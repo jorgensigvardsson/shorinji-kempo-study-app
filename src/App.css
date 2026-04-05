@@ -1,0 +1,71 @@
+#root {
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+}
+
+@media print {
+  #root {
+    margin: 1em;
+  }
+
+  .kamoku {
+    text-align: left;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+  }
+
+  .kamoku div {
+    padding: 0.25em;
+  }
+
+  .kamoku .cell {
+    border-left: 1px solid;
+    border-top: 1px solid;
+  }
+
+  .kamoku .header {
+    font-size: 0.75em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .kamoku p {
+    margin: 0
+  }
+
+  .kamoku div {
+    margin: 0;
+  }
+
+  .kamoku .kyohan {
+    text-align: right;
+  }
+
+  .week {
+    display: flex;
+    margin: 10px;
+  }
+
+  .basic-exercises {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin: 10px;
+  }
+
+  .basic-exercise {
+    padding: 0 !important;
+    margin-bottom: 2em !important;
+  }
+
+  .main-exercises {
+    display: flex;
+    margin: 10px;
+  }
+}

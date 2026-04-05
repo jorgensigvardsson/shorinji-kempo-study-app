@@ -1,0 +1,48 @@
+# Node / package managers
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output (Docker builds it)
+dist
+build
+
+# Vite cache
+.vite
+
+# TypeScript
+*.tsbuildinfo
+
+# Tests / coverage
+coverage
+__tests__
+*.spec.*
+*.test.*
+
+# Environment files (should be injected at build/runtime)
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# Editor / OS files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker artifacts
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs / misc
+README.md
+*.md

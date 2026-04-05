@@ -1,0 +1,3076 @@
+[
+  {
+    "index": 0,
+    "kanji": "諸作法",
+    "romaji": "shosahō",
+    "meanings": [
+      "varierande etikett/uppförande"
+    ]
+  },
+  {
+    "index": 1,
+    "kanji": "作法",
+    "romaji": "sahō",
+    "meanings": [
+      "uppförande"
+    ]
+  },
+  {
+    "index": 2,
+    "kanji": "礼儀作法",
+    "romaji": "reigi sahō",
+    "meanings": [
+      "etikett"
+    ]
+  },
+  {
+    "index": 3,
+    "kanji": "礼式",
+    "romaji": "reishiki",
+    "meanings": [
+      "etikett, uppförande"
+    ]
+  },
+  {
+    "index": 4,
+    "kanji": "脚下照顧",
+    "romaji": "kyakka shōko",
+    "meanings": [
+      "titta runt dina fötter",
+      "reflektera över sig själv"
+    ]
+  },
+  {
+    "index": 5,
+    "kanji": "合掌礼",
+    "romaji": "gasshō rei",
+    "meanings": [
+      "hälsning på Shorinji Kempo-vis (handflatorna ihop)"
+    ]
+  },
+  {
+    "index": 6,
+    "kanji": "礼",
+    "romaji": "rei",
+    "meanings": [
+      "hälsa"
+    ]
+  },
+  {
+    "index": 7,
+    "kanji": "なおれ",
+    "romaji": "naore",
+    "meanings": [
+      "avsluta (t.ex. hälsning eller rättning av led)"
+    ]
+  },
+  {
+    "index": 8,
+    "kanji": "お願いします",
+    "romaji": "onegaishimasu",
+    "meanings": [
+      "hälsning, tillåt mig"
+    ]
+  },
+  {
+    "index": 9,
+    "kanji": "ありがとうございました",
+    "romaji": "arigatō gozaimashita",
+    "meanings": [
+      "hälsning, tack så mycket"
+    ]
+  },
+  {
+    "index": 10,
+    "kanji": "解散／わかれ",
+    "romaji": "kaisan / wakare",
+    "meanings": [
+      "skingra er, avsluta träningen"
+    ]
+  },
+  {
+    "index": 11,
+    "kanji": "お互いに礼",
+    "romaji": "otagai ni rei",
+    "meanings": [
+      "hälsa på varandra"
+    ]
+  },
+  {
+    "index": 12,
+    "kanji": "正面",
+    "romaji": "shōmen",
+    "meanings": [
+      "front/framsida"
+    ]
+  },
+  {
+    "index": 13,
+    "kanji": "集合",
+    "romaji": "shūgō",
+    "meanings": [
+      "samling i grupp"
+    ]
+  },
+  {
+    "index": 14,
+    "kanji": "整列",
+    "romaji": "seiretsu",
+    "meanings": [
+      "uppställning i rader i allmänhet"
+    ]
+  },
+  {
+    "index": 15,
+    "kanji": "結手",
+    "romaji": "kesshu",
+    "meanings": [
+      "intag kesshu gamae (vänster tumme i höger hand, fötterna ihop)"
+    ]
+  },
+  {
+    "index": 16,
+    "kanji": "休め",
+    "romaji": "yasume",
+    "meanings": [
+      "viloposition (händerna i kesshu, fötterna isär)"
+    ]
+  },
+  {
+    "index": 17,
+    "kanji": "右へならえ",
+    "romaji": "migi e narae",
+    "meanings": [
+      "rättning (av led) åt höger"
+    ]
+  },
+  {
+    "index": 18,
+    "kanji": "前にならえ",
+    "romaji": "mae ni narae",
+    "meanings": [
+      "rättning (av led) framåt"
+    ]
+  },
+  {
+    "index": 19,
+    "kanji": "座り方",
+    "romaji": "suwari kata",
+    "meanings": [
+      "sätt att sitta"
+    ]
+  },
+  {
+    "index": 20,
+    "kanji": "立ち方",
+    "romaji": "tachi kata",
+    "meanings": [
+      "sätt att stå"
+    ]
+  },
+  {
+    "index": 21,
+    "kanji": "着座",
+    "romaji": "chakuza",
+    "meanings": [
+      "sitt ner (i seiza)"
+    ]
+  },
+  {
+    "index": 22,
+    "kanji": "正座",
+    "romaji": "seiza",
+    "meanings": [
+      "sitta ner på knäna"
+    ]
+  },
+  {
+    "index": 23,
+    "kanji": "安座",
+    "romaji": "anza",
+    "meanings": [
+      "sitta med benen i kors (hankafuza)"
+    ]
+  },
+  {
+    "index": 24,
+    "kanji": "半跏趺坐",
+    "romaji": "hankafuza",
+    "meanings": [
+      "sitta i halvlotus (anza)"
+    ]
+  },
+  {
+    "index": 25,
+    "kanji": "起立",
+    "romaji": "kiritsu",
+    "meanings": [
+      "stå upp"
+    ]
+  },
+  {
+    "index": 26,
+    "kanji": "服装",
+    "romaji": "fukusō",
+    "meanings": [
+      "klädsel"
+    ]
+  },
+  {
+    "index": 27,
+    "kanji": "態度",
+    "romaji": "taido",
+    "meanings": [
+      "attityd"
+    ]
+  },
+  {
+    "index": 28,
+    "kanji": "言葉",
+    "romaji": "kotoba",
+    "meanings": [
+      "språk"
+    ]
+  },
+  {
+    "index": 29,
+    "kanji": "返事",
+    "romaji": "henji",
+    "meanings": [
+      "svara"
+    ]
+  },
+  {
+    "index": 30,
+    "kanji": "すみません",
+    "romaji": "sumimasen",
+    "meanings": [
+      "ursäkta"
+    ]
+  },
+  {
+    "index": 31,
+    "kanji": "ごめんなさい",
+    "romaji": "gomennasai",
+    "meanings": [
+      "förlåt"
+    ]
+  },
+  {
+    "index": 32,
+    "kanji": "分かります",
+    "romaji": "wakarimasu",
+    "meanings": [
+      "förstår"
+    ]
+  },
+  {
+    "index": 33,
+    "kanji": "挨拶",
+    "romaji": "aisatsu",
+    "meanings": [
+      "hälsning"
+    ]
+  },
+  {
+    "index": 34,
+    "kanji": "本部",
+    "romaji": "hombu",
+    "meanings": [
+      "huvudkontor (i Japan)"
+    ]
+  },
+  {
+    "index": 35,
+    "kanji": "開祖",
+    "romaji": "kaiso",
+    "meanings": [
+      "grundare, So Doshin (familjenamnet först)"
+    ]
+  },
+  {
+    "index": 36,
+    "kanji": "師家",
+    "romaji": "shike",
+    "meanings": [
+      "överhuvud"
+    ]
+  },
+  {
+    "index": 37,
+    "kanji": "初代師家",
+    "romaji": "shodai shike",
+    "meanings": [
+      "första generationens överhuvud (So Doshin)"
+    ]
+  },
+  {
+    "index": 38,
+    "kanji": "代表",
+    "romaji": "daihyō",
+    "meanings": [
+      "representant (för Shorinji Kempo Group), titel för So Kouma"
+    ]
+  },
+  {
+    "index": 39,
+    "kanji": "管長",
+    "romaji": "kanchō",
+    "meanings": [
+      "chefsabbot (titel för ledaren av Kongo Zen)"
+    ]
+  },
+  {
+    "index": 40,
+    "kanji": "支部",
+    "romaji": "shibu",
+    "meanings": [
+      "förening (eg. avdelning)"
+    ]
+  },
+  {
+    "index": 41,
+    "kanji": "道院",
+    "romaji": "dōin",
+    "meanings": [
+      "förening (dō = väg, in = institution) enbart i Japan"
+    ]
+  },
+  {
+    "index": 42,
+    "kanji": "支部長／部長",
+    "romaji": "shibu-chō / bu-chō",
+    "meanings": [
+      "föreningsinstruktör (eg. avdelningschef)"
+    ]
+  },
+  {
+    "index": 43,
+    "kanji": "副支部長",
+    "romaji": "fuku shibu-chō",
+    "meanings": [
+      "assisterande föreningsinstruktör"
+    ]
+  },
+  {
+    "index": 44,
+    "kanji": "道院長",
+    "romaji": "dōin-chō",
+    "meanings": [
+      "föreningsinstruktör för en dōin"
+    ]
+  },
+  {
+    "index": 45,
+    "kanji": "先生",
+    "romaji": "sensei",
+    "meanings": [
+      "lärare, instruktör (eg. någon som är född före)"
+    ]
+  },
+  {
+    "index": 46,
+    "kanji": "拳士",
+    "romaji": "kenshi",
+    "meanings": [
+      "Shorinji Kempo-utövare/elev"
+    ]
+  },
+  {
+    "index": 47,
+    "kanji": "先輩",
+    "romaji": "sempai",
+    "meanings": [
+      "senior, någon som har tränat längre än du själv"
+    ]
+  },
+  {
+    "index": 48,
+    "kanji": "後輩",
+    "romaji": "kōhai",
+    "meanings": [
+      "junior, någon som har tränat kortare tid än du själv"
+    ]
+  },
+  {
+    "index": 49,
+    "kanji": "同輩",
+    "romaji": "dōhai",
+    "meanings": [
+      "någon som har tränat lika länge som du själv"
+    ]
+  },
+  {
+    "index": 50,
+    "kanji": "見習い",
+    "romaji": "minarai",
+    "meanings": [
+      "nybörjare / lärling",
+      "nybörjare - vitt bälte"
+    ]
+  },
+  {
+    "index": 51,
+    "kanji": "初心者",
+    "romaji": "shoshinsha",
+    "meanings": [
+      "nybörjare"
+    ]
+  },
+  {
+    "index": 52,
+    "kanji": "有段者",
+    "romaji": "yūdansha",
+    "meanings": [
+      "dan-graderad person (svartbälte)"
+    ]
+  },
+  {
+    "index": 53,
+    "kanji": "高段者",
+    "romaji": "kōdansha",
+    "meanings": [
+      "person med hög dan-grad"
+    ]
+  },
+  {
+    "index": 54,
+    "kanji": "指導員",
+    "romaji": "shidōin",
+    "meanings": [
+      "instruktör (shidō = instruktion, in = medlem)"
+    ]
+  },
+  {
+    "index": 55,
+    "kanji": "指導者",
+    "romaji": "shidōsha",
+    "meanings": [
+      "instruktör (shidō = instruktion, sha = person)"
+    ]
+  },
+  {
+    "index": 56,
+    "kanji": "主将",
+    "romaji": "shushō",
+    "meanings": [
+      "kapten (lagkapten)"
+    ]
+  },
+  {
+    "index": 57,
+    "kanji": "助教",
+    "romaji": "jokyō",
+    "meanings": [
+      "assisterande instruktör (sandan eller högre)"
+    ]
+  },
+  {
+    "index": 58,
+    "kanji": "助士",
+    "romaji": "joshi",
+    "meanings": [
+      "assistent (nidan eller lägre)"
+    ]
+  },
+  {
+    "index": 59,
+    "kanji": "相手",
+    "romaji": "aite",
+    "meanings": [
+      "partner (träningspartner)"
+    ]
+  },
+  {
+    "index": 60,
+    "kanji": "主座",
+    "romaji": "shuza",
+    "meanings": [
+      "ledare för chinkon gyō etc."
+    ]
+  },
+  {
+    "index": 61,
+    "kanji": "監督",
+    "romaji": "kantoku",
+    "meanings": [
+      "coach"
+    ]
+  },
+  {
+    "index": 62,
+    "kanji": "代議員",
+    "romaji": "daigi-in",
+    "meanings": [
+      "landsrepresentant"
+    ]
+  },
+  {
+    "index": 63,
+    "kanji": "評議員",
+    "romaji": "hyōgi-in",
+    "meanings": [
+      "rådsmedlem (WSKO Council)"
+    ]
+  },
+  {
+    "index": 64,
+    "kanji": "理事",
+    "romaji": "riji",
+    "meanings": [
+      "styrelsemedlem"
+    ]
+  },
+  {
+    "index": 65,
+    "kanji": "理事長",
+    "romaji": "riji-chō",
+    "meanings": [
+      "styrelseordförande"
+    ]
+  },
+  {
+    "index": 66,
+    "kanji": "事務総長",
+    "romaji": "jimusōchō",
+    "meanings": [
+      "generalsekreterare"
+    ]
+  },
+  {
+    "index": 67,
+    "kanji": "会長",
+    "romaji": "kaichō",
+    "meanings": [
+      "ordförande (för t.ex. förbund)"
+    ]
+  },
+  {
+    "index": 68,
+    "kanji": "会員",
+    "romaji": "kai-in",
+    "meanings": [
+      "medlem"
+    ]
+  },
+  {
+    "index": 69,
+    "kanji": "考試員",
+    "romaji": "kōshi-in",
+    "meanings": [
+      "examinator"
+    ]
+  },
+  {
+    "index": 70,
+    "kanji": "審判員",
+    "romaji": "shimpan-in",
+    "meanings": [
+      "domare"
+    ]
+  },
+  {
+    "index": 71,
+    "kanji": "主審",
+    "romaji": "shushin",
+    "meanings": [
+      "huvuddomare"
+    ]
+  },
+  {
+    "index": 72,
+    "kanji": "副審",
+    "romaji": "fukushin",
+    "meanings": [
+      "assisterande domare"
+    ]
+  },
+  {
+    "index": 73,
+    "kanji": "少林寺拳法世界連合",
+    "romaji": "shōrinji kempō sekai rengō",
+    "meanings": [
+      "World Shorinji Kempo Organization, WSKO"
+    ]
+  },
+  {
+    "index": 74,
+    "kanji": "少林寺拳法連盟",
+    "romaji": "shōrinji kempō renmei",
+    "meanings": [
+      "Shorinji Kempo Federation (japanska förbundet)"
+    ]
+  },
+  {
+    "index": 75,
+    "kanji": "金剛禅総本山少林寺",
+    "romaji": "kongō zen sōhonzan shōrinji",
+    "meanings": [
+      "den buddistiska (religiösa) delen av Shorinji Kempos organisation"
+    ]
+  },
+  {
+    "index": 76,
+    "kanji": "禅林学\uF8FF",
+    "romaji": "zenrin gakuen",
+    "meanings": [
+      "skolan som tidigare fanns på hombu (tidigare känd som busen)"
+    ]
+  },
+  {
+    "index": 77,
+    "kanji": "武専コース",
+    "romaji": "busen course",
+    "meanings": [
+      "kurs utan officell skolexamen som leds av zenrin gakuen"
+    ]
+  },
+  {
+    "index": 78,
+    "kanji": "少 導 師",
+    "romaji": "shōdōshi",
+    "meanings": [
+      "1:a sōkai-graden (shō=liten, dōshi=präst/munk)"
+    ]
+  },
+  {
+    "index": 79,
+    "kanji": "権中導師",
+    "romaji": "gon chūdōshi",
+    "meanings": [
+      "2:a sōkai-graden (gon=interim, chū=mellan, dōshi=präst/munk)"
+    ]
+  },
+  {
+    "index": 80,
+    "kanji": "中 導 師",
+    "romaji": "chūdōshi",
+    "meanings": [
+      "3:e sōkai-graden (chū=mellan, dōshi=präst/munk)"
+    ]
+  },
+  {
+    "index": 81,
+    "kanji": "権大導師",
+    "romaji": "gon daidōshi",
+    "meanings": [
+      "4:e sōkai-graden (gon=interim, dai=stor, dōshi=präst/munk)"
+    ]
+  },
+  {
+    "index": 82,
+    "kanji": "大 導 師",
+    "romaji": "daidōshi",
+    "meanings": [
+      "5:e sōkai-graden (dai=stor, dōshi=präst/munk)"
+    ]
+  },
+  {
+    "index": 83,
+    "kanji": "権少法師",
+    "romaji": "gon shōhōshi",
+    "meanings": [
+      "6:e sōkai-graden (gon=interim, shō=liten, ”hōshi=buddhistpräst)"
+    ]
+  },
+  {
+    "index": 84,
+    "kanji": "少 法 師",
+    "romaji": "shōhōshi",
+    "meanings": [
+      "7:e sōkai-graden (shō=liten, hōshi=buddhistpräst”)"
+    ]
+  },
+  {
+    "index": 85,
+    "kanji": "権中法師",
+    "romaji": "gon chūhōshi",
+    "meanings": [
+      "8:e sōkai-graden (gon=interim, chū=mellan, hōshi=buddhistpräst)"
+    ]
+  },
+  {
+    "index": 86,
+    "kanji": "中 法 師",
+    "romaji": "chūhōshi",
+    "meanings": [
+      "9:e sōkai-graden (chū=mellan, hōshi=buddhistpräst)"
+    ]
+  },
+  {
+    "index": 87,
+    "kanji": "権大法師",
+    "romaji": "gon daidōshi",
+    "meanings": [
+      "10:e sōkai-graden (gon=interim, dai=stor, hōshi=buddhistpräst)"
+    ]
+  },
+  {
+    "index": 88,
+    "kanji": "大 法 師",
+    "romaji": "daihōshi",
+    "meanings": [
+      "11:e sōkai-graden (dai=stor, hōshi=buddhistpräst)"
+    ]
+  },
+  {
+    "index": 89,
+    "kanji": "准拳士",
+    "romaji": "junkenshi",
+    "meanings": [
+      "kan erhållas samtidigt som shodan (≈ ”semi-kenshi”)"
+    ]
+  },
+  {
+    "index": 90,
+    "kanji": "少拳士",
+    "romaji": "shōkenshi",
+    "meanings": [
+      "kan erhållas samtidigt som nidan (≈ ”liten kenshi”)"
+    ]
+  },
+  {
+    "index": 91,
+    "kanji": "中拳士",
+    "romaji": "chūkenshi",
+    "meanings": [
+      "kan erhållas samtidigt som sandan (≈ ”mellan-kenshi”)"
+    ]
+  },
+  {
+    "index": 92,
+    "kanji": "正拳士",
+    "romaji": "seikenshi",
+    "meanings": [
+      "kan erhållas samtidigt som yondan (≈ ”sann kenshi”)"
+    ]
+  },
+  {
+    "index": 93,
+    "kanji": "大拳士",
+    "romaji": "daikenshi",
+    "meanings": [
+      "kan erhållas efter godan (≈ ”stor kenshi”)"
+    ]
+  },
+  {
+    "index": 94,
+    "kanji": "准範士",
+    "romaji": "junhanshi",
+    "meanings": [
+      "kan erhållas efter rokudan (≈ ”semi-mästare”)"
+    ]
+  },
+  {
+    "index": 95,
+    "kanji": "正範士",
+    "romaji": "seihanshi",
+    "meanings": [
+      "kan erhållas efter nanadan (≈ ”sann mästare”)"
+    ]
+  },
+  {
+    "index": 96,
+    "kanji": "大範士",
+    "romaji": "daihanshi",
+    "meanings": [
+      "kan erhållas efter hachidan (≈ ”stor mästare”)"
+    ]
+  },
+  {
+    "index": 97,
+    "kanji": "四字熟語 ",
+    "romaji": "yoji jukugo ",
+    "meanings": [
+      "Talesätt"
+    ]
+  },
+  {
+    "index": 98,
+    "kanji": "拳禅一如",
+    "romaji": "ken zen ichinyo",
+    "meanings": [
+      "kropp och själ är ett"
+    ]
+  },
+  {
+    "index": 99,
+    "kanji": "力愛不二",
+    "romaji": "riki ai funi",
+    "meanings": [
+      "styrka och kärlek i harmoni (styrka kärlek inte två)"
+    ]
+  },
+  {
+    "index": 100,
+    "kanji": "守主攻従",
+    "romaji": "shushu kōju",
+    "meanings": [
+      "försvar är primärt, attack sekundärt"
+    ]
+  },
+  {
+    "index": 101,
+    "kanji": "不殺活人",
+    "romaji": "fusatsu katsu jin",
+    "meanings": [
+      "inte döda utan hjälpa människor"
+    ]
+  },
+  {
+    "index": 102,
+    "kanji": "剛柔一体",
+    "romaji": "gōjū ittai",
+    "meanings": [
+      "hårt och mjukt är ett"
+    ]
+  },
+  {
+    "index": 103,
+    "kanji": "組手主体",
+    "romaji": "kumite shutai",
+    "meanings": [
+      "parträning är grundlägganden"
+    ]
+  },
+  {
+    "index": 104,
+    "kanji": "自己確立",
+    "romaji": "jiko kakuritsu",
+    "meanings": [
+      "bygga upp sitt eget jag"
+    ]
+  },
+  {
+    "index": 105,
+    "kanji": "自他共楽",
+    "romaji": "jita kyōraku",
+    "meanings": [
+      "ömsesidig lycka"
+    ]
+  },
+  {
+    "index": 106,
+    "kanji": "漸々修学",
+    "romaji": "zen zen shūgaku",
+    "meanings": [
+      "stegvis inlärning"
+    ]
+  },
+  {
+    "index": 107,
+    "kanji": "護身練胆",
+    "romaji": "goshin rentan",
+    "meanings": [
+      "förmåga i självförsvar"
+    ]
+  },
+  {
+    "index": 108,
+    "kanji": "精神修養",
+    "romaji": "seishin shūyō",
+    "meanings": [
+      "mental utveckling"
+    ]
+  },
+  {
+    "index": 109,
+    "kanji": "健康増進",
+    "romaji": "kenkō zōshin",
+    "meanings": [
+      "förbättrad hälsa"
+    ]
+  },
+  {
+    "index": 110,
+    "kanji": "不撓不屈",
+    "romaji": "futō fukutsu",
+    "meanings": [
+      "never giving up with unyielding spirit"
+    ]
+  },
+  {
+    "index": 111,
+    "kanji": "天地陰陽",
+    "romaji": "tenchi in'yō",
+    "meanings": [
+      "himmel-jord, yin-yang"
+    ]
+  },
+  {
+    "index": 112,
+    "kanji": "幸福運動",
+    "romaji": "kōfuku undō",
+    "meanings": [
+      "????"
+    ]
+  },
+  {
+    "index": 113,
+    "kanji": "一期一会",
+    "romaji": "ichi-go ichi-e",
+    "meanings": [
+      "ett tillfälle, ett möte"
+    ]
+  },
+  {
+    "index": 114,
+    "kanji": "一生懸命",
+    "romaji": "isshō kenmei",
+    "meanings": [
+      "????"
+    ]
+  },
+  {
+    "index": 115,
+    "kanji": "身心一如",
+    "romaji": "shin shin ichinyo",
+    "meanings": [
+      "kropp och sinne är ett"
+    ]
+  },
+  {
+    "index": 116,
+    "kanji": "真純単一",
+    "romaji": "shinjun tan'itsu",
+    "meanings": [
+      "pure and focused"
+    ]
+  },
+  {
+    "index": 117,
+    "kanji": "協力一致",
+    "romaji": "kyōryoku itchi",
+    "meanings": [
+      "????"
+    ]
+  },
+  {
+    "index": 118,
+    "kanji": "身心練磨",
+    "romaji": "shinshin renma",
+    "meanings": [
+      "kropp och sinne ????"
+    ]
+  },
+  {
+    "index": 119,
+    "kanji": "生涯修行",
+    "romaji": "shōgai shugyō",
+    "meanings": [
+      "????"
+    ]
+  },
+  {
+    "index": 120,
+    "kanji": "一志一道",
+    "romaji": "isshi ichidō",
+    "meanings": [
+      "one goal, one path"
+    ]
+  },
+  {
+    "index": 121,
+    "kanji": "平常心",
+    "romaji": "hei jo shin",
+    "meanings": [
+      "oberört lugnt sinne"
+    ]
+  },
+  {
+    "index": 122,
+    "kanji": "心•気•力",
+    "romaji": "shin, ki, ryoku",
+    "meanings": [
+      "sinne, energi, styrka"
+    ]
+  },
+  {
+    "index": 123,
+    "kanji": "虚心坦懐",
+    "romaji": "kyoshin taikan"
+  },
+  {
+    "index": 124,
+    "kanji": "諸法無我",
+    "romaji": "shohō muga"
+  },
+  {
+    "index": 125,
+    "kanji": "諸行無常",
+    "romaji": "shogyō mujō"
+  },
+  {
+    "index": 126,
+    "kanji": "愛民愛郷"
+  },
+  {
+    "index": 127,
+    "kanji": "不言実行",
+    "romaji": "fugen jikkō"
+  },
+  {
+    "index": 128,
+    "kanji": "一拳多生",
+    "romaji": "ikken tasshō"
+  },
+  {
+    "index": 129,
+    "kanji": "破邪顕正",
+    "romaji": "haja kenshō"
+  },
+  {
+    "index": 130,
+    "kanji": "破邪の拳",
+    "romaji": "haja no ken ??"
+  },
+  {
+    "index": 131,
+    "kanji": "済生利人"
+  },
+  {
+    "index": 132,
+    "kanji": "夫婦相和"
+  },
+  {
+    "index": 133,
+    "kanji": "自己修練",
+    "romaji": "jiko shūren"
+  },
+  {
+    "index": 134,
+    "kanji": "同志相親",
+    "romaji": "dōshi ??"
+  },
+  {
+    "index": 135,
+    "kanji": "明鏡止水",
+    "romaji": "meikyō shisui"
+  },
+  {
+    "index": 136,
+    "kanji": "守破離",
+    "romaji": "shu ha ri"
+  },
+  {
+    "index": 137,
+    "kanji": "直心",
+    "romaji": "jikishin"
+  },
+  {
+    "index": 138,
+    "kanji": "鎮魂行を行います",
+    "romaji": "chinkon gyō wo okonaimasu",
+    "meanings": [
+      "nu ska vi göra chinkon gyō"
+    ]
+  },
+  {
+    "index": 139,
+    "kanji": "○○を始めます",
+    "romaji": "xx wo hajimemasu",
+    "meanings": [
+      "nu börjar xx"
+    ]
+  },
+  {
+    "index": 140,
+    "kanji": "稽古を終ります",
+    "romaji": "keiko wo owarimasu",
+    "meanings": [
+      "träningen är slut"
+    ]
+  },
+  {
+    "index": 141,
+    "kanji": "稽古",
+    "romaji": "keiko",
+    "meanings": [
+      "träning/studier"
+    ]
+  },
+  {
+    "index": 142,
+    "kanji": "練習",
+    "romaji": "renshū",
+    "meanings": [
+      "träning"
+    ]
+  },
+  {
+    "index": 143,
+    "kanji": "はい",
+    "romaji": "hai",
+    "meanings": [
+      "ja"
+    ]
+  },
+  {
+    "index": 144,
+    "kanji": "いいえ",
+    "romaji": "iie",
+    "meanings": [
+      "nej"
+    ]
+  },
+  {
+    "index": 145,
+    "kanji": "号令",
+    "romaji": "gōrei",
+    "meanings": [
+      "kommando (räkning)"
+    ]
+  },
+  {
+    "index": 146,
+    "kanji": "始め",
+    "romaji": "hajime",
+    "meanings": [
+      "börja"
+    ]
+  },
+  {
+    "index": 147,
+    "kanji": "やめ",
+    "romaji": "yame",
+    "meanings": [
+      "sluta"
+    ]
+  },
+  {
+    "index": 148,
+    "kanji": "終ります",
+    "romaji": "owarimasu",
+    "meanings": [
+      "avsluta"
+    ]
+  },
+  {
+    "index": 149,
+    "kanji": "用意",
+    "romaji": "yōi",
+    "meanings": [
+      "var beredd"
+    ]
+  },
+  {
+    "index": 150,
+    "kanji": "構えて",
+    "romaji": "kamaete",
+    "meanings": [
+      "intag ställning"
+    ]
+  },
+  {
+    "index": 151,
+    "kanji": "単演",
+    "romaji": "tan'en",
+    "meanings": [
+      "singelträning"
+    ]
+  },
+  {
+    "index": 152,
+    "kanji": "相対",
+    "romaji": "sōtai",
+    "meanings": [
+      "parträning"
+    ]
+  },
+  {
+    "index": 153,
+    "kanji": "交代",
+    "romaji": "kōtai",
+    "meanings": [
+      "byt (partner)"
+    ]
+  },
+  {
+    "index": 154,
+    "kanji": "反対",
+    "romaji": "hantai",
+    "meanings": [
+      "skifta sida, (motsatt)"
+    ]
+  },
+  {
+    "index": 155,
+    "kanji": "左",
+    "romaji": "hidari",
+    "meanings": [
+      "vänster"
+    ]
+  },
+  {
+    "index": 156,
+    "kanji": "右",
+    "romaji": "migi",
+    "meanings": [
+      "höger"
+    ]
+  },
+  {
+    "index": 157,
+    "kanji": "左右",
+    "romaji": "sayū",
+    "meanings": [
+      "vänster-höger"
+    ]
+  },
+  {
+    "index": 158,
+    "kanji": "前",
+    "romaji": "mae",
+    "meanings": [
+      "framåt"
+    ]
+  },
+  {
+    "index": 159,
+    "kanji": "後",
+    "romaji": "ushiro/ato",
+    "meanings": [
+      "bakåt"
+    ]
+  },
+  {
+    "index": 160,
+    "kanji": "前後",
+    "romaji": "zengo",
+    "meanings": [
+      "framåt-bakåt"
+    ]
+  },
+  {
+    "index": 161,
+    "kanji": "より",
+    "romaji": "yori",
+    "meanings": [
+      "från-till"
+    ]
+  },
+  {
+    "index": 162,
+    "kanji": "から",
+    "romaji": "kara",
+    "meanings": [
+      "från"
+    ]
+  },
+  {
+    "index": 163,
+    "kanji": "右拳から",
+    "romaji": "migi ken kara",
+    "meanings": [
+      "[börja] från höger näve (migi = höger, ken = näve, kara = från)"
+    ]
+  },
+  {
+    "index": 164,
+    "kanji": "左足から",
+    "romaji": "hidari ashi kara",
+    "meanings": [
+      "[börja] från vänster ben"
+    ]
+  },
+  {
+    "index": 165,
+    "kanji": "右向け右",
+    "romaji": "migi muke migi",
+    "meanings": [
+      "90°-vändning åt höger"
+    ]
+  },
+  {
+    "index": 166,
+    "kanji": "左向け左",
+    "romaji": "hidari muke hidari",
+    "meanings": [
+      "90°-vändning åt vänster"
+    ]
+  },
+  {
+    "index": 167,
+    "kanji": "まわれ右",
+    "romaji": "maware migi",
+    "meanings": [
+      "180°-vändning åt höger (medurs)"
+    ]
+  },
+  {
+    "index": 168,
+    "kanji": "休憩",
+    "romaji": "kyūkei",
+    "meanings": [
+      "rast"
+    ]
+  },
+  {
+    "index": 169,
+    "kanji": "調息法",
+    "romaji": "chosokuhō",
+    "meanings": [
+      "kontrollerad andning"
+    ]
+  },
+  {
+    "index": 170,
+    "kanji": "深呼吸",
+    "romaji": "shinkokyū",
+    "meanings": [
+      "”andningskontroll” med kroppsrörelse"
+    ]
+  },
+  {
+    "index": 171,
+    "kanji": "気合",
+    "romaji": "kiai",
+    "meanings": [
+      "skrik, (skrik i harmoni med energi)"
+    ]
+  },
+  {
+    "index": 172,
+    "kanji": "極め",
+    "romaji": "kime",
+    "meanings": [
+      "fysisk och psykisk fokusering"
+    ]
+  },
+  {
+    "index": 173,
+    "kanji": "早く",
+    "romaji": "hayaku",
+    "meanings": [
+      "fort"
+    ]
+  },
+  {
+    "index": 174,
+    "kanji": "ゆっくり",
+    "romaji": "yukkuri",
+    "meanings": [
+      "långsamt"
+    ]
+  },
+  {
+    "index": 175,
+    "kanji": "攻者",
+    "romaji": "kōsha",
+    "meanings": [
+      "anfallare"
+    ]
+  },
+  {
+    "index": 176,
+    "kanji": "守者",
+    "romaji": "shusha",
+    "meanings": [
+      "försvarare"
+    ]
+  },
+  {
+    "index": 177,
+    "kanji": "技あり",
+    "romaji": "waza ari",
+    "meanings": [
+      "effektiv teknik"
+    ]
+  },
+  {
+    "index": 178,
+    "kanji": "有効",
+    "romaji": "yūkō",
+    "meanings": [
+      "effektiv (teknik), lägre än waza ari"
+    ]
+  },
+  {
+    "index": 179,
+    "kanji": "それまで",
+    "romaji": "soremade",
+    "meanings": [
+      "stopp, ”till och med detta”"
+    ]
+  },
+  {
+    "index": 180,
+    "kanji": "わかれて",
+    "romaji": "wakarete",
+    "meanings": [
+      "dela upp, separera"
+    ]
+  },
+  {
+    "index": 181,
+    "kanji": "武道",
+    "romaji": "budō",
+    "meanings": [
+      "kampväg"
+    ]
+  },
+  {
+    "index": 182,
+    "kanji": "道場",
+    "romaji": "dōjō",
+    "meanings": [
+      "träningslokal"
+    ]
+  },
+  {
+    "index": 183,
+    "kanji": "道衣／道着",
+    "romaji": "dōgi",
+    "meanings": [
+      "träningskläder för budō"
+    ]
+  },
+  {
+    "index": 184,
+    "kanji": "上衣／上着",
+    "romaji": "uwagi",
+    "meanings": [
+      "jacka/överdel"
+    ]
+  },
+  {
+    "index": 185,
+    "kanji": "ズボン",
+    "romaji": "zubon",
+    "meanings": [
+      "byxor"
+    ]
+  },
+  {
+    "index": 186,
+    "kanji": "帯",
+    "romaji": "obi",
+    "meanings": [
+      "bälte"
+    ]
+  },
+  {
+    "index": 187,
+    "kanji": "法衣",
+    "romaji": "hōi",
+    "meanings": [
+      "svart ”kappa” som bärs av yūdansha vid speciella tillfällen"
+    ]
+  },
+  {
+    "index": 188,
+    "kanji": "胸章",
+    "romaji": "munashō",
+    "meanings": [
+      "bröstmärke"
+    ]
+  },
+  {
+    "index": 189,
+    "kanji": "袖章",
+    "romaji": "sodeshō",
+    "meanings": [
+      "ärmmärke"
+    ]
+  },
+  {
+    "index": 190,
+    "kanji": "講話",
+    "romaji": "kōwa",
+    "meanings": [
+      "föreläsning"
+    ]
+  },
+  {
+    "index": 191,
+    "kanji": "法話",
+    "romaji": "hōwa",
+    "meanings": [
+      "föreläsning (buddhistisk predikan)"
+    ]
+  },
+  {
+    "index": 192,
+    "kanji": "法階講座",
+    "romaji": "hōkai kōza",
+    "meanings": [
+      "hōkai-föreläsning/seminarie"
+    ]
+  },
+  {
+    "index": 193,
+    "kanji": "学科",
+    "romaji": "gakka",
+    "meanings": [
+      "teoriämne"
+    ]
+  },
+  {
+    "index": 194,
+    "kanji": "教範",
+    "romaji": "kyōhan",
+    "meanings": [
+      "bok med alla tekniker och filosofi (ordagrant lärobok)"
+    ]
+  },
+  {
+    "index": 195,
+    "kanji": "読本",
+    "romaji": "tokuhon",
+    "meanings": [
+      "textbok"
+    ]
+  },
+  {
+    "index": 196,
+    "kanji": "科目表",
+    "romaji": "kamokuhyō",
+    "meanings": [
+      "läroplan"
+    ]
+  },
+  {
+    "index": 197,
+    "kanji": "入門式",
+    "romaji": "nyumonshiki",
+    "meanings": [
+      "inträdesceremoni"
+    ]
+  },
+  {
+    "index": 198,
+    "kanji": "期生",
+    "romaji": "kisei",
+    "meanings": [
+      "inträdesnummer (indikerar månad man blev medlem)"
+    ]
+  },
+  {
+    "index": 199,
+    "kanji": "会員証",
+    "romaji": "kai-in shō",
+    "meanings": [
+      "medlemskort"
+    ]
+  },
+  {
+    "index": 200,
+    "kanji": "允可状",
+    "romaji": "inkajō",
+    "meanings": [
+      "diplom/certifikat (dan-grader)"
+    ]
+  },
+  {
+    "index": 201,
+    "kanji": "合格証書",
+    "romaji": "gōkaku shōsho",
+    "meanings": [
+      "diplom/certifikat (kyū-grader)"
+    ]
+  },
+  {
+    "index": 202,
+    "kanji": "合宿",
+    "romaji": "gasshuku",
+    "meanings": [
+      "träningsläger"
+    ]
+  },
+  {
+    "index": 203,
+    "kanji": "講習会",
+    "romaji": "kōshūkai",
+    "meanings": [
+      "studiesammankomst"
+    ]
+  },
+  {
+    "index": 204,
+    "kanji": "研修会",
+    "romaji": "kenshūkai",
+    "meanings": [
+      "seminarium"
+    ]
+  },
+  {
+    "index": 205,
+    "kanji": "合同練習",
+    "romaji": "gōdō renshū",
+    "meanings": [
+      "gemensam träning (mellan föreningar)"
+    ]
+  },
+  {
+    "index": 206,
+    "kanji": "試験",
+    "romaji": "shiken",
+    "meanings": [
+      "examination/gradering"
+    ]
+  },
+  {
+    "index": 207,
+    "kanji": "特別試験",
+    "romaji": "tokubetsu shiken",
+    "meanings": [
+      "special-examination/gradering (4 dan och högre)"
+    ]
+  },
+  {
+    "index": 208,
+    "kanji": "考試",
+    "romaji": "kōshi",
+    "meanings": [
+      "examination/gradering"
+    ]
+  },
+  {
+    "index": 209,
+    "kanji": "大会",
+    "romaji": "taikai",
+    "meanings": [
+      "tävling (eg. stor sammankomst)"
+    ]
+  },
+  {
+    "index": 210,
+    "kanji": "演武会",
+    "romaji": "embukai",
+    "meanings": [
+      "embu-tävling"
+    ]
+  },
+  {
+    "index": 211,
+    "kanji": "まんじ（卍）",
+    "romaji": "manji",
+    "meanings": [
+      "symbol för buddism"
+    ]
+  },
+  {
+    "index": 212,
+    "kanji": "ダーマ",
+    "romaji": "daama",
+    "meanings": [
+      "universums lag, dharma"
+    ]
+  },
+  {
+    "index": 213,
+    "kanji": "易筋行",
+    "romaji": "ekkin gyō",
+    "meanings": [
+      "teknisk träning"
+    ]
+  },
+  {
+    "index": 214,
+    "kanji": "鎮魂行",
+    "romaji": "chinkon gyō",
+    "meanings": [
+      "”lugn sinnesträning”, meditation"
+    ]
+  },
+  {
+    "index": 215,
+    "kanji": "座禅",
+    "romaji": "zazen",
+    "meanings": [
+      "sittande meditation (eg. sittande zen)"
+    ]
+  },
+  {
+    "index": 216,
+    "kanji": "打棒",
+    "romaji": "dabō",
+    "meanings": [
+      "stav som används under chinkon gyō (eg. slagstav)"
+    ]
+  },
+  {
+    "index": 217,
+    "kanji": "作務",
+    "romaji": "samu",
+    "meanings": [
+      "städning eller arbete"
+    ]
+  },
+  {
+    "index": 218,
+    "kanji": "剛法",
+    "romaji": "gōhō",
+    "meanings": [
+      "hårda tekniker (eg. metoder)"
+    ]
+  },
+  {
+    "index": 219,
+    "kanji": "柔法",
+    "romaji": "jūhō",
+    "meanings": [
+      "mjuka tekniker (eg. metoder)"
+    ]
+  },
+  {
+    "index": 220,
+    "kanji": "整法(整体)",
+    "romaji": "seihō (seitai)",
+    "meanings": [
+      "akupressurmassage, (eg. korrigerande metoder)"
+    ]
+  },
+  {
+    "index": 221,
+    "kanji": "拳系",
+    "romaji": "kenkei",
+    "meanings": [
+      "teknikgrupper med hōkei, (niō ken, sangō ken, ryūō ken etc.)"
+    ]
+  },
+  {
+    "index": 222,
+    "kanji": "法形",
+    "romaji": "hōkei",
+    "meanings": [
+      "förutbestämda mönster, (partekniker)"
+    ]
+  },
+  {
+    "index": 223,
+    "kanji": "演武",
+    "romaji": "embu",
+    "meanings": [
+      "”visa kamp”, parmönster för uppvisning och tävling"
+    ]
+  },
+  {
+    "index": 224,
+    "kanji": "運用法",
+    "romaji": "un'yōhō",
+    "meanings": [
+      "tillämpningsmetod (randori)"
+    ]
+  },
+  {
+    "index": 225,
+    "kanji": "乱捕り",
+    "romaji": "randori",
+    "meanings": [
+      "träningsmetod för att förstå hur man tillämpar hōkei"
+    ]
+  },
+  {
+    "index": 226,
+    "kanji": "自由乱捕り",
+    "romaji": "jiyū randori",
+    "meanings": [
+      "fri randori"
+    ]
+  },
+  {
+    "index": 227,
+    "kanji": "限定乱捕り",
+    "romaji": "gentei randori",
+    "meanings": [
+      "begränsad randori"
+    ]
+  },
+  {
+    "index": 228,
+    "kanji": "防具",
+    "romaji": "bōgu",
+    "meanings": [
+      "skyddsutrustning, t.ex. dō"
+    ]
+  },
+  {
+    "index": 229,
+    "kanji": "胴",
+    "romaji": "dō",
+    "meanings": [
+      "överkroppsskydd"
+    ]
+  },
+  {
+    "index": 230,
+    "kanji": "八方目",
+    "romaji": "happōmoku",
+    "meanings": [
+      "vidseende, ”split vision” (se åt åtta håll)"
+    ]
+  },
+  {
+    "index": 231,
+    "kanji": "目配り",
+    "romaji": "mekubari",
+    "meanings": [
+      "blick"
+    ]
+  },
+  {
+    "index": 232,
+    "kanji": "残心",
+    "romaji": "zanshin",
+    "meanings": [
+      "medvetande, koncentration"
+    ]
+  },
+  {
+    "index": 233,
+    "kanji": "武階",
+    "romaji": "bukai",
+    "meanings": [
+      "teknikgrad, dvs. kyū- och dan-grader"
+    ]
+  },
+  {
+    "index": 234,
+    "kanji": "法階",
+    "romaji": "hōkai",
+    "meanings": [
+      "filosofigrad, endast dan-nivå (junkenshi, shōkenshi, etc.)"
+    ]
+  },
+  {
+    "index": 235,
+    "kanji": "僧階",
+    "romaji": "sōkai",
+    "meanings": [
+      "munkgrad (shōdōshi, gon chūdōshi, chūdōshi, osv.)"
+    ]
+  },
+  {
+    "index": 236,
+    "kanji": "心",
+    "romaji": "kokoro/shin",
+    "meanings": [
+      "hjärta, själ, mentalitet"
+    ]
+  },
+  {
+    "index": 237,
+    "kanji": "体",
+    "romaji": "karada/tai",
+    "meanings": [
+      "kropp"
+    ]
+  },
+  {
+    "index": 238,
+    "kanji": "智",
+    "romaji": "chi",
+    "meanings": [
+      "visdom"
+    ]
+  },
+  {
+    "index": 239,
+    "kanji": "気",
+    "romaji": "ki",
+    "meanings": [
+      "kraft, energi"
+    ]
+  },
+  {
+    "index": 240,
+    "kanji": "行",
+    "romaji": "gyō",
+    "meanings": [
+      "disciplin, handling, utövning"
+    ]
+  },
+  {
+    "index": 241,
+    "kanji": "先",
+    "romaji": "sen",
+    "meanings": [
+      "initiativ"
+    ]
+  },
+  {
+    "index": 242,
+    "kanji": "勘",
+    "romaji": "kan",
+    "meanings": [
+      "intuition"
+    ]
+  },
+  {
+    "index": 243,
+    "kanji": "当身",
+    "romaji": "atemi",
+    "meanings": [
+      "slag mot kroppen"
+    ]
+  },
+  {
+    "index": 244,
+    "kanji": "急所",
+    "romaji": "kyūsho",
+    "meanings": [
+      "vitala punkter"
+    ]
+  },
+  {
+    "index": 245,
+    "kanji": "攻防用器",
+    "romaji": "kōbō yōki",
+    "meanings": [
+      "kroppsdelar som används vid attack/försvar"
+    ]
+  },
+  {
+    "index": 246,
+    "kanji": "法器",
+    "romaji": "hōki",
+    "meanings": [
+      "”buddistiska föremål”, inom Shorinji Kempo våra ”vapen”"
+    ]
+  },
+  {
+    "index": 247,
+    "kanji": "錫杖",
+    "romaji": "shakujō",
+    "meanings": [
+      "vandringsstav använd av buddistmunkar"
+    ]
+  },
+  {
+    "index": 248,
+    "kanji": "如意棒",
+    "romaji": "nyoibō",
+    "meanings": [
+      "kort batongliknande pinne använd av buddistmunkar"
+    ]
+  },
+  {
+    "index": 249,
+    "kanji": "独鈷",
+    "romaji": "dokko",
+    "meanings": [
+      "typ av kongōsho, cirka 15 cm, metallstav använd av buddistmunkar"
+    ]
+  },
+  {
+    "index": 250,
+    "kanji": "ソーエン",
+    "romaji": "sōen",
+    "meanings": [
+      "symbol för Shorinji Kempo (två cirklar)"
+    ]
+  },
+  {
+    "index": 251,
+    "kanji": "ワツー",
+    "romaji": "wa-tsū",
+    "meanings": [
+      "figur (för barn) som symboliserar Shorinji Kempo"
+    ]
+  },
+  {
+    "index": 252,
+    "kanji": "少年部",
+    "romaji": "shōnembu",
+    "meanings": [
+      "barngrupp"
+    ]
+  },
+  {
+    "index": 253,
+    "kanji": "一般部",
+    "romaji": "ippanbu",
+    "meanings": [
+      "generell grupp (vuxna)"
+    ]
+  },
+  {
+    "index": 254,
+    "kanji": "体操",
+    "romaji": "taisō",
+    "meanings": [
+      "fysisk träning"
+    ]
+  },
+  {
+    "index": 255,
+    "kanji": "運動",
+    "romaji": "undō",
+    "meanings": [
+      "fysisk träning"
+    ]
+  },
+  {
+    "index": 256,
+    "kanji": "準備体操／準備運動",
+    "romaji": "junbi taisō/junbi undō",
+    "meanings": [
+      "uppvärmning (junbi = förberedande)"
+    ]
+  },
+  {
+    "index": 257,
+    "kanji": "単演法形",
+    "romaji": "tan'en hōkei",
+    "meanings": [
+      "ensam form"
+    ]
+  },
+  {
+    "index": 258,
+    "kanji": "単独演武",
+    "romaji": "tandoku embu",
+    "meanings": [
+      "ensam embu"
+    ]
+  },
+  {
+    "index": 259,
+    "kanji": "組演武",
+    "romaji": "kumi embu",
+    "meanings": [
+      "par-embu"
+    ]
+  },
+  {
+    "index": 260,
+    "kanji": "団体演武",
+    "romaji": "dantai embu",
+    "meanings": [
+      "grupp-embu"
+    ]
+  },
+  {
+    "index": 261,
+    "kanji": "ゼッケン",
+    "romaji": "zekken",
+    "meanings": [
+      "”nummerlapp” (på ryggen av uwagi vid taikai, indikerar förening eller land)"
+    ]
+  },
+  {
+    "index": 262,
+    "kanji": "技術度",
+    "romaji": "gijutsudo"
+  },
+  {
+    "index": 263,
+    "kanji": "表限度",
+    "romaji": "hyōgendo"
+  },
+  {
+    "index": 264,
+    "kanji": "構成",
+    "romaji": "kōsei",
+    "meanings": [
+      "sekvens/komposition i embu"
+    ]
+  },
+  {
+    "index": 265,
+    "kanji": "節度",
+    "romaji": "setsudo"
+  },
+  {
+    "index": 266,
+    "kanji": "美しさ",
+    "romaji": "utsukushisa"
+  },
+  {
+    "index": 267,
+    "kanji": "冴え",
+    "romaji": "sae"
+  },
+  {
+    "index": 268,
+    "kanji": "表示",
+    "romaji": "hyōji",
+    "meanings": [
+      "visa, kommando för att visa poäng vid embu-bedömning"
+    ]
+  },
+  {
+    "index": 269,
+    "kanji": "移動練習",
+    "romaji": "idō renshū",
+    "meanings": [
+      "träning i rörelse"
+    ]
+  },
+  {
+    "index": 270,
+    "kanji": "攻撃技",
+    "romaji": "kōgeki waza",
+    "meanings": [
+      "attacktekniker"
+    ]
+  },
+  {
+    "index": 271,
+    "kanji": "防御技",
+    "romaji": "bōgyo waza",
+    "meanings": [
+      "försvarstekniker"
+    ]
+  },
+  {
+    "index": 272,
+    "kanji": "補技（仕掛け技）",
+    "romaji": "hogi (shikake waza)",
+    "meanings": [
+      "arresteringsteknik (attackeringsteknik [från dig själv])"
+    ]
+  },
+  {
+    "index": 273,
+    "kanji": "誘い",
+    "romaji": "sasoi",
+    "meanings": [
+      "bjuda in [öppna för attack]"
+    ]
+  },
+  {
+    "index": 274,
+    "kanji": "前進",
+    "romaji": "zenshin",
+    "meanings": [
+      "rörelse framåt"
+    ]
+  },
+  {
+    "index": 275,
+    "kanji": "裏",
+    "romaji": "ura",
+    "meanings": [
+      "baksida"
+    ]
+  },
+  {
+    "index": 276,
+    "kanji": "表",
+    "romaji": "omote",
+    "meanings": [
+      "framsida"
+    ]
+  },
+  {
+    "index": 277,
+    "kanji": "内",
+    "romaji": "uchi/nai",
+    "meanings": [
+      "insida"
+    ]
+  },
+  {
+    "index": 278,
+    "kanji": "外",
+    "romaji": "soto/gai",
+    "meanings": [
+      "utsida"
+    ]
+  },
+  {
+    "index": 279,
+    "kanji": "順",
+    "romaji": "jun",
+    "meanings": [
+      "vanlig ordning (främre)"
+    ]
+  },
+  {
+    "index": 280,
+    "kanji": "逆",
+    "romaji": "gyaku",
+    "meanings": [
+      "omvänd (bakre)"
+    ]
+  },
+  {
+    "index": 281,
+    "kanji": "上段",
+    "romaji": "jōdan",
+    "meanings": [
+      "övre delen"
+    ]
+  },
+  {
+    "index": 282,
+    "kanji": "中段",
+    "romaji": "chūdan",
+    "meanings": [
+      "mittendelen"
+    ]
+  },
+  {
+    "index": 283,
+    "kanji": "下段",
+    "romaji": "gedan",
+    "meanings": [
+      "nedre delen"
+    ]
+  },
+  {
+    "index": 284,
+    "kanji": "片手",
+    "romaji": "katate",
+    "meanings": [
+      "en hand på en"
+    ]
+  },
+  {
+    "index": 285,
+    "kanji": "両手",
+    "romaji": "ryōte",
+    "meanings": [
+      "två händer på två"
+    ]
+  },
+  {
+    "index": 286,
+    "kanji": "諸手",
+    "romaji": "morote",
+    "meanings": [
+      "två händer på en"
+    ]
+  },
+  {
+    "index": 287,
+    "kanji": "順手",
+    "romaji": "jun te",
+    "meanings": [
+      "vanlig hand"
+    ]
+  },
+  {
+    "index": 288,
+    "kanji": "逆手",
+    "romaji": "gyaku te",
+    "meanings": [
+      "omvänd hand"
+    ]
+  },
+  {
+    "index": 289,
+    "kanji": "拇指丘",
+    "romaji": "boshi kyū"
+  },
+  {
+    "index": 290,
+    "kanji": "小指丘",
+    "romaji": "shoshi kyū"
+  },
+  {
+    "index": 291,
+    "kanji": "各種",
+    "romaji": "kaku shu",
+    "meanings": [
+      "flera sätt"
+    ]
+  },
+  {
+    "index": 292,
+    "kanji": "抜き手",
+    "romaji": "nukite",
+    "meanings": [
+      "losstagning av handen"
+    ]
+  },
+  {
+    "index": 293,
+    "kanji": "間合",
+    "romaji": "maai",
+    "meanings": [
+      "avstånd"
+    ]
+  },
+  {
+    "index": 294,
+    "kanji": "一足一拳の間合",
+    "romaji": "issoku ikken no maai",
+    "meanings": [
+      "”ett steg ett slag”-avstånd"
+    ]
+  },
+  {
+    "index": 295,
+    "kanji": "近間",
+    "romaji": "chikama",
+    "meanings": [
+      "kort avstånd"
+    ]
+  },
+  {
+    "index": 296,
+    "kanji": "遠間",
+    "romaji": "tōma",
+    "meanings": [
+      "långt avstånd"
+    ]
+  },
+  {
+    "index": 297,
+    "kanji": "引押",
+    "romaji": "hiki oshi",
+    "meanings": [
+      "drag-tryck"
+    ]
+  },
+  {
+    "index": 298,
+    "kanji": "正中線",
+    "romaji": "seichūsen",
+    "meanings": [
+      "centrum-linje"
+    ]
+  },
+  {
+    "index": 299,
+    "kanji": "演武線",
+    "romaji": "embusen",
+    "meanings": [
+      "embu-linje"
+    ]
+  },
+  {
+    "index": 300,
+    "kanji": "技術",
+    "romaji": "gijutsu",
+    "meanings": [
+      "tekniker"
+    ]
+  },
+  {
+    "index": 301,
+    "kanji": "修行",
+    "romaji": "shugyō",
+    "meanings": [
+      "disciplin (asketisk träning)"
+    ]
+  },
+  {
+    "index": 302,
+    "kanji": "変化",
+    "romaji": "henka",
+    "meanings": [
+      "variation"
+    ]
+  },
+  {
+    "index": 303,
+    "kanji": "絡子",
+    "romaji": "rakusu"
+  },
+  {
+    "index": 304,
+    "kanji": "輪袈裟",
+    "romaji": "wagesa",
+    "meanings": [
+      "loop-shaped monk’s stole"
+    ]
+  },
+  {
+    "index": 305,
+    "kanji": "念珠",
+    "romaji": "nenju",
+    "meanings": [
+      "rosary; string of prayer beads"
+    ]
+  },
+  {
+    "index": 306,
+    "kanji": "祭壇",
+    "romaji": "saidan"
+  },
+  {
+    "index": 307,
+    "kanji": "五具足",
+    "romaji": "gogusoku",
+    "meanings": [
+      "de fem saker som placeras på ett buddhistiskt altare; två ljusstakar, två vaser och ett rökelsekar"
+    ]
+  },
+  {
+    "index": 308,
+    "kanji": "仁王 (像?)",
+    "romaji": "niōsō"
+  },
+  {
+    "index": 309,
+    "kanji": "達磨／だるま",
+    "romaji": "daruma"
+  },
+  {
+    "index": 310,
+    "kanji": "達磨大師",
+    "romaji": "daruma daishi"
+  },
+  {
+    "index": 311,
+    "kanji": "釈尊",
+    "romaji": "shakuson",
+    "meanings": [
+      "annat ord för Buddha"
+    ]
+  },
+  {
+    "index": 312,
+    "kanji": "教典",
+    "romaji": "kyōten"
+  },
+  {
+    "index": 313,
+    "kanji": "聖句",
+    "romaji": "seiku",
+    "meanings": [
+      "betraktelse"
+    ]
+  },
+  {
+    "index": 314,
+    "kanji": "誓願",
+    "romaji": "seigan",
+    "meanings": [
+      "löfte"
+    ]
+  },
+  {
+    "index": 315,
+    "kanji": "礼拝詞",
+    "romaji": "raihaishi"
+  },
+  {
+    "index": 316,
+    "kanji": "道訓",
+    "romaji": "dōkun",
+    "meanings": [
+      "vägens lära"
+    ]
+  },
+  {
+    "index": 317,
+    "kanji": "信条",
+    "romaji": "shinjō",
+    "meanings": [
+      "bekännelse"
+    ]
+  },
+  {
+    "index": 318,
+    "kanji": "振子突",
+    "romaji": "furiko zuki",
+    "meanings": [
+      "pendelslag, (grundslag, pendla/skifta från sida till sida)"
+    ]
+  },
+  {
+    "index": 319,
+    "kanji": "目打ち",
+    "romaji": "me uchi",
+    "meanings": [
+      "typ av urate uchi mot ögat med fingrarna"
+    ]
+  },
+  {
+    "index": 320,
+    "kanji": "直蹴",
+    "romaji": "choku geri",
+    "meanings": [
+      "rak spark"
+    ]
+  },
+  {
+    "index": 321,
+    "kanji": "足刀蹴",
+    "romaji": "sokutō geri",
+    "meanings": [
+      "sidospark (eg. fotkantsspark), (yoko geri)"
+    ]
+  },
+  {
+    "index": 322,
+    "kanji": "同時蹴",
+    "romaji": "dōji geri",
+    "meanings": [
+      "spark samtidigt (som blockering)"
+    ]
+  },
+  {
+    "index": 323,
+    "kanji": "下段蹴",
+    "romaji": "gedan geri",
+    "meanings": [
+      "spark mot benen"
+    ]
+  },
+  {
+    "index": 324,
+    "kanji": "足払い",
+    "romaji": "ashi barai",
+    "meanings": [
+      "bensvep"
+    ]
+  },
+  {
+    "index": 325,
+    "kanji": "前進突",
+    "romaji": "zenshin zuki",
+    "meanings": [
+      "slag under rörelse framåt"
+    ]
+  },
+  {
+    "index": 326,
+    "kanji": "前進蹴",
+    "romaji": "zenshin geri",
+    "meanings": [
+      "spark under rörelse framåt"
+    ]
+  },
+  {
+    "index": 327,
+    "kanji": "胴蹴",
+    "romaji": "dō geri",
+    "meanings": [
+      "spark mot dō (överkroppsskydd)"
+    ]
+  },
+  {
+    "index": 328,
+    "kanji": "胴突",
+    "romaji": "dō zuki",
+    "meanings": [
+      "slag mot dō (överkroppsskydd)"
+    ]
+  },
+  {
+    "index": 329,
+    "kanji": "段受",
+    "romaji": "dan uke",
+    "meanings": [
+      "flera blockeringar efter varandra med samma hand"
+    ]
+  },
+  {
+    "index": 330,
+    "kanji": "連受",
+    "romaji": "ren uke",
+    "meanings": [
+      "flera blockeringar efter varandra med olika händer"
+    ]
+  },
+  {
+    "index": 331,
+    "kanji": "三防受",
+    "romaji": "sambō uke",
+    "meanings": [
+      "tre blockeringar samtidigt; uchi uke, harai uke och hiza uke"
+    ]
+  },
+  {
+    "index": 332,
+    "kanji": "横転身",
+    "romaji": "yoko tenshin",
+    "meanings": [
+      "vrida kroppen åt sidan"
+    ]
+  },
+  {
+    "index": 333,
+    "kanji": "二連攻",
+    "romaji": "ni renkō",
+    "meanings": [
+      "två offensiva tekniker i en följd"
+    ]
+  },
+  {
+    "index": 334,
+    "kanji": "三連攻",
+    "romaji": "san renkō",
+    "meanings": [
+      "tre offensiva tekniker i en följd"
+    ]
+  },
+  {
+    "index": 335,
+    "kanji": "上中二連攻",
+    "romaji": "jō chū ni renkō",
+    "meanings": [
+      "två attacker efter varandra, först jōdan och sedan chūdan"
+    ]
+  },
+  {
+    "index": 336,
+    "kanji": "上中上三連攻",
+    "romaji": "jō chū jō san renkō",
+    "meanings": [
+      "tre attacker efter varandra; jōdan, chūdan och jōdan"
+    ]
+  },
+  {
+    "index": 337,
+    "kanji": "連反攻",
+    "romaji": "ren hankō",
+    "meanings": [
+      "fri uppföljning efter teknik, flera kontringsattacker"
+    ]
+  },
+  {
+    "index": 338,
+    "kanji": "単攻撃",
+    "romaji": "tan kōgeki",
+    "meanings": [
+      "enkla [en i taget] attacker"
+    ]
+  },
+  {
+    "index": 339,
+    "kanji": "連攻撃",
+    "romaji": "ren kōgeki",
+    "meanings": [
+      "flera attacker (i en rörelse)"
+    ]
+  },
+  {
+    "index": 340,
+    "kanji": "波浪脚撃",
+    "romaji": "harō kyaku geki",
+    "meanings": [
+      "attack med benet i en vågrörelse"
+    ]
+  },
+  {
+    "index": 341,
+    "kanji": "反撃",
+    "romaji": "hangeki",
+    "meanings": [
+      "kontringsattack"
+    ]
+  },
+  {
+    "index": 342,
+    "kanji": "段反撃",
+    "romaji": "dan hangeki",
+    "meanings": [
+      "blockera och kontra med samma hand"
+    ]
+  },
+  {
+    "index": 343,
+    "kanji": "段反攻",
+    "romaji": "dan hankō",
+    "meanings": [
+      "kontringsattacker med samma hand"
+    ]
+  },
+  {
+    "index": 344,
+    "kanji": "段撃",
+    "romaji": "dan geki",
+    "meanings": [
+      "flera attacker efter varandra med samma hand"
+    ]
+  },
+  {
+    "index": 345,
+    "kanji": "横転より起上がり",
+    "romaji": "ōten yori okiagari",
+    "meanings": [
+      "upprullning från liggande på golvet"
+    ]
+  },
+  {
+    "index": 346,
+    "kanji": "投げに対する受身",
+    "romaji": "nage ni tai suru ukemi",
+    "meanings": [
+      "ukemi vid kast"
+    ]
+  },
+  {
+    "index": 347,
+    "kanji": "腕後捻上",
+    "romaji": "ude ushiro neji age",
+    "meanings": [
+      "arm-bakåt-vrid-upp, attack vid t.ex. kiri kaeshi nuki"
+    ]
+  },
+  {
+    "index": 348,
+    "kanji": "腕逆捕",
+    "romaji": "ude gyaku dori",
+    "meanings": [
+      "attackteknik (maki tembin)"
+    ]
+  },
+  {
+    "index": 349,
+    "kanji": "ハンマー投",
+    "romaji": "hamma nage",
+    "meanings": [
+      "”hammar-kast”"
+    ]
+  },
+  {
+    "index": 350,
+    "kanji": "背負投げ",
+    "romaji": "seoi nage",
+    "meanings": [
+      "ryggkast"
+    ]
+  },
+  {
+    "index": 351,
+    "kanji": "一本背投",
+    "romaji": "ippon se nage",
+    "meanings": [
+      "ryggkast när man håller i motståndarens ena arm"
+    ]
+  },
+  {
+    "index": 352,
+    "kanji": "肩車",
+    "romaji": "kata guruma",
+    "meanings": [
+      "”brandmanskast”, judo-teknik, attack vid t.ex. kata uchi nage"
+    ]
+  },
+  {
+    "index": 353,
+    "kanji": "空中転回",
+    "romaji": "kūchū tenkai",
+    "meanings": [
+      "vändning i luften, hjula över kōsha vid seoi nage / kata guruma"
+    ]
+  },
+  {
+    "index": 354,
+    "kanji": "連行",
+    "romaji": "renkō",
+    "meanings": [
+      "transportera någon [till polisen], arrestera"
+    ]
+  },
+  {
+    "index": 355,
+    "kanji": "攻防技",
+    "romaji": "kōbōgi",
+    "meanings": [
+      "offensiva och defensiva tekniker"
+    ]
+  },
+  {
+    "index": 356,
+    "kanji": "移動攻技",
+    "romaji": "idō kōgi",
+    "meanings": [
+      "offensiva tekniker i rörelse"
+    ]
+  },
+  {
+    "index": 357,
+    "kanji": "移動防技",
+    "romaji": "idō bōgi",
+    "meanings": [
+      "defensiva tekniker i rörelse"
+    ]
+  },
+  {
+    "index": 358,
+    "kanji": "移動攻防技",
+    "romaji": "idō kōbōgi",
+    "meanings": [
+      "offensiva och defensiva tekniker i rörelse"
+    ]
+  },
+  {
+    "index": 359,
+    "kanji": "縛法",
+    "romaji": "bakuhō"
+  },
+  {
+    "index": 360,
+    "kanji": "押倒",
+    "romaji": "oshi taoshi"
+  },
+  {
+    "index": 361,
+    "kanji": "—",
+    "romaji": "ichi",
+    "meanings": [
+      "1"
+    ]
+  },
+  {
+    "index": 362,
+    "kanji": "二",
+    "romaji": "ni",
+    "meanings": [
+      "2"
+    ]
+  },
+  {
+    "index": 363,
+    "kanji": "三",
+    "romaji": "san",
+    "meanings": [
+      "3"
+    ]
+  },
+  {
+    "index": 364,
+    "kanji": "四",
+    "romaji": "shi, yon",
+    "meanings": [
+      "4"
+    ]
+  },
+  {
+    "index": 365,
+    "kanji": "五",
+    "romaji": "go",
+    "meanings": [
+      "5"
+    ]
+  },
+  {
+    "index": 366,
+    "kanji": "六",
+    "romaji": "roku",
+    "meanings": [
+      "6"
+    ]
+  },
+  {
+    "index": 367,
+    "kanji": "七",
+    "romaji": "shichi / nana",
+    "meanings": [
+      "7"
+    ]
+  },
+  {
+    "index": 368,
+    "kanji": "八",
+    "romaji": "hachi",
+    "meanings": [
+      "8"
+    ]
+  },
+  {
+    "index": 369,
+    "kanji": "九",
+    "romaji": "ku / kyū",
+    "meanings": [
+      "9"
+    ]
+  },
+  {
+    "index": 370,
+    "kanji": "十",
+    "romaji": "jū",
+    "meanings": [
+      "10"
+    ]
+  },
+  {
+    "index": 371,
+    "kanji": "十一",
+    "romaji": "jū-ichi",
+    "meanings": [
+      "11"
+    ]
+  },
+  {
+    "index": 372,
+    "kanji": "十二",
+    "romaji": "jū-ni",
+    "meanings": [
+      "12"
+    ]
+  },
+  {
+    "index": 373,
+    "kanji": "二十",
+    "romaji": "ni-jū",
+    "meanings": [
+      "20"
+    ]
+  },
+  {
+    "index": 374,
+    "kanji": "二十一",
+    "romaji": "ni-jū-ichi",
+    "meanings": [
+      "21"
+    ]
+  },
+  {
+    "index": 375,
+    "kanji": "三十",
+    "romaji": "san-jū",
+    "meanings": [
+      "30"
+    ]
+  },
+  {
+    "index": 376,
+    "kanji": "三十一",
+    "romaji": "san-jū-ichi",
+    "meanings": [
+      "31"
+    ]
+  },
+  {
+    "index": 377,
+    "kanji": "百",
+    "romaji": "hyaku",
+    "meanings": [
+      "100"
+    ]
+  },
+  {
+    "index": 378,
+    "kanji": "千",
+    "romaji": "sen",
+    "meanings": [
+      "1000"
+    ]
+  },
+  {
+    "index": 379,
+    "kanji": "八級",
+    "romaji": "hachikyū",
+    "meanings": [
+      "8:e kyū - gult bälte, endast barn under 10 år"
+    ]
+  },
+  {
+    "index": 380,
+    "kanji": "七級",
+    "romaji": "nanakyū",
+    "meanings": [
+      "7:e kyū - gult bälte, endast barn under 10 år"
+    ]
+  },
+  {
+    "index": 381,
+    "kanji": "六級",
+    "romaji": "rokkyū",
+    "meanings": [
+      "6:e kyū - grönt bälte"
+    ]
+  },
+  {
+    "index": 382,
+    "kanji": "五級",
+    "romaji": "gokyū",
+    "meanings": [
+      "5:e kyū - grönt bälte"
+    ]
+  },
+  {
+    "index": 383,
+    "kanji": "四級",
+    "romaji": "yonkyū",
+    "meanings": [
+      "4:e kyū - grönt bälte"
+    ]
+  },
+  {
+    "index": 384,
+    "kanji": "三級",
+    "romaji": "sankyū",
+    "meanings": [
+      "3:e kyū - brunt bälte"
+    ]
+  },
+  {
+    "index": 385,
+    "kanji": "二級",
+    "romaji": "nikyū",
+    "meanings": [
+      "2:a kyū - brunt bälte"
+    ]
+  },
+  {
+    "index": 386,
+    "kanji": "一級",
+    "romaji": "ikkyū",
+    "meanings": [
+      "1:a kyū - brunt bälte"
+    ]
+  },
+  {
+    "index": 387,
+    "kanji": "初段",
+    "romaji": "shodan",
+    "meanings": [
+      "1:a dan - svart bälte"
+    ]
+  },
+  {
+    "index": 388,
+    "kanji": "二段",
+    "romaji": "nidan",
+    "meanings": [
+      "2:a dan - svart bälte"
+    ]
+  },
+  {
+    "index": 389,
+    "kanji": "三段",
+    "romaji": "sandan",
+    "meanings": [
+      "3:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 390,
+    "kanji": "四段",
+    "romaji": "yondan",
+    "meanings": [
+      "4:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 391,
+    "kanji": "五段",
+    "romaji": "godan",
+    "meanings": [
+      "5:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 392,
+    "kanji": "六段",
+    "romaji": "rokudan",
+    "meanings": [
+      "6:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 393,
+    "kanji": "七段",
+    "romaji": "nanadan",
+    "meanings": [
+      "7:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 394,
+    "kanji": "八段",
+    "romaji": "hachidan",
+    "meanings": [
+      "8:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 395,
+    "kanji": "九段",
+    "romaji": "kyūdan",
+    "meanings": [
+      "9:e dan - svart bälte"
+    ]
+  }
+]

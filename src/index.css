@@ -1,0 +1,25 @@
+img.logo {
+  height: 64px;
+}
+
+@media (max-width: 600px) {
+  img.logo {
+    height: 32px;
+  }
+}
+
+.japanese-subtitle {
+  font-size: small;
+}
+
+.stance-icon {
+  width: 64px;
+}
+
+table.hokei-individuals-table td {
+  padding-right: 0.5em;
+}
+
+.top-align-cell {
+  vertical-align: top;
+}

@@ -1,0 +1,5246 @@
+[{
+  "name": "Dan1",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "idō kōbōgi"
+          },
+          {
+            "type": "basic",
+            "description": "han tenshin & gyaku tenshin"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (jōdan zuki & han tenshin / gyaku tenshin)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.1.1",
+            "hokei": {
+              "name": "gedan gaeshi",
+              "description": "gedan gaeshi ren hankō (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "sashikomi mawashi geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              180
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.1.2",
+            "hokei": {
+              "name": "gyaku tenshin geri",
+              "description": "gyaku tenshin geri ren hankō (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "sashikae chūdan jun zuki gyaku tenshin & shita uke"
+              },
+              "stance": {
+                "name": "hassō gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              183
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande hiji ate"
+          },
+          {
+            "type": "basic",
+            "description": "varierande wantō uchi"
+          },
+          {
+            "type": "basic",
+            "description": "varierande ren kōgeki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.2.1",
+            "hokei": {
+              "name": "gyaku tembin",
+              "description": "gyaku tembin (goka ken)",
+              "group": "goka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              277
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.2.2",
+            "hokei": {
+              "name": "morote oshi nuki",
+              "description": "morote oshi nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "gyaku tembin"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kagite shuhō, nai wantō uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              223
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "harō kyaku geki hiza uke & kinteki geri"
+          },
+          {
+            "type": "basic",
+            "description": "kōbōgi kinteki geri & hiza uke"
+          },
+          {
+            "type": "basic",
+            "description": "varierande jūji uke"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.3.1",
+            "hokei": {
+              "name": "kinteki geri hiza uke nami gaeshi",
+              "description": "kinteki geri hiza uke nami gaeshi ren hankō (kakuritsu ken)",
+              "group": "kakuritsu ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "kinteki geri (jun)"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "hiza uke, kinteki keri kaeshi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              200
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.3.2",
+            "hokei": {
+              "name": "gyaku geri hiza uke nami gaeshi",
+              "description": "gyaku geri hiza uke nami gaeshi ren hankō (kakuritsu ken)",
+              "group": "kakuritsu ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "kinteki geri (gyaku)"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "hiza uke & jūji uke, kinteki keri kaeshi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              200
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kyūsho på armarna"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.4.1",
+            "hokei": {
+              "name": "oshi gote",
+              "description": "oshi gote (katate, ryōte) (ryūka ken)",
+              "group": "ryūka ken",
+              "variations": [
+                "katate",
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              253,
+              254,
+              289
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.4.2",
+            "hokei": {
+              "name": "kote maki gaeshi",
+              "description": "kote maki gaeshi (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kannuki gatame"
+              },
+              "stance": {
+                "name": "gyaku gedan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              254
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ippon se nage kūchū tenkai (hjula över) från seoi nage varierande ukemi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.5.1",
+            "hokei": {
+              "name": "morote wa nuki",
+              "description": "morote wa nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ippon se nage"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              226
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan1.5.2",
+            "hokei": {
+              "name": "morote maki nuki",
+              "description": "morote maki nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ippon se nage"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              222
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Dan2",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kō manji ken (manji no kata) ren kōbō (ni ren, san ren)"
+          },
+          {
+            "type": "basic",
+            "description": "tenchi ken dai ikkei - dai rokkei (tan'en)"
+          },
+          {
+            "type": "basic",
+            "description": "uchi uke zuki, uchi uke geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.1.1",
+            "hokei": {
+              "name": "kaishin zuki",
+              "description": "kaishin zuki (ura, omote) ren hankō (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura",
+                "omote"
+              ],
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kaishin & hangetsu uke"
+              },
+              "stance": {
+                "name": "midare gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              176
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "giwa ken dai ikkei - dai nikei (tan'en) idō kōbōgi (ren kōbō)"
+          },
+          {
+            "type": "basic",
+            "description": "keri kōgeki & tai sabaki (yoko-, han-, gyaku tenshin)"
+          },
+          {
+            "type": "basic",
+            "description": "soto uke zuki, soto uke geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.2.1",
+            "hokei": {
+              "name": "hangetsu geri",
+              "description": "hangetsu geri ren hankō (niō ken)",
+              "group": "niō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kaishin & hangetsu uke"
+              },
+              "stance": {
+                "name": "midare gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              177
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande kihon kōbōgi kote nuki, gyaku gote varierande ukemi"
+          },
+          {
+            "type": "basic",
+            "description": "tsuki nuki (soto, uchi)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.3.1",
+            "hokei": {
+              "name": "gyakute nage",
+              "description": "gyakute nage (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "henka från gyaku gote, ura gatame"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              242
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ryūō ken dai ikkei (tan'en, sōtai) tenchi ken dai ikkei (tan'en, sōtai) tenchi ken dai nikei (tan'en, sōtai)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.4.1",
+            "hokei": {
+              "name": "ryū nage",
+              "description": "ryū nage (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "henka från gyaku gote, ryū gatame"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              244,
+              292
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "nuki waza, gyaku waza vid grepp i handleden"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.5.1",
+            "hokei": {
+              "name": "soto maki tembin",
+              "description": "soto maki tembin (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "henka från gyaku gote"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              245
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "giwa ken dai ikkei (sōtai)"
+          },
+          {
+            "type": "basic",
+            "description": "ryōte yori nuki, maki nuki (ryōte) hiji nuki yori mae tembin"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.6.1",
+            "hokei": {
+              "name": "uchi nuki",
+              "description": "uchi nuki (katate, ryōte) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "katate",
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae",
+              "tai gamae"
+            ],
+            "kyohan": [
+              228
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "byakuren ken dai ikkei (tan'en) shita uke geri, shita uke jun geri, gyaku tenshin geri"
+          },
+          {
+            "type": "basic",
+            "description": "ukemi (ukemi vid nage)"
+          },
+          {
+            "type": "basic",
+            "description": "träna tobi komi geri, tobi ren geri ren geri, dan geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.7.1",
+            "hokei": {
+              "name": "shita uke geri kote nage",
+              "description": "shita uke geri kote nage (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "chūdan gyaku zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ura gatame eller tembin gatame (ura)"
+              },
+              "stance": {
+                "name": "hassō gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              243
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 8,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "tsuki ten ichi, keri ten san"
+          },
+          {
+            "type": "basic",
+            "description": "ren zuki, ren geri sokutō geri, ushiro geri"
+          },
+          {
+            "type": "basic",
+            "description": "ren uke, dan uke, sambō uke"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.8.1",
+            "hokei": {
+              "name": "tai ten ichi",
+              "description": "tai ten ichi ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jō chū ni ren zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uwa uke & shita uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              191
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 9,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "försvarstekniker (bōgi) mot ren kōgeki"
+          },
+          {
+            "type": "basic",
+            "description": "kon ten ichi tsuki ten ni, furi ten ni"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.9.1",
+            "hokei": {
+              "name": "gyaku ten ichi",
+              "description": "gyaku ten ichi ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "ni ren kō med jōdan gyaku zuki & chūdan jun zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi uke & uchi harai uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              187
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 10,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande tai sabaki varierande umpohō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.10.1",
+            "hokei": {
+              "name": "hiki tembin",
+              "description": "hiki tembin (goka ken)",
+              "group": "goka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "shikake waza"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              277
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 11,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "jūji nuki, jūji gote kiri nuki (soto, uchi) gasshō nuki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.11.1",
+            "hokei": {
+              "name": "gyaku hiki tembin",
+              "description": "gyaku hiki tembin (goka ken)",
+              "group": "goka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "sträck armen och gör motstånd"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              278
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 12,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kiri kaeshi nuki, kiri gote ryaku jūji gote, maki jūji gote"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.12.1",
+            "hokei": {
+              "name": "kiri kaeshi tembin",
+              "description": "kiri kaeshi tembin (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "henka från kiri gote"
+              },
+              "stance": {
+                "name": "gedan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              259
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 13,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "sankaku nuki morote jūji nuki, morote jūji gote"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.13.1",
+            "hokei": {
+              "name": "kiri kaeshi maki tembin",
+              "description": "kiri kaeshi maki tembin (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "henka från kiri gote"
+              },
+              "stance": {
+                "name": "gedan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              259
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 14,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "uwa uke zuki, uwa uke geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.14.1",
+            "hokei": {
+              "name": "uwa uke nage",
+              "description": "uwa uke nage (goka ken)",
+              "group": "goka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uraken uchi komi från sashikae ashi uwa uke, kannuki gatame"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              268
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 15,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "soto oshi uke zuki, soto oshi uke geri uchi oshi uke zuki, uchi oshi uke geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.15.1",
+            "hokei": {
+              "name": "uwa uke gyakute nage",
+              "description": "uwa uke gyakute nage (goka ken)",
+              "group": "goka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uraken uchi komi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              269
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 16,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "morote wa nuki, morote tsuki nuki varierande attack & försvar med kyokusen tsuki"
+          },
+          {
+            "type": "basic",
+            "description": "shutō uchi, uraken uchi, uraken zuki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.16.1",
+            "hokei": {
+              "name": "morote gyaku gote",
+              "description": "morote gyaku gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "dra, eller ”dra över axeln”"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "tate ichiji gatame, sekoshi ichiji gatame, kumo garami"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              241
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 17,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "morote maki nuki studera hiji ate, hiza geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.17.1",
+            "hokei": {
+              "name": "morote okuri gote yori bakuhō",
+              "description": "morote okuri gote yori bakuhō (ichi) (ryūka ken)",
+              "group": "ryūka ken",
+              "variations": [
+                "ichi"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "ippon se nage"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "tsuri age ura gatame, ura hiza gatame"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              247,
+              290,
+              292
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 18,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ude jūji gatame, tate gasshō gatame"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.18.1",
+            "hokei": {
+              "name": "ude jūji gatame yori ura gasshō gatame",
+              "description": "ude jūji gatame yori ura gasshō gatame (kongō ken)",
+              "group": "kongō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              291
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 19,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "yori nuki, maki nuki studera jōdan kōbō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.19.1",
+            "hokei": {
+              "name": "okuri tembin dori",
+              "description": "okuri tembin dori (ni shu [två typer]) (kongō ken)",
+              "group": "kongō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              286
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 20,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "okuri gote, okuri yoko tembin, okuri maki tembin, ryōte okuri gote"
+          },
+          {
+            "type": "basic",
+            "description": "studera chūdan kōbō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.20.1",
+            "hokei": {
+              "name": "okuri hiji zeme",
+              "description": "okuri hiji zeme (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "böj armbågen och gör motstånd"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              249
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 21,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "uchi age zuki, uchi age geri"
+          },
+          {
+            "type": "basic",
+            "description": "studera ren kōbō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.21.1",
+            "hokei": {
+              "name": "tsuri otoshi",
+              "description": "tsuri otoshi (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "vänd runt och försök undkomma"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              249
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 22,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "okuri dori studera dan kōbō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.22.1",
+            "hokei": {
+              "name": "tsuri age dori",
+              "description": "tsuri age dori (kongō ken)",
+              "group": "kongō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              290
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 23,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kata muna otoshi, eri jūji studera försvar mot seoi nage & ashi barai"
+          },
+          {
+            "type": "basic",
+            "description": "jōhaku nuki, jōhaku dori, oshi kiri nuki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.23.1",
+            "hokei": {
+              "name": "hiki muna otoshi",
+              "description": "hiki muna otoshi (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              302
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 24,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "nuki waza/gyaku waza vid grepp i ärmen/ kragen"
+          },
+          {
+            "type": "basic",
+            "description": "sode nuki, sode dori, sode maki sode maki tembin, hiki otoshi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.24.1",
+            "hokei": {
+              "name": "ryō muna otoshi",
+              "description": "ryō muna otoshi (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              302
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 25,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kinteki geri hiza uke nami gaeshi me uchi, kinteki geri (sōtai)"
+          },
+          {
+            "type": "basic",
+            "description": "kinteki geri & bōgi (ken uke, hiza uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.25.1",
+            "hokei": {
+              "name": "jun geri chi ichi",
+              "description": "jun geri chi ichi ren hankō (chiō ken)",
+              "group": "chiō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "hebi zuki & kinteki geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ken uke, kinteki keri kaeshi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              195
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 26,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "gyaku geri hiza uke nami gaeshi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.26.1",
+            "hokei": {
+              "name": "gyaku geri chi ichi",
+              "description": "gyaku geri chi ichi ren hankō (chiō ken)",
+              "group": "chiō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "hebi zuki & kinteki geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ken uke, kinteki keri kaeshi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              196
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 27,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kūchū tenkai (hjula över) från ippon se nage studera seoi nage"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.27.1",
+            "hokei": {
+              "name": "maki otoshi",
+              "description": "maki otoshi (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              302
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 28,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "studera ashi barai"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.28.1",
+            "hokei": {
+              "name": "soto maki otoshi",
+              "description": "soto maki otoshi (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              302
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 29,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "harai uke geri, jūji uke geri"
+          },
+          {
+            "type": "basic",
+            "description": "mawashi geri (ren) & bōgi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.29.1",
+            "hokei": {
+              "name": "mawashi geri sambō uke nami gaeshi",
+              "description": "mawashi geri sambō uke nami gaeshi ren hankō (kakuritsu ken)",
+              "group": "kakuritsu ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "三防受､蹴返"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              200
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 30,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "studera varierande keri waza varierande dan geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.30.1",
+            "hokei": {
+              "name": "dan geri sambō uke dan geri gaeshi",
+              "description": "dan geri sambō uke dan geri gaeshi ren hankō (kakuritsu ken)",
+              "group": "kakuritsu ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "dan geri med kinteki geri & mikazuki geri hiza uke, yoko jūji uke, dan geri gaeshi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              201
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 31,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande keri kōgeki och deras försvar keri kōgeki från sashikomi ashi & sashikae ashi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.31.1",
+            "hokei": {
+              "name": "sokutō geri hiki ashi nami gaeshi",
+              "description": "sokutō geri hiki ashi nami gaeshi ren hankō (kakuritsu ken)",
+              "group": "kakuritsu ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "sparka mot knät med sokutō"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              200
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 32,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "nidan nuki, oshi gote katate oshi nuki, kote maki gaeshi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.32.1",
+            "hokei": {
+              "name": "nuki uchi oshi gote",
+              "description": "nuki uchi oshi gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "henka från ryōte oshi gote"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              254
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 33,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "dan kōgeki, dan hangeki"
+          },
+          {
+            "type": "basic",
+            "description": "tsubame gaeshi, chidori gaeshi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.33.1",
+            "hokei": {
+              "name": "harai uke dan zuki",
+              "description": "harai uke dan zuki ren hankō (byakuren ken)",
+              "group": "byakuren ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "sashikomi mawashi geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi harai uke, uraken uchi komi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              194
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 34,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "gedan gaeshi"
+          },
+          {
+            "type": "basic",
+            "description": "försvarstekniker mot mawashi geri, sokutō geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.34.1",
+            "hokei": {
+              "name": "harai uke chi ni",
+              "description": "harai uke chi ni ren hankō (chiō ken)",
+              "group": "chiō ken",
+              "renhanko": true
+            },
+            "stance": [],
+            "kyohan": [
+              197
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 35,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kusshin zuki, kusshin geri kusshin zuki geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.35.1",
+            "hokei": {
+              "name": "jun geri chi san",
+              "description": "jun geri chi san ren hankō (chiō ken)",
+              "group": "chiō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "sokutō geri (mawashi geri) & jō chū ni ren zuki uchi harai uke & uwa uke, ren uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              198
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      },
+      {
+        "weekNumber": 36,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "gyaku tembin, morote oshi nuki morote hiki nuki, maki gote"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "dan2.36.1",
+            "hokei": {
+              "name": "gyaku geri chi san",
+              "description": "gyaku geri chi san ren hankō (chiō ken)",
+              "group": "chiō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "kinteki geri & shutō giri, chūdan zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ken uke & soto oshi uke, ren uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              199
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori embu repetition"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Kyu1",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "tenchi ken dai gokei (tan'en) tenchi ken dai rokkei (tan'en)"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (ren) (choku geri, mawashi geri, sokutō geri)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.1.1",
+            "hokei": {
+              "name": "morote tsuki nuki",
+              "description": "morote tsuki nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "tryck kagite neråt"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "tsuitate shuhō, urate uchi eller shōken uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              221
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.1.2",
+            "hokei": {
+              "name": "katate oshi nuki",
+              "description": "katate oshi nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "鈎手守法､熊手突または内腕刀打"
+              },
+              "stance": {
+                "name": "gedan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              223
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot keri"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ashi barai med grepp i ärmen & dess försvar ashi barai med grepp i ärmen/kragen & dess försvar"
+          },
+          {
+            "type": "basic",
+            "description": "kūchū tenkai (dai sharin) från seoi nage"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.2.1",
+            "hokei": {
+              "name": "kata muna otoshi",
+              "description": "kata muna otoshi (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              300
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.2.2",
+            "hokei": {
+              "name": "eri jūji",
+              "description": "eri jūji (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              303
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar vid grepp i kragen"
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "dan hangeki (från uchi uke, soto uke, uchi age uke) byakuren ken dai ikkei (tan'en)"
+          },
+          {
+            "type": "basic",
+            "description": "träna dan hankō (uchi uke & shutō giri, uchi uke & me uchi) träna dan geki (jō jō dan zuki, jō chū dan zuki)"
+          },
+          {
+            "type": "basic",
+            "description": "varierande kari ashi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.3.1",
+            "hokei": {
+              "name": "tsubame gaeshi",
+              "description": "tsubame gaeshi ren hankō (byakuren ken)",
+              "group": "byakuren ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "dan hangeki med uchi uke & shutō giri"
+              },
+              "stance": {
+                "name": "taiki gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              192
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.3.2",
+            "hokei": {
+              "name": "chidori gaeshi kari ashi,",
+              "description": "chidori gaeshi kari ashi, ren hankō (byakuren ken)",
+              "group": "byakuren ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "sashikae jōdan jun zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "dan hangeki med uchi uke & urate uchi"
+              },
+              "stance": {
+                "name": "taiki gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              193
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot ren kōgeki"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "studera bōgi mot seoi nage/ashi barai dai sharin från seoi nage"
+          },
+          {
+            "type": "basic",
+            "description": "choku geri/mawashi geri från sashikomi ashi choku geri/mawashi geri från sashikae ashi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.4.1",
+            "hokei": {
+              "name": "sode nuki",
+              "description": "sode nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              229
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.4.2",
+            "hokei": {
+              "name": "sode dori",
+              "description": "sode dori (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              297
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar vid grepp i ärmen (sode)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "träna dan uke (uchi uke & uchi harai uke, uchi age uke & uchi otoshi uke)"
+          },
+          {
+            "type": "basic",
+            "description": "kōbōgi (mawashi geri & uchi harai uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.5.1",
+            "hokei": {
+              "name": "hiki otoshi",
+              "description": "hiki otoshi (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              300
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.5.2",
+            "hokei": {
+              "name": "harai uke geri",
+              "description": "harai uke geri ren hankō (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "打払受､蹴込"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              180
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot keri"
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "gör mae ukemi, ushiro ukemi, dai sharin som en kontinuerlig rörelse"
+          },
+          {
+            "type": "basic",
+            "description": "tobi komi geri, tobi geri, tobi ren geri mawashi geri, sokutō geri, ushiro geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.6.1",
+            "hokei": {
+              "name": "sode maki",
+              "description": "sode maki (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              296
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.6.2",
+            "hokei": {
+              "name": "sode maki tembin",
+              "description": "sode maki tembin (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              298
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar vid grepp i krage/ärm (eri/sode)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "dan uke (uchi age uke & uchi otoshi uke) idō kōbōgi (ren zuki & ren uke)"
+          },
+          {
+            "type": "basic",
+            "description": "dan uke (soto oshi uke & uchi oshi uke) idō kōbōgi (ren zuki & dan uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.7.1",
+            "hokei": {
+              "name": "tsuki ten ni",
+              "description": "tsuki ten ni ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jō jō ren zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "dan uke med uchi age uke & uchi otoshi uke, dōji geri"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              188
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.7.2",
+            "hokei": {
+              "name": "furi ten ni",
+              "description": "furi ten ni ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ni renkō (yoko furi zuki & age furi zuki) dan uke med soto oshi uke & uchi otoshi uke, sokutō geri (dōji geri)"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              188
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot ren kōgeki (tsuki)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 8,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ren kōgeki (mawashi geri & jō chū ni ren zuki) ren kōgeki (sokutō geri & jō chū ni ren zuki)"
+          },
+          {
+            "type": "basic",
+            "description": "ni renkō (furi zuki)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.8.1",
+            "hokei": {
+              "name": "eri nuki",
+              "description": "eri nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              229
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.8.2",
+            "hokei": {
+              "name": "ude maki",
+              "description": "ude maki (rakan ken)",
+              "group": "rakan ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              302
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar vid grepp i kragen/ärmen (eri/sode)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 9,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ni renkō (tsuki & keri) ni ren zuki (jun & gyaku, gyaku & jun)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.9.1",
+            "hokei": {
+              "name": "morote jūji nuki",
+              "description": "morote jūji nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              224
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.9.2",
+            "hokei": {
+              "name": "morote jūji gote",
+              "description": "morote jūji gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              258
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar från chūdan gamae (nävarna hålls högt)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 10,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "san renkō (jō chū jō san ren zuki) träna ren uke, dan uke"
+          },
+          {
+            "type": "basic",
+            "description": "san renkō (jō chū choku geri, jō chū mawashi geri) idō kōbōgi (ni renkō, san renkō)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.10.1",
+            "hokei": {
+              "name": "tsuki ten san",
+              "description": "tsuki ten san ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jō chū jō san ren zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ren uke & uwa uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              189
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.10.2",
+            "hokei": {
+              "name": "keri ten san",
+              "description": "keri ten san ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "san renkō med jō chū ni ren zuki & keri ren uke & jūji uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              189
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot ren kōgeki (tsuki/keri)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 11,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande ni renkō varierande san renkō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.11.1",
+            "hokei": {
+              "name": "morote hiki nuki",
+              "description": "morote hiki nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "ude gyaku dori"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "shutō giri & chūdan zuki"
+              },
+              "stance": {
+                "name": "främre handen hålls högt"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              226
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu1.11.2",
+            "hokei": {
+              "name": "maki gote",
+              "description": "maki gote (katate, morote) (ryūka ken)",
+              "group": "ryūka ken",
+              "variations": [
+                "katate",
+                "morote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "katate: insidan handleden i gyaku, morote: ude gyaku dori | tembin gatame (ura), mae tembin gatame, ura gatame"
+              },
+              "stance": {
+                "name": "främre handen hålls högt"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              242
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar från chūdan gamae (nävarna hålls högt)"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Kyu2",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ni renkō (shutō giri & chūdan zuki) ni renkō (jōdan zuki & chūdan zuki)"
+          },
+          {
+            "type": "basic",
+            "description": "varierande hiji ate studera försvar mot ashi barai"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.1.1",
+            "hokei": {
+              "name": "gasshō nuki",
+              "description": "gasshō nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan båda handlederna i gyaku, dra motståndaren ur balans"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              225
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.1.2",
+            "hokei": {
+              "name": "sankaku nuki",
+              "description": "sankaku nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "ude ushiro neji age"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "sankaku shuhō, yoko hiji ate"
+              },
+              "stance": {
+                "name": "gedan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              228
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot tsuki kōgeki"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande hiji ate"
+          },
+          {
+            "type": "basic",
+            "description": "tobi komi geri, tobi geri, tobi ren geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.2.1",
+            "hokei": {
+              "name": "jūji nuki",
+              "description": "jūji nuki (ryōte) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "från jūji nuki till hiji ate, från kiri nuki"
+              },
+              "stance": {
+                "name": "båda händerna hålls högt"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              224
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.2.2",
+            "hokei": {
+              "name": "ryōte jūji gote",
+              "description": "ryōte jūji gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i gyaku, tryck"
+              },
+              "stance": {
+                "name": "båda händerna hålls högt"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              257
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza (katate) vid grepp av utsidan av handleden i gyaku"
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande furi zuki kusshin uke"
+          },
+          {
+            "type": "basic",
+            "description": "kōbōgi (furi zuki & kusshin uke) ni renkō"
+          },
+          {
+            "type": "basic",
+            "description": "san renkō (jō chū jō, jō chū keri)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.3.1",
+            "hokei": {
+              "name": "kusshin zuki kusshin geri",
+              "description": "kusshin zuki kusshin geri (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "yoko furi zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kusshin & chūdan zuki, kusshin & chūdan geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              176
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.3.2",
+            "hokei": {
+              "name": "kusshin zuki geri",
+              "description": "kusshin zuki geri (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "stance": []
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot tsuki kōgeki (jōdan eller chūdan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "tenchi ken dai nikei (tan'en) ude ushiro neji age, hamma nage"
+          },
+          {
+            "type": "basic",
+            "description": "tenchi ken dai nikei (sōtai)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.4.1",
+            "hokei": {
+              "name": "kiri kaeshi nuki",
+              "description": "kiri kaeshi nuki (katate, morote) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "katate",
+                "morote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "鈎手守法､中段突または熊手突"
+              },
+              "stance": {
+                "name": "gedan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              227
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.4.2",
+            "hokei": {
+              "name": "kiri gote",
+              "description": "kiri gote (katate, morote) (ryūka ken)",
+              "group": "ryūka ken",
+              "variations": [
+                "katate",
+                "morote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ude ushiro neji age kagite shuhō"
+              },
+              "stance": {
+                "name": "gedan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              258
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza (ryōte) vid grepp av utsidan av handlederna i gyaku"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "gyaku geri & yoko tenshin, han tenshin, gyaku tenshin"
+          },
+          {
+            "type": "basic",
+            "description": "sashikomi ashi yori keri renkō sashikae ashi yori keri renkō"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.5.1",
+            "hokei": {
+              "name": "yoko tenshin geri",
+              "description": "yoko tenshin geri ren hankō (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "gyaku geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "yoko tenshin & uchi harai uke, chūdan geri"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              183
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.5.2",
+            "hokei": {
+              "name": "han tenshin geri",
+              "description": "han tenshin geri ren hankō (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "gyaku geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "han tenshin & uchi otoshi uke, chūdan geri"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              183
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot chūdan geri (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kyūsho på armar ni renkō (furi zuki)"
+          },
+          {
+            "type": "basic",
+            "description": "träna uchi te tai sabaki med tenshin (yoko, han, gyaku) & keri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.6.1",
+            "hokei": {
+              "name": "jōhaku nuki",
+              "description": "jōhaku nuki (katate, ryōte) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "katate",
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              227
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.6.2",
+            "hokei": {
+              "name": "jōhaku dori",
+              "description": "jōhaku dori (katate, ryōte) (rakan ken)",
+              "group": "rakan ken",
+              "variations": [
+                "katate",
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              300
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza (katate, ryōte) från chūdan gamae"
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande furi zuki kōbōgi (furi zuki & soto oshi uke)"
+          },
+          {
+            "type": "basic",
+            "description": "träna yoko geri kōbōgi (furi zuki & uchi oshi uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.7.1",
+            "hokei": {
+              "name": "soto oshi uke geri",
+              "description": "soto oshi uke geri ren hankō (niō ken)",
+              "group": "niō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "yoko furi zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "soto oshi uke & keri komi"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.7.2",
+            "hokei": {
+              "name": "uchi oshi uke geri",
+              "description": "uchi oshi uke geri ren hankō (niō ken)",
+              "group": "niō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "yoko furi zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi oshi uke & sokutō geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot furi zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 8,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ni ren zuki (jun gyaku, gyaku jun) idō kōbōgi (mawashi geri & uchi harai uke) idō kōbōgi (mawashi geri & jūji uke)"
+          },
+          {
+            "type": "basic",
+            "description": "ni ren zuki (furi zuki & chūdan zuki) oshi uke, ren uke"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.8.1",
+            "hokei": {
+              "name": "uchi uke zuki",
+              "description": "uchi uke zuki (omote) ren hankō (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "omote"
+              ],
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi uke & chūdan zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              173
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.8.2",
+            "hokei": {
+              "name": "kon ten ichi",
+              "description": "kon ten ichi ren hankō (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": true
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ni ren kō med yoko furi zuki & gyaku zuki soto oshi uke & ren uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              190
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot chūdan zuki, chūdan geri (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 9,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande wantō uchi"
+          },
+          {
+            "type": "basic",
+            "description": "ren kōgeki (mawashi geri & jō chū ni ren zuki) ren kōgeki (sokutō geri & jō chū ni ren zuki)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.9.1",
+            "hokei": {
+              "name": "oshi kiri nuki",
+              "description": "oshi kiri nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": ""
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "förhindra jōhaku nuki"
+              },
+              "stance": {
+                "name": ""
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              227
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.9.2",
+            "hokei": {
+              "name": "okuri dori",
+              "description": "okuri dori (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              248
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza vid grepp i båda armarna"
+          }
+        ]
+      },
+      {
+        "weekNumber": 10,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kōbōgi"
+          },
+          {
+            "type": "basic",
+            "description": "studera seoi nage, ashi barai kyūsho på armarna"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.10.1",
+            "hokei": {
+              "name": "ryōte okuri gote",
+              "description": "ryōte okuri gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan båda handlederna i jun, dra okuri yubi dori yori renkō"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              246,
+              286
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.10.2",
+            "hokei": {
+              "name": "ryōte okuri gote yori okuri yoko tembin",
+              "description": "ryōte okuri gote yori okuri yoko tembin (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan båda handlederna i jun, dra ura gatame"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              250
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza (katate, ryōte) från chūdan gamae"
+          }
+        ]
+      },
+      {
+        "weekNumber": 11,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande ukemi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.11.1",
+            "hokei": {
+              "name": "ryaku jūji gote",
+              "description": "ryaku jūji gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              257
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu2.11.2",
+            "hokei": {
+              "name": "maki jūji gote",
+              "description": "maki jūji gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              258
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot tan kōgeki (tsuki eller keri)"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Kyu3",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "san renkō (jō chū jō tsuki, jō chū keri) tenchi ken dai sankei (tan'en) tenchi ken dai yonkei (tan'en)"
+          },
+          {
+            "type": "basic",
+            "description": "ren geri (jun gyaku, gyaku jun) tobi ren geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.1.1",
+            "hokei": {
+              "name": "ude jūji gatame yori tate gasshō gatame",
+              "description": "ude jūji gatame yori tate gasshō gatame (kongō ken)",
+              "group": "kongō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              284,
+              291
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot chūdan zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande dan zuki (me uchi & chūdan zuki, jō jō dan zuki, jō chū dan zuki)"
+          },
+          {
+            "type": "basic",
+            "description": "träna ren uke"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.2.1",
+            "hokei": {
+              "name": "ryōte yori nuki",
+              "description": "ryōte yori nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "目打と中段突､上段直突"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              218
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.2.2",
+            "hokei": {
+              "name": "maki nuki",
+              "description": "maki nuki (ryōte) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i jun uraken"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              221
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "attack och försvar mot utsidan av båda handlederna (ryōte)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "sokutō geri"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (jōdan zuki & uchi uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.3.1",
+            "hokei": {
+              "name": "uchi uke geri",
+              "description": "uchi uke geri (ura) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "内受､足刀蹴"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              174
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.3.2",
+            "hokei": {
+              "name": "uchi uke geri",
+              "description": "uchi uke geri (omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "内受､足刀蹴"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              174
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot jōdan zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande hiji ate ni renkō (jō jō zuki, jō chū zuki) ni renkō (shutō giri & chūdan zuki) ni renkō (uraken uchi & chūdan zuki) dō zuki, dō geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.4.1",
+            "hokei": {
+              "name": "jūji nuki",
+              "description": "jūji nuki (katate) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "katate"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i gyaku, tryck kagite shuhō, uraken uchi, chūdan zuki"
+              },
+              "stance": {
+                "name": "främre handen hålls högt"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              224
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.4.2",
+            "hokei": {
+              "name": "jūji gote",
+              "description": "jūji gote (katate) (ryūka ken)",
+              "group": "ryūka ken",
+              "variations": [
+                "katate"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i gyaku, tryck kagite shuhō, jūji gatame"
+              },
+              "stance": {
+                "name": "främre handen hålls högt"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              257,
+              290
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza vid grepp av utsidan av handleden i gyaku"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "giwa ken dai nikei (tan'en)"
+          },
+          {
+            "type": "basic",
+            "description": "san renkō (jō chū choku geri, jō chū mawashi geri)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.5.1",
+            "hokei": {
+              "name": "nidan nuki",
+              "description": "nidan nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "förhindra ryōte yori nuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              225
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza vid grepp av insidan av handleden i gyaku"
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "furi zuki (tan, ren)"
+          },
+          {
+            "type": "basic",
+            "description": "kōbōgi (furi zuki & soto oshi uke) kōbōgi (furi zuki & uchi oshi uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.6.1",
+            "hokei": {
+              "name": "soto oshi uke zuki",
+              "description": "soto oshi uke zuki (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              175
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.6.2",
+            "hokei": {
+              "name": "uchi oshi uke zuki",
+              "description": "uchi oshi uke zuki (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              175
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot furi zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande umpohō"
+          },
+          {
+            "type": "basic",
+            "description": "varierande ukemi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.7.1",
+            "hokei": {
+              "name": "tsuki nuki",
+              "description": "tsuki nuki (ryōte) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "ryōte"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "突抜より裏手打または掌拳打"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              220
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza vid grepp mot utsidan av båda handlederna (ryōte)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 8,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "giwa ken dai ikkei (sōtai)"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (ni ren zuki & ren uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.8.1",
+            "hokei": {
+              "name": "tsuki ten ichi",
+              "description": "tsuki ten ichi (ten'ō ken)",
+              "group": "ten'ō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jō chū ni ren zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ren uke, dan uke, dōji geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              185
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot shutō uchi eller furi zuki"
+          }
+        ]
+      },
+      {
+        "weekNumber": 9,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "shōken uchi (mikazuki, suigetsu)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.9.1",
+            "hokei": {
+              "name": "hiji nuki yori mae tembin",
+              "description": "hiji nuki yori mae tembin (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "en hand drar, en hand trycker"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              225
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza (katate, ryōte) från chūdan gamae"
+          }
+        ]
+      },
+      {
+        "weekNumber": 10,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ryūō ken dai ikkei (tan'en) ryūō ken dai ikkei (sōtai)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.10.1",
+            "hokei": {
+              "name": "gyaku gote yori ura gaeshi nage, ura gatame",
+              "description": "gyaku gote yori ura gaeshi nage, ura gatame (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ura gatame"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              243,
+              288
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) embu repetition",
+            "restrictions": "nuki waza (katate, ryōte) från chūdan gamae (näven hålls högt)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 11,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "mawashi geri från sashikomi ashi harai uke & yoko jūji uke"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (mawashi geri & uchi harai uke) idō kōbōgi (mawashi geri & jūji uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu3.11.1",
+            "hokei": {
+              "name": "jūji uke geri",
+              "description": "jūji uke geri (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "十字受と蹴返"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              183
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) embu repetition",
+            "restrictions": "attack och försvar mot jōdan (choku zuki eller furi zuki)"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Kyu4",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "jun zuki (mae chidori ashi, sashikae ashi) soto uke"
+          },
+          {
+            "type": "basic",
+            "description": "giwa ken dai ikkei (tan'en) jō chū ni ren zuki (från chūdan gamae)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.1.1",
+            "hokei": {
+              "name": "soto uke zuki",
+              "description": "soto uke zuki (ura) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "soto uke & chūdan zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              174
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.1.2",
+            "hokei": {
+              "name": "soto uke zuki",
+              "description": "soto uke zuki (omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "soto uke & chūdan zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              174
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) repetition",
+            "restrictions": "attack och försvar mot jōdan zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "kōbōgi (jōdan zuki & soto uke) varierande ukemi"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbō (ren)"
+          },
+          {
+            "type": "basic",
+            "description": "varierande umpohō varierande tai sabaki"
+          },
+          {
+            "type": "basic",
+            "description": "varierande furi och kagi zuki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.2.1",
+            "hokei": {
+              "name": "soto uke geri",
+              "description": "soto uke geri (ura) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "soto uke & chūdan geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              175
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.2.2",
+            "hokei": {
+              "name": "soto uke geri",
+              "description": "soto uke geri (omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "soto uke & chūdan geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              175
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) repetition",
+            "restrictions": "attack och försvar mot chūdan zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "furi zuki, chūdan zuki (ni renkō)"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (kagi zuki & uchi harai uke, mawashi geri & uchi harai uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.4.1",
+            "hokei": {
+              "name": "okuri maki tembin",
+              "description": "okuri maki tembin (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "送小手より変化"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              249
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) repetition",
+            "restrictions": "attack och försvar mot grepp av insidan av handleden i jun"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "soto uke & uchi age uke kōbōgi (jōdan zuki & uchi age uke)"
+          },
+          {
+            "type": "basic",
+            "description": "tenchi ken dai nikei (tan'en)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.5.1",
+            "hokei": {
+              "name": "uchi age zuki",
+              "description": "uchi age zuki (ura, omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura",
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi age uke & chūdan zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              172
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.5.2",
+            "hokei": {
+              "name": "uchi age geri",
+              "description": "uchi age geri (ura, omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura",
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi age uke & chūdan geri"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              173
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) repetition",
+            "restrictions": "attack och försvar mot jōdan eller chūdan tan kōgeki (enkla attacker)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "ni renkō (jō jō zuki, jō chū zuki) principer för nukite (gyakute, insidan handleden, utsidan handleden)"
+          },
+          {
+            "type": "basic",
+            "description": "ni renkō (uraken & chūdan zuki, shutō giri & chūdan zuki)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.6.1",
+            "hokei": {
+              "name": "kiri nuki",
+              "description": "kiri nuki (soto) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "soto"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i gyaku, dra främre näven hålls högt,"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "chūdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              223
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.6.2",
+            "hokei": {
+              "name": "kiri nuki",
+              "description": "kiri nuki (uchi) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "uchi"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "insidan handleden i gyaku, dra främre näven hålls högt,"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "chūdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              223
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) repetition",
+            "restrictions": "attack och försvar mot grepp av in- eller utsidan av handleden i gyaku"
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "urate uchi (kinteki uchi) shōken uchi (suigetsu, yoko sammai, mikazuki)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.7.1",
+            "hokei": {
+              "name": "tsuki nuki",
+              "description": "tsuki nuki (soto) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "soto"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "tryck kagite neråt"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "tsuitate shuhō, urate uchi eller shōken uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              220
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu4.7.2",
+            "hokei": {
+              "name": "tsuki nuki",
+              "description": "tsuki nuki (uchi) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "uchi"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "tryck kagite neråt"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "tsuitate shuhō, urate uchi eller shōken uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              220
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō, jūhō), repetition",
+            "restrictions": "attack och försvar mot jōdan eller chūdan tan kōgeki (enkla attacker), attack och försvar mot grepp av in- eller utsidan av handleden i jun"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Kyu5",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "keri age & keri komi ryūsui uke & keri age"
+          },
+          {
+            "type": "basic",
+            "description": "från byakuren chūdan gamae (kaisoku chūdan gamae) jō chū ni ren zuki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.1.1",
+            "hokei": {
+              "name": "ryūsui geri",
+              "description": "ryūsui geri (mae) (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan choku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ryūsui uke & keri komi, jūji ashi sagari/kumo ashi sagari"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              170
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) repetition",
+            "restrictions": "attack och försvar mot jōdan zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (hiraki sagatte keri, hiraki sagatte uwa uke & keri)"
+          },
+          {
+            "type": "basic",
+            "description": "dō zuki, dō geri"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.2.1",
+            "hokei": {
+              "name": "uwa uke geri",
+              "description": "uwa uke geri (omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "shutō uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uwa uke & keri komi, jūji ashi sagari/kumo ashi sagari"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              172
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.2.2",
+            "hokei": {
+              "name": "uwa uke geri",
+              "description": "uwa uke geri (ura) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "shutō uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uwa uke & keri komi, jūji ashi sagari/kumo ashi sagari"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              172
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) repetition",
+            "restrictions": "attack och försvar mot shutō uchi"
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "shutō giri, yorimi principer för nukite (utsidan handleden, jun)"
+          },
+          {
+            "type": "basic",
+            "description": "tenchi ken dai ikkei (sōtai) kyūsho på huvudet"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.3.1",
+            "hokei": {
+              "name": "katate yori nuki",
+              "description": "katate yori nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i jun, dra"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kagite shuhō, kumade zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              210
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) repetition",
+            "restrictions": "nuki waza från seitai gamae (utsidan av handleden i jun)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "jun geri/mawashi geri från sashikomi ashi yoko jūji uke"
+          },
+          {
+            "type": "basic",
+            "description": "ryūō ken dai ikkei (sōtai) jō chū ni ren zuki (från kaisoku chūdan gamae)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.4.1",
+            "hokei": {
+              "name": "maki nuki",
+              "description": "maki nuki (katate) (ryūō ken)",
+              "group": "ryūō ken",
+              "variations": [
+                "katate"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "utsidan handleden i jun"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kagite shuhō, uraken uchi, chūdan zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              221
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) repetition",
+            "restrictions": "nuki waza från seitai gamae (utsidan av handleden i jun)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "varierande tai gamae idō kōbōgi (chūdan zuki & shita uke)"
+          },
+          {
+            "type": "basic",
+            "description": "jō chū ni ren zuki (från chūdan gamae) giwa ken dai ikkei (tan'en)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.5.1",
+            "hokei": {
+              "name": "shita uke geri",
+              "description": "shita uke geri (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "chūdan gyaku zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "shita uke, gyaku geri"
+              },
+              "stance": {
+                "name": "hassō gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              182
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (jūhō) repetition",
+            "restrictions": "nuki waza vid grepp av insidan av handleden i jun"
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "jun zuki, gyaku zuki, jun geri, gyaku geri"
+          },
+          {
+            "type": "basic",
+            "description": "keri age/sokutō geri från sashikae ashi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.6.1",
+            "hokei": {
+              "name": "shita uke jun geri",
+              "description": "shita uke jun geri (sangō ken)",
+              "group": "sangō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "chūdan jun zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "shita uke (bakre handen), jun geri"
+              },
+              "stance": {
+                "name": "hassō gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              182
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō) repetition",
+            "restrictions": "attack och försvar mot chūdan zuki (tan)"
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "uchi geri gedan zuki"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu5.7.1",
+            "hokei": {
+              "name": "gyaku gote",
+              "description": "gyaku gote (ryūka ken)",
+              "group": "ryūka ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "insidan handleden i jun, dra"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi geri, mae yubi gatame, gedan zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              239,
+              286
+            ]
+          },
+          {
+            "type": "other",
+            "description": "randori (gōhō, jūhō) repetition",
+            "restrictions": "attack och försvar mot jōdan eller chūdan tan kōgeki (enkla attacker), nuki waza vid grepp av handleden i jun (insidan eller utsidan)"
+          }
+        ]
+      }
+    ]
+  }
+},{
+  "name": "Kyu6",
+  "trainingProgram": {
+    "weeks": [
+      {
+        "weekNumber": 1,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "nyūmonshiki, reishiki, shosahō (kyakka shōko, gasshō rei, samu, fukusō, taido, kotoba)"
+          },
+          {
+            "type": "basic",
+            "description": "suwari kata, tachi kata, varierande tai gamae chōsokuhō, mekubari, sokuihō"
+          },
+          {
+            "type": "basic",
+            "description": "fujinhō (seitai, tai, hiraki) urate uchi (me uchi), kinteki geri furiko zuki, keri age"
+          }
+        ]
+      },
+      {
+        "weekNumber": 2,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "de ashi, hiki ashi, yoko ashi, ryūsui uke, taishin, irimi"
+          },
+          {
+            "type": "basic",
+            "description": "jun zuki, gyaku zuki, jun geri, gyaku geri uwa uke, uchi uke, shita uke"
+          },
+          {
+            "type": "basic",
+            "description": "kōbōgi (jōdan zuki & ryūsui uke) kyūsho på ansiktet och överkroppen"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.2.1",
+            "hokei": {
+              "name": "ryūsui geri",
+              "description": "ryūsui geri (ushiro) (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "ryūsui uke & chūdan keri komi, jūji ashi sagari"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              170
+            ]
+          }
+        ]
+      },
+      {
+        "weekNumber": 3,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "uchi uke zuki (seitai gamae) kōbōgi (jōdan zuki & uchi uke)"
+          },
+          {
+            "type": "basic",
+            "description": "dō zuki, dō geri"
+          },
+          {
+            "type": "basic",
+            "description": "mae ukemi ushiro ukemi"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.3.1",
+            "hokei": {
+              "name": "uchi uke zuki",
+              "description": "uchi uke zuki (ura) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan gyaku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uchi uke & chūdan gyaku zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              173
+            ]
+          }
+        ]
+      },
+      {
+        "weekNumber": 4,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "dai sharin zen tenkan, han tenkan"
+          },
+          {
+            "type": "basic",
+            "description": "varierande kagi zuki, harai uke, uchi harai uke"
+          },
+          {
+            "type": "basic",
+            "description": "ōten yori okiagari kyūsho på armarna"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.4.1",
+            "hokei": {
+              "name": "ude jūji gatame",
+              "description": "ude jūji gatame (kongō ken)",
+              "group": "kongō ken",
+              "renhanko": false
+            },
+            "stance": [],
+            "kyohan": [
+              284
+            ]
+          }
+        ]
+      },
+      {
+        "weekNumber": 5,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "principer för nukite (insidan handleden, jun) uraken uchi kyūsho på huvudet och ansiktet"
+          },
+          {
+            "type": "basic",
+            "description": "sashikae irimi, chidori irimi hiraki sagari, jun sagari"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōgi (jun zuki, gyaku zuki, jun geri, gyaku geri) idō bōgi (uwa uke, uchi uke, shita uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.5.1",
+            "hokei": {
+              "name": "kote nuki",
+              "description": "kote nuki (ryūō ken)",
+              "group": "ryūō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "insidan handleden i jun, dra"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "kagite shuhō, uraken chūdan zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              213
+            ]
+          }
+        ]
+      },
+      {
+        "weekNumber": 6,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "tenchi ken dai ikkei (tan'en) dō zuki, dō geri"
+          },
+          {
+            "type": "basic",
+            "description": "keri age & keri komi"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (jōdan zuki & uchi uke, chūdan zuki & shita uke, chūdan geri & uchi harai uke)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.6.1",
+            "hokei": {
+              "name": "tenshin geri",
+              "description": "tenshin geri (niō ken)",
+              "group": "niō ken",
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "jōdan choku zuki"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "yoko tenshin & chūdan keri age"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ],
+            "kyohan": [
+              176
+            ]
+          }
+        ]
+      },
+      {
+        "weekNumber": 7,
+        "lessons": [
+          {
+            "type": "basic",
+            "description": "uwa uke zuki (från seitai gamae) sashikae irimi, chidori irimi"
+          },
+          {
+            "type": "basic",
+            "description": "idō kōbōgi (shutō uchi & uwa uke) kyūsho på huvudet och ansiktet"
+          },
+          {
+            "type": "basic",
+            "description": "ni ren kō med tsuki & keri ryūō ken dai ikkei (tan'en)"
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.7.1",
+            "hokei": {
+              "name": "uwa uke zuki",
+              "description": "uwa uke zuki (omote) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "omote"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "shutō uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uwa uke & chūdan zuki, kumade zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              171
+            ]
+          },
+          {
+            "type": "hokei",
+            "uniqueId": "kyu6.7.2",
+            "hokei": {
+              "name": "uwa uke zuki",
+              "description": "uwa uke zuki (ura) (niō ken)",
+              "group": "niō ken",
+              "variations": [
+                "ura"
+              ],
+              "renhanko": false
+            },
+            "offensiveIndividual": {
+              "technique": {
+                "name": "shutō uchi"
+              },
+              "stance": {
+                "name": "chūdan gamae"
+              }
+            },
+            "defensiveIndividual": {
+              "technique": {
+                "name": "uwa uke & chūdan zuki"
+              },
+              "stance": {
+                "name": "ichiji gamae"
+              }
+            },
+            "stance": [
+              "tai gamae"
+            ],
+            "kyohan": [
+              171
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}]
