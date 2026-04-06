@@ -141,7 +141,7 @@ const FootStancesElement = ({ hokei }: FootStancesElementProps) => {
         return null;
 
     const renderFootStance = (s: string) => {
-        return <tbody><tr><td>{translator.translate(s)}</td><td rowSpan={translator.isJapanese ? 1 : 2} className="ps-5">{stanceIcon(effectiveTheme.effectiveTheme, s)}</td></tr>
+        return <tbody key={`${hokei.hokei_name}.${s}`}><tr><td>{translator.translate(s)}</td><td rowSpan={translator.isJapanese ? 1 : 2} className="ps-5">{stanceIcon(effectiveTheme.effectiveTheme, s)}</td></tr>
                     {!translator.isJapanese && <tr className="japanese-subtitle text-muted"><td>{translator.japanese(s)}</td></tr>}</tbody>;
 
     }

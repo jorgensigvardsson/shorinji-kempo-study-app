@@ -15,9 +15,11 @@ const WordList = () => {
                           name="filter"/>
             <table className="table table-sm mt-3">
                 <thead>
-                    <th>Kanji</th>
-                    <th>Romaji</th>
-                    <th>Betydelse</th>
+                    <tr>
+                        <th>Kanji</th>
+                        <th>Romaji</th>
+                        <th>Betydelse</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {filteredEntries.map(we => createWordListRow(we))}
@@ -42,22 +44,13 @@ const orderEntries = (a: WordListEntry, b: WordListEntry) => {
 
 
 const createWordListRow = (entry: WordListEntry) => {
-    let meanings: any = "";
-
+    const meanings = [];
+    let index = 0;
     if (entry.meanings) {
-        if (entry.meanings.length === 1) {
-            meanings = entry.meanings[0];
-        } else {
-            meanings = [];
-            for (let i = 0; i < entry.meanings.length; ++i) {
-                const m = entry.meanings[i];
-                meanings.push(m);
-
-                if (i + 1 < entry.meanings.length) {
-                    meanings.push(",");
-                    meanings.push(<br/>);
-                }
-            }
+        for (const meaning of entry.meanings) {
+            if(meanings.length > 0)
+                meanings.push(<br key={index++}/>);
+            meanings.push(<span key={index++}>{meaning}</span>);
         }
     }
 

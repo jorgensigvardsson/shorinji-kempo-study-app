@@ -13,7 +13,9 @@ export interface Props {
 
 interface HokeiMomentWithGrade {
     moment: HokeiMoment;
+    momentIndex: number;
     grade: GradeName;
+    week: number;
 }
 
 const Groups = (props: Props) => {
@@ -22,8 +24,8 @@ const Groups = (props: Props) => {
     
     const translator = useContext(TranslatorContext);
         
-    const allHokeis = allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({grade: grade.grade, moments: getHokeiMoments(w)})))
-                                   .flatMap(({grade, moments}) => moments.map(moment => ({ grade, moment})))
+    const allHokeis = allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({grade: grade.grade, week: w.week, moments: getHokeiMoments(w)})))
+                                   .flatMap(({grade, week, moments}) => moments.map((moment, momentIndex) => ({ grade, week, moment, momentIndex })))
                                    .sort((a, b) => a.grade.localeCompare(b.grade));
 
     const hokeisByGroup = new Map<string, HokeiMomentWithGrade[]>();
@@ -49,8 +51,8 @@ const Groups = (props: Props) => {
                     {!translator.isJapanese && <div style={{fontSize: `${cardSettings.cardTextSize * 1}em`}}>{japaneseGroup}</div>}
                 </Card.Header>
                 <Card.Body className="p-0">
-                    {hokeis.map(h => <div style={{fontSize: "smaller"}}>
-                        <HokeiCard key={h.moment.hokei_name} hokei={h.moment} gradeName={h.grade} className="m-1"
+                    {hokeis.map(h => <div style={{fontSize: "smaller"}} key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`}>
+                        <HokeiCard hokei={h.moment} gradeName={h.grade} className="m-1"
                                    notesData={notesData} />
                     </div>)}
                 </Card.Body>

@@ -90,20 +90,23 @@ interface BasicExerciseCardProps {
 function BasicExerciseCard(props: BasicExerciseCardProps) {
     const { basicExercises, translator } = props;
     const cardSettings = useContext(CardSettingsContext);
+
+    const bullets = [];
+
+    let index = 0;
+    for (const be of basicExercises) {
+        if (translator.isJapanese) {
+            bullets.push(<li key={index++}>{translator.japanese(be)}</li>);
+        } else {
+            bullets.push(<li key={index++}>{translator.translate(be)}</li>);
+            bullets.push(<li key={index++} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(be)}</li>);
+        }
+    }
     
     return (
         <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`, { emSize: cardSettings.cardTextSize })} className="mt-3">
             <ul>
-                {basicExercises.map((be, index) => {
-                    if (translator.isJapanese)
-                        return <li key={index * 2}>{translator.japanese(be)}</li>
-                    return (
-                        <>
-                            <li key={index * 2}>{translator.translate(be)}</li>
-                            <li key={index * 2 + 1} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(be)}</li>
-                        </>
-                    );
-                })}
+                {bullets}
             </ul>
         </CollapsibleCard>
     );
