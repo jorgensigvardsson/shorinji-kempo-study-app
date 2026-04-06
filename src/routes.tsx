@@ -1,5 +1,5 @@
 import { Book, Collection, Gear, House, JournalText, ListUl, type Icon } from "react-bootstrap-icons";
-import type { Level } from "./data.ts";
+import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
 import { type Language, type Translator } from "./i18n.ts";
@@ -15,9 +15,9 @@ export interface Route {
     icon: Icon;
 }
 
-export const getRoutes = (level: Level, allLevels: Level[], translator: Translator, notesData: HokeiNotes,
+export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes,
                           cardTextSize: number, 
-                          setLanguage: (lang: Language) => void, setLevel: (level: Level) => void,
+                          setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
                           setCardTextSize: (size: number) => void): Route[] => {
     let routes: Route[] = [{
         path: "/",
@@ -26,17 +26,17 @@ export const getRoutes = (level: Level, allLevels: Level[], translator: Translat
         icon: House
     }, {
         path: "/kamoku",
-        component: () => <Kamoku myLevel={level.name} allLevels={allLevels} notesData={notesData}/>,
+        component: () => <Kamoku myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData}/>,
         menuText: translator.translate("Kamoku"),
         icon: Book
     }, {
         path: "/list",
-        component: () => <List allLevels={allLevels} notesData={notesData} level={level}/>,
+        component: () => <List allGradePlans={allGradePlans} notesData={notesData} grade={gradePlan}/>,
         menuText: translator.translate("Lista"),
         icon: ListUl
     }, {
         path: "/groups",
-        component: () => <Groups allLevels={allLevels} notesData={notesData}/>,
+        component: () => <Groups allGradePlans={allGradePlans} notesData={notesData}/>,
         menuText: translator.translate("Grupper"),
         icon: Collection
     }, {
@@ -46,7 +46,7 @@ export const getRoutes = (level: Level, allLevels: Level[], translator: Translat
         icon: JournalText
     }, {
         path: "/settings",
-        component: () => <Settings onSetLanguage={setLanguage} onSetLevel={setLevel} level={level} levels={allLevels} translator={translator}
+        component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} grade={gradePlan} allGradePlans={allGradePlans} translator={translator}
                                    cardTextSize={cardTextSize} onSetCardTextSize={setCardTextSize} />,
         menuText: translator.translate("Inställningar"),
         icon: Gear

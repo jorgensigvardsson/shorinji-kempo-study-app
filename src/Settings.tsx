@@ -1,25 +1,25 @@
 import { Form } from "react-bootstrap";
 import { useTheme } from "./hooks";
 import type { Language, Translator } from "./i18n";
-import { humanLevelName, type Level, type LevelName } from "./data";
+import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultCardSettings } from "./persistence/card-settings";
 
 interface Props {
     translator: Translator;
-    level: Level;
-    levels: Level[];
+    grade: GradePlan;
+    allGradePlans: GradePlan[];
     cardTextSize: number;
     onSetLanguage: (lang: Language) => void;
-    onSetLevel: (level: Level) => void;
+    onSetGrade: (grade: GradePlan) => void;
     onSetCardTextSize: (cardTextSize: number) => void;
 }
 
 const Settings = (props: Props) => {
-    const { translator, level, levels, cardTextSize, onSetLanguage, onSetLevel, onSetCardTextSize } = props;
+    const { translator, grade, allGradePlans, cardTextSize, onSetLanguage, onSetGrade, onSetCardTextSize } = props;
     const { theme, setTheme } = useTheme();
 
-    const levelLabel = (name: LevelName) => {
-        let humanName = humanLevelName(name);
+    const gradeLabel = (name: GradeName) => {
+        let humanName = humanGradeName(name);
         humanName = `${humanName[0].toUpperCase()}${humanName.slice(1)}`;
 
         if (!translator.isJapanese)
@@ -58,10 +58,10 @@ const Settings = (props: Props) => {
 
             <Form.Group className="mb-3" controlId="settingsLevel">
                 <Form.Label>Nivå</Form.Label>
-                <Form.Select onChange={e => onSetLevel(levels.find(x => x.name === e.target.value)!)} value={level.name}>
+                <Form.Select onChange={e => onSetGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
                     {
-                        levels.map(
-                            (l, i) => <option value={l.name} key={i}>{levelLabel(l.name)}</option>
+                        allGradePlans.map(
+                            (l, i) => <option value={l.grade} key={i}>{gradeLabel(l.grade)}</option>
                         )
                     }
                 </Form.Select>

@@ -1,84 +1,119 @@
-export type Variation = "ura" | "omote" | "katate" | "ryōte" | "morote";
-
-export interface Hokei {
-    readonly name: string;
-    readonly description: string;
-    readonly group: string;
-    readonly variations?: Variation[];
-    readonly renhanko: boolean;
+export type GradeName = "1 kyū" | "2 kyū" | "3 kyū" | "4 kyū" | "5 kyū" | "6 kyū" |
+                        "shodan" | "nidan" | "sandan" | "yondan" | "godan" | "rokudan" | "nanadan" | "hachidan" | "kudan";
+"nidan"
+export const humanGradeName = (ln: GradeName): string => {
+    return ln;
 }
 
-export type HokeiStance = "tai gamae" | "hiraki gamae"; // MorE?
-
-export interface HokeiIndividual {
-    readonly technique?: Technique;
-    readonly stance: Stance;
+export interface GradePlan {
+  grade: GradeName;
+  note?: string;
+  weeks: Week[];
 }
 
-export interface Stance {
-    readonly name: string;
+export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek;
+
+export interface RegularWeek {
+  week: number;
+  type: "regular_week";
+  kihon_shoho?: string[];
+  moments: Moment[];
 }
 
-
-export interface Technique {
-    readonly name: string;
+export interface KihonOnlyWeek {
+  week: number;
+  type: "kihon_only";
+  kihon_shoho: string[];
+  moments: Moment[];
 }
 
-export type MainExercise = HokeiExercise | OtherExercise;
-export type Lesson = MainExercise | BasicExercise;
-
-export type HokeiExercise = {
-    type: "hokei";
-    readonly uniqueId: string;
-    readonly hokei: Hokei;
-    readonly offensiveIndividual?: HokeiIndividual;
-    readonly defensiveIndividual?: HokeiIndividual;
-    readonly stance: HokeiStance[];
-    readonly kyohan?: number[];
+export interface ReviewPreparationWeek {
+  week: number;
+  type: "review_preparation_week";
+  content: string[];
 }
 
-export type BasicExercise = {
-    type: "basic",
-    readonly description: string;
+export type Moment = HokeiMoment | StandardMoment;
+
+export interface HokeiMoment {
+  type: "hokei_moment";
+  hokei_name: string;
+  ren_hanko: boolean;
+  variations: string[];
+  technique_group: string;
+  foot_stance: string[];
+  roles: Roles;
+  references?: string[];
+  kyohan_pages: number[];
 }
 
-export type OtherExercise = {
-    type: "other",
-    readonly description: string;
-    readonly restrictions?: string;
+export interface Roles {
+  attacker: RoleDetails;
+  defender: RoleDetails;
 }
 
-export interface Week {
-    readonly weekNumber: number;
-    readonly lessons: Lesson[];
+export interface RoleDetails {
+  stance?: string;
+  action?: string;
 }
 
-export interface TrainingProgram {
-    readonly weeks: Week[];
+export interface StandardMoment {
+  type: "standard_moment";
+  randori?: string;
+  content: string[];
+  restrictions?: string;
 }
 
-export type LevelName = "Kyu6" | "Kyu5" | "Kyu4" | "Kyu3" | "Kyu2" | "Kyu1" | "Dan1" | "Dan2" | "Dan3" | "Dan4" | "Dan5";
+/**
+ * Narrowers / type guards
+ */
 
-export interface Level {
-    readonly name: LevelName; // "1st Kyu", "1st Dan"
-    readonly trainingProgram: TrainingProgram;
+export function isReviewPreparationWeek(week: Week): week is ReviewPreparationWeek {
+  return week.type === "review_preparation_week";
 }
 
-export const humanLevelName = (ln: LevelName) => {
-    switch(ln) {
-        case "Dan1": return "shodan";
-        case "Dan2": return "nidan";
-        case "Dan3": return "sandan";
-        case "Dan4": return "yondan";
-        case "Dan5": return "godan";
-        case "Kyu6": return "6 kyū";
-        case "Kyu5": return "5 kyū";
-        case "Kyu4": return "4 kyū";
-        case "Kyu3": return "3 kyū";
-        case "Kyu2": return "2 kyū";
-        case "Kyu1": return "1 kyū";
-    }
+export function isKihonOnlyWeek(week: Week): week is KihonOnlyWeek {
+  return week.type === "kihon_only";
 }
+
+export function isRegularWeek(week: Week): week is RegularWeek {
+  return week.type === "regular_week";
+}
+
+export function isStandardMoment(moment: Moment): moment is StandardMoment {
+  return "type" in moment && moment.type === "standard_moment";
+}
+
+export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
+  return "hokei_name" in moment;
+}
+
+/**
+ * Small helpers that are handy when consuming imported JSON assets.
+ */
+
+export function getHokeiMoments(week: Week): HokeiMoment[] {
+  if (isReviewPreparationWeek(week)) return [];
+  return week.moments.filter(isHokeiMoment);
+}
+
+export function getStandardMoments(week: Week): StandardMoment[] {
+  if (isReviewPreparationWeek(week)) return [];
+  return week.moments.filter(isStandardMoment);
+}
+
+export function getAllHokeiMoments(plan: GradePlan): HokeiMoment[] {
+  return plan.weeks.flatMap(getHokeiMoments);
+}
+
+export function getWeeksWithKihonShoho(plan: GradePlan): Array<RegularWeek | KihonOnlyWeek> {
+  return plan.weeks.filter(
+    (week): week is RegularWeek | KihonOnlyWeek =>
+      (week.type === "regular_week" || week.type === "kihon_only") &&
+      Array.isArray(week.kihon_shoho)
+  );
+}
+
 
 export interface WordListEntry {
     index: number;

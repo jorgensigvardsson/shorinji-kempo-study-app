@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import './App.css'
-import { type Level, type LevelName } from './data'
+import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language } from './i18n';
 import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap';
 import { getRoutes, type Route } from './routes';
@@ -10,33 +10,33 @@ import type { HokeiNotes } from './persistence/app-data';
 import { CardSettingsContext, type CardSettings } from './persistence/card-settings';
 
 interface Props {
-  levels: Level[];
+  gradePlans: GradePlan[];
   cardSettingsData: Data<CardSettings>;
-  levelData: Data<LevelName>;
+  gradeData: Data<GradeName>;
   languageData: Data<Language>;
   notesData: HokeiNotes;
 }
 
 function App(props: Props) {
-  const { levels, languageData, levelData, notesData, cardSettingsData } = props;
+  const { gradePlans, languageData, gradeData, notesData, cardSettingsData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ cardSettings, setCardSettings ] = useState<CardSettings>(cardSettingsData.data);
-  const [ level, setLevel ] = useState<LevelName>(levels.find(l => l.name === levelData.data)!.name);
+  const [ grade, setGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const translations = useContext(TranslationsContext);
   const translator = new TranslatorImplementation(translations, language);
   const routes = getRoutes(
-    levels.find(l => l.name === level)!,
-    levels,
+    gradePlans.find(l => l.grade === grade)!,
+    gradePlans,
     translator,
     notesData,
     cardSettings.cardTextSize,
     lang => languageData.save(lang),
-    level => levelData.save(level.name),
+    g => gradeData.save(g.grade),
     size => cardSettingsData.save({ cardTextSize: size })
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
-  useEffect(() => levelData.registerListener(l => setLevel(l)), [levelData]);
+  useEffect(() => gradeData.registerListener(g => setGrade(g)), [gradeData]);
   useEffect(() => cardSettingsData.registerListener(l => setCardSettings(l)), [cardSettingsData]);
 
   return (

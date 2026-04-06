@@ -1,30 +1,30 @@
-import type { Level } from "../data";
+import type { GradeName } from "../data";
 
-export const compareLevels = (a: Level, b: Level): number => {
-    const ac = /^(Dan|Kyu)(\d)$/.exec(a.name);
-    const bc = /^(Dan|Kyu)(\d)$/.exec(b.name);
+export const compareLevels = (a: GradeName, b: GradeName): number => {
+    const ao = makeLevelOrdinal(a);
+    const bo = makeLevelOrdinal(b);
 
-    if (!ac)
-        throw new Error("a is not a valid level.");
-
-    if (!bc)
-        throw new Error("b is not a valid level.");
-
-    const aOrdinal = makeLevelOrdinal(ac[1], parseInt(ac[2]));
-    const bOrdinal = makeLevelOrdinal(ac[1], parseInt(ac[2]));
-
-    return aOrdinal - bOrdinal;
+    return ao - bo;
 }
 
-const kyuLevels = 6;
-
-const makeLevelOrdinal = (group: string, groupOrdinal: number): number => {
-    let ordinal = 0;
-    if (group === "Kyu") {
-        ordinal = kyuLevels - groupOrdinal; // Because kyu levels are enumerated in descending order
-    } else {
-        // Must be dan
-        ordinal = kyuLevels + groupOrdinal - 1; // Because Shodan starts with 1, and we're 0-indexed
+const makeLevelOrdinal = (grade: GradeName): number => {
+    switch (grade) {
+        case "kudan": return 9;
+        case "hachidan": return 8;
+        case "nanadan": return 7;
+        case "rokudan": return 6;
+        case "godan": return 5;
+        case "yondan": return 4;
+        case "sandan": return 3;
+        case "nidan": return 2;
+        case "shodan": return 1;
+        case "1 kyū": return -1;
+        case "2 kyū": return -2;
+        case "3 kyū": return -3;
+        case "4 kyū": return -4;
+        case "5 kyū": return -5;
+        case "6 kyū": return -6;
+        default:
+            throw new Error(`Unrecognized level name ${grade}`);
     }
-    return ordinal;
 }

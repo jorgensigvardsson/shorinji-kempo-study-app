@@ -1,39 +1,37 @@
 import { Card, Container } from "react-bootstrap";
 import { useContext } from "react";
 import { TranslatorContext } from "./i18n";
-import type { HokeiExercise, Level } from "./data";
+import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import type { HokeiNotes } from "./persistence/app-data";
 import { CardSettingsContext } from "./persistence/card-settings";
 
 export interface Props {
-    allLevels: Level[];
+    allGradePlans: GradePlan[];
     notesData: HokeiNotes;
 }
 
-interface HokeiExerciseWithLevel {
-    hokeiExercise: HokeiExercise;
-    level: Level;
+interface HokeiMomentWithGrade {
+    moment: HokeiMoment;
+    grade: GradeName;
 }
 
 const Groups = (props: Props) => {
-    const { allLevels, notesData } = props;
+    const { allGradePlans, notesData } = props;
     const cardSettings = useContext(CardSettingsContext);
     
     const translator = useContext(TranslatorContext);
         
-    const allHokeis = allLevels.flatMap(level => level.trainingProgram.weeks.map(w => ({level: level, week: w})))
-                               .flatMap(levelAndWeek => levelAndWeek.week.lessons.map(l => ({level: levelAndWeek.level, lesson: l})))
-                               .filter(levelAndLesson => levelAndLesson.lesson.type === "hokei")
-                               .map(levelAndLesson => ({ level: levelAndLesson.level, hokeiExercise: levelAndLesson.lesson as HokeiExercise}))
-                               .sort((a, b) => a.hokeiExercise.hokei.name.localeCompare(b.hokeiExercise.hokei.name));
+    const allHokeis = allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({grade: grade.grade, moments: getHokeiMoments(w)})))
+                                   .flatMap(({grade, moments}) => moments.map(moment => ({ grade, moment})))
+                                   .sort((a, b) => a.grade.localeCompare(b.grade));
 
-    const hokeisByGroup = new Map<string, HokeiExerciseWithLevel[]>();
-    for (const hokeiAndLevel of allHokeis) {
-        if(!hokeisByGroup.has(hokeiAndLevel.hokeiExercise.hokei.group))
-            hokeisByGroup.set(hokeiAndLevel.hokeiExercise.hokei.group, [hokeiAndLevel]);
+    const hokeisByGroup = new Map<string, HokeiMomentWithGrade[]>();
+    for (const hokeiAndGrade of allHokeis) {
+        if(!hokeisByGroup.has(hokeiAndGrade.moment.technique_group))
+            hokeisByGroup.set(hokeiAndGrade.moment.technique_group, [hokeiAndGrade]);
         else
-            hokeisByGroup.get(hokeiAndLevel.hokeiExercise.hokei.group)!.push(hokeiAndLevel);
+            hokeisByGroup.get(hokeiAndGrade.moment.technique_group)!.push(hokeiAndGrade);
     }
 
     const sortedGroups = [...hokeisByGroup.keys()].sort((a, b) => a.localeCompare(b));
@@ -52,7 +50,7 @@ const Groups = (props: Props) => {
                 </Card.Header>
                 <Card.Body className="p-0">
                     {hokeis.map(h => <div style={{fontSize: "smaller"}}>
-                        <HokeiCard key={h.hokeiExercise.hokei.name} hokei={h.hokeiExercise} levelName={h.level.name} className="m-1"
+                        <HokeiCard key={h.moment.hokei_name} hokei={h.moment} gradeName={h.grade} className="m-1"
                                    notesData={notesData} />
                     </div>)}
                 </Card.Body>

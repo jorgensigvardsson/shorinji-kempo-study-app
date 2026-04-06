@@ -1,39 +1,38 @@
 import { Form, Container } from "react-bootstrap";
 import { useContext, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { humanLevelName, type BasicExercise, type Level, type LevelName, type OtherExercise, type Week } from "./data";
+import { humanGradeName, type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
 import CollapsibleCard from "./CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
 import { CardSettingsContext } from "./persistence/card-settings";
 import type { HokeiNotes } from "./persistence/app-data";
-import KamokuPrinting from "./printing/Kamoku";
 
 export interface Props {
-    myLevel: LevelName;
-    allLevels: Level[];
+    myGrade: GradeName;
+    allGradePlans: GradePlan[];
     notesData: HokeiNotes;
 }
 
 const Kamoku = (props: Props) => {
-    const { myLevel, allLevels, notesData } = props;
+    const { myGrade, allGradePlans, notesData } = props;
     const [selectedWeek, setSelectedWeek] = useState(0);
     const translator = useContext(TranslatorContext);
-    const [level, setLevel] = useState<Level>(allLevels.find(l => l.name == myLevel)!);
+    const [grade, setGrade] = useState<GradePlan>(allGradePlans.find(l => l.grade == myGrade)!);
 
-    const setNewLevel = (level: Level) => {
+    const setNewGrade = (grade: GradePlan) => {
         setSelectedWeek(0);
-        setLevel(level);
+        setGrade(grade);
     }
 
     const optionLabel = (week: Week) => {
         if (!translator.isJapanese)
-            return `${translator.translate("Vecka")} ${week.weekNumber} (${translator.japanese("Vecka")} ${translator.japanese(week.weekNumber)})`;
-        return `${translator.translate("Vecka")} ${translator.translate(week.weekNumber)}`;
+            return `${translator.translate("Vecka")} ${week.week} (${translator.japanese("Vecka")} ${translator.japanese(week.week)})`;
+        return `${translator.translate("Vecka")} ${translator.translate(week.week)}`;
     }
 
-    const levelLabel = (name: LevelName) => {
-        let humanName = humanLevelName(name);
+    const gradeLabel = (grade: GradeName) => {
+        let humanName = humanGradeName(grade);
         humanName = `${humanName[0].toUpperCase()}${humanName.slice(1)}`;
 
         if (!translator.isJapanese)
@@ -42,43 +41,50 @@ const Kamoku = (props: Props) => {
         return translator.japanese(humanName);
     }
 
-    const basicExercises = level.trainingProgram.weeks[selectedWeek].lessons.filter(l => l.type === "basic");
-    const hokeiExercises = level.trainingProgram.weeks[selectedWeek].lessons.filter(l => l.type === "hokei");
-    const otherExercises = level.trainingProgram.weeks[selectedWeek].lessons.filter(l => l.type === "other");
+    const basicExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
+        ? (grade.weeks[selectedWeek].kihon_shoho ?? [])
+        : null;
+
+    const hokeiExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
+        ? grade.weeks[selectedWeek].moments.filter(m => "hokei_name" in m).map((m, mi) => ({ key: `${grade.grade}.${selectedWeek}.${m.hokei_name}).${mi}`, hokei: m }))
+        : null;
+
+    const otherExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
+        ? grade.weeks[selectedWeek].moments.filter(m => "type" in m && m.type === "standard_moment").map((m, mi) => ({ key: `${grade.grade}.${selectedWeek}.standard.${mi}`, moment: m as StandardMoment}))
+        : null;
+
+    const preparationExercisesWeek = grade.weeks[selectedWeek].type === "review_preparation_week";
+
 
     return (
-        <>
-            <Container className="p-3 d-print-none">
-                <Form.Group className="mb-3" controlId="level">
-                    <Form.Label>Nivå</Form.Label>
-                    <Form.Select onChange={e => setNewLevel(allLevels.find(x => x.name === e.target.value)!)} value={level.name}>
-                        <option value={myLevel} key={myLevel}>Min grad: {levelLabel(myLevel)}</option>
-                        {
-                            allLevels.filter(l => l.name !== myLevel).map(
-                                l => <option value={l.name} key={l.name}>{levelLabel(l.name)}</option>
-                            )
-                        }
-                    </Form.Select>
-                </Form.Group>
-                <Form.Select onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))} name="week-selector">
-                    {level.trainingProgram.weeks.map((week, index) => (
-                        <option key={index} value={index}>{optionLabel(week)}</option>)
-                    )}
+        <Container className="p-3 d-print-none">
+            <Form.Group className="mb-3" controlId="level">
+                <Form.Label>Nivå</Form.Label>
+                <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
+                    <option value={myGrade} key={myGrade}>Min grad: {gradeLabel(myGrade)}</option>
+                    {
+                        allGradePlans.filter(l => l.grade !== myGrade).map(
+                            l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade)}</option>
+                        )
+                    }
                 </Form.Select>
-                {basicExercises && <BasicExerciseCard key={"be"} translator={translator} basicExercises={basicExercises} />}
-                {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.uniqueId} hokei={he} className="mt-3" notesData={notesData} />)}
-                {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.description} translator={translator} other={oe} />)}
-            </Container>
-            <div className="d-none d-print-block">
-                <KamokuPrinting {...props}/>
-            </div>
-        </>
+            </Form.Group>
+            <Form.Select onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))} name="week-selector">
+                {grade.weeks.map((week, index) => (
+                    <option key={index} value={index}>{optionLabel(week)}</option>)
+                )}
+            </Form.Select>
+            {basicExercises && <BasicExerciseCard key={"be"} translator={translator} basicExercises={basicExercises} />}
+            {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-3" notesData={notesData} />)}
+            {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.key} translator={translator} other={oe.moment} />)}
+            {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
+        </Container>
     )
 }
 
 interface BasicExerciseCardProps {
     translator: Translator;
-    basicExercises: BasicExercise[];
+    basicExercises: string[];
 }
 
 function BasicExerciseCard(props: BasicExerciseCardProps) {
@@ -90,11 +96,11 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
             <ul>
                 {basicExercises.map((be, index) => {
                     if (translator.isJapanese)
-                        return <li key={index * 2}>{translator.japanese(be.description)}</li>
+                        return <li key={index * 2}>{translator.japanese(be)}</li>
                     return (
                         <>
-                            <li key={index * 2}>{translator.translate(be.description)}</li>
-                            <li key={index * 2 + 1} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(be.description)}</li>
+                            <li key={index * 2}>{translator.translate(be)}</li>
+                            <li key={index * 2 + 1} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(be)}</li>
                         </>
                     );
                 })}
@@ -105,27 +111,118 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
 
 interface OtherCardProps {
     translator: Translator;
-    other: OtherExercise;
+    other: StandardMoment;
 }
 
 function OtherCard(props: OtherCardProps) {
+    // TODO: Re-implement this
     const { translator, other } = props;
     const cardSettings = useContext(CardSettingsContext);
+
+    const renderRandori = () => {
+        if (other.content.indexOf("randori") < 0)
+            return null;
+
+        if (translator.isJapanese) {
+            if (!other.randori && !other.restrictions)
+                return <tr><td>{translator.translate("Randori")}</td></tr>;
+            else if (other.randori && !other.restrictions)
+                return <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}</td></tr>;
+            else if (!other.randori && other.restrictions)
+                return <tr><td>{translator.translate("Randori")}, {translator.translate(other.restrictions)}</td></tr>;
+            else if (other.randori && other.restrictions)
+                return <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}, {translator.translate(other.restrictions)}</td></tr>;
+        } else {
+             if (!other.randori && !other.restrictions) {
+                return <>
+                    <tr><td>{translator.translate("Randori")}</td></tr>
+                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}</td></tr>
+                </>;
+            } else if (other.randori && !other.restrictions) {
+                return <>
+                    <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}</td></tr>
+                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}</td></tr>
+                </>
+            } else if (!other.randori && other.restrictions) {
+                return <>
+                    <tr><td>{translator.translate("Randori")}, {translator.translate(other.restrictions)}</td></tr>
+                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.restrictions)}</td></tr>
+                </>
+            }
+            else if (other.randori && other.restrictions) {
+                return <>
+                    <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}, {translator.translate(other.restrictions)}</td></tr>
+                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}, {translator.japanese(other.restrictions)}</td></tr>
+                </>
+            }
+        }
+
+        return null;
+    }
+
+    const renderEmbu = () => {
+        if (other.content.indexOf("embu") < 0)
+            return null;
+
+        if (translator.isJapanese) {
+            return <tr><td>{translator.translate("Embu")}</td></tr>;
+        } else {
+            return <>
+                <tr><td>{translator.translate("Embu")}</td></tr>
+                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Embu")}</td></tr>
+            </>;
+        }
+    }
+
+    const renderRepetition = () => {
+        if (other.content.indexOf("repetition") < 0)
+            return null;
+
+        if (translator.isJapanese) {
+            return <tr><td>{translator.translate("Repetition")}</td></tr>;
+        } else {
+            return <>
+                <tr><td>{translator.translate("Repetition")}</td></tr>
+                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Repetition")}</td></tr>
+            </>;
+        }
+    }
     
     return (
         <CollapsibleCard header={cardHead(translator, `Kihon shohō`, { emSize: cardSettings.cardTextSize })} className="mt-3">
             <table className="hokei-individuals-table">
                 <tbody>
-                    <tr>
-                        <td>{translator.translate(other.description)}</td>
-                        {other.restrictions && <td>{translator.translate(other.restrictions)}</td>}
-                    </tr>
-                    {!translator.isJapanese && <tr className="japanese-subtitle text-muted">
-                        <td>{translator.japanese(other.description)}</td>
-                        {other.restrictions && <td>{translator.japanese(other.restrictions)}</td>}
-                    </tr>}
+                    {renderRandori()}
+                    {renderEmbu()}
+                    {renderRepetition()}
                 </tbody>
             </table>
+        </CollapsibleCard>
+    );
+}
+
+interface PreparationWeekCardProps {
+    translator: Translator;
+}
+
+function PreparationWeekCard(props: PreparationWeekCardProps) {
+    const { translator } = props;
+    const cardSettings = useContext(CardSettingsContext);
+
+    const text = "Repetition, studier, förberedelse inför gradering";
+    const body = translator.isJapanese 
+        ? <tr><td>{translator.japanese(text)}</td></tr>
+        : <>
+            <tr><td>{translator.translate(text)}</td></tr>
+            <tr className="japanese-subtitle text-muted"><td>{translator.japanese(text)}</td></tr>
+        </>
+    return (
+        <CollapsibleCard header={cardHead(translator, `Repetition`, { emSize: cardSettings.cardTextSize })} className="mt-3">
+            <table>
+                <tbody>
+                    {body}
+                </tbody>
+            </table>            
         </CollapsibleCard>
     );
 }

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { type HokeiExercise, type Level } from "./data";
+import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } from "./data";
 import { TranslatorContext } from "./i18n";
 import type { HokeiNotes } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
@@ -7,33 +7,31 @@ import { Container, Form } from "react-bootstrap";
 import { compareLevels } from "./utilities/level";
 
 interface Props {
-    level: Level;
-    allLevels: Level[];
+    grade: GradePlan;
+    allGradePlans: GradePlan[];
     notesData: HokeiNotes;
 }
 
 type Selection = "all" | "own" | "up-to-own";
 
 const List = (props: Props) => {
-    const { level, allLevels, notesData } = props;
+    const { grade, allGradePlans, notesData } = props;
     const [selection, setSelection] = useState<Selection>("own");
     const [filterText, setFilterText] = useState<string>("");
-    const [allHokeis, setAllHokeis] = useState<HokeiAndLevel[]>([]);
+    const [allHokeis, setAllHokeis] = useState<HokeiAndGrade[]>([]);
 
     const translator = useContext(TranslatorContext);
 
     useEffect(() => {
         setAllHokeis(
-            allLevels.flatMap(level => level.trainingProgram.weeks.map(w => ({level: level, week: w})))
-                     .flatMap(levelAndWeek => levelAndWeek.week.lessons.map(l => ({level: levelAndWeek.level, lesson: l})))
-                     .filter(levelAndLesson => levelAndLesson.lesson.type === "hokei")
-                     .map(levelAndLesson => ({ level: levelAndLesson.level, hokeiExercise: levelAndLesson.lesson as HokeiExercise}))
-                     .sort((a, b) => a.hokeiExercise.hokei.name.localeCompare(b.hokeiExercise.hokei.name))
+            allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({week: w.week, grade: grade.grade, moments: getHokeiMoments(w)})))
+                         .flatMap(({week, grade, moments}) => moments.map((moment, momentIndex) => ({ week, grade, moment, momentIndex})))
+                         .sort((a, b) => a.grade.localeCompare(b.grade))
         )
-    }, [allLevels]);
+    }, [allGradePlans]);
            
-    const filteredHokeis = allHokeis.filter(l => matchesSelection(l.level, level, selection))
-                                    .filter(l => matchesFilterText(l.hokeiExercise, filterText));
+    const filteredHokeis = allHokeis.filter(l => matchesSelection(l.grade, grade.grade, selection))
+                                    .filter(l => matchesFilterText(l.grade, l.moment, filterText));
 
     return (
         <Container className="p-3">
@@ -52,30 +50,24 @@ const List = (props: Props) => {
     )
 }
 
-const matchesSelection = (level: Level, myLevel: Level, selection: Selection) => {
+const matchesSelection = (grade: GradeName, myGrade: GradeName, selection: Selection) => {
     if (selection === "all")
         return true;
 
     if (selection === "own")
-        return level.name == myLevel.name;
+        return grade == myGrade;
     
-    return compareLevels(level, myLevel) <= 0;
+    return compareLevels(grade, myGrade) <= 0;
 }
 
-const matchesFilterText = (hokeiExercise: HokeiExercise, filterText: string) => {
-    return matchesString(hokeiExercise.hokei.name, filterText) ||
-           hokeiExercise.stance.some(s => matchesString(s, filterText)) ||
-           hokeiExercise.offensiveIndividual && (
-              matchesString(hokeiExercise.offensiveIndividual.stance.name, filterText) ||
-              hokeiExercise.offensiveIndividual.technique && matchesString(hokeiExercise.offensiveIndividual.technique.name, filterText)
-           ) ||
-           hokeiExercise.defensiveIndividual && (
-              matchesString(hokeiExercise.defensiveIndividual.stance.name, filterText) ||
-              hokeiExercise.defensiveIndividual.technique && matchesString(hokeiExercise.defensiveIndividual.technique.name, filterText)
-           ) ||
-           matchesString(hokeiExercise.hokei.description, filterText) ||
-           matchesString(hokeiExercise.hokei.group, filterText) ||
-           hokeiExercise.hokei.variations && hokeiExercise.hokei.variations.some(v => matchesString(v, filterText));
+const matchesFilterText = (grade: GradeName, hokeiExercise: HokeiMoment, filterText: string) => {
+    return matchesString(grade, filterText) ||
+           hokeiExercise.roles.attacker.stance && matchesString(hokeiExercise.roles.attacker.stance, filterText) ||
+           hokeiExercise.roles.attacker.action && matchesString(hokeiExercise.roles.attacker.action, filterText) ||
+           hokeiExercise.roles.defender.stance && matchesString(hokeiExercise.roles.defender.stance, filterText) ||
+           hokeiExercise.roles.defender.action && matchesString(hokeiExercise.roles.defender.action, filterText) ||
+           matchesString(hokeiExercise.technique_group, filterText) ||
+           hokeiExercise.variations && hokeiExercise.variations.some(v => matchesString(v, filterText));
 }
 
 const matchesString = (hayStack: string, needle: string) => {
@@ -87,13 +79,15 @@ const matchesString = (hayStack: string, needle: string) => {
     return hayStack.toLowerCase().includes(needle.toLowerCase());
 }
 
-interface HokeiAndLevel {
-    level: Level;
-    hokeiExercise: HokeiExercise
+interface HokeiAndGrade {
+    week: number;
+    grade: GradeName;
+    moment: HokeiMoment;
+    momentIndex: number;
 }
-const renderHokeis = (hokeis: HokeiAndLevel[], notesData: HokeiNotes) => {
+const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes) => {
     return hokeis.map(h => (
-        <HokeiCard key={h.hokeiExercise.uniqueId} hokei={h.hokeiExercise} levelName={h.level.name} className="mt-3"
+        <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-3"
                         notesData={notesData}/>
     ))
 }
