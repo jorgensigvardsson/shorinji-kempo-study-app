@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import CollapsibleCard from "../CollapsibleCard";
-import { humanGradeName, type HokeiMoment, type GradeName, type RoleDetails } from "../data";
+import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
 import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";

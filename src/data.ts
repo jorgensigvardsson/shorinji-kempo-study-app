@@ -1,6 +1,6 @@
 export type GradeName = "1 kyū" | "2 kyū" | "3 kyū" | "4 kyū" | "5 kyū" | "6 kyū" |
                         "shodan" | "nidan" | "sandan" | "yondan" | "godan" | "rokudan" | "nanadan" | "hachidan" | "kudan";
-"nidan"
+
 export const humanGradeName = (ln: GradeName): string => {
     return ln;
 }
