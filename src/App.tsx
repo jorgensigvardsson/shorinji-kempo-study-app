@@ -43,8 +43,10 @@ function App(props: Props) {
     <CardSettingsContext.Provider value={cardSettingsData.data}>
       <TranslatorContext.Provider value={translator}>
         <AppNavbar routes={routes} translator={translator} className="d-print-none"/>
-        {renderRoutes(routes)}
-        <Outlet />
+        <div className="m-3">
+          {renderRoutes(routes)}
+          <Outlet />
+        </div>
       </TranslatorContext.Provider>
     </CardSettingsContext.Provider>
   )
