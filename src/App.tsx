@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
-import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language } from './i18n';
+import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
 import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap';
-import { getRoutes, type Route } from './routes';
-import { Outlet, Route as DomRoute, Routes, Link } from 'react-router-dom';
+import { getRoutes, routeText, type Route } from './routes';
+import { Outlet, Route as DomRoute, Routes, NavLink } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes } from './persistence/app-data';
 import { CardSettingsContext, type CardSettings } from './persistence/card-settings';
@@ -42,7 +42,7 @@ function App(props: Props) {
   return (
     <CardSettingsContext.Provider value={cardSettingsData.data}>
       <TranslatorContext.Provider value={translator}>
-        <AppNavbar routes={routes} className="d-print-none"/>
+        <AppNavbar routes={routes} translator={translator} className="d-print-none"/>
         {renderRoutes(routes)}
         <Outlet />
       </TranslatorContext.Provider>
@@ -62,28 +62,29 @@ function renderRoutes(routes: Route[]) {
 
 interface NavbarProps {
   routes: Route[];
+  translator: Translator;
   className?: string;
 }
 
 const AppNavbar = (props: NavbarProps) => {
-  const { routes, className } = props;
+  const { routes, className, translator } = props;
   const [show, setShow] = useState(false);
 
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
-        <Navbar.Brand href="/"><img src="/shorinjikempo.png" className="logo" />ShorinjiKempo Study App</Navbar.Brand>
+        <Navbar.Brand href="/"><img src="/shorinjikempo.png" className="logo" />{translator.translate("Shorinji Kempo")}</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow(true)} />
         <Navbar.Offcanvas id="basic-navbar-nav" placement="end"
           show={show} onHide={() => setShow(false)}>
           <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Shorinji kempo training app</Offcanvas.Title>
+            <Offcanvas.Title>{translator.translate("Shorinji Kempo")}</Offcanvas.Title>
           </Offcanvas.Header>
           <Offcanvas.Body>
-            <Nav className="me-auto">
-              {routes.map((route, index) => (
-                <Nav.Link className="menu-item" as={Link} key={index} to={route.path} onClick={() => setShow(false)}>{route.icon && <route.icon size={20} />}&nbsp;&nbsp;{route.menuText}</Nav.Link>
-              ))}
+            <Nav className="me-auto" variant="pills">
+              {routes.map((route, index) => {
+                return <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path} onClick={() => setShow(false)}>{route.icon && <>&nbsp;&nbsp;<route.icon size={20} /></>}&nbsp;&nbsp;{routeText(route)}</Nav.Link>
+              })}
             </Nav>
           </Offcanvas.Body>
         </Navbar.Offcanvas>

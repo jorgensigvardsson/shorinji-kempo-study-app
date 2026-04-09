@@ -11,8 +11,12 @@ import WordList from "./WordList.tsx";
 export interface Route {
     path: string;
     component: React.ComponentType<any>;
-    menuText: string;
+    menuText: string | (() => string);
     icon: Icon;
+}
+
+export const routeText = (route: Route) => { 
+    return typeof(route.menuText) === "function" ? route.menuText() : route.menuText;
 }
 
 export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes,
