@@ -32,27 +32,13 @@ const flashCards: FlashCardQuestion[] = [
 
 const FlashCardPractice = () => {
   const pickQuestionIndex = () => Math.floor(Math.random() * flashCards.length);
+
   const [questionIndex, setQuestionIndex] = useState(() => pickQuestionIndex());
   const [answer, setAnswer] = useState<number | null>(null);
   const [showBack, setShowBack] = useState(false);
 
   const flashCard = flashCards[questionIndex];
   const translator = useContext(TranslatorContext);
-
-  const alternatives = flashCard.alternatives.map((alternative, index) => {
-    return (
-      <Form.Check
-        key={`answer-${questionIndex}-${index}`}
-        type="radio"
-        name={`answer-${questionIndex}`}
-        label={translator.translate(alternative)}
-        value={index}
-        id={`answer-${questionIndex}-${index}`}
-        checked={answer === index}
-        onChange={() => setAnswer(index)}
-      />
-    );
-  });
 
   const showAnswer = () => {
     setShowBack(true);
@@ -64,6 +50,7 @@ const FlashCardPractice = () => {
 
   const nextCard = () => {
     let nextIndex = questionIndex;
+
     if (flashCards.length > 1) {
       while (nextIndex === questionIndex) {
         nextIndex = pickQuestionIndex();
@@ -75,24 +62,37 @@ const FlashCardPractice = () => {
     setShowBack(false);
   };
 
+  const alternatives = flashCard.alternatives.map((alternative, index) => (
+    <Form.Check
+      key={`answer-${questionIndex}-${index}`}
+      type="radio"
+      name={`answer-${questionIndex}`}
+      label={translator.translate(alternative)}
+      value={index}
+      id={`answer-${questionIndex}-${index}`}
+      checked={answer === index}
+      onChange={() => setAnswer(index)}
+    />
+  ));
+
   const selectedAlternative =
     answer !== null ? flashCard.alternatives[answer] : null;
 
-  const correctAlternative = flashCard.alternatives[flashCard.correctAnswer];
+  const correctAlternative =
+    flashCard.alternatives[flashCard.correctAnswer];
 
   const answeredCorrectly = answer === flashCard.correctAnswer;
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ minHeight: "calc(100vh - 8rem)" }}
-    >
-      <div className={`flashcard-scene w-100 ${showBack ? "is-flipped" : ""}`}>
+    <div className="flashcard-page">
+      <div className={`flashcard-scene ${showBack ? "is-flipped" : ""}`}>
         <div className="flashcard-inner">
           <div className="flashcard-face flashcard-front">
-            <Card className="w-100 h-100">
+            <Card className="flashcard-card">
               <Card.Header>
-                <h1>{translator.translate(flashCard.question)}</h1>
+                <h1 className="mb-0">
+                  {translator.translate(flashCard.question)}
+                </h1>
               </Card.Header>
 
               <Card.Body className="fs-3 d-flex flex-column justify-content-center">
@@ -117,12 +117,12 @@ const FlashCardPractice = () => {
           </div>
 
           <div className="flashcard-face flashcard-back">
-            <Card className="w-100 h-100">
+            <Card className="flashcard-card">
               <Card.Header>
-                <h1>{translator.translate("Svar")}</h1>
+                <h1 className="mb-0">{translator.translate("Svar")}</h1>
               </Card.Header>
 
-              <Card.Body className="fs-3 d-flex flex-column justify-content-center">
+              <Card.Body className="fs-3">
                 <div className="mb-3">
                   <strong>{translator.translate("Fråga")}:</strong>{" "}
                   {translator.translate(flashCard.question)}

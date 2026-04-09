@@ -1,14 +1,27 @@
+.flashcard-page {
+  padding: 1rem;
+}
+
 .flashcard-scene {
-  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 50rem;
+  margin: 0 auto;
   perspective: 1000px;
 }
 
 .flashcard-inner {
   position: relative;
   width: 100%;
-  height: 100%;
   transition: transform 0.6s ease;
   transform-style: preserve-3d;
+}
+
+/* This invisible block gives the flip container its height.
+   Adjust the min-height to taste. */
+.flashcard-inner::before {
+  content: "";
+  display: block;
+  min-height: 24rem;
 }
 
 .flashcard-scene.is-flipped .flashcard-inner {
@@ -24,4 +37,9 @@
 
 .flashcard-back {
   transform: rotateY(180deg);
+}
+
+.flashcard-card {
+  width: 100%;
+  height: 100%;
 }
