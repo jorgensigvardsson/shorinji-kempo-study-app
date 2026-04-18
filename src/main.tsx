@@ -1,7 +1,7 @@
 import { StrictMode, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/bootstrap-theme.scss';
 import App from './App.tsx'
 import { BrowserRouter } from "react-router-dom";
 import gradePlans from './assets/kamokuhyo.json';
