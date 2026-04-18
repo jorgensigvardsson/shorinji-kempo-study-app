@@ -1,4 +1,4 @@
-import { Book, Collection, Gear, House, JournalText, ListUl, CardHeading, type Icon } from "react-bootstrap-icons";
+import { Book, Collection, Gear, House, JournalText, ListUl, CardHeading, type Icon, QuestionSquare } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
@@ -39,12 +39,12 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
     }, {
         path: "/list",
         component: () => <List allGradePlans={allGradePlans} notesData={notesData} grade={gradePlan}/>,
-        menuText: translator.translate("Lista"),
+        menuText: translator.translate("Alla hokei"),
         icon: ListUl
     }, {
         path: "/groups",
         component: () => <Groups allGradePlans={allGradePlans} notesData={notesData}/>,
-        menuText: translator.translate("Grupper"),
+        menuText: translator.translate("Teknikgrupper"),
         icon: Collection
     }, {
         path: "/word-list",
@@ -55,7 +55,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         path: "/quiz",
         component: () => <Quiz myGrade={gradePlan.grade}/>,
         menuText: translator.translate("Quiz"),
-        icon: CardHeading
+        icon: QuestionSquare
     }, {
         path: "/flashcard",
         component: () => <Flashcard />,

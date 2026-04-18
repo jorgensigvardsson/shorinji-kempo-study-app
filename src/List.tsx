@@ -19,6 +19,7 @@ const List = (props: Props) => {
     const { grade, allGradePlans, notesData } = props;
     const [selection, setSelection] = useState<Selection>("own");
     const [filterText, setFilterText] = useState<string>("");
+    const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
     const [allHokeis, setAllHokeis] = useState<HokeiAndGrade[]>([]);
 
     const translator = useContext(TranslatorContext);
@@ -30,9 +31,14 @@ const List = (props: Props) => {
                          .sort((a, b) => a.grade.localeCompare(b.grade))
         )
     }, [allGradePlans]);
+
+    useEffect(() => {
+        const timeoutId = window.setTimeout(() => setDebouncedFilterText(filterText), 500);
+        return () => window.clearTimeout(timeoutId);
+    }, [filterText]);
            
     const filteredHokeis = allHokeis.filter(l => matchesSelection(l.grade, grade.grade, selection))
-                                    .filter(l => matchesFilterText(l.grade, l.moment, filterText));
+                                    .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText));
 
     console.log("filteredHokeis: ", filteredHokeis.map(h => h.moment.hokei_name));
 
@@ -44,7 +50,6 @@ const List = (props: Props) => {
                     <option value="own">{translator.translate('Endast egna')}</option>
                     <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
                 </Form.Select>
-                {/* TODO: don't filter directly, add some kind of wait state before running the query */}
                 <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-2"
                               value={filterText} onChange={e => setFilterText(e.target.value)} />
             </Form>
