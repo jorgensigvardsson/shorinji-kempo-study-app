@@ -8,7 +8,6 @@ import type { Variant } from "react-bootstrap/esm/types";
 import { Badge, Col, Container, Form, Row } from "react-bootstrap";
 import { ChatFill, JournalText } from "react-bootstrap-icons";
 import type { HokeiNotes } from "../persistence/app-data";
-import { CardSettingsContext } from "../persistence/card-settings";
 
 interface HokeiCardProps {
     hokei: HokeiMoment;
@@ -22,13 +21,10 @@ const HokeiCard = (props: HokeiCardProps) => {
     const translator = useContext(TranslatorContext);
     const [hasNotes, setHasNotes] = useState(!!notesData.getNotes(hokei.hokei_name));
 
-    const cardSettings = useContext(CardSettingsContext);
-
     useEffect(() => notesData.registerListener(hokei.hokei_name, note => setHasNotes(!!note)), [notesData]);
 
     const options: HeadOptions = {
-        badges: [],
-        emSize: cardSettings.cardTextSize
+        badges: []
     };
 
     if(gradeName) {

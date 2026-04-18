@@ -2,20 +2,20 @@ import { Form } from "react-bootstrap";
 import { useTheme } from "./hooks";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
-import { DefaultCardSettings } from "./persistence/card-settings";
+import { DefaultTextSize } from "./persistence/text-size";
 
 interface Props {
     translator: Translator;
     grade: GradePlan;
     allGradePlans: GradePlan[];
-    cardTextSize: number;
+    textSize: number;
     onSetLanguage: (lang: Language) => void;
     onSetGrade: (grade: GradePlan) => void;
-    onSetCardTextSize: (cardTextSize: number) => void;
+    onSetTextSize: (textSize: number) => void;
 }
 
 const Settings = (props: Props) => {
-    const { translator, grade, allGradePlans, cardTextSize, onSetLanguage, onSetGrade, onSetCardTextSize } = props;
+    const { translator, grade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
     const { theme, setTheme } = useTheme();
 
     const gradeLabel = (name: GradeName) => {
@@ -47,12 +47,12 @@ const Settings = (props: Props) => {
                 </Form.Select>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="cardTextSize">
+            <Form.Group className="mb-3" controlId="textSize">
                 <Form.Label>Textstorlek</Form.Label>
-                <Form.Select onChange={e => onSetCardTextSize(parseFloat(e.target.value))} value={cardTextSize}>
-                    <option value="1.0">Liten</option>
-                    <option value={DefaultCardSettings.cardTextSize}>Medium</option>
-                    <option value="1.7">Stor</option>
+                <Form.Select onChange={e => onSetTextSize(parseFloat(e.target.value))} value={textSize}>
+                    <option value="0.9">Liten</option>
+                    <option value={DefaultTextSize}>Medium</option>
+                    <option value="1.1">Stor</option>
                 </Form.Select>
             </Form.Group>
 

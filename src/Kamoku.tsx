@@ -5,7 +5,6 @@ import { type GradePlan, type GradeName, type Week, type StandardMoment } from "
 import CollapsibleCard from "./CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
-import { CardSettingsContext } from "./persistence/card-settings";
 import type { HokeiNotes } from "./persistence/app-data";
 import { gradeLabel } from "./strings";
 
@@ -80,7 +79,6 @@ interface BasicExerciseCardProps {
 
 function BasicExerciseCard(props: BasicExerciseCardProps) {
     const { basicExercises, translator } = props;
-    const cardSettings = useContext(CardSettingsContext);
 
     const bullets = [];
 
@@ -95,7 +93,7 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
     }
     
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`, { emSize: cardSettings.cardTextSize })} className="mt-3">
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-3">
             <ul>
                 {bullets}
             </ul>
@@ -111,7 +109,6 @@ interface OtherCardProps {
 function OtherCard(props: OtherCardProps) {
     // TODO: Re-implement this
     const { translator, other } = props;
-    const cardSettings = useContext(CardSettingsContext);
 
     const renderRandori = () => {
         if (other.content.indexOf("randori") < 0)
@@ -183,7 +180,7 @@ function OtherCard(props: OtherCardProps) {
     }
     
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō`, { emSize: cardSettings.cardTextSize })} className="mt-3">
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-3">
             <table className="hokei-individuals-table">
                 <tbody>
                     {renderRandori()}
@@ -201,7 +198,6 @@ interface PreparationWeekCardProps {
 
 function PreparationWeekCard(props: PreparationWeekCardProps) {
     const { translator } = props;
-    const cardSettings = useContext(CardSettingsContext);
 
     const text = "Repetition, studier, förberedelse inför gradering";
     const body = translator.isJapanese 
@@ -211,7 +207,7 @@ function PreparationWeekCard(props: PreparationWeekCardProps) {
             <tr className="japanese-subtitle text-muted"><td>{translator.japanese(text)}</td></tr>
         </>
     return (
-        <CollapsibleCard header={cardHead(translator, `Repetition`, { emSize: cardSettings.cardTextSize })} className="mt-3">
+        <CollapsibleCard header={cardHead(translator, `Repetition`)} className="mt-3">
             <table>
                 <tbody>
                     {body}

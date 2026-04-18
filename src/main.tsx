@@ -9,12 +9,12 @@ import translations from './assets/kamokuhyo.translations.json';
 import { TranslationsContext, type Language } from './i18n.ts';
 import { load } from './persistence/data.ts';
 import { HokeiNotes } from './persistence/app-data.ts';
-import { DefaultCardSettings, type CardSettings } from './persistence/card-settings.ts';
+import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
 import { type GradeName, type GradePlan } from './data.ts'
 
 const gradeData = load<GradeName>("grade", "shodan");
 const languageData = load<Language>("language", "sv");
-const cardSettingsData = load<CardSettings>("card-settings", DefaultCardSettings);
+const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);
 const notesData = new HokeiNotes();
 
 function mountRoot() {
@@ -23,7 +23,7 @@ function mountRoot() {
       <BrowserRouter>
         <TranslationsContext value={translations}>
           <App gradeData={gradeData} languageData={languageData}
-               gradePlans={gradePlans as GradePlan[]} notesData={notesData} cardSettingsData={cardSettingsData}/>
+               gradePlans={gradePlans as GradePlan[]} notesData={notesData} textSizeData={textSizeData}/>
         </TranslationsContext>
       </BrowserRouter>
     </StrictMode>

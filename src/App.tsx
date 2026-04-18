@@ -7,20 +7,19 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes } from './persistence/app-data';
-import { CardSettingsContext, type CardSettings } from './persistence/card-settings';
 
 interface Props {
   gradePlans: GradePlan[];
-  cardSettingsData: Data<CardSettings>;
+  textSizeData: Data<number>;
   gradeData: Data<GradeName>;
   languageData: Data<Language>;
   notesData: HokeiNotes;
 }
 
 function App(props: Props) {
-  const { gradePlans, languageData, gradeData, notesData, cardSettingsData } = props;
+  const { gradePlans, languageData, gradeData, notesData, textSizeData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
-  const [ cardSettings, setCardSettings ] = useState<CardSettings>(cardSettingsData.data);
+  const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ grade, setGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const translations = useContext(TranslationsContext);
   const translator = new TranslatorImplementation(translations, language);
@@ -29,26 +28,26 @@ function App(props: Props) {
     gradePlans,
     translator,
     notesData,
-    cardSettings.cardTextSize,
+    textZoom,
     lang => languageData.save(lang),
     g => gradeData.save(g.grade),
-    size => cardSettingsData.save({ cardTextSize: size })
+    size => textSizeData.save(size)
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
   useEffect(() => gradeData.registerListener(g => setGrade(g)), [gradeData]);
-  useEffect(() => cardSettingsData.registerListener(l => setCardSettings(l)), [cardSettingsData]);
+  useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
 
   return (
-    <CardSettingsContext.Provider value={cardSettingsData.data}>
-      <TranslatorContext.Provider value={translator}>
+    <TranslatorContext.Provider value={translator}>
+      <div style={{ zoom: textZoom }}>
         <AppNavbar routes={routes} translator={translator} className="d-print-none"/>
         <div className="m-3">
           {renderRoutes(routes)}
           <Outlet />
         </div>
-      </TranslatorContext.Provider>
-    </CardSettingsContext.Provider>
+      </div>
+    </TranslatorContext.Provider>
   )
 }
 

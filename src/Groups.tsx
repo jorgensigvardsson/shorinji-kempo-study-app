@@ -4,7 +4,6 @@ import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import type { HokeiNotes } from "./persistence/app-data";
-import { CardSettingsContext } from "./persistence/card-settings";
 import "./Groups.css";
 
 export interface Props {
@@ -28,7 +27,6 @@ interface HokeiGroup {
 
 const Groups = (props: Props) => {
     const { allGradePlans, notesData } = props;
-    const cardSettings = useContext(CardSettingsContext);
     const translator = useContext(TranslatorContext);
     const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
 
@@ -62,7 +60,7 @@ const Groups = (props: Props) => {
                 <div className="groups-detail groups-detail-enter">
                     <div className="groups-detail-head mb-3">
                         <div>
-                            <h2 className="groups-detail-title mb-1" style={{ fontSize: `${cardSettings.cardTextSize * 1.4}em` }}>{selectedGroup.translated}</h2>
+                            <h2 className="groups-detail-title mb-1">{selectedGroup.translated}</h2>
                             {!translator.isJapanese && <div className="groups-detail-subtitle">{selectedGroup.japanese}</div>}
                         </div>
                         <div className="d-flex align-items-center gap-2">
@@ -98,7 +96,7 @@ const Groups = (props: Props) => {
                               role="button" tabIndex={0}>
                             <Card.Body>
                                 <div className="groups-grid-card-top">
-                                    <h3 className="groups-grid-title mb-1" style={{ fontSize: `${cardSettings.cardTextSize * 1.2}em` }}>{group.translated}</h3>
+                                    <h3 className="groups-grid-title mb-1">{group.translated}</h3>
                                     <Badge bg="secondary">{group.hokeis.length}</Badge>
                                 </div>
                                 {!translator.isJapanese && <div className="groups-grid-subtitle">{group.japanese}</div>}

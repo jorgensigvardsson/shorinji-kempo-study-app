@@ -24,9 +24,9 @@ export const routeText = (route: Route) => {
 }
 
 export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes,
-                          cardTextSize: number, 
+                          textSize: number, 
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
-                          setCardTextSize: (size: number) => void): Route[] => {
+                          setTextSize: (size: number) => void): Route[] => {
     let routes: Route[] = [{
         path: "/",
         component: () => <Start/>,
@@ -69,7 +69,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
     }, {
         path: "/settings",
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} grade={gradePlan} allGradePlans={allGradePlans} translator={translator}
-                                   cardTextSize={cardTextSize} onSetCardTextSize={setCardTextSize} />,
+                                   textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
         icon: Gear
     }];
