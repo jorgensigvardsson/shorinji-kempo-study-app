@@ -9,7 +9,7 @@ const Start = () => {
     return (
         <MenuLayout>
             <h1>{translator.translate("Vad vill du göra idag?")}</h1>
-            <NavButton to="/flash-cards">{translator.translate("Flash Cards")}</NavButton>
+            <NavButton to="/flash-cards">{translator.translate("Quiz")}</NavButton>
         </MenuLayout>
     )
 }

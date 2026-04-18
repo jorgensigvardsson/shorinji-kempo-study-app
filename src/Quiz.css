@@ -1,15 +1,15 @@
-.flashcard-page {
+.quiz-page {
   padding: 1rem;
 }
 
-.flashcard-scene {
+.quiz-scene {
   width: 100%;
   max-width: 50rem;
   margin: 0 auto;
   perspective: 1000px;
 }
 
-.flashcard-inner {
+.quiz-inner {
   position: relative;
   width: 100%;
   transition: transform 0.6s ease;
@@ -18,28 +18,28 @@
 
 /* This invisible block gives the flip container its height.
    Adjust the min-height to taste. */
-.flashcard-inner::before {
+.quiz-inner::before {
   content: "";
   display: block;
   min-height: 24rem;
 }
 
-.flashcard-scene.is-flipped .flashcard-inner {
+.quiz-scene.is-flipped .quiz-inner {
   transform: rotateY(180deg);
 }
 
-.flashcard-face {
+.quiz-face {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-.flashcard-back {
+.quiz-back {
   transform: rotateY(180deg);
 }
 
-.flashcard-card {
+.quiz-card {
   width: 100%;
   height: 100%;
 }

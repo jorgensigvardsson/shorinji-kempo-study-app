@@ -1,15 +1,15 @@
 import { useContext, useState } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import { TranslatorContext } from "./i18n";
-import "./FlashCardPractice.css";
+import "./Quiz.css";
 
-interface FlashCardQuestion {
+interface QuizQuestion {
     question: string;
     alternatives: string[];
     correctAnswer: number;
 }
 
-const flashCards: FlashCardQuestion[] = [
+const quizCards: QuizQuestion[] = [
     {
         question: "Vad är tsuki?",
         alternatives: [
@@ -30,14 +30,14 @@ const flashCards: FlashCardQuestion[] = [
     }
 ]
 
-const FlashCardPractice = () => {
-  const pickQuestionIndex = () => Math.floor(Math.random() * flashCards.length);
+const Quiz = () => {
+  const pickQuestionIndex = () => Math.floor(Math.random() * quizCards.length);
 
   const [questionIndex, setQuestionIndex] = useState(() => pickQuestionIndex());
   const [answer, setAnswer] = useState<number | null>(null);
   const [showBack, setShowBack] = useState(false);
 
-  const flashCard = flashCards[questionIndex];
+  const quizCard = quizCards[questionIndex];
   const translator = useContext(TranslatorContext);
 
   const showAnswer = () => {
@@ -51,7 +51,7 @@ const FlashCardPractice = () => {
   const nextCard = () => {
     let nextIndex = questionIndex;
 
-    if (flashCards.length > 1) {
+    if (quizCards.length > 1) {
       while (nextIndex === questionIndex) {
         nextIndex = pickQuestionIndex();
       }
@@ -62,7 +62,7 @@ const FlashCardPractice = () => {
     setShowBack(false);
   };
 
-  const alternatives = flashCard.alternatives.map((alternative, index) => (
+  const alternatives = quizCard.alternatives.map((alternative, index) => (
     <Form.Check
       key={`answer-${questionIndex}-${index}`}
       type="radio"
@@ -76,22 +76,22 @@ const FlashCardPractice = () => {
   ));
 
   const selectedAlternative =
-    answer !== null ? flashCard.alternatives[answer] : null;
+    answer !== null ? quizCard.alternatives[answer] : null;
 
   const correctAlternative =
-    flashCard.alternatives[flashCard.correctAnswer];
+    quizCard.alternatives[quizCard.correctAnswer];
 
-  const answeredCorrectly = answer === flashCard.correctAnswer;
+  const answeredCorrectly = answer === quizCard.correctAnswer;
 
   return (
-    <div className="flashcard-page">
-      <div className={`flashcard-scene ${showBack ? "is-flipped" : ""}`}>
-        <div className="flashcard-inner">
-          <div className="flashcard-face flashcard-front">
-            <Card className="flashcard-card">
+    <div className="quiz-page">
+      <div className={`quiz-scene ${showBack ? "is-flipped" : ""}`}>
+        <div className="quiz-inner">
+          <div className="quiz-face quiz-front">
+            <Card className="quiz-card">
               <Card.Header>
                 <h1 className="mb-0">
-                  {translator.translate(flashCard.question)}
+                  {translator.translate(quizCard.question)}
                 </h1>
               </Card.Header>
 
@@ -116,8 +116,8 @@ const FlashCardPractice = () => {
             </Card>
           </div>
 
-          <div className="flashcard-face flashcard-back">
-            <Card className="flashcard-card">
+          <div className="quiz-face quiz-back">
+            <Card className="quiz-card">
               <Card.Header>
                 <h1 className="mb-0">{translator.translate("Svar")}</h1>
               </Card.Header>
@@ -125,7 +125,7 @@ const FlashCardPractice = () => {
               <Card.Body className="fs-3">
                 <div className="mb-3">
                   <strong>{translator.translate("Fråga")}:</strong>{" "}
-                  {translator.translate(flashCard.question)}
+                  {translator.translate(quizCard.question)}
                 </div>
 
                 {selectedAlternative !== null && (
@@ -171,4 +171,4 @@ const FlashCardPractice = () => {
   );
 };
 
-export default FlashCardPractice;
+export default Quiz;

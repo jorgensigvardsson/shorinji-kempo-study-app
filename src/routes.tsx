@@ -8,7 +8,7 @@ import List from "./List.tsx";
 import type { HokeiNotes } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
-import FlashCardPractice from "./FlashCardPractice.tsx";
+import Quiz from "./Quiz.tsx";
 
 export interface Route {
     path: string;
@@ -58,8 +58,8 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         icon: Gear
     }, {
         path: "/flash-cards",
-        component: () => <FlashCardPractice />,
-        menuText: translator.translate("Flash cards"),
+        component: () => <Quiz />,
+        menuText: translator.translate("Quiz"),
         icon: CardHeading
     }];
 
