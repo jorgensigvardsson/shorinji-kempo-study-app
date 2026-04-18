@@ -1,7 +1,7 @@
 import { Form, Container } from "react-bootstrap";
 import { useContext, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { humanGradeName, type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
+import { type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
 import CollapsibleCard from "./CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
