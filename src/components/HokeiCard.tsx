@@ -38,7 +38,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     options.badges!.push(...(hokei.variations ?? []).map(v => ({ variant: "secondary", text: v })));
 
     if (hasNotes)
-        options.icons = [<ChatFill/>];
+        options.icons = [<ChatFill key="has-notes"/>];
 
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
