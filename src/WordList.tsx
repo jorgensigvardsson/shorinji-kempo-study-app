@@ -2,6 +2,7 @@ import type { WordListEntry } from "./data";
 import wordList from './assets/word-list.json';
 import { Form } from "react-bootstrap";
 import { useState } from "react";
+import { matchesString } from "./strings";
 
 
 const WordList = () => {
@@ -67,15 +68,6 @@ const matches = (entry: WordListEntry, filterText: string) => {
     return entry.kanji && entry.kanji.indexOf(filterText) >= 0 ||
            entry.romaji && matchesString(entry.romaji, filterText) ||
            entry.meanings && entry.meanings.some(m => matchesString(m, filterText));
-}
-
-const matchesString = (hayStack: string, needle: string) => {
-    if (hayStack.indexOf('ō') >= 0)
-        hayStack = hayStack.replaceAll("ō", "o");
-    if (hayStack.indexOf('ū'))
-        hayStack = hayStack.replaceAll('ū', 'u');
-
-    return hayStack.toLowerCase().includes(needle.toLowerCase());
 }
 
 export default WordList;

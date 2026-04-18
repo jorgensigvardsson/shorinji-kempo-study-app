@@ -5,6 +5,7 @@ import type { HokeiNotes } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
 import { Container, Form } from "react-bootstrap";
 import { compareLevels } from "./utilities/level";
+import { matchesString } from "./strings";
 
 interface Props {
     grade: GradePlan;
@@ -32,6 +33,8 @@ const List = (props: Props) => {
            
     const filteredHokeis = allHokeis.filter(l => matchesSelection(l.grade, grade.grade, selection))
                                     .filter(l => matchesFilterText(l.grade, l.moment, filterText));
+
+    console.log("filteredHokeis: ", filteredHokeis.map(h => h.moment.hokei_name));
 
     return (
         <Container className="p-3">
@@ -68,15 +71,6 @@ const matchesFilterText = (grade: GradeName, hokeiExercise: HokeiMoment, filterT
            hokeiExercise.roles.defender.action && matchesString(hokeiExercise.roles.defender.action, filterText) ||
            matchesString(hokeiExercise.technique_group, filterText) ||
            hokeiExercise.variations && hokeiExercise.variations.some(v => matchesString(v, filterText));
-}
-
-const matchesString = (hayStack: string, needle: string) => {
-    if (hayStack.indexOf('ō') >= 0)
-        hayStack = hayStack.replaceAll("ō", "o");
-    if (hayStack.indexOf('ū'))
-        hayStack = hayStack.replaceAll('ū', 'u');
-
-    return hayStack.toLowerCase().includes(needle.toLowerCase());
 }
 
 interface HokeiAndGrade {
