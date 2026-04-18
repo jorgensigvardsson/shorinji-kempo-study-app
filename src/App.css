@@ -6,3 +6,25 @@
   display: flex;
   align-items: center;
 }
+
+.menu-no-wrap {
+  white-space: nowrap;
+}
+
+.menu-main-nav {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.menu-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-dropdown-icon {
+  display: inline-flex;
+  width: 1rem;
+  justify-content: center;
+}

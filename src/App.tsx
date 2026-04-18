@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
-import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap';
+import { Container, Nav, Navbar, NavDropdown, Offcanvas } from 'react-bootstrap';
 import { getRoutes, routeText, type Route } from './routes';
-import { Outlet, Route as DomRoute, Routes, NavLink } from 'react-router-dom';
+import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes } from './persistence/app-data';
 import { CardSettingsContext, type CardSettings } from './persistence/card-settings';
@@ -71,6 +71,10 @@ interface NavbarProps {
 const AppNavbar = (props: NavbarProps) => {
   const { routes, className, translator } = props;
   const [show, setShow] = useState(false);
+  const location = useLocation();
+  const mainMenuRoutes = routes.filter(route => route.showInMainMenu);
+  const dropdownRoutes = routes.filter(route => !route.showInMainMenu);
+  const isDropdownActive = dropdownRoutes.some(route => location.pathname === route.path);
 
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
@@ -83,10 +87,27 @@ const AppNavbar = (props: NavbarProps) => {
             <Offcanvas.Title>{translator.translate("Shorinji Kempo")}</Offcanvas.Title>
           </Offcanvas.Header>
           <Offcanvas.Body>
-            <Nav className="me-auto" variant="pills">
+            <Nav className="me-auto d-lg-none" variant="pills">
               {routes.map((route, index) => {
                 return <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path} onClick={() => setShow(false)}>{route.icon && <>&nbsp;&nbsp;<route.icon size={20} /></>}&nbsp;&nbsp;{routeText(route)}</Nav.Link>
               })}
+            </Nav>
+            <Nav className="me-auto d-none d-lg-flex menu-main-nav" variant="pills">
+              {mainMenuRoutes.map((route, index) => (
+                <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path}>
+                  {route.icon && <>&nbsp;&nbsp;<route.icon size={20} /></>}&nbsp;&nbsp;{routeText(route)}
+                </Nav.Link>
+              ))}
+              {dropdownRoutes.length > 0 && (
+                <NavDropdown title={translator.translate("Mer")} id="desktop-more-menu" active={isDropdownActive}>
+                  {dropdownRoutes.map((route, index) => (
+                    <NavDropdown.Item as={NavLink} key={index} to={route.path} className="menu-dropdown-item">
+                      {route.icon && <span className="menu-dropdown-icon"><route.icon size={16} /></span>}
+                      {routeText(route)}
+                    </NavDropdown.Item>
+                  ))}
+                </NavDropdown>
+              )}
             </Nav>
           </Offcanvas.Body>
         </Navbar.Offcanvas>

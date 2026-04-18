@@ -16,6 +16,7 @@ export interface Route {
     component: React.ComponentType<any>;
     menuText: string | (() => string);
     icon: Icon;
+    showInMainMenu?: boolean;
 }
 
 export const routeText = (route: Route) => { 
@@ -30,22 +31,26 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         path: "/",
         component: () => <Start/>,
         menuText: translator.translate("Start"),
-        icon: House
+        icon: House,
+        showInMainMenu: true
     }, {
         path: "/kamoku",
         component: () => <Kamoku myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData}/>,
         menuText: translator.translate("Kamoku"),
-        icon: Book
+        icon: Book,
+        showInMainMenu: true
     }, {
         path: "/list",
         component: () => <List allGradePlans={allGradePlans} notesData={notesData} grade={gradePlan}/>,
         menuText: translator.translate("Alla hokei"),
-        icon: ListUl
+        icon: ListUl,
+        showInMainMenu: true
     }, {
         path: "/groups",
         component: () => <Groups allGradePlans={allGradePlans} notesData={notesData}/>,
         menuText: translator.translate("Teknikgrupper"),
-        icon: Collection
+        icon: Collection,
+        showInMainMenu: true
     }, {
         path: "/word-list",
         component: () => <WordList />,
