@@ -7,6 +7,7 @@ import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
 import { CardSettingsContext } from "./persistence/card-settings";
 import type { HokeiNotes } from "./persistence/app-data";
+import { gradeLabel } from "./strings";
 
 export interface Props {
     myGrade: GradeName;
@@ -31,16 +32,6 @@ const Kamoku = (props: Props) => {
         return `${translator.translate("Vecka")} ${translator.translate(week.week)}`;
     }
 
-    const gradeLabel = (grade: GradeName) => {
-        let humanName = humanGradeName(grade);
-        humanName = `${humanName[0].toUpperCase()}${humanName.slice(1)}`;
-
-        if (!translator.isJapanese)
-            return `${translator.translate(humanName)} (${translator.japanese(humanName)})`;
-
-        return translator.japanese(humanName);
-    }
-
     const basicExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
         ? (grade.weeks[selectedWeek].kihon_shoho ?? [])
         : null;
@@ -61,10 +52,10 @@ const Kamoku = (props: Props) => {
             <Form.Group className="mb-3" controlId="level">
                 <Form.Label>Nivå</Form.Label>
                 <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
-                    <option value={myGrade} key={myGrade}>Min grad: {gradeLabel(myGrade)}</option>
+                    <option value={myGrade} key={myGrade}>Min grad: {gradeLabel(myGrade, translator)}</option>
                     {
                         allGradePlans.filter(l => l.grade !== myGrade).map(
-                            l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade)}</option>
+                            l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator)}</option>
                         )
                     }
                 </Form.Select>

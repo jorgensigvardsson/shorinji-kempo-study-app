@@ -1,3 +1,6 @@
+import { humanGradeName, type GradeName } from "./data";
+import type { Translator } from "./i18n";
+
 export const matchesString = (hayStack: string, needle: string) => {
     const needleLength = needle.length;
     if (needleLength === 0)
@@ -32,4 +35,14 @@ const normalizeCharacterCode = (charCode: number) => {
         return charCode + 32;
 
     return charCode;
+}
+
+export const gradeLabel = (grade: GradeName, translator: Translator) => {
+    let humanName = humanGradeName(grade);
+    humanName = `${humanName[0].toUpperCase()}${humanName.slice(1)}`;
+
+    if (!translator.isJapanese)
+        return `${translator.translate(humanName)} (${translator.japanese(humanName)})`;
+
+    return translator.japanese(humanName);
 }

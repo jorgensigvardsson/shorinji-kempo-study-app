@@ -5,7 +5,7 @@ import type { HokeiNotes } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
 import { Container, Form } from "react-bootstrap";
 import { compareLevels } from "./utilities/level";
-import { matchesString } from "./strings";
+import { gradeLabel, matchesString } from "./strings";
 
 interface Props {
     grade: GradePlan;
@@ -13,7 +13,7 @@ interface Props {
     notesData: HokeiNotes;
 }
 
-type Selection = "all" | "own" | "up-to-own";
+type Selection = "all" | "own" | "up-to-own" | GradeName;
 
 const List = (props: Props) => {
     const { grade, allGradePlans, notesData } = props;
@@ -40,8 +40,6 @@ const List = (props: Props) => {
     const filteredHokeis = allHokeis.filter(l => matchesSelection(l.grade, grade.grade, selection))
                                     .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText));
 
-    console.log("filteredHokeis: ", filteredHokeis.map(h => h.moment.hokei_name));
-
     return (
         <Container className="p-3">
             <Form className="mb-3">
@@ -49,6 +47,15 @@ const List = (props: Props) => {
                     <option value="all">{translator.translate('Alla')}</option>
                     <option value="own">{translator.translate('Endast egna')}</option>
                     <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
+                    <option value="6 kyū">{gradeLabel('6 kyū', translator)}</option>
+                    <option value="5 kyū">{gradeLabel('5 kyū', translator)}</option>
+                    <option value="4 kyū">{gradeLabel('4 kyū', translator)}</option>
+                    <option value="3 kyū">{gradeLabel('3 kyū', translator)}</option>
+                    <option value="2 kyū">{gradeLabel('2 kyū', translator)}</option>
+                    <option value="1 kyū">{gradeLabel('1 kyū', translator)}</option>
+                    <option value="shodan">{gradeLabel('shodan', translator)}</option>
+                    <option value="nidan">{gradeLabel('nidan', translator)}</option>
+                    <option value="sandan">{gradeLabel('sandan', translator)}</option>
                 </Form.Select>
                 <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-2"
                               value={filterText} onChange={e => setFilterText(e.target.value)} />
@@ -65,7 +72,10 @@ const matchesSelection = (grade: GradeName, myGrade: GradeName, selection: Selec
     if (selection === "own")
         return grade == myGrade;
     
-    return compareLevels(grade, myGrade) <= 0;
+    if (selection === "up-to-own")
+        return compareLevels(grade, myGrade) <= 0;
+
+    return compareLevels(grade, selection) === 0;
 }
 
 const matchesFilterText = (grade: GradeName, hokeiExercise: HokeiMoment, filterText: string) => {
