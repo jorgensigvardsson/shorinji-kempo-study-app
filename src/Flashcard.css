@@ -1,0 +1,142 @@
+.flashcard-page {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.flashcard-scene {
+  perspective: 1000px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+
+.flashcard-inner::before {
+  content: "";
+  display: block;
+  min-height: 32rem;
+}
+
+.flashcard-scene.is-flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+}
+
+.flashcard-card {
+  height: 100%;
+  border-radius: 2rem;
+  border: 1px solid var(--bs-border-color);
+  background: linear-gradient(180deg, var(--bs-body-bg) 0%, var(--bs-secondary-bg) 100%);
+  color: var(--bs-body-color);
+}
+
+.flashcard-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+}
+
+.flashcard-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--bs-secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.flashcard-index {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.flashcard-main {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.flashcard-kanji {
+  margin: 0;
+  font-size: clamp(3rem, 10vw, 6rem);
+  color: var(--bs-emphasis-color);
+  line-height: 1.05;
+}
+
+.flashcard-romaji {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  font-style: italic;
+  color: var(--bs-secondary-color);
+}
+
+.flashcard-meaning {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  color: var(--bs-emphasis-color);
+}
+
+.flashcard-example {
+  margin: 0;
+  color: var(--bs-body-color);
+  font-size: 1.2rem;
+  max-width: 40rem;
+}
+
+.flashcard-hint {
+  margin: 0;
+  text-align: center;
+  color: var(--bs-secondary-color);
+  font-size: 1.3rem;
+}
+
+.flashcard-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .flashcard-inner::before {
+    min-height: 26rem;
+  }
+
+  .flashcard-body {
+    padding: 1rem;
+  }
+
+  .flashcard-meta {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+  }
+
+  .flashcard-hint {
+    font-size: 1rem;
+  }
+}

@@ -88,85 +88,83 @@ const Quiz = () => {
       <div className={`quiz-scene ${showBack ? "is-flipped" : ""}`}>
         <div className="quiz-inner">
           <div className="quiz-face quiz-front">
-            <Card className="quiz-card">
-              <Card.Header>
-                <h1 className="mb-0">
-                  {translator.translate(quizCard.question)}
-                </h1>
-              </Card.Header>
-
-              <Card.Body className="fs-3 d-flex flex-column justify-content-center">
-                <Form>{alternatives}</Form>
-              </Card.Body>
-
-              <Card.Footer className="ps-2 pe-2">
-                <div className="d-flex flex-row justify-content-between">
-                  <Button variant="danger" onClick={showAnswer}>
-                    {translator.translate("Visa svar")}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    disabled={answer === null}
-                    onClick={submitAnswer}
-                  >
-                    {translator.translate("Svara")}
-                  </Button>
+            <Card className="quiz-card shadow-sm">
+              <Card.Body className="quiz-body">
+                <div className="quiz-main">
+                  <h1 className="quiz-title">
+                    {translator.translate(quizCard.question)}
+                  </h1>
+                  <Form className="quiz-alternatives">{alternatives}</Form>
                 </div>
-              </Card.Footer>
+              </Card.Body>
             </Card>
           </div>
 
           <div className="quiz-face quiz-back">
-            <Card className="quiz-card">
-              <Card.Header>
-                <h1 className="mb-0">{translator.translate("Svar")}</h1>
-              </Card.Header>
-
-              <Card.Body className="fs-3">
-                <div className="mb-3">
+            <Card className="quiz-card shadow-sm">
+              <Card.Body className="quiz-body">
+                <div className="quiz-main quiz-answer-main">
+                  <div className="mb-3">
                   <strong>{translator.translate("Fråga")}:</strong>{" "}
                   {translator.translate(quizCard.question)}
-                </div>
+                  </div>
 
-                {selectedAlternative !== null && (
+                  {selectedAlternative !== null && (
+                    <div className="mb-3">
+                      <strong>{translator.translate("Ditt svar")}:</strong>{" "}
+                      {translator.translate(selectedAlternative)}
+                    </div>
+                  )}
+
                   <div className="mb-3">
-                    <strong>{translator.translate("Ditt svar")}:</strong>{" "}
-                    {translator.translate(selectedAlternative)}
+                    <strong>{translator.translate("Rätt svar")}:</strong>{" "}
+                    {translator.translate(correctAlternative)}
                   </div>
-                )}
 
-                <div className="mb-3">
-                  <strong>{translator.translate("Rätt svar")}:</strong>{" "}
-                  {translator.translate(correctAlternative)}
+                  {answer !== null && (
+                    <div
+                      className={answeredCorrectly ? "text-success" : "text-danger"}
+                    >
+                      <strong>
+                        {answeredCorrectly
+                          ? translator.translate("Rätt!")
+                          : translator.translate("Fel!")}
+                      </strong>
+                    </div>
+                  )}
                 </div>
-
-                {answer !== null && (
-                  <div
-                    className={answeredCorrectly ? "text-success" : "text-danger"}
-                  >
-                    <strong>
-                      {answeredCorrectly
-                        ? translator.translate("Rätt!")
-                        : translator.translate("Fel!")}
-                    </strong>
-                  </div>
-                )}
               </Card.Body>
 
-              <Card.Footer className="ps-2 pe-2">
-                <div className="d-flex flex-row justify-content-between">
-                  <Button variant="secondary" onClick={() => setShowBack(false)}>
-                    {translator.translate("Tillbaka")}
-                  </Button>
-                  <Button variant="primary" onClick={nextCard}>
-                    {translator.translate("Nästa kort")}
-                  </Button>
-                </div>
-              </Card.Footer>
             </Card>
           </div>
         </div>
       </div>
+
+      {!showBack && (
+        <div className="quiz-actions">
+          <Button variant="danger" onClick={showAnswer}>
+            {translator.translate("Visa svar")}
+          </Button>
+          <Button
+            variant="primary"
+            disabled={answer === null}
+            onClick={submitAnswer}
+          >
+            {translator.translate("Svara")}
+          </Button>
+        </div>
+      )}
+
+      {showBack && (
+        <div className="quiz-actions">
+          <Button variant="secondary" onClick={() => setShowBack(false)}>
+            {translator.translate("Tillbaka")}
+          </Button>
+          <Button variant="primary" onClick={nextCard}>
+            {translator.translate("Nästa kort")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

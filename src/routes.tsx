@@ -9,6 +9,7 @@ import type { HokeiNotes } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
 import Quiz from "./Quiz.tsx";
+import Flashcard from "./Flashcard.tsx";
 
 export interface Route {
     path: string;
@@ -51,16 +52,21 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         menuText: translator.translate("Ordlista"),
         icon: JournalText
     }, {
+        path: "/quiz",
+        component: () => <Quiz />,
+        menuText: translator.translate("Quiz"),
+        icon: CardHeading
+    }, {
+        path: "/flashcard",
+        component: () => <Flashcard />,
+        menuText: translator.translate("Flashkort"),
+        icon: CardHeading
+    }, {
         path: "/settings",
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} grade={gradePlan} allGradePlans={allGradePlans} translator={translator}
                                    cardTextSize={cardTextSize} onSetCardTextSize={setCardTextSize} />,
         menuText: translator.translate("Inställningar"),
         icon: Gear
-    }, {
-        path: "/flash-cards",
-        component: () => <Quiz />,
-        menuText: translator.translate("Quiz"),
-        icon: CardHeading
     }];
 
     return routes;

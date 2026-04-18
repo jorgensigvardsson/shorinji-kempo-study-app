@@ -9,7 +9,8 @@ const Start = () => {
     return (
         <MenuLayout>
             <h1>{translator.translate("Vad vill du göra idag?")}</h1>
-            <NavButton to="/flash-cards">{translator.translate("Quiz")}</NavButton>
+            <NavButton to="/quiz">{translator.translate("Quiz")}</NavButton>
+            <NavButton to="/flashcard">{translator.translate("Flashkort")}</NavButton>
         </MenuLayout>
     )
 }
