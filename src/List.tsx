@@ -43,7 +43,7 @@ const List = (props: Props) => {
     return (
         <Container className="p-3">
             <Form className="mb-3">
-                <Form.Select size="sm" value={selection} onChange={e => setSelection(e.target.value as Selection)}>
+                <Form.Select value={selection} onChange={e => setSelection(e.target.value as Selection)}>
                     <option value="all">{translator.translate('Alla')}</option>
                     <option value="own">{translator.translate('Endast egna')}</option>
                     <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
