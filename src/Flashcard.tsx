@@ -19,7 +19,7 @@ const hasFlashCardContent = (entry: WordListEntry): entry is WordListEntry & { r
 const flashCards: FlashCardEntry[] = (wordList as WordListEntry[])
     .filter(hasFlashCardContent)
     .map(entry => ({
-        id: entry.index,
+        id: entry.index + 1,
         kanji: entry.kanji,
         romaji: entry.romaji,
         meanings: entry.meanings
@@ -27,7 +27,9 @@ const flashCards: FlashCardEntry[] = (wordList as WordListEntry[])
 
 const Flashcard = () => {
     const translator = useContext(TranslatorContext);
-    const [cardIndex, setCardIndex] = useState(0);
+    const [cardIndex, setCardIndex] = useState(() =>
+        flashCards.length > 0 ? Math.floor(Math.random() * flashCards.length) : 0
+    );
     const [showBack, setShowBack] = useState(false);
 
     if (flashCards.length === 0) {
@@ -44,8 +46,8 @@ const Flashcard = () => {
 
     const card = flashCards[cardIndex];
     const kanji = card.kanji ?? card.romaji;
-    const primaryMeaning = card.meanings[0];
-    const extraMeanings = card.meanings.slice(1);
+    const primaryMeaning = translator.translate(card.meanings[0]);
+    const extraMeanings = card.meanings.slice(1).map(s => translator.translate(s));
 
     const nextCard = () => {
         let nextIndex = cardIndex;
