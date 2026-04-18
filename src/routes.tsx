@@ -53,7 +53,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         icon: JournalText
     }, {
         path: "/quiz",
-        component: () => <Quiz />,
+        component: () => <Quiz myGrade={gradePlan.grade}/>,
         menuText: translator.translate("Quiz"),
         icon: CardHeading
     }, {
