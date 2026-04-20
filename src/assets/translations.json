@@ -702,7 +702,10 @@
     "Vad vill du göra idag?": "今日は何をしますか？",
     "Visa svar": "答えを表示",
     "Engelska": "英語",
-    "Turkiska": "トルコ語"
+    "Turkiska": "トルコ語",
+    "Mindre": "やや小",
+    "Större": "やや大",
+    "Störst": "最大"
   },
   "en": {
     "1 kyū": "1 kyū",
@@ -1408,7 +1411,10 @@
     "utsidan båda handlederna i gyaku": "outside of both wrists in gyaku",
     "tenchi ken dai ikkei (sōtai), kyūsho på huvudet": "tenchi ken dai ikkei (sōtai), kyūsho on the head",
     "ippon se nage & kūchū tenkai (hjula över)": "ippon se nage & kūchū tenkai (cartwheel over)",
-    "ōten yori okiagari, kyūsho på armarna": "ōten yori okiagari, kyūsho on the arms"
+    "ōten yori okiagari, kyūsho på armarna": "ōten yori okiagari, kyūsho on the arms",
+    "Mindre": "Smaller",
+    "Större": "Larger",
+    "Störst": "Largest"
   },
   "tr": {
     "1 kyū": "1 kyū",
@@ -2114,6 +2120,9 @@
     "utsidan båda handlederna i gyaku": "gyaku durumunda iki bileğin dışı",
     "tenchi ken dai ikkei (sōtai), kyūsho på huvudet": "tenchi ken dai ikkei (sōtai), baş üzerindeki kyūsho",
     "ippon se nage & kūchū tenkai (hjula över)": "ippon se nage & kūchū tenkai (takla atarak geçiş)",
-    "ōten yori okiagari, kyūsho på armarna": "ōten yori okiagari, kollardaki kyūsho"
+    "ōten yori okiagari, kyūsho på armarna": "ōten yori okiagari, kollardaki kyūsho",
+    "Mindre": "Daha küçük",
+    "Större": "Daha büyük",
+    "Störst": "En büyük"
   }
 }

@@ -60,8 +60,10 @@ const Settings = (props: Props) => {
                 <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
                 <Form.Select onChange={e => onSetTextSize(parseFloat(e.target.value))} value={textSize}>
                     <option value="0.9">{translator.translate("Liten")}</option>
-                    <option value={DefaultTextSize}>{translator.translate("Medium")}</option>
-                    <option value="1.1">{translator.translate("Stor")}</option>
+                    <option value={DefaultTextSize}>{translator.translate("Mindre")}</option>
+                    <option value="1.1">{translator.translate("Medium")}</option>
+                    <option value="1.2">{translator.translate("Större")}</option>
+                    <option value="1.3">{translator.translate("Störst")}</option>
                 </Form.Select>
             </Form.Group>
 
