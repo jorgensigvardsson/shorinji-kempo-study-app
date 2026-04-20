@@ -17,8 +17,10 @@ const CollapsibleCard = (props: Props) => {
     if (showCollapse ?? true)
         style = {...style, cursor: "pointer"};
 
+    const cardClassName = `${className ?? ""} ${open ? "is-expanded" : "is-collapsed"}`.trim();
+
     return (
-        <Card className={className}>
+        <Card className={cardClassName}>
             <Card.Header onClick={() => setOpen(!open)} style={style}>
                 {
                     (showCollapse ?? true) ?

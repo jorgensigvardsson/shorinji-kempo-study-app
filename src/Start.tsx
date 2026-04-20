@@ -1,4 +1,3 @@
-import { Container } from "react-bootstrap";
 import { TranslatorContext } from "./i18n";
 import { type ComponentType, useContext } from "react";
 import { useNavigate } from "react-router";
@@ -29,12 +28,12 @@ const Start = (props: Props) => {
     }));
 
     return (
-        <Container className="p-3">
+        <div>
             <div className="app-grid-panel mb-3">
                 <h2 className="app-grid-title mb-1">{translator.translate("Vad vill du göra idag?")}</h2>
             </div>
             <Grid items={items} />
-        </Container>
+        </div>
     );
 };
 

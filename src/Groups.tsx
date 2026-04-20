@@ -1,4 +1,4 @@
-import { Badge, Button, Container } from "react-bootstrap";
+import { Badge, Button } from "react-bootstrap";
 import { useContext, useMemo, useState } from "react";
 import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
@@ -57,7 +57,7 @@ const Groups = (props: Props) => {
 
     if (selectedGroup) {
         return (
-            <Container className="p-3">
+            <div>
                 <div className="groups-detail groups-detail-enter">
                     <div className="groups-detail-head mb-3">
                         <div>
@@ -80,7 +80,7 @@ const Groups = (props: Props) => {
                         ))}
                     </div>
                 </div>
-            </Container>
+            </div>
         );
     }
 
@@ -104,11 +104,7 @@ const Groups = (props: Props) => {
         };
     });
 
-    return (
-        <Container className="p-3">
-            <Grid items={items} />
-        </Container>
-    );
+    return <Grid items={items} />;
 }
 
 export default Groups;

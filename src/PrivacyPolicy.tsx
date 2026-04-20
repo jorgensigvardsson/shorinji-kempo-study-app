@@ -1,4 +1,3 @@
-import { Container } from "react-bootstrap";
 import { useContext } from "react";
 import { TranslatorContext } from "./i18n";
 
@@ -6,7 +5,7 @@ const PrivacyPolicy = () => {
   const translator = useContext(TranslatorContext);
 
   return (
-    <Container className="p-3">
+    <div>
       <h2>{translator.translate("Integritetspolicy")}</h2>
       <p>
         {translator.translate("Vi samlar inte in någon personlig information om dig.")}
@@ -17,7 +16,7 @@ const PrivacyPolicy = () => {
       <p>
         {translator.translate("Vi använder inte analysverktyg och vi säljer inte användardata. Dina data förblir under din kontroll i lokal lagring och/eller i ditt valda molnlagringskonto.")}
       </p>
-    </Container>
+    </div>
   );
 };
 

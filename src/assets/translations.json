@@ -1096,6 +1096,10 @@
     "This provider is not implemented yet.": "このプロバイダーはまだ実装されていません。",
     "Synchronizing...": "同期中...",
     "Unexpected sync error.": "予期しない同期エラー。",
+    "Sortera": "並び替え",
+    "resultat": "件",
+    "Inga träffar": "一致なし",
+    "Prova ett annat sökord.": "別の検索語を試してください。",
     "1": "1",
     "2": "2",
     "8": "8"
@@ -2200,7 +2204,11 @@
     "Disconnected.": "Disconnected.",
     "This provider is not implemented yet.": "This provider is not implemented yet.",
     "Synchronizing...": "Synchronizing...",
-    "Unexpected sync error.": "Unexpected sync error."
+    "Unexpected sync error.": "Unexpected sync error.",
+    "Sortera": "Sort",
+    "resultat": "results",
+    "Inga träffar": "No matches",
+    "Prova ett annat sökord.": "Try another search term."
   },
   "tr": {
     "1 kyū": "1 kyū",
@@ -3300,6 +3308,10 @@
     "This provider is not implemented yet.": "Bu sağlayıcı henüz uygulanmadı.",
     "Synchronizing...": "Senkronize ediliyor...",
     "Unexpected sync error.": "Beklenmeyen senkronizasyon hatası.",
+    "Sortera": "Sırala",
+    "resultat": "sonuç",
+    "Inga träffar": "Eşleşme yok",
+    "Prova ett annat sökord.": "Başka bir arama terimi deneyin.",
     "1": "1",
     "2": "2",
     "8": "8"

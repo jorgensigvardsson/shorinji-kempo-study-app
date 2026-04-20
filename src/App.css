@@ -2,6 +2,10 @@
   margin: 0;
 }
 
+.app-route-content {
+  padding: 1rem;
+}
+
 .menu-item {
   display: flex;
   align-items: center;

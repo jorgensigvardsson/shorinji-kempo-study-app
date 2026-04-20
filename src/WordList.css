@@ -1,0 +1,34 @@
+.wordlist-count {
+  color: var(--bs-secondary-color);
+  font-size: 0.95rem;
+}
+
+.wordlist-sort-label {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.wordlist-table-wrapper {
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.wordlist-table {
+  margin: 0;
+}
+
+.wordlist-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: color-mix(in srgb, var(--bs-secondary-bg) 92%, var(--bs-body-bg) 8%);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.wordlist-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--bs-secondary-bg) 42%, transparent 58%);
+}
+
+.wordlist-table tbody tr:hover {
+  background: color-mix(in srgb, var(--bs-primary-bg-subtle) 35%, transparent 65%);
+}

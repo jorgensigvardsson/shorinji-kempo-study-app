@@ -3,7 +3,7 @@ import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } fro
 import { TranslatorContext } from "./i18n";
 import type { HokeiNotes } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
-import { Container, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { compareLevels } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
 
@@ -41,27 +41,29 @@ const List = (props: Props) => {
                                     .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText));
 
     return (
-        <Container className="p-3">
-            <Form className="mb-3">
-                <Form.Select value={selection} onChange={e => setSelection(e.target.value as Selection)}>
-                    <option value="all">{translator.translate('Alla')}</option>
-                    <option value="own">{translator.translate('Endast egna')}</option>
-                    <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
-                    <option value="6 kyū">{gradeLabel('6 kyū', translator)}</option>
-                    <option value="5 kyū">{gradeLabel('5 kyū', translator)}</option>
-                    <option value="4 kyū">{gradeLabel('4 kyū', translator)}</option>
-                    <option value="3 kyū">{gradeLabel('3 kyū', translator)}</option>
-                    <option value="2 kyū">{gradeLabel('2 kyū', translator)}</option>
-                    <option value="1 kyū">{gradeLabel('1 kyū', translator)}</option>
-                    <option value="shodan">{gradeLabel('shodan', translator)}</option>
-                    <option value="nidan">{gradeLabel('nidan', translator)}</option>
-                    <option value="sandan">{gradeLabel('sandan', translator)}</option>
-                </Form.Select>
-                <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-2"
-                              value={filterText} onChange={e => setFilterText(e.target.value)} />
-            </Form>
+        <div>
+            <div className="app-grid-panel mb-4">
+                <Form>
+                    <Form.Select value={selection} onChange={e => setSelection(e.target.value as Selection)}>
+                        <option value="all">{translator.translate('Alla')}</option>
+                        <option value="own">{translator.translate('Endast egna')}</option>
+                        <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
+                        <option value="6 kyū">{gradeLabel('6 kyū', translator)}</option>
+                        <option value="5 kyū">{gradeLabel('5 kyū', translator)}</option>
+                        <option value="4 kyū">{gradeLabel('4 kyū', translator)}</option>
+                        <option value="3 kyū">{gradeLabel('3 kyū', translator)}</option>
+                        <option value="2 kyū">{gradeLabel('2 kyū', translator)}</option>
+                        <option value="1 kyū">{gradeLabel('1 kyū', translator)}</option>
+                        <option value="shodan">{gradeLabel('shodan', translator)}</option>
+                        <option value="nidan">{gradeLabel('nidan', translator)}</option>
+                        <option value="sandan">{gradeLabel('sandan', translator)}</option>
+                    </Form.Select>
+                    <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-3"
+                                value={filterText} onChange={e => setFilterText(e.target.value)} />
+                </Form>
+            </div>
             {renderHokeis(filteredHokeis, notesData)}
-        </Container>
+        </div>
     )
 }
 

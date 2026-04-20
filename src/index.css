@@ -23,3 +23,21 @@ table.hokei-individuals-table td {
 .top-align-cell {
   vertical-align: top;
 }
+
+.hokei-card .card-header,
+.hokei-card .card-body,
+.hokei-card .card-footer {
+  background-color: transparent;
+}
+
+.hokei-card.is-collapsed .card-header {
+  border-bottom: 0;
+}
+
+.hokei-card.is-expanded .card-header {
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.hokei-card .card-footer {
+  border-top: 1px solid var(--bs-border-color-translucent);
+}

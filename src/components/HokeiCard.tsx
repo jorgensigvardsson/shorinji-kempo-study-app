@@ -39,7 +39,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
                          footer={<CardFooter notesData={notesData} hokei={hokei}/>}
-                         className={className}>
+                         className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <FootStancesElement hokei={hokei} />
                 <HokeiIndividualsElement hokei={hokei}/>

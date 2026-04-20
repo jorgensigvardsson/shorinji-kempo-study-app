@@ -51,7 +51,7 @@ const Settings = (props: Props) => {
     const syncStateLabel = syncState.message ? `, ${syncState.message}` : null;
     
     return (
-        <Form className="p-3">
+        <Form>
             <Form.Group className="mb-3" controlId="settingsTheme">
                 <Form.Label>{translator.translate("Tema")}</Form.Label>
                 <Form.Select value={theme} onChange={e => setTheme(e.target.value as "light" | "dark" | "system")}>

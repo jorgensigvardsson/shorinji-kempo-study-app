@@ -1,4 +1,4 @@
-import { Form, Container } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { useContext, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
@@ -47,27 +47,29 @@ const Kamoku = (props: Props) => {
 
 
     return (
-        <Container className="p-3 d-print-none">
-            <Form.Group className="mb-3" controlId="level">
-                <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
-                    <option value={myGrade} key={myGrade}>{translator.translate("Min grad")}: {gradeLabel(myGrade, translator)}</option>
-                    {
-                        allGradePlans.filter(l => l.grade !== myGrade).map(
-                            l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator)}</option>
-                        )
-                    }
+        <div className="d-print-none">
+            <div className="app-grid-panel mb-4">
+                <Form.Group className="mb-3" controlId="level">
+                    <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
+                        <option value={myGrade} key={myGrade}>{translator.translate("Min grad")}: {gradeLabel(myGrade, translator)}</option>
+                        {
+                            allGradePlans.filter(l => l.grade !== myGrade).map(
+                                l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator)}</option>
+                            )
+                        }
+                    </Form.Select>
+                </Form.Group>
+                <Form.Select onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))} name="week-selector">
+                    {grade.weeks.map((week, index) => (
+                        <option key={index} value={index}>{optionLabel(week)}</option>)
+                    )}
                 </Form.Select>
-            </Form.Group>
-            <Form.Select onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))} name="week-selector">
-                {grade.weeks.map((week, index) => (
-                    <option key={index} value={index}>{optionLabel(week)}</option>)
-                )}
-            </Form.Select>
+            </div>
             {basicExercises && <BasicExerciseCard key={"be"} translator={translator} basicExercises={basicExercises} />}
             {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-3" notesData={notesData} />)}
             {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.key} translator={translator} other={oe.moment} />)}
             {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
-        </Container>
+        </div>
     )
 }
 
@@ -94,7 +96,7 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
     const body = bullets.length > 0 ? <ul>{bullets}</ul> : null;
 
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-3" showCollapse={bullets.length > 0}>
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-3 app-grid-card hokei-card" showCollapse={bullets.length > 0}>
             {body}
         </CollapsibleCard>
     );
@@ -179,7 +181,7 @@ function OtherCard(props: OtherCardProps) {
     }
     
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-3">
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-3 app-grid-card hokei-card">
             <table className="hokei-individuals-table">
                 <tbody>
                     {renderRandori()}
@@ -206,7 +208,7 @@ function PreparationWeekCard(props: PreparationWeekCardProps) {
             <tr className="japanese-subtitle text-muted"><td>{translator.japanese(text)}</td></tr>
         </>
     return (
-        <CollapsibleCard header={cardHead(translator, `Repetition`)} className="mt-3">
+        <CollapsibleCard header={cardHead(translator, `Repetition`)} className="mt-3 app-grid-card hokei-card">
             <table>
                 <tbody>
                     {body}
