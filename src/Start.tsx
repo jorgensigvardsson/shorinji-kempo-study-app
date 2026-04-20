@@ -1,6 +1,8 @@
-import { type ComponentType } from "react";
+import { useContext, type ComponentType } from "react";
 import { useNavigate } from "react-router";
+import { Card } from "react-bootstrap";
 import Grid, { type GridItem } from "./components/Grid";
+import { TranslatorContext } from "./i18n";
 
 interface StartRouteCard {
     path: string;
@@ -16,6 +18,7 @@ interface Props {
 const Start = (props: Props) => {
     const { routes } = props;
     const navigate = useNavigate();
+    const translator = useContext(TranslatorContext);
 
     const items: GridItem[] = routes.map((route) => ({
         key: route.path,
@@ -27,6 +30,11 @@ const Start = (props: Props) => {
 
     return (
         <div>
+            <Card className="app-grid-panel mb-3">
+                <Card.Body>
+                    <h2 className="mb-0">{translator.translate("Vad vill du göra idag?")}</h2>
+                </Card.Body>
+            </Card>
             <Grid items={items} />
         </div>
     );

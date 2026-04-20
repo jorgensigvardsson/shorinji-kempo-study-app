@@ -36,8 +36,12 @@
 
 .app-grid-icon {
   display: inline-flex;
-  color: var(--bs-primary);
+  color: #dfbe5a;
   margin-right: 0.3em;
+}
+
+[data-bs-theme="dark"] .app-grid-icon {
+  color: #f3d36c;
 }
 
 .app-grid-title {

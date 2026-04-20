@@ -27,6 +27,17 @@
   color: var(--bs-secondary-color);
 }
 
+.groups-count-badge {
+  background-color: #dfbe5a !important;
+  color: #1f2329 !important;
+  border: none;
+}
+
+[data-bs-theme="dark"] .groups-count-badge {
+  background-color: #f3d36c !important;
+  color: #1a1d22 !important;
+}
+
 @keyframes groups-detail-expand {
   0% {
     opacity: 0;

@@ -1,7 +1,11 @@
 @import "bootstrap/scss/functions";
 
+// Primary gold tuned for contrast in each color mode
+$primary-light-gold: #dfbe5a;
+$primary-dark-gold: #f3d36c;
+
 // Light theme palette (compiled into Bootstrap component styles)
-$primary: #2f8f6b;
+$primary: $primary-light-gold;
 $secondary: #6c757d;
 $success: #2f9e44;
 $info: #1971c2;
@@ -12,7 +16,7 @@ $danger: #c2413a;
 
 // Dark theme palette (runtime overrides when data-bs-theme="dark")
 $dark-theme-colors: (
-  "primary": green,
+  "primary": $primary-dark-gold,
   "secondary": #9ca3af,
   "success": #69db7c,
   "info": #74c0fc,

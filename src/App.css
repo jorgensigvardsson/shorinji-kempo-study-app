@@ -52,6 +52,7 @@
 .menu-item {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .menu-no-wrap {
@@ -62,6 +63,10 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.25rem;
+}
+
+.menu-more-dropdown > .nav-link {
+  white-space: nowrap;
 }
 
 .menu-dropdown-item {
@@ -76,10 +81,56 @@
   justify-content: center;
 }
 
-/* Ensure active route in top/offcanvas menus follows primary color */
+.menu-route-icon {
+  display: inline-flex;
+  color: #dfbe5a;
+}
+
+[data-bs-theme="dark"] .menu-route-icon {
+  color: #f3d36c;
+}
+
+/* Keep main menu active states neutral gray even when app primary is gold */
 .menu-item.active,
 .menu-item.active:focus,
 .menu-item.active:hover {
-  color: var(--bs-component-active-color, #fff);
-  background-color: var(--bs-primary);
+  color: #101318;
+  background-color: #9ca4b0;
+}
+
+.menu-more-dropdown > .nav-link.active,
+.menu-more-dropdown > .nav-link:focus,
+.menu-more-dropdown > .nav-link:hover,
+.menu-more-dropdown.show > .nav-link {
+  color: #101318;
+  background-color: #9ca4b0;
+}
+
+.menu-dropdown-item.active,
+.menu-dropdown-item.active:focus,
+.menu-dropdown-item.active:hover {
+  color: #101318;
+  background-color: #9ca4b0;
+}
+
+[data-bs-theme="dark"] .menu-item.active,
+[data-bs-theme="dark"] .menu-item.active:focus,
+[data-bs-theme="dark"] .menu-item.active:hover {
+  color: #f8f9fa;
+  background-color: #5b6470;
+}
+
+[data-bs-theme="dark"] .menu-more-dropdown > .nav-link.active,
+[data-bs-theme="dark"] .menu-more-dropdown > .nav-link:focus,
+[data-bs-theme="dark"] .menu-more-dropdown > .nav-link:hover,
+[data-bs-theme="dark"] .menu-more-dropdown.show > .nav-link {
+  color: #f8f9fa;
+  background-color: #5b6470;
+}
+
+[data-bs-theme="dark"] .menu-dropdown-item.active,
+[data-bs-theme="dark"] .menu-dropdown-item.active:focus,
+[data-bs-theme="dark"] .menu-dropdown-item.active:hover {
+  color: #f8f9fa;
+  background-color: #5b6470;
 }

@@ -66,7 +66,7 @@ const Groups = (props: Props) => {
                             {!translator.isJapanese && <div className="groups-detail-subtitle">{selectedGroup.japanese}</div>}
                         </div>
                         <div className="d-flex align-items-center gap-2">
-                            <Badge bg="secondary">{selectedGroup.hokeis.length}</Badge>
+                            <Badge className="groups-count-badge">{selectedGroup.hokeis.length}</Badge>
                             <Button variant="outline-secondary" onClick={() => setSelectedGroupKey(null)}>
                                 {translator.translate("Stäng")}
                             </Button>
@@ -91,7 +91,7 @@ const Groups = (props: Props) => {
         return {
             key: group.key,
             title: group.translated,
-            badge: <Badge bg="secondary">{group.hokeis.length}</Badge>,
+            badge: <Badge className="groups-count-badge">{group.hokeis.length}</Badge>,
             subtitle: !translator.isJapanese ? group.japanese : undefined,
             preview: (
                 <>

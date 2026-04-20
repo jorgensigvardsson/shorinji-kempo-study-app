@@ -113,20 +113,31 @@ const AppNavbar = (props: NavbarProps) => {
           <Offcanvas.Body>
             <Nav className="me-auto d-lg-none" variant="pills">
               {routes.map((route, index) => {
-                return <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path} onClick={() => setShow(false)}>{route.icon && <>&nbsp;&nbsp;<route.icon size={20} /></>}&nbsp;&nbsp;{routeText(route)}</Nav.Link>
+                return (
+                  <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path} onClick={() => setShow(false)}>
+                    {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                    {routeText(route)}
+                  </Nav.Link>
+                );
               })}
             </Nav>
             <Nav className="me-auto d-none d-lg-flex menu-main-nav" variant="pills">
               {mainMenuRoutes.map((route, index) => (
                 <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path}>
-                  {route.icon && <>&nbsp;&nbsp;<route.icon size={20} /></>}&nbsp;&nbsp;{routeText(route)}
+                  {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                  {routeText(route)}
                 </Nav.Link>
               ))}
               {dropdownRoutes.length > 0 && (
-                <NavDropdown title={translator.translate("Mer")} id="desktop-more-menu" active={isDropdownActive}>
+                <NavDropdown
+                  title={translator.translate("Mer")}
+                  id="desktop-more-menu"
+                  active={isDropdownActive}
+                  className="menu-more-dropdown"
+                >
                   {dropdownRoutes.map((route, index) => (
                     <NavDropdown.Item as={NavLink} key={index} to={route.path} className="menu-dropdown-item">
-                      {route.icon && <span className="menu-dropdown-icon"><route.icon size={16} /></span>}
+                      {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
                       {routeText(route)}
                     </NavDropdown.Item>
                   ))}

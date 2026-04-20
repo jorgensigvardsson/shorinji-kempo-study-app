@@ -130,28 +130,31 @@ const Quiz = (props: QuizProps) => {
                   {translator.translate(quizCard.question)}
                   </div>
 
-                  {selectedAlternative !== null && (
+                  {answeredCorrectly ? (
                     <div className="mb-3">
-                      <strong>{translator.translate("Ditt svar")}:</strong>{" "}
-                      {translator.translate(selectedAlternative)}
+                      <strong className="text-success">{translator.translate("Rätt svar")}:</strong>{" "}
+                      {translator.translate(correctAlternative)}
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      {selectedAlternative !== null && (
+                        <div className="mb-3">
+                          <strong>{translator.translate("Ditt svar")}:</strong>{" "}
+                          {translator.translate(selectedAlternative)}
+                        </div>
+                      )}
 
-                  <div className="mb-3">
-                    <strong>{translator.translate("Rätt svar")}:</strong>{" "}
-                    {translator.translate(correctAlternative)}
-                  </div>
+                      <div className="mb-3">
+                        <strong>{translator.translate("Rätt svar")}:</strong>{" "}
+                        {translator.translate(correctAlternative)}
+                      </div>
 
-                  {answer !== null && (
-                    <div
-                      className={answeredCorrectly ? "text-success" : "text-danger"}
-                    >
-                      <strong>
-                        {answeredCorrectly
-                          ? translator.translate("Rätt!")
-                          : translator.translate("Fel!")}
-                      </strong>
-                    </div>
+                      {answer !== null && (
+                        <div className="text-danger">
+                          <strong>{translator.translate("Fel!")}</strong>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </Card.Body>
