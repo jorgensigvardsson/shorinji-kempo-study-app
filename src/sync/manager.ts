@@ -1,6 +1,7 @@
 import { getAppDataStore } from "../persistence/store";
 import type { AppDataDocument, SyncProvider } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
+import { GoogleDriveClient } from "./google-drive";
 import { OneDriveClient } from "./onedrive";
 import type { SyncResult, SyncState } from "./types";
 
@@ -13,6 +14,7 @@ const backupStoragePrefix = "sync-backup:";
 class SyncManager {
   private readonly store = getAppDataStore();
   private readonly oneDriveClient = new OneDriveClient();
+  private readonly googleDriveClient = new GoogleDriveClient();
   private state: SyncState = {
     status: "local_only",
     message: null,
@@ -63,30 +65,37 @@ class SyncManager {
 
   async connect(): Promise<void> {
     const provider = this.store.get("syncProvider");
-    if (provider !== "onedrive") {
+    const client = this.cloudClient(provider);
+    if (!client) {
       this.setState({
         status: "disconnected",
-        message: "Connect is only available for OneDrive right now.",
+        message: "This provider is not implemented yet.",
       });
       return;
     }
 
-    if (!this.oneDriveClient.canUse()) {
+    if (!client.canUse()) {
       this.setState({
         status: "error",
-        message: "Set VITE_ONEDRIVE_CLIENT_ID to enable OneDrive sync.",
+        message: provider === "onedrive"
+          ? "Set VITE_ONEDRIVE_CLIENT_ID to enable OneDrive sync."
+          : "Set VITE_GOOGLE_CLIENT_ID to enable Google Drive sync.",
       });
       return;
     }
 
-    this.setState({ status: "connecting", message: "Connecting to OneDrive..." });
-    await this.oneDriveClient.beginAuthorization();
+    this.setState({
+      status: "connecting",
+      message: provider === "onedrive" ? "Connecting to OneDrive..." : "Connecting to Google Drive...",
+    });
+    await client.beginAuthorization();
   }
 
   disconnect(): void {
     const provider = this.store.get("syncProvider");
-    if (provider === "onedrive") {
-      this.oneDriveClient.disconnect();
+    const client = this.cloudClient(provider);
+    if (client) {
+      client.disconnect();
     }
 
     this.setState({
@@ -102,7 +111,8 @@ class SyncManager {
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
-    if (provider !== "onedrive") {
+    const client = this.cloudClient(provider);
+    if (!client) {
       this.setState({
         status: "disconnected",
         message: "This provider is not implemented yet.",
@@ -110,21 +120,26 @@ class SyncManager {
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
-    if (!this.oneDriveClient.isConnected()) {
-      this.setState({ status: "disconnected", message: "Please connect to OneDrive first." });
+    if (!client.isConnected()) {
+      this.setState({
+        status: "disconnected",
+        message: provider === "onedrive"
+          ? "Please connect to OneDrive first."
+          : "Please connect to Google Drive first.",
+      });
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
     this.setState({ status: "syncing", message: "Synchronizing..." });
     const localDocument = this.store.getDocument();
-    const remoteDocument = await this.oneDriveClient.downloadDocument();
+    const remoteDocument = await client.downloadDocument();
 
     if (!remoteDocument) {
-      await this.oneDriveClient.uploadDocument(localDocument);
+      await client.uploadDocument(localDocument);
       this.saveBaseDocument(provider, localDocument);
       this.setState({
         status: "connected",
-        message: "Synced to OneDrive.",
+        message: provider === "onedrive" ? "Synced to OneDrive." : "Synced to Google Drive.",
         lastSyncedAt: new Date().toISOString(),
       });
       return { conflictDetected: false, pushedLocalChanges: true };
@@ -147,7 +162,7 @@ class SyncManager {
     }
 
     if (mergedDiffersFromRemote) {
-      await this.oneDriveClient.uploadDocument(mergedDocument);
+      await client.uploadDocument(mergedDocument);
     }
 
     this.saveBaseDocument(provider, mergedDocument);
@@ -179,7 +194,8 @@ class SyncManager {
       return;
     }
 
-    if (provider !== "onedrive") {
+    const client = this.cloudClient(provider);
+    if (!client) {
       this.clearScheduledSync();
       this.setState({
         status: "disconnected",
@@ -188,16 +204,18 @@ class SyncManager {
       return;
     }
 
-    if (!this.oneDriveClient.canUse()) {
+    if (!client.canUse()) {
       this.setState({
         status: "error",
-        message: "Set VITE_ONEDRIVE_CLIENT_ID to enable OneDrive sync.",
+        message: provider === "onedrive"
+          ? "Set VITE_ONEDRIVE_CLIENT_ID to enable OneDrive sync."
+          : "Set VITE_GOOGLE_CLIENT_ID to enable Google Drive sync.",
       });
       return;
     }
 
-    const authCompleted = await this.oneDriveClient.completeAuthorizationIfPresent();
-    if (!this.oneDriveClient.isConnected()) {
+    const authCompleted = await client.completeAuthorizationIfPresent();
+    if (!client.isConnected()) {
       this.setState({
         status: "disconnected",
         message: authCompleted ? "Connected callback handled. Please connect again." : "Not connected.",
@@ -205,7 +223,10 @@ class SyncManager {
       return;
     }
 
-    this.setState({ status: "connected", message: "Connected to OneDrive." });
+    this.setState({
+      status: "connected",
+      message: provider === "onedrive" ? "Connected to OneDrive." : "Connected to Google Drive.",
+    });
     await this.syncNow();
   }
 
@@ -266,6 +287,17 @@ class SyncManager {
       listener(snapshot);
     }
   }
+
+  private cloudClient(provider: SyncProvider): CloudSyncClient | null {
+    switch (provider) {
+      case "onedrive":
+        return this.oneDriveClient;
+      case "google-drive":
+        return this.googleDriveClient;
+      default:
+        return null;
+    }
+  }
 }
 
 let syncManager: SyncManager | null = null;
@@ -288,4 +320,14 @@ function formatError(error: unknown): string {
   }
 
   return "Unexpected sync error.";
+}
+
+interface CloudSyncClient {
+  canUse(): boolean;
+  beginAuthorization(): Promise<void>;
+  completeAuthorizationIfPresent(): Promise<boolean>;
+  isConnected(): boolean;
+  disconnect(): void;
+  downloadDocument(): Promise<AppDataDocument | null>;
+  uploadDocument(document: AppDataDocument): Promise<void>;
 }

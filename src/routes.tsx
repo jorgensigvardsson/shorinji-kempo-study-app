@@ -1,4 +1,4 @@
-import { Book, Collection, Gear, House, JournalText, ListUl, CardHeading, type Icon, QuestionSquare } from "react-bootstrap-icons";
+import { Book, Collection, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
@@ -10,6 +10,8 @@ import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
 import Quiz from "./Quiz.tsx";
 import Flashcard from "./Flashcard.tsx";
+import TermsOfServices from "./TermsOfServices.tsx";
+import PrivacyPolicy from "./PrivacyPolicy.tsx";
 
 export interface Route {
     path: string;
@@ -18,6 +20,7 @@ export interface Route {
     startDescription?: string | (() => string);
     icon: Icon;
     showInMainMenu?: boolean;
+    hideOnStartPage?: boolean;
 }
 
 export const routeText = (route: Route) => { 
@@ -37,7 +40,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
                           setTextSize: (size: number) => void): Route[] => {
     let routes: Route[] = [{
         path: "/",
-        component: () => <Start routes={routes.filter(r => r.path !== "/")
+        component: () => <Start routes={routes.filter(r => r.path !== "/" && !r.hideOnStartPage)
                                               .map(r => ({ path: r.path, title: routeText(r), description: routeDescription(r), icon: r.icon }))} />,
         menuText: translator.translate("Start"),
         icon: House,
@@ -88,6 +91,20 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
+    }, {
+        path: "/terms-of-service",
+        component: () => <TermsOfServices />,
+        menuText: translator.translate("Användarvillkor"),
+        startDescription: translator.translate("Läs villkoren för hur appen används."),
+        icon: FileEarmarkText,
+        hideOnStartPage: true
+    }, {
+        path: "/privacy-policy",
+        component: () => <PrivacyPolicy />,
+        menuText: translator.translate("Integritetspolicy"),
+        startDescription: translator.translate("Se hur appen hanterar dina uppgifter."),
+        icon: ShieldCheck,
+        hideOnStartPage: true
     }];
 
     return routes;

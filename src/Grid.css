@@ -37,6 +37,7 @@
 .app-grid-icon {
   display: inline-flex;
   color: var(--bs-primary);
+  margin-right: 0.3em;
 }
 
 .app-grid-title {

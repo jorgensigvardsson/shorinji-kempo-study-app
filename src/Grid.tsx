@@ -51,7 +51,7 @@ const Grid = (props: Props) => {
                                 </div>
                                 {item.badge}
                             </div>
-                            {item.subtitle && <div className="app-grid-subtitle">{item.subtitle}</div>}
+                            {item.subtitle && <div className="app-grid-subtitle mt-1">{item.subtitle}</div>}
                             {item.preview && <div className="app-grid-preview mt-3">{item.preview}</div>}
                         </Card.Body>
                     </Card>
