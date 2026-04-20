@@ -20,10 +20,8 @@ export function mergeDocuments(
   const baseDocument = base;
   let conflictDetected = false;
   const mergedData: AppDataState = {
-    ...local.data,
     grade: mergeScalar("grade"),
     language: mergeScalar("language"),
-    textSize: mergeScalar("textSize"),
     theme: mergeScalar("theme"),
     syncProvider: mergeScalar("syncProvider"),
     notes: mergeNotes(baseDocument.data.notes, local.data.notes, remote.data.notes, local, remote),

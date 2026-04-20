@@ -83,8 +83,6 @@ function persistentNameToAppDataKey(name: string): keyof AppDataState | null {
             return "grade";
         case "language":
             return "language";
-        case "text-size":
-            return "textSize";
         default:
             return null;
     }

@@ -1,6 +1,5 @@
 import type { GradeName } from "../data";
 import type { Language } from "../i18n";
-import { DefaultTextSize } from "./text-size";
 
 export type ThemePreference = "light" | "dark" | "system";
 export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox";
@@ -8,7 +7,6 @@ export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox";
 export interface AppDataState {
   grade: GradeName;
   language: Language;
-  textSize: number;
   theme: ThemePreference;
   syncProvider: SyncProvider;
   notes: Record<string, string>;
@@ -37,7 +35,6 @@ export function createDefaultAppDataDocument(): AppDataDocument {
     data: {
       grade: "shodan",
       language: "sv",
-      textSize: DefaultTextSize,
       theme: "system",
       syncProvider: "local",
       notes: {},

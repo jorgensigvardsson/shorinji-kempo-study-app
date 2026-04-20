@@ -15,11 +15,10 @@ export class AppDataStore {
   private readonly documentCallbacks = new Map<number, (document: AppDataDocument) => void>();
 
   constructor(private readonly backend = new LocalStorageBackend<AppDataDocument>("app-data-document")) {
-    this.document = backend.load(createDefaultAppDataDocument());
+    this.document = sanitizeDocument(backend.load(createDefaultAppDataDocument()));
     this.callbacks = {
       grade: new Map<number, DataChangedCallback<"grade">>(),
       language: new Map<number, DataChangedCallback<"language">>(),
-      textSize: new Map<number, DataChangedCallback<"textSize">>(),
       theme: new Map<number, DataChangedCallback<"theme">>(),
       syncProvider: new Map<number, DataChangedCallback<"syncProvider">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
@@ -55,7 +54,7 @@ export class AppDataStore {
 
   setDocument(document: AppDataDocument): void {
     const previous = this.document;
-    this.document = document;
+    this.document = sanitizeDocument(document);
     this.backend.save(this.document);
 
     const keys = Object.keys(this.document.data) as Array<keyof AppDataState>;
@@ -126,4 +125,24 @@ function clone<T>(value: T): T {
 
 function areEqual<T>(a: T, b: T): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function sanitizeDocument(input: AppDataDocument): AppDataDocument {
+  const fallback = createDefaultAppDataDocument();
+  return {
+    version: typeof input.version === "number" ? input.version : fallback.version,
+    updatedAt: typeof input.updatedAt === "string" ? input.updatedAt : fallback.updatedAt,
+    deviceId: typeof input.deviceId === "string" ? input.deviceId : fallback.deviceId,
+    data: {
+      grade: input.data?.grade ?? fallback.data.grade,
+      language: input.data?.language ?? fallback.data.language,
+      theme: input.data?.theme ?? fallback.data.theme,
+      syncProvider: input.data?.syncProvider ?? fallback.data.syncProvider,
+      notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
+    },
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, string> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
