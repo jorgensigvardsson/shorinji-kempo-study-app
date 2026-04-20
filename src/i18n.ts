@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-export type Language = "ja" | "sv";
+export type Language = "ja" | "sv" | "en" | "tr";
 
 export interface Translations {
   [lang: string]: { [text: string]: string; }

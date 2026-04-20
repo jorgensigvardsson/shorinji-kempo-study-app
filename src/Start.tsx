@@ -1,4 +1,4 @@
-import { Badge, Container } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { CardHeading, QuestionSquare } from "react-bootstrap-icons";
 import { TranslatorContext } from "./i18n";
 import { type ComponentType, useContext } from "react";
@@ -41,8 +41,6 @@ const Start = () => {
         key: action.key,
         title: action.title,
         icon: <action.icon size={20} />,
-        badge: <Badge bg="secondary">{translator.translate("Starta")}</Badge>,
-        subtitle: !translator.isJapanese ? action.japanese : undefined,
         preview: <div className="app-grid-preview-item">{action.description}</div>,
         onSelect: () => navigate(action.to),
     }));

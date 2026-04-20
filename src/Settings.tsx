@@ -17,6 +17,12 @@ interface Props {
 const Settings = (props: Props) => {
     const { translator, grade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
     const { theme, setTheme } = useTheme();
+    const languages: { code: Language; key: string }[] = [
+        { code: "sv", key: "Svenska" },
+        { code: "en", key: "Engelska" },
+        { code: "tr", key: "Turkiska" },
+        { code: "ja", key: "Japanska" },
+    ];
 
     const gradeLabel = (name: GradeName) => {
         let humanName = humanGradeName(name);
@@ -42,8 +48,11 @@ const Settings = (props: Props) => {
             <Form.Group className="mb-3" controlId="settingsTheme">
                 <Form.Label>{translator.translate("Språk")}</Form.Label>
                 <Form.Select onChange={e => onSetLanguage(e.target.value as Language)} value={translator.currentLanguage}>
-                    <option value="sv">{translator.translate("Svenska")}</option>
-                    <option value="ja">{translator.translate("Japanska")}</option>
+                    {languages.map(language => (
+                        <option value={language.code} key={language.code}>
+                            {translator.explicitTranslate(language.code, language.key)} ({translator.translate(language.key)})
+                        </option>
+                    ))}
                 </Form.Select>
             </Form.Group>
 
