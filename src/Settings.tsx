@@ -31,33 +31,33 @@ const Settings = (props: Props) => {
     return (
         <Form className="p-3">
             <Form.Group className="mb-3" controlId="settingsTheme">
-                <Form.Label>Tema</Form.Label>
+                <Form.Label>{translator.translate("Tema")}</Form.Label>
                 <Form.Select value={theme} onChange={e => setTheme(e.target.value as "light" | "dark" | "system")}>
-                    <option value={"light"}>Ljust</option>
-                    <option value={"dark"}>Mörkt</option>
-                    <option value={"system"}>System</option>
+                    <option value={"light"}>{translator.translate("Ljust")}</option>
+                    <option value={"dark"}>{translator.translate("Mörkt")}</option>
+                    <option value={"system"}>{translator.translate("System")}</option>
                 </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsTheme">
-                <Form.Label>Språk</Form.Label>
+                <Form.Label>{translator.translate("Språk")}</Form.Label>
                 <Form.Select onChange={e => onSetLanguage(e.target.value as Language)} value={translator.currentLanguage}>
-                    <option value="sv">Svenska</option>
-                    <option value="ja">日本語</option>
+                    <option value="sv">{translator.translate("Svenska")}</option>
+                    <option value="ja">{translator.translate("Japanska")}</option>
                 </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="textSize">
-                <Form.Label>Textstorlek</Form.Label>
+                <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
                 <Form.Select onChange={e => onSetTextSize(parseFloat(e.target.value))} value={textSize}>
-                    <option value="0.9">Liten</option>
-                    <option value={DefaultTextSize}>Medium</option>
-                    <option value="1.1">Stor</option>
+                    <option value="0.9">{translator.translate("Liten")}</option>
+                    <option value={DefaultTextSize}>{translator.translate("Medium")}</option>
+                    <option value="1.1">{translator.translate("Stor")}</option>
                 </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsLevel">
-                <Form.Label>Nivå</Form.Label>
+                <Form.Label>{translator.translate("Nivå")}</Form.Label>
                 <Form.Select onChange={e => onSetGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
                     {
                         allGradePlans.map(

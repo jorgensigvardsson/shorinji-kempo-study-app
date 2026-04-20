@@ -1,25 +1,27 @@
 import type { WordListEntry } from "./data";
 import wordList from './assets/word-list.json';
 import { Form } from "react-bootstrap";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { matchesString } from "./strings";
+import { TranslatorContext } from "./i18n";
 
 
 const WordList = () => {
+    const translator = useContext(TranslatorContext);
     const [filterText, setFilterText] = useState("");
     const filteredEntries = wordList.filter(e => matches(e, filterText)).sort(orderEntries);
 
     return (
         <div className="m-3">
-            <Form.Control placeholder={"Filtrera..."}
+            <Form.Control placeholder={translator.translate("Filtrera...")}
                           value={filterText} onChange={e => setFilterText(e.target.value)}
                           name="filter"/>
             <table className="table table-sm mt-3">
                 <thead>
                     <tr>
-                        <th>Kanji</th>
-                        <th>Romaji</th>
-                        <th>Betydelse</th>
+                        <th>{translator.translate("Kanji")}</th>
+                        <th>{translator.translate("Romaji")}</th>
+                        <th>{translator.translate("Betydelse")}</th>
                     </tr>
                 </thead>
                 <tbody>

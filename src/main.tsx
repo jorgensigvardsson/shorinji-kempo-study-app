@@ -5,7 +5,7 @@ import './styles/bootstrap-theme.scss';
 import App from './App.tsx'
 import { BrowserRouter } from "react-router-dom";
 import gradePlans from './assets/kamokuhyo.json';
-import translations from './assets/kamokuhyo.translations.json';
+import translations from './assets/translations.json';
 import { TranslationsContext, type Language } from './i18n.ts';
 import { load } from './persistence/data.ts';
 import { HokeiNotes } from './persistence/app-data.ts';
@@ -36,3 +36,4 @@ function mountRoot() {
 }
 
 mountRoot();
+
