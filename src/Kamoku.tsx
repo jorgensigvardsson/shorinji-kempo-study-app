@@ -91,12 +91,12 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
             bullets.push(<li key={index++} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(be)}</li>);
         }
     }
-    
+
+    const body = bullets.length > 0 ? <ul>{bullets}</ul> : null;
+
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-3">
-            <ul>
-                {bullets}
-            </ul>
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-3" showCollapse={bullets.length > 0}>
+            {body}
         </CollapsibleCard>
     );
 }

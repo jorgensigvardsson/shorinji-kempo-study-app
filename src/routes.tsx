@@ -15,6 +15,7 @@ export interface Route {
     path: string;
     component: React.ComponentType<any>;
     menuText: string | (() => string);
+    startDescription?: string | (() => string);
     icon: Icon;
     showInMainMenu?: boolean;
 }
@@ -23,13 +24,21 @@ export const routeText = (route: Route) => {
     return typeof(route.menuText) === "function" ? route.menuText() : route.menuText;
 }
 
+export const routeDescription = (route: Route) => {
+    if (!route.startDescription)
+        return undefined;
+
+    return typeof(route.startDescription) === "function" ? route.startDescription() : route.startDescription;
+}
+
 export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes,
                           textSize: number, 
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
                           setTextSize: (size: number) => void): Route[] => {
     let routes: Route[] = [{
         path: "/",
-        component: () => <Start/>,
+        component: () => <Start routes={routes.filter(r => r.path !== "/")
+                                              .map(r => ({ path: r.path, title: routeText(r), description: routeDescription(r), icon: r.icon }))} />,
         menuText: translator.translate("Start"),
         icon: House,
         showInMainMenu: true
@@ -37,40 +46,47 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         path: "/kamoku",
         component: () => <Kamoku myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData}/>,
         menuText: translator.translate("Kamoku"),
+        startDescription: translator.translate("Träna veckans innehåll utifrån din grad."),
         icon: Book,
         showInMainMenu: true
     }, {
         path: "/list",
         component: () => <List allGradePlans={allGradePlans} notesData={notesData} grade={gradePlan}/>,
         menuText: translator.translate("Alla hokei"),
+        startDescription: translator.translate("Bläddra bland alla hokei och filtrera på nivå."),
         icon: ListUl,
         showInMainMenu: true
     }, {
         path: "/groups",
         component: () => <Groups allGradePlans={allGradePlans} notesData={notesData}/>,
         menuText: translator.translate("Teknikgrupper"),
+        startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection,
         showInMainMenu: true
     }, {
         path: "/word-list",
         component: () => <WordList />,
         menuText: translator.translate("Ordlista"),
+        startDescription: translator.translate("Slå upp ord på kanji, romaji och betydelse."),
         icon: JournalText
     }, {
         path: "/quiz",
         component: () => <Quiz myGrade={gradePlan.grade}/>,
         menuText: translator.translate("Quiz"),
+        startDescription: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
         icon: QuestionSquare
     }, {
         path: "/flashcard",
         component: () => <Flashcard />,
         menuText: translator.translate("Flashkort"),
+        startDescription: translator.translate("Öva med kort och bygg minnet steg för steg."),
         icon: CardHeading
     }, {
         path: "/settings",
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} grade={gradePlan} allGradePlans={allGradePlans} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
+        startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
     }];
 
