@@ -1,9 +1,10 @@
-import { Badge, Button, Card, Container } from "react-bootstrap";
+import { Badge, Button, Container } from "react-bootstrap";
 import { useContext, useMemo, useState } from "react";
 import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import type { HokeiNotes } from "./persistence/app-data";
+import Grid, { type GridItem } from "./Grid";
 import "./Groups.css";
 
 export interface Props {
@@ -83,34 +84,29 @@ const Groups = (props: Props) => {
         );
     }
 
+    const items: GridItem[] = groups.map((group: HokeiGroup) => {
+        const previewHokeis = group.hokeis.slice(0, 3).map(h => translator.translate(h.moment.hokei_name));
+
+        return {
+            key: group.key,
+            title: group.translated,
+            badge: <Badge bg="secondary">{group.hokeis.length}</Badge>,
+            subtitle: !translator.isJapanese ? group.japanese : undefined,
+            preview: (
+                <>
+                    {previewHokeis.map((hokei, index) => (
+                        <div key={`${group.key}.preview.${index}`} className="app-grid-preview-item">{hokei}</div>
+                    ))}
+                    {group.hokeis.length > previewHokeis.length && <div className="app-grid-preview-more">+{group.hokeis.length - previewHokeis.length}</div>}
+                </>
+            ),
+            onSelect: () => setSelectedGroupKey(group.key),
+        };
+    });
+
     return (
         <Container className="p-3">
-            <div className="groups-grid">
-                {groups.map((group: HokeiGroup) => {
-                    const previewHokeis = group.hokeis.slice(0, 3).map(h => translator.translate(h.moment.hokei_name));
-
-                    return (
-                        <Card key={group.key} className="groups-grid-card"
-                              onClick={() => setSelectedGroupKey(group.key)}
-                              onKeyDown={e => (e.key === "Enter" || e.key === " ") && setSelectedGroupKey(group.key)}
-                              role="button" tabIndex={0}>
-                            <Card.Body>
-                                <div className="groups-grid-card-top">
-                                    <h3 className="groups-grid-title mb-1">{group.translated}</h3>
-                                    <Badge bg="secondary">{group.hokeis.length}</Badge>
-                                </div>
-                                {!translator.isJapanese && <div className="groups-grid-subtitle">{group.japanese}</div>}
-                                <div className="groups-grid-preview mt-3">
-                                    {previewHokeis.map((hokei, index) => (
-                                        <div key={`${group.key}.preview.${index}`} className="groups-grid-preview-item">{hokei}</div>
-                                    ))}
-                                    {group.hokeis.length > previewHokeis.length && <div className="groups-grid-preview-more">+{group.hokeis.length - previewHokeis.length}</div>}
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    );
-                })}
-            </div>
+            <Grid items={items} />
         </Container>
     );
 }
