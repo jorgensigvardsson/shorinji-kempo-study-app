@@ -1,12 +1,15 @@
 import { Form } from "react-bootstrap";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
 import CollapsibleCard from "./CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
 import type { HokeiNotes } from "./persistence/app-data";
+import { getAppDataStore } from "./persistence/store";
+import type { CurrentWeekAnchor } from "./persistence/schema";
 import { gradeLabel } from "./strings";
+import { resolveCurrentWeekNumber, toLocalDateKey } from "./utilities/current-week";
 
 export interface Props {
     myGrade: GradeName;
@@ -16,14 +19,36 @@ export interface Props {
 
 const Kamoku = (props: Props) => {
     const { myGrade, allGradePlans, notesData } = props;
-    const [selectedWeek, setSelectedWeek] = useState(0);
+    const store = getAppDataStore();
+    const initialGrade = allGradePlans.find(l => l.grade == myGrade)!;
+    const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
+    const [todayKey, setTodayKey] = useState(() => toLocalDateKey());
+    const [selectedWeek, setSelectedWeek] = useState(() => findSelectedWeekIndex(initialGrade, currentWeekAnchor, toLocalDateKey()));
     const translator = useContext(TranslatorContext);
-    const [grade, setGrade] = useState<GradePlan>(allGradePlans.find(l => l.grade == myGrade)!);
+    const [grade, setGrade] = useState<GradePlan>(initialGrade);
 
     const setNewGrade = (grade: GradePlan) => {
-        setSelectedWeek(0);
         setGrade(grade);
     }
+
+    useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
+
+    useEffect(() => {
+        setSelectedWeek(findSelectedWeekIndex(grade, currentWeekAnchor, todayKey));
+    }, [grade, currentWeekAnchor, todayKey]);
+
+    useEffect(() => {
+        const now = new Date();
+        const nextMidnight = new Date(now);
+        nextMidnight.setHours(24, 0, 0, 0);
+        const delay = Math.max(1000, nextMidnight.getTime() - now.getTime() + 100);
+
+        const timerId = window.setTimeout(() => {
+            setTodayKey(toLocalDateKey());
+        }, delay);
+
+        return () => window.clearTimeout(timerId);
+    }, [todayKey]);
 
     const optionLabel = (week: Week) => {
         if (!translator.isJapanese)
@@ -59,7 +84,11 @@ const Kamoku = (props: Props) => {
                         }
                     </Form.Select>
                 </Form.Group>
-                <Form.Select onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))} name="week-selector">
+                <Form.Select
+                    value={selectedWeek}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))}
+                    name="week-selector"
+                >
                     {grade.weeks.map((week, index) => (
                         <option key={index} value={index}>{optionLabel(week)}</option>)
                     )}
@@ -219,3 +248,13 @@ function PreparationWeekCard(props: PreparationWeekCardProps) {
 }
 
 export default Kamoku;
+
+function findSelectedWeekIndex(grade: GradePlan, anchor: CurrentWeekAnchor | null, todayKey: string): number {
+    if (grade.weeks.length === 0) {
+        return 0;
+    }
+
+    const weekNumber = resolveCurrentWeekNumber(anchor, grade.weeks.length, todayKey);
+    const index = grade.weeks.findIndex(week => week.week === weekNumber);
+    return index >= 0 ? index : 0;
+}

@@ -709,7 +709,6 @@
     "Tillbaka": "戻る",
     "Tryck för att vända": "タップして裏返す",
     "Tryck för att vända tillbaka": "タップして表に戻す",
-    "Vad vill du göra idag?": "今日は何をしますか？",
     "Visa svar": "答えを表示",
     "Engelska": "英語",
     "Turkiska": "トルコ語",
@@ -1100,6 +1099,9 @@
     "resultat": "件",
     "Inga träffar": "一致なし",
     "Prova ett annat sökord.": "別の検索語を試してください。",
+    "Aktuell vecka": "現在の週",
+    "Byt vecka för att ankra till dagens datum.": "週を変更すると本日の日付に固定されます。",
+    "Ankrad till": "固定日",
     "1": "1",
     "2": "2",
     "8": "8"
@@ -1672,7 +1674,6 @@
     "Tillbaka": "Back",
     "Tryck för att vända": "Tap to flip",
     "Tryck för att vända tillbaka": "Tap to flip back",
-    "Vad vill du göra idag?": "What do you want to do today?",
     "Visa svar": "Show answer",
     "Engelska": "English",
     "Repetition, studier, förberedelse inför gradering": "Repetition, studies, preparation for grading",
@@ -2208,7 +2209,10 @@
     "Sortera": "Sort",
     "resultat": "results",
     "Inga träffar": "No matches",
-    "Prova ett annat sökord.": "Try another search term."
+    "Prova ett annat sökord.": "Try another search term.",
+    "Aktuell vecka": "Current week",
+    "Byt vecka för att ankra till dagens datum.": "Changing week anchors it to today.",
+    "Ankrad till": "Anchored to"
   },
   "tr": {
     "1 kyū": "1 kyū",
@@ -2778,7 +2782,6 @@
     "Tillbaka": "Geri",
     "Tryck för att vända": "Çevirmek için dokun",
     "Tryck för att vända tillbaka": "Geri çevirmek için dokun",
-    "Vad vill du göra idag?": "Bugün ne yapmak istiyorsun?",
     "Visa svar": "Cevabı göster",
     "Engelska": "İngilizce",
     "Turkiska": "Türkçe",
@@ -3312,6 +3315,9 @@
     "resultat": "sonuç",
     "Inga träffar": "Eşleşme yok",
     "Prova ett annat sökord.": "Başka bir arama terimi deneyin.",
+    "Aktuell vecka": "Geçerli hafta",
+    "Byt vecka för att ankra till dagens datum.": "Haftayı değiştirince bugünün tarihine sabitlenir.",
+    "Ankrad till": "Sabitlenme tarihi",
     "1": "1",
     "2": "2",
     "8": "8"

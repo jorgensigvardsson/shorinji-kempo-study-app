@@ -20,6 +20,7 @@ export class AppDataStore {
       grade: new Map<number, DataChangedCallback<"grade">>(),
       language: new Map<number, DataChangedCallback<"language">>(),
       theme: new Map<number, DataChangedCallback<"theme">>(),
+      currentWeekAnchor: new Map<number, DataChangedCallback<"currentWeekAnchor">>(),
       syncProvider: new Map<number, DataChangedCallback<"syncProvider">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
     };
@@ -137,6 +138,9 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       grade: input.data?.grade ?? fallback.data.grade,
       language: input.data?.language ?? fallback.data.language,
       theme: input.data?.theme ?? fallback.data.theme,
+      currentWeekAnchor: isWeekAnchor(input.data?.currentWeekAnchor)
+        ? input.data.currentWeekAnchor
+        : fallback.data.currentWeekAnchor,
       syncProvider: input.data?.syncProvider ?? fallback.data.syncProvider,
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
     },
@@ -145,4 +149,13 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
 
 function isRecord(value: unknown): value is Record<string, string> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isWeekAnchor(value: unknown): value is { week: number; anchorDate: string } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as { week?: unknown; anchorDate?: unknown };
+  return typeof candidate.week === "number" && Number.isFinite(candidate.week) && typeof candidate.anchorDate === "string";
 }

@@ -23,6 +23,7 @@ export function mergeDocuments(
     grade: mergeScalar("grade"),
     language: mergeScalar("language"),
     theme: mergeScalar("theme"),
+    currentWeekAnchor: mergeScalar("currentWeekAnchor"),
     syncProvider: mergeScalar("syncProvider"),
     notes: mergeNotes(baseDocument.data.notes, local.data.notes, remote.data.notes, local, remote),
   };

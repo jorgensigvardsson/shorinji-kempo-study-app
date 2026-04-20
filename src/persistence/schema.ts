@@ -4,10 +4,16 @@ import type { Language } from "../i18n";
 export type ThemePreference = "light" | "dark" | "system";
 export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox";
 
+export interface CurrentWeekAnchor {
+  week: number;
+  anchorDate: string; // YYYY-MM-DD in local time
+}
+
 export interface AppDataState {
   grade: GradeName;
   language: Language;
   theme: ThemePreference;
+  currentWeekAnchor: CurrentWeekAnchor | null;
   syncProvider: SyncProvider;
   notes: Record<string, string>;
 }
@@ -36,6 +42,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       grade: "shodan",
       language: "sv",
       theme: "system",
+      currentWeekAnchor: null,
       syncProvider: "local",
       notes: {},
     },

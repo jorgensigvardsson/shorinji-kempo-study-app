@@ -1,10 +1,13 @@
+import { useEffect, useMemo, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useSyncProvider, useSyncState, useTheme } from "./hooks";
-import type { SyncProvider } from "./persistence/schema";
+import { getAppDataStore } from "./persistence/store";
+import type { CurrentWeekAnchor, SyncProvider } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
+import { toLocalDateKey } from "./utilities/current-week";
 
 interface Props {
     translator: Translator;
@@ -18,9 +21,18 @@ interface Props {
 
 const Settings = (props: Props) => {
     const { translator, grade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
+    const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
     const { syncProvider, setSyncProvider } = useSyncProvider();
     const syncState = useSyncState();
+    const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
+    const availableWeeks = useMemo(
+        () => [...new Set(grade.weeks.map(week => week.week))].sort((a, b) => a - b),
+        [grade]
+    );
+    const selectedWeek = availableWeeks.includes(currentWeekAnchor?.week ?? -1)
+        ? currentWeekAnchor!.week
+        : (availableWeeks[0] ?? 1);
     const languages: { code: Language; key: string }[] = [
         { code: "sv", key: "Svenska" },
         { code: "en", key: "Engelska" },
@@ -49,6 +61,15 @@ const Settings = (props: Props) => {
         ? new Date(syncState.lastSyncedAt).toLocaleString()
         : translator.translate("Never");
     const syncStateLabel = syncState.message ? `, ${syncState.message}` : null;
+
+    useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
+
+    const setAnchoredWeek = (week: number) => {
+        store.set("currentWeekAnchor", {
+            week,
+            anchorDate: toLocalDateKey()
+        });
+    };
     
     return (
         <Form>
@@ -92,6 +113,23 @@ const Settings = (props: Props) => {
                         )
                     }
                 </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="settingsCurrentWeek">
+                <Form.Label>{translator.translate("Aktuell vecka")}</Form.Label>
+                <Form.Select value={selectedWeek} onChange={e => setAnchoredWeek(parseInt(e.target.value, 10))}>
+                    {availableWeeks.map(week => (
+                        <option key={week} value={week}>{translator.translate("Vecka")} {week}</option>
+                    ))}
+                </Form.Select>
+                <Form.Text className="d-block mt-2">
+                    {translator.translate("Byt vecka för att ankra till dagens datum.")}
+                </Form.Text>
+                {currentWeekAnchor && (
+                    <Form.Text className="d-block">
+                        {translator.translate("Ankrad till")} {currentWeekAnchor.anchorDate}
+                    </Form.Text>
+                )}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsSyncProvider">

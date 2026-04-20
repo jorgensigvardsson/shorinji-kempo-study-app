@@ -3,7 +3,34 @@
 }
 
 .app-route-content {
-  padding: 1rem;
+  padding: 0.5rem;
+}
+
+.app-navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-navbar-brand .logo {
+  display: block;
+  flex-shrink: 0;
+}
+
+.app-navbar-title {
+  line-height: 1.1;
+}
+
+.app-offcanvas-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.1;
+}
+
+.app-offcanvas-title .logo {
+  display: block;
+  flex-shrink: 0;
 }
 
 .menu-item {

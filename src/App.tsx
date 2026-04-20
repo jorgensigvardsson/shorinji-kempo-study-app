@@ -71,19 +71,30 @@ const AppNavbar = (props: NavbarProps) => {
   const { routes, className, translator } = props;
   const [show, setShow] = useState(false);
   const location = useLocation();
+  const normalizedPath = location.pathname.endsWith("/") && location.pathname.length > 1
+    ? location.pathname.slice(0, -1)
+    : location.pathname;
   const mainMenuRoutes = routes.filter(route => route.showInMainMenu);
   const dropdownRoutes = routes.filter(route => !route.showInMainMenu);
   const isDropdownActive = dropdownRoutes.some(route => location.pathname === route.path);
+  const activeRoute = routes.find(route => route.path === normalizedPath);
+  const navbarTitle = activeRoute ? routeText(activeRoute) : translator.translate("Shorinji Kempo");
 
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
-        <Navbar.Brand href="/"><img src="/shorinjikempo.png" className="logo" />{translator.translate("Shorinji Kempo")}</Navbar.Brand>
+        <Navbar.Brand href="/" className="app-navbar-brand">
+          <img src="/shorinjikempo.png" className="logo" />
+          <span className="app-navbar-title">{navbarTitle}</span>
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow(true)} />
         <Navbar.Offcanvas id="basic-navbar-nav" placement="end"
           show={show} onHide={() => setShow(false)}>
           <Offcanvas.Header closeButton>
-            <Offcanvas.Title>{translator.translate("Shorinji Kempo")}</Offcanvas.Title>
+            <Offcanvas.Title className="app-offcanvas-title">
+              <img src="/shorinjikempo.png" className="logo" />
+              <span>{translator.translate("Shorinji Kempo")}</span>
+            </Offcanvas.Title>
           </Offcanvas.Header>
           <Offcanvas.Body>
             <Nav className="me-auto d-lg-none" variant="pills">
