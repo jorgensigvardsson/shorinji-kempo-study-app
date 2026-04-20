@@ -5,7 +5,7 @@ import Settings from "./Settings.tsx";
 import { type Language, type Translator } from "./i18n.ts";
 import Groups from "./Groups.tsx";
 import List from "./List.tsx";
-import type { HokeiNotes } from "./persistence/app-data.ts";
+import type { HokeiNotes, HokeiRanks } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
 import Quiz from "./Quiz.tsx";
@@ -34,7 +34,7 @@ export const routeDescription = (route: Route) => {
     return typeof(route.startDescription) === "function" ? route.startDescription() : route.startDescription;
 }
 
-export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes,
+export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes, ranksData: HokeiRanks,
                           textSize: number, 
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
                           setTextSize: (size: number) => void): Route[] => {
@@ -47,21 +47,21 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         showInMainMenu: true
     }, {
         path: "/kamoku",
-        component: () => <Kamoku myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData}/>,
+        component: () => <Kamoku myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/>,
         menuText: translator.translate("Kamoku"),
         startDescription: translator.translate("Träna veckans innehåll utifrån din grad."),
         icon: Book,
         showInMainMenu: true
     }, {
         path: "/list",
-        component: () => <List allGradePlans={allGradePlans} notesData={notesData} grade={gradePlan}/>,
+        component: () => <List allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} grade={gradePlan}/>,
         menuText: translator.translate("Alla hokei"),
         startDescription: translator.translate("Bläddra bland alla hokei och filtrera på nivå."),
         icon: ListUl,
         showInMainMenu: true
     }, {
         path: "/groups",
-        component: () => <Groups allGradePlans={allGradePlans} notesData={notesData}/>,
+        component: () => <Groups allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/>,
         menuText: translator.translate("Teknikgrupper"),
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection,

@@ -1,4 +1,4 @@
-import type { AppDataDocument, AppDataState } from "../persistence/schema";
+import type { AppDataDocument, AppDataState, HokeiRankEntry } from "../persistence/schema";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -26,11 +26,17 @@ export function mergeDocuments(
     currentWeekAnchor: mergeScalar("currentWeekAnchor"),
     syncProvider: mergeScalar("syncProvider"),
     notes: mergeNotes(baseDocument.data.notes, local.data.notes, remote.data.notes, local, remote),
+    hokeiRanks: mergeHokeiRanks(baseDocument.data.hokeiRanks, local.data.hokeiRanks, remote.data.hokeiRanks, local, remote),
   };
 
   if (mergedData.notes.__conflictMarker) {
     conflictDetected = true;
     delete mergedData.notes.__conflictMarker;
+  }
+
+  if (mergedData.hokeiRanks.__conflictMarker) {
+    conflictDetected = true;
+    delete mergedData.hokeiRanks.__conflictMarker;
   }
 
   return {
@@ -72,6 +78,7 @@ export function mergeDocuments(
 }
 
 type NoteMapWithMarker = Record<string, string> & { __conflictMarker?: string };
+type HokeiRankMapWithMarker = Record<string, HokeiRankEntry> & { __conflictMarker?: string };
 
 function mergeNotes(
   base: Record<string, string>,
@@ -112,6 +119,45 @@ function mergeNotes(
   return result;
 }
 
+function mergeHokeiRanks(
+  base: Record<string, HokeiRankEntry>,
+  local: Record<string, HokeiRankEntry>,
+  remote: Record<string, HokeiRankEntry>,
+  localDocument: AppDataDocument,
+  remoteDocument: AppDataDocument
+): HokeiRankMapWithMarker {
+  const result: HokeiRankMapWithMarker = {};
+  const allKeys = new Set<string>([
+    ...Object.keys(base),
+    ...Object.keys(local),
+    ...Object.keys(remote),
+  ]);
+
+  for (const key of allKeys) {
+    const baseValue = readOptional(base, key);
+    const localValue = readOptional(local, key);
+    const remoteValue = readOptional(remote, key);
+    const localChanged = !areEqual(localValue, baseValue);
+    const remoteChanged = !areEqual(remoteValue, baseValue);
+
+    if (localChanged && remoteChanged && !areEqual(localValue, remoteValue)) {
+      result.__conflictMarker = "true";
+      const winner = newerRank(localValue, remoteValue, localDocument, remoteDocument);
+      if (winner) {
+        result[key] = winner;
+      }
+      continue;
+    }
+
+    const chosen = localChanged ? localValue : (remoteChanged ? remoteValue : baseValue);
+    if (chosen) {
+      result[key] = chosen;
+    }
+  }
+
+  return result;
+}
+
 function newerByTimestamp(
   localValue: string | undefined,
   remoteValue: string | undefined,
@@ -123,8 +169,28 @@ function newerByTimestamp(
     : remoteValue;
 }
 
-function readOptional(map: Record<string, string>, key: string): string | undefined {
+function readOptional<T>(map: Record<string, T>, key: string): T | undefined {
   return key in map ? map[key] : undefined;
+}
+
+function newerRank(
+  localValue: HokeiRankEntry | undefined,
+  remoteValue: HokeiRankEntry | undefined,
+  localDocument: AppDataDocument,
+  remoteDocument: AppDataDocument
+): HokeiRankEntry | undefined {
+  if (!localValue) return remoteValue;
+  if (!remoteValue) return localValue;
+
+  const localUpdated = parseTimestamp(localValue.updatedAt);
+  const remoteUpdated = parseTimestamp(remoteValue.updatedAt);
+  if (localUpdated !== remoteUpdated) {
+    return localUpdated >= remoteUpdated ? localValue : remoteValue;
+  }
+
+  return parseTimestamp(localDocument.updatedAt) >= parseTimestamp(remoteDocument.updatedAt)
+    ? localValue
+    : remoteValue;
 }
 
 function newerOf(local: AppDataDocument, remote: AppDataDocument): AppDataDocument {

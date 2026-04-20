@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import CollapsibleCard from "../CollapsibleCard";
+import CollapsibleCard from "./CollapsibleCard";
 import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
 import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
@@ -7,21 +7,26 @@ import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
 import { Badge, Col, Container, Form, Row } from "react-bootstrap";
 import { ChatFill, JournalText } from "react-bootstrap-icons";
-import type { HokeiNotes } from "../persistence/app-data";
+import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
+import StarRating from "./StarRating";
+import type { HokeiRankValue } from "../persistence/schema";
 
 interface HokeiCardProps {
     hokei: HokeiMoment;
     notesData: HokeiNotes;
+    ranksData: HokeiRanks;
     className?: string;
     gradeName?: GradeName;
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, notesData, gradeName } = props;
+    const { hokei, className, notesData, ranksData, gradeName } = props;
     const translator = useContext(TranslatorContext);
     const [hasNotes, setHasNotes] = useState(!!notesData.getNotes(hokei.hokei_name));
+    const [rank, setRank] = useState<HokeiRankValue | null>(ranksData.getRank(hokei.hokei_name));
 
     useEffect(() => notesData.registerListener(hokei.hokei_name, note => setHasNotes(!!note)), [notesData]);
+    useEffect(() => ranksData.registerListener(hokei.hokei_name, setRank), [ranksData, hokei.hokei_name]);
 
     const options: HeadOptions = {
         badges: []
@@ -35,6 +40,15 @@ const HokeiCard = (props: HokeiCardProps) => {
 
     if (hasNotes)
         options.icons = [<ChatFill key="has-notes"/>];
+
+    options.rightNode = (
+        <StarRating
+            value={rank}
+            onChange={(value) => ranksData.setRank(hokei.hokei_name, value)}
+            groupLabel={translator.translate("Rankning")}
+            getLabel={(value) => translator.translate(`Nivå ${value}`)}
+        />
+    );
 
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}

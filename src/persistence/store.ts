@@ -23,6 +23,7 @@ export class AppDataStore {
       currentWeekAnchor: new Map<number, DataChangedCallback<"currentWeekAnchor">>(),
       syncProvider: new Map<number, DataChangedCallback<"syncProvider">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
+      hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
     };
   }
 
@@ -143,6 +144,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
         : fallback.data.currentWeekAnchor,
       syncProvider: input.data?.syncProvider ?? fallback.data.syncProvider,
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
+      hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
     },
   };
 }
@@ -158,4 +160,23 @@ function isWeekAnchor(value: unknown): value is { week: number; anchorDate: stri
 
   const candidate = value as { week?: unknown; anchorDate?: unknown };
   return typeof candidate.week === "number" && Number.isFinite(candidate.week) && typeof candidate.anchorDate === "string";
+}
+
+function isRankRecord(value: unknown): value is Record<string, { value: 1 | 2 | 3; updatedAt: string }> {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  for (const entry of Object.values(value)) {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+      return false;
+    }
+
+    const candidate = entry as { value?: unknown; updatedAt?: unknown };
+    if ((candidate.value !== 1 && candidate.value !== 2 && candidate.value !== 3) || typeof candidate.updatedAt !== "string") {
+      return false;
+    }
+  }
+
+  return true;
 }

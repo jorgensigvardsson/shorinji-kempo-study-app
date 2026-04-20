@@ -1102,6 +1102,12 @@
     "Aktuell vecka": "現在の週",
     "Byt vecka för att ankra till dagens datum.": "週を変更すると本日の日付に固定されます。",
     "Ankrad till": "固定日",
+    "Rankning": "評価",
+    "Nivå 1": "レベル 1",
+    "Nivå 2": "レベル 2",
+    "Nivå 3": "レベル 3",
+    "Tryck för att expandera": "展開",
+    "Tryck för att fälla ihop": "折りたたむ",
     "1": "1",
     "2": "2",
     "8": "8"
@@ -2212,7 +2218,13 @@
     "Prova ett annat sökord.": "Try another search term.",
     "Aktuell vecka": "Current week",
     "Byt vecka för att ankra till dagens datum.": "Changing week anchors it to today.",
-    "Ankrad till": "Anchored to"
+    "Ankrad till": "Anchored to",
+    "Rankning": "Rating",
+    "Nivå 1": "Level 1",
+    "Nivå 2": "Level 2",
+    "Nivå 3": "Level 3",
+    "Tryck för att expandera": "Expand",
+    "Tryck för att fälla ihop": "Collapse"
   },
   "tr": {
     "1 kyū": "1 kyū",
@@ -3318,6 +3330,12 @@
     "Aktuell vecka": "Geçerli hafta",
     "Byt vecka för att ankra till dagens datum.": "Haftayı değiştirince bugünün tarihine sabitlenir.",
     "Ankrad till": "Sabitlenme tarihi",
+    "Rankning": "Derecelendirme",
+    "Nivå 1": "Seviye 1",
+    "Nivå 2": "Seviye 2",
+    "Nivå 3": "Seviye 3",
+    "Tryck för att expandera": "Genişlet",
+    "Tryck för att fälla ihop": "Daralt",
     "1": "1",
     "2": "2",
     "8": "8"

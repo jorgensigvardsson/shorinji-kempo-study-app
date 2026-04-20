@@ -1,6 +1,6 @@
 import { type KeyboardEvent, type ReactNode } from "react";
 import { Card } from "react-bootstrap";
-import "./Grid.css";
+import "../Grid.css";
 
 export interface GridItem {
     key: string;

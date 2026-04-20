@@ -3,6 +3,12 @@ import type { Language } from "../i18n";
 
 export type ThemePreference = "light" | "dark" | "system";
 export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox";
+export type HokeiRankValue = 1 | 2 | 3;
+
+export interface HokeiRankEntry {
+  value: HokeiRankValue;
+  updatedAt: string;
+}
 
 export interface CurrentWeekAnchor {
   week: number;
@@ -16,6 +22,7 @@ export interface AppDataState {
   currentWeekAnchor: CurrentWeekAnchor | null;
   syncProvider: SyncProvider;
   notes: Record<string, string>;
+  hokeiRanks: Record<string, HokeiRankEntry>;
 }
 
 export interface AppDataDocument {
@@ -45,6 +52,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       currentWeekAnchor: null,
       syncProvider: "local",
       notes: {},
+      hokeiRanks: {},
     },
   };
 }

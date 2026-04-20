@@ -6,7 +6,7 @@ import { Container, Nav, Navbar, NavDropdown, Offcanvas } from 'react-bootstrap'
 import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
 import type { Data } from './persistence/data';
-import type { HokeiNotes } from './persistence/app-data';
+import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -14,10 +14,11 @@ interface Props {
   gradeData: Data<GradeName>;
   languageData: Data<Language>;
   notesData: HokeiNotes;
+  ranksData: HokeiRanks;
 }
 
 function App(props: Props) {
-  const { gradePlans, languageData, gradeData, notesData, textSizeData } = props;
+  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ grade, setGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
@@ -28,6 +29,7 @@ function App(props: Props) {
     gradePlans,
     translator,
     notesData,
+    ranksData,
     textZoom,
     lang => languageData.save(lang),
     g => gradeData.save(g.grade),
@@ -70,6 +72,7 @@ interface NavbarProps {
 const AppNavbar = (props: NavbarProps) => {
   const { routes, className, translator } = props;
   const [show, setShow] = useState(false);
+  const [isDesktopMenu, setIsDesktopMenu] = useState(() => window.matchMedia("(min-width: 992px)").matches);
   const location = useLocation();
   const normalizedPath = location.pathname.endsWith("/") && location.pathname.length > 1
     ? location.pathname.slice(0, -1)
@@ -78,7 +81,17 @@ const AppNavbar = (props: NavbarProps) => {
   const dropdownRoutes = routes.filter(route => !route.showInMainMenu);
   const isDropdownActive = dropdownRoutes.some(route => location.pathname === route.path);
   const activeRoute = routes.find(route => route.path === normalizedPath);
-  const navbarTitle = activeRoute ? routeText(activeRoute) : translator.translate("Shorinji Kempo");
+  const navbarTitle = isDesktopMenu
+    ? translator.translate("Shorinji Kempo")
+    : (activeRoute ? routeText(activeRoute) : translator.translate("Shorinji Kempo"));
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 992px)");
+    const onChange = (event: MediaQueryListEvent) => setIsDesktopMenu(event.matches);
+    setIsDesktopMenu(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
 
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">

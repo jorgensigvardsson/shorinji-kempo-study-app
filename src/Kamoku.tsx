@@ -2,10 +2,10 @@ import { Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
-import CollapsibleCard from "./CollapsibleCard";
+import CollapsibleCard from "./components/CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
-import type { HokeiNotes } from "./persistence/app-data";
+import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import { getAppDataStore } from "./persistence/store";
 import type { CurrentWeekAnchor } from "./persistence/schema";
 import { gradeLabel } from "./strings";
@@ -15,10 +15,11 @@ export interface Props {
     myGrade: GradeName;
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
+    ranksData: HokeiRanks;
 }
 
 const Kamoku = (props: Props) => {
-    const { myGrade, allGradePlans, notesData } = props;
+    const { myGrade, allGradePlans, notesData, ranksData } = props;
     const store = getAppDataStore();
     const initialGrade = allGradePlans.find(l => l.grade == myGrade)!;
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
@@ -95,7 +96,7 @@ const Kamoku = (props: Props) => {
                 </Form.Select>
             </div>
             {basicExercises && <BasicExerciseCard key={"be"} translator={translator} basicExercises={basicExercises} />}
-            {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-3" notesData={notesData} />)}
+            {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-3" notesData={notesData} ranksData={ranksData} />)}
             {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.key} translator={translator} other={oe.moment} />)}
             {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
         </div>

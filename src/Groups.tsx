@@ -3,13 +3,14 @@ import { useContext, useMemo, useState } from "react";
 import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
 import HokeiCard from "./components/HokeiCard";
-import type { HokeiNotes } from "./persistence/app-data";
-import Grid, { type GridItem } from "./Grid";
+import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
+import Grid, { type GridItem } from "./components/Grid";
 import "./Groups.css";
 
 export interface Props {
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
+    ranksData: HokeiRanks;
 }
 
 interface HokeiMomentWithGrade {
@@ -27,7 +28,7 @@ interface HokeiGroup {
 }
 
 const Groups = (props: Props) => {
-    const { allGradePlans, notesData } = props;
+    const { allGradePlans, notesData, ranksData } = props;
     const translator = useContext(TranslatorContext);
     const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
 
@@ -75,7 +76,7 @@ const Groups = (props: Props) => {
                         {selectedGroup.hokeis.map(h => (
                             <div style={{ fontSize: "smaller" }} key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`}>
                                 <HokeiCard hokei={h.moment} gradeName={h.grade} className="m-1"
-                                           notesData={notesData} />
+                                           notesData={notesData} ranksData={ranksData} />
                             </div>
                         ))}
                     </div>

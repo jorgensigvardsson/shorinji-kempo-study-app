@@ -1,6 +1,6 @@
 import { type ComponentType } from "react";
 import { useNavigate } from "react-router";
-import Grid, { type GridItem } from "./Grid";
+import Grid, { type GridItem } from "./components/Grid";
 
 interface StartRouteCard {
     path: string;

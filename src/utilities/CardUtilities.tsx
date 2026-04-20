@@ -19,6 +19,7 @@ export interface HeadOptions {
     badges?: HeadBadge[];
     icons?: ReactNode[];
     emSize?: number;
+    rightNode?: ReactNode;
 }
 
 interface BadgeProps {
@@ -88,7 +89,10 @@ export const cardHead = (translator: Translator, text: string, options: HeadOpti
             <>
                 <div style={{display: "flex", alignItems: "baseline", justifyContent: "space-between"}}>
                     <div style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
-                    <div style={{paddingRight: "0.5em"}}>{translatedTopBadges}</div>
+                    <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>
+                        {options.rightNode}
+                        {translatedTopBadges}
+                    </div>
                 </div>
                 <div>{translatedBadges}</div>
             </>
@@ -101,10 +105,11 @@ export const cardHead = (translator: Translator, text: string, options: HeadOpti
         <>
             <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                 <div style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
-                <div style={{paddingRight: "0.5em"}}>{translatedTopBadges}</div>
+                <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>{translatedTopBadges}</div>
             </div>
-            <div style={{ fontSize: `${(options.emSize ?? 1.4) * 0.75}em` }} className="text-muted">
-                {japaneseNative}
+            <div style={{ fontSize: `${(options.emSize ?? 1.4) * 0.75}em`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }} className="text-muted">
+                <span>{japaneseNative}</span>
+                <span>{options.rightNode}</span>
             </div>
             <div>{translatedBadges}</div>
         </>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "react-bootstrap";
-import { ArrowsCollapse, ArrowsExpand } from "react-bootstrap-icons";
+import { ChevronDoubleDown, ChevronDoubleUp } from "react-bootstrap-icons";
 
 interface Props extends React.PropsWithChildren {
     header: React.ReactNode;
@@ -22,17 +22,14 @@ const CollapsibleCard = (props: Props) => {
     return (
         <Card className={cardClassName}>
             <Card.Header onClick={() => setOpen(!open)} style={style}>
-                {
-                    (showCollapse ?? true) ?
-                    <div style={{display: "grid", gridTemplateColumns: "1fr 1em"}}>
-                        <div>{header}</div>
-                        <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                            <ArrowsExpand style={{ display: open ? "none" : undefined }}/>
-                            <ArrowsCollapse style={{ display: open ? undefined : "none" }}/>
+                <div className="collapsible-card-header">
+                    <div>{header}</div>
+                    {(showCollapse ?? true) && (
+                    <div className="collapsible-card-chevron">
+                            {open ? <ChevronDoubleUp size={13} /> : <ChevronDoubleDown size={13} />}
                         </div>
-                    </div>
-                    : <div>{header}</div>
-                }
+                    )}
+                </div>
             </Card.Header>
             {(showCollapse ?? true) && <Card.Body style={{ display: open ? undefined : "none" }}>{children}</Card.Body>}
             {footer && <Card.Footer style={{ display: open ? undefined : "none" }}>{footer}</Card.Footer>}

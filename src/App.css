@@ -33,6 +33,22 @@
   flex-shrink: 0;
 }
 
+.collapsible-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.collapsible-card-chevron {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: flex-end;
+  line-height: 1;
+  color: var(--bs-secondary-color);
+  opacity: 0.9;
+}
+
 .menu-item {
   display: flex;
   align-items: center;

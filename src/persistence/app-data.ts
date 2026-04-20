@@ -1,4 +1,5 @@
 import { getAppDataStore } from "./store";
+import type { HokeiRankValue } from "./schema";
 
 type NoteUpdatedCallback = (notes: string | null) => void;
 type UnregisterNoteUpdatedCallback = () => void;
@@ -57,5 +58,76 @@ export class HokeiNotes {
                 store.set("notes", updatedNotes);
             }
         }
+    }
+}
+
+type RankUpdatedCallback = (rank: HokeiRankValue | null) => void;
+type UnregisterRankUpdatedCallback = () => void;
+
+type RankRegistration = {
+    id: number;
+    callback: RankUpdatedCallback;
+}
+
+export class HokeiRanks {
+    private nextId: number = 0;
+    private callbackRegistrations: Map<string, RankRegistration[]> = new Map<string, RankRegistration[]>();
+
+    constructor() {
+        getAppDataStore().subscribe("hokeiRanks", ranks => {
+            for (const [hokeiName, registrations] of this.callbackRegistrations) {
+                const value = ranks[hokeiName]?.value ?? null;
+                for (const registration of registrations) {
+                    registration.callback(value);
+                }
+            }
+        });
+    }
+
+    registerListener(hokeiName: string, callback: RankUpdatedCallback): UnregisterRankUpdatedCallback {
+        const id = this.nextId++;
+        const registrations = this.callbackRegistrations.get(hokeiName) ?? [];
+        registrations.push({ id, callback });
+        this.callbackRegistrations.set(hokeiName, registrations);
+
+        return () => {
+            const index = registrations.findIndex(e => e.id === id);
+            if (index >= 0)
+                registrations.splice(index, 1);
+        };
+    }
+
+    getRank(hokeiName: string): HokeiRankValue | null {
+        const ranks = getAppDataStore().get("hokeiRanks");
+        return ranks[hokeiName]?.value ?? null;
+    }
+
+    setRank(hokeiName: string, rank: HokeiRankValue | null): void {
+        const store = getAppDataStore();
+        const existingRanks = store.get("hokeiRanks");
+
+        if (rank === null) {
+            if (!(hokeiName in existingRanks)) {
+                return;
+            }
+
+            const updatedRanks = { ...existingRanks };
+            delete updatedRanks[hokeiName];
+            store.set("hokeiRanks", updatedRanks);
+            return;
+        }
+
+        const existing = existingRanks[hokeiName];
+        if (existing?.value === rank) {
+            return;
+        }
+
+        store.set("hokeiRanks", {
+            ...existingRanks,
+            [hokeiName]: {
+                value: rank,
+                updatedAt: new Date().toISOString(),
+            }
+        });
     }
 }

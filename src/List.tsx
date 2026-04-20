@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } from "./data";
 import { TranslatorContext } from "./i18n";
-import type { HokeiNotes } from "./persistence/app-data";
+import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
 import { Form } from "react-bootstrap";
 import { compareLevels } from "./utilities/level";
@@ -11,12 +11,13 @@ interface Props {
     grade: GradePlan;
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
+    ranksData: HokeiRanks;
 }
 
 type Selection = "all" | "own" | "up-to-own" | GradeName;
 
 const List = (props: Props) => {
-    const { grade, allGradePlans, notesData } = props;
+    const { grade, allGradePlans, notesData, ranksData } = props;
     const [selection, setSelection] = useState<Selection>("own");
     const [filterText, setFilterText] = useState<string>("");
     const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
@@ -62,7 +63,7 @@ const List = (props: Props) => {
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />
                 </Form>
             </div>
-            {renderHokeis(filteredHokeis, notesData)}
+            {renderHokeis(filteredHokeis, notesData, ranksData)}
         </div>
     )
 }
@@ -96,10 +97,10 @@ interface HokeiAndGrade {
     moment: HokeiMoment;
     momentIndex: number;
 }
-const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes) => {
+const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes, ranksData: HokeiRanks) => {
     return hokeis.map(h => (
         <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-3"
-                        notesData={notesData}/>
+                        notesData={notesData} ranksData={ranksData}/>
     ))
 }
 
