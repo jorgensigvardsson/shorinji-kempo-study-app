@@ -28,3 +28,11 @@
   width: 1rem;
   justify-content: center;
 }
+
+/* Ensure active route in top/offcanvas menus follows primary color */
+.menu-item.active,
+.menu-item.active:focus,
+.menu-item.active:hover {
+  color: var(--bs-component-active-color, #fff);
+  background-color: var(--bs-primary);
+}

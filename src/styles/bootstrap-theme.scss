@@ -1,10 +1,124 @@
 @import "bootstrap/scss/functions";
 
-$primary: gray;
-$danger: #c2413a;
+// Light theme palette (compiled into Bootstrap component styles)
+$primary: #2f8f6b;
+$secondary: #6c757d;
 $success: #2f9e44;
-$warning: #e67700;
 $info: #1971c2;
+$warning: #e67700;
+$danger: #c2413a;
 
 @import "bootstrap/scss/bootstrap";
 
+// Dark theme palette (runtime overrides when data-bs-theme="dark")
+$dark-theme-colors: (
+  "primary": green,
+  "secondary": #9ca3af,
+  "success": #69db7c,
+  "info": #74c0fc,
+  "warning": #ffc078,
+  "danger": #ff8787
+);
+
+@include color-mode(dark, true) {
+  @each $name, $value in $dark-theme-colors {
+    --#{$prefix}#{$name}: #{$value};
+    --#{$prefix}#{$name}-rgb: #{to-rgb($value)};
+    --#{$prefix}#{$name}-text-emphasis: #{tint-color($value, 40%)};
+    --#{$prefix}#{$name}-bg-subtle: #{shade-color($value, 80%)};
+    --#{$prefix}#{$name}-border-subtle: #{shade-color($value, 40%)};
+  }
+
+  $dark-primary: map-get($dark-theme-colors, "primary");
+  $dark-primary-contrast: color-contrast($dark-primary);
+  --#{$prefix}link-color: #{$dark-primary};
+  --#{$prefix}link-color-rgb: #{to-rgb($dark-primary)};
+  --#{$prefix}link-hover-color: #{tint-color($dark-primary, 12%)};
+  --#{$prefix}link-hover-color-rgb: #{to-rgb(tint-color($dark-primary, 12%))};
+
+  // Keep common active colors aligned with dark primary
+  --#{$prefix}component-active-bg: var(--#{$prefix}primary);
+  --#{$prefix}component-active-color: #{$dark-primary-contrast};
+}
+
+// Rebuild contextual button variants for dark mode
+@include color-mode(dark) {
+  $dark-primary: map-get($dark-theme-colors, "primary");
+  $dark-primary-contrast: color-contrast($dark-primary);
+
+  .nav-pills {
+    --#{$prefix}nav-pills-link-active-bg: var(--#{$prefix}primary);
+    --#{$prefix}nav-pills-link-active-color: #{$dark-primary-contrast};
+  }
+
+  .dropdown-menu {
+    --#{$prefix}dropdown-link-active-bg: var(--#{$prefix}primary);
+    --#{$prefix}dropdown-link-active-color: #{$dark-primary-contrast};
+  }
+
+  .pagination {
+    --#{$prefix}pagination-active-bg: var(--#{$prefix}primary);
+    --#{$prefix}pagination-active-border-color: var(--#{$prefix}primary);
+    --#{$prefix}pagination-active-color: #{$dark-primary-contrast};
+  }
+
+  .list-group {
+    --#{$prefix}list-group-active-bg: var(--#{$prefix}primary);
+    --#{$prefix}list-group-active-border-color: var(--#{$prefix}primary);
+    --#{$prefix}list-group-active-color: #{$dark-primary-contrast};
+  }
+
+  .progress {
+    --#{$prefix}progress-bar-bg: var(--#{$prefix}primary);
+  }
+
+  @each $name, $value in $dark-theme-colors {
+    .btn-#{$name} {
+      @include button-variant($value, $value);
+    }
+
+    .btn-outline-#{$name} {
+      @include button-outline-variant($value);
+    }
+
+    @include table-variant($name, $value);
+
+    .text-bg-#{$name} {
+      color: color-contrast($value) if($enable-important-utilities, !important, null);
+      background-color: RGBA(var(--#{$prefix}#{$name}-rgb), var(--#{$prefix}bg-opacity, 1)) if($enable-important-utilities, !important, null);
+    }
+
+    .link-#{$name} {
+      color: RGBA(var(--#{$prefix}#{$name}-rgb), var(--#{$prefix}link-opacity, 1)) if($enable-important-utilities, !important, null);
+      text-decoration-color: RGBA(var(--#{$prefix}#{$name}-rgb), var(--#{$prefix}link-underline-opacity, 1)) if($enable-important-utilities, !important, null);
+
+      @if $link-shade-percentage != 0 {
+        &:hover,
+        &:focus {
+          $hover-color: if(color-contrast($value) == $color-contrast-light, shade-color($value, $link-shade-percentage), tint-color($value, $link-shade-percentage));
+          color: RGBA(#{to-rgb($hover-color)}, var(--#{$prefix}link-opacity, 1)) if($enable-important-utilities, !important, null);
+          text-decoration-color: RGBA(to-rgb($hover-color), var(--#{$prefix}link-underline-opacity, 1)) if($enable-important-utilities, !important, null);
+        }
+      }
+    }
+  }
+
+  // Form controls using hard-coded Sass color vars
+  .form-check-input:checked {
+    background-color: var(--#{$prefix}primary);
+    border-color: var(--#{$prefix}primary);
+  }
+
+  .form-check-input[type="checkbox"]:indeterminate {
+    background-color: var(--#{$prefix}primary);
+    border-color: var(--#{$prefix}primary);
+  }
+
+  .form-range::-webkit-slider-thumb {
+    background-color: var(--#{$prefix}primary);
+  }
+
+  .form-range::-moz-range-thumb {
+    background-color: var(--#{$prefix}primary);
+  }
+}
