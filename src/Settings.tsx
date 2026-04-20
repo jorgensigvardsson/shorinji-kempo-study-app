@@ -1,8 +1,10 @@
-import { Form } from "react-bootstrap";
-import { useTheme } from "./hooks";
+import { Button, Form } from "react-bootstrap";
+import { useSyncProvider, useSyncState, useTheme } from "./hooks";
+import type { SyncProvider } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
+import { getSyncManager } from "./sync/manager";
 
 interface Props {
     translator: Translator;
@@ -17,6 +19,8 @@ interface Props {
 const Settings = (props: Props) => {
     const { translator, grade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
     const { theme, setTheme } = useTheme();
+    const { syncProvider, setSyncProvider } = useSyncProvider();
+    const syncState = useSyncState();
     const languages: { code: Language; key: string }[] = [
         { code: "sv", key: "Svenska" },
         { code: "en", key: "Engelska" },
@@ -32,6 +36,19 @@ const Settings = (props: Props) => {
 
         return translator.japanese(humanName);
     }
+
+    const isConnected = syncState.status === "connected" || syncState.status === "syncing" || syncState.status === "connecting";
+    const providerLabel = syncProvider === "onedrive"
+        ? "OneDrive"
+        : syncProvider === "google-drive"
+            ? "Google Drive"
+            : syncProvider === "dropbox"
+                ? "Dropbox"
+                : translator.translate("Ingen");
+    const lastSyncedLabel = syncState.lastSyncedAt
+        ? new Date(syncState.lastSyncedAt).toLocaleString()
+        : translator.translate("Never");
+    const syncStateLabel = syncState.message ? `, ${syncState.message}` : null;
     
     return (
         <Form className="p-3">
@@ -75,6 +92,56 @@ const Settings = (props: Props) => {
                         )
                     }
                 </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="settingsSyncProvider">
+                <Form.Label>{translator.translate("Synk")}</Form.Label>
+                {!isConnected && (
+                    <>
+                        <Form.Select value={syncProvider} onChange={e => setSyncProvider(e.target.value as SyncProvider)}>
+                            <option value="local">{translator.translate("Ingen")}</option>
+                            <option value="onedrive">OneDrive</option>
+                            <option value="google-drive">Google Drive</option>
+                            <option value="dropbox">Dropbox</option>
+                        </Form.Select>
+                        {syncProvider !== "local" && (
+                            <div className="mt-2 d-flex gap-2">
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => getSyncManager().connect()}
+                                    disabled={syncState.status === "connecting" || syncState.status === "syncing"}
+                                >
+                                    {translator.translate("Connect")}
+                                </Button>
+                            </div>
+                        )}
+                    </>
+                )}
+                {isConnected && (
+                    <>
+                        <Form.Text className="d-block mt-2">
+                            {translator.translate("Connected to")} {providerLabel}, {translator.translate("last synced")} {lastSyncedLabel}{syncStateLabel}
+                        </Form.Text>
+                        <div className="mt-2 d-flex gap-2">
+                            <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                onClick={() => getSyncManager().disconnect()}
+                            >
+                                {translator.translate("Disconnect")}
+                            </Button>
+                            <Button
+                                variant="outline-success"
+                                size="sm"
+                                onClick={() => { void getSyncManager().syncNow(); }}
+                                disabled={syncState.status === "connecting" || syncState.status === "syncing"}
+                            >
+                                {translator.translate("Sync now")}
+                            </Button>
+                        </div>
+                    </>
+                )}
             </Form.Group>
         </Form>
     )

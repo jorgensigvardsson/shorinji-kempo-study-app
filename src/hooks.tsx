@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react'
+import { getAppDataStore } from './persistence/store';
+import type { SyncProvider, ThemePreference } from './persistence/schema';
+import { getSyncManager } from './sync/manager';
+import type { SyncState } from './sync/types';
 
 export const useDeviceSize = () => {
 
@@ -26,8 +30,6 @@ export const useIsDesktop = () => {
   return width >= 1230;
 }
 
-const STORAGE_KEY = "theme-preference";
-
 function getSystemTheme(): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
@@ -39,17 +41,17 @@ function applyTheme(theme: "light" | "dark") {
 }
 
 export function useTheme() {
-  const [preference, setPreference] = useState<"light" | "dark" | "system">(
-    () => (localStorage.getItem(STORAGE_KEY) as any) ?? "system"
-  );
+  const [preference, setPreference] = useState<ThemePreference>(() => getAppDataStore().get("theme"));
 
   useEffect(() => {
     const resolved =
       preference === "system" ? getSystemTheme() : preference;
 
     applyTheme(resolved);
-    localStorage.setItem(STORAGE_KEY, preference);
+    getAppDataStore().set("theme", preference);
   }, [preference]);
+
+  useEffect(() => getAppDataStore().subscribe("theme", setPreference), []);
 
   // React to OS theme changes when in system mode
   useEffect(() => {
@@ -67,4 +69,25 @@ export function useTheme() {
     effectiveTheme: preference === "system" ? getSystemTheme() : preference,
     setTheme: setPreference
   };
+}
+
+export function useSyncProvider() {
+  const [syncProvider, setSyncProvider] = useState<SyncProvider>(() => getAppDataStore().get("syncProvider"));
+
+  useEffect(() => {
+    getAppDataStore().set("syncProvider", syncProvider);
+  }, [syncProvider]);
+
+  useEffect(() => getAppDataStore().subscribe("syncProvider", setSyncProvider), []);
+
+  return { syncProvider, setSyncProvider };
+}
+
+export function useSyncState() {
+  const manager = getSyncManager();
+  const [state, setState] = useState<SyncState>(() => manager.getState());
+
+  useEffect(() => manager.subscribe(setState), [manager]);
+
+  return state;
 }

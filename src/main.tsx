@@ -11,11 +11,13 @@ import { load } from './persistence/data.ts';
 import { HokeiNotes } from './persistence/app-data.ts';
 import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
 import { type GradeName, type GradePlan } from './data.ts'
+import { getSyncManager } from './sync/manager.ts';
 
 const gradeData = load<GradeName>("grade", "shodan");
 const languageData = load<Language>("language", "sv");
 const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);
 const notesData = new HokeiNotes();
+getSyncManager().start();
 
 function mountRoot() {
   render(

@@ -1,3 +1,6 @@
+import { getAppDataStore } from "./store";
+import type { AppDataState } from "./schema";
+
 type DataUpdatedCallback<TData> = (data: TData) => void;
 type UnregisterDataUpdatedCallback = () => void;
 
@@ -9,9 +12,20 @@ export interface Data<TData> {
 }
 
 export function load<TData>(name: string, defaultData: TData): Data<TData> {
-    var data = localStorage.getItem(name);
-    const deserializedData = data === null ? defaultData : (typeof defaultData === "string" ? data as TData : JSON.parse(data) as TData);
-    return new DataImplementation<TData>(name, deserializedData);
+    const mappedKey = persistentNameToAppDataKey(name);
+
+    if (!mappedKey) {
+        const localData = localStorage.getItem(name);
+        const deserializedData =
+            localData === null
+                ? defaultData
+                : (typeof defaultData === "string" ? localData as TData : JSON.parse(localData) as TData);
+        return new LocalDataImplementation<TData>(name, deserializedData);
+    }
+
+    const store = getAppDataStore();
+    const data = store.get(mappedKey) as TData;
+    return new StoreDataImplementation<TData>(name, mappedKey, data);
 }
 
 type Registration<TData> = {
@@ -19,14 +33,31 @@ type Registration<TData> = {
     callback: DataUpdatedCallback<TData>;
 }
 
-class DataImplementation<TData> {
+class StoreDataImplementation<TData> {
+    constructor(public name: string, private appDataKey: keyof AppDataState, public data: TData) {}
+
+    save(data: TData) {
+        const store = getAppDataStore();
+        store.set(this.appDataKey as never, data as never);
+        this.data = data;
+    }
+
+    registerListener(callback: DataUpdatedCallback<TData>): UnregisterDataUpdatedCallback {
+        return getAppDataStore().subscribe(this.appDataKey as never, value => {
+            this.data = value as TData;
+            callback(value as TData);
+        });
+    }
+}
+
+class LocalDataImplementation<TData> {
     private nextId: number = 0;
     private callbackRegistrations: Registration<TData>[] = [];
 
     constructor(public name: string, public data: TData) {}
 
     save(data: TData) {
-        const serializedData = typeof data === "string" ? data : JSON.stringify(data); 
+        const serializedData = typeof data === "string" ? data : JSON.stringify(data);
         localStorage.setItem(this.name, serializedData);
         this.data = data;
         for (const registration of this.callbackRegistrations) {
@@ -41,7 +72,20 @@ class DataImplementation<TData> {
         return () => {
             const index = this.callbackRegistrations.findIndex(e => e.id === id);
             if (index >= 0)
-                this.callbackRegistrations.splice(index);
+                this.callbackRegistrations.splice(index, 1);
         }
+    }
+}
+
+function persistentNameToAppDataKey(name: string): keyof AppDataState | null {
+    switch (name) {
+        case "grade":
+            return "grade";
+        case "language":
+            return "language";
+        case "text-size":
+            return "textSize";
+        default:
+            return null;
     }
 }

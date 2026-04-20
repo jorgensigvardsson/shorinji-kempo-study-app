@@ -1,6 +1,4 @@
-interface StringMap {
-  [key: string]: string;
-}
+import { getAppDataStore } from "./store";
 
 type NoteUpdatedCallback = (notes: string | null) => void;
 type UnregisterNoteUpdatedCallback = () => void;
@@ -10,15 +8,19 @@ type Registration = {
     callback: NoteUpdatedCallback;
 }
 
-const hokeiNotesPersistentName = "hokei-notes";
-
 export class HokeiNotes {
-    private readonly notes: StringMap;
     private nextId: number = 0;
     private callbackRegistrations: Map<string, Registration[]> = new Map<string, Registration[]>();
 
     constructor() {
-        this.notes = JSON.parse(localStorage.getItem(hokeiNotesPersistentName) ?? '{}');
+        getAppDataStore().subscribe("notes", notes => {
+            for (const [hokeiName, registrations] of this.callbackRegistrations) {
+                const value = notes[hokeiName] ?? null;
+                for (const registration of registrations) {
+                    registration.callback(value);
+                }
+            }
+        });
     }
 
     registerListener(hokeiName: string, callback: NoteUpdatedCallback): UnregisterNoteUpdatedCallback {
@@ -36,36 +38,24 @@ export class HokeiNotes {
     }
 
     getNotes(hokeiName: string): string | null {
-        return this.notes[hokeiName] ?? null;
+        const notes = getAppDataStore().get("notes");
+        return notes[hokeiName] ?? null;
     }
 
     setNotes(hokeiName: string, notes: string | null) {
+        const store = getAppDataStore();
+        const existingNotes = store.get("notes");
+
         if (notes) {
-            if (this.notes[hokeiName] !== notes) {
-                this.notes[hokeiName] = notes;
-                this.saveData();
-                this.fireChangeNotification(hokeiName, notes);
+            if (existingNotes[hokeiName] !== notes) {
+                store.set("notes", { ...existingNotes, [hokeiName]: notes });
             }
         } else {
-            if (hokeiName in this.notes) {
-                delete this.notes[hokeiName];
-                this.saveData();
-                this.fireChangeNotification(hokeiName, null);
+            if (hokeiName in existingNotes) {
+                const updatedNotes = { ...existingNotes };
+                delete updatedNotes[hokeiName];
+                store.set("notes", updatedNotes);
             }
-        }
-    }
-
-    private saveData() {
-        localStorage.setItem(hokeiNotesPersistentName, JSON.stringify(this.notes));
-    }
-
-    private fireChangeNotification(hokeiName: string, notes: string | null) {
-        const registrations = this.callbackRegistrations.get(hokeiName);
-        if (!registrations)
-            return;
-
-        for (const registration of registrations) {
-            registration.callback(notes);
         }
     }
 }

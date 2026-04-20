@@ -25,6 +25,7 @@ __tests__
 .env
 .env.*
 !.env.example
+!.env.production
 
 # Git
 .git
