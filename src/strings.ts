@@ -38,11 +38,10 @@ const normalizeCharacterCode = (charCode: number) => {
 }
 
 export const gradeLabel = (grade: GradeName, translator: Translator) => {
-    let humanName = humanGradeName(grade);
-    humanName = `${humanName[0].toUpperCase()}${humanName.slice(1)}`;
+    const humanName = humanGradeName(grade);
 
     if (!translator.isJapanese)
-        return `${translator.translate(humanName)} (${translator.japanese(humanName)})`;
+        return `${translator.translate(humanName, { capitalize: true })} (${translator.japanese(humanName)})`;
 
     return translator.japanese(humanName);
 }

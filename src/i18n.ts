@@ -10,6 +10,8 @@ interface Options {
   capitalize?: boolean;
 }
 
+const languageLookupCache = new WeakMap<Translations, Map<Language, Map<string, string>>>();
+
 export const i18n = (translations: Translations, lang: Language, text: string | number, options?: Options): string => {
   if (typeof text === "number") {
     if (lang === "ja" && text >= 0 && Number.isInteger(text)) {
@@ -22,12 +24,11 @@ export const i18n = (translations: Translations, lang: Language, text: string | 
   if (!(lang in translations))
     return postProcess(lang, text, options);
 
-  const langtrans = translations[lang];
-
-  for(const key in langtrans) {
-    if (key.localeCompare(text.toString(), "sv-SE",  { sensitivity: 'base' }) === 0)
-      return postProcess(lang, langtrans[key], options);
-  }
+  const key = normalizeLookupKey(text.toString(), lang);
+  const langLookup = getLanguageLookup(translations, lang);
+  const translated = langLookup.get(key);
+  if (translated !== undefined)
+    return postProcess(lang, translated, options);
 
   return postProcess(lang, text, options);
 }
@@ -38,9 +39,64 @@ const postProcess = (lang: Language, text: string, options?: Options): string =>
   }
 
   if (options?.capitalize) {
-    return text.charAt(0).toUpperCase() + text.slice(1);
+    return capitalizeFirstCharacter(text, lang);
   }
   return text;
+}
+
+const getLocale = (lang: Language): string => {
+  switch (lang) {
+    case "sv":
+      return "sv-SE";
+    case "en":
+      return "en-US";
+    case "tr":
+      return "tr-TR";
+    default:
+      return "ja-JP";
+  }
+}
+
+const normalizeLookupKey = (text: string, lang: Language): string => {
+  return text.toLocaleLowerCase(getLocale(lang));
+}
+
+const getLanguageLookup = (translations: Translations, lang: Language): Map<string, string> => {
+  let translationsCache = languageLookupCache.get(translations);
+  if (!translationsCache) {
+    translationsCache = new Map<Language, Map<string, string>>();
+    languageLookupCache.set(translations, translationsCache);
+  }
+
+  const cachedLanguageLookup = translationsCache.get(lang);
+  if (cachedLanguageLookup)
+    return cachedLanguageLookup;
+
+  const languageEntries = translations[lang] ?? {};
+  const languageLookup = new Map<string, string>();
+  for (const [key, value] of Object.entries(languageEntries)) {
+    languageLookup.set(normalizeLookupKey(key, lang), value);
+  }
+
+  translationsCache.set(lang, languageLookup);
+  return languageLookup;
+}
+
+const capitalizeFirstCharacter = (text: string, lang: Language): string => {
+  if (text.length === 0)
+    return text;
+
+  const match = text.match(/^\s*\S/);
+  if (!match)
+    return text;
+
+  const firstChar = match[0][match[0].length - 1];
+  const index = text.indexOf(firstChar);
+  if (index < 0)
+    return text;
+
+  const upper = firstChar.toLocaleUpperCase(getLocale(lang));
+  return text.slice(0, index) + upper + text.slice(index + firstChar.length);
 }
 
 export const japanese = (translations: Translations, text: string | number): string => {

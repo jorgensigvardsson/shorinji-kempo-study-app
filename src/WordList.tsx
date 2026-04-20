@@ -3,13 +3,13 @@ import wordList from './assets/word-list.json';
 import { Form } from "react-bootstrap";
 import { useContext, useState } from "react";
 import { matchesString } from "./strings";
-import { TranslatorContext } from "./i18n";
+import { TranslatorContext, type Translator } from "./i18n";
 
 
 const WordList = () => {
     const translator = useContext(TranslatorContext);
     const [filterText, setFilterText] = useState("");
-    const filteredEntries = wordList.filter(e => matches(e, filterText)).sort(orderEntries);
+    const filteredEntries = wordList.filter(e => matches(e, filterText, translator)).sort(orderEntries);
 
     return (
         <div className="m-3">
@@ -25,7 +25,7 @@ const WordList = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredEntries.map(we => createWordListRow(we))}
+                    {filteredEntries.map(we => createWordListRow(we, translator))}
                 </tbody>
             </table>
         </div>
@@ -46,14 +46,14 @@ const orderEntries = (a: WordListEntry, b: WordListEntry) => {
 }
 
 
-const createWordListRow = (entry: WordListEntry) => {
+const createWordListRow = (entry: WordListEntry, translator: Translator) => {
     const meanings = [];
     let index = 0;
     if (entry.meanings) {
         for (const meaning of entry.meanings) {
             if(meanings.length > 0)
                 meanings.push(<br key={index++}/>);
-            meanings.push(<span key={index++}>{meaning}</span>);
+            meanings.push(<span key={index++}>{translator.translate(meaning)}</span>);
         }
     }
 
@@ -66,10 +66,10 @@ const createWordListRow = (entry: WordListEntry) => {
     );
 }
 
-const matches = (entry: WordListEntry, filterText: string) => {
+const matches = (entry: WordListEntry, filterText: string, translator: Translator) => {
     return entry.kanji && entry.kanji.indexOf(filterText) >= 0 ||
            entry.romaji && matchesString(entry.romaji, filterText) ||
-           entry.meanings && entry.meanings.some(m => matchesString(m, filterText));
+           entry.meanings && entry.meanings.some(m => matchesString(translator.translate(m), filterText));
 }
 
 export default WordList;

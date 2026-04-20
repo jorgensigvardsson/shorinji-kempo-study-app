@@ -25,11 +25,10 @@ const Settings = (props: Props) => {
     ];
 
     const gradeLabel = (name: GradeName) => {
-        let humanName = humanGradeName(name);
-        humanName = `${humanName[0].toUpperCase()}${humanName.slice(1)}`;
+        const humanName = humanGradeName(name);
 
         if (!translator.isJapanese)
-            return `${translator.translate(humanName)} (${translator.japanese(humanName)})`;
+            return `${translator.translate(humanName, { capitalize: true })} (${translator.japanese(humanName)})`;
 
         return translator.japanese(humanName);
     }
