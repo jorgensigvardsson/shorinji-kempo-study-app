@@ -42,7 +42,7 @@ function App(props: Props) {
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
         <AppNavbar routes={routes} translator={translator} className="d-print-none"/>
-        <div className="m-3">
+        <div className="m-1">
           {renderRoutes(routes)}
           <Outlet />
         </div>
