@@ -43,7 +43,7 @@ function App(props: Props) {
   return (
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
-        <AppNavbar routes={routes} translator={translator} className="d-print-none"/>
+        <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none"/>
         <div className="app-route-content">
           {renderRoutes(routes)}
           <Outlet />
@@ -66,11 +66,12 @@ function renderRoutes(routes: Route[]) {
 interface NavbarProps {
   routes: Route[];
   translator: Translator;
+  textZoom: number;
   className?: string;
 }
 
 const AppNavbar = (props: NavbarProps) => {
-  const { routes, className, translator } = props;
+  const { routes, className, translator, textZoom } = props;
   const [show, setShow] = useState(false);
   const [isDesktopMenu, setIsDesktopMenu] = useState(() => window.matchMedia("(min-width: 992px)").matches);
   const location = useLocation();
@@ -101,7 +102,7 @@ const AppNavbar = (props: NavbarProps) => {
           <span className="app-navbar-title">{navbarTitle}</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow(true)} />
-        <Navbar.Offcanvas id="basic-navbar-nav" placement="end"
+        <Navbar.Offcanvas id="basic-navbar-nav" placement="end" style={{ zoom: textZoom }}
           show={show} onHide={() => setShow(false)}>
           <Offcanvas.Header closeButton>
             <Offcanvas.Title className="app-offcanvas-title">
