@@ -49,7 +49,6 @@ const Kamoku = (props: Props) => {
     return (
         <Container className="p-3 d-print-none">
             <Form.Group className="mb-3" controlId="level">
-                <Form.Label>{translator.translate("Nivå")}</Form.Label>
                 <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
                     <option value={myGrade} key={myGrade}>{translator.translate("Min grad")}: {gradeLabel(myGrade, translator)}</option>
                     {
