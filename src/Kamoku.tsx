@@ -74,7 +74,7 @@ const Kamoku = (props: Props) => {
 
     return (
         <div className="d-print-none">
-            <div className="app-grid-panel mb-4">
+            <div className="app-grid-panel">
                 <Form.Group className="mb-3" controlId="level">
                     <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
                         <option value={myGrade} key={myGrade}>{translator.translate("Min grad")}: {gradeLabel(myGrade, translator)}</option>
@@ -96,7 +96,7 @@ const Kamoku = (props: Props) => {
                 </Form.Select>
             </div>
             {basicExercises && <BasicExerciseCard key={"be"} translator={translator} basicExercises={basicExercises} />}
-            {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-3" notesData={notesData} ranksData={ranksData} />)}
+            {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} />)}
             {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.key} translator={translator} other={oe.moment} />)}
             {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
         </div>
@@ -126,7 +126,7 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
     const body = bullets.length > 0 ? <ul>{bullets}</ul> : null;
 
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-3 app-grid-card hokei-card" showCollapse={bullets.length > 0}>
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-2 app-grid-card hokei-card" showCollapse={bullets.length > 0}>
             {body}
         </CollapsibleCard>
     );
@@ -211,7 +211,7 @@ function OtherCard(props: OtherCardProps) {
     }
     
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-3 app-grid-card hokei-card">
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-2 app-grid-card hokei-card">
             <table className="hokei-individuals-table">
                 <tbody>
                     {renderRandori()}

@@ -43,7 +43,7 @@ const List = (props: Props) => {
 
     return (
         <div>
-            <div className="app-grid-panel mb-4">
+            <div className="app-grid-panel">
                 <Form>
                     <Form.Select value={selection} onChange={e => setSelection(e.target.value as Selection)}>
                         <option value="all">{translator.translate('Alla')}</option>
@@ -88,6 +88,7 @@ const matchesFilterText = (grade: GradeName, hokeiExercise: HokeiMoment, filterT
            hokeiExercise.roles.defender.stance && matchesString(hokeiExercise.roles.defender.stance, filterText) ||
            hokeiExercise.roles.defender.action && matchesString(hokeiExercise.roles.defender.action, filterText) ||
            matchesString(hokeiExercise.technique_group, filterText) ||
+           matchesString(hokeiExercise.hokei_name, filterText) ||
            hokeiExercise.variations && hokeiExercise.variations.some(v => matchesString(v, filterText));
 }
 
@@ -99,7 +100,7 @@ interface HokeiAndGrade {
 }
 const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes, ranksData: HokeiRanks) => {
     return hokeis.map(h => (
-        <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-3"
+        <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-2"
                         notesData={notesData} ranksData={ranksData}/>
     ))
 }

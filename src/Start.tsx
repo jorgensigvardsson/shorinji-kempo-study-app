@@ -30,9 +30,9 @@ const Start = (props: Props) => {
 
     return (
         <div>
-            <Card className="app-grid-panel mb-3">
+            <Card className="app-grid-panel mb-2">
                 <Card.Body>
-                    <h2 className="mb-0">{translator.translate("Vad vill du göra idag?")}</h2>
+                    <h2>{translator.translate("Vad vill du göra idag?")}</h2>
                 </Card.Body>
             </Card>
             <Grid items={items} />

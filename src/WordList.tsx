@@ -18,7 +18,7 @@ const WordList = () => {
 
     return (
         <div>
-            <div className="app-grid-panel mb-3">
+            <div className="app-grid-panel">
                 <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                     <h2 className="app-grid-title mb-0">{translator.translate("Ordlista")}</h2>
                     <div className="wordlist-count">{filteredEntries.length} {translator.translate("resultat")}</div>
@@ -52,7 +52,7 @@ const WordList = () => {
             )}
 
             {filteredEntries.length > 0 && (
-                <div className="wordlist-table-wrapper app-grid-card mt-4">
+                <div className="wordlist-table-wrapper app-grid-card mt-2">
                     <table className="table table-sm mb-0 wordlist-table">
                         <thead>
                             <tr>

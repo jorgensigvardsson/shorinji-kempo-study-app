@@ -17,6 +17,24 @@
   margin: 0;
 }
 
+.wordlist-table th:first-child,
+.wordlist-table td:first-child {
+  padding-left: 0.7rem;
+}
+
+.wordlist-table th:last-child,
+.wordlist-table td:last-child {
+  padding-right: 0.7rem;
+}
+
+.wordlist-table thead th {
+  padding-top: 0.3rem;
+}
+
+.wordlist-table tbody tr:last-child td {
+  padding-bottom: 0.3rem;
+}
+
 .wordlist-table thead th {
   position: sticky;
   top: 0;
