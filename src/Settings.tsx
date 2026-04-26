@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Dropdown, Form } from "react-bootstrap";
 import { useSyncProvider, useSyncState, useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
 import type { CurrentWeekAnchor, SyncProvider } from "./persistence/schema";
@@ -8,6 +8,8 @@ import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
+import { DeviceHdd } from "react-bootstrap-icons";
+import "./Settings.css";
 
 interface Props {
     translator: Translator;
@@ -61,6 +63,13 @@ const Settings = (props: Props) => {
         ? new Date(syncState.lastSyncedAt).toLocaleString()
         : translator.translate("Aldrig");
     const syncStateLabel = syncState.message ? `, ${translator.translate(syncState.message)}` : null;
+    const syncProviderOptions: { value: SyncProvider; label: string; logo?: string }[] = [
+        { value: "local", label: translator.translate("Ingen") },
+        { value: "onedrive", label: "OneDrive", logo: "/onedrive-logo.svg" },
+        { value: "google-drive", label: "Google Drive", logo: "/google-drive-logo.svg" },
+        { value: "dropbox", label: "Dropbox", logo: "/dropbox-logo.svg" },
+    ];
+    const selectedSyncProvider = syncProviderOptions.find(option => option.value === syncProvider) ?? syncProviderOptions[0];
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
 
@@ -136,12 +145,25 @@ const Settings = (props: Props) => {
                 <Form.Label>{translator.translate("Synk")}</Form.Label>
                 {!isConnected && (
                     <>
-                        <Form.Select value={syncProvider} onChange={e => setSyncProvider(e.target.value as SyncProvider)}>
-                            <option value="local">{translator.translate("Ingen")}</option>
-                            <option value="onedrive">OneDrive</option>
-                            <option value="google-drive">Google Drive</option>
-                            <option value="dropbox">Dropbox</option>
-                        </Form.Select>
+                        <Dropdown onSelect={eventKey => eventKey && setSyncProvider(eventKey as SyncProvider)}>
+                            <Dropdown.Toggle as="button" type="button" className="form-select settings-provider-select-toggle">
+                                <ProviderLogo logo={selectedSyncProvider.logo} />
+                                <span>{selectedSyncProvider.label}</span>
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu className="w-100 settings-provider-menu">
+                                {syncProviderOptions.map(option => (
+                                    <Dropdown.Item
+                                        key={option.value}
+                                        eventKey={option.value}
+                                        active={option.value === syncProvider}
+                                        className="settings-provider-option"
+                                    >
+                                        <ProviderLogo logo={option.logo} />
+                                        <span>{option.label}</span>
+                                    </Dropdown.Item>
+                                ))}
+                            </Dropdown.Menu>
+                        </Dropdown>
                         {syncProvider !== "local" && (
                             <div className="mt-2 d-flex gap-2">
                                 <Button
@@ -183,6 +205,14 @@ const Settings = (props: Props) => {
             </Form.Group>
         </Form>
     )
+}
+
+const ProviderLogo = (props: { logo?: string }) => {
+    const { logo } = props;
+
+    return logo
+        ? <img src={logo} alt="" className="settings-provider-logo" />
+        : <DeviceHdd className="settings-provider-logo-placeholder" aria-hidden="true" />;
 }
 
 export default Settings;
