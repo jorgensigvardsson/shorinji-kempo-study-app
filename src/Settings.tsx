@@ -59,8 +59,8 @@ const Settings = (props: Props) => {
                 : translator.translate("Ingen");
     const lastSyncedLabel = syncState.lastSyncedAt
         ? new Date(syncState.lastSyncedAt).toLocaleString()
-        : translator.translate("Never");
-    const syncStateLabel = syncState.message ? `, ${syncState.message}` : null;
+        : translator.translate("Aldrig");
+    const syncStateLabel = syncState.message ? `, ${translator.translate(syncState.message)}` : null;
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
 
@@ -150,7 +150,7 @@ const Settings = (props: Props) => {
                                     onClick={() => getSyncManager().connect()}
                                     disabled={syncState.status === "connecting" || syncState.status === "syncing"}
                                 >
-                                    {translator.translate("Connect")}
+                                    {translator.translate("Anslut")}
                                 </Button>
                             </div>
                         )}
@@ -159,7 +159,7 @@ const Settings = (props: Props) => {
                 {isConnected && (
                     <>
                         <Form.Text className="d-block mt-2">
-                            {translator.translate("Connected to")} {providerLabel}, {translator.translate("last synced")} {lastSyncedLabel}{syncStateLabel}
+                            {translator.translate("Ansluten till")} {providerLabel}, {translator.translate("senast synkad")} {lastSyncedLabel}{syncStateLabel}
                         </Form.Text>
                         <div className="mt-2 d-flex gap-2">
                             <Button
@@ -167,7 +167,7 @@ const Settings = (props: Props) => {
                                 size="sm"
                                 onClick={() => getSyncManager().disconnect()}
                             >
-                                {translator.translate("Disconnect")}
+                                {translator.translate("Koppla från")}
                             </Button>
                             <Button
                                 variant="outline-success"
@@ -175,7 +175,7 @@ const Settings = (props: Props) => {
                                 onClick={() => { void getSyncManager().syncNow(); }}
                                 disabled={syncState.status === "connecting" || syncState.status === "syncing"}
                             >
-                                {translator.translate("Sync now")}
+                                {translator.translate("Synka nu")}
                             </Button>
                         </div>
                     </>

@@ -69,7 +69,7 @@ class SyncManager {
     if (!client) {
       this.setState({
         status: "disconnected",
-        message: "This provider is not implemented yet.",
+        message: "Den här leverantören är inte implementerad än.",
       });
       return;
     }
@@ -78,15 +78,15 @@ class SyncManager {
       this.setState({
         status: "error",
         message: provider === "onedrive"
-          ? "Set VITE_ONEDRIVE_CLIENT_ID to enable OneDrive sync."
-          : "Set VITE_GOOGLE_CLIENT_ID to enable Google Drive sync.",
+          ? "Sätt VITE_ONEDRIVE_CLIENT_ID för att aktivera synk med OneDrive."
+          : "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive.",
       });
       return;
     }
 
     this.setState({
       status: "connecting",
-      message: provider === "onedrive" ? "Connecting to OneDrive..." : "Connecting to Google Drive...",
+      message: provider === "onedrive" ? "Ansluter till OneDrive..." : "Ansluter till Google Drive...",
     });
     await client.beginAuthorization();
   }
@@ -100,7 +100,7 @@ class SyncManager {
 
     this.setState({
       status: provider === "local" ? "local_only" : "disconnected",
-      message: provider === "local" ? null : "Disconnected.",
+      message: provider === "local" ? null : "Frånkopplad.",
     });
   }
 
@@ -115,7 +115,7 @@ class SyncManager {
     if (!client) {
       this.setState({
         status: "disconnected",
-        message: "This provider is not implemented yet.",
+        message: "Den här leverantören är inte implementerad än.",
       });
       return { conflictDetected: false, pushedLocalChanges: false };
     }
@@ -124,13 +124,13 @@ class SyncManager {
       this.setState({
         status: "disconnected",
         message: provider === "onedrive"
-          ? "Please connect to OneDrive first."
-          : "Please connect to Google Drive first.",
+          ? "Anslut till OneDrive först."
+          : "Anslut till Google Drive först.",
       });
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
-    this.setState({ status: "syncing", message: "Synchronizing..." });
+    this.setState({ status: "syncing", message: "Synkar..." });
     const localDocument = this.store.getDocument();
     const remoteDocument = await client.downloadDocument();
 
@@ -139,7 +139,7 @@ class SyncManager {
       this.saveBaseDocument(provider, localDocument);
       this.setState({
         status: "connected",
-        message: provider === "onedrive" ? "Synced to OneDrive." : "Synced to Google Drive.",
+        message: provider === "onedrive" ? "Synkad med OneDrive." : "Synkad med Google Drive.",
         lastSyncedAt: new Date().toISOString(),
       });
       return { conflictDetected: false, pushedLocalChanges: true };
@@ -169,8 +169,8 @@ class SyncManager {
     this.setState({
       status: "connected",
       message: mergeResult.conflictDetected
-        ? "Synced with conflict resolution."
-        : "Synced.",
+        ? "Synkad med konfliktlösning."
+        : "Synkad.",
       lastSyncedAt: new Date().toISOString(),
       lastConflictResolutionAt: mergeResult.conflictDetected
         ? new Date().toISOString()
@@ -189,7 +189,7 @@ class SyncManager {
       this.clearScheduledSync();
       this.setState({
         status: "local_only",
-        message: "Using local storage only.",
+        message: "Använder bara lokal lagring.",
       });
       return;
     }
@@ -199,7 +199,7 @@ class SyncManager {
       this.clearScheduledSync();
       this.setState({
         status: "disconnected",
-        message: "This provider is not implemented yet.",
+        message: "Den här leverantören är inte implementerad än.",
       });
       return;
     }
@@ -208,8 +208,8 @@ class SyncManager {
       this.setState({
         status: "error",
         message: provider === "onedrive"
-          ? "Set VITE_ONEDRIVE_CLIENT_ID to enable OneDrive sync."
-          : "Set VITE_GOOGLE_CLIENT_ID to enable Google Drive sync.",
+          ? "Sätt VITE_ONEDRIVE_CLIENT_ID för att aktivera synk med OneDrive."
+          : "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive.",
       });
       return;
     }
@@ -218,14 +218,14 @@ class SyncManager {
     if (!client.isConnected()) {
       this.setState({
         status: "disconnected",
-        message: authCompleted ? "Connected callback handled. Please connect again." : "Not connected.",
+        message: authCompleted ? "Svar från anslutning hanterat. Anslut igen." : "Inte ansluten.",
       });
       return;
     }
 
     this.setState({
       status: "connected",
-      message: provider === "onedrive" ? "Connected to OneDrive." : "Connected to Google Drive.",
+      message: provider === "onedrive" ? "Ansluten till OneDrive." : "Ansluten till Google Drive.",
     });
     await this.syncNow();
   }
@@ -319,7 +319,7 @@ function formatError(error: unknown): string {
     return error.message;
   }
 
-  return "Unexpected sync error.";
+  return "Oväntat synkfel.";
 }
 
 interface CloudSyncClient {

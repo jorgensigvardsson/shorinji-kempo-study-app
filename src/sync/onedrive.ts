@@ -170,7 +170,7 @@ export class OneDriveClient {
 
     const tokenSet = this.readToken();
     if (!tokenSet) {
-      throw new Error("Not connected to OneDrive.");
+      throw new Error("Inte ansluten till OneDrive.");
     }
 
     if (tokenSet.expiresAt > Date.now()) {

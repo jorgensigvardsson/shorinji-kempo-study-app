@@ -1,10 +1,18 @@
 import type { GradeName } from "../data";
 
-export const compareLevels = (a: GradeName, b: GradeName): number => {
+export const compareGrades = (a: GradeName, b: GradeName): number => {
     const ao = makeLevelOrdinal(a);
     const bo = makeLevelOrdinal(b);
 
     return ao - bo;
+}
+
+export const compareGradeThenWeek = <T extends { grade: GradeName; week: number; momentIndex?: number }>(a: T, b: T): number => {
+    const gradeComparison = compareGrades(a.grade, b.grade);
+    if (gradeComparison !== 0)
+        return gradeComparison;
+
+    return a.week - b.week || (a.momentIndex ?? 0) - (b.momentIndex ?? 0);
 }
 
 const makeLevelOrdinal = (grade: GradeName): number => {

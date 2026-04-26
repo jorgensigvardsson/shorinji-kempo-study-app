@@ -200,7 +200,7 @@ export class GoogleDriveClient {
 
     const tokenSet = this.readToken();
     if (!tokenSet) {
-      throw new Error("Not connected to Google Drive.");
+      throw new Error("Inte ansluten till Google Drive.");
     }
 
     if (tokenSet.expiresAt > Date.now()) {

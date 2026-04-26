@@ -5,7 +5,7 @@ import "./Quiz.css";
 import { getHokeiMoments, type GradeName, type GradePlan, type WordListEntry } from "./data";
 import wordList from "./assets/word-list.json";
 import kamokuhyo from "./assets/kamokuhyo.json";
-import { compareLevels } from "./utilities/level";
+import { compareGrades } from "./utilities/level";
 
 interface QuizCandidate {
     id: string;
@@ -260,7 +260,7 @@ const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): QuizCand
   const candidates: QuizCandidate[] = [];
 
   for (const plan of plans) {
-    if (compareLevels(plan.grade, myGrade) > 0)
+    if (compareGrades(plan.grade, myGrade) > 0)
       continue;
 
     for (const week of plan.weeks) {

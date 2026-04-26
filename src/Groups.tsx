@@ -6,6 +6,7 @@ import HokeiCard from "./components/HokeiCard";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import Grid, { type GridItem } from "./components/Grid";
 import "./Groups.css";
+import { compareGradeThenWeek } from "./utilities/level";
 
 export interface Props {
     allGradePlans: GradePlan[];
@@ -35,7 +36,7 @@ const Groups = (props: Props) => {
     const groups = useMemo(() => {
         const allHokeis = allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({ grade: grade.grade, week: w.week, moments: getHokeiMoments(w) })))
                                        .flatMap(({ grade, week, moments }) => moments.map((moment, momentIndex) => ({ grade, week, moment, momentIndex })))
-                                       .sort((a, b) => a.grade.localeCompare(b.grade));
+                                       .sort(compareGradeThenWeek);
 
         const hokeisByGroup = new Map<string, HokeiMomentWithGrade[]>();
         for (const hokeiAndGrade of allHokeis) {

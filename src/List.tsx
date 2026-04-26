@@ -4,7 +4,7 @@ import { TranslatorContext } from "./i18n";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
 import { Form } from "react-bootstrap";
-import { compareLevels } from "./utilities/level";
+import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
 
 interface Props {
@@ -29,7 +29,7 @@ const List = (props: Props) => {
         setAllHokeis(
             allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({week: w.week, grade: grade.grade, moments: getHokeiMoments(w)})))
                          .flatMap(({week, grade, moments}) => moments.map((moment, momentIndex) => ({ week, grade, moment, momentIndex})))
-                         .sort((a, b) => a.grade.localeCompare(b.grade))
+                         .sort(compareGradeThenWeek)
         )
     }, [allGradePlans]);
 
@@ -76,9 +76,9 @@ const matchesSelection = (grade: GradeName, myGrade: GradeName, selection: Selec
         return grade == myGrade;
     
     if (selection === "up-to-own")
-        return compareLevels(grade, myGrade) <= 0;
+        return compareGrades(grade, myGrade) <= 0;
 
-    return compareLevels(grade, selection) === 0;
+    return compareGrades(grade, selection) === 0;
 }
 
 const matchesFilterText = (grade: GradeName, hokeiExercise: HokeiMoment, filterText: string) => {
