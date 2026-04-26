@@ -81,7 +81,7 @@ const Settings = (props: Props) => {
     };
     
     return (
-        <Form>
+        <div>
             <Form.Group className="mb-3" controlId="settingsTheme">
                 <Form.Label>{translator.translate("Tema")}</Form.Label>
                 <Form.Select value={theme} onChange={e => setTheme(e.target.value as "light" | "dark" | "system")}>
@@ -203,7 +203,7 @@ const Settings = (props: Props) => {
                     </>
                 )}
             </Form.Group>
-        </Form>
+        </div>
     )
 }
 

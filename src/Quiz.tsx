@@ -115,7 +115,7 @@ const Quiz = (props: QuizProps) => {
                   <h1 className="quiz-title">
                     {translator.translate(quizCard.question)}
                   </h1>
-                  <Form className="quiz-alternatives">{alternatives}</Form>
+                  <div className="quiz-alternatives">{alternatives}</div>
                 </div>
               </Card.Body>
             </Card>

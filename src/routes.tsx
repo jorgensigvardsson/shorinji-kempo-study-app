@@ -78,13 +78,13 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         menuText: translator.translate("Quiz"),
         startDescription: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
         icon: QuestionSquare
-    }, {
+    }, ...(!translator.isJapanese ? [{
         path: "/flashcard",
         component: () => <Flashcard />,
         menuText: translator.translate("Flashkort"),
         startDescription: translator.translate("Öva med kort och bygg minnet steg för steg."),
         icon: CardHeading
-    }, {
+    } satisfies Route] : []), {
         path: "/settings",
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} grade={gradePlan} allGradePlans={allGradePlans} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,

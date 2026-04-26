@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
@@ -8,6 +8,7 @@ import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-r
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 import { ArrowClockwise } from 'react-bootstrap-icons';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -49,7 +50,7 @@ function App(props: Props) {
           {renderRoutes(routes)}
           <Outlet />
         </div>
-        <TestUpdateToast translator={translator} />
+        <UpdateToast translator={translator} />
       </div>
     </TranslatorContext.Provider>
   )
@@ -153,12 +154,46 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const TestUpdateToast = (props: { translator: Translator }) => {
+const UpdateToast = (props: { translator: Translator }) => {
   const { translator } = props;
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
+  useRegisterSW({
+    onNeedRefresh() {
+      setNeedRefresh(true);
+    },
+    onRegisteredSW(_swUrl, registration) {
+      registrationRef.current = registration;
+      if (registration) {
+        if (registration.waiting) {
+          setNeedRefresh(true);
+        }
+        setInterval(() => registration.update(), 60 * 60 * 1000);
+      }
+    },
+  });
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && registrationRef.current?.waiting) {
+        setNeedRefresh(true);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
+
+  const handleUpdate = () => {
+    const waiting = registrationRef.current?.waiting;
+    if (!waiting) return;
+    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once: true });
+    waiting.postMessage({ type: 'SKIP_WAITING' });
+    setNeedRefresh(false);
+  };
 
   return (
     <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
-      <Toast show className="app-update-toast">
+      <Toast show={needRefresh} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon" aria-hidden="true">
             <ArrowClockwise size={20} />
@@ -167,7 +202,7 @@ const TestUpdateToast = (props: { translator: Translator }) => {
             <div className="app-update-toast-title">{translator.translate("Ny version tillgänglig")}</div>
             <div className="app-update-toast-text">{translator.translate("Ladda om när du vill uppdatera appen.")}</div>
           </div>
-          <Button size="sm" variant="primary" className="app-update-toast-action">
+          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={handleUpdate}>
             {translator.translate("Uppdatera")}
           </Button>
         </Toast.Body>

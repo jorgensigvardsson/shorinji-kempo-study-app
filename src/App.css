@@ -140,7 +140,8 @@
 }
 
 .app-update-toast {
-  max-width: min(28rem, calc(100vw - 1rem));
+  --bs-toast-max-width: auto;
+  max-width: min(28rem, calc(100vw - 2rem));
   color: var(--bs-body-color);
   background: color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-primary-bg-subtle) 8%);
   border: 1px solid color-mix(in srgb, var(--bs-primary) 30%, var(--bs-border-color) 70%);

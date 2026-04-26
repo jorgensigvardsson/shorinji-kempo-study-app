@@ -1,6 +1,21 @@
 {
-    "name": "",
-    "short_name": "",
+    "lang": "en",
+    "name": "Shorinji Kempo Study App",
+    "short_name": "SK Study App",
+    "translations": {
+        "ja": {
+            "name": "少林寺拳法学習アプリ",
+            "short_name": "SK学習"
+        },
+        "sv": {
+            "name": "Shorinji Kempo Studieapp",
+            "short_name": "SK Studieapp"
+        },
+        "tr": {
+            "name": "Shorinji Kempo Çalışma Uygulaması",
+            "short_name": "SK Çalışma"
+        }
+    },
     "icons": [
         {
             "src": "/android-chrome-192x192.png",

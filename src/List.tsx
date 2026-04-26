@@ -44,7 +44,7 @@ const List = (props: Props) => {
     return (
         <div>
             <div className="app-grid-panel">
-                <Form>
+                <div>
                     <Form.Select value={selection} onChange={e => setSelection(e.target.value as Selection)}>
                         <option value="all">{translator.translate('Alla')}</option>
                         <option value="own">{translator.translate('Endast egna')}</option>
@@ -61,7 +61,7 @@ const List = (props: Props) => {
                     </Form.Select>
                     <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-3"
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />
-                </Form>
+                </div>
             </div>
             {renderHokeis(filteredHokeis, notesData, ranksData)}
         </div>
