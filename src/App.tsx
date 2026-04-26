@@ -2,11 +2,12 @@ import { useContext, useEffect, useState } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
-import { Container, Nav, Navbar, NavDropdown, Offcanvas } from 'react-bootstrap';
+import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
+import { ArrowClockwise } from 'react-bootstrap-icons';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -48,6 +49,7 @@ function App(props: Props) {
           {renderRoutes(routes)}
           <Outlet />
         </div>
+        <TestUpdateToast translator={translator} />
       </div>
     </TranslatorContext.Provider>
   )
@@ -148,6 +150,29 @@ const AppNavbar = (props: NavbarProps) => {
         </Navbar.Offcanvas>
       </Container>
     </Navbar>
+  );
+}
+
+const TestUpdateToast = (props: { translator: Translator }) => {
+  const { translator } = props;
+
+  return (
+    <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
+      <Toast show className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon" aria-hidden="true">
+            <ArrowClockwise size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Ny version tillgänglig")}</div>
+            <div className="app-update-toast-text">{translator.translate("Ladda om när du vill uppdatera appen.")}</div>
+          </div>
+          <Button size="sm" variant="primary" className="app-update-toast-action">
+            {translator.translate("Uppdatera")}
+          </Button>
+        </Toast.Body>
+      </Toast>
+    </ToastContainer>
   );
 }
 

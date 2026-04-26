@@ -1115,7 +1115,10 @@
     "Tryck för att expandera": "展開",
     "Tryck för att fälla ihop": "折りたたむ",
     "Inte ansluten till OneDrive.": "OneDrive に接続されていません。",
-    "Inte ansluten till Google Drive.": "Google Drive に接続されていません。"
+    "Inte ansluten till Google Drive.": "Google Drive に接続されていません。",
+    "Ny version tillgänglig": "新しいバージョンがあります",
+    "Ladda om när du vill uppdatera appen.": "アプリを更新するには再読み込みしてください。",
+    "Uppdatera": "更新"
   },
   "en": {
     "1": "1",
@@ -2233,7 +2236,10 @@
     "Tryck för att expandera": "Expand",
     "Tryck för att fälla ihop": "Collapse",
     "Inte ansluten till OneDrive.": "Not connected to OneDrive.",
-    "Inte ansluten till Google Drive.": "Not connected to Google Drive."
+    "Inte ansluten till Google Drive.": "Not connected to Google Drive.",
+    "Ny version tillgänglig": "New version available",
+    "Ladda om när du vill uppdatera appen.": "Reload when you want to update the app.",
+    "Uppdatera": "Update"
   },
   "tr": {
     "1": "1",
@@ -3351,6 +3357,9 @@
     "Tryck för att expandera": "Genişlet",
     "Tryck för att fälla ihop": "Daralt",
     "Inte ansluten till OneDrive.": "OneDrive'a bağlı değil.",
-    "Inte ansluten till Google Drive.": "Google Drive'a bağlı değil."
+    "Inte ansluten till Google Drive.": "Google Drive'a bağlı değil.",
+    "Ny version tillgänglig": "Yeni sürüm mevcut",
+    "Ladda om när du vill uppdatera appen.": "Uygulamayı güncellemek istediğinizde yeniden yükleyin.",
+    "Uppdatera": "Güncelle"
   }
 }
