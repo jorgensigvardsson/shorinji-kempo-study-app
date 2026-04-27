@@ -1118,7 +1118,8 @@
     "Inte ansluten till Google Drive.": "Google Drive に接続されていません。",
     "Ny version tillgänglig": "新しいバージョンがあります",
     "Ladda om när du vill uppdatera appen.": "アプリを更新するには再読み込みしてください。",
-    "Uppdatera": "更新"
+    "Uppdatera": "更新",
+    "Uppställning": "構え"
   },
   "en": {
     "1": "1",
@@ -2239,7 +2240,8 @@
     "Inte ansluten till Google Drive.": "Not connected to Google Drive.",
     "Ny version tillgänglig": "New version available",
     "Ladda om när du vill uppdatera appen.": "Reload when you want to update the app.",
-    "Uppdatera": "Update"
+    "Uppdatera": "Update",
+    "Uppställning": "Stance"
   },
   "tr": {
     "1": "1",
@@ -3360,6 +3362,7 @@
     "Inte ansluten till Google Drive.": "Google Drive'a bağlı değil.",
     "Ny version tillgänglig": "Yeni sürüm mevcut",
     "Ladda om när du vill uppdatera appen.": "Uygulamayı güncellemek istediğinizde yeniden yükleyin.",
-    "Uppdatera": "Güncelle"
+    "Uppdatera": "Güncelle",
+    "Uppställning": "Duruş"
   }
 }

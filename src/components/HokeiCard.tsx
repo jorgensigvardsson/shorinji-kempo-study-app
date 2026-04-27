@@ -55,7 +55,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                          footer={<CardFooter notesData={notesData} hokei={hokei}/>}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <FootStancesElement hokei={hokei} />
+                {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}
                 <HokeiIndividualsElement hokei={hokei}/>
                 <Container className="p-0 mt-2">
                     <Badge>{hokei.technique_group}</Badge>
@@ -161,7 +161,7 @@ const FootStancesElement = ({ hokei }: FootStancesElementProps) => {
             <thead>
                 <tr>
                     <th colSpan={2}>
-                        Uppställning
+                        {translator.translate("Uppställning")}
                     </th>
                 </tr>
             </thead>
