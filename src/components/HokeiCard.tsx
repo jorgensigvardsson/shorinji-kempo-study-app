@@ -194,7 +194,7 @@ const renderStances = (translator: Translator, hokei: HokeiMoment) => {
             <thead>
                 <tr>
                     <th colSpan={2}>
-                        Stans
+                        {translator.translate("Stans")}
                     </th>
                 </tr>
             </thead>
@@ -236,7 +236,7 @@ const renderActions = (translator: Translator, hokei: HokeiMoment) => {
             <thead>
                 <tr>
                     <th colSpan={2}>
-                        Utförande
+                        {translator.translate("Utförande")}
                     </th>
                 </tr>
             </thead>

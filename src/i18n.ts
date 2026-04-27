@@ -8,6 +8,7 @@ export interface Translations {
 
 interface Options {
   capitalize?: boolean;
+  params?: string[];
 }
 
 const languageLookupCache = new WeakMap<Translations, Map<Language, Map<string, string>>>();
@@ -34,14 +35,17 @@ export const i18n = (translations: Translations, lang: Language, text: string | 
 }
 
 const postProcess = (lang: Language, text: string, options?: Options): string => {
-  if (lang === "ja") {
-    return text;
-  }
+  let result = options?.params
+    ? text.replace(/\{(\d+)\}/g, (_, i) => options.params![parseInt(i)] ?? `{${i}}`)
+    : text;
 
-  if (options?.capitalize) {
-    return capitalizeFirstCharacter(text, lang);
-  }
-  return text;
+  if (lang === "ja")
+    return result;
+
+  if (options?.capitalize)
+    return capitalizeFirstCharacter(result, lang);
+
+  return result;
 }
 
 const getLocale = (lang: Language): string => {

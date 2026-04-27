@@ -1119,7 +1119,19 @@
     "Ny version tillgänglig": "新しいバージョンがあります",
     "Ladda om när du vill uppdatera appen.": "アプリを更新するには再読み込みしてください。",
     "Uppdatera": "更新",
-    "Uppställning": "構え"
+    "Uppställning": "構え",
+    "Stans": "構え",
+    "Utförande": "動作",
+    "Kihon shohō, repetition, studier": "基本少法、反復、研究",
+    "Repetition, studier, förberedelse inför gradering": "反復、研究、審査準備",
+    "Vad betyder \"{0}\"?": "「{0}」はどういう意味ですか？",
+    "Vilket romaji motsvarar \"{0}\"?": "「{0}」に対応するローマ字は何ですか？",
+    "Hur läses \"{0}\" på romaji?": "「{0}」のローマ字読みは？",
+    "Vilken teknikgrupp tillhör \"{0}\"?": "「{0}」はどの技術グループに属しますか？",
+    "Vilken stans har angriparen i \"{0}\"?": "「{0}」での攻者の構えは？",
+    "Vad gör angriparen i \"{0}\"?": "「{0}」で攻者は何をしますか？",
+    "Vilken stans har försvararen i \"{0}\"?": "「{0}」での守者の構えは？",
+    "Vad gör försvararen i \"{0}\"?": "「{0}」で守者は何をしますか？"
   },
   "en": {
     "1": "1",
@@ -2241,7 +2253,17 @@
     "Ny version tillgänglig": "New version available",
     "Ladda om när du vill uppdatera appen.": "Reload when you want to update the app.",
     "Uppdatera": "Update",
-    "Uppställning": "Stance"
+    "Uppställning": "Stance",
+    "Stans": "Stance",
+    "Utförande": "Execution",
+    "Vad betyder \"{0}\"?": "What does \"{0}\" mean?",
+    "Vilket romaji motsvarar \"{0}\"?": "What romaji corresponds to \"{0}\"?",
+    "Hur läses \"{0}\" på romaji?": "How is \"{0}\" read in romaji?",
+    "Vilken teknikgrupp tillhör \"{0}\"?": "What technique group does \"{0}\" belong to?",
+    "Vilken stans har angriparen i \"{0}\"?": "What stance does the attacker have in \"{0}\"?",
+    "Vad gör angriparen i \"{0}\"?": "What does the attacker do in \"{0}\"?",
+    "Vilken stans har försvararen i \"{0}\"?": "What stance does the defender have in \"{0}\"?",
+    "Vad gör försvararen i \"{0}\"?": "What does the defender do in \"{0}\"?"
   },
   "tr": {
     "1": "1",
@@ -3363,6 +3385,16 @@
     "Ny version tillgänglig": "Yeni sürüm mevcut",
     "Ladda om när du vill uppdatera appen.": "Uygulamayı güncellemek istediğinizde yeniden yükleyin.",
     "Uppdatera": "Güncelle",
-    "Uppställning": "Duruş"
+    "Uppställning": "Duruş",
+    "Stans": "Duruş",
+    "Utförande": "İcra",
+    "Vad betyder \"{0}\"?": "\"{0}\" ne anlama gelir?",
+    "Vilket romaji motsvarar \"{0}\"?": "\"{0}\" hangi romaji ile karşılık gelir?",
+    "Hur läses \"{0}\" på romaji?": "\"{0}\" romaji ile nasıl okunur?",
+    "Vilken teknikgrupp tillhör \"{0}\"?": "\"{0}\" hangi teknik grubuna aittir?",
+    "Vilken stans har angriparen i \"{0}\"?": "\"{0}\" tekniğinde saldıranın duruşu nedir?",
+    "Vad gör angriparen i \"{0}\"?": "\"{0}\" tekniğinde saldıran ne yapar?",
+    "Vilken stans har försvararen i \"{0}\"?": "\"{0}\" tekniğinde savunanın duruşu nedir?",
+    "Vad gör försvararen i \"{0}\"?": "\"{0}\" tekniğinde savunan ne yapar?"
   }
 }

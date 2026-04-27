@@ -10,6 +10,7 @@ import { compareGrades } from "./utilities/level";
 interface QuizCandidate {
     id: string;
     question: string;
+    questionArgs: string[];
     correctAnswer: string;
     domain: string;
 }
@@ -17,6 +18,7 @@ interface QuizCandidate {
 interface QuizQuestion {
   id: string;
   question: string;
+  questionArgs: string[];
   alternatives: string[];
   correctAnswer: number;
 }
@@ -113,7 +115,7 @@ const Quiz = (props: QuizProps) => {
               <Card.Body className="quiz-body">
                 <div className="quiz-main">
                   <h1 className="quiz-title">
-                    {translator.translate(quizCard.question)}
+                    {translator.translate(quizCard.question, { params: quizCard.questionArgs })}
                   </h1>
                   <div className="quiz-alternatives">{alternatives}</div>
                 </div>
@@ -127,7 +129,7 @@ const Quiz = (props: QuizProps) => {
                 <div className="quiz-main quiz-answer-main">
                   <div className="mb-3">
                   <strong>{translator.translate("Fråga")}:</strong>{" "}
-                  {translator.translate(quizCard.question)}
+                  {translator.translate(quizCard.question, { params: quizCard.questionArgs })}
                   </div>
 
                   {answeredCorrectly ? (
@@ -231,14 +233,16 @@ const buildWordListCandidates = (entries: WordListEntry[]): QuizCandidate[] => {
 
     candidates.push({
       id: `word.meaning.${entryId}`,
-      question: `Vad betyder "${romaji}"?`,
+      question: `Vad betyder "{0}"?`,
+      questionArgs: [romaji],
       correctAnswer: primaryMeaning,
       domain: "word.meaning"
     });
 
     candidates.push({
       id: `word.romaji_from_meaning.${entryId}`,
-      question: `Vilket romaji motsvarar "${primaryMeaning}"?`,
+      question: `Vilket romaji motsvarar "{0}"?`,
+      questionArgs: [primaryMeaning],
       correctAnswer: romaji,
       domain: "word.romaji"
     });
@@ -246,7 +250,8 @@ const buildWordListCandidates = (entries: WordListEntry[]): QuizCandidate[] => {
     if (kanji) {
       candidates.push({
         id: `word.romaji_from_kanji.${entryId}`,
-        question: `Hur läses "${kanji}" på romaji?`,
+        question: `Hur läses "{0}" på romaji?`,
+        questionArgs: [kanji],
         correctAnswer: romaji,
         domain: "word.romaji"
       });
@@ -280,7 +285,8 @@ const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): QuizCand
         if (techniqueGroup) {
           candidates.push({
             id: `kamoku.technique_group.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vilken teknikgrupp tillhör "${hokeiName}"?`,
+            question: `Vilken teknikgrupp tillhör "{0}"?`,
+            questionArgs: [hokeiName],
             correctAnswer: techniqueGroup,
             domain: "kamoku.technique_group"
           });
@@ -289,7 +295,8 @@ const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): QuizCand
         if (attackerStance) {
           candidates.push({
             id: `kamoku.attacker_stance.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vilken stans har angriparen i "${hokeiName}"?`,
+            question: `Vilken stans har angriparen i "{0}"?`,
+            questionArgs: [hokeiName],
             correctAnswer: attackerStance,
             domain: "kamoku.attacker_stance"
           });
@@ -298,7 +305,8 @@ const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): QuizCand
         if (attackerAction) {
           candidates.push({
             id: `kamoku.attacker_action.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vad gör angriparen i "${hokeiName}"?`,
+            question: `Vad gör angriparen i "{0}"?`,
+            questionArgs: [hokeiName],
             correctAnswer: attackerAction,
             domain: "kamoku.attacker_action"
           });
@@ -307,7 +315,8 @@ const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): QuizCand
         if (defenderStance) {
           candidates.push({
             id: `kamoku.defender_stance.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vilken stans har försvararen i "${hokeiName}"?`,
+            question: `Vilken stans har försvararen i "{0}"?`,
+            questionArgs: [hokeiName],
             correctAnswer: defenderStance,
             domain: "kamoku.defender_stance"
           });
@@ -316,7 +325,8 @@ const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): QuizCand
         if (defenderAction) {
           candidates.push({
             id: `kamoku.defender_action.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vad gör försvararen i "${hokeiName}"?`,
+            question: `Vad gör försvararen i "{0}"?`,
+            questionArgs: [hokeiName],
             correctAnswer: defenderAction,
             domain: "kamoku.defender_action"
           });
@@ -345,6 +355,7 @@ const drawQuestion = (pool: QuizPool, recentQuestionIds: string[] = []): QuizQue
   return {
     id: candidate.id,
     question: candidate.question,
+    questionArgs: candidate.questionArgs,
     alternatives,
     correctAnswer: alternatives.findIndex(option => normalizeKey(option) === normalizeKey(candidate.correctAnswer))
   };
