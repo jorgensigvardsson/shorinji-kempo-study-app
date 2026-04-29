@@ -55,6 +55,11 @@
   gap: 0.5rem;
 }
 
+.offcanvas-body .nav-link.menu-item {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
 .menu-no-wrap {
   white-space: nowrap;
 }
