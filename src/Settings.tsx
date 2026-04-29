@@ -8,7 +8,7 @@ import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
-import { DeviceHdd } from "react-bootstrap-icons";
+import { DeviceHdd, Download } from "react-bootstrap-icons";
 import "./Settings.css";
 
 interface Props {
@@ -72,6 +72,18 @@ const Settings = (props: Props) => {
     const selectedSyncProvider = syncProviderOptions.find(option => option.value === syncProvider) ?? syncProviderOptions[0];
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
+
+    const exportData = () => {
+        const { version, data } = store.getDocument();
+        const json = JSON.stringify({ version, data }, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `shorinji-kempo-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const setAnchoredWeek = (week: number) => {
         store.set("currentWeekAnchor", {
@@ -202,6 +214,15 @@ const Settings = (props: Props) => {
                         </div>
                     </>
                 )}
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>{translator.translate("Exportera data")}</Form.Label>
+                <div>
+                    <Button variant="outline-secondary" size="sm" onClick={exportData}>
+                        <Download className="me-2" />
+                        {translator.translate("Ladda ner")}
+                    </Button>
+                </div>
             </Form.Group>
         </div>
     )
