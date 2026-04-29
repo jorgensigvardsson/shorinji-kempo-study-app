@@ -1,4 +1,5 @@
 import type { AppDataDocument } from "../persistence/schema";
+import { AuthExpiredError } from "./types";
 
 interface GoogleTokenSet {
   accessToken: string;
@@ -223,7 +224,7 @@ export class GoogleDriveClient {
 
     if (!refreshResponse.ok) {
       this.disconnect();
-      throw new Error("Failed to refresh Google Drive access token.");
+      throw new AuthExpiredError();
     }
 
     const payload = await refreshResponse.json();

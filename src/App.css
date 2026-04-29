@@ -194,6 +194,12 @@
   white-space: nowrap;
 }
 
+.app-update-toast-icon--warning {
+  color: var(--bs-warning-text-emphasis);
+  background: var(--bs-warning-bg-subtle);
+  border-color: var(--bs-warning-border-subtle);
+}
+
 @media (max-width: 520px) {
   .app-update-toast-body {
     grid-template-columns: auto minmax(0, 1fr);

@@ -7,7 +7,9 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
-import { ArrowClockwise } from 'react-bootstrap-icons';
+import { ArrowClockwise, CloudSlash } from 'react-bootstrap-icons';
+import { useSyncProvider, useSyncState } from './hooks';
+import { getSyncManager } from './sync/manager';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 interface Props {
@@ -50,7 +52,7 @@ function App(props: Props) {
           {renderRoutes(routes)}
           <Outlet />
         </div>
-        <UpdateToast translator={translator} />
+        <AppToasts translator={translator} />
       </div>
     </TranslatorContext.Provider>
   )
@@ -154,8 +156,10 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const UpdateToast = (props: { translator: Translator }) => {
+const AppToasts = (props: { translator: Translator }) => {
   const { translator } = props;
+
+  // --- update toast ---
   const [needRefresh, setNeedRefresh] = useState(false);
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
   useRegisterSW({
@@ -191,6 +195,14 @@ const UpdateToast = (props: { translator: Translator }) => {
     setNeedRefresh(false);
   };
 
+  // --- reconnect toast ---
+  const syncState = useSyncState();
+  const { syncProvider } = useSyncProvider();
+  const providerLabel = syncProvider === "onedrive" ? "OneDrive"
+    : syncProvider === "google-drive" ? "Google Drive"
+    : syncProvider === "dropbox" ? "Dropbox"
+    : translator.translate("molntjänsten");
+
   return (
     <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
       <Toast show={needRefresh} className="app-update-toast">
@@ -204,6 +216,21 @@ const UpdateToast = (props: { translator: Translator }) => {
           </div>
           <Button size="sm" variant="primary" className="app-update-toast-action" onClick={handleUpdate}>
             {translator.translate("Uppdatera")}
+          </Button>
+        </Toast.Body>
+      </Toast>
+      <Toast show={syncState.status === "auth_expired"} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
+            <CloudSlash size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Synken har kopplats från")}</div>
+            <div className="app-update-toast-text">{translator.translate("Anslutningen till {0} har gått ut.", { params: [providerLabel] })}</div>
+          </div>
+          <Button size="sm" variant="primary" className="app-update-toast-action"
+            onClick={() => getSyncManager().connect()}>
+            {translator.translate("Anslut igen")}
           </Button>
         </Toast.Body>
       </Toast>

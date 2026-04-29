@@ -3,7 +3,11 @@ import type { AppDataDocument, SyncProvider } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
 import { GoogleDriveClient } from "./google-drive";
 import { OneDriveClient } from "./onedrive";
-import type { SyncResult, SyncState } from "./types";
+import { AuthExpiredError, type SyncResult, type SyncState } from "./types";
+
+const debug = import.meta.env.VITE_DEBUG === "true";
+const debugLog = (...args: unknown[]) => { if (debug) console.log(...args); };
+const debugWarn = (...args: unknown[]) => { if (debug) console.warn(...args); };
 
 type SyncStateListener = (state: SyncState) => void;
 type Unsubscribe = () => void;
@@ -18,6 +22,7 @@ class SyncManager {
   private state: SyncState = {
     status: "local_only",
     message: null,
+    error: null,
     lastSyncedAt: null,
     lastConflictResolutionAt: null,
   };
@@ -34,9 +39,7 @@ class SyncManager {
     this.started = true;
 
     this.store.subscribe("syncProvider", () => {
-      this.handleProviderChanged().catch(error => {
-        this.setState({ status: "error", message: formatError(error) });
-      });
+      this.handleProviderChanged().catch(error => this.handleSyncError(error));
     });
 
     this.store.subscribeDocument(() => {
@@ -46,9 +49,7 @@ class SyncManager {
       this.scheduleBackgroundSync();
     });
 
-    this.handleProviderChanged().catch(error => {
-      this.setState({ status: "error", message: formatError(error) });
-    });
+    this.handleProviderChanged().catch(error => this.handleSyncError(error));
   }
 
   getState(): SyncState {
@@ -121,6 +122,7 @@ class SyncManager {
     }
 
     if (!client.isConnected()) {
+      debugWarn(`[sync] syncNow() called but client is not connected (provider: ${provider}). Token missing?`);
       this.setState({
         status: "disconnected",
         message: provider === "onedrive"
@@ -132,9 +134,12 @@ class SyncManager {
 
     this.setState({ status: "syncing", message: "Synkar..." });
     const localDocument = this.store.getDocument();
+    debugLog(`[sync] Starting sync with ${provider}. Local updatedAt: ${localDocument.updatedAt}`);
+
     const remoteDocument = await client.downloadDocument();
 
     if (!remoteDocument) {
+      debugLog("[sync] No remote document found — uploading local as initial.");
       await client.uploadDocument(localDocument);
       this.saveBaseDocument(provider, localDocument);
       this.setState({
@@ -142,8 +147,11 @@ class SyncManager {
         message: provider === "onedrive" ? "Synkad med OneDrive." : "Synkad med Google Drive.",
         lastSyncedAt: new Date().toISOString(),
       });
+      debugLog("[sync] Initial upload complete.");
       return { conflictDetected: false, pushedLocalChanges: true };
     }
+
+    debugLog(`[sync] Remote document found. Remote updatedAt: ${remoteDocument.updatedAt}`);
 
     const baseDocument = this.readBaseDocument(provider);
     const mergeResult = mergeDocuments(baseDocument, localDocument, remoteDocument);
@@ -151,7 +159,11 @@ class SyncManager {
 
     const mergedDiffersFromLocal = !areEqual(localDocument, mergedDocument);
     const mergedDiffersFromRemote = !areEqual(remoteDocument, mergedDocument);
+
+    debugLog(`[sync] Merge result — conflictDetected: ${mergeResult.conflictDetected}, applyingRemoteChanges: ${mergedDiffersFromLocal}, uploadingToRemote: ${mergedDiffersFromRemote}`);
+
     if (mergeResult.conflictDetected) {
+      debugWarn("[sync] Conflict detected — local backup saved before overwrite.");
       this.backupDocument(localDocument, provider);
     }
 
@@ -159,10 +171,12 @@ class SyncManager {
       this.isApplyingRemoteDocument = true;
       this.store.setDocument(mergedDocument);
       this.isApplyingRemoteDocument = false;
+      debugLog("[sync] Applied remote changes to local store.");
     }
 
     if (mergedDiffersFromRemote) {
       await client.uploadDocument(mergedDocument);
+      debugLog("[sync] Uploaded merged document to remote.");
     }
 
     this.saveBaseDocument(provider, mergedDocument);
@@ -177,6 +191,8 @@ class SyncManager {
         : this.state.lastConflictResolutionAt,
     });
 
+    debugLog(`[sync] Sync complete. ${mergeResult.conflictDetected ? "⚠️ Conflicts were resolved." : "No conflicts."}`);
+
     return {
       conflictDetected: mergeResult.conflictDetected,
       pushedLocalChanges: mergedDiffersFromRemote,
@@ -185,6 +201,8 @@ class SyncManager {
 
   private async handleProviderChanged(): Promise<void> {
     const provider = this.store.get("syncProvider");
+    debugLog(`[sync] handleProviderChanged: provider=${provider}`);
+
     if (provider === "local") {
       this.clearScheduledSync();
       this.setState({
@@ -205,6 +223,7 @@ class SyncManager {
     }
 
     if (!client.canUse()) {
+      debugWarn(`[sync] Client for ${provider} cannot be used (missing env var?)`);
       this.setState({
         status: "error",
         message: provider === "onedrive"
@@ -215,6 +234,8 @@ class SyncManager {
     }
 
     const authCompleted = await client.completeAuthorizationIfPresent();
+    debugLog(`[sync] completeAuthorizationIfPresent: ${authCompleted}, isConnected: ${client.isConnected()}`);
+
     if (!client.isConnected()) {
       this.setState({
         status: "disconnected",
@@ -238,12 +259,7 @@ class SyncManager {
 
     this.clearScheduledSync();
     this.syncTimer = setTimeout(() => {
-      this.syncNow().catch(error => {
-        this.setState({
-          status: "error",
-          message: formatError(error),
-        });
-      });
+      this.syncNow().catch(error => this.handleSyncError(error));
     }, 2500);
   }
 
@@ -274,6 +290,16 @@ class SyncManager {
   private backupDocument(document: AppDataDocument, provider: SyncProvider): void {
     const key = `${backupStoragePrefix}${provider}:${new Date().toISOString()}`;
     localStorage.setItem(key, JSON.stringify(document));
+  }
+
+  private handleSyncError(error: unknown): void {
+    const err = error instanceof Error ? error : new Error(String(error));
+    if (error instanceof AuthExpiredError) {
+      this.clearScheduledSync();
+      this.setState({ status: "auth_expired", message: null, error: err });
+    } else {
+      this.setState({ status: "error", message: err.message, error: err });
+    }
   }
 
   private setState(update: Partial<SyncState>): void {

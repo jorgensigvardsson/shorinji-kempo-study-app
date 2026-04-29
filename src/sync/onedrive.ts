@@ -1,4 +1,5 @@
 import type { AppDataDocument } from "../persistence/schema";
+import { AuthExpiredError } from "./types";
 
 interface OneDriveTokenSet {
   accessToken: string;
@@ -195,7 +196,7 @@ export class OneDriveClient {
 
     if (!refreshResponse.ok) {
       this.disconnect();
-      throw new Error("Failed to refresh OneDrive access token.");
+      throw new AuthExpiredError();
     }
 
     const payload = await refreshResponse.json();

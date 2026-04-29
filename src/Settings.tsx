@@ -66,8 +66,10 @@ const Settings = (props: Props) => {
     const syncProviderOptions: { value: SyncProvider; label: string; logo?: string }[] = [
         { value: "local", label: translator.translate("Ingen") },
         { value: "onedrive", label: "OneDrive", logo: "/onedrive-logo.svg" },
+/* TODO: implement syncing with these providers
         { value: "google-drive", label: "Google Drive", logo: "/google-drive-logo.svg" },
         { value: "dropbox", label: "Dropbox", logo: "/dropbox-logo.svg" },
+*/
     ];
     const selectedSyncProvider = syncProviderOptions.find(option => option.value === syncProvider) ?? syncProviderOptions[0];
 
