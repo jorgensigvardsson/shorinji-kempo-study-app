@@ -19,11 +19,6 @@ const WordList = () => {
     return (
         <div>
             <div className="app-grid-panel">
-                <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-                    <h2 className="app-grid-title mb-0">{translator.translate("Ordlista")}</h2>
-                    <div className="wordlist-count">{filteredEntries.length} {translator.translate("resultat")}</div>
-                </div>
-
                 <Form.Control placeholder={translator.translate("Filtrera...")}
                             value={filterText} onChange={e => setFilterText(e.target.value)}
                             name="filter"/>
@@ -45,7 +40,7 @@ const WordList = () => {
             </div>
 
             {filteredEntries.length === 0 && (
-                <div className="app-grid-panel">
+                <div className="app-grid-panel mt-2">
                     <h3 className="app-grid-title mb-1">{translator.translate("Inga träffar")}</h3>
                     <div className="app-grid-subtitle">{translator.translate("Prova ett annat sökord.")}</div>
                 </div>

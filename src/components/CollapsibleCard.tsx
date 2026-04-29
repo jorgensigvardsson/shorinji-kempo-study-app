@@ -21,7 +21,7 @@ const CollapsibleCard = (props: Props) => {
 
     return (
         <Card className={cardClassName}>
-            <Card.Header onClick={() => setOpen(!open)} style={style}>
+            <Card.Header className="border-bottom-0" onClick={() => setOpen(!open)} style={style}>
                 <div className="collapsible-card-header">
                     <div>{header}</div>
                     {(showCollapse ?? true) && (
@@ -32,7 +32,7 @@ const CollapsibleCard = (props: Props) => {
                 </div>
             </Card.Header>
             {(showCollapse ?? true) && <Card.Body style={{ display: open ? undefined : "none" }}>{children}</Card.Body>}
-            {footer && <Card.Footer style={{ display: open ? undefined : "none" }}>{footer}</Card.Footer>}
+            {footer && <Card.Footer className="border-top-0" style={{ display: open ? undefined : "none" }}>{footer}</Card.Footer>}
         </Card>
     )
 }

@@ -37,6 +37,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     }
 
     options.badges!.push(...(hokei.variations ?? []).map(v => ({ variant: "secondary", text: v })));
+    options.badges!.push({ text: hokei.technique_group, variant: "primary" });
 
     if (hasNotes)
         options.icons = [<ChatFill key="has-notes"/>];
@@ -57,9 +58,6 @@ const HokeiCard = (props: HokeiCardProps) => {
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}
                 <HokeiIndividualsElement hokei={hokei}/>
-                <Container className="p-0 mt-2">
-                    <Badge>{hokei.technique_group}</Badge>
-                </Container>
             </div>
         </CollapsibleCard>
     )
@@ -95,9 +93,9 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
     }, [notesAreShown]);
 
     return (
-        <Container>
+        <Container className="px-0">
             <Row>
-                <Col>
+                <Col xs="auto">
                     <div style={{ display: "flex", alignItems: "center" }} onClick={() => setNotesAreShown(!notesAreShown)}>
                         <JournalText style={{marginRight: "0.5em"}}/>
                         {translator.translate('Anteckningar')}
@@ -157,7 +155,7 @@ const FootStancesElement = ({ hokei }: FootStancesElementProps) => {
     }
 
     return (
-        <table>
+        <table className="mb-3">
             <thead>
                 <tr>
                     <th colSpan={2}>
@@ -190,7 +188,7 @@ const renderStances = (translator: Translator, hokei: HokeiMoment) => {
         return null;
 
     return (
-        <table className="hokei-individuals-table mt-3">
+        <table className="hokei-individuals-table mb-3">
             <thead>
                 <tr>
                     <th colSpan={2}>
@@ -232,7 +230,7 @@ const renderActions = (translator: Translator, hokei: HokeiMoment) => {
     const japaneseRenhanko = hokei.ren_hanko ? <i> ({translator.japanese("ren hankō")})</i> : undefined;
 
     return (
-        <table className="hokei-individuals-table mt-3">
+        <table className="hokei-individuals-table">
             <thead>
                 <tr>
                     <th colSpan={2}>
