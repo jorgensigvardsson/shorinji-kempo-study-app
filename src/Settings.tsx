@@ -146,13 +146,9 @@ const Settings = (props: Props) => {
                     ))}
                 </Form.Select>
                 <Form.Text className="d-block mt-2">
-                    {translator.translate("Byt vecka för att ankra till dagens datum.")}
+                    {translator.translate("Välj vilken träningsvecka som ska visas på Kamoku-sidan. Appen kommer ihåg när du gjorde valet och räknar automatiskt upp veckan allt eftersom tiden går.")}
+                    {currentWeekAnchor && <> {translator.translate("Inställningen gjordes den {0}.", { params: [currentWeekAnchor.anchorDate] })}</>}
                 </Form.Text>
-                {currentWeekAnchor && (
-                    <Form.Text className="d-block">
-                        {translator.translate("Ankrad till")} {currentWeekAnchor.anchorDate}
-                    </Form.Text>
-                )}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsSyncProvider">
