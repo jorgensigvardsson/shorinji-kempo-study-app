@@ -340,14 +340,6 @@ function areEqual<T>(a: T, b: T): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function formatError(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Oväntat synkfel.";
-}
-
 interface CloudSyncClient {
   canUse(): boolean;
   beginAuthorization(): Promise<void>;

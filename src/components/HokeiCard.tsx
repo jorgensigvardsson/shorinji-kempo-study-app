@@ -5,7 +5,7 @@ import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
-import { Badge, Col, Container, Form, Row } from "react-bootstrap";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import { ChatFill, JournalText } from "react-bootstrap-icons";
 import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import StarRating from "./StarRating";
