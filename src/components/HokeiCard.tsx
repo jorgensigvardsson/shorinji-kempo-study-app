@@ -5,8 +5,8 @@ import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
-import { Col, Container, Form, Row } from "react-bootstrap";
-import { ChatFill, ChevronCompactDown, ChevronDown, ChevronRight, ChevronUp, JournalText } from "react-bootstrap-icons";
+import { Collapse, Form } from "react-bootstrap";
+import { ChatFill, ChevronDown, ChevronRight, JournalText } from "react-bootstrap-icons";
 import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import StarRating from "./StarRating";
 import type { HokeiRankValue } from "../persistence/schema";
@@ -107,12 +107,12 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
                     </div>
                 }
             </div>
-            {notesAreShown &&
+            <Collapse in={notesAreShown}>
                 <div>
                     <Form.Control className="mt-2 mb-2" as="textarea" rows={5} ref={notesRef} value={notes ?? ""}
                                     onChange={e => setNotes(e.target.value)} onBlur={() => persistNotes()}/>
                 </div>
-            }
+            </Collapse>
         </div>
     )
 }

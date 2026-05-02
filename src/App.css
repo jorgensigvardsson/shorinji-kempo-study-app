@@ -33,6 +33,10 @@
   flex-shrink: 0;
 }
 
+.collapsing {
+  transition-duration: 0.1s;
+}
+
 .collapsible-card-header {
   display: flex;
   flex-direction: column;

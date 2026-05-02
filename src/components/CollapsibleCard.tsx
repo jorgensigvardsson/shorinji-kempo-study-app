@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Collapse } from "react-bootstrap";
 import { ChevronDoubleDown, ChevronDoubleUp } from "react-bootstrap-icons";
 
 interface Props extends React.PropsWithChildren {
@@ -31,8 +31,14 @@ const CollapsibleCard = (props: Props) => {
                     )}
                 </div>
             </Card.Header>
-            {(showCollapse ?? true) && <Card.Body style={{ display: open ? undefined : "none" }}>{children}</Card.Body>}
-            {footer && <Card.Footer className="border-top-0" style={{ display: open ? undefined : "none" }}>{footer}</Card.Footer>}
+            {(showCollapse ?? true) && (
+                <Collapse in={open}>
+                    <div>
+                        <Card.Body>{children}</Card.Body>
+                        {footer && <Card.Footer className="border-top-0">{footer}</Card.Footer>}
+                    </div>
+                </Collapse>
+            )}
         </Card>
     )
 }
