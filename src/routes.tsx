@@ -1,8 +1,8 @@
-import { Book, Collection, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
-import { type Language, type Translator } from "./i18n.ts";
+import { noTranslate, type Language, type Translator } from "./i18n.ts";
 import Groups from "./Groups.tsx";
 import List from "./List.tsx";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data.ts";
@@ -14,8 +14,9 @@ import TermsOfServices from "./TermsOfServices.tsx";
 import PrivacyPolicy from "./PrivacyPolicy.tsx";
 
 export interface Route {
-    path: string;
-    component: React.ComponentType<any>;
+    path?: string;
+    component?: React.ComponentType<any>;
+    href?: string;
     menuText: string | (() => string);
     startDescription?: string | (() => string);
     icon: Icon;
@@ -104,6 +105,11 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         menuText: translator.translate("Integritetspolicy"),
         startDescription: translator.translate("Se hur appen hanterar dina uppgifter."),
         icon: ShieldCheck,
+        hideOnStartPage: true
+    }, {
+        href: `mailto:${import.meta.env.VITE_FEEDBACK_EMAIL}?subject=${encodeURIComponent(noTranslate("App feedback"))}&body=${encodeURIComponent(noTranslate("Hi!\n\nMy feedback:"))}`,
+        menuText: translator.translate("Skicka feedback"),
+        icon: Envelope,
         hideOnStartPage: true
     }];
 

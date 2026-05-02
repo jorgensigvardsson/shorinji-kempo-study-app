@@ -61,9 +61,10 @@ function App(props: Props) {
 function renderRoutes(routes: Route[]) {
   return (
     <Routes>
-      {routes.map((route, index) => (
-        <DomRoute key={index} path={route.path} element={<route.component />} />
-      ))}
+      {routes.filter(r => r.path && r.component).map((route, index) => {
+        const Component = route.component!;
+        return <DomRoute key={index} path={route.path!} element={<Component />} />;
+      })}
     </Routes>
   )
 }
@@ -85,7 +86,7 @@ const AppNavbar = (props: NavbarProps) => {
     : location.pathname;
   const mainMenuRoutes = routes.filter(route => route.showInMainMenu);
   const dropdownRoutes = routes.filter(route => !route.showInMainMenu);
-  const isDropdownActive = dropdownRoutes.some(route => location.pathname === route.path);
+  const isDropdownActive = dropdownRoutes.some(route => route.path && location.pathname === route.path);
   const activeRoute = routes.find(route => route.path === normalizedPath);
   const navbarTitle = isDesktopMenu
     ? translator.translate("Shorinji Kempo")
@@ -117,18 +118,26 @@ const AppNavbar = (props: NavbarProps) => {
           </Offcanvas.Header>
           <Offcanvas.Body>
             <Nav className="me-auto d-lg-none" variant="pills">
-              {routes.map((route, index) => {
-                return (
-                  <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path} onClick={() => setShow(false)}>
-                    {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
-                    {routeText(route)}
-                  </Nav.Link>
-                );
-              })}
+              {routes.map((route, index) => route.href ? (
+                <Nav.Link className="menu-item" key={index} href={route.href} onClick={() => setShow(false)}>
+                  {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                  {routeText(route)}
+                </Nav.Link>
+              ) : (
+                <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path!} onClick={() => setShow(false)}>
+                  {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                  {routeText(route)}
+                </Nav.Link>
+              ))}
             </Nav>
             <Nav className="me-auto d-none d-lg-flex menu-main-nav" variant="pills">
-              {mainMenuRoutes.map((route, index) => (
-                <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path}>
+              {mainMenuRoutes.map((route, index) => route.href ? (
+                <Nav.Link className="menu-item menu-no-wrap" key={index} href={route.href}>
+                  {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                  {routeText(route)}
+                </Nav.Link>
+              ) : (
+                <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path!}>
                   {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
                   {routeText(route)}
                 </Nav.Link>
@@ -140,8 +149,13 @@ const AppNavbar = (props: NavbarProps) => {
                   active={isDropdownActive}
                   className="menu-more-dropdown"
                 >
-                  {dropdownRoutes.map((route, index) => (
-                    <NavDropdown.Item as={NavLink} key={index} to={route.path} className="menu-dropdown-item">
+                  {dropdownRoutes.map((route, index) => route.href ? (
+                    <NavDropdown.Item key={index} href={route.href} className="menu-dropdown-item">
+                      {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
+                      {routeText(route)}
+                    </NavDropdown.Item>
+                  ) : (
+                    <NavDropdown.Item as={NavLink} key={index} to={route.path!} className="menu-dropdown-item">
                       {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
                       {routeText(route)}
                     </NavDropdown.Item>

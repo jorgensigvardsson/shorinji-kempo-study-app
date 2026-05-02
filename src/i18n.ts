@@ -181,5 +181,7 @@ export class TranslatorImplementation {
   }
 }
 
+export const noTranslate = (text: string): string => text;
+
 export const TranslationsContext = createContext<Translations>({ });
 export const TranslatorContext = createContext<Translator>(new TranslatorImplementation({}, "sv"));
