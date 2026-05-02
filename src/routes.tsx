@@ -41,8 +41,8 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
                           setTextSize: (size: number) => void): Route[] => {
     let routes: Route[] = [{
         path: "/",
-        component: () => <Start routes={routes.filter(r => r.path !== "/" && !r.hideOnStartPage)
-                                              .map(r => ({ path: r.path, title: routeText(r), description: routeDescription(r), icon: r.icon }))} />,
+        component: () => <Start routes={routes.filter(r => r.path && r.path !== "/" && !r.hideOnStartPage)
+                                              .map(r => ({ path: r.path!, title: routeText(r), description: routeDescription(r), icon: r.icon }))} />,
         menuText: translator.translate("Start"),
         icon: House,
         showInMainMenu: true
