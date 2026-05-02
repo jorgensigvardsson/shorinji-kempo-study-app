@@ -6,7 +6,7 @@ import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import { ChatFill, JournalText } from "react-bootstrap-icons";
+import { ChatFill, ChevronCompactDown, ChevronDown, ChevronRight, ChevronUp, JournalText } from "react-bootstrap-icons";
 import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import StarRating from "./StarRating";
 import type { HokeiRankValue } from "../persistence/schema";
@@ -93,27 +93,27 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
     }, [notesAreShown]);
 
     return (
-        <Container className="px-0">
-            <Row>
-                <Col xs="auto">
-                    <div style={{ display: "flex", alignItems: "center" }} onClick={() => setNotesAreShown(!notesAreShown)}>
-                        <JournalText style={{marginRight: "0.5em"}}/>
-                        {translator.translate('Anteckningar')}
-                    </div>
-                </Col>
-                {hokei.kyohan_pages && <Col>
-                    <div className="float-end">
+        <div className="p-2 border border-primary rounded">
+            <div style={{display: "flex", justifyContent: "space-between"}}>
+                <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => setNotesAreShown(!notesAreShown)}>
+                    <JournalText className="text-primary" style={{marginRight: "0.5em"}}/>
+                    {translator.translate(notes ? 'Mina anteckningar' : 'Lägg till anteckningar')}
+                    {notesAreShown && <ChevronDown style={{marginLeft: "0.5rem"}}/>}
+                    {notesAreShown || <ChevronRight style={{marginLeft: "0.5rem"}}/>}
+                </div>
+                {hokei.kyohan_pages &&
+                    <div>
                         {translator.translate("Kyohan")} {hokei.kyohan_pages.map(k => translator.translate(k)).join(', ')}
                     </div>
-                </Col>}
-            </Row>
-            {notesAreShown && <Row>
-                <Col>
-                    <Form.Control className="mt-2 mb-3" as="textarea" rows={5} ref={notesRef} value={notes ?? ""}
+                }
+            </div>
+            {notesAreShown &&
+                <div>
+                    <Form.Control className="mt-2 mb-2" as="textarea" rows={5} ref={notesRef} value={notes ?? ""}
                                     onChange={e => setNotes(e.target.value)} onBlur={() => persistNotes()}/>
-                </Col>
-            </Row>}
-        </Container>
+                </div>
+            }
+        </div>
     )
 }
 
