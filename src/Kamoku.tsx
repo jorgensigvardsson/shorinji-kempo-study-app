@@ -28,8 +28,9 @@ const Kamoku = (props: Props) => {
     const translator = useContext(TranslatorContext);
     const [grade, setGrade] = useState<GradePlan>(initialGrade);
 
-    const setNewGrade = (grade: GradePlan) => {
-        setGrade(grade);
+    const setNewGrade = (newGrade: GradePlan) => {
+        setGrade(newGrade);
+        setSelectedWeek(findSelectedWeekIndex(newGrade, currentWeekAnchor, todayKey));
     }
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
