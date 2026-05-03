@@ -1,4 +1,4 @@
-import { Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Newspaper, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
@@ -12,6 +12,7 @@ import Quiz from "./Quiz.tsx";
 import Flashcard from "./Flashcard.tsx";
 import TermsOfServices from "./TermsOfServices.tsx";
 import PrivacyPolicy from "./PrivacyPolicy.tsx";
+import Changelog from "./Changelog.tsx";
 
 export interface Route {
     path?: string;
@@ -92,6 +93,12 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
+    }, {
+        path: "/changelog",
+        component: () => <Changelog />,
+        menuText: translator.translate("Nyheter"),
+        icon: Newspaper,
+        hideOnStartPage: true,
     }, {
         path: "/terms-of-service",
         component: () => <TermsOfServices />,

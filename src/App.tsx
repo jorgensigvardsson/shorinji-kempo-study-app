@@ -4,13 +4,14 @@ import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, routeText, type Route } from './routes';
-import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
-import { ArrowClockwise, CloudSlash, ExclamationTriangle } from 'react-bootstrap-icons';
+import { ArrowClockwise, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -172,6 +173,20 @@ const AppNavbar = (props: NavbarProps) => {
 
 const AppToasts = (props: { translator: Translator }) => {
   const { translator } = props;
+  const navigate = useNavigate();
+  const lang = translator.currentLanguage;
+
+  // --- changelog toast ---
+  const [showChangelogToast, setShowChangelogToast] = useState(() => isChangelogUnseen());
+  useEffect(() => {
+    const handler = () => setShowChangelogToast(false);
+    window.addEventListener("changelog-seen", handler);
+    return () => window.removeEventListener("changelog-seen", handler);
+  }, []);
+  const dismissChangelog = () => {
+    markChangelogSeen();
+    setShowChangelogToast(false);
+  };
 
   // --- update toast ---
   const [needRefresh, setNeedRefresh] = useState(false);
@@ -219,6 +234,29 @@ const AppToasts = (props: { translator: Translator }) => {
 
   return (
     <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
+      <Toast show={showChangelogToast} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon" aria-hidden="true">
+            <Megaphone size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Nyheter")}</div>
+            <ul className="app-update-toast-changelog-list">
+              {CHANGELOG[0].changes.map((change, i) => (
+                <li key={i}>{change[lang]}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="d-flex flex-column gap-2 app-update-toast-action">
+            <Button size="sm" variant="primary" onClick={() => { navigate("/changelog"); dismissChangelog(); }}>
+              {translator.translate("Visa")}
+            </Button>
+            <Button size="sm" variant="outline-secondary" onClick={dismissChangelog}>
+              {translator.translate("Stäng")}
+            </Button>
+          </div>
+        </Toast.Body>
+      </Toast>
       <Toast show={needRefresh} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon" aria-hidden="true">
@@ -226,7 +264,12 @@ const AppToasts = (props: { translator: Translator }) => {
           </div>
           <div className="app-update-toast-copy">
             <div className="app-update-toast-title">{translator.translate("Ny version tillgänglig")}</div>
-            <div className="app-update-toast-text">{translator.translate("Ladda om när du vill uppdatera appen.")}</div>
+            <div className="app-update-toast-text">
+              {translator.translate("Ladda om när du vill uppdatera appen.")}{" "}
+              <a href="#" className="app-update-changelog-link" onClick={e => { e.preventDefault(); navigate("/changelog"); }}>
+                {translator.translate("Se nyheter")}
+              </a>
+            </div>
           </div>
           <Button size="sm" variant="primary" className="app-update-toast-action" onClick={handleUpdate}>
             {translator.translate("Uppdatera")}

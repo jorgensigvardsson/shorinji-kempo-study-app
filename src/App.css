@@ -207,6 +207,22 @@
   border-color: var(--bs-warning-border-subtle);
 }
 
+.app-update-toast-changelog-list {
+  margin: 0.2rem 0 0 0;
+  padding-left: 1.2rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.app-update-toast-changelog-list li + li {
+  margin-top: 0.1rem;
+}
+
+.app-update-changelog-link {
+  color: var(--bs-body-color);
+}
+
 @media (max-width: 520px) {
   .app-update-toast-body {
     grid-template-columns: auto minmax(0, 1fr);
