@@ -9,12 +9,23 @@
 }
 
 .wordlist-table-wrapper {
-  overflow: hidden;
+  overflow-x: auto;
   margin-top: 1rem;
 }
 
 .wordlist-table {
   margin: 0;
+  table-layout: fixed;
+}
+
+.wordlist-table th:first-child,
+.wordlist-table td:first-child { width: 18%; }
+
+.wordlist-table th:nth-child(2),
+.wordlist-table td:nth-child(2) { width: 28%; }
+
+.wordlist-table td {
+  word-break: break-word;
 }
 
 .wordlist-table th:first-child,
