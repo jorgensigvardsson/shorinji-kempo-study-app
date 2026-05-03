@@ -21,6 +21,7 @@ export interface AppDataState {
   theme: ThemePreference;
   currentWeekAnchor: CurrentWeekAnchor | null;
   syncProvider: SyncProvider;
+  kenshiNumber: string | undefined;
   notes: Record<string, string>;
   hokeiRanks: Record<string, HokeiRankEntry>;
 }
@@ -51,6 +52,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       theme: "system",
       currentWeekAnchor: null,
       syncProvider: "local",
+      kenshiNumber: undefined,
       notes: {},
       hokeiRanks: {},
     },

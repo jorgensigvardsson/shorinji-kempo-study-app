@@ -28,6 +28,7 @@ const Settings = (props: Props) => {
     const { syncProvider, setSyncProvider } = useSyncProvider();
     const syncState = useSyncState();
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
+    const [kenshiNumber, setKenshiNumber] = useState(() => store.get("kenshiNumber"));
     const availableWeeks = useMemo(
         () => [...new Set(grade.weeks.map(week => week.week))].sort((a, b) => a - b),
         [grade]
@@ -74,6 +75,7 @@ const Settings = (props: Props) => {
     const selectedSyncProvider = syncProviderOptions.find(option => option.value === syncProvider) ?? syncProviderOptions[0];
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
+    useEffect(() => store.subscribe("kenshiNumber", setKenshiNumber), [store]);
 
     const exportData = () => {
         const { version, data } = store.getDocument();
@@ -125,6 +127,21 @@ const Settings = (props: Props) => {
                     <option value="1.3">{translator.translate("Större")}</option>
                     <option value="1.4">{translator.translate("Störst")}</option>
                 </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="settingsKenshiNumber">
+                <Form.Label>{translator.translate("Kenshinummer")}</Form.Label>
+                <Form.Control
+                    type="text"
+                    inputMode="numeric"
+                    value={kenshiNumber ?? ""}
+                    onChange={e => {
+                        const value = e.target.value.replace(/\D/g, "");
+                        const stored = value.length > 0 ? value : undefined;
+                        setKenshiNumber(stored);
+                        store.set("kenshiNumber", stored);
+                    }}
+                />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsLevel">

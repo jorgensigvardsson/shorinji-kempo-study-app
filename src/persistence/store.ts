@@ -22,6 +22,7 @@ export class AppDataStore {
       theme: new Map<number, DataChangedCallback<"theme">>(),
       currentWeekAnchor: new Map<number, DataChangedCallback<"currentWeekAnchor">>(),
       syncProvider: new Map<number, DataChangedCallback<"syncProvider">>(),
+      kenshiNumber: new Map<number, DataChangedCallback<"kenshiNumber">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
       hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
     };
@@ -143,10 +144,15 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
         ? input.data.currentWeekAnchor
         : fallback.data.currentWeekAnchor,
       syncProvider: input.data?.syncProvider ?? fallback.data.syncProvider,
+      kenshiNumber: isKenshiNumber(input.data?.kenshiNumber) ? input.data.kenshiNumber : fallback.data.kenshiNumber,
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
     },
   };
+}
+
+function isKenshiNumber(value: unknown): value is string | undefined {
+  return value === undefined || (typeof value === "string" && /^\d+$/.test(value));
 }
 
 function isRecord(value: unknown): value is Record<string, string> {
