@@ -133,10 +133,9 @@ const Settings = (props: Props) => {
                 <Form.Label>{translator.translate("Kenshinummer")}</Form.Label>
                 <Form.Control
                     type="text"
-                    inputMode="numeric"
                     value={kenshiNumber ?? ""}
                     onChange={e => {
-                        const value = e.target.value.replace(/\D/g, "");
+                        const value = e.target.value ?? "";
                         const stored = value.length > 0 ? value : undefined;
                         setKenshiNumber(stored);
                         store.set("kenshiNumber", stored);
