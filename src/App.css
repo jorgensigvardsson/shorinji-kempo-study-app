@@ -4,6 +4,9 @@
 
 .app-route-content {
   padding: 0.5rem;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .app-navbar-brand {
