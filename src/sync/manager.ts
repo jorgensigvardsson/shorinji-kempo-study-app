@@ -30,6 +30,10 @@ class SyncManager {
   private nextListenerId = 0;
   private started = false;
   private syncTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryCount = 0;
+  private readonly MAX_RETRIES = 3;
+  private readonly RETRY_DELAYS_MS = [10_000, 30_000, 90_000];
   private isApplyingRemoteDocument = false;
 
   start(): void {
@@ -105,7 +109,12 @@ class SyncManager {
     });
   }
 
+  retrySync(): void {
+    this.syncNow().catch(err => this.handleSyncError(err));
+  }
+
   async syncNow(): Promise<SyncResult> {
+    this.clearRetryTimer();
     const provider = this.store.get("syncProvider");
     if (provider === "local") {
       this.setState({ status: "local_only", message: null });
@@ -142,6 +151,7 @@ class SyncManager {
       debugLog("[sync] No remote document found — uploading local as initial.");
       await client.uploadDocument(localDocument);
       this.saveBaseDocument(provider, localDocument);
+      this.retryCount = 0;
       this.setState({
         status: "connected",
         message: provider === "onedrive" ? "Synkad med OneDrive." : "Synkad med Google Drive.",
@@ -179,6 +189,7 @@ class SyncManager {
       debugLog("[sync] Uploaded merged document to remote.");
     }
 
+    this.retryCount = 0;
     this.saveBaseDocument(provider, mergedDocument);
     this.setState({
       status: "connected",
@@ -200,6 +211,8 @@ class SyncManager {
   }
 
   private async handleProviderChanged(): Promise<void> {
+    this.clearRetryTimer();
+    this.retryCount = 0;
     const provider = this.store.get("syncProvider");
     debugLog(`[sync] handleProviderChanged: provider=${provider}`);
 
@@ -270,6 +283,13 @@ class SyncManager {
     }
   }
 
+  private clearRetryTimer(): void {
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
+  }
+
   private saveBaseDocument(provider: SyncProvider, document: AppDataDocument): void {
     localStorage.setItem(`${baseDocumentStoragePrefix}${provider}`, JSON.stringify(document));
   }
@@ -296,8 +316,20 @@ class SyncManager {
     const err = error instanceof Error ? error : new Error(String(error));
     if (error instanceof AuthExpiredError) {
       this.clearScheduledSync();
+      this.clearRetryTimer();
+      this.retryCount = 0;
       this.setState({ status: "auth_expired", message: null, error: err });
+    } else if (this.retryCount < this.MAX_RETRIES) {
+      const delay = this.RETRY_DELAYS_MS[this.retryCount];
+      this.retryCount++;
+      this.clearRetryTimer();
+      this.retryTimer = setTimeout(() => {
+        this.retryTimer = null;
+        this.syncNow().catch(e => this.handleSyncError(e));
+      }, delay);
+      this.setState({ status: "error", message: err.message, error: err });
     } else {
+      this.retryCount = 0;
       this.setState({ status: "error", message: err.message, error: err });
     }
   }

@@ -7,7 +7,7 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
-import { ArrowClockwise, CloudSlash } from 'react-bootstrap-icons';
+import { ArrowClockwise, CloudSlash, ExclamationTriangle } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { useRegisterSW } from 'virtual:pwa-register/react';
@@ -230,6 +230,21 @@ const AppToasts = (props: { translator: Translator }) => {
           </div>
           <Button size="sm" variant="primary" className="app-update-toast-action" onClick={handleUpdate}>
             {translator.translate("Uppdatera")}
+          </Button>
+        </Toast.Body>
+      </Toast>
+      <Toast show={syncState.status === "error"} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
+            <ExclamationTriangle size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Synkfel")}</div>
+            <div className="app-update-toast-text">{translator.translate("Kunde inte synka med {0}. Försöker igen automatiskt.", { params: [providerLabel] })}</div>
+          </div>
+          <Button size="sm" variant="warning" className="app-update-toast-action"
+            onClick={() => getSyncManager().retrySync()}>
+            {translator.translate("Försök nu")}
           </Button>
         </Toast.Body>
       </Toast>

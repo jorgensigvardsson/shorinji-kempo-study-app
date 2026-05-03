@@ -195,8 +195,12 @@ export class OneDriveClient {
     });
 
     if (!refreshResponse.ok) {
-      this.disconnect();
-      throw new AuthExpiredError();
+      const body = await refreshResponse.json().catch(() => null);
+      if (refreshResponse.status === 400 && body?.error === "invalid_grant") {
+        this.disconnect();
+        throw new AuthExpiredError();
+      }
+      throw new Error(`OneDrive token refresh failed: ${refreshResponse.status} ${body?.error ?? refreshResponse.statusText}`);
     }
 
     const payload = await refreshResponse.json();
