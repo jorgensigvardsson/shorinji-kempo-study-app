@@ -25,3 +25,6 @@ dist-ssr
 *.sln
 *.sw?
 SESSION.md
+.claude/settings.local.json
+src/assets/kamokuhyo2.json
+src/assets/kamokuhyo.json.bak.preupdate

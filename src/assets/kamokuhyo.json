@@ -22,6 +22,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "ryūsui geri",
             "variations": [
               "ushiro"
@@ -40,7 +41,6 @@
             "kyohan_pages": [
               170
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae",
@@ -53,12 +53,13 @@
         "week": 3,
         "type": "regular_week",
         "kihon_shoho": [
-          "uchi uke zuki (från seitai gamae), kōbōgi (jōdan zuki & uchi uke)",
+          "uchi uke zuki (seitai gamae), kōbōgi (jōdan zuki & uchi uke)",
           "dō zuki, dō geri",
           "mae ukemi, ushiro ukemi"
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "uchi uke zuki",
             "variations": [
               "ura"
@@ -77,7 +78,6 @@
             "kyohan_pages": [
               173
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -95,6 +95,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "ude jūji gatame",
             "variations": [],
             "technique_group": "kongō ken",
@@ -110,7 +111,6 @@
             "kyohan_pages": [
               284
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -128,6 +128,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "kote nuki",
             "variations": [],
             "technique_group": "ryūō ken",
@@ -144,10 +145,10 @@
             "kyohan_pages": [
               213
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
-              "tai gamae"
+              "tai gamae",
+              "hiraki gamae"
             ]
           }
         ]
@@ -162,6 +163,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tenshin geri",
             "variations": [],
             "technique_group": "niō ken",
@@ -178,10 +180,10 @@
             "kyohan_pages": [
               176
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
-              "tai gamae"
+              "tai gamae",
+              "hiraki gamae"
             ]
           }
         ]
@@ -196,6 +198,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "uwa uke zuki",
             "variations": [
               "omote"
@@ -214,13 +217,13 @@
             "kyohan_pages": [
               171
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "uwa uke zuki",
             "variations": [
               "ura"
@@ -239,7 +242,6 @@
             "kyohan_pages": [
               171
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -251,8 +253,7 @@
         "week": 8,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
@@ -269,6 +270,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "ryūsui geri",
             "variations": [
               "mae"
@@ -287,7 +289,6 @@
             "kyohan_pages": [
               170
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -313,6 +314,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "uwa uke geri",
             "variations": [
               "omote"
@@ -331,13 +333,13 @@
             "kyohan_pages": [
               172
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "uwa uke geri",
             "variations": [
               "ura"
@@ -356,7 +358,6 @@
             "kyohan_pages": [
               172
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -383,6 +384,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "katate yori nuki",
             "variations": [],
             "technique_group": "ryūō ken",
@@ -399,7 +401,6 @@
             "kyohan_pages": [
               210
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
@@ -425,6 +426,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "maki nuki",
             "variations": [
               "katate"
@@ -443,7 +445,6 @@
             "kyohan_pages": [
               221
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
@@ -470,6 +471,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "shita uke geri",
             "variations": [],
             "technique_group": "sangō ken",
@@ -486,7 +488,6 @@
             "kyohan_pages": [
               182
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -512,6 +513,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "shita uke jun geri",
             "variations": [],
             "technique_group": "sangō ken",
@@ -528,7 +530,6 @@
             "kyohan_pages": [
               182
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -553,6 +554,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "gyaku gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -570,7 +572,6 @@
               239,
               286
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae",
@@ -601,15 +602,13 @@
         "week": 8,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
   },
   {
     "grade": "4 kyū",
-    "note": "extracted from kyukenshi pages 0015-0016 (JPG source only)",
     "weeks": [
       {
         "week": 1,
@@ -622,15 +621,12 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "soto uke zuki",
-            "ren_hanko": false,
             "variations": [
               "ura"
             ],
             "technique_group": "niō ken",
-            "foot_stance": [
-              "tai gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -644,18 +640,18 @@
             "kyohan_pages": [
               174
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "soto uke zuki",
-            "ren_hanko": false,
             "variations": [
               "omote"
             ],
             "technique_group": "niō ken",
-            "foot_stance": [
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -669,7 +665,10 @@
             "kyohan_pages": [
               174
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -692,15 +691,12 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "soto uke geri",
-            "ren_hanko": false,
             "variations": [
               "ura"
             ],
             "technique_group": "niō ken",
-            "foot_stance": [
-              "tai gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -714,18 +710,18 @@
             "kyohan_pages": [
               175
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "soto uke geri",
-            "ren_hanko": false,
             "variations": [
               "omote"
             ],
             "technique_group": "niō ken",
-            "foot_stance": [
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -739,7 +735,10 @@
             "kyohan_pages": [
               175
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -763,13 +762,10 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "katate okuri gote",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūka ken",
-            "foot_stance": [
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -784,7 +780,10 @@
               245,
               285
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -806,13 +805,10 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "okuri maki tembin",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūka ken",
-            "foot_stance": [
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -826,7 +822,10 @@
             "kyohan_pages": [
               249
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -849,17 +848,13 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "uchi age zuki",
-            "ren_hanko": false,
             "variations": [
               "ura",
               "omote"
             ],
             "technique_group": "niō ken",
-            "foot_stance": [
-              "tai gamae",
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -873,20 +868,20 @@
             "kyohan_pages": [
               172
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "uchi age geri",
-            "ren_hanko": false,
             "variations": [
               "ura",
               "omote"
             ],
             "technique_group": "niō ken",
-            "foot_stance": [
-              "tai gamae",
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -900,7 +895,11 @@
             "kyohan_pages": [
               173
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae",
+              "hiraki gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -923,15 +922,12 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "kiri nuki",
-            "ren_hanko": false,
             "variations": [
               "soto"
             ],
             "technique_group": "ryūō ken",
-            "foot_stance": [
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -945,18 +941,18 @@
             "kyohan_pages": [
               223
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "kiri nuki",
-            "ren_hanko": false,
             "variations": [
               "uchi"
             ],
             "technique_group": "ryūō ken",
-            "foot_stance": [
-              "tai gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -970,7 +966,10 @@
             "kyohan_pages": [
               223
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -988,19 +987,16 @@
         "type": "regular_week",
         "kihon_shoho": [
           "urate uchi (kinteki uchi)",
-          "shōken uchi (suigetsu, yoko sanmai, mikazuki)"
+          "shōken uchi (suigetsu, yoko sammai, mikazuki)"
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tsuki nuki",
-            "ren_hanko": false,
             "variations": [
               "soto"
             ],
             "technique_group": "ryūō ken",
-            "foot_stance": [
-              "hiraki gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -1014,18 +1010,18 @@
             "kyohan_pages": [
               220
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "tsuki nuki",
-            "ren_hanko": false,
             "variations": [
               "uchi"
             ],
             "technique_group": "ryūō ken",
-            "foot_stance": [
-              "tai gamae"
-            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -1039,7 +1035,10 @@
             "kyohan_pages": [
               220
             ],
-            "type": "hokei_moment"
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ]
           },
           {
             "type": "standard_moment",
@@ -1065,8 +1064,7 @@
         "week": 8,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
@@ -1086,6 +1084,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "ude jūji gatame yori tate gasshō gatame",
             "variations": [],
             "technique_group": "kongō ken",
@@ -1102,7 +1101,6 @@
               284,
               291
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1129,6 +1127,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "ryōte yori nuki",
             "variations": [],
             "technique_group": "ryūō ken",
@@ -1145,13 +1144,13 @@
             "kyohan_pages": [
               218
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "maki nuki",
             "variations": [
               "ryōte"
@@ -1170,7 +1169,6 @@
             "kyohan_pages": [
               221
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1197,6 +1195,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "uchi uke geri",
             "variations": [
               "ura"
@@ -1215,13 +1214,13 @@
             "kyohan_pages": [
               174
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "uchi uke geri",
             "variations": [
               "omote"
@@ -1240,7 +1239,6 @@
             "kyohan_pages": [
               174
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
@@ -1270,6 +1268,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "jūji nuki",
             "variations": [
               "katate"
@@ -1288,13 +1287,13 @@
             "kyohan_pages": [
               224
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "jūji gote",
             "variations": [
               "katate"
@@ -1314,7 +1313,6 @@
               257,
               290
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
@@ -1341,6 +1339,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "nidan nuki",
             "variations": [],
             "technique_group": "ryūō ken",
@@ -1360,7 +1359,6 @@
             "kyohan_pages": [
               225
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1388,6 +1386,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "soto oshi uke zuki",
             "variations": [],
             "technique_group": "niō ken",
@@ -1404,13 +1403,13 @@
             "kyohan_pages": [
               175
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "uchi oshi uke zuki",
             "variations": [],
             "technique_group": "niō ken",
@@ -1427,7 +1426,6 @@
             "kyohan_pages": [
               175
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1454,6 +1452,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tsuki nuki",
             "variations": [
               "ryōte"
@@ -1472,7 +1471,6 @@
             "kyohan_pages": [
               220
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1499,6 +1497,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tsuki ten ichi",
             "variations": [],
             "technique_group": "ten'ō ken",
@@ -1515,7 +1514,6 @@
             "kyohan_pages": [
               185
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
@@ -1541,6 +1539,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "hiji nuki yori mae tembin",
             "variations": [],
             "technique_group": "ryūō ken",
@@ -1556,7 +1555,6 @@
             "kyohan_pages": [
               225
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1578,11 +1576,12 @@
         "week": 10,
         "type": "regular_week",
         "kihon_shoho": [
-          "ryūō ken dai ikkei - dai nikei (tan'en)",
+          "ryūō ken dai ikkei (tan'en)",
           "ryūō ken dai ikkei (sōtai)"
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "gyaku gote yori ura gaeshi nage, ura gatame",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -1599,7 +1598,6 @@
               243,
               288
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1628,6 +1626,7 @@
         ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "jūji uke geri",
             "variations": [],
             "technique_group": "sangō ken",
@@ -1644,7 +1643,6 @@
             "kyohan_pages": [
               183
             ],
-            "type": "hokei_moment",
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
@@ -1666,28 +1664,35 @@
         "week": 12,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
   },
   {
     "grade": "2 kyū",
-    "note": "structured extraction following agreed rules; condensed but consistent",
     "weeks": [
       {
         "week": 1,
         "type": "regular_week",
+        "kihon_shoho": [
+          "ni renkō (shutō giri & chūdan zuki)",
+          "ni renkō (jōdan zuki & chūdan zuki)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "gasshō nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
-                "action": "utsidan båda handlederna i gyaku"
+                "action": "utsidan båda handlederna i gyaku, dra motståndaren ur balans"
               },
               "defender": {
                 "stance": "chūdan gamae",
@@ -1696,33 +1701,29 @@
             },
             "kyohan_pages": [
               225
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "sankaku nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "ude ushiro neji age"
               },
               "defender": {
                 "stance": "gedan gamae",
-                "action": "ude ushiro neji age, sankaku shuhō"
+                "action": "sankaku shuhō, yoko hiji ate"
               }
             },
             "kyohan_pages": [
               228
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -1740,38 +1741,48 @@
       {
         "week": 2,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande hiji ate",
+          "studera försvar mot ashi barai"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "jūji nuki",
             "variations": [
               "ryōte"
             ],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "från jūji nuki till hiji ate"
+                "action": "från jūji nuki till hiji ate, från kiri nuki"
               }
             },
             "kyohan_pages": [
               224
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "ryōte jūji gote",
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "utsidan handlederna i jun, tryck"
               },
               "defender": {
                 "stance": "chūdan gamae",
@@ -1780,11 +1791,6 @@
             },
             "kyohan_pages": [
               257
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -1795,18 +1801,51 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "nuki waza (katate) vid grepp av utsidan i gyaku"
+            "restrictions": "nuki waza (katate, ryōte) från chūdan gamae"
           }
         ]
       },
       {
         "week": 3,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande furi zuki",
+          "kusshin uke",
+          "san renkō (jō chū jō, jō chū kō zuki)"
+        ],
         "moments": [
           {
-            "hokei_name": "kusshin zuki geri",
+            "type": "hokei_moment",
+            "hokei_name": "kusshin zuki",
             "variations": [],
             "technique_group": "niō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
+            "roles": {
+              "attacker": {
+                "stance": "chūdan gamae",
+                "action": "yoko furi zuki"
+              },
+              "defender": {
+                "stance": "ichiji gamae",
+                "action": "kusshin & chūdan zuki"
+              }
+            },
+            "kyohan_pages": [
+              176
+            ]
+          },
+          {
+            "type": "hokei_moment",
+            "hokei_name": "kusshin geri",
+            "variations": [],
+            "technique_group": "niō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -1819,19 +1858,14 @@
             },
             "kyohan_pages": [
               176
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
             "type": "hokei_moment",
-            "hokei_name": "kusshin zuki",
-            "ren_hanko": false,
+            "hokei_name": "kōbōgi (furi zuki & kusshin uke)",
             "variations": [],
             "technique_group": "niō ken",
+            "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ],
@@ -1842,12 +1876,10 @@
               },
               "defender": {
                 "stance": "ichiji gamae",
-                "action": "kusshin & chūdan zuki, kusshin & chūdan geri"
+                "action": "kusshin zuki & chūdan furi zuki ni renkō"
               }
             },
-            "kyohan_pages": [
-              176
-            ]
+            "kyohan_pages": []
           },
           {
             "type": "standard_moment",
@@ -1857,46 +1889,56 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "attack mot tsuki kōgeki"
+            "restrictions": "attack och försvar mot tsuki kōgeki (jōdan eller chūdan)"
           }
         ]
       },
       {
         "week": 4,
         "type": "regular_week",
+        "kihon_shoho": [
+          "tenchi ken dai nikei (tan'en)",
+          "ude ushiro neji age, hamma nage"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "kiri kaeshi nuki",
             "variations": [
               "katate",
               "morote"
             ],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "ude ushiro neji age"
               },
               "defender": {
                 "stance": "gedan gamae",
-                "action": "ude ushiro neji age, kagite shuhō"
+                "action": "kagite shuhō, chūdan zuki eller kumade zuki"
               }
             },
             "kyohan_pages": [
               227
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "kiri gote",
             "variations": [
               "katate",
               "morote"
             ],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
@@ -1908,11 +1950,6 @@
             },
             "kyohan_pages": [
               258
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -1923,18 +1960,27 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "nuki waza (ryōte) vid grepp av utsidan i gyaku"
+            "restrictions": "nuki waza (ryōte) vid grepp av utsidan av handlederna i gyaku"
           }
         ]
       },
       {
         "week": 5,
         "type": "regular_week",
+        "kihon_shoho": [
+          "gyaku geri & yoko tenshin, han tenshin, gyaku tenshin",
+          "sashikomi ashi yori keri renkō"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "yoko tenshin geri",
             "variations": [],
             "technique_group": "sangō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
@@ -1942,24 +1988,19 @@
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "yoko tenshin & uchi harai uke"
+                "action": "yoko tenshin & uchi harai uke, chūdan geri"
               }
             },
             "kyohan_pages": [
               183
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
             "type": "hokei_moment",
             "hokei_name": "han tenshin geri",
-            "ren_hanko": true,
             "variations": [],
             "technique_group": "sangō ken",
+            "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
             ],
@@ -1985,24 +2026,36 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "attack mot chūdan geri (tan)"
+            "restrictions": "attack och försvar mot chūdan geri (tan)"
           }
         ]
       },
       {
         "week": 6,
         "type": "regular_week",
+        "kihon_shoho": [
+          "kyūsho på armar",
+          "ni renkō (furi zuki)",
+          "träna uchi te",
+          "tai sabaki med tenshin (yoko, han, gyaku) & keri"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "jōhaku nuki",
             "variations": [
               "katate",
               "ryōte"
             ],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "greppa överarmen kraftigt & tryck"
               },
               "defender": {
                 "stance": "chūdan gamae",
@@ -2011,36 +2064,31 @@
             },
             "kyohan_pages": [
               227
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "jōhaku dori",
             "variations": [
               "katate",
               "ryōte"
             ],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "jōhaku dori"
+                "action": "vid ryōte, först jōhaku nuki sedan jōhaku dori"
               }
             },
             "kyohan_pages": [
               300
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -2051,20 +2099,26 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "nuki waza från chūdan gamae"
+            "restrictions": "nuki waza (katate, ryōte) från chūdan gamae"
           }
         ]
       },
       {
         "week": 7,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande furi zuki",
+          "kōbōgi (furi zuki & soto oshi uke)",
+          "träna yoko geri",
+          "kōbōgi (furi zuki & uchi oshi uke)"
+        ],
         "moments": [
           {
             "type": "hokei_moment",
             "hokei_name": "soto oshi uke geri",
-            "ren_hanko": true,
             "variations": [],
             "technique_group": "niō ken",
+            "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
             ],
@@ -2083,9 +2137,9 @@
           {
             "type": "hokei_moment",
             "hokei_name": "uchi oshi uke geri",
-            "ren_hanko": true,
             "variations": [],
             "technique_group": "niō ken",
+            "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
             ],
@@ -2116,15 +2170,21 @@
       {
         "week": 8,
         "type": "regular_week",
+        "kihon_shoho": [
+          "ni renkō (jun zuki, gyaku zuki)",
+          "idō kōbōgi (mawashi geri & gyaku zuki, mawashi geri & uchi harai uke)",
+          "idō kōbōgi (mawashi geri & jūji uke)",
+          "ni renkō (furi zuki & chūdan zuki)"
+        ],
         "moments": [
           {
             "type": "hokei_moment",
             "hokei_name": "uchi uke zuki",
-            "ren_hanko": true,
             "variations": [
               "omote"
             ],
             "technique_group": "niō ken",
+            "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
             ],
@@ -2135,7 +2195,7 @@
               },
               "defender": {
                 "stance": "ichiji gamae",
-                "action": "uchi uke & chūdan zuki"
+                "action": "uchi uke & chūdan gyaku zuki"
               }
             },
             "kyohan_pages": [
@@ -2145,16 +2205,16 @@
           {
             "type": "hokei_moment",
             "hokei_name": "kon ten ichi",
-            "ren_hanko": true,
             "variations": [],
             "technique_group": "ten'ō ken",
+            "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
             ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
-                "action": "ni ren kō med yoko furi zuki & gyaku zuki"
+                "action": "ni renkō med yoko furi zuki & gyaku zuki"
               },
               "defender": {
                 "stance": "ichiji gamae",
@@ -2173,20 +2233,25 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "attack och försvar mot chūdan zuki, chūdan geri (tan)"
+            "restrictions": "attack och försvar mot tsuki kōgeki, chūdan geri (tan)"
           }
         ]
       },
       {
         "week": 9,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande wantō uchi",
+          "ren kōgeki (mawashi geri & jō chū ni ren zuki)",
+          "ren kōgeki (sokutō geri & jō chū ni ren zuki)"
+        ],
         "moments": [
           {
             "type": "hokei_moment",
             "hokei_name": "oshi kiri nuki",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ],
@@ -2205,9 +2270,9 @@
           {
             "type": "hokei_moment",
             "hokei_name": "okuri dori",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
             "foot_stance": [],
             "roles": {
               "attacker": {},
@@ -2234,13 +2299,19 @@
       {
         "week": 10,
         "type": "regular_week",
+        "kihon_shoho": [
+          "kōbōgi",
+          "chūdan geri & shita uke, chūdan geri & uchi otoshi uke",
+          "studera seoi nage, ashi barai",
+          "kyūsho på armar"
+        ],
         "moments": [
           {
             "type": "hokei_moment",
             "hokei_name": "ryōte okuri gote",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ],
@@ -2262,9 +2333,9 @@
           {
             "type": "hokei_moment",
             "hokei_name": "ryōte okuri gote yori okuri yoko tembin",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
             ],
@@ -2297,13 +2368,16 @@
       {
         "week": 11,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande ukemi"
+        ],
         "moments": [
           {
             "type": "hokei_moment",
             "hokei_name": "ryaku jūji gote",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
             "foot_stance": [],
             "roles": {
               "attacker": {
@@ -2320,9 +2394,9 @@
           {
             "type": "hokei_moment",
             "hokei_name": "maki jūji gote",
-            "ren_hanko": false,
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
             "foot_stance": [],
             "roles": {
               "attacker": {
@@ -2352,24 +2426,32 @@
         "week": 12,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
   },
   {
     "grade": "1 kyū",
-    "note": "structured extraction following agreed phase-1 rules; compatible with prior grades",
     "weeks": [
       {
         "week": 1,
         "type": "regular_week",
+        "kihon_shoho": [
+          "tenchi ken dai gokei (tan'en)",
+          "tenchi ken dai rokkei (tan'en)",
+          "idō kōbōgi (ren) (choku geri, mawashi geri, sokutō geri)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "morote tsuki nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -2382,17 +2464,17 @@
             },
             "kyohan_pages": [
               221
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "katate oshi nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -2405,11 +2487,6 @@
             },
             "kyohan_pages": [
               223
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
@@ -2427,44 +2504,47 @@
       {
         "week": 2,
         "type": "regular_week",
+        "kihon_shoho": [
+          "ashi barai med grepp i ärmen, försvar",
+          "ashi barai med grepp i ärmen/kragen & dess försvar",
+          "kūchū tenkai (dai sharin) från seoi nage"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "kata muna otoshi",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
+                "stance": "chūdan gamae",
                 "action": "greppa övre kragen och tryck (tate ken)"
-              }
+              },
+              "defender": {}
             },
             "kyohan_pages": [
               300
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "eri jūji",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
+                "stance": "chūdan gamae",
                 "action": "greppa övre kragen och tryck (yoko ken)"
-              }
+              },
+              "defender": {}
             },
             "kyohan_pages": [
               303
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
             "type": "standard_moment",
@@ -2481,51 +2561,58 @@
       {
         "week": 3,
         "type": "regular_week",
+        "kihon_shoho": [
+          "dan hangeki (från uchi uke, soto uke, uchi age uke)",
+          "byakuren ken dai ikkei (tan'en)",
+          "träna dan hangeki",
+          "dan hangeki (jō chū gyaku zuki, uchi uke & me uchi)",
+          "varierande kari ashi"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tsubame gaeshi",
             "variations": [],
             "technique_group": "byakuren ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
                 "action": "jōdan gyaku zuki"
               },
               "defender": {
-                "stance": "tai gamae",
+                "stance": "ichiji gamae",
                 "action": "dan hangeki med uchi uke & shutō giri"
               }
             },
             "kyohan_pages": [
               192
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "chidori gaeshi kari ashi",
             "variations": [],
             "technique_group": "byakuren ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
                 "action": "sashikae jōdan jun zuki"
               },
               "defender": {
-                "stance": "tai gamae",
+                "stance": "ichiji gamae",
                 "action": "dan hangeki med uchi uke & urate uchi"
               }
             },
             "kyohan_pages": [
               193
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -2543,46 +2630,53 @@
       {
         "week": 4,
         "type": "regular_week",
+        "kihon_shoho": [
+          "studera försvar mot seoi nage & ashi barai",
+          "dai sharin från seoi nage",
+          "choku geri/mawashi geri från sashikomi ashi",
+          "choku geri/mawashi geri från sashikae ashi"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "sode nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "greppa övre delen av ärmen, dra"
               },
               "defender": {
                 "stance": "gyaku gedan gamae",
-                "action": "greppa övre delen av ärmen, dra; uraken uchi & chūdan zuki"
+                "action": "uraken uchi & chūdan zuki"
               }
             },
             "kyohan_pages": [
               229
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "sode dori",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "greppa övre delen av ärmen, dra"
               },
               "defender": {
-                "stance": "gyaku gedan gamae",
-                "action": "greppa övre delen av ärmen, dra"
+                "stance": "gyaku gedan gamae"
               }
             },
             "kyohan_pages": [
               297
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
             "type": "standard_moment",
@@ -2599,31 +2693,41 @@
       {
         "week": 5,
         "type": "regular_week",
+        "kihon_shoho": [
+          "träna dan uke (uchi uke & uchi harai uke, uchi age uke & uchi otoshi uke)",
+          "kōbōgi (mawashi geri & uchi harai uke)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "hiki otoshi",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "gör motstånd och spänn, tryck"
               },
               "defender": {
                 "stance": "erbjud jōhaku",
-                "action": "gör motstånd och spänn, tryck; henka från sode dori eller jōhaku dori"
+                "action": "henka från sode dori eller jōhaku dori"
               }
             },
             "kyohan_pages": [
               300
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "harai uke geri",
             "variations": [],
             "technique_group": "sangō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
@@ -2636,11 +2740,6 @@
             },
             "kyohan_pages": [
               180
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
@@ -2658,31 +2757,39 @@
       {
         "week": 6,
         "type": "regular_week",
+        "kihon_shoho": [
+          "gör mae ukemi, ushiro ukemi, dai sharin som en kontinuerlig rörelse",
+          "tobi komi geri, tobi geri, tobi ren geri",
+          "mawashi geri, sokutō geri, ushiro geri"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "sode maki",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "greppa bakre delen av ärmen, dra"
               },
               "defender": {
-                "stance": "gyaku gedan gamae",
-                "action": "greppa bakre delen av ärmen, dra"
+                "stance": "gyaku gedan gamae"
               }
             },
             "kyohan_pages": [
               296
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "sode maki tembin",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
@@ -2694,10 +2801,7 @@
             },
             "kyohan_pages": [
               298
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
             "type": "standard_moment",
@@ -2707,41 +2811,52 @@
               "embu",
               "repetition"
             ],
-            "restrictions": "attack och försvar vid grepp i krage/ärm (eri/sode)"
+            "restrictions": "attack och försvar vid grepp i kragen/ärmen (eri/sode)"
           }
         ]
       },
       {
         "week": 7,
         "type": "regular_week",
+        "kihon_shoho": [
+          "dan uke (uchi uke & uchi otoshi uke)",
+          "idō kōbōgi (ren zuki & ren uke)",
+          "dan uke (soto oshi uke & uchi oshi uke)",
+          "idō kōbōgi (furi zuki & dan uke)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tsuki ten ni",
             "variations": [],
             "technique_group": "ten'ō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
                 "action": "jō jō ren zuki"
               },
               "defender": {
-                "stance": "chūdan gamae",
+                "stance": "ichiji gamae",
                 "action": "dan uke med uchi age uke & uchi otoshi uke, dōji geri"
               }
             },
             "kyohan_pages": [
               188
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "furi ten ni",
             "variations": [],
             "technique_group": "ten'ō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
@@ -2754,11 +2869,6 @@
             },
             "kyohan_pages": [
               188
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
@@ -2776,46 +2886,52 @@
       {
         "week": 8,
         "type": "regular_week",
+        "kihon_shoho": [
+          "ren kōgeki (mawashi geri & jō chū ni renkō)",
+          "ren kōgeki (sokutō geri & jō chū ni renkō)",
+          "ni renkō (furi zuki)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "eri nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "greppa nedre delen av kragen, dra"
               },
               "defender": {
                 "stance": "gyaku gedan gamae",
-                "action": "greppa nedre delen av kragen, dra; uraken uchi & chūdan zuki"
+                "action": "uraken uchi & chūdan zuki"
               }
             },
             "kyohan_pages": [
               229
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "ude maki",
             "variations": [],
             "technique_group": "rakan ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "greppa nedre delen av kragen, dra"
               },
               "defender": {
-                "stance": "gyaku gedan gamae",
-                "action": "greppa nedre delen av kragen, dra"
+                "stance": "gyaku gedan gamae"
               }
             },
             "kyohan_pages": [
               302
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
             "type": "standard_moment",
@@ -2832,11 +2948,18 @@
       {
         "week": 9,
         "type": "regular_week",
+        "kihon_shoho": [
+          "ni renkō (tsuki & keri)",
+          "ni ren zuki (jun & gyaku, gyaku & jun)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "morote jūji nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -2849,15 +2972,15 @@
             },
             "kyohan_pages": [
               224
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "morote jūji gote",
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -2870,10 +2993,7 @@
             },
             "kyohan_pages": [
               258
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
             "type": "standard_moment",
@@ -2890,14 +3010,25 @@
       {
         "week": 10,
         "type": "regular_week",
+        "kihon_shoho": [
+          "san renkō (jō chū jō san ren zuki)",
+          "träna ren uke, dan uke",
+          "san renkō (jō chū choku geri, jō chū mawashi geri)",
+          "idō kōbōgi (ni ren zuki, san renkō)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "tsuki ten san",
             "variations": [],
             "technique_group": "ten'ō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
-                "stance": "ichiji gamae",
+                "stance": "chūdan gamae",
                 "action": "jō chū jō san ren zuki"
               },
               "defender": {
@@ -2907,20 +3038,20 @@
             },
             "kyohan_pages": [
               189
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "keri ten san",
             "variations": [],
             "technique_group": "ten'ō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
-                "stance": "ichiji gamae",
+                "stance": "chūdan gamae",
                 "action": "san renkō med jō chū ni ren zuki & keri"
               },
               "defender": {
@@ -2930,11 +3061,6 @@
             },
             "kyohan_pages": [
               189
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
@@ -2952,11 +3078,20 @@
       {
         "week": 11,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande ni renkō",
+          "varierande san renkō"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "morote hiki nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -2969,20 +3104,20 @@
             },
             "kyohan_pages": [
               226
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "maki gote",
             "variations": [
               "katate",
               "morote"
             ],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -2993,18 +3128,8 @@
                 "action": "tembin gatame (ura), mae tembin gatame, ura gatame"
               }
             },
-            "references": [
-              "tembin gatame",
-              "mae tembin gatame",
-              "ura gatame"
-            ],
             "kyohan_pages": [
               242
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -3023,47 +3148,54 @@
         "week": 12,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
   },
   {
     "grade": "shodan",
-    "note": "structured extraction following phase-1 rules; compatible with prior grades",
     "weeks": [
       {
         "week": 1,
         "type": "regular_week",
+        "kihon_shoho": [
+          "idō kōbōgi (mawashi geri & uchi harai uke, sashikae jun zuki & shita uke)",
+          "han tenshin & gyaku tenshin",
+          "idō kōbōgi (jōdan zuki & han tenshin / gyaku tenshin)"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "gedan gaeshi",
             "variations": [],
             "technique_group": "sangō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
                 "action": "sashikomi mawashi geri"
               },
               "defender": {
-                "stance": "ichiji gamae",
-                "action": "gedan gaeshi"
+                "stance": "ichiji gamae"
               }
             },
             "kyohan_pages": [
               180
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "gyaku tenshin geri",
             "variations": [],
             "technique_group": "sangō ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
@@ -3076,11 +3208,6 @@
             },
             "kyohan_pages": [
               183
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -3096,11 +3223,21 @@
       {
         "week": 2,
         "type": "regular_week",
+        "kihon_shoho": [
+          "varierande hiji ate",
+          "varierande wantō uchi",
+          "varierande ren kōgeki"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "gyaku tembin",
             "variations": [],
             "technique_group": "goka ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
@@ -3111,17 +3248,17 @@
             },
             "kyohan_pages": [
               277
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "morote oshi nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -3132,16 +3269,8 @@
                 "action": "kagite shuhō, nai wantō uchi"
               }
             },
-            "references": [
-              "gyaku tembin"
-            ],
             "kyohan_pages": [
               223
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -3157,11 +3286,23 @@
       {
         "week": 3,
         "type": "regular_week",
+        "kihon_shoho": [
+          "harō kyaku geki",
+          "hiza uke & kinteki geri",
+          "kōbōgi",
+          "kinteki geri & hiza uke",
+          "varierande jūji uke"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "kinteki geri hiza uke nami gaeshi",
             "variations": [],
             "technique_group": "kakuritsu ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
@@ -3174,17 +3315,17 @@
             },
             "kyohan_pages": [
               200
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "gyaku geri hiza uke nami gaeshi",
             "variations": [],
             "technique_group": "kakuritsu ken",
+            "ren_hanko": true,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "ichiji gamae",
@@ -3197,11 +3338,6 @@
             },
             "kyohan_pages": [
               200
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": true,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
@@ -3217,14 +3353,20 @@
       {
         "week": 4,
         "type": "regular_week",
+        "kihon_shoho": [
+          "kyūsho på armarna"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "oshi gote",
             "variations": [
               "katate",
               "ryōte"
             ],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
+            "foot_stance": [],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae",
@@ -3235,22 +3377,21 @@
                 "action": "kannuki gatame"
               }
             },
-            "references": [
-              "kannuki gatame"
-            ],
             "kyohan_pages": [
               253,
               254,
               289
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
+            ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "kote maki gaeshi",
             "variations": [],
             "technique_group": "ryūka ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "tai gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
@@ -3260,16 +3401,8 @@
                 "action": "kannuki gatame"
               }
             },
-            "references": [
-              "kannuki gatame"
-            ],
             "kyohan_pages": [
               254
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "tai gamae"
             ]
           },
           {
@@ -3285,11 +3418,21 @@
       {
         "week": 5,
         "type": "regular_week",
+        "kihon_shoho": [
+          "ippon se nage",
+          "kūchū tenkai (hjula över) från seoi nage",
+          "varierande ukemi"
+        ],
         "moments": [
           {
+            "type": "hokei_moment",
             "hokei_name": "morote wa nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
@@ -3299,22 +3442,19 @@
                 "action": "ippon se nage"
               }
             },
-            "references": [
-              "ippon se nage"
-            ],
             "kyohan_pages": [
               226
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
+            "type": "hokei_moment",
             "hokei_name": "morote maki nuki",
             "variations": [],
             "technique_group": "ryūō ken",
+            "ren_hanko": false,
+            "foot_stance": [
+              "hiraki gamae"
+            ],
             "roles": {
               "attacker": {
                 "stance": "chūdan gamae"
@@ -3324,16 +3464,8 @@
                 "action": "ippon se nage"
               }
             },
-            "references": [
-              "ippon se nage"
-            ],
             "kyohan_pages": [
               222
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": [
-              "hiraki gamae"
             ]
           },
           {
@@ -3350,8 +3482,7 @@
         "week": 6,
         "type": "review_preparation_week",
         "content": [
-          "repetition",
-          "förberedelse inför gradering"
+          "repetition, förberedelse inför gradering"
         ]
       }
     ]
