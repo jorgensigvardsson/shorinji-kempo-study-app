@@ -8,3 +8,6 @@ Strings wrapped with `noTranslate()` (imported from `src/i18n.ts`) are intention
 
 ## README.md
 When something worth mentioning in README.md has happened (new build steps, tech stack changes, features), note it there.
+
+## src/changelog.ts
+Add a changelog entry here before committing. This is user facing, so make it less technical.
