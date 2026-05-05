@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        # Produces the production bundle in dist/
+
+      - name: Publish
+        # TODO: replace this step with the real SSH publish.
+        #
+        # Suggested implementation:
+        #   - Add three repository secrets in GitHub → Settings → Secrets:
+        #       SSH_HOST        the target server hostname or IP
+        #       SSH_USER        the SSH user on the target
+        #       SSH_PRIVATE_KEY the private key whose public half is in
+        #                       ~/.ssh/authorized_keys on the target
+        #
+        # Then replace the echo below with something like:
+        #
+        #   - name: Publish via SSH
+        #     env:
+        #       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        #     run: |
+        #       install -m 600 /dev/null /tmp/deploy_key
+        #       echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
+        #       rsync -az --delete dist/ \
+        #         -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no" \
+        #         ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/webroot/
+        #       ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
+        #         ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+        #         "bash /path/to/post-deploy.sh"
+        run: echo "TODO: implement publish"
