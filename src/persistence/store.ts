@@ -1,4 +1,4 @@
-import { LocalStorageBackend } from "./backend";
+import { LocalStorageBackend, type PersistenceBackend } from "./backend";
 import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState } from "./schema";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
@@ -14,7 +14,7 @@ export class AppDataStore {
   private document: AppDataDocument;
   private readonly documentCallbacks = new Map<number, (document: AppDataDocument) => void>();
 
-  constructor(private readonly backend = new LocalStorageBackend<AppDataDocument>("app-data-document")) {
+  constructor(private readonly backend: PersistenceBackend<AppDataDocument> = new LocalStorageBackend<AppDataDocument>("app-data-document")) {
     this.document = sanitizeDocument(backend.load(createDefaultAppDataDocument()));
     this.callbacks = {
       grade: new Map<number, DataChangedCallback<"grade">>(),
