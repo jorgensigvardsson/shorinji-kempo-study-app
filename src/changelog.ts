@@ -23,6 +23,12 @@ export const CHANGELOG: ChangelogEntry[] = [
         tr: "Otomatik testler ve yeni bir dağıtım hattı eklendi — kararlılığı sağlayan ve gelecekteki güncellemeleri daha hızlı ve güvenli hale getiren iyileştirmeler.",
         ja: "自動テストと新しいデプロイパイプラインを追加しました。安定性を確保し、今後のアップデートをより速く安全に行えるようにする改善です。",
       },
+      {
+        sv: "Ett fel som hindrade de automatiserade testerna från att köras korrekt har åtgärdats.",
+        en: "A bug that prevented the automated tests from running correctly has been fixed.",
+        tr: "Otomatik testlerin doğru çalışmasını engelleyen bir hata düzeltildi.",
+        ja: "自動テストが正しく動作しないバグを修正しました。",
+      },
     ],
   },
   {
