@@ -94,18 +94,15 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
 
     return (
         <div className="p-2 border border-primary rounded">
-            <div style={{display: "flex", justifyContent: "space-between"}}>
-                <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => setNotesAreShown(!notesAreShown)}>
-                    <JournalText className="text-primary" style={{marginRight: "0.5em"}}/>
+            <div style={{ display: "flex", alignItems: "center", cursor: "pointer", justifyContent: "space-between" }} onClick={() => setNotesAreShown(!notesAreShown)}>
+                <div style={{ display: "flex", alignItems: "center" }} >
+                    <JournalText className="text-primary" style={{marginRight: "0.5em", display: "block"}}/>
                     {translator.translate(notes ? 'Mina anteckningar' : 'Lägg till anteckningar')}
-                    {notesAreShown && <ChevronDown style={{marginLeft: "0.5rem"}}/>}
-                    {notesAreShown || <ChevronRight style={{marginLeft: "0.5rem"}}/>}
                 </div>
-                {hokei.kyohan_pages &&
-                    <div>
-                        {translator.translate("Kyohan")} {hokei.kyohan_pages.map(k => translator.translate(k)).join(', ')}
-                    </div>
-                }
+                <div>
+                    {notesAreShown && <ChevronDown style={{marginLeft: "0.5rem", display: "block"}}/>}
+                    {notesAreShown || <ChevronRight style={{marginLeft: "0.5rem", display: "block"}}/>}
+                </div>
             </div>
             <Collapse in={notesAreShown}>
                 <div>
@@ -179,6 +176,7 @@ const HokeiIndividualsElement = ({ hokei }: HokeiIndividualsElementProps) => {
         <>
             {renderStances(translator, hokei)}
             {renderActions(translator, hokei)}
+            {renderKyohan(translator, hokei)}
         </>
     )
 }
@@ -260,6 +258,26 @@ const renderActions = (translator: Translator, hokei: HokeiMoment) => {
             </tbody>}
         </table>
     );
+}
+
+const renderKyohan = (translator: Translator, hokei: HokeiMoment) => {
+    if (!hokei.kyohan_pages)
+        return null;
+
+    return (
+        <table className="hokei-individuals-table mt-3">
+            <thead>
+                <tr>
+                    <th colSpan={2}>
+                        {translator.translate("Kyohan")}
+                    </th>
+                </tr>
+            </thead>
+            <tr>
+                <td>{hokei.kyohan_pages.map(k => translator.translate(k)).join(', ')}</td>
+            </tr>
+        </table>
+    )
 }
 
 export default HokeiCard;

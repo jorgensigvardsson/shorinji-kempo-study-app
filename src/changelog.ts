@@ -9,13 +9,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-05-05T00:30:00.000Z",
+    timestamp: "2026-05-05T03:00:00.000Z",
     changes: [
       {
-        sv: "Den japanska stavningen av \"kihon shohō\" i Kamoku-vyn har korrigerats.",
-        en: "The Japanese spelling of \"kihon shohō\" in the Kamoku view has been corrected.",
-        tr: "Kamoku görünümündeki \"kihon shohō\" ifadesinin Japonca yazımı düzeltildi.",
-        ja: "Kamokuビューの「基本諸法」の日本語表記を修正しました。",
+        sv: "Kyohan-sidorna visas nu i teknikkortet tillsammans med ställningar och rörelser, istället för i anteckningssektionen.",
+        en: "Kyohan page references are now shown in the technique card alongside stances and actions, instead of inside the notes section.",
+        tr: "Kyohan sayfa referansları artık notlar bölümünde değil, teknik kartında duruşlar ve hareketlerle birlikte gösteriliyor.",
+        ja: "教範のページ参照が、メモ欄ではなく技のカード内の構えや動作と並んで表示されるようになりました。",
       },
     ],
   },
@@ -38,6 +38,12 @@ export const CHANGELOG: ChangelogEntry[] = [
         en: "The OneDrive connection now shows a clear message when the session has expired, instead of silently showing the connect button again. A reminder that OneDrive connections need to be re-established every 24 hours is also shown.",
         tr: "OneDrive bağlantısı artık oturum sona erdiğinde, sessizce bağlan düğmesini tekrar göstermek yerine net bir mesaj gösteriyor. OneDrive bağlantılarının her 24 saatte bir yeniden kurulması gerektiğine dair bir hatırlatma da gösteriliyor.",
         ja: "OneDriveの接続が切れた際、接続ボタンを無言で再表示するのではなく、わかりやすいメッセージを表示するようになりました。また、OneDriveの接続は24時間ごとに再確立が必要である旨の案内も表示されます。",
+      },
+      {
+        sv: "Den japanska stavningen av \"kihon shohō\" i Kamoku-vyn har korrigerats.",
+        en: "The Japanese spelling of \"kihon shohō\" in the Kamoku view has been corrected.",
+        tr: "Kamoku görünümündeki \"kihon shohō\" ifadesinin Japonca yazımı düzeltildi.",
+        ja: "Kamokuビューの「基本諸法」の日本語表記を修正しました。",
       },
     ],
   },
