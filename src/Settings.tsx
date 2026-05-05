@@ -8,7 +8,7 @@ import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
-import { DeviceHdd, Download } from "react-bootstrap-icons";
+import { DeviceHdd, Download, Upload } from "react-bootstrap-icons";
 import "./Settings.css";
 
 interface Props {
@@ -87,6 +87,34 @@ const Settings = (props: Props) => {
         a.download = `shorinji-kempo-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
+    };
+
+    const importData = () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json,application/json";
+        input.onchange = () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const parsed = JSON.parse(reader.result as string) as Record<string, unknown>;
+                    const current = store.getDocument();
+                    store.setDocument({
+                        ...current,
+                        updatedAt: new Date().toISOString(),
+                        version: typeof parsed.version === "number" ? parsed.version : current.version,
+                        // sanitizeDocument in the store validates and defaults all fields
+                        data: (parsed.data ?? current.data) as typeof current.data,
+                    });
+                } catch {
+                    // malformed file — ignore silently
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     };
 
     const setAnchoredWeek = (week: number) => {
@@ -242,11 +270,15 @@ const Settings = (props: Props) => {
                 )}
             </Form.Group>
             <Form.Group className="mb-3">
-                <Form.Label>{translator.translate("Exportera data")}</Form.Label>
-                <div>
+                <Form.Label>{translator.translate("Exportera/importera data")}</Form.Label>
+                <div className="d-flex gap-2">
                     <Button variant="outline-secondary" size="sm" onClick={exportData}>
                         <Download className="me-2" />
                         {translator.translate("Ladda ner")}
+                    </Button>
+                    <Button variant="outline-secondary" size="sm" onClick={importData}>
+                        <Upload className="me-2" />
+                        {translator.translate("Importera")}
                     </Button>
                 </div>
             </Form.Group>

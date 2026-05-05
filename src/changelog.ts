@@ -20,6 +20,17 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    timestamp: "2026-05-05T02:00:00.000Z",
+    changes: [
+      {
+        sv: "Du kan nu importera en tidigare exporterad datafil under Inställningar – Exportera/importera data.",
+        en: "You can now import a previously exported data file under Settings – Export/import data.",
+        tr: "Artık Ayarlar – Veriyi dışa/içe aktar bölümünden daha önce dışa aktarılmış bir veri dosyasını içe aktarabilirsiniz.",
+        ja: "設定の「データのエクスポート/インポート」から、以前エクスポートしたデータファイルをインポートできるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-05T01:00:00.000Z",
     changes: [
       {
