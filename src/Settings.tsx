@@ -191,16 +191,28 @@ const Settings = (props: Props) => {
                             </Dropdown.Menu>
                         </Dropdown>
                         {syncProvider !== "local" && (
-                            <div className="mt-2 d-flex gap-2">
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    onClick={() => getSyncManager().connect()}
-                                    disabled={syncState.status === "connecting" || syncState.status === "syncing"}
-                                >
-                                    {translator.translate("Anslut")}
-                                </Button>
-                            </div>
+                            <>
+                                {syncState.status === "auth_expired" && syncProvider === "onedrive" && (
+                                    <Form.Text className="d-block mt-2 text-warning">
+                                        {translator.translate("Anslutningen till {0} har gått ut.", { params: ["OneDrive"] })}
+                                    </Form.Text>
+                                )}
+                                <div className="mt-2 d-flex gap-2">
+                                    <Button
+                                        variant="outline-primary"
+                                        size="sm"
+                                        onClick={() => getSyncManager().connect()}
+                                        disabled={syncState.status === "connecting" || syncState.status === "syncing"}
+                                    >
+                                        {translator.translate("Anslut")}
+                                    </Button>
+                                </div>
+                                {syncProvider === "onedrive" && (
+                                    <Form.Text className="d-block mt-2">
+                                        {translator.translate("OneDrive-anslutningar behöver förnyas var 24:e timme.")}
+                                    </Form.Text>
+                                )}
+                            </>
                         )}
                     </>
                 )}

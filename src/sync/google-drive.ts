@@ -121,6 +121,10 @@ export class GoogleDriveClient {
     return !!token?.accessToken;
   }
 
+  wasAuthExpired(): boolean {
+    return false;
+  }
+
   disconnect(): void {
     localStorage.removeItem(tokenStorageKey);
     localStorage.removeItem(pkceStorageKey);

@@ -14,6 +14,7 @@ interface PkceState {
 
 const tokenStorageKey = "sync-onedrive-token";
 const pkceStorageKey = "sync-onedrive-pkce";
+const authExpiredStorageKey = "sync-onedrive-auth-expired";
 const scope = "offline_access Files.ReadWrite.AppFolder";
 const documentPath = "shorinji-kempo-app-data.json";
 
@@ -112,6 +113,7 @@ export class OneDriveClient {
 
     localStorage.setItem(tokenStorageKey, JSON.stringify(tokens));
     localStorage.removeItem(pkceStorageKey);
+    localStorage.removeItem(authExpiredStorageKey);
     cleanupAuthParams(url);
     return true;
   }
@@ -121,9 +123,14 @@ export class OneDriveClient {
     return !!token?.accessToken;
   }
 
+  wasAuthExpired(): boolean {
+    return localStorage.getItem(authExpiredStorageKey) === "1";
+  }
+
   disconnect(): void {
     localStorage.removeItem(tokenStorageKey);
     localStorage.removeItem(pkceStorageKey);
+    localStorage.removeItem(authExpiredStorageKey);
   }
 
   async downloadDocument(): Promise<AppDataDocument | null> {
@@ -197,6 +204,7 @@ export class OneDriveClient {
     if (!refreshResponse.ok) {
       const body = await refreshResponse.json().catch(() => null);
       if (refreshResponse.status === 400 && body?.error === "invalid_grant") {
+        localStorage.setItem(authExpiredStorageKey, "1");
         this.disconnect();
         throw new AuthExpiredError();
       }

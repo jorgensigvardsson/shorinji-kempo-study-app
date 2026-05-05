@@ -250,10 +250,14 @@ class SyncManager {
     debugLog(`[sync] completeAuthorizationIfPresent: ${authCompleted}, isConnected: ${client.isConnected()}`);
 
     if (!client.isConnected()) {
-      this.setState({
-        status: "disconnected",
-        message: authCompleted ? "Svar från anslutning hanterat. Anslut igen." : "Inte ansluten.",
-      });
+      if (client.wasAuthExpired()) {
+        this.setState({ status: "auth_expired", message: null, error: null });
+      } else {
+        this.setState({
+          status: "disconnected",
+          message: authCompleted ? "Svar från anslutning hanterat. Anslut igen." : "Inte ansluten.",
+        });
+      }
       return;
     }
 
@@ -377,6 +381,7 @@ interface CloudSyncClient {
   beginAuthorization(): Promise<void>;
   completeAuthorizationIfPresent(): Promise<boolean>;
   isConnected(): boolean;
+  wasAuthExpired(): boolean;
   disconnect(): void;
   downloadDocument(): Promise<AppDataDocument | null>;
   uploadDocument(document: AppDataDocument): Promise<void>;
