@@ -9,6 +9,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-05T00:30:00.000Z",
+    changes: [
+      {
+        sv: "Den japanska stavningen av \"kihon shohō\" i Kamoku-vyn har korrigerats.",
+        en: "The Japanese spelling of \"kihon shohō\" in the Kamoku view has been corrected.",
+        tr: "Kamoku görünümündeki \"kihon shohō\" ifadesinin Japonca yazımı düzeltildi.",
+        ja: "Kamokuビューの「基本諸法」の日本語表記を修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-05T01:00:00.000Z",
     changes: [
       {
