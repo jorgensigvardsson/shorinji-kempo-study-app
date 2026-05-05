@@ -198,18 +198,21 @@ function OtherCard(props: OtherCardProps) {
     }
 
     const renderExamPreparation = () => {
-        if (other.content.indexOf("förberedelser") < 0)
+        if (other.content.indexOf("repetition") < 0)
             return null;
 
+        console.log("In it");
         if (translator.isJapanese) {
-            return <tr><td>{translator.translate("Förberedelser inför gradering")}</td></tr>;
+            return <tr><td>{translator.translate("Repetition")}</td></tr>;
         } else {
             return <>
-                <tr><td>{translator.translate("Förberedelser inför gradering")}</td></tr>
-                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Förberedelser inför gradering")}</td></tr>
+                <tr><td>{translator.translate("Repetition")}</td></tr>
+                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Repetition")}</td></tr>
             </>;
         }
     }
+
+    console.log("Hmm", other.content);
     
     return (
         <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-2 app-grid-card hokei-card">
