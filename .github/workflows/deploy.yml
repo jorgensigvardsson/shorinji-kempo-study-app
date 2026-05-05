@@ -6,43 +6,50 @@ on:
       - deploy
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+    env:
+      IMAGE: internal-docker-registry:80/shorinjikempo:latest
+      SSH_HOST: ${{ secrets.SSH_HOST }}      # format: dns-name:port
+      SSH_USER: ${{ secrets.SSH_USER }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+      - name: Build image
+        run: docker build -t "$IMAGE" .
 
-      - run: npm ci
+      - name: Save and compress image
+        run: docker save "$IMAGE" | gzip > image.tar.gz
 
-      - run: npm run build
-        # Produces the production bundle in dist/
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          DEPLOY_HOST="${SSH_HOST%:*}"
+          DEPLOY_PORT="${SSH_HOST##*:}"
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "DEPLOY_HOST=$DEPLOY_HOST" >> "$GITHUB_ENV"
+          echo "DEPLOY_PORT=$DEPLOY_PORT" >> "$GITHUB_ENV"
 
-      - name: Publish
-        # TODO: replace this step with the real SSH publish.
-        #
-        # Suggested implementation:
-        #   - Add three repository secrets in GitHub → Settings → Secrets:
-        #       SSH_HOST        the target server hostname or IP
-        #       SSH_USER        the SSH user on the target
-        #       SSH_PRIVATE_KEY the private key whose public half is in
-        #                       ~/.ssh/authorized_keys on the target
-        #
-        # Then replace the echo below with something like:
-        #
-        #   - name: Publish via SSH
-        #     env:
-        #       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        #     run: |
-        #       install -m 600 /dev/null /tmp/deploy_key
-        #       echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
-        #       rsync -az --delete dist/ \
-        #         -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no" \
-        #         ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/webroot/
-        #       ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
-        #         ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-        #         "bash /path/to/post-deploy.sh"
-        run: echo "TODO: implement publish"
+      - name: Copy image to dockernode1
+        run: |
+          REMOTE_PATH="/tmp/shorinjikempo-${{ github.sha }}.tar.gz"
+          scp -i ~/.ssh/id_deploy -P "$DEPLOY_PORT" \
+            image.tar.gz "$SSH_USER@$DEPLOY_HOST:$REMOTE_PATH"
+          echo "REMOTE_PATH=$REMOTE_PATH" >> "$GITHUB_ENV"
+
+      - name: Load, push, and restart stack on dockernode1
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" "$SSH_USER@$DEPLOY_HOST" bash -s <<REMOTE
+          set -euo pipefail
+          trap 'rm -f "$REMOTE_PATH"' EXIT
+          gunzip < "$REMOTE_PATH" | docker load
+          docker push "$IMAGE"
+          cd services/shorinjikempo
+          docker compose down
+          docker compose up -d
+          REMOTE
