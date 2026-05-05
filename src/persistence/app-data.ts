@@ -1,5 +1,5 @@
-import { getAppDataStore } from "./store";
-import type { HokeiRankValue } from "./schema";
+import { getAppDataStore, type AppDataStore } from "./store";
+import type { HokeiRankEntry, HokeiRankValue } from "./schema";
 
 type NoteUpdatedCallback = (notes: string | null) => void;
 type UnregisterNoteUpdatedCallback = () => void;
@@ -12,15 +12,20 @@ type Registration = {
 export class HokeiNotes {
     private nextId: number = 0;
     private callbackRegistrations: Map<string, Registration[]> = new Map<string, Registration[]>();
+    private lastKnownNotes: Record<string, string> = {};
 
-    constructor() {
-        getAppDataStore().subscribe("notes", notes => {
+    constructor(private readonly store: AppDataStore = getAppDataStore()) {
+        store.subscribe("notes", notes => {
             for (const [hokeiName, registrations] of this.callbackRegistrations) {
-                const value = notes[hokeiName] ?? null;
-                for (const registration of registrations) {
-                    registration.callback(value);
+                const newValue = notes[hokeiName] ?? null;
+                const oldValue = this.lastKnownNotes[hokeiName] ?? null;
+                if (newValue !== oldValue) {
+                    for (const registration of registrations) {
+                        registration.callback(newValue);
+                    }
                 }
             }
+            this.lastKnownNotes = notes;
         });
     }
 
@@ -34,28 +39,27 @@ export class HokeiNotes {
         return () => {
             const index = registrations.findIndex(e => e.id === id);
             if (index >= 0)
-                registrations.splice(index);
+                registrations.splice(index, 1);
         }
     }
 
     getNotes(hokeiName: string): string | null {
-        const notes = getAppDataStore().get("notes");
+        const notes = this.store.get("notes");
         return notes[hokeiName] ?? null;
     }
 
     setNotes(hokeiName: string, notes: string | null) {
-        const store = getAppDataStore();
-        const existingNotes = store.get("notes");
+        const existingNotes = this.store.get("notes");
 
         if (notes) {
             if (existingNotes[hokeiName] !== notes) {
-                store.set("notes", { ...existingNotes, [hokeiName]: notes });
+                this.store.set("notes", { ...existingNotes, [hokeiName]: notes });
             }
         } else {
             if (hokeiName in existingNotes) {
                 const updatedNotes = { ...existingNotes };
                 delete updatedNotes[hokeiName];
-                store.set("notes", updatedNotes);
+                this.store.set("notes", updatedNotes);
             }
         }
     }
@@ -72,15 +76,20 @@ type RankRegistration = {
 export class HokeiRanks {
     private nextId: number = 0;
     private callbackRegistrations: Map<string, RankRegistration[]> = new Map<string, RankRegistration[]>();
+    private lastKnownRanks: Record<string, HokeiRankEntry> = {};
 
-    constructor() {
-        getAppDataStore().subscribe("hokeiRanks", ranks => {
+    constructor(private readonly store: AppDataStore = getAppDataStore()) {
+        store.subscribe("hokeiRanks", ranks => {
             for (const [hokeiName, registrations] of this.callbackRegistrations) {
-                const value = ranks[hokeiName]?.value ?? null;
-                for (const registration of registrations) {
-                    registration.callback(value);
+                const newValue = ranks[hokeiName]?.value ?? null;
+                const oldValue = this.lastKnownRanks[hokeiName]?.value ?? null;
+                if (newValue !== oldValue) {
+                    for (const registration of registrations) {
+                        registration.callback(newValue);
+                    }
                 }
             }
+            this.lastKnownRanks = ranks;
         });
     }
 
@@ -98,13 +107,12 @@ export class HokeiRanks {
     }
 
     getRank(hokeiName: string): HokeiRankValue | null {
-        const ranks = getAppDataStore().get("hokeiRanks");
+        const ranks = this.store.get("hokeiRanks");
         return ranks[hokeiName]?.value ?? null;
     }
 
     setRank(hokeiName: string, rank: HokeiRankValue | null): void {
-        const store = getAppDataStore();
-        const existingRanks = store.get("hokeiRanks");
+        const existingRanks = this.store.get("hokeiRanks");
 
         if (rank === null) {
             if (!(hokeiName in existingRanks)) {
@@ -113,7 +121,7 @@ export class HokeiRanks {
 
             const updatedRanks = { ...existingRanks };
             delete updatedRanks[hokeiName];
-            store.set("hokeiRanks", updatedRanks);
+            this.store.set("hokeiRanks", updatedRanks);
             return;
         }
 
@@ -122,7 +130,7 @@ export class HokeiRanks {
             return;
         }
 
-        store.set("hokeiRanks", {
+        this.store.set("hokeiRanks", {
             ...existingRanks,
             [hokeiName]: {
                 value: rank,
