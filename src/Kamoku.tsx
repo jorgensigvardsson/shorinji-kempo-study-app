@@ -197,16 +197,16 @@ function OtherCard(props: OtherCardProps) {
         }
     }
 
-    const renderRepetition = () => {
-        if (other.content.indexOf("repetition") < 0)
+    const renderExamPreparation = () => {
+        if (other.content.indexOf("förberedelser") < 0)
             return null;
 
         if (translator.isJapanese) {
-            return <tr><td>{translator.translate("Repetition")}</td></tr>;
+            return <tr><td>{translator.translate("Förberedelser inför gradering")}</td></tr>;
         } else {
             return <>
-                <tr><td>{translator.translate("Repetition")}</td></tr>
-                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Repetition")}</td></tr>
+                <tr><td>{translator.translate("Förberedelser inför gradering")}</td></tr>
+                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Förberedelser inför gradering")}</td></tr>
             </>;
         }
     }
@@ -217,7 +217,7 @@ function OtherCard(props: OtherCardProps) {
                 <tbody>
                     {renderRandori()}
                     {renderEmbu()}
-                    {renderRepetition()}
+                    {renderExamPreparation()}
                 </tbody>
             </table>
         </CollapsibleCard>

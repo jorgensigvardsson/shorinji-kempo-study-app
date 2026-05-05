@@ -9,6 +9,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-05T02:00:00.000Z",
+    changes: [
+      {
+        sv: "Texten \"Repetition\" i Kamoku-vyn har ändrats till \"Förberedelser inför gradering\" för att bättre beskriva vad veckan innehåller.",
+        en: "The label \"Repetition\" in the Kamoku view has been changed to \"Preparations before grading\" to better describe what the week contains.",
+        tr: "Kamoku görünümündeki \"Tekrar\" etiketi, haftanın içeriğini daha iyi açıklamak için \"Sınava hazırlık\" olarak değiştirildi.",
+        ja: "Kamokuビューの「Repetition」という表示を、週の内容をより正確に表す「試験準備」に変更しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-05T01:00:00.000Z",
     changes: [
       {
