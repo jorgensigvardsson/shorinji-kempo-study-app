@@ -35,6 +35,8 @@ class SyncManager {
   private readonly MAX_RETRIES = 3;
   private readonly RETRY_DELAYS_MS = [10_000, 30_000, 90_000];
   private isApplyingRemoteDocument = false;
+  private pendingLocalDocument: AppDataDocument | null = null;
+  private pendingRemoteDocument: AppDataDocument | null = null;
 
   start(): void {
     if (this.started) {
@@ -120,6 +122,44 @@ class SyncManager {
     this.syncNow().catch(err => this.handleSyncError(err));
   }
 
+  async resolveConflict(choice: "local" | "remote"): Promise<void> {
+    if (this.state.status !== "conflict_resolution") return;
+    const localDoc = this.pendingLocalDocument;
+    const remoteDoc = this.pendingRemoteDocument;
+    if (!localDoc || !remoteDoc) return;
+
+    this.pendingLocalDocument = null;
+    this.pendingRemoteDocument = null;
+
+    const chosen = choice === "local" ? localDoc : remoteDoc;
+    const provider = this.store.get("syncProvider");
+    const client = this.cloudClient(provider);
+
+    this.setState({ status: "syncing", message: "Synkar..." });
+
+    this.isApplyingRemoteDocument = true;
+    this.store.setDocument(chosen);
+    this.isApplyingRemoteDocument = false;
+
+    try {
+      if (client?.isConnected()) {
+        await client.uploadDocument(chosen);
+        this.saveBaseDocument(provider, chosen);
+      }
+    } catch (error) {
+      this.handleSyncError(error);
+      return;
+    }
+
+    this.retryCount = 0;
+    this.setState({
+      status: "connected",
+      message: "Synkad.",
+      lastSyncedAt: new Date().toISOString(),
+      lastConflictResolutionAt: new Date().toISOString(),
+    });
+  }
+
   async syncNow(): Promise<SyncResult> {
     this.clearRetryTimer();
     const provider = this.store.get("syncProvider");
@@ -180,8 +220,12 @@ class SyncManager {
     debugLog(`[sync] Merge result — conflictDetected: ${mergeResult.conflictDetected}, applyingRemoteChanges: ${mergedDiffersFromLocal}, uploadingToRemote: ${mergedDiffersFromRemote}`);
 
     if (mergeResult.conflictDetected) {
-      debugWarn("[sync] Conflict detected — local backup saved before overwrite.");
+      debugWarn("[sync] Conflict detected — asking user to resolve.");
       this.backupDocument(localDocument, provider);
+      this.pendingLocalDocument = localDocument;
+      this.pendingRemoteDocument = remoteDocument;
+      this.setState({ status: "conflict_resolution", message: null });
+      return { conflictDetected: true, pushedLocalChanges: false };
     }
 
     if (mergedDiffersFromLocal) {
@@ -200,21 +244,13 @@ class SyncManager {
     this.saveBaseDocument(provider, mergedDocument);
     this.setState({
       status: "connected",
-      message: mergeResult.conflictDetected
-        ? "Synkad med konfliktlösning."
-        : "Synkad.",
+      message: "Synkad.",
       lastSyncedAt: new Date().toISOString(),
-      lastConflictResolutionAt: mergeResult.conflictDetected
-        ? new Date().toISOString()
-        : this.state.lastConflictResolutionAt,
     });
 
-    debugLog(`[sync] Sync complete. ${mergeResult.conflictDetected ? "⚠️ Conflicts were resolved." : "No conflicts."}`);
+    debugLog("[sync] Sync complete. No conflicts.");
 
-    return {
-      conflictDetected: mergeResult.conflictDetected,
-      pushedLocalChanges: mergedDiffersFromRemote,
-    };
+    return { conflictDetected: false, pushedLocalChanges: mergedDiffersFromRemote };
   }
 
   private async handleProviderChanged(): Promise<void> {
@@ -277,7 +313,7 @@ class SyncManager {
 
   private scheduleBackgroundSync(): void {
     const provider = this.store.get("syncProvider");
-    if (provider === "local" || this.state.status === "error" || this.state.status === "connecting") {
+    if (provider === "local" || this.state.status === "error" || this.state.status === "connecting" || this.state.status === "conflict_resolution") {
       return;
     }
 

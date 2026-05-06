@@ -24,27 +24,38 @@ const OLD = "2024-01-01T00:00:00.000Z";
 const NEW = "2024-06-01T00:00:00.000Z";
 
 describe("mergeDocuments — null base", () => {
-  it("returns local when local is newer", () => {
+  it("remote non-default data is applied when local is at defaults", () => {
+    const defaults = makeDoc({ updatedAt: OLD }).data;
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...defaults, kenshiNumber: "12345" } });
+    const result = mergeDocuments(null, local, remote);
+    expect(result.document.data.kenshiNumber).toBe("12345");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("local non-default data is preserved when remote is at defaults", () => {
+    const defaults = makeDoc({ updatedAt: OLD }).data;
+    const local = makeDoc({ updatedAt: NEW, data: { ...defaults, kenshiNumber: "99999" } });
+    const remote = makeDoc({ updatedAt: OLD });
+    const result = mergeDocuments(null, local, remote);
+    expect(result.document.data.kenshiNumber).toBe("99999");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("both sides changed from defaults — newer wins with conflict", () => {
+    const defaults = makeDoc({ updatedAt: OLD }).data;
+    const local = makeDoc({ updatedAt: OLD, data: { ...defaults, kenshiNumber: "11111" } });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...defaults, kenshiNumber: "22222" } });
+    const result = mergeDocuments(null, local, remote);
+    expect(result.document.data.kenshiNumber).toBe("22222");
+    expect(result.conflictDetected).toBe(true);
+  });
+
+  it("both sides at defaults — no conflict", () => {
     const local = makeDoc({ updatedAt: NEW });
     const remote = makeDoc({ updatedAt: OLD });
     const result = mergeDocuments(null, local, remote);
-    expect(result.document).toEqual(local);
-    expect(result.conflictDetected).toBe(false);
-  });
-
-  it("returns remote when remote is newer", () => {
-    const local = makeDoc({ updatedAt: OLD });
-    const remote = makeDoc({ updatedAt: NEW, deviceId: "device-b" });
-    const result = mergeDocuments(null, local, remote);
-    expect(result.document).toEqual(remote);
-    expect(result.conflictDetected).toBe(false);
-  });
-
-  it("returns local when timestamps are equal", () => {
-    const local = makeDoc({ updatedAt: NEW });
-    const remote = makeDoc({ updatedAt: NEW, deviceId: "device-b" });
-    const result = mergeDocuments(null, local, remote);
-    expect(result.document).toEqual(local);
+    expect(result.document.data.grade).toBe("shodan");
     expect(result.conflictDetected).toBe(false);
   });
 });

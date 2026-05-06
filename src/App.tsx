@@ -7,7 +7,7 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
-import { ArrowClockwise, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
+import { ArrowClockwise, ArrowLeftRight, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { useRegisterSW } from 'virtual:pwa-register/react';
@@ -292,6 +292,27 @@ const AppToasts = (props: { translator: Translator }) => {
             onClick={() => getSyncManager().retrySync()}>
             {translator.translate("Försök nu")}
           </Button>
+        </Toast.Body>
+      </Toast>
+      <Toast show={syncState.status === "conflict_resolution"} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
+            <ArrowLeftRight size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Inställningarna ändrades på flera enheter")}</div>
+            <div className="app-update-toast-text">{translator.translate("Vilken enhet har rätt inställningar?")}</div>
+          </div>
+          <div className="d-flex flex-column gap-2 app-update-toast-action">
+            <Button size="sm" variant="primary"
+              onClick={() => getSyncManager().resolveConflict("local")}>
+              {translator.translate("Den här enheten")}
+            </Button>
+            <Button size="sm" variant="outline-secondary"
+              onClick={() => getSyncManager().resolveConflict("remote")}>
+              {translator.translate("Den andra enheten")}
+            </Button>
+          </div>
         </Toast.Body>
       </Toast>
       <Toast show={syncState.status === "auth_expired"} className="app-update-toast">
