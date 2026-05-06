@@ -5,6 +5,11 @@ export interface MergeResult {
   conflictDetected: boolean;
 }
 
+function withDefaultData(doc: AppDataDocument): AppDataDocument {
+  const { data: defaults } = createDefaultAppDataDocument();
+  return { ...doc, data: { ...defaults, ...doc.data } };
+}
+
 export function mergeDocuments(
   base: AppDataDocument | null,
   local: AppDataDocument,
@@ -18,6 +23,12 @@ export function mergeDocuments(
     base = createDefaultAppDataDocument();
   }
 
+  // Fill in defaults for any fields missing from older-version documents so that
+  // absent fields are not mistaken for an explicit change to undefined.
+  local = withDefaultData(local);
+  remote = withDefaultData(remote);
+  base = withDefaultData(base);
+
   const baseDocument = base;
   let conflictDetected = false;
   const mergedData: AppDataState = {
@@ -27,6 +38,7 @@ export function mergeDocuments(
     currentWeekAnchor: mergeScalar("currentWeekAnchor"),
     syncProvider: mergeScalar("syncProvider"),
     kenshiNumber: mergeScalar("kenshiNumber"),
+    hokeiListSelection: mergeScalar("hokeiListSelection"),
     notes: mergeNotes(baseDocument.data.notes ?? {}, local.data.notes ?? {}, remote.data.notes ?? {}, local, remote),
     hokeiRanks: mergeHokeiRanks(baseDocument.data.hokeiRanks ?? {}, local.data.hokeiRanks ?? {}, remote.data.hokeiRanks ?? {}, local, remote),
   };

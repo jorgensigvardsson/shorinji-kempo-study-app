@@ -25,6 +25,7 @@ export class AppDataStore {
       kenshiNumber: new Map<number, DataChangedCallback<"kenshiNumber">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
       hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
+      hokeiListSelection: new Map<number, DataChangedCallback<"hokeiListSelection">>(),
     };
   }
 
@@ -147,6 +148,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       kenshiNumber: isKenshiNumber(input.data?.kenshiNumber) ? input.data.kenshiNumber : fallback.data.kenshiNumber,
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
+      hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
     },
   };
 }

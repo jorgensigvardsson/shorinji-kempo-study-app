@@ -15,9 +15,16 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       kenshiNumber: undefined,
       notes: {},
       hokeiRanks: {},
+      hokeiListSelection: "own",
     },
     ...overrides,
   };
+}
+
+function makeOldDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): AppDataDocument {
+  const doc = makeDoc(overrides);
+  const { hokeiListSelection: _omit, ...dataWithoutNew } = doc.data;
+  return { ...doc, data: dataWithoutNew as AppDataDocument["data"] };
 }
 
 const OLD = "2024-01-01T00:00:00.000Z";
@@ -215,6 +222,35 @@ describe("mergeDocuments — hokeiRanks", () => {
     const local = makeDoc({ updatedAt: NEW, data: { ...base.data, hokeiRanks: { "ippo": rank1 } } });
     const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, hokeiRanks: { "ippo": rank1 } } });
     const result = mergeDocuments(base, local, remote);
+    expect(result.conflictDetected).toBe(false);
+  });
+});
+
+describe("mergeDocuments — old-version documents missing new fields", () => {
+  it("local change to hokeiListSelection is preserved when remote is an old document without the field", () => {
+    const base = makeOldDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW, data: { ...makeDoc({ updatedAt: NEW }).data, hokeiListSelection: "all" } });
+    const remote = makeOldDoc({ updatedAt: OLD });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.hokeiListSelection).toBe("all");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("no conflict and default is used when both sides are old documents without the field", () => {
+    const base = makeOldDoc({ updatedAt: OLD });
+    const local = makeOldDoc({ updatedAt: NEW });
+    const remote = makeOldDoc({ updatedAt: OLD });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.hokeiListSelection).toBe("own");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("remote change to hokeiListSelection is applied when local is an old document without the field", () => {
+    const base = makeOldDoc({ updatedAt: OLD });
+    const local = makeOldDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...makeDoc({ updatedAt: NEW }).data, hokeiListSelection: "up-to-own" } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.hokeiListSelection).toBe("up-to-own");
     expect(result.conflictDetected).toBe(false);
   });
 });

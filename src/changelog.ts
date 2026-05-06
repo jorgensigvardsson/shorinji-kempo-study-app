@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-06T16:00:00.000Z",
+    changes: [
+      {
+        emoji: "💾",
+        sv: "Listan på hokei-övningar kommer nu ihåg vilken sortering du valde (Alla, Endast egna, etc.) och synkar den med dina övriga enheter.",
+        en: "The hokei exercise list now remembers which filter you selected (All, Only own, etc.) and syncs it to your other devices.",
+        tr: "Hokei alıştırması listesi artık seçtiğiniz filtreyi (Tümü, Yalnız benimkiler, vb.) hatırlıyor ve diğer cihazlarınızla senkronize ediyor.",
+        ja: "ホーケイ運動リストで選択したフィルター（すべて、自分のみなど）を記憶し、他のデバイスと同期するようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-06T14:00:00.000Z",
     changes: [
       {

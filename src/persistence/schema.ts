@@ -24,6 +24,7 @@ export interface AppDataState {
   kenshiNumber: string | undefined;
   notes: Record<string, string>;
   hokeiRanks: Record<string, HokeiRankEntry>;
+  hokeiListSelection: string;
 }
 
 export interface AppDataDocument {
@@ -55,6 +56,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       kenshiNumber: undefined,
       notes: {},
       hokeiRanks: {},
+      hokeiListSelection: "own",
     },
   };
 }

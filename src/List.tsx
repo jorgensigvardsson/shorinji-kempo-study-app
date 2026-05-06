@@ -6,6 +6,7 @@ import HokeiCard from "./components/HokeiCard";
 import { Form } from "react-bootstrap";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
+import { load } from "./persistence/data";
 
 interface Props {
     grade: GradePlan;
@@ -16,9 +17,11 @@ interface Props {
 
 type Selection = "all" | "own" | "up-to-own" | GradeName;
 
+const selectionData = load<string>("hokeiListSelection", "own");
+
 const List = (props: Props) => {
     const { grade, allGradePlans, notesData, ranksData } = props;
-    const [selection, setSelection] = useState<Selection>("own");
+    const [selection, setSelection] = useState<Selection>((selectionData.data ?? "own") as Selection);
     const [filterText, setFilterText] = useState<string>("");
     const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
     const [allHokeis, setAllHokeis] = useState<HokeiAndGrade[]>([]);
@@ -37,6 +40,12 @@ const List = (props: Props) => {
         const timeoutId = window.setTimeout(() => setDebouncedFilterText(filterText), 500);
         return () => window.clearTimeout(timeoutId);
     }, [filterText]);
+
+    useEffect(() => {
+        return selectionData.registerListener((newSelection) => {
+            setSelection(newSelection as Selection);
+        });
+    }, []);
            
     const filteredHokeis = allHokeis.filter(l => matchesSelection(l.grade, grade.grade, selection))
                                     .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText));
@@ -45,7 +54,11 @@ const List = (props: Props) => {
         <div>
             <div className="app-grid-panel">
                 <div>
-                    <Form.Select value={selection} onChange={e => setSelection(e.target.value as Selection)}>
+                    <Form.Select value={selection} onChange={e => {
+                        const newSelection = e.target.value as Selection;
+                        selectionData.save(newSelection);
+                        setSelection(newSelection);
+                    }}>
                         <option value="all">{translator.translate('Alla')}</option>
                         <option value="own">{translator.translate('Endast egna')}</option>
                         <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
