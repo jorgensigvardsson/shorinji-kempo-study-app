@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-06T11:00:00.000Z",
+    changes: [
+      {
+        emoji: "🔄",
+        sv: "Appen synkroniserar nu automatiskt med molnet när du växlar tillbaka till fliken – så att du alltid ser den senaste datan från dina andra enheter.",
+        en: "The app now syncs automatically with the cloud when you switch back to the tab – so you always see the latest data from your other devices.",
+        tr: "Uygulama artık sekmeye geri döndüğünüzde bulutla otomatik olarak senkronize oluyor – böylece diğer cihazlarınızdaki en güncel verileri her zaman görürsünüz.",
+        ja: "タブに戻ったときに自動的にクラウドと同期するようになりました。他のデバイスの最新データが常に表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-06T10:00:00.000Z",
     changes: [
       {

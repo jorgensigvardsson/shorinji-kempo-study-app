@@ -53,6 +53,13 @@ class SyncManager {
       this.scheduleBackgroundSync();
     });
 
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && this.state.status === "connected") {
+        this.clearScheduledSync();
+        this.syncNow().catch(error => this.handleSyncError(error));
+      }
+    });
+
     this.handleProviderChanged().catch(error => this.handleSyncError(error));
   }
 
