@@ -6,6 +6,9 @@ import { type GradeName, type GradePlan, type WordListEntry } from "./data";
 import wordList from "./assets/word-list.json";
 import kamokuhyo from "./assets/kamokuhyo.json";
 import { buildQuizPool, drawQuestion, type QuizQuestion } from "./quiz-logic";
+import { load } from "./persistence/data";
+
+const highScoreData = load<number>("quizStreakHighScore", 0);
 
 interface QuizProps {
   myGrade: GradeName;
@@ -18,6 +21,8 @@ const Quiz = (props: QuizProps) => {
   const [recentQuestionIds, setRecentQuestionIds] = useState<string[]>([]);
   const [answer, setAnswer] = useState<number | null>(null);
   const [showBack, setShowBack] = useState(false);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [highScore, setHighScore] = useState(highScoreData.data ?? 0);
 
   const translator = useContext(TranslatorContext);
 
@@ -27,13 +32,31 @@ const Quiz = (props: QuizProps) => {
     setRecentQuestionIds(initialQuestion ? [initialQuestion.id] : []);
     setAnswer(null);
     setShowBack(false);
+    setCurrentStreak(0);
   }, [quizPool]);
 
+  useEffect(() => {
+    return highScoreData.registerListener((newHighScore) => {
+      setHighScore(newHighScore);
+    });
+  }, []);
+
   const showAnswer = () => {
+    setCurrentStreak(0);
     setShowBack(true);
   };
 
   const submitAnswer = () => {
+    if (answeredCorrectly) {
+      const newStreak = currentStreak + 1;
+      setCurrentStreak(newStreak);
+      if (newStreak > highScore) {
+        highScoreData.save(newStreak);
+        setHighScore(newStreak);
+      }
+    } else {
+      setCurrentStreak(0);
+    }
     setShowBack(true);
   };
 
@@ -143,6 +166,11 @@ const Quiz = (props: QuizProps) => {
             </Card>
           </div>
         </div>
+      </div>
+
+      <div className="quiz-streak">
+        <span>{translator.translate("Streak")}: <strong>{currentStreak}</strong></span>
+        <span>{translator.translate("Rekord")}: <strong>{highScore}</strong></span>
       </div>
 
       {!showBack && (

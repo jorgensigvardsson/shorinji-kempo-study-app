@@ -16,6 +16,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       notes: {},
       hokeiRanks: {},
       hokeiListSelection: "own",
+      quizStreakHighScore: 0,
     },
     ...overrides,
   };
@@ -252,5 +253,31 @@ describe("mergeDocuments — old-version documents missing new fields", () => {
     const result = mergeDocuments(base, local, remote);
     expect(result.document.data.hokeiListSelection).toBe("up-to-own");
     expect(result.conflictDetected).toBe(false);
+  });
+});
+
+describe("mergeDocuments — quizStreakHighScore", () => {
+  it("takes the higher value when local is higher", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW, data: { ...base.data, quizStreakHighScore: 15 } });
+    const remote = makeDoc({ updatedAt: OLD, data: { ...base.data, quizStreakHighScore: 7 } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.quizStreakHighScore).toBe(15);
+  });
+
+  it("takes the higher value when remote is higher", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: OLD, data: { ...base.data, quizStreakHighScore: 3 } });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, quizStreakHighScore: 20 } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.quizStreakHighScore).toBe(20);
+  });
+
+  it("uses zero when neither side has set a score", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW });
+    const remote = makeDoc({ updatedAt: OLD });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.quizStreakHighScore).toBe(0);
   });
 });

@@ -25,6 +25,7 @@ export interface AppDataState {
   notes: Record<string, string>;
   hokeiRanks: Record<string, HokeiRankEntry>;
   hokeiListSelection: string;
+  quizStreakHighScore: number;
 }
 
 export interface AppDataDocument {
@@ -57,6 +58,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       notes: {},
       hokeiRanks: {},
       hokeiListSelection: "own",
+      quizStreakHighScore: 0,
     },
   };
 }

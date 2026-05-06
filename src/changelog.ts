@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-06T17:00:00.000Z",
+    changes: [
+      {
+        emoji: "🔥",
+        sv: "Quiz visar nu din nuvarande streak och ditt rekord. Rekorder synkas mellan dina enheter.",
+        en: "Quiz now shows your current streak and all-time best. High scores sync across your devices.",
+        tr: "Quiz artık mevcut serinizi ve tüm zamanların en yüksek skorunu gösteriyor. En yüksek skorlar cihazlarınız arasında senkronize edilir.",
+        ja: "クイズに連続正解数と最高記録が表示されるようになりました。最高記録はデバイス間で同期されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-06T16:00:00.000Z",
     changes: [
       {

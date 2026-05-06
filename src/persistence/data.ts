@@ -85,6 +85,8 @@ function persistentNameToAppDataKey(name: string): keyof AppDataState | null {
             return "language";
         case "hokeiListSelection":
             return "hokeiListSelection";
+        case "quizStreakHighScore":
+            return "quizStreakHighScore";
         default:
             return null;
     }

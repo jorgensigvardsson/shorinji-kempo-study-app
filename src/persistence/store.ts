@@ -26,6 +26,7 @@ export class AppDataStore {
       notes: new Map<number, DataChangedCallback<"notes">>(),
       hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
       hokeiListSelection: new Map<number, DataChangedCallback<"hokeiListSelection">>(),
+      quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
     };
   }
 
@@ -149,6 +150,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
       hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
+      quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
     },
   };
 }

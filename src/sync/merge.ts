@@ -39,6 +39,7 @@ export function mergeDocuments(
     syncProvider: mergeScalar("syncProvider"),
     kenshiNumber: mergeScalar("kenshiNumber"),
     hokeiListSelection: mergeScalar("hokeiListSelection"),
+    quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     notes: mergeNotes(baseDocument.data.notes ?? {}, local.data.notes ?? {}, remote.data.notes ?? {}, local, remote),
     hokeiRanks: mergeHokeiRanks(baseDocument.data.hokeiRanks ?? {}, local.data.hokeiRanks ?? {}, remote.data.hokeiRanks ?? {}, local, remote),
   };
