@@ -271,6 +271,9 @@ const Settings = (props: Props) => {
             </Form.Group>
             <Form.Group className="mb-3">
                 <Form.Label>{translator.translate("Exportera/importera data")}</Form.Label>
+                <Form.Text className="d-block mt-1 mb-2">
+                    {translator.translate("Ladda ner en säkerhetskopia av all din data, eller importera data från en tidigare nedladdning. Detta kan användas för att spara inställningar, dina anteckningar, dina självvärderingar, och annan information du samlat ihop. T.ex. kan detta användas när du inte använder en molntjänst som t.ex OneDrive, men vill kunna ta med den här informationen till en ny dator, eller telefon.")}
+                </Form.Text>
                 <div className="d-flex gap-2">
                     <Button variant="outline-secondary" size="sm" onClick={exportData}>
                         <Download className="me-2" />

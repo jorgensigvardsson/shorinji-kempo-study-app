@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-06T14:00:00.000Z",
+    changes: [
+      {
+        emoji: "⚙️",
+        sv: "Inställningssidan visar nu en beskrivning av vad export/import-funktionen kan användas till.",
+        en: "The Settings page now shows a description of what the export/import feature can be used for.",
+        tr: "Ayarlar sayfası artık dışa/içe aktarma özelliğinin ne için kullanılabileceğini gösteren bir açıklama gösteriyor.",
+        ja: "設定ページにエクスポート/インポート機能の用途説明が表示されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-06T13:00:00.000Z",
     changes: [
       {
