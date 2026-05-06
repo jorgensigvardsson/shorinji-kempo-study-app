@@ -1,0 +1,107 @@
+name: Deploy-Staging
+
+on:
+  workflow_run:
+    workflows: ["Test"]
+    branches:
+      - deploy-staging
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: internal-docker-registry:80/shorinjikempo:latest-staging
+      SSH_HOST: ${{ secrets.SSH_HOST }}      # format: dns-name:port
+      SSH_USER: ${{ secrets.SSH_USER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write .env.production from secrets
+        env:
+          VITE_DEBUG: ${{ vars.VITE_DEBUG || 'true' }}
+          VITE_FEEDBACK_EMAIL: ${{ secrets.VITE_FEEDBACK_EMAIL }}
+          VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
+          VITE_ONEDRIVE_TENANT_ID: ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
+          VITE_ONEDRIVE_REDIRECT_URI: ${{ vars.VITE_ONEDRIVE_REDIRECT_URI }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_REDIRECT_URI: ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
+        run: |
+          set -euo pipefail
+          missing=()
+          require() {
+            local name="$1"
+            local value="$2"
+            if [ -z "$value" ]; then
+              missing+=("$name")
+            fi
+          }
+          # VITE_DEBUG is the only value allowed to be missing (it defaults to "false").
+          # VITE_ONEDRIVE_REDIRECT_URI and VITE_GOOGLE_REDIRECT_URI are optional —
+          # if blank, the app falls back to "<origin>/" at runtime.
+          require VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
+          require VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
+          require VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
+          require VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required deploy secrets/vars: ${missing[*]}"
+            echo "::error::Set them in repo Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+
+          : > .env.production
+          write_var() {
+            local name="$1"
+            local value="$2"
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$name" "$value" >> .env.production
+            fi
+          }
+          write_var VITE_DEBUG "$VITE_DEBUG"
+          write_var VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
+          write_var VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
+          write_var VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
+          write_var VITE_ONEDRIVE_REDIRECT_URI "$VITE_ONEDRIVE_REDIRECT_URI"
+          write_var VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
+          write_var VITE_GOOGLE_REDIRECT_URI "$VITE_GOOGLE_REDIRECT_URI"
+
+      - name: Build image
+        run: docker build -t "$IMAGE" .
+
+      - name: Save and compress image
+        run: docker save "$IMAGE" | gzip > image.tar.gz
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          DEPLOY_HOST="${SSH_HOST%:*}"
+          DEPLOY_PORT="${SSH_HOST##*:}"
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "DEPLOY_HOST=$DEPLOY_HOST" >> "$GITHUB_ENV"
+          echo "DEPLOY_PORT=$DEPLOY_PORT" >> "$GITHUB_ENV"
+
+      - name: Copy image to dockernode1
+        run: |
+          REMOTE_PATH="/tmp/shorinjikempo-staging-${{ github.sha }}.tar.gz"
+          scp -i ~/.ssh/id_deploy -P "$DEPLOY_PORT" \
+            image.tar.gz "$SSH_USER@$DEPLOY_HOST:$REMOTE_PATH"
+          echo "REMOTE_PATH=$REMOTE_PATH" >> "$GITHUB_ENV"
+
+      - name: Load, push, and restart stack on dockernode1
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" "$SSH_USER@$DEPLOY_HOST" bash -s <<REMOTE
+          set -euo pipefail
+          trap 'rm -f "$REMOTE_PATH"' EXIT
+          gunzip < "$REMOTE_PATH" | docker load
+          docker push "$IMAGE"
+          cd services/shorinjikempo-staging
+          docker compose down
+          docker compose up -d
+          REMOTE
