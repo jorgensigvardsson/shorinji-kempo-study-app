@@ -1,4 +1,4 @@
-import type { AppDataDocument, AppDataState, HokeiRankEntry } from "../persistence/schema";
+import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type HokeiRankEntry } from "../persistence/schema";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -11,10 +11,11 @@ export function mergeDocuments(
   remote: AppDataDocument
 ): MergeResult {
   if (!base) {
-    return {
-      document: newerOf(local, remote),
-      conflictDetected: false,
-    };
+    // No sync history on this device. Use schema defaults as the implicit common
+    // ancestor so the field-by-field merge runs normally. Without this, newerOf()
+    // would pick the fresh device's document (updatedAt=now) over older cloud data,
+    // silently deleting whatever the cloud had.
+    base = createDefaultAppDataDocument();
   }
 
   const baseDocument = base;
