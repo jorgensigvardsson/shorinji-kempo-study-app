@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-06T13:00:00.000Z",
+    changes: [
+      {
+        emoji: "🛡️",
+        sv: "Appen visar nu ett felmeddelande med en omladdningsknapp om något oväntat går fel, istället för att visa en tom sida.",
+        en: "The app now shows an error message with a reload button if something unexpected goes wrong, instead of showing a blank page.",
+        tr: "Uygulama artık beklenmedik bir şey ters gittiğinde boş bir sayfa göstermek yerine yeniden yükleme düğmesiyle bir hata mesajı gösteriyor.",
+        ja: "予期しないエラーが発生した際に、空白のページを表示するのではなく、再読み込みボタン付きのエラーメッセージを表示するようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-06T12:00:00.000Z",
     changes: [
       {

@@ -1,4 +1,5 @@
 import { StrictMode, type ReactNode } from 'react'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/bootstrap-theme.scss';
@@ -23,12 +24,14 @@ getSyncManager().start();
 function mountRoot() {
   render(
     <StrictMode>
-      <BrowserRouter>
-        <TranslationsContext value={translations}>
-          <App gradeData={gradeData} languageData={languageData}
-               gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}/>
-        </TranslationsContext>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <TranslationsContext value={translations}>
+            <App gradeData={gradeData} languageData={languageData}
+                 gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}/>
+          </TranslationsContext>
+        </BrowserRouter>
+      </ErrorBoundary>
     </StrictMode>
   )
 
