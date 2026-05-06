@@ -241,11 +241,14 @@ const AppToasts = (props: { translator: Translator }) => {
           </div>
           <div className="app-update-toast-copy">
             <div className="app-update-toast-title">{translator.translate("Nyheter")}</div>
-            <ul className="app-update-toast-changelog-list">
+            <div className="app-update-toast-changelog-list">
               {CHANGELOG[0].changes.map((change, i) => (
-                <li key={i}>{change[lang]}</li>
+                <div key={i} className="app-update-toast-changelog-item">
+                  <span>{change.emoji}</span>
+                  <span>{change[lang]}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
           <div className="d-flex flex-column gap-2 app-update-toast-action">
             <Button size="sm" variant="primary" onClick={() => { navigate("/changelog"); dismissChangelog(); }}>

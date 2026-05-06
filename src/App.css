@@ -209,13 +209,18 @@
 
 .app-update-toast-changelog-list {
   margin: 0.2rem 0 0 0;
-  padding-left: 1.2rem;
   color: var(--bs-secondary-color);
   font-size: 0.85rem;
   line-height: 1.4;
 }
 
-.app-update-toast-changelog-list li + li {
+.app-update-toast-changelog-item {
+  display: grid;
+  grid-template-columns: 1.5em 1fr;
+  gap: 0.2rem;
+}
+
+.app-update-toast-changelog-item + .app-update-toast-changelog-item {
   margin-top: 0.1rem;
 }
 

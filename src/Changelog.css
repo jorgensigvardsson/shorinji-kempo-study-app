@@ -1,0 +1,12 @@
+.changelog-item {
+  display: grid;
+  grid-template-columns: 1.75em 1fr;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.changelog-item-emoji {
+  text-align: center;
+  user-select: none;
+}
