@@ -19,6 +19,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Write .env.production from secrets
+        env:
+          VITE_DEBUG: ${{ vars.VITE_DEBUG || 'false' }}
+          VITE_FEEDBACK_EMAIL: ${{ secrets.VITE_FEEDBACK_EMAIL }}
+          VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
+          VITE_ONEDRIVE_TENANT_ID: ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
+          VITE_ONEDRIVE_REDIRECT_URI: ${{ vars.VITE_ONEDRIVE_REDIRECT_URI }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_REDIRECT_URI: ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
+        run: |
+          set -euo pipefail
+          missing=()
+          require() {
+            local name="$1"
+            local value="$2"
+            if [ -z "$value" ]; then
+              missing+=("$name")
+            fi
+          }
+          # VITE_DEBUG is the only value allowed to be missing (it defaults to "false").
+          # VITE_ONEDRIVE_REDIRECT_URI and VITE_GOOGLE_REDIRECT_URI are optional —
+          # if blank, the app falls back to "<origin>/" at runtime.
+          require VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
+          require VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
+          require VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
+          require VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required deploy secrets/vars: ${missing[*]}"
+            echo "::error::Set them in repo Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+
+          : > .env.production
+          write_var() {
+            local name="$1"
+            local value="$2"
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$name" "$value" >> .env.production
+            fi
+          }
+          write_var VITE_DEBUG "$VITE_DEBUG"
+          write_var VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
+          write_var VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
+          write_var VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
+          write_var VITE_ONEDRIVE_REDIRECT_URI "$VITE_ONEDRIVE_REDIRECT_URI"
+          write_var VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
+          write_var VITE_GOOGLE_REDIRECT_URI "$VITE_GOOGLE_REDIRECT_URI"
+
       - name: Build image
         run: docker build -t "$IMAGE" .
 

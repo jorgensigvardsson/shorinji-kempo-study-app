@@ -35,4 +35,15 @@ npm run build     # production build
 
 Pushes to the `deploy` branch trigger the GitHub Actions workflow, which builds a Docker image and deploys it to the production host via SSH. See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for details.
 
-Required repository secrets: `SSH_HOST` (`hostname:port`), `SSH_USER`, `SSH_PRIVATE_KEY`.
+The workflow writes `.env.production` from repository secrets/vars before building, since `.env.*` files are gitignored.
+
+Required repository secrets:
+- `SSH_HOST` (`hostname:port`), `SSH_USER`, `SSH_PRIVATE_KEY` — deploy target
+- `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
+- `VITE_ONEDRIVE_CLIENT_ID` — OneDrive OAuth public client ID
+- `VITE_GOOGLE_CLIENT_ID` — Google Drive OAuth public client ID
+
+Optional repository variables (with sensible defaults):
+- `VITE_DEBUG` (default `false`)
+- `VITE_ONEDRIVE_TENANT_ID` (default `consumers`)
+- `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`
