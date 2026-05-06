@@ -1,4 +1,4 @@
-import { Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Newspaper, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Newspaper, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
@@ -9,6 +9,7 @@ import type { HokeiNotes, HokeiRanks } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
 import Quiz from "./Quiz.tsx";
+import GradingTest from "./GradingTest.tsx";
 import Flashcard from "./Flashcard.tsx";
 import TermsOfServices from "./TermsOfServices.tsx";
 import PrivacyPolicy from "./PrivacyPolicy.tsx";
@@ -68,6 +69,12 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection,
         showInMainMenu: true
+    }, {
+        path: "/grading-test",
+        component: () => <GradingTest />,
+        menuText: translator.translate("Graderingstest"),
+        startDescription: translator.translate("Se krav inför nästa gradering."),
+        icon: Award,
     }, {
         path: "/word-list",
         component: () => <WordList />,

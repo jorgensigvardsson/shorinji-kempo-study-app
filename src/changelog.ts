@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-06T19:00:00.000Z",
+    changes: [
+      {
+        emoji: "📋",
+        sv: "Ny sida: Graderingstest, med krav för 6 kyū.",
+        en: "New page: Grading test, with requirements for 6 kyū.",
+        tr: "Yeni sayfa: Sınav testi, 6 kyū için gereksinimler.",
+        ja: "新機能：昇級考試ページ（6級の要件）を追加しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-06T17:00:00.000Z",
     changes: [
       {

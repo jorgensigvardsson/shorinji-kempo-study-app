@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://shorinjikempo.example/schemas/grade-manual.json",
+  "title": "GradeManual",
+  "description": "Curriculum/grading-test description for a single Shorinji Kempo grade (kyu/dan). Generic recursive structure that captures the numbered, bulleted, and annotated content used throughout the kamokuhyō.",
+  "type": "object",
+  "required": ["grade", "title", "sections"],
+  "properties": {
+    "grade": {
+      "type": "string",
+      "description": "Stable grade identifier, e.g. '6kyu', '5kyu', '1dan'."
+    },
+    "term": {
+      "$ref": "#/definitions/Term",
+      "description": "Original Japanese title of the document (kanji + romaji), e.g. '6級昇級考試実施要目' / 'rokkyū shōkyū kōshi jisshi yōmoku'."
+    },
+    "title": {
+      "$ref": "#/definitions/Translatable",
+      "description": "User-visible document title, translated like the rest of the app."
+    },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Section" }
+    }
+  },
+  "definitions": {
+    "Translatable": {
+      "description": "A user-visible string. Stored in the fallback language (Swedish). When the data is consumed by the app, translations for ja/en/tr are looked up either by 'key' or by the Swedish text itself, mirroring translations.json. Non-translatable Japanese terminology must use 'Term' instead, never 'Translatable'.",
+      "type": "object",
+      "required": ["sv"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Optional stable translation key. If omitted, the Swedish string acts as the lookup key."
+        },
+        "sv": {
+          "type": "string",
+          "description": "Swedish (fallback) text."
+        }
+      }
+    },
+    "Term": {
+      "description": "A Shorinji Kempo terminology unit. The kanji+romaji pair is treated as fixed Japanese terminology and is NEVER translated (analogous to noTranslate() in the app). Only the optional 'gloss' is translatable.",
+      "type": "object",
+      "required": ["romaji"],
+      "properties": {
+        "kanji": {
+          "type": "string",
+          "description": "Original Japanese script (kanji and/or kana)."
+        },
+        "romaji": {
+          "type": "string",
+          "description": "Hepburn romanization."
+        },
+        "gloss": {
+          "$ref": "#/definitions/Translatable",
+          "description": "Optional short explanation shown in parentheses after the romaji, e.g. 'fukusō (klädsel)'."
+        }
+      }
+    },
+    "Numbering": {
+      "description": "How the item is labelled in the printed source. The renderer decides the visual style; 'value' is the sequential number within its parent.",
+      "type": "object",
+      "required": ["style"],
+      "properties": {
+        "style": {
+          "type": "string",
+          "enum": ["bullet", "numeric", "paren", "circled"],
+          "description": "bullet = '・'; numeric = '1.'; paren = '(1)'; circled = '①'."
+        },
+        "value": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Sequential number within siblings. Omit for bullets."
+        }
+      }
+    },
+    "Annotation": {
+      "description": "A note attached to an item, shown beneath it. The Japanese source uses ※ (kome); the Swedish translation uses *.",
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "marker": {
+          "type": "string",
+          "enum": ["kome", "asterisk"],
+          "default": "kome"
+        },
+        "text": { "$ref": "#/definitions/Translatable" }
+      }
+    },
+    "TechniqueGroup": {
+      "description": "A list of Japanese techniques sharing a common context (stance, direction, etc.). The context is rendered in parentheses before the list, e.g. '(開足立から) / (från kaisoku dachi)'.",
+      "type": "object",
+      "required": ["techniques"],
+      "properties": {
+        "context": {
+          "type": "object",
+          "description": "Optional shared context. Rendered as 'kanji' on the Japanese line and 'text' on the translated line.",
+          "properties": {
+            "kanji": { "type": "string" },
+            "text": { "$ref": "#/definitions/Translatable" }
+          }
+        },
+        "techniques": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/Term" }
+        }
+      }
+    },
+    "Section": {
+      "description": "A top-level subdivision of the manual, typically marked '◎' in the source.",
+      "type": "object",
+      "required": ["title", "items"],
+      "properties": {
+        "marker": {
+          "type": "string",
+          "description": "Visual marker in the source, e.g. '◎'."
+        },
+        "term": {
+          "$ref": "#/definitions/Term",
+          "description": "Japanese name of the section, e.g. '学科科目' / 'gakka kamoku'."
+        },
+        "title": {
+          "$ref": "#/definitions/Translatable",
+          "description": "Translatable section title, e.g. 'teoretiska ämnen'."
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Item" }
+        }
+      }
+    },
+    "Item": {
+      "description": "Generic recursive node. Represents a numbered or bulleted entry with optional Japanese term, translatable description, point value, annotations, technique groups, and nested sub-items.",
+      "type": "object",
+      "properties": {
+        "numbering": { "$ref": "#/definitions/Numbering" },
+        "term": { "$ref": "#/definitions/Term" },
+        "text": {
+          "$ref": "#/definitions/Translatable",
+          "description": "Translatable prose, used when an item's main content is descriptive rather than a Japanese term."
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Point value (X 点 / X poäng)."
+        },
+        "annotations": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Annotation" }
+        },
+        "techniqueGroups": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/TechniqueGroup" }
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Item" }
+        }
+      }
+    }
+  }
+}
