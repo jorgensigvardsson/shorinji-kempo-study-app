@@ -18,6 +18,8 @@ jobs:
       SSH_USER: ${{ secrets.SSH_USER }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Write .env.production from secrets
         env:
