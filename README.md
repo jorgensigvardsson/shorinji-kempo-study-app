@@ -8,7 +8,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **All Hokei** — browse and filter all techniques across all grades
 - **Technique Groups** — explore techniques organized by category
 - **Word List** — searchable dictionary of kanji, romaji, and technique terminology
-- **Quiz** — rapid-fire questions testing technique names and terminology
+- **Quiz** — rapid-fire questions testing technique names and terminology, with streak counter and synced all-time high score
 - **Flashcards** — spaced-repetition learning tool (non-Japanese languages)
 - **Notes & ratings** — attach personal notes and star ratings to individual techniques
 - **Cloud sync** — data syncs automatically to OneDrive, Google Drive, or Dropbox
@@ -47,3 +47,6 @@ Optional repository variables (with sensible defaults):
 - `VITE_DEBUG` (default `false`)
 - `VITE_ONEDRIVE_TENANT_ID` (default `consumers`)
 - `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`
+
+## Deployment staging
+Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The only thing that differs is that one must push to the branch `deploy-staging`.

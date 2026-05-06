@@ -41,6 +41,8 @@ const Quiz = (props: QuizProps) => {
     });
   }, []);
 
+  const answeredCorrectly = answer !== null && quizCard !== null && answer === quizCard.correctAnswer;
+
   const showAnswer = () => {
     setCurrentStreak(0);
     setShowBack(true);
@@ -106,8 +108,6 @@ const Quiz = (props: QuizProps) => {
   const correctAlternative =
     quizCard.alternatives[quizCard.correctAnswer];
 
-  const answeredCorrectly = answer === quizCard.correctAnswer;
-
   return (
     <div className="quiz-page">
       <div className={`quiz-scene ${showBack ? "is-flipped" : ""}`}>
@@ -120,6 +120,10 @@ const Quiz = (props: QuizProps) => {
                     {translator.translate(quizCard.question, { params: quizCard.questionArgs })}
                   </h1>
                   <div className="quiz-alternatives">{alternatives}</div>
+                </div>
+                <div className="quiz-streak-footer">
+                  <span>{translator.translate("Streak")}: <strong>{currentStreak}</strong></span>
+                  <span>{translator.translate("Rekord")}: <strong>{highScore}</strong></span>
                 </div>
               </Card.Body>
             </Card>
@@ -161,16 +165,14 @@ const Quiz = (props: QuizProps) => {
                     </>
                   )}
                 </div>
+                <div className="quiz-streak-footer">
+                  <span>{translator.translate("Streak")}: <strong>{currentStreak}</strong></span>
+                  <span>{translator.translate("Rekord")}: <strong>{highScore}</strong></span>
+                </div>
               </Card.Body>
-
             </Card>
           </div>
         </div>
-      </div>
-
-      <div className="quiz-streak">
-        <span>{translator.translate("Streak")}: <strong>{currentStreak}</strong></span>
-        <span>{translator.translate("Rekord")}: <strong>{highScore}</strong></span>
       </div>
 
       {!showBack && (

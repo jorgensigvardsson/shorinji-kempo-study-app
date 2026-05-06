@@ -13,7 +13,7 @@ Any user-visible string passed to `translator.translate()` must have a correspon
 Strings wrapped with `noTranslate()` (imported from `src/i18n.ts`) are intentionally fixed in an unspecified language and must never be passed to `translator.translate()` or added to `translations.json`. The function is an identity marker — its purpose is to signal that translation is explicitly unwanted.
 
 ## README.md
-When something worth mentioning in README.md has happened (new build steps, tech stack changes, features), note it there.
+When something worth mentioning in README.md has happened (new build steps, tech stack changes, features), note it there. Also, see how deployments are done here.
 
 ## src/changelog.ts
 Add a changelog entry here before committing. This is user facing, so make it less technical.
