@@ -1,5 +1,3 @@
-import type { Language } from "./i18n";
-
 export interface ChangelogChange {
   emoji: string;
   sv: string;
