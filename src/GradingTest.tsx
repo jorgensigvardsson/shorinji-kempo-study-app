@@ -222,7 +222,7 @@ const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }
                 ))}
                 <div className="d-flex flex-column gap-2">
                     {item.items?.map((subItem, i) => (
-                        <SubItemCard key={i} item={subItem} translator={translator} />
+                        <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} />
                     ))}
                 </div>
             </Card.Body>
@@ -230,13 +230,19 @@ const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }
     );
 };
 
-const SubItemCard = ({ item, translator }: { item: Item; translator: Translator }) => {
+const emojiNumbers = ["", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+
+const SubItemCard = ({ item, translator, showEmojiNumbers }: { item: Item; translator: Translator; showEmojiNumbers?: boolean }) => {
     const display = itemDisplay(item, translator);
     const hasContent = hasExpandableContent(item);
+    const numEmoji = showEmojiNumbers && item.numbering?.style === "paren" && item.numbering.value != null
+        ? (emojiNumbers[item.numbering.value] ?? `(${item.numbering.value})`)
+        : undefined;
 
     const header = (
         <div className="d-flex justify-content-between align-items-start w-100">
             <div>
+                {numEmoji && <span className="me-2">{numEmoji}</span>}
                 <span className="fw-semibold">{display.primary}</span>
                 {display.gloss && <span className="text-muted ms-1 small">({display.gloss})</span>}
                 {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
