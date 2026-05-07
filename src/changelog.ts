@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-07T20:06:00.000Z",
+    changes: [
+      {
+        emoji: "🪳",
+        sv: "Graderingsinformation för 3 kyū: tekniska ämnena visas nu korrekt i listan.",
+        en: "Grading information for 3 kyū: technical subjects now display correctly in the list.",
+        tr: "3 kyū için derecelendirme bilgisi: teknik konular artık listede doğru görüntüleniyor.",
+        ja: "3級の昇級考試情報：技術科目がリストに正しく表示されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-07T19:45:00.000Z",
     changes: [
       {

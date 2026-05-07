@@ -35,6 +35,7 @@ interface Item {
     numbering?: Numbering;
     term?: Term;
     text?: string;
+    description?: string;
     points?: number;
     annotations?: Annotation[];
     techniqueGroups?: TechniqueGroup[];
@@ -215,6 +216,7 @@ const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }
                     </div>
                     {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
                 </div>
+                {item.description && <p className="mb-2">{translator.translate(item.description)}</p>}
                 {item.annotations?.map((ann, i) => (
                     <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
                 ))}

@@ -342,7 +342,6 @@
               "gloss": "utvalda tekniker"
             },
             "points": 100,
-            "text": "Fem gōhō (50 poäng) och fem jūhō (50 poäng) väljs ut av alla tekniker upp till 3 kyū. Dock ska minst 3 tekniker vara från 3 kyūs kamoku både när det gäller gōhō och jūhō.",
             "annotations": [
               {
                 "marker": "kome",
@@ -352,7 +351,8 @@
                 "marker": "kome",
                 "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
               }
-            ]
+            ],
+            "description": "Fem gōhō (50 poäng) och fem jūhō (50 poäng) väljs ut av alla tekniker upp till 3 kyū. Dock ska minst 3 tekniker vara från 3 kyūs kamoku både när det gäller gōhō och jūhō."
           },
           {
             "numbering": {
@@ -435,7 +435,6 @@
               "romaji": "un'yōhō"
             },
             "points": 100,
-            "text": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna.",
             "annotations": [
               {
                 "marker": "kome",
@@ -491,7 +490,8 @@
                   }
                 ]
               }
-            ]
+            ],
+            "description": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna."
           }
         ]
       }
