@@ -105,7 +105,7 @@ const GradingTest = () => {
     if (!selectedSection) {
         const gridItems: GridItem[] = manual.sections.map((section, i) => ({
             key: `section-${i}`,
-            title: section.title.sv,
+            title: <span style={{ textTransform: "capitalize" }}>{section.title.sv}</span>,
             subtitle: section.term?.romaji,
             onSelect: () => setSelectedSection(section),
         }));
@@ -126,15 +126,12 @@ const GradingTest = () => {
     if (!selectedItem) {
         const gridItems: GridItem[] = selectedSection.items.map((item, i) => {
             const display = itemDisplay(item);
-            const prefix = formatNumbering(item.numbering);
-            const showPrefix = item.numbering?.style !== "bullet" && !!prefix;
-            const title = showPrefix ? `${prefix} ${display.primary}` : display.primary;
             const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
             const subtitle = subtitleParts.length > 0 ? subtitleParts.join(" · ") : undefined;
 
             return {
                 key: `item-${i}`,
-                title,
+                title: display.primary,
                 subtitle,
                 badge: item.points != null ? <Badge bg="secondary">{item.points}p</Badge> : undefined,
                 onSelect: hasExpandableContent(item) ? () => setSelectedItem(item) : undefined,
@@ -181,23 +178,20 @@ const BackPanel = ({ title, subtitle, onBack }: BackPanelProps) => (
         onKeyDown={e => { if (e.key === "Enter" || e.key === " ") onBack(); }}
     >
         <ChevronLeft size={16} />
-        <span className="fw-semibold">{title}</span>
+        <span className="fw-semibold" style={{ textTransform: "capitalize" }}>{title}</span>
         {subtitle && <span className="text-muted small">· {subtitle}</span>}
     </div>
 );
 
 const ItemDetail = ({ item }: { item: Item }) => {
     const display = itemDisplay(item);
-    const prefix = formatNumbering(item.numbering);
-    const showPrefix = item.numbering?.style !== "bullet" && !!prefix;
-    const title = showPrefix ? `${prefix} ${display.primary}` : display.primary;
 
     return (
         <Card className="app-grid-card">
             <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h3 className="mb-0">{title}</h3>
+                        <h3 className="mb-0">{display.primary}</h3>
                         {display.gloss && <div className="text-muted small">({display.gloss})</div>}
                         {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
                         {display.kanji && <div className="text-muted small">{display.kanji}</div>}
@@ -219,13 +213,11 @@ const ItemDetail = ({ item }: { item: Item }) => {
 
 const SubItemCard = ({ item }: { item: Item }) => {
     const display = itemDisplay(item);
-    const prefix = formatNumbering(item.numbering);
     const hasContent = hasExpandableContent(item);
 
     const header = (
         <div className="d-flex justify-content-between align-items-start w-100">
             <div>
-                {prefix && <span className="text-muted me-1 small">{prefix}</span>}
                 <span className="fw-semibold">{display.primary}</span>
                 {display.gloss && <span className="text-muted ms-1 small">({display.gloss})</span>}
                 {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
