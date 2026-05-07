@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Badge, Card } from "react-bootstrap";
 import { ChevronLeft } from "react-bootstrap-icons";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
-import rawData from "../data/file.json";
+import { TranslatorContext, type Translator } from "./i18n";
+import type { GradeName } from "./data";
+import gradingExamInformation from "./assets/grading-exam-information.json";
 
-interface Translatable {
-    sv: string;
-    key?: string;
+interface GradingTestProps {
+    grade: GradeName;
 }
 
 interface Term {
-    kanji?: string;
     romaji: string;
-    gloss?: Translatable;
+    gloss?: string;
 }
 
 interface Numbering {
@@ -23,18 +23,18 @@ interface Numbering {
 
 interface Annotation {
     marker: "kome" | "asterisk";
-    text: Translatable;
+    text: string;
 }
 
 interface TechniqueGroup {
-    context?: { kanji?: string; text?: Translatable };
+    context?: { kanji?: string; text?: string };
     techniques: Term[];
 }
 
 interface Item {
     numbering?: Numbering;
     term?: Term;
-    text?: Translatable;
+    text?: string;
     points?: number;
     annotations?: Annotation[];
     techniqueGroups?: TechniqueGroup[];
@@ -44,18 +44,17 @@ interface Item {
 interface Section {
     marker?: string;
     term?: Term;
-    title: Translatable;
+    title: string;
     items: Item[];
 }
 
 interface GradeManual {
-    grade: string;
     term?: Term;
-    title: Translatable;
+    title: string;
     sections: Section[];
 }
 
-const manual = rawData as unknown as GradeManual;
+const allGrades = gradingExamInformation as unknown as Partial<Record<GradeName, GradeManual>>;
 
 function formatNumbering(n: Numbering | undefined): string {
     if (!n) return "";
@@ -78,19 +77,25 @@ interface ItemDisplay {
     gloss?: string;
 }
 
-function itemDisplay(item: Item): ItemDisplay {
-    if (item.text?.sv) {
+function itemDisplay(item: Item, translator: Translator): ItemDisplay {
+    const kanji = item.term?.romaji ? translator.japanese(item.term.romaji) : undefined;
+    const kanjiDisplay = kanji !== item.term?.romaji ? kanji : undefined;
+    const gloss = item.term?.gloss ? translator.translate(item.term.gloss) : undefined;
+    if (item.text) {
         return {
-            primary: item.text.sv,
-            romajiSecondary: item.term?.romaji,
-            kanji: item.term?.kanji,
-            gloss: item.term?.gloss?.sv,
+            primary: translator.translate(item.text),
+            romajiSecondary: translator.isJapanese ? undefined : item.term?.romaji,
+            kanji: translator.isJapanese ? undefined : kanjiDisplay,
+            gloss,
         };
+    }
+    if (translator.isJapanese && kanjiDisplay) {
+        return { primary: kanjiDisplay, gloss };
     }
     return {
         primary: item.term?.romaji ?? "",
-        kanji: item.term?.kanji,
-        gloss: item.term?.gloss?.sv,
+        kanji: kanjiDisplay,
+        gloss,
     };
 }
 
@@ -98,15 +103,27 @@ function hasExpandableContent(item: Item): boolean {
     return !!(item.annotations?.length || item.techniqueGroups?.length || item.items?.length);
 }
 
-const GradingTest = () => {
+const GradingTest = ({ grade }: GradingTestProps) => {
+    const translator = useContext(TranslatorContext);
     const [selectedSection, setSelectedSection] = useState<Section | null>(null);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+    const manual = allGrades[grade];
+    if (!manual) {
+        return (
+            <Card className="app-grid-panel">
+                <Card.Body>
+                    <p className="text-muted mb-0">{translator.translate("Information för graderingstest saknas.")}</p>
+                </Card.Body>
+            </Card>
+        );
+    }
 
     if (!selectedSection) {
         const gridItems: GridItem[] = manual.sections.map((section, i) => ({
             key: `section-${i}`,
-            title: <span style={{ textTransform: "capitalize" }}>{section.title.sv}</span>,
-            subtitle: section.term?.romaji,
+            title: <span style={{ textTransform: "capitalize" }}>{translator.translate(section.title)}</span>,
+            subtitle: translator.isJapanese ? undefined : section.term?.romaji,
             onSelect: () => setSelectedSection(section),
         }));
 
@@ -114,8 +131,8 @@ const GradingTest = () => {
             <div>
                 <Card className="app-grid-panel mb-2">
                     <Card.Body>
-                        <h2>{manual.title.sv}</h2>
-                        {manual.term && <div className="text-muted small">{manual.term.romaji}</div>}
+                        <h2>{translator.translate(manual.title)}</h2>
+                        {manual.term && !translator.isJapanese && <div className="text-muted small">{manual.term.romaji}</div>}
                     </Card.Body>
                 </Card>
                 <Grid items={gridItems} />
@@ -125,7 +142,7 @@ const GradingTest = () => {
 
     if (!selectedItem) {
         const gridItems: GridItem[] = selectedSection.items.map((item, i) => {
-            const display = itemDisplay(item);
+            const display = itemDisplay(item, translator);
             const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
             const subtitle = subtitleParts.length > 0 ? subtitleParts.join(" · ") : undefined;
 
@@ -133,7 +150,7 @@ const GradingTest = () => {
                 key: `item-${i}`,
                 title: display.primary,
                 subtitle,
-                badge: item.points != null ? <Badge bg="secondary">{item.points}p</Badge> : undefined,
+                badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
                 onSelect: hasExpandableContent(item) ? () => setSelectedItem(item) : undefined,
             };
         });
@@ -141,8 +158,8 @@ const GradingTest = () => {
         return (
             <div>
                 <BackPanel
-                    title={selectedSection.title.sv}
-                    subtitle={selectedSection.term?.romaji}
+                    title={translator.translate(selectedSection.title)}
+                    subtitle={translator.isJapanese ? undefined : selectedSection.term?.romaji}
                     onBack={() => setSelectedSection(null)}
                 />
                 <Grid items={gridItems} />
@@ -153,11 +170,11 @@ const GradingTest = () => {
     return (
         <div>
             <BackPanel
-                title={selectedSection.title.sv}
-                subtitle={selectedSection.term?.romaji}
+                title={translator.translate(selectedSection.title)}
+                subtitle={translator.isJapanese ? undefined : selectedSection.term?.romaji}
                 onBack={() => setSelectedItem(null)}
             />
-            <ItemDetail item={selectedItem} />
+            <ItemDetail item={selectedItem} translator={translator} />
         </div>
     );
 };
@@ -183,8 +200,8 @@ const BackPanel = ({ title, subtitle, onBack }: BackPanelProps) => (
     </div>
 );
 
-const ItemDetail = ({ item }: { item: Item }) => {
-    const display = itemDisplay(item);
+const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }) => {
+    const display = itemDisplay(item, translator);
 
     return (
         <Card className="app-grid-card">
@@ -196,14 +213,14 @@ const ItemDetail = ({ item }: { item: Item }) => {
                         {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
                         {display.kanji && <div className="text-muted small">{display.kanji}</div>}
                     </div>
-                    {item.points != null && <Badge bg="secondary">{item.points}p</Badge>}
+                    {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
                 </div>
                 {item.annotations?.map((ann, i) => (
-                    <p key={i} className="text-muted small fst-italic mb-2">* {ann.text.sv}</p>
+                    <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
                 ))}
                 <div className="d-flex flex-column gap-2">
                     {item.items?.map((subItem, i) => (
-                        <SubItemCard key={i} item={subItem} />
+                        <SubItemCard key={i} item={subItem} translator={translator} />
                     ))}
                 </div>
             </Card.Body>
@@ -211,8 +228,8 @@ const ItemDetail = ({ item }: { item: Item }) => {
     );
 };
 
-const SubItemCard = ({ item }: { item: Item }) => {
-    const display = itemDisplay(item);
+const SubItemCard = ({ item, translator }: { item: Item; translator: Translator }) => {
+    const display = itemDisplay(item, translator);
     const hasContent = hasExpandableContent(item);
 
     const header = (
@@ -223,7 +240,7 @@ const SubItemCard = ({ item }: { item: Item }) => {
                 {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
                 {display.kanji && <div className="text-muted small">{display.kanji}</div>}
             </div>
-            {item.points != null && <Badge bg="secondary" className="ms-2 flex-shrink-0">{item.points}p</Badge>}
+            {item.points != null && <Badge bg="secondary" className="ms-2 flex-shrink-0">{item.points}{translator.translate("p")}</Badge>}
         </div>
     );
 
@@ -234,22 +251,29 @@ const SubItemCard = ({ item }: { item: Item }) => {
             showCollapse={hasContent}
         >
             {item.annotations?.map((ann, i) => (
-                <p key={i} className="text-muted small fst-italic mb-2">* {ann.text.sv}</p>
+                <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
             ))}
             {item.techniqueGroups?.map((group, gi) => (
                 <div key={gi} className="mb-2">
                     {group.context?.text && (
-                        <div className="text-muted small mb-1">{group.context.text.sv}</div>
+                        <div className="text-muted small mb-1">{translator.translate(group.context.text)}</div>
                     )}
                     <ul className="mb-0">
-                        {group.techniques.map((tech, ti) => (
-                            <li key={ti}>{tech.romaji}</li>
-                        ))}
+                        {group.techniques.map((tech, ti) => {
+                            const techKanji = translator.japanese(tech.romaji);
+                            const hasKanji = techKanji !== tech.romaji;
+                            return (
+                                <li key={ti}>
+                                    {translator.isJapanese && hasKanji ? techKanji : tech.romaji}
+                                    {!translator.isJapanese && hasKanji && <span className="text-muted ms-1 small">{techKanji}</span>}
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
             ))}
             {item.items?.map((subItem, i) => {
-                const subDisplay = itemDisplay(subItem);
+                const subDisplay = itemDisplay(subItem, translator);
                 const subPrefix = formatNumbering(subItem.numbering);
                 return (
                     <div key={i} className="ms-2 mb-1">

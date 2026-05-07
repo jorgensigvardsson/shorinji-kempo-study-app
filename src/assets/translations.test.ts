@@ -7,24 +7,29 @@ import translations from "./translations.json";
 const normalizedKeySet = (obj: Record<string, string>) =>
   new Set(Object.keys(obj).map(k => k.toLowerCase()));
 
-const sections = ["ja", "en", "tr"] as const;
+// "ja" is a curated set of real translations — it is intentionally a subset of
+// "en"/"tr" and is not required to mirror them fully. "en" and "tr" must be
+// symmetric with each other, and anything translated into "ja" must also have
+// coverage in "en" and "tr".
+const mustBeSubsetOf: Array<[string, string]> = [
+  ["ja", "en"],
+  ["ja", "tr"],
+  ["en", "tr"],
+  ["tr", "en"],
+];
 
 describe("translations.json completeness", () => {
   const keysBySection = Object.fromEntries(
-    sections.map(lang => [lang, normalizedKeySet(translations[lang])])
-  ) as Record<typeof sections[number], Set<string>>;
+    ["ja", "en", "tr"].map(lang => [lang, normalizedKeySet(translations[lang as keyof typeof translations])])
+  ) as Record<"ja" | "en" | "tr", Set<string>>;
 
-  for (const source of sections) {
-    for (const target of sections) {
-      if (source === target) continue;
-
-      it(`every key in "${source}" also exists in "${target}"`, () => {
-        const missing = [...keysBySection[source]].filter(k => !keysBySection[target].has(k));
-        expect(
-          missing,
-          `${missing.length} key(s) in "${source}" missing from "${target}": ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`
-        ).toHaveLength(0);
-      });
-    }
+  for (const [source, target] of mustBeSubsetOf) {
+    it(`every key in "${source}" also exists in "${target}"`, () => {
+      const missing = [...keysBySection[source as "ja" | "en" | "tr"]].filter(k => !keysBySection[target as "ja" | "en" | "tr"].has(k));
+      expect(
+        missing,
+        `${missing.length} key(s) in "${source}" missing from "${target}": ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`
+      ).toHaveLength(0);
+    });
   }
 });

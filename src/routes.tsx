@@ -63,18 +63,18 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         icon: ListUl,
         showInMainMenu: true
     }, {
+        path: "/grading-test",
+        component: () => <GradingTest grade={gradePlan.grade} />,
+        menuText: translator.translate("Graderingstest"),
+        startDescription: translator.translate("Se krav inför nästa gradering."),
+        icon: Award,
+        showInMainMenu: true,
+    }, {
         path: "/groups",
         component: () => <Groups allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/>,
         menuText: translator.translate("Teknikgrupper"),
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
-        icon: Collection,
-        showInMainMenu: true
-    }, {
-        path: "/grading-test",
-        component: () => <GradingTest />,
-        menuText: translator.translate("Graderingstest"),
-        startDescription: translator.translate("Se krav inför nästa gradering."),
-        icon: Award,
+        icon: Collection
     }, {
         path: "/word-list",
         component: () => <WordList />,

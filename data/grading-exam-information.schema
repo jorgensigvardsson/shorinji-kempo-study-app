@@ -1,60 +1,41 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://shorinjikempo.example/schemas/grade-manual.json",
-  "title": "GradeManual",
-  "description": "Curriculum/grading-test description for a single Shorinji Kempo grade (kyu/dan). Generic recursive structure that captures the numbered, bulleted, and annotated content used throughout the kamokuhyō.",
+  "$id": "https://shorinjikempo.example/schemas/grading-exam-information.json",
+  "title": "GradingExamInformation",
+  "description": "Dictionary of grading-test descriptions keyed by GradeName (e.g. '6 kyū', 'shodan'). Each value describes the curriculum/grading-test content for a single Shorinji Kempo grade. User-visible Swedish strings are looked up in src/assets/translations.json at runtime; romaji keys are used to look up kanji in the 'ja' section of translations.json.",
   "type": "object",
-  "required": ["grade", "title", "sections"],
-  "properties": {
-    "grade": {
-      "type": "string",
-      "description": "Stable grade identifier, e.g. '6kyu', '5kyu', '1dan'."
-    },
-    "term": {
-      "$ref": "#/definitions/Term",
-      "description": "Original Japanese title of the document (kanji + romaji), e.g. '6級昇級考試実施要目' / 'rokkyū shōkyū kōshi jisshi yōmoku'."
-    },
-    "title": {
-      "$ref": "#/definitions/Translatable",
-      "description": "User-visible document title, translated like the rest of the app."
-    },
-    "sections": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/Section" }
-    }
-  },
+  "additionalProperties": { "$ref": "#/definitions/GradeManual" },
   "definitions": {
-    "Translatable": {
-      "description": "A user-visible string. Stored in the fallback language (Swedish). When the data is consumed by the app, translations for ja/en/tr are looked up either by 'key' or by the Swedish text itself, mirroring translations.json. Non-translatable Japanese terminology must use 'Term' instead, never 'Translatable'.",
+    "GradeManual": {
       "type": "object",
-      "required": ["sv"],
+      "required": ["title", "sections"],
       "properties": {
-        "key": {
-          "type": "string",
-          "description": "Optional stable translation key. If omitted, the Swedish string acts as the lookup key."
+        "term": {
+          "$ref": "#/definitions/Term",
+          "description": "Original Japanese title of the document (romaji), e.g. 'rokkyū shōkyū kōshi jisshi yōmoku'. Kanji is looked up via translations.json."
         },
-        "sv": {
+        "title": {
           "type": "string",
-          "description": "Swedish (fallback) text."
+          "description": "User-visible document title in Swedish. Used as the lookup key into translations.json for ja/en/tr."
+        },
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Section" }
         }
       }
     },
     "Term": {
-      "description": "A Shorinji Kempo terminology unit. The kanji+romaji pair is treated as fixed Japanese terminology and is NEVER translated (analogous to noTranslate() in the app). Only the optional 'gloss' is translatable.",
+      "description": "A Shorinji Kempo terminology unit. Romaji is the canonical key; kanji is looked up from the 'ja' section of translations.json at render time. Only the optional 'gloss' is translatable.",
       "type": "object",
       "required": ["romaji"],
       "properties": {
-        "kanji": {
-          "type": "string",
-          "description": "Original Japanese script (kanji and/or kana)."
-        },
         "romaji": {
           "type": "string",
-          "description": "Hepburn romanization."
+          "description": "Hepburn romanization. Also serves as the translations.json lookup key for kanji (ja section)."
         },
         "gloss": {
-          "$ref": "#/definitions/Translatable",
-          "description": "Optional short explanation shown in parentheses after the romaji, e.g. 'fukusō (klädsel)'."
+          "type": "string",
+          "description": "Optional short Swedish explanation shown in parentheses after the romaji, e.g. 'klädsel'. Looked up in translations.json."
         }
       }
     },
@@ -85,7 +66,10 @@
           "enum": ["kome", "asterisk"],
           "default": "kome"
         },
-        "text": { "$ref": "#/definitions/Translatable" }
+        "text": {
+          "type": "string",
+          "description": "Annotation text in Swedish. Looked up in translations.json."
+        }
       }
     },
     "TechniqueGroup": {
@@ -95,10 +79,9 @@
       "properties": {
         "context": {
           "type": "object",
-          "description": "Optional shared context. Rendered as 'kanji' on the Japanese line and 'text' on the translated line.",
+          "description": "Optional shared context. 'text' is a Swedish string looked up in translations.json; Japanese form is retrieved from the 'ja' section using 'text' as key.",
           "properties": {
-            "kanji": { "type": "string" },
-            "text": { "$ref": "#/definitions/Translatable" }
+            "text": { "type": "string" }
           }
         },
         "techniques": {
@@ -122,8 +105,8 @@
           "description": "Japanese name of the section, e.g. '学科科目' / 'gakka kamoku'."
         },
         "title": {
-          "$ref": "#/definitions/Translatable",
-          "description": "Translatable section title, e.g. 'teoretiska ämnen'."
+          "type": "string",
+          "description": "Swedish section title, e.g. 'teoretiska ämnen'. Looked up in translations.json."
         },
         "items": {
           "type": "array",
@@ -138,8 +121,8 @@
         "numbering": { "$ref": "#/definitions/Numbering" },
         "term": { "$ref": "#/definitions/Term" },
         "text": {
-          "$ref": "#/definitions/Translatable",
-          "description": "Translatable prose, used when an item's main content is descriptive rather than a Japanese term."
+          "type": "string",
+          "description": "Swedish prose used when an item's main content is descriptive rather than a Japanese term. Looked up in translations.json."
         },
         "points": {
           "type": "integer",

@@ -17,10 +17,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       {
         emoji: "📋",
-        sv: "Ny sida: Graderingstest, med krav för 6 kyū.",
-        en: "New page: Grading test, with requirements for 6 kyū.",
-        tr: "Yeni sayfa: Sınav testi, 6 kyū için gereksinimler.",
-        ja: "新機能：昇級考試ページ（6級の要件）を追加しました。",
+        sv: "Ny sida: Graderingsinformation för din nästa grad.",
+        en: "New page: Grading information for your next grade.",
+        tr: "Yeni sayfa: Bir sonraki derece için sınav bilgisi.",
+        ja: "新機能：次の昇級に向けた考試情報ページを追加しました。",
       },
     ],
   },
