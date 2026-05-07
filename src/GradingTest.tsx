@@ -8,7 +8,7 @@ import type { GradeName } from "./data";
 import gradingExamInformation from "./assets/grading-exam-information.json";
 
 interface GradingTestProps {
-    grade: GradeName;
+    grade: GradeName | undefined;
 }
 
 interface Term {
@@ -109,7 +109,7 @@ const GradingTest = ({ grade }: GradingTestProps) => {
     const [selectedSection, setSelectedSection] = useState<Section | null>(null);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-    const manual = allGrades[grade];
+    const manual = grade ? allGrades[grade] : undefined;
     if (!manual) {
         return (
             <Card className="app-grid-panel">

@@ -5,6 +5,16 @@ export const humanGradeName = (ln: GradeName): string => {
     return ln;
 }
 
+const gradeProgression: GradeName[] = [
+    "6 kyū", "5 kyū", "4 kyū", "3 kyū", "2 kyū", "1 kyū",
+    "shodan", "nidan", "sandan", "yondan", "godan", "rokudan", "nanadan", "hachidan", "kudan",
+];
+
+export function nextGrade(grade: GradeName): GradeName | undefined {
+    const idx = gradeProgression.indexOf(grade);
+    return idx >= 0 && idx < gradeProgression.length - 1 ? gradeProgression[idx + 1] : undefined;
+}
+
 export interface GradePlan {
   grade: GradeName;
   note?: string;

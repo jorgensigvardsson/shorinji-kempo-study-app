@@ -1,5 +1,6 @@
 import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Newspaper, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
+import { nextGrade } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
 import { noTranslate, type Language, type Translator } from "./i18n.ts";
@@ -64,7 +65,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         showInMainMenu: true
     }, {
         path: "/grading-test",
-        component: () => <GradingTest grade={gradePlan.grade} />,
+        component: () => <GradingTest grade={nextGrade(gradePlan.grade)} />,
         menuText: translator.translate("Graderingstest"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,

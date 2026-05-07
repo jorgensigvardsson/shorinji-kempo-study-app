@@ -13,74 +13,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-05-07T21:04:00.000Z",
+    timestamp: "2026-05-07T21:11:00.000Z",
     changes: [
       {
         emoji: "📋",
-        sv: "Graderingsinformation för shodan (1 dan) tillagd.",
-        en: "Grading information for shodan (1 dan) added.",
-        tr: "Shodan (1 dan) için derecelendirme bilgisi eklendi.",
-        ja: "初段の昇格考試情報を追加しました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-05-07T20:48:00.000Z",
-    changes: [
-      {
-        emoji: "📋",
-        sv: "Graderingsinformation för 1 kyū tillagd.",
-        en: "Grading information for 1 kyū added.",
-        tr: "1 kyū için derecelendirme bilgisi eklendi.",
-        ja: "1級の昇級考試情報を追加しました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-05-07T20:22:00.000Z",
-    changes: [
-      {
-        emoji: "📋",
-        sv: "Graderingsinformation för 2 kyū tillagd.",
-        en: "Grading information for 2 kyū added.",
-        tr: "2 kyū için derecelendirme bilgisi eklendi.",
-        ja: "2級の昇級考試情報を追加しました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-05-07T20:06:00.000Z",
-    changes: [
-      {
-        emoji: "🪳",
-        sv: "Graderingsinformation för 3 kyū: tekniska ämnena visas nu korrekt i listan.",
-        en: "Grading information for 3 kyū: technical subjects now display correctly in the list.",
-        tr: "3 kyū için derecelendirme bilgisi: teknik konular artık listede doğru görüntüleniyor.",
-        ja: "3級の昇級考試情報：技術科目がリストに正しく表示されるようになりました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-05-07T19:45:00.000Z",
-    changes: [
-      {
-        emoji: "📋",
-        sv: "Graderingsinformation för 3 kyū tillagd.",
-        en: "Grading information for 3 kyū added.",
-        tr: "3 kyū için derecelendirme bilgisi eklendi.",
-        ja: "3級の昇級考試情報を追加しました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-05-07T18:23:00.000Z",
-    changes: [
-      {
-        emoji: "📋",
-        sv: "Graderingsinformation för 4 kyū tillagd.",
-        en: "Grading information for 4 kyū added.",
-        tr: "4 kyū için derecelendirme bilgisi eklendi.",
-        ja: "4級の昇級考試情報を追加しました。",
+        sv: "Graderingsinformation för alla kyugrader och shodan tillagt.",
+        en: "Grading information for all kyū grades and shodan added.",
+        tr: "Tüm kyū dereceleri ve shodan için derecelendirme bilgisi eklendi.",
+        ja: "全級位と初段の昇格考試情報を追加しました。",
       },
     ],
   },
