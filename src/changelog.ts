@@ -13,6 +13,32 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-07T22:30:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan visas inte längre för japanska användare – den är avsedd som hjälp för icke-japaner att lära sig japanska termer.",
+        en: "The word list is no longer shown to Japanese-language users — it is intended to help non-Japanese speakers learn Japanese terms.",
+        tr: "Kelime listesi artık Japonca kullanıcılara gösterilmiyor — Japonca olmayan kullanıcıların Japonca terimleri öğrenmesine yardımcı olmak için tasarlanmıştır.",
+        ja: "単語リストは日本語ユーザーには表示されなくなりました。このリストは日本語以外のユーザーが日本語の用語を学ぶためのものです。",
+      },
+      {
+        emoji: "✏️",
+        sv: "Engelska och turkiska översättningar i ordlistan har korrigerats och kompletterats – många var tidigare ofullständiga eller inte översatta alls.",
+        en: "English and Turkish translations in the word list have been corrected and completed — many were previously incomplete or not translated at all.",
+        tr: "Kelime listesindeki İngilizce ve Türkçe çeviriler düzeltildi ve tamamlandı — önceden birçoğu eksik ya da hiç çevrilmemişti.",
+        ja: "単語リストの英語・トルコ語訳を修正・補完しました。以前は不完全または未翻訳のものが多くありました。",
+      },
+      {
+        emoji: "✏️",
+        sv: "Romaji har lagts till för ett antal ord i ordlistan som tidigare saknade det.",
+        en: "Romaji has been added for several words in the word list that previously lacked it.",
+        tr: "Daha önce romaji'si olmayan kelime listesindeki birkaç kelimeye romaji eklendi.",
+        ja: "単語リストでローマ字が欠けていたいくつかの単語にローマ字を追加しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-07T21:22:00.000Z",
     changes: [
       {

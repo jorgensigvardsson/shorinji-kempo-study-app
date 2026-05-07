@@ -670,7 +670,7 @@
     "kanji": "権少法師",
     "romaji": "gon shōhōshi",
     "meanings": [
-      "6:e sōkai-graden (gon=interim, shō=liten, ”hōshi=buddhistpräst)"
+      "6:e sōkai-graden (gon=interim, shō=liten, \"hōshi=buddhistpräst)"
     ]
   },
   {
@@ -678,7 +678,7 @@
     "kanji": "少 法 師",
     "romaji": "shōhōshi",
     "meanings": [
-      "7:e sōkai-graden (shō=liten, hōshi=buddhistpräst”)"
+      "7:e sōkai-graden (shō=liten, hōshi=buddhistpräst\")"
     ]
   },
   {
@@ -700,7 +700,7 @@
   {
     "index": 87,
     "kanji": "権大法師",
-    "romaji": "gon daidōshi",
+    "romaji": "gon daihōshi",
     "meanings": [
       "10:e sōkai-graden (gon=interim, dai=stor, hōshi=buddhistpräst)"
     ]
@@ -718,7 +718,7 @@
     "kanji": "准拳士",
     "romaji": "junkenshi",
     "meanings": [
-      "kan erhållas samtidigt som shodan (≈ ”semi-kenshi”)"
+      "kan erhållas samtidigt som shodan (≈ \"semi-kenshi\")"
     ]
   },
   {
@@ -726,7 +726,7 @@
     "kanji": "少拳士",
     "romaji": "shōkenshi",
     "meanings": [
-      "kan erhållas samtidigt som nidan (≈ ”liten kenshi”)"
+      "kan erhållas samtidigt som nidan (≈ \"liten kenshi\")"
     ]
   },
   {
@@ -734,7 +734,7 @@
     "kanji": "中拳士",
     "romaji": "chūkenshi",
     "meanings": [
-      "kan erhållas samtidigt som sandan (≈ ”mellan-kenshi”)"
+      "kan erhållas samtidigt som sandan (≈ \"mellan-kenshi\")"
     ]
   },
   {
@@ -742,7 +742,7 @@
     "kanji": "正拳士",
     "romaji": "seikenshi",
     "meanings": [
-      "kan erhållas samtidigt som yondan (≈ ”sann kenshi”)"
+      "kan erhållas samtidigt som yondan (≈ \"sann kenshi\")"
     ]
   },
   {
@@ -750,7 +750,7 @@
     "kanji": "大拳士",
     "romaji": "daikenshi",
     "meanings": [
-      "kan erhållas efter godan (≈ ”stor kenshi”)"
+      "kan erhållas efter godan (≈ \"stor kenshi\")"
     ]
   },
   {
@@ -758,7 +758,7 @@
     "kanji": "准範士",
     "romaji": "junhanshi",
     "meanings": [
-      "kan erhållas efter rokudan (≈ ”semi-mästare”)"
+      "kan erhållas efter rokudan (≈ \"semi-mästare\")"
     ]
   },
   {
@@ -766,7 +766,7 @@
     "kanji": "正範士",
     "romaji": "seihanshi",
     "meanings": [
-      "kan erhållas efter nanadan (≈ ”sann mästare”)"
+      "kan erhållas efter nanadan (≈ \"sann mästare\")"
     ]
   },
   {
@@ -774,7 +774,7 @@
     "kanji": "大範士",
     "romaji": "daihanshi",
     "meanings": [
-      "kan erhållas efter hachidan (≈ ”stor mästare”)"
+      "kan erhållas efter hachidan (≈ \"stor mästare\")"
     ]
   },
   {
@@ -886,7 +886,7 @@
     "kanji": "不撓不屈",
     "romaji": "futō fukutsu",
     "meanings": [
-      "never giving up with unyielding spirit"
+      "aldrig ge upp, orubblig anda"
     ]
   },
   {
@@ -900,7 +900,10 @@
   {
     "index": 112,
     "kanji": "幸福運動",
-    "romaji": "kōfuku undō"
+    "romaji": "kōfuku undō",
+    "meanings": [
+      "rörelse för lycka"
+    ]
   },
   {
     "index": 113,
@@ -913,7 +916,10 @@
   {
     "index": 114,
     "kanji": "一生懸命",
-    "romaji": "isshō kenmei"
+    "romaji": "isshō kenmei",
+    "meanings": [
+      "ge sitt yttersta, anstränga sig av alla krafter"
+    ]
   },
   {
     "index": 115,
@@ -928,30 +934,39 @@
     "kanji": "真純単一",
     "romaji": "shinjun tan'itsu",
     "meanings": [
-      "pure and focused"
+      "ren och fokuserad"
     ]
   },
   {
     "index": 117,
     "kanji": "協力一致",
-    "romaji": "kyōryoku itchi"
+    "romaji": "kyōryoku itchi",
+    "meanings": [
+      "samarbete och enighet"
+    ]
   },
   {
     "index": 118,
     "kanji": "身心練磨",
-    "romaji": "shinshin renma"
+    "romaji": "shinshin renma",
+    "meanings": [
+      "träning av kropp och sinne"
+    ]
   },
   {
     "index": 119,
     "kanji": "生涯修行",
-    "romaji": "shōgai shugyō"
+    "romaji": "shōgai shugyō",
+    "meanings": [
+      "livslång övning"
+    ]
   },
   {
     "index": 120,
     "kanji": "一志一道",
     "romaji": "isshi ichidō",
     "meanings": [
-      "one goal, one path"
+      "ett mål, en väg"
     ]
   },
   {
@@ -973,74 +988,119 @@
   {
     "index": 123,
     "kanji": "虚心坦懐",
-    "romaji": "kyoshin taikan"
+    "romaji": "kyoshin taikan",
+    "meanings": [
+      "öppet och ofördomsfritt sinne"
+    ]
   },
   {
     "index": 124,
     "kanji": "諸法無我",
-    "romaji": "shohō muga"
+    "romaji": "shohō muga",
+    "meanings": [
+      "alla fenomen saknar ett eget, fast jag"
+    ]
   },
   {
     "index": 125,
     "kanji": "諸行無常",
-    "romaji": "shogyō mujō"
+    "romaji": "shogyō mujō",
+    "meanings": [
+      "alla ting är förgängliga"
+    ]
   },
   {
     "index": 126,
-    "kanji": "愛民愛郷"
+    "kanji": "愛民愛郷",
+    "romaji": "aimin aikyō",
+    "meanings": [
+      "kärlek till folket och hemlandet"
+    ]
   },
   {
     "index": 127,
     "kanji": "不言実行",
-    "romaji": "fugen jikkō"
+    "romaji": "fugen jikkō",
+    "meanings": [
+      "handling utan ord"
+    ]
   },
   {
     "index": 128,
     "kanji": "一拳多生",
-    "romaji": "ikken tasshō"
+    "romaji": "ikken tasshō",
+    "meanings": [
+      "ett slag räddar många liv"
+    ]
   },
   {
     "index": 129,
     "kanji": "破邪顕正",
-    "romaji": "haja kenshō"
+    "romaji": "haja kenshō",
+    "meanings": [
+      "utplåna det onda, uppenbara det rätta"
+    ]
   },
   {
     "index": 130,
     "kanji": "破邪の拳",
-    "romaji": "haja no ken ??"
+    "romaji": "haja no ken"
   },
   {
     "index": 131,
-    "kanji": "済生利人"
+    "kanji": "済生利人",
+    "romaji": "saisei rinin",
+    "meanings": [
+      "rädda liv, gynna människor"
+    ]
   },
   {
     "index": 132,
-    "kanji": "夫婦相和"
+    "kanji": "夫婦相和",
+    "romaji": "fūfu sōwa",
+    "meanings": [
+      "make och maka i harmoni"
+    ]
   },
   {
     "index": 133,
     "kanji": "自己修練",
-    "romaji": "jiko shūren"
+    "romaji": "jiko shūren",
+    "meanings": [
+      "självdisciplin"
+    ]
   },
   {
     "index": 134,
     "kanji": "同志相親",
-    "romaji": "dōshi ??"
+    "romaji": "dōshi sōshin",
+    "meanings": [
+      "kamrater nära varandra"
+    ]
   },
   {
     "index": 135,
     "kanji": "明鏡止水",
-    "romaji": "meikyō shisui"
+    "romaji": "meikyō shisui",
+    "meanings": [
+      "klar som en spegel, stilla som vatten"
+    ]
   },
   {
     "index": 136,
     "kanji": "守破離",
-    "romaji": "shu ha ri"
+    "romaji": "shu ha ri",
+    "meanings": [
+      "följa, bryta, frigöra sig (inlärningsstadier)"
+    ]
   },
   {
     "index": 137,
     "kanji": "直心",
-    "romaji": "jikishin"
+    "romaji": "jikishin",
+    "meanings": [
+      "uppriktigt hjärta"
+    ]
   },
   {
     "index": 138,
@@ -1303,7 +1363,7 @@
     "kanji": "深呼吸",
     "romaji": "shinkokyū",
     "meanings": [
-      "”andningskontroll” med kroppsrörelse"
+      "\"andningskontroll\" med kroppsrörelse"
     ]
   },
   {
@@ -1375,7 +1435,7 @@
     "kanji": "それまで",
     "romaji": "soremade",
     "meanings": [
-      "stopp, ”till och med detta”"
+      "stopp, \"till och med detta\""
     ]
   },
   {
@@ -1439,7 +1499,7 @@
     "kanji": "法衣",
     "romaji": "hōi",
     "meanings": [
-      "svart ”kappa” som bärs av yūdansha vid speciella tillfällen"
+      "svart \"kappa\" som bärs av yūdansha vid speciella tillfällen"
     ]
   },
   {
@@ -1655,7 +1715,7 @@
     "kanji": "鎮魂行",
     "romaji": "chinkon gyō",
     "meanings": [
-      "”lugn sinnesträning”, meditation"
+      "\"lugn sinnesträning\", meditation"
     ]
   },
   {
@@ -1727,7 +1787,7 @@
     "kanji": "演武",
     "romaji": "embu",
     "meanings": [
-      "”visa kamp”, parmönster för uppvisning och tävling"
+      "\"visa kamp\", parmönster för uppvisning och tävling"
     ]
   },
   {
@@ -1783,7 +1843,7 @@
     "kanji": "八方目",
     "romaji": "happōmoku",
     "meanings": [
-      "vidseende, ”split vision” (se åt åtta håll)"
+      "vidseende, \"split vision\" (se åt åtta håll)"
     ]
   },
   {
@@ -1911,7 +1971,7 @@
     "kanji": "法器",
     "romaji": "hōki",
     "meanings": [
-      "”buddistiska föremål”, inom Shorinji Kempo våra ”vapen”"
+      "\"buddistiska föremål\", inom Shorinji Kempo våra \"vapen\""
     ]
   },
   {
@@ -2031,18 +2091,24 @@
     "kanji": "ゼッケン",
     "romaji": "zekken",
     "meanings": [
-      "”nummerlapp” (på ryggen av uwagi vid taikai, indikerar förening eller land)"
+      "\"nummerlapp\" (på ryggen av uwagi vid taikai, indikerar förening eller land)"
     ]
   },
   {
     "index": 262,
     "kanji": "技術度",
-    "romaji": "gijutsudo"
+    "romaji": "gijutsudo",
+    "meanings": [
+      "teknisk nivå (poäng vid embu-bedömning)"
+    ]
   },
   {
     "index": 263,
     "kanji": "表限度",
-    "romaji": "hyōgendo"
+    "romaji": "hyōgendo",
+    "meanings": [
+      "uttrycksbegränsning (poäng vid embu-bedömning)"
+    ]
   },
   {
     "index": 264,
@@ -2055,17 +2121,26 @@
   {
     "index": 265,
     "kanji": "節度",
-    "romaji": "setsudo"
+    "romaji": "setsudo",
+    "meanings": [
+      "måttfullhet, behärskning"
+    ]
   },
   {
     "index": 266,
     "kanji": "美しさ",
-    "romaji": "utsukushisa"
+    "romaji": "utsukushisa",
+    "meanings": [
+      "skönhet"
+    ]
   },
   {
     "index": 267,
     "kanji": "冴え",
-    "romaji": "sae"
+    "romaji": "sae",
+    "meanings": [
+      "skärpa, klarhet"
+    ]
   },
   {
     "index": 268,
@@ -2238,12 +2313,18 @@
   {
     "index": 289,
     "kanji": "拇指丘",
-    "romaji": "boshi kyū"
+    "romaji": "boshi kyū",
+    "meanings": [
+      "tummens muskelkudde (tenar)"
+    ]
   },
   {
     "index": 290,
     "kanji": "小指丘",
-    "romaji": "shoshi kyū"
+    "romaji": "shoshi kyū",
+    "meanings": [
+      "lillfingrets muskelkudde (hypotenar)"
+    ]
   },
   {
     "index": 291,
@@ -2274,7 +2355,7 @@
     "kanji": "一足一拳の間合",
     "romaji": "issoku ikken no maai",
     "meanings": [
-      "”ett steg ett slag”-avstånd"
+      "\"ett steg ett slag\"-avstånd"
     ]
   },
   {
@@ -2344,14 +2425,17 @@
   {
     "index": 303,
     "kanji": "絡子",
-    "romaji": "rakusu"
+    "romaji": "rakusu",
+    "meanings": [
+      "litet munkplagg, bärs kring halsen"
+    ]
   },
   {
     "index": 304,
     "kanji": "輪袈裟",
     "romaji": "wagesa",
     "meanings": [
-      "loop-shaped monk’s stole"
+      "munkstola i loopform"
     ]
   },
   {
@@ -2359,13 +2443,16 @@
     "kanji": "念珠",
     "romaji": "nenju",
     "meanings": [
-      "rosary; string of prayer beads"
+      "radband, bönepärlor"
     ]
   },
   {
     "index": 306,
     "kanji": "祭壇",
-    "romaji": "saidan"
+    "romaji": "saidan",
+    "meanings": [
+      "altare"
+    ]
   },
   {
     "index": 307,
@@ -2378,17 +2465,26 @@
   {
     "index": 308,
     "kanji": "仁王 (像?)",
-    "romaji": "niōsō"
+    "romaji": "niōsō",
+    "meanings": [
+      "Niō (buddistiska tempelväktare)"
+    ]
   },
   {
     "index": 309,
     "kanji": "達磨／だるま",
-    "romaji": "daruma"
+    "romaji": "daruma",
+    "meanings": [
+      "Bodhidharma / lyckodocka"
+    ]
   },
   {
     "index": 310,
     "kanji": "達磨大師",
-    "romaji": "daruma daishi"
+    "romaji": "daruma daishi",
+    "meanings": [
+      "Bodhidharma, grundare av Shaolin-traditionen"
+    ]
   },
   {
     "index": 311,
@@ -2401,7 +2497,10 @@
   {
     "index": 312,
     "kanji": "教典",
-    "romaji": "kyōten"
+    "romaji": "kyōten",
+    "meanings": [
+      "buddistiska heliga skrifter"
+    ]
   },
   {
     "index": 313,
@@ -2422,7 +2521,10 @@
   {
     "index": 315,
     "kanji": "礼拝詞",
-    "romaji": "raihaishi"
+    "romaji": "raihaishi",
+    "meanings": [
+      "tillbedjansbön (recitation vid hälsningsrit)"
+    ]
   },
   {
     "index": 316,
@@ -2693,7 +2795,7 @@
     "kanji": "ハンマー投",
     "romaji": "hamma nage",
     "meanings": [
-      "”hammar-kast”"
+      "\"hammar-kast\""
     ]
   },
   {
@@ -2717,7 +2819,7 @@
     "kanji": "肩車",
     "romaji": "kata guruma",
     "meanings": [
-      "”brandmanskast”, judo-teknik, attack vid t.ex. kata uchi nage"
+      "\"brandmanskast\", judo-teknik, attack vid t.ex. kata uchi nage"
     ]
   },
   {
@@ -2771,12 +2873,18 @@
   {
     "index": 359,
     "kanji": "縛法",
-    "romaji": "bakuhō"
+    "romaji": "bakuhō",
+    "meanings": [
+      "bindningstekniker"
+    ]
   },
   {
     "index": 360,
     "kanji": "押倒",
-    "romaji": "oshi taoshi"
+    "romaji": "oshi taoshi",
+    "meanings": [
+      "knuffa omkull, skjuta ned"
+    ]
   },
   {
     "index": 361,

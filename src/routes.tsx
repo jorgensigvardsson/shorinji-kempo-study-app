@@ -76,13 +76,13 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         menuText: translator.translate("Teknikgrupper"),
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection
-    }, {
+    }, ...(!translator.isJapanese ? [{
         path: "/word-list",
         component: () => <WordList />,
         menuText: translator.translate("Ordlista"),
         startDescription: translator.translate("Slå upp ord på kanji, romaji och betydelse."),
         icon: JournalText
-    }, {
+    } satisfies Route] : []), {
         path: "/quiz",
         component: () => <Quiz myGrade={gradePlan.grade}/>,
         menuText: translator.translate("Quiz"),
