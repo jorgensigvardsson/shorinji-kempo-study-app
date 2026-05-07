@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-07T21:22:00.000Z",
+    changes: [
+      {
+        emoji: "🪳",
+        sv: "Sukui kubi nage korrigerad - den hokei tillhör rakan ken.",
+        en: "Sukui kubi nage corrected — that hokei belongs to rakan ken.",
+        tr: "Sukui kubi nage düzeltildi — bu hokei rakan ken'e aittir.",
+        ja: "掬首投を修正しました。この法形は羅漢拳に属します。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-07T21:11:00.000Z",
     changes: [
       {
