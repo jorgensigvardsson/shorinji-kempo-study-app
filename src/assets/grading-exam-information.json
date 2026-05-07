@@ -1,5 +1,579 @@
 {
   "$schema": "../../data/grading-exam-information.schema",
+  "4 kyū": {
+    "term": {
+      "romaji": "yonkyū shōkyū kōshi jisshi yōmoku"
+    },
+    "title": "Ämnen för graderingstest till yonkyū (4 kyū)",
+    "sections": [
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gakka kamoku"
+        },
+        "title": "teoretiska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "bullet"
+            },
+            "term": {
+              "romaji": "jukensha ga teishutsu suru shukudai"
+            },
+            "text": "Hemarbete att lämna in",
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "hontō no tsuyosa to wa"
+                },
+                "text": "Vad är \"sann styrka\"?"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "shugyō no kokoroe"
+                },
+                "text": "Åtta nyckelaspekter för shugyō (träning)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gijutsu kamoku"
+        },
+        "title": "tekniska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "gijutsu I"
+            },
+            "points": 100,
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "rei shiki, sahō",
+                  "gloss": "etikett, uppförande"
+                },
+                "points": 20,
+                "annotations": [
+                  {
+                    "marker": "kome",
+                    "text": "Detta bedöms under hela graderingstestet, men kan bekräftas med specifika kommandon om nödvändigt."
+                  }
+                ],
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "shūgō"
+                      },
+                      {
+                        "romaji": "seiretsu"
+                      },
+                      {
+                        "romaji": "suwari kata",
+                        "gloss": "hur man sitter"
+                      },
+                      {
+                        "romaji": "tachi kata",
+                        "gloss": "hur man står"
+                      },
+                      {
+                        "romaji": "kesshu"
+                      },
+                      {
+                        "romaji": "gasshō rei"
+                      }
+                    ]
+                  },
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "chōsoku"
+                      },
+                      {
+                        "romaji": "happō moku"
+                      },
+                      {
+                        "romaji": "fukusō",
+                        "gloss": "klädsel"
+                      },
+                      {
+                        "romaji": "taido",
+                        "gloss": "attityd"
+                      },
+                      {
+                        "romaji": "henji",
+                        "gloss": "hur man svarar"
+                      },
+                      {
+                        "romaji": "kotoba",
+                        "gloss": "språk"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "tai gamae"
+                },
+                "points": 20,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "chūdan gamae"
+                      },
+                      {
+                        "romaji": "hassō gamae"
+                      },
+                      {
+                        "romaji": "ichiji gamae"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "zen tenkan, han tenkan, hiraki sagari, jun sagari"
+                },
+                "points": 20
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "umpohō"
+                },
+                "points": 20,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "chidori ashi"
+                      },
+                      {
+                        "romaji": "kani ashi"
+                      },
+                      {
+                        "romaji": "jūji ashi"
+                      },
+                      {
+                        "romaji": "kumo ashi"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "ukemi"
+                },
+                "points": 20,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "mae ukemi"
+                      },
+                      {
+                        "romaji": "ushiro ukemi"
+                      },
+                      {
+                        "romaji": "dai sharin"
+                      },
+                      {
+                        "romaji": "ōten yori okiagari"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "gijutsu II"
+            },
+            "points": 100,
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "kihon kōgi 1"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "context": {
+                      "text": "(från kaisoku dachi)"
+                    },
+                    "techniques": [
+                      {
+                        "romaji": "me uchi"
+                      },
+                      {
+                        "romaji": "kinteki geri"
+                      },
+                      {
+                        "romaji": "furiko zuki"
+                      },
+                      {
+                        "romaji": "gedan zuki"
+                      },
+                      {
+                        "romaji": "shutō uchi"
+                      },
+                      {
+                        "romaji": "keri age"
+                      },
+                      {
+                        "romaji": "jō chū ni ren zuki"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "kihon kōgi 2"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "context": {
+                      "text": "(från hidari/migi mae)"
+                    },
+                    "techniques": [
+                      {
+                        "romaji": "jun zuki"
+                      },
+                      {
+                        "romaji": "gyaku zuki"
+                      },
+                      {
+                        "romaji": "jun geri"
+                      },
+                      {
+                        "romaji": "gyaku geri"
+                      },
+                      {
+                        "romaji": "sashikomi mawashi geri"
+                      },
+                      {
+                        "romaji": "sashikae sokuō geri"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "kihon bōgi"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "context": {
+                      "text": "(från kaisoku dachi)"
+                    },
+                    "techniques": [
+                      {
+                        "romaji": "uwa uke"
+                      },
+                      {
+                        "romaji": "uchi uke"
+                      },
+                      {
+                        "romaji": "shita uke"
+                      },
+                      {
+                        "romaji": "soto uke"
+                      },
+                      {
+                        "romaji": "uchi age uke"
+                      },
+                      {
+                        "romaji": "uchi harai uke"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "idō kōgi"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "zenshin zuki (jun, gyaku)"
+                      },
+                      {
+                        "romaji": "zenshin geri (jun, gyaku)"
+                      },
+                      {
+                        "romaji": "hiraki sagatte jun geri"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "idō kōbōgi (sōtai)"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "chūdan zuki & shita uke"
+                      },
+                      {
+                        "romaji": "jō chū ni ren zuki & ren uke"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "tenchi ken dai ikkei - dai nikei (tan'en, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 7
+                },
+                "term": {
+                  "romaji": "tenchi ken dai ikkei (sōtai, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 8
+                },
+                "term": {
+                  "romaji": "ryūō ken dai ikkei (tan'en, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 9
+                },
+                "term": {
+                  "romaji": "ryūō ken dai ikkei (sōtai, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 10
+                },
+                "term": {
+                  "romaji": "giwa ken dai ikkei (tan'en)"
+                },
+                "points": 10
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "hōkei kamoku"
+            },
+            "points": 100,
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
+              },
+              {
+                "marker": "kome",
+                "text": "Utförs med bōgu (dō)."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "soto uke zuki (ura & omote, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "soto uke geri (ura & omote, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "uchi age zuki (ura & omote, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "uchi age geri (ura & omote, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "tsuki nuki (soto, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "tsuki nuki (uchi, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 7
+                },
+                "term": {
+                  "romaji": "kiri nuki (soto, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 8
+                },
+                "term": {
+                  "romaji": "kiri nuki (uchi, hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 9
+                },
+                "term": {
+                  "romaji": "katate okuri gote - okuri gatame (hidari & migi)"
+                },
+                "points": 10
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 10
+                },
+                "term": {
+                  "romaji": "okuri maki tembin (hidari & migi)"
+                },
+                "points": 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "5 kyū": {
     "term": {
       "romaji": "gokyū shōkyū kōshi jisshi yōmoku"
@@ -82,22 +656,52 @@
                 "techniqueGroups": [
                   {
                     "techniques": [
-                      { "romaji": "shūgō" },
-                      { "romaji": "seiretsu" },
-                      { "romaji": "suwari kata", "gloss": "hur man sitter" },
-                      { "romaji": "tachi kata", "gloss": "hur man står" },
-                      { "romaji": "kesshu" },
-                      { "romaji": "gasshō rei" }
+                      {
+                        "romaji": "shūgō"
+                      },
+                      {
+                        "romaji": "seiretsu"
+                      },
+                      {
+                        "romaji": "suwari kata",
+                        "gloss": "hur man sitter"
+                      },
+                      {
+                        "romaji": "tachi kata",
+                        "gloss": "hur man står"
+                      },
+                      {
+                        "romaji": "kesshu"
+                      },
+                      {
+                        "romaji": "gasshō rei"
+                      }
                     ]
                   },
                   {
                     "techniques": [
-                      { "romaji": "chōsoku" },
-                      { "romaji": "happō moku" },
-                      { "romaji": "fukusō", "gloss": "klädsel" },
-                      { "romaji": "taido", "gloss": "attityd" },
-                      { "romaji": "henji", "gloss": "hur man svarar" },
-                      { "romaji": "kotoba", "gloss": "språk" }
+                      {
+                        "romaji": "chōsoku"
+                      },
+                      {
+                        "romaji": "happō moku"
+                      },
+                      {
+                        "romaji": "fukusō",
+                        "gloss": "klädsel"
+                      },
+                      {
+                        "romaji": "taido",
+                        "gloss": "attityd"
+                      },
+                      {
+                        "romaji": "henji",
+                        "gloss": "hur man svarar"
+                      },
+                      {
+                        "romaji": "kotoba",
+                        "gloss": "språk"
+                      }
                     ]
                   }
                 ]
@@ -114,9 +718,15 @@
                 "techniqueGroups": [
                   {
                     "techniques": [
-                      { "romaji": "chūdan gamae" },
-                      { "romaji": "hassō gamae" },
-                      { "romaji": "ichiji gamae" }
+                      {
+                        "romaji": "chūdan gamae"
+                      },
+                      {
+                        "romaji": "hassō gamae"
+                      },
+                      {
+                        "romaji": "ichiji gamae"
+                      }
                     ]
                   }
                 ]
@@ -143,10 +753,18 @@
                 "techniqueGroups": [
                   {
                     "techniques": [
-                      { "romaji": "chidori ashi" },
-                      { "romaji": "kani ashi" },
-                      { "romaji": "jūji ashi" },
-                      { "romaji": "kumo ashi" }
+                      {
+                        "romaji": "chidori ashi"
+                      },
+                      {
+                        "romaji": "kani ashi"
+                      },
+                      {
+                        "romaji": "jūji ashi"
+                      },
+                      {
+                        "romaji": "kumo ashi"
+                      }
                     ]
                   }
                 ]
@@ -163,10 +781,18 @@
                 "techniqueGroups": [
                   {
                     "techniques": [
-                      { "romaji": "mae ukemi" },
-                      { "romaji": "ushiro ukemi" },
-                      { "romaji": "dai sharin" },
-                      { "romaji": "ōten yori okiagari" }
+                      {
+                        "romaji": "mae ukemi"
+                      },
+                      {
+                        "romaji": "ushiro ukemi"
+                      },
+                      {
+                        "romaji": "dai sharin"
+                      },
+                      {
+                        "romaji": "ōten yori okiagari"
+                      }
                     ]
                   }
                 ]
@@ -198,13 +824,27 @@
                       "text": "(från kaisoku dachi)"
                     },
                     "techniques": [
-                      { "romaji": "me uchi" },
-                      { "romaji": "kinteki geri" },
-                      { "romaji": "furiko zuki" },
-                      { "romaji": "gedan zuki" },
-                      { "romaji": "shutō uchi" },
-                      { "romaji": "keri age" },
-                      { "romaji": "jō chū ni ren zuki" }
+                      {
+                        "romaji": "me uchi"
+                      },
+                      {
+                        "romaji": "kinteki geri"
+                      },
+                      {
+                        "romaji": "furiko zuki"
+                      },
+                      {
+                        "romaji": "gedan zuki"
+                      },
+                      {
+                        "romaji": "shutō uchi"
+                      },
+                      {
+                        "romaji": "keri age"
+                      },
+                      {
+                        "romaji": "jō chū ni ren zuki"
+                      }
                     ]
                   }
                 ]
@@ -224,11 +864,21 @@
                       "text": "(från hidari/migi mae)"
                     },
                     "techniques": [
-                      { "romaji": "jun zuki" },
-                      { "romaji": "gyaku zuki" },
-                      { "romaji": "jun geri" },
-                      { "romaji": "gyaku geri" },
-                      { "romaji": "sashikomi mawashi geri" }
+                      {
+                        "romaji": "jun zuki"
+                      },
+                      {
+                        "romaji": "gyaku zuki"
+                      },
+                      {
+                        "romaji": "jun geri"
+                      },
+                      {
+                        "romaji": "gyaku geri"
+                      },
+                      {
+                        "romaji": "sashikomi mawashi geri"
+                      }
                     ]
                   }
                 ]
@@ -248,10 +898,18 @@
                       "text": "(från kaisoku dachi)"
                     },
                     "techniques": [
-                      { "romaji": "uwa uke" },
-                      { "romaji": "uchi uke" },
-                      { "romaji": "shita uke" },
-                      { "romaji": "uchi harai uke" }
+                      {
+                        "romaji": "uwa uke"
+                      },
+                      {
+                        "romaji": "uchi uke"
+                      },
+                      {
+                        "romaji": "shita uke"
+                      },
+                      {
+                        "romaji": "uchi harai uke"
+                      }
                     ]
                   }
                 ]
@@ -268,9 +926,15 @@
                 "techniqueGroups": [
                   {
                     "techniques": [
-                      { "romaji": "zenshin zuki (jun, gyaku)" },
-                      { "romaji": "zenshin geri (jun, gyaku)" },
-                      { "romaji": "hiraki sagatte jun geri" }
+                      {
+                        "romaji": "zenshin zuki (jun, gyaku)"
+                      },
+                      {
+                        "romaji": "zenshin geri (jun, gyaku)"
+                      },
+                      {
+                        "romaji": "hiraki sagatte jun geri"
+                      }
                     ]
                   }
                 ]
@@ -296,8 +960,12 @@
                       "text": "(från kaisoku dachi)"
                     },
                     "techniques": [
-                      { "romaji": "furiko zuki" },
-                      { "romaji": "keri age" }
+                      {
+                        "romaji": "furiko zuki"
+                      },
+                      {
+                        "romaji": "keri age"
+                      }
                     ]
                   },
                   {
@@ -305,10 +973,18 @@
                       "text": "(från hidari/migi mae)"
                     },
                     "techniques": [
-                      { "romaji": "jun zuki" },
-                      { "romaji": "gyaku zuki" },
-                      { "romaji": "jun geri" },
-                      { "romaji": "gyaku geri" }
+                      {
+                        "romaji": "jun zuki"
+                      },
+                      {
+                        "romaji": "gyaku zuki"
+                      },
+                      {
+                        "romaji": "jun geri"
+                      },
+                      {
+                        "romaji": "gyaku geri"
+                      }
                     ]
                   }
                 ]
@@ -378,53 +1054,103 @@
             ],
             "items": [
               {
-                "numbering": { "style": "paren", "value": 1 },
-                "term": { "romaji": "tenchi ken dai ikkei (sōtai, hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "tenchi ken dai ikkei (sōtai, hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 2 },
-                "term": { "romaji": "ryūō ken dai ikkei (sōtai, hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "ryūō ken dai ikkei (sōtai, hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 3 },
-                "term": { "romaji": "ryūsui geri (mae, hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "ryūsui geri (mae, hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 4 },
-                "term": { "romaji": "uwa uke zuki (ura, hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "uwa uke zuki (ura, hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 5 },
-                "term": { "romaji": "uwa uke geri (omote & ura, hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "uwa uke geri (omote & ura, hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 6 },
-                "term": { "romaji": "shita uke geri (hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "shita uke geri (hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 7 },
-                "term": { "romaji": "shita uke jun geri (hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 7
+                },
+                "term": {
+                  "romaji": "shita uke jun geri (hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 8 },
-                "term": { "romaji": "katate yori nuki (hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 8
+                },
+                "term": {
+                  "romaji": "katate yori nuki (hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 9 },
-                "term": { "romaji": "maki nuki (katate) (hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 9
+                },
+                "term": {
+                  "romaji": "maki nuki (katate) (hidari & migi)"
+                },
                 "points": 10
               },
               {
-                "numbering": { "style": "paren", "value": 10 },
-                "term": { "romaji": "gyaku gote - mae yubi gatame (hidari & migi)" },
+                "numbering": {
+                  "style": "paren",
+                  "value": 10
+                },
+                "term": {
+                  "romaji": "gyaku gote - mae yubi gatame (hidari & migi)"
+                },
                 "points": 10
               }
             ]
