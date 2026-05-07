@@ -1,5 +1,508 @@
 {
   "$schema": "../../data/grading-exam-information.schema",
+  "2 kyū": {
+    "term": {
+      "romaji": "nikyū shōkyū kōshi jisshi yōmoku"
+    },
+    "title": "Ämnen för graderingstest till nikyū (2 kyū)",
+    "sections": [
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gakka kamoku"
+        },
+        "title": "teoretiska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "bullet"
+            },
+            "term": {
+              "romaji": "jukensha ga teishutsu suru shukudai"
+            },
+            "text": "Hemarbete att lämna in",
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "shōrinji kempō no tokucho (shushu kōjū, fusatsu katsujin)"
+                },
+                "text": "Shorinji Kempos karaktärsdrag \"shushu kōjū, fusatsu katsujin\""
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "chinkon gyō ni tsuite"
+                },
+                "text": "Om chinkon gyō"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "shin, ki, ryoku ni tsuite"
+                },
+                "text": "Om shin, ki och ryoku (sinne, energi och styrka)"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "shōrinji kempō no enkaku to sōritsu"
+                },
+                "text": "Shorinji Kempos historia och dess grundande"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gijutsu kamoku"
+        },
+        "title": "tekniska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "kiso kamoku"
+            },
+            "points": 100,
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "tai gamae, tai sabaki, umpohō"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "chūdan gamae"
+                      },
+                      {
+                        "romaji": "hassō gamae"
+                      },
+                      {
+                        "romaji": "ichiji gamae"
+                      }
+                    ]
+                  },
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "zen tenkan"
+                      },
+                      {
+                        "romaji": "han tenkan"
+                      },
+                      {
+                        "romaji": "jun sagari"
+                      },
+                      {
+                        "romaji": "hiraki sagari"
+                      }
+                    ]
+                  },
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "chidori ashi"
+                      },
+                      {
+                        "romaji": "kani ashi"
+                      },
+                      {
+                        "romaji": "jūji ashi"
+                      },
+                      {
+                        "romaji": "kumo ashi"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "ukemi"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "mae ukemi"
+                      },
+                      {
+                        "romaji": "ushiro ukemi"
+                      },
+                      {
+                        "romaji": "dai sharin"
+                      },
+                      {
+                        "romaji": "ōten yori okiagari"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "kihon kōgi"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "context": {
+                      "text": "(från kaisoku dachi)"
+                    },
+                    "techniques": [
+                      {
+                        "romaji": "furiko zuki"
+                      },
+                      {
+                        "romaji": "shutō uchi"
+                      },
+                      {
+                        "romaji": "kumade zuki"
+                      },
+                      {
+                        "romaji": "keri age"
+                      }
+                    ]
+                  },
+                  {
+                    "context": {
+                      "text": "(från hidari/migi mae)"
+                    },
+                    "techniques": [
+                      {
+                        "romaji": "jō chū ni ren zuki"
+                      },
+                      {
+                        "romaji": "jō chū mawashi geri"
+                      },
+                      {
+                        "romaji": "sashikae sokuō geri"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "kihon bōgi"
+                },
+                "points": 10,
+                "annotations": [
+                  {
+                    "marker": "kome",
+                    "text": "från kaisoku dachi, lägg till kontringsattack som står inom parentes."
+                  }
+                ],
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "uwa uke (tsuki)"
+                      },
+                      {
+                        "romaji": "uchi uke (tsuki)"
+                      },
+                      {
+                        "romaji": "shita uke (keri)"
+                      },
+                      {
+                        "romaji": "soto uke (tsuki)"
+                      },
+                      {
+                        "romaji": "uchi age uke (keri)"
+                      },
+                      {
+                        "romaji": "uchi harai uke (keri)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "idō kōbōgi"
+                },
+                "points": 10,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "zenshin zuki (jun, gyaku)"
+                      },
+                      {
+                        "romaji": "zenshin geri (jun, gyaku)"
+                      },
+                      {
+                        "romaji": "hiraki sagatte jun geri"
+                      },
+                      {
+                        "romaji": "chūdan zuki & shita uke"
+                      },
+                      {
+                        "romaji": "jō chū ni ren zuki & ren uke (sōtai)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "tan'en kihon hōkei"
+                },
+                "points": 20,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "tenchi ken dai ikkei - dai yonkei (hidari & migi)"
+                      },
+                      {
+                        "romaji": "ryūō ken dai ikkei (hidari & migi)"
+                      },
+                      {
+                        "romaji": "giwa ken dai ikkei - dai nikei"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 7
+                },
+                "term": {
+                  "romaji": "tan'en kihon hōkei (sōtai)"
+                },
+                "points": 30,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "tenchi ken dai nikei"
+                      },
+                      {
+                        "romaji": "giwa ken dai ikkei"
+                      },
+                      {
+                        "romaji": "ryūō ken dai ikkei"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "chūshutsu kamoku",
+              "gloss": "utvalda tekniker"
+            },
+            "points": 100,
+            "description": "Fem gōhō (50 poäng) och fem jūhō (50 poäng) väljs ut av alla tekniker upp till 2 kyū. Dock ska minst 3 tekniker vara från 2 kyūs kamoku både när det gäller gōhō och jūhō.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Även inklusive embu kamoku."
+              },
+              {
+                "marker": "kome",
+                "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "kumi embu"
+            },
+            "points": 100,
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "En sida gör (1), (3) & (5) som shusha, vem som gör vilken sida bestäms av kōshi-in (examinator)."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "tsuki ten ichi ren hankō"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "han tenshin geri ren hankō"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "katate okuri gote - okuri yoko tembin - ura gatame"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "kiri gote (katate)"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "tenchi ken dai nikei (sōtai)"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "jōhaku dori (ryōte)"
+                }
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 4
+            },
+            "term": {
+              "romaji": "un'yōhō"
+            },
+            "points": 100,
+            "description": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Obligatoriskt upp till 49 års ålder. Frivilligt från 50 års ålder och över."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "gōhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: enkla eller dubbla attacker med tsuki och keri mot jōdan och chūdan."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: fria kontringar."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "jūhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: attackera genom att greppa handleden (katate, ryōte)."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: försvara och kontringsattackera med tekniker från ryūō ken, ryūka ken & rakan ken."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "3 kyū": {
     "term": {
       "romaji": "sankyū shōkyū kōshi jisshi yōmoku"
