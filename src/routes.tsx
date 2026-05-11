@@ -1,6 +1,5 @@
 import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Newspaper, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
-import { nextGrade } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
 import { noTranslate, type Language, type Translator } from "./i18n.ts";
@@ -65,7 +64,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         showInMainMenu: true
     }, {
         path: "/grading-test",
-        component: () => <GradingTest grade={nextGrade(gradePlan.grade)} />,
+        component: () => <GradingTest grade={gradePlan.grade} />,
         menuText: translator.translate("Graderingstest"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -96,7 +95,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         icon: CardHeading
     } satisfies Route] : []), {
         path: "/settings",
-        component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} grade={gradePlan} allGradePlans={allGradePlans} translator={translator}
+        component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={gradePlan} allGradePlans={allGradePlans} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),

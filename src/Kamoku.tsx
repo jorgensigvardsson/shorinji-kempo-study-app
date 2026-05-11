@@ -78,7 +78,7 @@ const Kamoku = (props: Props) => {
             <div className="app-grid-panel">
                 <Form.Group className="mb-3" controlId="level">
                     <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
-                        <option value={myGrade} key={myGrade}>{translator.translate("Min grad")}: {gradeLabel(myGrade, translator)}</option>
+                        <option value={myGrade} key={myGrade}>{translator.translate("Min nästa grad")}: {gradeLabel(myGrade, translator)}</option>
                         {
                             allGradePlans.filter(l => l.grade !== myGrade).map(
                                 l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator)}</option>

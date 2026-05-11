@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-11T19:47:17.000Z",
+    changes: [
+      {
+        emoji: "✏️",
+        sv: "Inställningsetiketten 'Nivå' heter nu 'Min nästa grad'.",
+        en: "The settings label 'Level' is now 'My next grade'.",
+        tr: "'Seviye' ayar etiketi artık 'Bir sonraki seviyem' olarak gösterilmektedir.",
+        ja: "設定の「級」ラベルを「次の級」に変更しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-11T19:35:00.000Z",
     changes: [
       {

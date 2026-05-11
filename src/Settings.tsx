@@ -13,7 +13,7 @@ import "./Settings.css";
 
 interface Props {
     translator: Translator;
-    grade: GradePlan;
+    nextGrade: GradePlan;
     allGradePlans: GradePlan[];
     textSize: number;
     onSetLanguage: (lang: Language) => void;
@@ -22,7 +22,7 @@ interface Props {
 }
 
 const Settings = (props: Props) => {
-    const { translator, grade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
+    const { translator, nextGrade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
     const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
     const { syncProvider, setSyncProvider } = useSyncProvider();
@@ -30,8 +30,8 @@ const Settings = (props: Props) => {
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
     const [kenshiNumber, setKenshiNumber] = useState(() => store.get("kenshiNumber"));
     const availableWeeks = useMemo(
-        () => [...new Set(grade.weeks.map(week => week.week))].sort((a, b) => a - b),
-        [grade]
+        () => [...new Set(nextGrade.weeks.map(week => week.week))].sort((a, b) => a - b),
+        [nextGrade]
     );
     const selectedWeek = availableWeeks.includes(currentWeekAnchor?.week ?? -1)
         ? currentWeekAnchor!.week
@@ -172,8 +172,8 @@ const Settings = (props: Props) => {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsLevel">
-                <Form.Label>{translator.translate("Nivå")}</Form.Label>
-                <Form.Select onChange={e => onSetGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
+                <Form.Label>{translator.translate("Min nästa grad")}</Form.Label>
+                <Form.Select onChange={e => onSetGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={nextGrade.grade}>
                     {
                         allGradePlans.map(
                             (l, i) => <option value={l.grade} key={i}>{gradeLabel(l.grade)}</option>

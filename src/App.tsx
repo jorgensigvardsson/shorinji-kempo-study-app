@@ -26,11 +26,11 @@ function App(props: Props) {
   const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
-  const [ grade, setGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
+  const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const translations = useContext(TranslationsContext);
   const translator = new TranslatorImplementation(translations, language);
   const routes = getRoutes(
-    gradePlans.find(l => l.grade === grade)!,
+    gradePlans.find(l => l.grade === nextGrade)!,
     gradePlans,
     translator,
     notesData,
@@ -42,7 +42,7 @@ function App(props: Props) {
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
-  useEffect(() => gradeData.registerListener(g => setGrade(g)), [gradeData]);
+  useEffect(() => gradeData.registerListener(g => setNextGrade(g)), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
 
   return (
