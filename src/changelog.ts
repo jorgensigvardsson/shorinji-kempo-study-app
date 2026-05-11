@@ -13,6 +13,30 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-11T19:35:00.000Z",
+    changes: [
+      {
+        emoji: "📋",
+        sv: "Graderingsinformation för nidan (2 dan) tillagd.",
+        en: "Grading information for nidan (2 dan) added.",
+        tr: "Nidan (2 dan) için derecelendirme bilgisi eklendi.",
+        ja: "二段（2 dan）の昇格考試科目を追加しました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-05-11T18:58:00.000Z",
+    changes: [
+      {
+        emoji: "✏️",
+        sv: "Flera fel i tekniklistan för nidan har rättats (teknikgrupper, stanser, tekniknamn m.m.) efter granskning mot det ursprungliga kamokuhyo.",
+        en: "Several errors in the nidan technique list have been corrected (technique groups, stances, technique names, etc.) after a review against the original kamokuhyo.",
+        tr: "Orijinal kamokuhyo ile karşılaştırıldıktan sonra nidan teknik listesindeki birkaç hata düzeltildi (teknik grupları, duruşlar, teknik adları vb.).",
+        ja: "原本の科目表と照合し、二段の技術一覧にあったいくつかの誤りを修正しました（技術グループ、構え、技名など）。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-07T22:30:00.000Z",
     changes: [
       {

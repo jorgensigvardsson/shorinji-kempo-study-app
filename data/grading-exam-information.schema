@@ -124,6 +124,10 @@
           "type": "string",
           "description": "Swedish prose used when an item's main content is descriptive rather than a Japanese term. Looked up in translations.json."
         },
+        "description": {
+          "type": "string",
+          "description": "Secondary Swedish explanation shown beneath an item (e.g. how a test is structured, what gets selected). Distinct from 'text' (the item's main content) and 'annotations' (※/* notes). Looked up in translations.json."
+        },
         "points": {
           "type": "integer",
           "minimum": 0,

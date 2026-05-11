@@ -3521,7 +3521,7 @@
               176
             ],
             "type": "hokei_moment",
-            "ren_hanko": false,
+            "ren_hanko": true,
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
@@ -3646,11 +3646,11 @@
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "henka från gyakute gote, ryū gatame"
+                "action": "henka från gyaku gote, ryū gatame"
               }
             },
             "references": [
-              "gyakute gote",
+              "gyaku gote",
               "ryū gatame"
             ],
             "kyohan_pages": [
@@ -3733,7 +3733,7 @@
             "technique_group": "ryūō ken",
             "roles": {
               "attacker": {
-                "stance": "hiraki gamae, tai gamae"
+                "stance": "chūdan gamae"
               },
               "defender": {
                 "stance": "chūdan gamae"
@@ -4285,8 +4285,7 @@
           {
             "hokei_name": "okuri tembin dori",
             "variations": [
-              "ni shu",
-              "två typer"
+              "ni shu"
             ],
             "technique_group": "kongō ken",
             "roles": {
@@ -4568,7 +4567,7 @@
               },
               "defender": {
                 "stance": "ichiji gamae",
-                "action": "ken uke, kinteki keri gaeshi"
+                "action": "ken uke, kinteki keri kaeshi"
               }
             },
             "kyohan_pages": [
@@ -4756,7 +4755,7 @@
         ],
         "moments": [
           {
-            "hokei_name": "sokutō geri hiza nami gaeshi",
+            "hokei_name": "sokutō geri hiki ashi nami gaeshi",
             "variations": [],
             "technique_group": "kakuritsu ken",
             "roles": {
