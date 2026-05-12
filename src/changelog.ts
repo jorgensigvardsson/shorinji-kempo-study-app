@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T17:56:00.000Z",
+    changes: [
+      {
+        emoji: "📋",
+        sv: "Graderingsinformation för godan (5 dan) är nu tillgänglig i appen.",
+        en: "Grading exam information for godan (5 dan) is now available in the app.",
+        tr: "Godan (5 dan) için sınav bilgileri artık uygulamada mevcut.",
+        ja: "五段の昇格考試実施要目をアプリに追加しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T15:38:03.000Z",
     changes: [
       {

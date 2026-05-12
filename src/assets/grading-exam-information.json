@@ -1,5 +1,218 @@
 {
   "$schema": "../../data/grading-exam-information.schema",
+  "godan": {
+    "term": {
+      "romaji": "godan shōkaku kōshi jisshi yōmoku"
+    },
+    "title": "Ämnen för graderingstest till godan (5 dan)",
+    "sections": [
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gakka kamoku"
+        },
+        "title": "teoretiska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "jukensha ga teishutsu suru shukudai"
+            },
+            "text": "Hemarbete att lämna in",
+            "annotations": [
+              {
+                "marker": "asterisk",
+                "text": "Om japanska mellan 2 000 och 3 200 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "text": "Beskriv Shorinji Kempo är en gyō (disciplin) som utvecklar individer"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "text": "Beskriv vad du vill förmedla till dina kōhai (juniorer) genom träning i Shorinji Kempo"
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "text": "Skriftligt test på graderingsdagen",
+            "points": 100,
+            "description": "Två ämnen väljs ut",
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "text": "Beskriv Shorinji Kempo är en gyō (disciplin) som utvecklar individer"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "text": "Beskriv rollen och betydelsen av ledare i Shorinji Kempo"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "text": "Beskriv ursprunget för kamptekniker (bujutsu) och betydelsen för kampkonst (budō) i dagens värld"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "text": "Beskriv behovet av styrka i livet, och det rätta sättet att använda styrka"
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "kōjutsu shinsa"
+            },
+            "text": "muntligt test"
+          }
+        ]
+      },
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gijutsu kamoku"
+        },
+        "title": "tekniker",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "kiso kamoku"
+            },
+            "points": 100,
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "tai gamae, tai sabaki"
+                },
+                "points": 10,
+                "description": "byakuren hachi jin, giwa kyū jin"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "tan'en kihon hōkei"
+                },
+                "points": 40,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "tenchi ken dai ikkei - dai rokkei (hidari & migi)"
+                      },
+                      {
+                        "romaji": "giwa ken dai ikkei - dai nikei"
+                      },
+                      {
+                        "romaji": "byakuren ken dai ikkei"
+                      },
+                      {
+                        "romaji": "kō manji ken (2:a hållet görs ryūō ken dai ikkei, 4:e hållet görs ryū no kata)"
+                      }
+                    ]
+                  }
+                ],
+                "annotations": [
+                  {
+                    "marker": "asterisk",
+                    "text": "gōrei görs av examinand."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "kenkei betsu shitei kamoku",
+                  "gloss": "utvalda tekniker från kenkei"
+                },
+                "points": 50,
+                "description": "Från hela shodan kamoku väljs en teknik ut från respektive kenkei nedan.",
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 1
+                    },
+                    "text": "sangō ken eller ten'ō ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 2
+                    },
+                    "text": "byakuren ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 3
+                    },
+                    "text": "kakuritsu ken eller chiō ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 4
+                    },
+                    "text": "ryūō ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 5
+                    },
+                    "text": "rakan ken"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "yondan": {
     "term": {
       "romaji": "yondan shōkaku kōshi jisshi yōmoku"
