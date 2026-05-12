@@ -1,5 +1,197 @@
 {
   "$schema": "../../data/grading-exam-information.schema",
+  "rokudan": {
+    "term": {
+      "romaji": "rokudan shōkaku kōshi jisshi yōmoku"
+    },
+    "title": "Ämnen för graderingstest till rokudan (6 dan)",
+    "sections": [
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gakka kamoku"
+        },
+        "title": "teoretiska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "jukensha ga teishutsu suru shukudai"
+            },
+            "text": "Hemarbete att lämna in",
+            "annotations": [
+              {
+                "marker": "asterisk",
+                "text": "Om japanska mellan 2 000 och 3 200 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "text": "Beskriv hur man kan överföra det ursprungliga syftet för Shorinji Kempo"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "text": "Beskriv hur du kan visa samhället din egen förbättring genom träning av Shorinji Kempo"
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "kōjutsu shinsa"
+            },
+            "text": "muntligt test"
+          }
+        ]
+      },
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gijutsu kamoku"
+        },
+        "title": "tekniker",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "kiso kamoku"
+            },
+            "points": 100,
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "tai gamae, tai sabaki"
+                },
+                "points": 10,
+                "description": "byakuren hachi jin, giwa kyū jin"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "tan'en kihon hōkei"
+                },
+                "points": 40,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "tenchi ken dai ikkei - dai rokkei (hidari & migi)"
+                      },
+                      {
+                        "romaji": "giwa ken dai ikkei - dai nikei"
+                      },
+                      {
+                        "romaji": "byakuren ken dai ikkei"
+                      },
+                      {
+                        "romaji": "kō manji ken (2:a hållet görs ryūō ken dai ikkei, 4:e hållet görs ryū no kata)"
+                      }
+                    ]
+                  }
+                ],
+                "annotations": [
+                  {
+                    "marker": "asterisk",
+                    "text": "gōrei görs av examinand."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "kenkei betsu shitei kamoku",
+                  "gloss": "utvalda tekniker från kenkei"
+                },
+                "points": 50,
+                "description": "Från hela shodan kamoku väljs en teknik ut från respektive kenkei nedan.",
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 1
+                    },
+                    "text": "sangō ken eller ten'ō ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 2
+                    },
+                    "text": "byakuren ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 3
+                    },
+                    "text": "kakuritsu ken eller chiō ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 4
+                    },
+                    "text": "ryūō ken"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 5
+                    },
+                    "text": "rakan ken"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "chūshutsu kamoku",
+              "gloss": "utvalda tekniker"
+            },
+            "points": 200,
+            "description": "Tio gōhō waza (100 poäng) och tio jūhō waza (100 poäng) väljs ut från hela nidan kamoku till godan kamoku. Men rakan appō exkluderas.",
+            "annotations": [
+              {
+                "marker": "asterisk",
+                "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "godan": {
     "term": {
       "romaji": "godan shōkaku kōshi jisshi yōmoku"
