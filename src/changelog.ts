@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T21:30:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan kompletterad med 8 sista ord: kroppsdelar (kata, kubi, mune), fotrörelsemönster (sagari, chidori), slagverktyg (tettsui, haito) och dōjō-termen mokusō.",
+        en: "Word list completed with 8 final entries: body parts (kata, kubi, mune), footwork patterns (sagari, chidori), striking surfaces (tettsui, haito), and the dōjō term mokusō.",
+        tr: "Kelime listesi 8 son girişle tamamlandı: vücut bölümleri (kata, kubi, mune), adım kalıpları (sagari, chidori), vuruş yüzeyleri (tettsui, haito) ve dōjō terimi mokusō.",
+        ja: "単語リストを8語で完成しました：身体部位（肩・首・胸）、足運び（下がり・千鳥）、打撃部位（鉄槌・背刀）、道場用語（黙想）。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T21:10:00.000Z",
     changes: [
       {
