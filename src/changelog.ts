@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T14:40:00.000Z",
+    changes: [
+      {
+        emoji: "📚",
+        sv: "Rokudans (6 dan) träningsplan är nu tillgänglig: 35 veckor med kyūsho-moment (羅漢圧法 · rakan appō).",
+        en: "The rokudan (6 dan) training plan is now available: 35 weeks of kyūsho moments (羅漢圧法 · rakan appō).",
+        tr: "Rokudan (6 dan) antrenman planı artık mevcut: 35 hafta kyūsho anı (羅漢圧法 · rakan appō).",
+        ja: "六段（6 dan）の訓練計画を追加しました。全35週の急所攻め（羅漢圧法）の項目です。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T14:35:00.000Z",
     changes: [
       {

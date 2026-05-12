@@ -8525,5 +8525,395 @@
         }
       }
     ]
+  },
+  {
+    "grade": "rokudan",
+    "weeks": [
+      {
+        "week": 1,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "seimon zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 2,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "jitsugetsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 3,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "sankaku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 4,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "jinchū zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 5,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "gekon zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 6,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "yongō zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 7,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "sangō zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 8,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "fūrin zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 9,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "mimi zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 10,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "dokko zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 11,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "keimyaku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 12,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "bukkotsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 13,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "yoko keichū zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 14,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "ushiro keichū zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 15,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "temmon zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 16,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "fūchi zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 17,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "danchū zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 18,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "shikoro zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 19,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "tsurigane zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 20,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "kenkō zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 21,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "hakuin zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 22,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "hakuyō zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 23,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "chūin zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 24,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "chūyō zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 25,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "chūkoku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 26,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "tōkotsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 27,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "summyaku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 28,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "gōkoku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 29,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "shikoku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 30,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "shōkoku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 31,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "yakō zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 32,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "kaimon zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 33,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "san'in zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 34,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "gyokkotsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 35,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "sōin zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      }
+    ]
   }
 ]
