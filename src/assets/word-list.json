@@ -3537,5 +3537,177 @@
     "meanings": [
       "teknikgrupp uppkallad efter det röda manji-tecknet (卍)"
     ]
+  },
+  {
+    "index": 440,
+    "kanji": "足",
+    "romaji": "ashi",
+    "meanings": [
+      "fot",
+      "ben (t.ex. ashi barai, de ashi, hiki ashi, kani ashi)"
+    ]
+  },
+  {
+    "index": 441,
+    "kanji": "腕",
+    "romaji": "ude",
+    "meanings": [
+      "arm (t.ex. ude jūji gatame, ude gyaku dori)"
+    ]
+  },
+  {
+    "index": 442,
+    "kanji": "小手",
+    "romaji": "kote",
+    "meanings": [
+      "underarm",
+      "handled (t.ex. kote nage, kote nuki, maki gote)"
+    ]
+  },
+  {
+    "index": 443,
+    "kanji": "腰",
+    "romaji": "koshi",
+    "meanings": [
+      "höft (central vid kastteknik)"
+    ]
+  },
+  {
+    "index": 444,
+    "kanji": "膝",
+    "romaji": "hiza",
+    "meanings": [
+      "knä (t.ex. hiza uke)"
+    ]
+  },
+  {
+    "index": 445,
+    "kanji": "襟",
+    "romaji": "eri",
+    "meanings": [
+      "krage (t.ex. eri jūji)"
+    ]
+  },
+  {
+    "index": 446,
+    "kanji": "袖",
+    "romaji": "sode",
+    "meanings": [
+      "ärm (t.ex. sode maki)"
+    ]
+  },
+  {
+    "index": 447,
+    "kanji": "基本",
+    "romaji": "kihon",
+    "meanings": [
+      "grundläggande",
+      "basal (t.ex. kihon kōgi, kihon bōgi, kihon hōkei)"
+    ]
+  },
+  {
+    "index": 448,
+    "kanji": "連",
+    "romaji": "ren",
+    "meanings": [
+      "i följd",
+      "på rad (t.ex. ren zuki, ren geri, ren uke, ren hankō)"
+    ]
+  },
+  {
+    "index": 449,
+    "kanji": "第",
+    "romaji": "dai",
+    "meanings": [
+      "ordningstalprefix (t.ex. dai ikkei = första serien, dai nikei = andra serien)"
+    ]
+  },
+  {
+    "index": 450,
+    "kanji": "系",
+    "romaji": "kei",
+    "meanings": [
+      "serie",
+      "system (t.ex. dai ikkei = första serien)"
+    ]
+  },
+  {
+    "index": 451,
+    "kanji": "上げ",
+    "romaji": "age",
+    "meanings": [
+      "höjande",
+      "uppåt (t.ex. keri age, uchi age uke)"
+    ]
+  },
+  {
+    "index": 452,
+    "kanji": "返し",
+    "romaji": "kaeshi/gaeshi",
+    "meanings": [
+      "omvändning, återföring (kaeshi = fristående; gaeshi = i sammansättning, t.ex. tsubame gaeshi, kote gaeshi)"
+    ]
+  },
+  {
+    "index": 453,
+    "kanji": "抜き",
+    "romaji": "nuki",
+    "meanings": [
+      "losslösning",
+      "befrielse (t.ex. kote nuki, ryōte yori nuki)"
+    ]
+  },
+  {
+    "index": 454,
+    "kanji": "巻き",
+    "romaji": "maki",
+    "meanings": [
+      "omvindning",
+      "inlindning (t.ex. sode maki, kote maki, maki gote)"
+    ]
+  },
+  {
+    "index": 455,
+    "kanji": "横",
+    "romaji": "yoko",
+    "meanings": [
+      "sida",
+      "lateral (t.ex. yoko tenshin, yoko ashi, yoko geri)"
+    ]
+  },
+  {
+    "index": 456,
+    "kanji": "武術",
+    "romaji": "bujutsu",
+    "meanings": [
+      "kamptekniker",
+      "krigarkonst (föregångare till budō — se budō)"
+    ]
+  },
+  {
+    "index": 457,
+    "kanji": "霊性",
+    "romaji": "reishō",
+    "meanings": [
+      "andlighet",
+      "spiritualitet (nämns explicit i sandan-graderingsprovet)"
+    ]
+  },
+  {
+    "index": 458,
+    "kanji": "正拳",
+    "romaji": "seiken",
+    "meanings": [
+      "standardknytnäve",
+      "rak knytnäve (grundläggande attackverktyg)"
+    ]
+  },
+  {
+    "index": 459,
+    "kanji": "裏拳",
+    "romaji": "uraken",
+    "meanings": [
+      "ryggknytnäve (t.ex. uraken uchi)"
+    ]
   }
 ]

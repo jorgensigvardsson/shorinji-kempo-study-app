@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T20:45:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan utökad med 20 fler ord: kroppsdelar (ashi, ude, kote, koshi, hiza, eri, sode), teknikmodifierare (kihon, ren, dai, kei, age, kaeshi, nuki, maki, yoko) och begrepp (bujutsu, reishō, seiken, uraken).",
+        en: "Word list expanded with 20 more entries: body parts (ashi, ude, kote, koshi, hiza, eri, sode), technique modifiers (kihon, ren, dai, kei, age, kaeshi, nuki, maki, yoko), and concepts (bujutsu, reishō, seiken, uraken).",
+        tr: "Kelime listesi 20 yeni girişle genişletildi: vücut bölümleri (ashi, ude, kote, koshi, hiza, eri, sode), teknik değiştiriciler (kihon, ren, dai, kei, age, kaeshi, nuki, maki, yoko) ve kavramlar (bujutsu, reishō, seiken, uraken).",
+        ja: "単語リストにさらに20語を追加しました：身体部位（足・腕・小手・腰・膝・襟・袖）、技の修飾語（基本・連・第・系・上げ・返し・抜き・巻き・横）、概念語（武術・霊性・正拳・裏拳）。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T20:15:00.000Z",
     changes: [
       {
