@@ -37,7 +37,8 @@ const HokeiCard = (props: HokeiCardProps) => {
     }
 
     options.badges!.push(...(hokei.variations ?? []).map(v => ({ variant: "secondary", text: v })));
-    options.badges!.push({ text: hokei.technique_group, variant: "primary" });
+    if (hokei.technique_group)
+        options.badges!.push({ text: hokei.technique_group, variant: "primary" });
 
     if (hasNotes)
         options.icons = [<ChatFill key="has-notes"/>];

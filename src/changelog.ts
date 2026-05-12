@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T14:35:00.000Z",
+    changes: [
+      {
+        emoji: "📚",
+        sv: "Godans (5 dan) träningsplan är nu tillgänglig i appen: 42 veckor, inklusive de avslutande kyūsho-momenten (attack mot vitala punkter).",
+        en: "The godan (5 dan) training plan is now available in the app: 42 weeks, including the closing kyūsho moments (attacks on vital points).",
+        tr: "Godan (5 dan) antrenman planı artık uygulamada mevcut: 42 hafta, son kyūsho anları (hayati noktalara saldırı) dahil.",
+        ja: "五段（5 dan）の訓練計画をアプリに追加しました。全42週で、最後の急所攻め（きゅうしょぜめ）の項目を含みます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T14:30:00.000Z",
     changes: [
       {

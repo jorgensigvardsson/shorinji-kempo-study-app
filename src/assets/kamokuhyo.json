@@ -7987,5 +7987,543 @@
         ]
       }
     ]
+  },
+  {
+    "grade": "godan",
+    "weeks": [
+      {
+        "week": 1,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "katate kannuki nage",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            274
+          ]
+        }
+      },
+      {
+        "week": 2,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "ryōte kannuki nage",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            274
+          ]
+        }
+      },
+      {
+        "week": 3,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "kannuki nai tembin",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            274
+          ]
+        }
+      },
+      {
+        "week": 4,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "osae kannuki nage soto",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            275
+          ]
+        }
+      },
+      {
+        "week": 5,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "osae kannuki nage uchi",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            274
+          ]
+        }
+      },
+      {
+        "week": 6,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "kannuki katate nage",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            273
+          ]
+        }
+      },
+      {
+        "week": 7,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "tekubi dori",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            303
+          ]
+        }
+      },
+      {
+        "week": 8,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "chōji dori",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            303
+          ]
+        }
+      },
+      {
+        "week": 9,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "sode jūji",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            300
+          ]
+        }
+      },
+      {
+        "week": 10,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "sode dori nai tembin",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            308
+          ]
+        }
+      },
+      {
+        "week": 11,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "sode maki gaeshi ura",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            309
+          ]
+        }
+      },
+      {
+        "week": 12,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "okuri eri dori omote",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            309
+          ]
+        }
+      },
+      {
+        "week": 13,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "kubi jime nage omote",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            310
+          ]
+        }
+      },
+      {
+        "week": 14,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "bukkotsu nage",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            276
+          ]
+        }
+      },
+      {
+        "week": 15,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "harai bukkotsu nage",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            276
+          ]
+        }
+      },
+      {
+        "week": 16,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "ushiro bukkotsu nage",
+          "variations": [],
+          "technique_group": "goka ken",
+          "kyohan_pages": [
+            276
+          ]
+        }
+      },
+      {
+        "week": 17,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "mae gami dori",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            305
+          ]
+        }
+      },
+      {
+        "week": 18,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "obi dori",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            305
+          ]
+        }
+      },
+      {
+        "week": 19,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "shikumi koshi nage",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            305
+          ]
+        }
+      },
+      {
+        "week": 20,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "shikumi nai tembin",
+          "variations": [],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            309
+          ]
+        }
+      },
+      {
+        "week": 21,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "tora daoshi",
+          "variations": [
+            "ni shu"
+          ],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            311
+          ]
+        }
+      },
+      {
+        "week": 22,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "fukko daoshi",
+          "variations": [
+            "kaku shu"
+          ],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            312
+          ]
+        }
+      },
+      {
+        "week": 23,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "hasami daoshi",
+          "variations": [
+            "kaku shu"
+          ],
+          "technique_group": "rakan ken",
+          "kyohan_pages": [
+            312
+          ]
+        }
+      },
+      {
+        "week": 24,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "chōji nage",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            261
+          ]
+        }
+      },
+      {
+        "week": 25,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "konoha chōji",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            262
+          ]
+        }
+      },
+      {
+        "week": 26,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "gyaku konoha gaeshi",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            262
+          ]
+        }
+      },
+      {
+        "week": 27,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "okuri gasshō konoha nage",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            263
+          ]
+        }
+      },
+      {
+        "week": 28,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "omote kumade gaeshi",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            251
+          ]
+        }
+      },
+      {
+        "week": 29,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "okuri hiji zeme omote",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            252
+          ]
+        }
+      },
+      {
+        "week": 30,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "okuri kannuki gote",
+          "variations": [],
+          "technique_group": "ryūka ken",
+          "kyohan_pages": [
+            251
+          ]
+        }
+      },
+      {
+        "week": 31,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "uchi gyakute dori",
+          "variations": [],
+          "technique_group": "kongō ken",
+          "kyohan_pages": [
+            290
+          ]
+        }
+      },
+      {
+        "week": 32,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "soto gyakute dori",
+          "variations": [],
+          "technique_group": "kongō ken",
+          "kyohan_pages": [
+            290
+          ]
+        }
+      },
+      {
+        "week": 33,
+        "type": "godan_week",
+        "moment": {
+          "type": "godan_hokei_moment",
+          "hokei_name": "hagai jime to shuhō",
+          "variations": [],
+          "kyohan_pages": [
+            211
+          ]
+        }
+      },
+      {
+        "week": 34,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "jitsugetsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 35,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "sankaku zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 36,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "jinchū zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 37,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "gekon zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 38,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "bukkotsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 39,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "danchū zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 40,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "san'in zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 41,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "gyokkotsu zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      },
+      {
+        "week": 42,
+        "type": "kyusho_zeme_week",
+        "zeme": {
+          "type": "kyusho_zeme",
+          "name": "sōin zeme",
+          "kyohan_pages": [
+            314
+          ]
+        }
+      }
+    ]
   }
 ]

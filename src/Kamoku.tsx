@@ -1,7 +1,7 @@
 import { Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, type YondanHokeiMoment, isHokeiRef, isHokeiMoment, isYondanWeek } from "./data";
+import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, type YondanHokeiMoment, type GodanHokeiMoment, type KyushoZeme, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek } from "./data";
 import CollapsibleCard from "./components/CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
@@ -73,6 +73,8 @@ const Kamoku = (props: Props) => {
     const preparationExercisesWeek = grade.weeks[selectedWeek].type === "review_preparation_week";
 
     const yondanWeek = isYondanWeek(grade.weeks[selectedWeek]) ? grade.weeks[selectedWeek] : null;
+    const godanWeek = isGodanWeek(grade.weeks[selectedWeek]) ? grade.weeks[selectedWeek] : null;
+    const kyushoZemeWeek = isKyushoZemeWeek(grade.weeks[selectedWeek]) ? grade.weeks[selectedWeek] : null;
 
 
     return (
@@ -104,6 +106,8 @@ const Kamoku = (props: Props) => {
             {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
             {yondanWeek && <StudyTeachCard key="st" translator={translator} entries={yondanWeek.study_teach} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} />}
             {yondanWeek?.moment && <HokeiCard key="ym" hokei={adaptYondanMoment(yondanWeek.moment)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
+            {godanWeek && <HokeiCard key="gm" hokei={adaptGodanMoment(godanWeek.moment)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
+            {kyushoZemeWeek && <HokeiCard key="kz" hokei={adaptKyushoZeme(kyushoZemeWeek.zeme)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
         </div>
     )
 }
@@ -137,7 +141,7 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
     const hokeiCards = hokeiEntries.flatMap((entry) => {
         const moment = allGradePlans
             .flatMap(p => p.weeks)
-            .flatMap((w): HokeiMoment[] => (w.type !== "review_preparation_week" && w.type !== "yondan_week") ? w.moments.filter(isHokeiMoment) : [])
+            .flatMap((w): HokeiMoment[] => ("moments" in w) ? w.moments.filter(isHokeiMoment) : [])
             .find(m => m.hokei_name === entry.hokei_ref);
         if (!moment) return [];
         const extended: HokeiMoment = entry.variants.length > 0
@@ -291,6 +295,32 @@ function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
     };
 }
 
+function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
+    return {
+        type: "hokei_moment",
+        hokei_name: m.hokei_name,
+        ren_hanko: false,
+        variations: m.variations,
+        technique_group: m.technique_group ?? "",
+        foot_stance: [],
+        roles: { attacker: {}, defender: {} },
+        kyohan_pages: m.kyohan_pages,
+    };
+}
+
+function adaptKyushoZeme(z: KyushoZeme): HokeiMoment {
+    return {
+        type: "hokei_moment",
+        hokei_name: z.name,
+        ren_hanko: false,
+        variations: [],
+        technique_group: "",
+        foot_stance: [],
+        roles: { attacker: {}, defender: {} },
+        kyohan_pages: z.kyohan_pages,
+    };
+}
+
 interface StudyTeachCardProps {
     translator: Translator;
     entries: HokeiRef[];
@@ -305,7 +335,7 @@ function StudyTeachCard(props: StudyTeachCardProps) {
     const hokeiCards = entries.flatMap((entry) => {
         const moment = allGradePlans
             .flatMap(p => p.weeks)
-            .flatMap((w): HokeiMoment[] => (w.type !== "review_preparation_week" && w.type !== "yondan_week") ? w.moments.filter(isHokeiMoment) : [])
+            .flatMap((w): HokeiMoment[] => ("moments" in w) ? w.moments.filter(isHokeiMoment) : [])
             .find(m => m.hokei_name === entry.hokei_ref);
         if (!moment) return [];
         const extended: HokeiMoment = entry.variants.length > 0

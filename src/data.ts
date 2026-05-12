@@ -21,7 +21,7 @@ export interface GradePlan {
   weeks: Week[];
 }
 
-export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek | YondanWeek;
+export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek | YondanWeek | GodanWeek | KyushoZemeWeek;
 
 /**
  * A reference to a previously-taught hōkei by name, with optional variant
@@ -65,6 +65,36 @@ export interface YondanHokeiMoment {
   variations: string[];
   technique_group: string;
   roles?: { attacker?: RoleDetails; defender?: RoleDetails };
+  kyohan_pages: number[];
+}
+
+export interface GodanWeek {
+  week: number;
+  type: "godan_week";
+  moment: GodanHokeiMoment;
+}
+
+export interface GodanHokeiMoment {
+  type: "godan_hokei_moment";
+  hokei_name: string;
+  variations: string[];
+  technique_group?: string;
+  kyohan_pages: number[];
+}
+
+/**
+ * A kyūsho-attack ("zeme") drill — not a defensive hōkei but a drill in
+ * exploiting a specific vital point. Used from godan onwards.
+ */
+export interface KyushoZemeWeek {
+  week: number;
+  type: "kyusho_zeme_week";
+  zeme: KyushoZeme;
+}
+
+export interface KyushoZeme {
+  type: "kyusho_zeme";
+  name: string;
   kyohan_pages: number[];
 }
 
@@ -117,6 +147,14 @@ export function isYondanWeek(week: Week): week is YondanWeek {
   return week.type === "yondan_week";
 }
 
+export function isGodanWeek(week: Week): week is GodanWeek {
+  return week.type === "godan_week";
+}
+
+export function isKyushoZemeWeek(week: Week): week is KyushoZemeWeek {
+  return week.type === "kyusho_zeme_week";
+}
+
 export function isKihonOnlyWeek(week: Week): week is KihonOnlyWeek {
   return week.type === "kihon_only";
 }
@@ -138,12 +176,12 @@ export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
  */
 
 export function getHokeiMoments(week: Week): HokeiMoment[] {
-  if (isReviewPreparationWeek(week) || isYondanWeek(week)) return [];
+  if (!("moments" in week)) return [];
   return week.moments.filter(isHokeiMoment);
 }
 
 export function getStandardMoments(week: Week): StandardMoment[] {
-  if (isReviewPreparationWeek(week) || isYondanWeek(week)) return [];
+  if (!("moments" in week)) return [];
   return week.moments.filter(isStandardMoment);
 }
 
