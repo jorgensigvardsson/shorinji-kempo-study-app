@@ -6824,5 +6824,1168 @@
         ]
       }
     ]
+  },
+  {
+    "grade": "yondan",
+    "weeks": [
+      {
+        "week": 1,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "soto uke zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "soto uke geri",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "kubi jime shuhō jūji nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "roles": {
+            "attacker": {
+              "action": "kubi jime"
+            },
+            "defender": {
+              "action": "kubi jime shuhō"
+            }
+          },
+          "kyohan_pages": [
+            307
+          ]
+        }
+      },
+      {
+        "week": 2,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "chūdan gaeshi yori uchi uke zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "yori nuki",
+            "variants": [
+              "ryōte"
+            ]
+          },
+          {
+            "hokei_ref": "maki nuki",
+            "variants": [
+              "ryōte"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "soto oshi uke zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "uchi oshi uke zuki",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "kubi jime nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "roles": {
+            "attacker": {
+              "action": "kubi jime"
+            },
+            "defender": {
+              "action": "kubi jime shuhō"
+            }
+          },
+          "kyohan_pages": [
+            306
+          ]
+        }
+      },
+      {
+        "week": 4,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "chūdan gaeshi yori tai ten ichi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "okuri gote",
+            "variants": [
+              "katate",
+              "ryōte"
+            ]
+          },
+          {
+            "hokei_ref": "okuri maki tembin",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 5,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kusshin zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kusshin geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kusshin zuki geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kusshin geri tenkai ren geri",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ken jime dori",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "roles": {
+            "attacker": {
+              "action": "ken jime"
+            },
+            "defender": {
+              "action": "kubi jime shuhō"
+            }
+          },
+          "kyohan_pages": [
+            307
+          ]
+        }
+      },
+      {
+        "week": 6,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "gedan gaeshi yori tobi ren geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "katate oshi nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kote maki gaeshi",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 7,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kaishin zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "hangetsu geri",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "tembin nage",
+          "technique_group": "goka ken",
+          "variations": [],
+          "kyohan_pages": [
+            278
+          ]
+        }
+      },
+      {
+        "week": 8,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kiri nuki",
+            "variants": [
+              "soto",
+              "uchi"
+            ]
+          },
+          {
+            "hokei_ref": "morote hiki nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "maki gote",
+            "variants": [
+              "katate",
+              "morote"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 9,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "soto uke dan zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "uchi age dan zuki",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "kumade gaeshi",
+          "technique_group": "ryūka ken",
+          "variations": [
+            "katate",
+            "ryōte"
+          ],
+          "kyohan_pages": [
+            248
+          ]
+        }
+      },
+      {
+        "week": 10,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "nidan nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "hiji nuki yori mae tembin",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 11,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "harai uke geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "chūdan gaeshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gedan gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "okuri gasshō",
+          "technique_group": "ryūka ken",
+          "variations": [
+            "ni shu"
+          ],
+          "kyohan_pages": [
+            248
+          ]
+        }
+      },
+      {
+        "week": 12,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "morote wa nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "morote gyaku gote",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 13,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "shita uke geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "shita uke jun geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gyaku tenshin geri",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "kannuki okuri dori",
+          "technique_group": "kongō ken",
+          "variations": [],
+          "roles": {
+            "defender": {
+              "action": "renkō"
+            }
+          },
+          "kyohan_pages": [
+            286
+          ]
+        }
+      },
+      {
+        "week": 14,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "jōhaku nuki",
+            "variants": [
+              "katate",
+              "ryōte"
+            ]
+          },
+          {
+            "hokei_ref": "jōhaku dori",
+            "variants": [
+              "katate",
+              "ryōte"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 15,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "yoko tenshin geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "han tenshin geri",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "kannuki soto tembin",
+          "technique_group": "goka ken",
+          "variations": [],
+          "kyohan_pages": [
+            274
+          ]
+        }
+      },
+      {
+        "week": 16,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kiri kaeshi nuki",
+            "variants": [
+              "katate",
+              "morote"
+            ]
+          },
+          {
+            "hokei_ref": "kiri gote",
+            "variants": [
+              "katate",
+              "morote"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 17,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "tenchi ken dai ikkei - dai rokkei",
+            "variants": [
+              "tan'en"
+            ]
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gasshō gyaku gote",
+          "technique_group": "ryūka ken",
+          "variations": [],
+          "kyohan_pages": [
+            241
+          ]
+        }
+      },
+      {
+        "week": 18,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kiri kaeshi tembin",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kiri kaeshi maki tembin",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 19,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "giwa ken dai ikkei - dai nikei",
+            "variants": [
+              "tan'en"
+            ]
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gyaku gasshō nage",
+          "technique_group": "ryūka ken",
+          "variations": [
+            "ni shu"
+          ],
+          "kyohan_pages": [
+            242
+          ]
+        }
+      },
+      {
+        "week": 20,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "ryūka ken",
+            "variants": [
+              "idori"
+            ]
+          },
+          {
+            "hokei_ref": "kiri kaeshi gote",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kiri kaeshi nage",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 21,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "tsuki ten ichi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "tsuki ten ni",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gyaku sode dori",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            298
+          ]
+        }
+      },
+      {
+        "week": 22,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "rakan ken",
+            "variants": [
+              "idori"
+            ]
+          },
+          {
+            "hokei_ref": "shita uke geri kote nage",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 23,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kon ten ichi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "furi ten ni",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gyaku sode maki",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            308
+          ]
+        }
+      },
+      {
+        "week": 24,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "oshi gote",
+            "variants": [
+              "katate",
+              "ryōte"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 25,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "tsuki ten san",
+            "variants": []
+          },
+          {
+            "hokei_ref": "keri ten san",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "hangetsu kubi nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            305
+          ]
+        }
+      },
+      {
+        "week": 26,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "sode nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "sode maki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "sode dori",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 27,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "tsubame gaeshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "chidori gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "maki uchi kubi nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            305
+          ]
+        }
+      },
+      {
+        "week": 28,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "okuri shi shi dori",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gasshō okuri dori",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 29,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "mikazuki gaeshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "suigetsu gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "omote nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "roles": {
+            "attacker": {
+              "action": "seoi nage eller koshi nage"
+            }
+          },
+          "kyohan_pages": [
+            307
+          ]
+        }
+      },
+      {
+        "week": 30,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "maki otoshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "soto maki otoshi",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 31,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "hangetsu gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ura nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            308
+          ]
+        }
+      },
+      {
+        "week": 32,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "okuri dori",
+            "variants": []
+          },
+          {
+            "hokei_ref": "tsuri otoshi",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 33,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "jun geri chi ichi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gyaku geri chi ichi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "katate nage kiri kaeshi",
+          "technique_group": "ryūka ken",
+          "variations": [],
+          "roles": {
+            "attacker": {
+              "action": "katate nage"
+            }
+          },
+          "kyohan_pages": [
+            260
+          ]
+        }
+      },
+      {
+        "week": 34,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "okuri hiji zeme",
+            "variants": []
+          },
+          {
+            "hokei_ref": "okuri tembin dori",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 35,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "jun geri chi san",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "okuri eri dori",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            303
+          ]
+        }
+      },
+      {
+        "week": 36,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "konoha okuri",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 37,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "okuri yubi gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ushiro kari taoshi",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            308
+          ]
+        }
+      },
+      {
+        "week": 38,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "konoha gaeshi",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 39,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "gyaku geri chi san",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ushiro eri dori",
+          "technique_group": "rakan ken",
+          "variations": [
+            "omote",
+            "ura"
+          ],
+          "roles": {
+            "attacker": {
+              "action": "ushiro kari taoshi"
+            }
+          },
+          "kyohan_pages": [
+            303
+          ]
+        }
+      },
+      {
+        "week": 40,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kata muna otoshi",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 41,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "hiki muna otoshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "ryō muna otoshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ushiro kubi nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "roles": {
+            "attacker": {
+              "action": "ushiro kari taoshi"
+            }
+          },
+          "kyohan_pages": [
+            310
+          ]
+        }
+      },
+      {
+        "week": 42,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "eri jūji",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 43,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "idori okuri gote",
+            "variants": []
+          },
+          {
+            "hokei_ref": "idori gyaku gote",
+            "variants": []
+          },
+          {
+            "hokei_ref": "idori oshi gote",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ushiro sode maki dori",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            300
+          ]
+        }
+      },
+      {
+        "week": 44,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "mae ude gatame",
+            "variants": [
+              "idori gyaku gote"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 45,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "uwa uke nage",
+            "variants": []
+          },
+          {
+            "hokei_ref": "uwa uke gyakute nage",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "yahazu nage",
+          "technique_group": "rakan ken",
+          "variations": [],
+          "kyohan_pages": [
+            306
+          ]
+        }
+      },
+      {
+        "week": 46,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "ushiro ude gatame",
+            "variants": [
+              "maki tembin"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 47,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "kinteki geri hiza uke nami gaeshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gyaku geri hiza uke nami gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "oshi uke nage",
+          "technique_group": "goka ken",
+          "variations": [],
+          "kyohan_pages": [
+            270
+          ]
+        }
+      },
+      {
+        "week": 48,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "sankaku gatame",
+            "variants": [
+              "gyaku waza"
+            ]
+          }
+        ]
+      },
+      {
+        "week": 49,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "sokutō geri hiki ashi nami gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "oshi uke maki nage",
+          "technique_group": "goka ken",
+          "variations": [],
+          "kyohan_pages": [
+            270
+          ]
+        }
+      },
+      {
+        "week": 50,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "tembin waza",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 51,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "mawashi geri sambō uke nami gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gasshō chōji",
+          "technique_group": "ryūka ken",
+          "variations": [],
+          "kyohan_pages": [
+            262
+          ]
+        }
+      },
+      {
+        "week": 52,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "dan geri sambō uke dan geri gaeshi",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 53,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "katate nage",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gyaku katate nage",
+            "variants": []
+          },
+          {
+            "hokei_ref": "nigiri gaeshi",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gasshō katate nage",
+          "technique_group": "goka ken",
+          "variations": [],
+          "kyohan_pages": [
+            273
+          ]
+        }
+      },
+      {
+        "week": 54,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "okuri katate nage",
+            "variants": []
+          },
+          {
+            "hokei_ref": "ryōte katate nage",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 55,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "shita uke zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "shita uke dan zuki",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "gasshō tsuki otoshi",
+          "technique_group": "ryūka ken",
+          "variations": [],
+          "kyohan_pages": [
+            262
+          ]
+        }
+      },
+      {
+        "week": 56,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "harai uke dan zuki",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 57,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "morote katate nage",
+            "variants": []
+          }
+        ],
+        "moment": {
+          "type": "yondan_hokei_moment",
+          "hokei_name": "ashi nuki",
+          "technique_group": "ryūō ken",
+          "variations": [
+            "ni shu"
+          ],
+          "roles": {
+            "attacker": {
+              "action": "hasami uke eller sukui uke"
+            }
+          },
+          "kyohan_pages": [
+            229
+          ]
+        }
+      },
+      {
+        "week": 58,
+        "type": "yondan_week",
+        "study_teach": [
+          {
+            "hokei_ref": "gyaku tembin",
+            "variants": []
+          },
+          {
+            "hokei_ref": "morote oshi nuki",
+            "variants": []
+          }
+        ]
+      },
+      {
+        "week": 59,
+        "type": "review_preparation_week",
+        "content": [
+          "repetition",
+          "studier",
+          "förberedelse inför gradering"
+        ]
+      }
+    ]
   }
 ]

@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T14:30:00.000Z",
+    changes: [
+      {
+        emoji: "📚",
+        sv: "Yondans (4 dan) träningsplan är nu tillgänglig i appen, med 59 veckors schema för studera/undervisa-tekniker och hokeimomenter.",
+        en: "The yondan (4 dan) training plan is now available in the app, with a 59-week schedule of study/teach techniques and hokei moments.",
+        tr: "Yondan (4 dan) antrenman planı artık uygulamada mevcut; 59 haftalık çalışma/öğretme teknikleri ve hokei momentleri içeriyor.",
+        ja: "四段（4 dan）の訓練計画をアプリに追加しました。習い・教えの技術とほうけいの瞬間を含む59週間のスケジュールです。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T06:45:48.000Z",
     changes: [
       {

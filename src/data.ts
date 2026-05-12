@@ -21,14 +21,18 @@ export interface GradePlan {
   weeks: Week[];
 }
 
-export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek;
+export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek | YondanWeek;
 
 /**
- * An entry in the kihon-shohō column. Either free text, or a reference to a
- * previously-taught hōkei (matched by `hokei_name`) shown for repetition study;
- * `variants` holds qualifiers such as ["katate", "morote"] when present.
+ * A reference to a previously-taught hōkei by name, with optional variant
+ * qualifiers such as ["katate", "morote"].
  */
-export type KihonShohoEntry = string | { hokei_ref: string; variants: string[] };
+export type HokeiRef = { hokei_ref: string; variants: string[] };
+
+/**
+ * An entry in the kihon-shohō column. Either free text, or a hōkei reference.
+ */
+export type KihonShohoEntry = string | HokeiRef;
 
 export interface RegularWeek {
   week: number;
@@ -44,8 +48,24 @@ export interface KihonOnlyWeek {
   moments: Moment[];
 }
 
-export function isHokeiRef(entry: KihonShohoEntry): entry is { hokei_ref: string; variants: string[] } {
+export function isHokeiRef(entry: KihonShohoEntry): entry is HokeiRef {
   return typeof entry === "object" && "hokei_ref" in entry;
+}
+
+export interface YondanWeek {
+  week: number;
+  type: "yondan_week";
+  study_teach: HokeiRef[];
+  moment?: YondanHokeiMoment;
+}
+
+export interface YondanHokeiMoment {
+  type: "yondan_hokei_moment";
+  hokei_name: string;
+  variations: string[];
+  technique_group: string;
+  roles?: { attacker?: RoleDetails; defender?: RoleDetails };
+  kyohan_pages: number[];
 }
 
 export interface ReviewPreparationWeek {
@@ -93,6 +113,10 @@ export function isReviewPreparationWeek(week: Week): week is ReviewPreparationWe
   return week.type === "review_preparation_week";
 }
 
+export function isYondanWeek(week: Week): week is YondanWeek {
+  return week.type === "yondan_week";
+}
+
 export function isKihonOnlyWeek(week: Week): week is KihonOnlyWeek {
   return week.type === "kihon_only";
 }
@@ -114,12 +138,12 @@ export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
  */
 
 export function getHokeiMoments(week: Week): HokeiMoment[] {
-  if (isReviewPreparationWeek(week)) return [];
+  if (isReviewPreparationWeek(week) || isYondanWeek(week)) return [];
   return week.moments.filter(isHokeiMoment);
 }
 
 export function getStandardMoments(week: Week): StandardMoment[] {
-  if (isReviewPreparationWeek(week)) return [];
+  if (isReviewPreparationWeek(week) || isYondanWeek(week)) return [];
   return week.moments.filter(isStandardMoment);
 }
 
