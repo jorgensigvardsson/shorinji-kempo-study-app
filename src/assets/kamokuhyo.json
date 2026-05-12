@@ -5042,7 +5042,10 @@
         "week": 2,
         "type": "regular_week",
         "kihon_shoho": [
-          "träna machi geri",
+          {
+            "hokei_ref": "machi geri",
+            "variants": []
+          },
           "träna idō kōbōgi"
         ],
         "moments": [
@@ -5196,7 +5199,14 @@
         "week": 6,
         "type": "regular_week",
         "kihon_shoho": [
-          "träna jōhaku nuki, jōhaku dori"
+          {
+            "hokei_ref": "jōhaku nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "jōhaku dori",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5240,7 +5250,14 @@
         "week": 7,
         "type": "regular_week",
         "kihon_shoho": [
-          "träna nidan nuki, oshi gote"
+          {
+            "hokei_ref": "nidan nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "oshi gote",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5278,7 +5295,14 @@
         "week": 8,
         "type": "regular_week",
         "kihon_shoho": [
-          "ude jūji gatame, gyaku tembin"
+          {
+            "hokei_ref": "ude jūji gatame",
+            "variants": []
+          },
+          {
+            "hokei_ref": "gyaku tembin",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5320,7 +5344,13 @@
         "week": 9,
         "type": "regular_week",
         "kihon_shoho": [
-          "gyaku gote (katate, morote)"
+          {
+            "hokei_ref": "gyaku gote",
+            "variants": [
+              "katate",
+              "morote"
+            ]
+          }
         ],
         "moments": [
           {
@@ -5362,7 +5392,10 @@
         "week": 10,
         "type": "regular_week",
         "kihon_shoho": [
-          "oshi gote"
+          {
+            "hokei_ref": "oshi gote",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5404,7 +5437,17 @@
         "week": 11,
         "type": "regular_week",
         "kihon_shoho": [
-          "maki nuki, okuri gote (katate, ryōte)"
+          {
+            "hokei_ref": "maki nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "okuri gote",
+            "variants": [
+              "katate",
+              "ryōte"
+            ]
+          }
         ],
         "moments": [
           {
@@ -5444,7 +5487,14 @@
         "week": 12,
         "type": "regular_week",
         "kihon_shoho": [
-          "tsubame gaeshi, chidori gaeshi"
+          {
+            "hokei_ref": "tsubame gaeshi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "chidori gaeshi",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5522,11 +5572,18 @@
         "week": 14,
         "type": "regular_week",
         "kihon_shoho": [
-          "tai ten ichi, kaishin zuki"
+          {
+            "hokei_ref": "tai ten ichi",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kaishin zuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
-            "hokei_name": "hangetsu gaeshi",
+            "hokei_name": "hangetsu gaeshi sukui kubi nage",
             "variations": [],
             "technique_group": "byakuren ken",
             "roles": {
@@ -5536,7 +5593,7 @@
               },
               "defender": {
                 "stance": "midare gamae",
-                "action": "hangetsu uke"
+                "action": "hangetsu uke & oshi dome, kumade zuki"
               }
             },
             "kyohan_pages": [
@@ -5548,31 +5605,6 @@
             "foot_stance": [
               "tai gamae"
             ]
-          },
-          {
-            "hokei_name": "sukui kubi nage",
-            "variations": [],
-            "technique_group": "rakan ken",
-            "roles": {
-              "attacker": {
-                "stance": "chūdan gamae",
-                "action": "jō chū ni ren zuki"
-              },
-              "defender": {
-                "stance": "midare gamae",
-                "action": "hangetsu uke & oshi dome, kumade zuki"
-              }
-            },
-            "references": [
-              "hangetsu gaeshi"
-            ],
-            "kyohan_pages": [
-              194,
-              305
-            ],
-            "type": "hokei_moment",
-            "ren_hanko": false,
-            "foot_stance": []
           },
           {
             "type": "standard_moment",
@@ -5588,7 +5620,16 @@
         "week": 15,
         "type": "regular_week",
         "kihon_shoho": [
-          "sode nuki, sode dori (maki)"
+          {
+            "hokei_ref": "sode nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "sode dori",
+            "variants": [
+              "maki"
+            ]
+          }
         ],
         "moments": [
           {
@@ -5625,7 +5666,14 @@
         "week": 16,
         "type": "regular_week",
         "kihon_shoho": [
-          "jōhaku nuki, oshi kiri nuki"
+          {
+            "hokei_ref": "jōhaku nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "oshi kiri nuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5662,7 +5710,14 @@
         "week": 17,
         "type": "regular_week",
         "kihon_shoho": [
-          "uwa uke zuki, uwa uke geri"
+          {
+            "hokei_ref": "uwa uke zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "uwa uke geri",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5699,7 +5754,17 @@
         "week": 18,
         "type": "regular_week",
         "kihon_shoho": [
-          "harai uke geri, yori nuki (katate, ryōte)"
+          {
+            "hokei_ref": "harai uke geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "yori nuki",
+            "variants": [
+              "katate",
+              "ryōte"
+            ]
+          }
         ],
         "moments": [
           {
@@ -5738,7 +5803,16 @@
         "week": 19,
         "type": "regular_week",
         "kihon_shoho": [
-          "kiri nuki (soto), gasshō nuki"
+          {
+            "hokei_ref": "kiri nuki",
+            "variants": [
+              "soto"
+            ]
+          },
+          {
+            "hokei_ref": "gasshō nuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5776,7 +5850,17 @@
         "week": 20,
         "type": "regular_week",
         "kihon_shoho": [
-          "kiri kaeshi nuki, kiri gote (katate, morote)"
+          {
+            "hokei_ref": "kiri kaeshi nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kiri gote",
+            "variants": [
+              "katate",
+              "morote"
+            ]
+          }
         ],
         "moments": [
           {
@@ -5819,7 +5903,14 @@
         "week": 21,
         "type": "regular_week",
         "kihon_shoho": [
-          "kiri kaeshi tembin, kiri kaeshi maki tembin"
+          {
+            "hokei_ref": "kiri kaeshi tembin",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kiri kaeshi maki tembin",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5861,7 +5952,14 @@
         "week": 22,
         "type": "regular_week",
         "kihon_shoho": [
-          "uchi uke zuki, uchi uke geri"
+          {
+            "hokei_ref": "uchi uke zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "uchi uke geri",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5904,7 +6002,14 @@
         "week": 23,
         "type": "regular_week",
         "kihon_shoho": [
-          "fukko chi ni, maki jūji gote"
+          {
+            "hokei_ref": "fukko chi ni",
+            "variants": []
+          },
+          {
+            "hokei_ref": "maki jūji gote",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5947,7 +6052,10 @@
         "week": 24,
         "type": "regular_week",
         "kihon_shoho": [
-          "nidan nuki"
+          {
+            "hokei_ref": "nidan nuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -5989,7 +6097,10 @@
         "week": 25,
         "type": "regular_week",
         "kihon_shoho": [
-          "morote wa nuki"
+          {
+            "hokei_ref": "morote wa nuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6032,7 +6143,10 @@
         "type": "regular_week",
         "kihon_shoho": [
           "ippon se nage & kūchū tenkai (hjula över)",
-          "kinteki geri hiza uke nami gaeshi"
+          {
+            "hokei_ref": "kinteki geri hiza uke nami gaeshi",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6109,7 +6223,10 @@
         "week": 28,
         "type": "regular_week",
         "kihon_shoho": [
-          "morote maki nuki"
+          {
+            "hokei_ref": "morote maki nuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6151,7 +6268,14 @@
         "week": 29,
         "type": "regular_week",
         "kihon_shoho": [
-          "tsuki ten san, keri ten san"
+          {
+            "hokei_ref": "tsuki ten san",
+            "variants": []
+          },
+          {
+            "hokei_ref": "keri ten san",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6193,7 +6317,14 @@
         "week": 30,
         "type": "regular_week",
         "kihon_shoho": [
-          "katate oshi nuki, kote maki gaeshi"
+          {
+            "hokei_ref": "katate oshi nuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kote maki gaeshi",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6235,7 +6366,14 @@
         "week": 31,
         "type": "regular_week",
         "kihon_shoho": [
-          "kusshin zuki, kusshin geri",
+          {
+            "hokei_ref": "kusshin zuki",
+            "variants": []
+          },
+          {
+            "hokei_ref": "kusshin geri",
+            "variants": []
+          },
           "kusshin geri tenkai ren geri"
         ],
         "moments": [
@@ -6278,7 +6416,14 @@
         "week": 32,
         "type": "regular_week",
         "kihon_shoho": [
-          "soto uke geri, soto uke zuki"
+          {
+            "hokei_ref": "soto uke geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "soto uke zuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6315,7 +6460,14 @@
         "week": 33,
         "type": "regular_week",
         "kihon_shoho": [
-          "uchi age geri, uchi age zuki"
+          {
+            "hokei_ref": "uchi age geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "uchi age zuki",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6353,7 +6505,14 @@
         "week": 34,
         "type": "regular_week",
         "kihon_shoho": [
-          "shita uke geri, shita uke jun geri"
+          {
+            "hokei_ref": "shita uke geri",
+            "variants": []
+          },
+          {
+            "hokei_ref": "shita uke jun geri",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6379,7 +6538,7 @@
             ]
           },
           {
-            "hokei_name": "shita dan uke zuki",
+            "hokei_name": "shita uke dan zuki",
             "variations": [],
             "technique_group": "niō ken",
             "roles": {
@@ -6415,8 +6574,18 @@
         "week": 35,
         "type": "regular_week",
         "kihon_shoho": [
-          "okuri dori, okuri maki tembin",
-          "okuri hiji zeme"
+          {
+            "hokei_ref": "okuri dori",
+            "variants": []
+          },
+          {
+            "hokei_ref": "okuri maki tembin",
+            "variants": []
+          },
+          {
+            "hokei_ref": "okuri hiji zeme",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6474,7 +6643,10 @@
         "week": 36,
         "type": "regular_week",
         "kihon_shoho": [
-          "tsuri age dori"
+          {
+            "hokei_ref": "tsuri age dori",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6511,7 +6683,14 @@
         "week": 37,
         "type": "regular_week",
         "kihon_shoho": [
-          "gyakute nage, ryū nage"
+          {
+            "hokei_ref": "gyakute nage",
+            "variants": []
+          },
+          {
+            "hokei_ref": "ryū nage",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6558,7 +6737,10 @@
         "week": 38,
         "type": "regular_week",
         "kihon_shoho": [
-          "okuri tembin dori"
+          {
+            "hokei_ref": "okuri tembin dori",
+            "variants": []
+          }
         ],
         "moments": [
           {
@@ -6596,7 +6778,10 @@
         "week": 39,
         "type": "regular_week",
         "kihon_shoho": [
-          "tsuri otoshi"
+          {
+            "hokei_ref": "tsuri otoshi",
+            "variants": []
+          }
         ],
         "moments": [
           {

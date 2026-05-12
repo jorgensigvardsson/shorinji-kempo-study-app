@@ -1,7 +1,7 @@
 import { Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { type GradePlan, type GradeName, type Week, type StandardMoment } from "./data";
+import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, isHokeiRef, isHokeiMoment } from "./data";
 import CollapsibleCard from "./components/CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
@@ -96,7 +96,7 @@ const Kamoku = (props: Props) => {
                     )}
                 </Form.Select>
             </div>
-            {basicExercises && <BasicExerciseCard key={"be"} translator={translator} basicExercises={basicExercises} />}
+            {basicExercises && <BasicExerciseCard key={"be"} translator={translator} entries={basicExercises} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} />}
             {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} />)}
             {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.key} translator={translator} other={oe.moment} />)}
             {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
@@ -106,29 +106,48 @@ const Kamoku = (props: Props) => {
 
 interface BasicExerciseCardProps {
     translator: Translator;
-    basicExercises: string[];
+    entries: KihonShohoEntry[];
+    allGradePlans: GradePlan[];
+    notesData: HokeiNotes;
+    ranksData: HokeiRanks;
 }
 
 function BasicExerciseCard(props: BasicExerciseCardProps) {
-    const { basicExercises, translator } = props;
+    const { entries, translator, allGradePlans, notesData, ranksData } = props;
 
-    const bullets = [];
+    const stringEntries = entries.filter((e): e is string => typeof e === "string");
+    const hokeiEntries = entries.filter(isHokeiRef);
 
-    let index = 0;
-    for (const be of basicExercises) {
+    const bullets: React.ReactNode[] = [];
+    let bulletKey = 0;
+    for (const entry of stringEntries) {
+        const k = bulletKey++;
         if (translator.isJapanese) {
-            bullets.push(<li key={index++}>{translator.japanese(be)}</li>);
+            bullets.push(<li key={k}>{translator.japanese(entry)}</li>);
         } else {
-            bullets.push(<li key={index++}>{translator.translate(be)}</li>);
-            bullets.push(<li key={index++} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(be)}</li>);
+            bullets.push(<li key={k}>{translator.translate(entry)}</li>);
+            bullets.push(<li key={`${k}j`} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(entry)}</li>);
         }
     }
 
-    const body = bullets.length > 0 ? <ul>{bullets}</ul> : null;
+    const hokeiCards = hokeiEntries.flatMap((entry) => {
+        const moment = allGradePlans
+            .flatMap(p => p.weeks)
+            .flatMap((w): HokeiMoment[] => w.type !== "review_preparation_week" ? w.moments.filter(isHokeiMoment) : [])
+            .find(m => m.hokei_name === entry.hokei_ref);
+        if (!moment) return [];
+        const extended: HokeiMoment = entry.variants.length > 0
+            ? { ...moment, variations: [...(moment.variations ?? []), ...entry.variants] }
+            : moment;
+        return [<HokeiCard key={`hokei-${entry.hokei_ref}`} hokei={extended} className="mt-2" notesData={notesData} ranksData={ranksData} />];
+    });
+
+    const hasContent = bullets.length > 0 || hokeiCards.length > 0;
 
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-2 app-grid-card hokei-card" showCollapse={bullets.length > 0}>
-            {body}
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-2 app-grid-card hokei-card" showCollapse={hasContent}>
+            {bullets.length > 0 && <ul>{bullets}</ul>}
+            {hokeiCards}
         </CollapsibleCard>
     );
 }

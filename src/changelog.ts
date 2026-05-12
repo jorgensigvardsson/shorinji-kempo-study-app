@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T06:45:48.000Z",
+    changes: [
+      {
+        emoji: "✏️",
+        sv: "Sandans (3 dan) träningsplan har gåtts igenom och rättats mot originalets kamokuhyō.",
+        en: "The sandan (3 dan) training plan has been reviewed and corrected against the original kamokuhyō.",
+        tr: "Sandan (3 dan) antrenman planı orijinal kamokuhyō ile karşılaştırılarak gözden geçirildi ve düzeltildi.",
+        ja: "三段（3 dan）の訓練計画を原本の科目表と照合し、見直して修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-11T19:47:17.000Z",
     changes: [
       {

@@ -23,18 +23,29 @@ export interface GradePlan {
 
 export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek;
 
+/**
+ * An entry in the kihon-shohō column. Either free text, or a reference to a
+ * previously-taught hōkei (matched by `hokei_name`) shown for repetition study;
+ * `variants` holds qualifiers such as ["katate", "morote"] when present.
+ */
+export type KihonShohoEntry = string | { hokei_ref: string; variants: string[] };
+
 export interface RegularWeek {
   week: number;
   type: "regular_week";
-  kihon_shoho?: string[];
+  kihon_shoho?: KihonShohoEntry[];
   moments: Moment[];
 }
 
 export interface KihonOnlyWeek {
   week: number;
   type: "kihon_only";
-  kihon_shoho: string[];
+  kihon_shoho: KihonShohoEntry[];
   moments: Moment[];
+}
+
+export function isHokeiRef(entry: KihonShohoEntry): entry is { hokei_ref: string; variants: string[] } {
+  return typeof entry === "object" && "hokei_ref" in entry;
 }
 
 export interface ReviewPreparationWeek {
