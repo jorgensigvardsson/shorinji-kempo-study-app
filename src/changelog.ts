@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T21:10:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan utökad med 18 fler ord: kroppsdelar (te, hiji/empi, shōtei), teknikmodifierare (oshi, hiki, choku, jūji, ryūsui, tenkan, kagi, komi), låsbegrepp (tembin, kannuki, gote) och träningstermer (kihon kōgi, kihon bōgi, gōhō/jūhō un'yōhō).",
+        en: "Word list expanded with 18 more entries: body parts (te, hiji/empi, shōtei), technique modifiers (oshi, hiki, choku, jūji, ryūsui, tenkan, kagi, komi), lock terms (tembin, kannuki, gote), and training terms (kihon kōgi, kihon bōgi, gōhō/jūhō un'yōhō).",
+        tr: "Kelime listesi 18 yeni girişle genişletildi: vücut bölümleri (te, hiji/empi, shōtei), teknik değiştiriciler (oshi, hiki, choku, jūji, ryūsui, tenkan, kagi, komi), kilit terimleri (tembin, kannuki, gote) ve antrenman terimleri (kihon kōgi, kihon bōgi, gōhō/jūhō un'yōhō).",
+        ja: "単語リストにさらに18語を追加しました：身体部位（手・肘/猿臂・掌底）、技の修飾語（押し・引き・直・十字・流水・転換・鍵・込み）、固め用語（天秤・閂・後手）、稽古用語（基本剛技・基本防技・剛法/柔法運用法）。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T20:45:00.000Z",
     changes: [
       {

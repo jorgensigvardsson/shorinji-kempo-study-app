@@ -3709,5 +3709,154 @@
     "meanings": [
       "ryggknytnäve (t.ex. uraken uchi)"
     ]
+  },
+  {
+    "index": 460,
+    "kanji": "手",
+    "romaji": "te",
+    "meanings": [
+      "hand (t.ex. katate = en hand, morote = två på en, ryōte = två på två)"
+    ]
+  },
+  {
+    "index": 461,
+    "kanji": "肘",
+    "romaji": "hiji / empi",
+    "meanings": [
+      "armbåge (t.ex. hiji uchi = armbågsstöt)"
+    ]
+  },
+  {
+    "index": 462,
+    "kanji": "掌底",
+    "romaji": "shōtei",
+    "meanings": [
+      "handflatans häl (attackyta med nedre delen av handflatan)"
+    ]
+  },
+  {
+    "index": 463,
+    "kanji": "押し",
+    "romaji": "oshi",
+    "meanings": [
+      "trycka",
+      "pressa (t.ex. oshi taoshi, hiki oshi)"
+    ]
+  },
+  {
+    "index": 464,
+    "kanji": "引き",
+    "romaji": "hiki",
+    "meanings": [
+      "dra (t.ex. hiki oshi = drag-tryck, hiki ashi)"
+    ]
+  },
+  {
+    "index": 465,
+    "kanji": "直",
+    "romaji": "choku",
+    "meanings": [
+      "rak",
+      "direkt (t.ex. choku geri = rak spark)"
+    ]
+  },
+  {
+    "index": 466,
+    "kanji": "十字",
+    "romaji": "jūji",
+    "meanings": [
+      "kors",
+      "korsform (t.ex. ude jūji gatame, jūji ashi)"
+    ]
+  },
+  {
+    "index": 467,
+    "kanji": "流水",
+    "romaji": "ryūsui",
+    "meanings": [
+      "flödande vatten (t.ex. ryūsui uke, ryūsui geri — bland de första hōkei vid 6 kyū)"
+    ]
+  },
+  {
+    "index": 468,
+    "kanji": "転換",
+    "romaji": "tenkan",
+    "meanings": [
+      "rotering",
+      "vändning (zen tenkan = helrotering, han tenkan = halvrotering)"
+    ]
+  },
+  {
+    "index": 469,
+    "kanji": "鍵",
+    "romaji": "kagi",
+    "meanings": [
+      "krok (t.ex. kagi zuki = hakslag)"
+    ]
+  },
+  {
+    "index": 470,
+    "kanji": "込み",
+    "romaji": "komi",
+    "meanings": [
+      "inträngande",
+      "pressa in (t.ex. keri komi = pressande spark)"
+    ]
+  },
+  {
+    "index": 471,
+    "kanji": "天秤",
+    "romaji": "tembin",
+    "meanings": [
+      "hävarm (t.ex. tembin gatame = hävarmsgrepp — vanlig låsteknik i jūhō)"
+    ]
+  },
+  {
+    "index": 472,
+    "kanji": "閂",
+    "romaji": "kannuki",
+    "meanings": [
+      "bom, regel (t.ex. kannuki gatame = bomgrepp — vanlig låsteknik i jūhō)"
+    ]
+  },
+  {
+    "index": 473,
+    "kanji": "後手",
+    "romaji": "gote",
+    "meanings": [
+      "armkontroll bakifrån (t.ex. maki gote, gyaku gote, kiri gote)"
+    ]
+  },
+  {
+    "index": 474,
+    "kanji": "基本剛技",
+    "romaji": "kihon kōgi",
+    "meanings": [
+      "grundläggande hårda teknikövningar (gōhō-träning i linje)"
+    ]
+  },
+  {
+    "index": 475,
+    "kanji": "基本防技",
+    "romaji": "kihon bōgi",
+    "meanings": [
+      "grundläggande försvarstekniker (defensiv träning i linje)"
+    ]
+  },
+  {
+    "index": 476,
+    "kanji": "剛法運用法",
+    "romaji": "gōhō un'yōhō",
+    "meanings": [
+      "tillämpningsträning för hårda tekniker (randori med gōhō)"
+    ]
+  },
+  {
+    "index": 477,
+    "kanji": "柔法運用法",
+    "romaji": "jūhō un'yōhō",
+    "meanings": [
+      "tillämpningsträning för mjuka tekniker (randori med jūhō)"
+    ]
   }
 ]
