@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-12T20:15:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan har utökats med 44 nya ord: stridsställningar (gamae), teknikkomponenter (uke, nage, waza, m.fl.), alla kenkei-namn (niō ken, ryūō ken m.fl.) samt nyckelbegrepp från graderingsprovet.",
+        en: "The word list has been expanded with 44 new entries: fighting stances (gamae), technique components (uke, nage, waza, etc.), all kenkei names (niō ken, ryūō ken, etc.), and key grading exam concepts.",
+        tr: "Kelime listesi 44 yeni girişle genişletildi: dövüş duruşları (gamae), teknik bileşenler (uke, nage, waza vb.), tüm kenkei adları (niō ken, ryūō ken vb.) ve önemli sınav kavramları.",
+        ja: "単語リストに44語を追加しました：構え（各種）、技の要素（受け・投げ・技など）、全拳系名（仁王拳・龍王拳など）、考試の重要語句。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T18:09:30.000Z",
     changes: [
       {

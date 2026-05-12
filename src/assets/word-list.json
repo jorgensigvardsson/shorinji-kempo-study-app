@@ -611,7 +611,7 @@
   },
   {
     "index": 76,
-    "kanji": "禅林学\uF8FF",
+    "kanji": "禅林学",
     "romaji": "zenrin gakuen",
     "meanings": [
       "skolan som tidigare fanns på hombu (tidigare känd som busen)"
@@ -3164,6 +3164,378 @@
     "romaji": "kyūdan",
     "meanings": [
       "9:e dan - svart bälte"
+    ]
+  },
+  {
+    "index": 396,
+    "kanji": "科目",
+    "romaji": "kamoku",
+    "meanings": [
+      "ämne (i läroplanen)",
+      "moment (t.ex. gakka kamoku, gijutsu kamoku)"
+    ]
+  },
+  {
+    "index": 397,
+    "kanji": "昇格",
+    "romaji": "shōkaku",
+    "meanings": [
+      "befordran till högre dan-grad"
+    ]
+  },
+  {
+    "index": 398,
+    "kanji": "実施",
+    "romaji": "jisshi",
+    "meanings": [
+      "genomförande",
+      "verkställande"
+    ]
+  },
+  {
+    "index": 399,
+    "kanji": "要目",
+    "romaji": "yōmoku",
+    "meanings": [
+      "krav",
+      "obligatoriska moment i graderingsprov"
+    ]
+  },
+  {
+    "index": 400,
+    "kanji": "受験者",
+    "romaji": "jukensha",
+    "meanings": [
+      "examinand",
+      "graderingskandidat"
+    ]
+  },
+  {
+    "index": 401,
+    "kanji": "宿題",
+    "romaji": "shukudai",
+    "meanings": [
+      "hemuppgift",
+      "inlämningsuppgift till gradering"
+    ]
+  },
+  {
+    "index": 402,
+    "kanji": "審査",
+    "romaji": "shinsa",
+    "meanings": [
+      "prövning",
+      "formell bedömning"
+    ]
+  },
+  {
+    "index": 403,
+    "kanji": "基礎",
+    "romaji": "kiso",
+    "meanings": [
+      "grundläggande",
+      "basal"
+    ]
+  },
+  {
+    "index": 404,
+    "kanji": "抽出",
+    "romaji": "chūshutsu",
+    "meanings": [
+      "urval",
+      "utplockning (t.ex. av tekniker till gradering)"
+    ]
+  },
+  {
+    "index": 405,
+    "kanji": "構え",
+    "romaji": "gamae",
+    "meanings": [
+      "position",
+      "stridsställning",
+      "guard"
+    ]
+  },
+  {
+    "index": 406,
+    "kanji": "体構え",
+    "romaji": "tai gamae",
+    "meanings": [
+      "kampposition",
+      "stridsställning för kroppen"
+    ]
+  },
+  {
+    "index": 407,
+    "kanji": "体捌き",
+    "romaji": "tai sabaki",
+    "meanings": [
+      "undvikande kroppsutveckling",
+      "fotrörelse och kropp för att undvika anfall"
+    ]
+  },
+  {
+    "index": 408,
+    "kanji": "中段構え",
+    "romaji": "chūdan gamae",
+    "meanings": [
+      "mittpositions-ställning (standard kampposition)"
+    ]
+  },
+  {
+    "index": 409,
+    "kanji": "一字構え",
+    "romaji": "ichiji gamae",
+    "meanings": [
+      "ett-teckens ställning (fötter utmed en rak linje)"
+    ]
+  },
+  {
+    "index": 410,
+    "kanji": "開き構え",
+    "romaji": "hiraki gamae",
+    "meanings": [
+      "öppen ställning (fötter brett isär)"
+    ]
+  },
+  {
+    "index": 411,
+    "kanji": "正体構え",
+    "romaji": "seitai gamae",
+    "meanings": [
+      "upprätt ställning (naturlig, rak kroppshållning)"
+    ]
+  },
+  {
+    "index": 412,
+    "kanji": "技",
+    "romaji": "waza",
+    "meanings": [
+      "teknik"
+    ]
+  },
+  {
+    "index": 413,
+    "kanji": "受け",
+    "romaji": "uke",
+    "meanings": [
+      "blockering",
+      "mottagning"
+    ]
+  },
+  {
+    "index": 414,
+    "kanji": "蹴り",
+    "romaji": "keri/geri",
+    "meanings": [
+      "spark (keri = fristående eller prefix; geri = i sammansättning, t.ex. choku geri)"
+    ]
+  },
+  {
+    "index": 415,
+    "kanji": "突き",
+    "romaji": "tsuki/zuki",
+    "meanings": [
+      "slag, stöt (tsuki = fristående; zuki = i sammansättning, t.ex. gyaku zuki)"
+    ]
+  },
+  {
+    "index": 416,
+    "kanji": "打ち",
+    "romaji": "uchi",
+    "meanings": [
+      "slagteknik (t.ex. shutō uchi, uraken uchi — ej att förväxla med 内 uchi/nai = insida)"
+    ]
+  },
+  {
+    "index": 417,
+    "kanji": "投げ",
+    "romaji": "nage",
+    "meanings": [
+      "kast"
+    ]
+  },
+  {
+    "index": 418,
+    "kanji": "取り",
+    "romaji": "tori/dori",
+    "meanings": [
+      "grepp, fattning (tori = fristående; dori = i sammansättning, t.ex. ude gyaku dori)"
+    ]
+  },
+  {
+    "index": 419,
+    "kanji": "捌き",
+    "romaji": "sabaki",
+    "meanings": [
+      "undvikande rörelse",
+      "kroppsutveckling"
+    ]
+  },
+  {
+    "index": 420,
+    "kanji": "払い",
+    "romaji": "harai",
+    "meanings": [
+      "svepande blockering",
+      "svep (t.ex. ashi barai, uchi harai uke)"
+    ]
+  },
+  {
+    "index": 421,
+    "kanji": "固め",
+    "romaji": "gatame",
+    "meanings": [
+      "lås",
+      "fixering (t.ex. ude jūji gatame)"
+    ]
+  },
+  {
+    "index": 422,
+    "kanji": "拳",
+    "romaji": "ken",
+    "meanings": [
+      "knytnäve",
+      "näve (används i kenkei-namn, t.ex. niō ken, ryūō ken)"
+    ]
+  },
+  {
+    "index": 423,
+    "kanji": "転身",
+    "romaji": "tenshin",
+    "meanings": [
+      "rotering av kroppen",
+      "vändning (t.ex. yoko tenshin)"
+    ]
+  },
+  {
+    "index": 424,
+    "kanji": "受け身",
+    "romaji": "ukemi",
+    "meanings": [
+      "fallteknik",
+      "metod för att falla utan skada (t.ex. mae ukemi, ushiro ukemi)"
+    ]
+  },
+  {
+    "index": 425,
+    "kanji": "入り身",
+    "romaji": "irimi",
+    "meanings": [
+      "inträdesrörelse",
+      "röra sig in mot motståndarens sida"
+    ]
+  },
+  {
+    "index": 426,
+    "kanji": "仁王拳",
+    "romaji": "niō ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter Niō (buddhistiska tempelväktare)"
+    ]
+  },
+  {
+    "index": 427,
+    "kanji": "金剛拳",
+    "romaji": "kongō ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter kongō (vajra, diamant)"
+    ]
+  },
+  {
+    "index": 428,
+    "kanji": "龍王拳",
+    "romaji": "ryūō ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter drakkonungen (ryū=drake, ō=kung)"
+    ]
+  },
+  {
+    "index": 429,
+    "kanji": "三合拳",
+    "romaji": "sangō ken",
+    "meanings": [
+      "teknikgrupp (tre harmoniers näve)"
+    ]
+  },
+  {
+    "index": 430,
+    "kanji": "龍華拳",
+    "romaji": "ryūka ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter drakblomman (ryū=drake, ka=blomma/lotus)"
+    ]
+  },
+  {
+    "index": 431,
+    "kanji": "天王拳",
+    "romaji": "ten'ō ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter himmelskungen (ten=himmel, ō=kung)"
+    ]
+  },
+  {
+    "index": 432,
+    "kanji": "羅漢拳",
+    "romaji": "rakan ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter rakaner (upplysta lärjungar, arhat)"
+    ]
+  },
+  {
+    "index": 433,
+    "kanji": "白蓮拳",
+    "romaji": "byakuren ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter vita lotusblomman"
+    ]
+  },
+  {
+    "index": 434,
+    "kanji": "鶴立拳",
+    "romaji": "kakuritsu ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter tranan i stående position (kaku=trana, ritsu=stå)"
+    ]
+  },
+  {
+    "index": 435,
+    "kanji": "地王拳",
+    "romaji": "chiō ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter jordkungen (chi=jord, ō=kung)"
+    ]
+  },
+  {
+    "index": 436,
+    "kanji": "五花拳",
+    "romaji": "goka ken",
+    "meanings": [
+      "teknikgrupp (fem blommornas näve)"
+    ]
+  },
+  {
+    "index": 437,
+    "kanji": "天地拳",
+    "romaji": "tenchi ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter himmel och jord (ten=himmel, chi=jord)"
+    ]
+  },
+  {
+    "index": 438,
+    "kanji": "義和拳",
+    "romaji": "giwa ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter rättvisa och harmoni (gi=rättvisa, wa=harmoni)"
+    ]
+  },
+  {
+    "index": 439,
+    "kanji": "紅卍拳",
+    "romaji": "kō manji ken",
+    "meanings": [
+      "teknikgrupp uppkallad efter det röda manji-tecknet (卍)"
     ]
   }
 ]
