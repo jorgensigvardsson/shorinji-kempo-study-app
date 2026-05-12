@@ -1,5 +1,465 @@
 {
   "$schema": "../../data/grading-exam-information.schema",
+  "sandan": {
+    "term": {
+      "romaji": "sandan shōkaku kōshi jisshi yōmoku"
+    },
+    "title": "Ämnen för graderingstest till sandan (3 dan)",
+    "sections": [
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gakka kamoku"
+        },
+        "title": "teoretiska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "jukensha ga teishutsu suru shukudai"
+            },
+            "text": "Hemarbete att lämna in",
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "text": "Shorinji Kempos sex karaktärsdrag"
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "text": "Beskriv Shorinji Kempos historia och dess grundande"
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "text": "Skriftligt test på graderingsdagen",
+            "points": 100,
+            "description": "4 ämnen av ①-⑨ nedan väljs ut",
+            "annotations": [
+              {
+                "marker": "asterisk",
+                "text": "Ett ämne från varje kategori (1)-(4) väljs ut. För kenshi utanför Japan är det uppsats som gäller för samtliga kategorier."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "text": "Grundläggande ämnen",
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 1
+                    },
+                    "text": "Shorinji Kempos historia och dess grundande"
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "text": "Sammanfatta från Tokuhon",
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 2
+                    },
+                    "text": "Om sen (initiativ)"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 3
+                    },
+                    "text": "Maai (avstånd) och kikai (tillfälle) för attack och försvar"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 4
+                    },
+                    "text": "Shorinji Kempos symboler och aktiviteter"
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "text": "Ämnen med att fylla i tomrum",
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 5
+                    },
+                    "text": "Kyūsho på huvudet, ansiktet & nacken, 22 punkter"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 6
+                    },
+                    "text": "Kyūsho på armarna, 15 punkter"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 7
+                    },
+                    "text": "Kyūsho på benen, 21 punkter"
+                  },
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 8
+                    },
+                    "text": "Kyūsho på överkroppen, 12 punkter"
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "text": "Uppsats",
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "circled",
+                      "value": 9
+                    },
+                    "text": "Beskriv Shorinji Kempos sex karaktärsdrag"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "marker": "◎",
+        "term": {
+          "romaji": "gijutsu kamoku"
+        },
+        "title": "tekniska ämnen",
+        "items": [
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 1
+            },
+            "term": {
+              "romaji": "kiso kamoku"
+            },
+            "points": 100,
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "tai gamae, tai sabaki, umpohō"
+                },
+                "points": 10,
+                "description": "Utför varierande tai gamae, tai sabaki och umpohō."
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "ukemi"
+                },
+                "points": 10,
+                "description": "Utför varierande typer av ukemi."
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "kihon kōgi"
+                },
+                "points": 10,
+                "description": "Utför varierande typer av kihon kōgi."
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "kihon bōgi"
+                },
+                "points": 10,
+                "description": "Utför varierande typer av kihon bōgi.",
+                "annotations": [
+                  {
+                    "marker": "kome",
+                    "text": "gör även hangeki."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "idō kōbōgi"
+                },
+                "points": 10,
+                "description": "Utför varierande typer av idō kōbōgi."
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "tan'en kihon hōkei"
+                },
+                "points": 20,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "tenchi ken dai ikkei - dai rokkei (hidari & migi)"
+                      },
+                      {
+                        "romaji": "giwa ken dai ikkei - dai nikei"
+                      },
+                      {
+                        "romaji": "byakuren ken dai ikkei"
+                      },
+                      {
+                        "romaji": "kō manji ken (2:a hållet görs ryūō ken dai ikkei, 4:e hållet görs ryū no kata)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 7
+                },
+                "term": {
+                  "romaji": "tan'en kihon hōkei (sōtai)"
+                },
+                "points": 30,
+                "techniqueGroups": [
+                  {
+                    "techniques": [
+                      {
+                        "romaji": "tenchi ken dai ikkei - dai nikei"
+                      },
+                      {
+                        "romaji": "giwa ken dai ikkei"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "chūshutsu kamoku",
+              "gloss": "utvalda tekniker"
+            },
+            "points": 100,
+            "description": "Fem gōhō waza (50 poäng) och fem jūhō waza (50 poäng) väljs ut av alla tekniker upp till sandan. Dock ska minst 3 tekniker vara från sandans kamoku både när det gäller gōhō och jūhō.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "kumi embu"
+            },
+            "points": 100,
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Ena sidan gör (1), (3) & (5) som shusha, andra sidan gör (2), (4) & (6) som shusha. Vem som gör vilken sida bestäms av kōshi-in (examinator)."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "kusshin geri tenkai ren geri"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "mikazuki gaeshi kari ashi"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "morote kiri kaeshi nage"
+                },
+                "annotations": [
+                  {
+                    "marker": "asterisk",
+                    "text": "kōgeki: ude ushiro neji age"
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "ryōte katate nage - kannuki gatame"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "keri ten ichi sukui nage"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "sode maki gaeshi - kannuki gatame"
+                },
+                "annotations": [
+                  {
+                    "marker": "asterisk",
+                    "text": "kōgeki: grepp ärmen ashi barai"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 4
+            },
+            "term": {
+              "romaji": "un'yōhō"
+            },
+            "points": 100,
+            "description": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Obligatoriskt upp till 49 års ålder. Frivilligt från 50 års ålder och över."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "gōhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: tsuki och keri mot jōdan och chūdan."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: fria kontringar."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "jūhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: attackera genom att greppa handled, överarm, övre ärm och krage."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: försvarare och kontringsattackera med tekniker från ryūō ken, ryūka ken & rakan ken."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "nidan": {
     "term": {
       "romaji": "nidan shōkaku kōshi jisshi yōmoku"
