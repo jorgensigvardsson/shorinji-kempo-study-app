@@ -71,6 +71,7 @@ const List = (props: Props) => {
                         <option value="shodan">{gradeLabel('shodan', translator)}</option>
                         <option value="nidan">{gradeLabel('nidan', translator)}</option>
                         <option value="sandan">{gradeLabel('sandan', translator)}</option>
+                        <option value="yondan">{gradeLabel('yondan', translator)}</option>
                     </Form.Select>
                     <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-3"
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />
