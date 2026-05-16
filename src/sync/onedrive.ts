@@ -274,14 +274,16 @@ function resolveRedirectUri(explicitRedirectUri?: string): string {
 
 function randomString(length: number): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const limit = Math.floor(256 / chars.length) * chars.length;
   let result = "";
-  const randomValues = new Uint8Array(length);
-  crypto.getRandomValues(randomValues);
-
-  for (let i = 0; i < length; i++) {
-    result += chars[randomValues[i] % chars.length];
+  while (result.length < length) {
+    const batch = new Uint8Array(Math.ceil((length - result.length) * 1.5));
+    crypto.getRandomValues(batch);
+    for (const byte of batch) {
+      if (result.length >= length) break;
+      if (byte < limit) result += chars[byte % chars.length];
+    }
   }
-
   return result;
 }
 

@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-16T15:00:00.000Z",
+    changes: [
+      {
+        emoji: "☁️",
+        sv: "Synkronisering med Google Drive är nu tillgänglig (beta).",
+        en: "Sync with Google Drive is now available (beta).",
+        tr: "Google Drive ile senkronizasyon artık kullanılabilir (beta).",
+        ja: "Google Drive との同期機能が利用可能になりました（ベータ版）。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-16T14:00:00.000Z",
     changes: [
       {

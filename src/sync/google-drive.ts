@@ -18,12 +18,16 @@ interface GoogleFilesListResponse {
 
 const tokenStorageKey = "sync-google-drive-token";
 const pkceStorageKey = "sync-google-drive-pkce";
+const authExpiredStorageKey = "sync-google-drive-auth-expired";
 const scope = "https://www.googleapis.com/auth/drive.appdata";
 const documentName = "shorinji-kempo-app-data.json";
 
 export class GoogleDriveClient {
   private readonly clientId: string | null = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? null;
+  private readonly clientSecret: string | null = import.meta.env.VITE_GOOGLE_CLIENT_SECRET ?? null;
   private readonly redirectUri: string = resolveRedirectUri(import.meta.env.VITE_GOOGLE_REDIRECT_URI);
+  // undefined = not yet looked up; null = confirmed absent; string = known file ID
+  private cachedFileId: string | null | undefined = undefined;
 
   canUse(): boolean {
     return !!this.clientId;
@@ -89,6 +93,7 @@ export class GoogleDriveClient {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         client_id: this.clientId,
+        ...(this.clientSecret ? { client_secret: this.clientSecret } : {}),
         grant_type: "authorization_code",
         code,
         redirect_uri: this.redirectUri,
@@ -97,8 +102,10 @@ export class GoogleDriveClient {
     });
 
     if (!tokenResponse.ok) {
+      const body = await tokenResponse.json().catch(() => null);
       cleanupAuthParams(url);
-      throw new Error("Failed to exchange Google Drive authorization code.");
+      const detail = body?.error_description ?? body?.error ?? String(tokenResponse.status);
+      throw new Error(`Google Drive authorization failed: ${detail}`);
     }
 
     const payload = await tokenResponse.json();
@@ -112,6 +119,7 @@ export class GoogleDriveClient {
 
     localStorage.setItem(tokenStorageKey, JSON.stringify(tokens));
     localStorage.removeItem(pkceStorageKey);
+    localStorage.removeItem(authExpiredStorageKey);
     cleanupAuthParams(url);
     return true;
   }
@@ -122,12 +130,14 @@ export class GoogleDriveClient {
   }
 
   wasAuthExpired(): boolean {
-    return false;
+    return localStorage.getItem(authExpiredStorageKey) === "1";
   }
 
   disconnect(): void {
     localStorage.removeItem(tokenStorageKey);
     localStorage.removeItem(pkceStorageKey);
+    localStorage.removeItem(authExpiredStorageKey);
+    this.cachedFileId = undefined;
   }
 
   async downloadDocument(): Promise<AppDataDocument | null> {
@@ -160,20 +170,28 @@ export class GoogleDriveClient {
 
     const url = fileId
       ? `https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=multipart`
-      : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+      : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id";
 
     const method = fileId ? "PATCH" : "POST";
-    const response = await this.fetchWithAuth(url, {
-      method,
-      body: form,
-    });
+    const response = await this.fetchWithAuth(url, { method, body: form });
 
     if (!response.ok) {
       throw new Error("Failed to upload Google Drive sync document.");
     }
+
+    if (!fileId) {
+      const created = await response.json() as { id?: string };
+      if (created.id) {
+        this.cachedFileId = created.id;
+      }
+    }
   }
 
   private async findDocumentId(): Promise<string | null> {
+    if (this.cachedFileId !== undefined) {
+      return this.cachedFileId;
+    }
+
     const query = encodeURIComponent(`name='${documentName}' and 'appDataFolder' in parents and trashed=false`);
     const url = `https://www.googleapis.com/drive/v3/files?q=${query}&spaces=appDataFolder&fields=files(id,name)&pageSize=1`;
     const response = await this.fetchWithAuth(url, { method: "GET" });
@@ -182,7 +200,8 @@ export class GoogleDriveClient {
     }
 
     const payload = await response.json() as GoogleFilesListResponse;
-    return payload.files?.[0]?.id ?? null;
+    this.cachedFileId = payload.files?.[0]?.id ?? null;
+    return this.cachedFileId;
   }
 
   private readToken(): GoogleTokenSet | null {
@@ -221,6 +240,7 @@ export class GoogleDriveClient {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         client_id: this.clientId,
+        ...(this.clientSecret ? { client_secret: this.clientSecret } : {}),
         grant_type: "refresh_token",
         refresh_token: tokenSet.refreshToken,
       }),
@@ -229,7 +249,11 @@ export class GoogleDriveClient {
     if (!refreshResponse.ok) {
       const body = await refreshResponse.json().catch(() => null);
       if (refreshResponse.status === 400 && body?.error === "invalid_grant") {
-        this.disconnect();
+        // Clear tokens without going through disconnect() so the auth-expired flag
+        // is set AFTER the tokens are gone and survives a page reload.
+        localStorage.removeItem(tokenStorageKey);
+        localStorage.removeItem(pkceStorageKey);
+        localStorage.setItem(authExpiredStorageKey, "1");
         throw new AuthExpiredError();
       }
       throw new Error(`Google Drive token refresh failed: ${refreshResponse.status} ${body?.error ?? refreshResponse.statusText}`);
@@ -247,6 +271,16 @@ export class GoogleDriveClient {
     return refreshed.accessToken;
   }
 
+  // Force-expire the stored access token so ensureAccessToken() will refresh it.
+  // Used when the server returns 401 for a token that hasn't expired by clock
+  // (e.g., manually revoked).
+  private expireToken(): void {
+    const tokenSet = this.readToken();
+    if (tokenSet) {
+      localStorage.setItem(tokenStorageKey, JSON.stringify({ ...tokenSet, expiresAt: 0 }));
+    }
+  }
+
   private async fetchWithAuth(url: string, options: RequestInit): Promise<Response> {
     const accessToken = await this.ensureAccessToken();
     let response = await fetch(url, {
@@ -261,6 +295,7 @@ export class GoogleDriveClient {
       return response;
     }
 
+    this.expireToken();
     const refreshedToken = await this.ensureAccessToken();
     response = await fetch(url, {
       ...options,
@@ -290,14 +325,16 @@ function resolveRedirectUri(explicitRedirectUri?: string): string {
 
 function randomString(length: number): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const limit = Math.floor(256 / chars.length) * chars.length;
   let result = "";
-  const randomValues = new Uint8Array(length);
-  crypto.getRandomValues(randomValues);
-
-  for (let i = 0; i < length; i++) {
-    result += chars[randomValues[i] % chars.length];
+  while (result.length < length) {
+    const batch = new Uint8Array(Math.ceil((length - result.length) * 1.5));
+    crypto.getRandomValues(batch);
+    for (const byte of batch) {
+      if (result.length >= length) break;
+      if (byte < limit) result += chars[byte % chars.length];
+    }
   }
-
   return result;
 }
 

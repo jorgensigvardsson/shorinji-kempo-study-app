@@ -8,7 +8,7 @@ import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
-import { DeviceHdd, Download, Upload } from "react-bootstrap-icons";
+import { DeviceHdd, Download, ExclamationTriangleFill, Upload } from "react-bootstrap-icons";
 import "./Settings.css";
 
 interface Props {
@@ -67,10 +67,7 @@ const Settings = (props: Props) => {
     const syncProviderOptions: { value: SyncProvider; label: string; logo?: string }[] = [
         { value: "local", label: translator.translate("Ingen") },
         { value: "onedrive", label: "OneDrive", logo: "/onedrive-logo.svg" },
-/* TODO: implement syncing with these providers
         { value: "google-drive", label: "Google Drive", logo: "/google-drive-logo.svg" },
-        { value: "dropbox", label: "Dropbox", logo: "/dropbox-logo.svg" },
-*/
     ];
     const selectedSyncProvider = syncProviderOptions.find(option => option.value === syncProvider) ?? syncProviderOptions[0];
 
@@ -220,9 +217,9 @@ const Settings = (props: Props) => {
                         </Dropdown>
                         {syncProvider !== "local" && (
                             <>
-                                {syncState.status === "auth_expired" && syncProvider === "onedrive" && (
+                                {syncState.status === "auth_expired" && (
                                     <Form.Text className="d-block mt-2 text-warning">
-                                        {translator.translate("Anslutningen till {0} har gått ut.", { params: ["OneDrive"] })}
+                                        {translator.translate("Anslutningen till {0} har gått ut.", { params: [providerLabel] })}
                                     </Form.Text>
                                 )}
                                 <div className="mt-2 d-flex gap-2">
@@ -267,6 +264,12 @@ const Settings = (props: Props) => {
                             </Button>
                         </div>
                     </>
+                )}
+                {syncProvider === "google-drive" && (
+                    <Form.Text className="d-block mt-2 text-warning">
+                        <ExclamationTriangleFill className="me-1" />
+                        {translator.translate("Support för Google Drive är fortfarande beta")}
+                    </Form.Text>
                 )}
             </Form.Group>
             <Form.Group className="mb-3">

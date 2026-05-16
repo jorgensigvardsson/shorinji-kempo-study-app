@@ -355,8 +355,14 @@ class SyncManager {
   }
 
   private backupDocument(document: AppDataDocument, provider: SyncProvider): void {
-    const key = `${backupStoragePrefix}${provider}:${new Date().toISOString()}`;
+    const prefix = `${backupStoragePrefix}${provider}:`;
+    const key = `${prefix}${new Date().toISOString()}`;
     localStorage.setItem(key, JSON.stringify(document));
+
+    const allKeys = Object.keys(localStorage).filter(k => k.startsWith(prefix)).sort();
+    for (const old of allKeys.slice(0, -5)) {
+      localStorage.removeItem(old);
+    }
   }
 
   private handleSyncError(error: unknown): void {
