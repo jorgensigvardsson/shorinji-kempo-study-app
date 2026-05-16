@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-16T14:00:00.000Z",
+    changes: [
+      {
+        emoji: "🐛",
+        sv: "Hōkei-listan visade inte tekniker för yondan och högre. Det är nu åtgärdat.",
+        en: "The hōkei list was not showing techniques for yondan and above. This has been fixed.",
+        tr: "Hōkei listesi yondan ve üzeri için teknikleri göstermiyordu. Bu sorun düzeltildi.",
+        ja: "法形リストで四段以上の技が表示されていない不具合を修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-16T13:00:00.000Z",
     changes: [
       {

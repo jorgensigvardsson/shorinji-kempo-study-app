@@ -1,7 +1,7 @@
 import { Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, type YondanHokeiMoment, type GodanHokeiMoment, type KyushoZeme, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek } from "./data";
+import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
 import CollapsibleCard from "./components/CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
@@ -277,48 +277,6 @@ function PreparationWeekCard(props: PreparationWeekCardProps) {
             </table>            
         </CollapsibleCard>
     );
-}
-
-function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
-    return {
-        type: "hokei_moment",
-        hokei_name: m.hokei_name,
-        ren_hanko: false,
-        variations: m.variations,
-        technique_group: m.technique_group,
-        foot_stance: [],
-        roles: {
-            attacker: m.roles?.attacker ?? {},
-            defender: m.roles?.defender ?? {},
-        },
-        kyohan_pages: m.kyohan_pages,
-    };
-}
-
-function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
-    return {
-        type: "hokei_moment",
-        hokei_name: m.hokei_name,
-        ren_hanko: false,
-        variations: m.variations,
-        technique_group: m.technique_group ?? "",
-        foot_stance: [],
-        roles: { attacker: {}, defender: {} },
-        kyohan_pages: m.kyohan_pages,
-    };
-}
-
-function adaptKyushoZeme(z: KyushoZeme): HokeiMoment {
-    return {
-        type: "hokei_moment",
-        hokei_name: z.name,
-        ren_hanko: false,
-        variations: [],
-        technique_group: "",
-        foot_stance: [],
-        roles: { attacker: {}, defender: {} },
-        kyohan_pages: z.kyohan_pages,
-    };
 }
 
 interface StudyTeachCardProps {

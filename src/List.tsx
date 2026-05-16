@@ -30,7 +30,7 @@ const List = (props: Props) => {
 
     useEffect(() => {
         setAllHokeis(
-            allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({week: w.week, grade: grade.grade, moments: getHokeiMoments(w)})))
+            allGradePlans.flatMap(grade => grade.weeks.map(w => ({week: w.week, grade: grade.grade, moments: getHokeiMoments(w)})))
                          .flatMap(({week, grade, moments}) => moments.map((moment, momentIndex) => ({ week, grade, moment, momentIndex})))
                          .sort(compareGradeThenWeek)
         )

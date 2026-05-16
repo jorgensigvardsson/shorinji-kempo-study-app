@@ -175,7 +175,52 @@ export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
  * Small helpers that are handy when consuming imported JSON assets.
  */
 
+export function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
+  return {
+    type: "hokei_moment",
+    hokei_name: m.hokei_name,
+    ren_hanko: false,
+    variations: m.variations,
+    technique_group: m.technique_group,
+    foot_stance: [],
+    roles: {
+      attacker: m.roles?.attacker ?? {},
+      defender: m.roles?.defender ?? {},
+    },
+    kyohan_pages: m.kyohan_pages,
+  };
+}
+
+export function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
+  return {
+    type: "hokei_moment",
+    hokei_name: m.hokei_name,
+    ren_hanko: false,
+    variations: m.variations,
+    technique_group: m.technique_group ?? "",
+    foot_stance: [],
+    roles: { attacker: {}, defender: {} },
+    kyohan_pages: m.kyohan_pages,
+  };
+}
+
+export function adaptKyushoZeme(z: KyushoZeme): HokeiMoment {
+  return {
+    type: "hokei_moment",
+    hokei_name: z.name,
+    ren_hanko: false,
+    variations: [],
+    technique_group: "",
+    foot_stance: [],
+    roles: { attacker: {}, defender: {} },
+    kyohan_pages: z.kyohan_pages,
+  };
+}
+
 export function getHokeiMoments(week: Week): HokeiMoment[] {
+  if (isYondanWeek(week)) return week.moment ? [adaptYondanMoment(week.moment)] : [];
+  if (isGodanWeek(week)) return [adaptGodanMoment(week.moment)];
+  if (isKyushoZemeWeek(week)) return [adaptKyushoZeme(week.zeme)];
   if (!("moments" in week)) return [];
   return week.moments.filter(isHokeiMoment);
 }
