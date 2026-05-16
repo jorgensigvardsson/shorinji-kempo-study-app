@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-16T16:30:00.000Z",
+    changes: [
+      {
+        emoji: "📋",
+        sv: "Graderingstestsidan har fått ett nytt utseende: alla ämnen visas direkt på en sida, och detaljer expanderar på plats istället för att navigera bort.",
+        en: "The grading test page has a new look: all subjects are shown on one page, and details expand in place instead of navigating away.",
+        tr: "Sınav sayfası yenilendi: tüm konular tek sayfada görünüyor, detaylar sayfa değiştirmeden yerinde açılıyor.",
+        ja: "審査ページが新しくなりました。すべての科目が1ページに表示され、詳細はページ遷移なしにその場で展開されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-16T15:00:00.000Z",
     changes: [
       {

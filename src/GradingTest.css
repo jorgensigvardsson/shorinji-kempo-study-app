@@ -1,0 +1,18 @@
+@keyframes grading-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.grading-section-body {
+  animation: grading-fade-slide 180ms ease-out forwards;
+}
+
+.grading-section-body .app-grid-title {
+  font-size: 1rem;
+}
