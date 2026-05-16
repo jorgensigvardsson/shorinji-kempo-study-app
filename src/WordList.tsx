@@ -1,8 +1,8 @@
 import type { WordListEntry } from "./data";
 import wordList from './assets/word-list.json';
 import { Button, ButtonGroup, Form } from "react-bootstrap";
-import { useContext, useState } from "react";
-import { matchesString } from "./strings";
+import { useContext, useMemo, useState } from "react";
+import { normalizeString } from "./strings";
 import { TranslatorContext, type Translator } from "./i18n";
 import "./WordList.css";
 
@@ -12,9 +12,17 @@ const WordList = () => {
     const translator = useContext(TranslatorContext);
     const [filterText, setFilterText] = useState("");
     const [sortKey, setSortKey] = useState<SortKey>("romaji");
-    const filteredEntries = wordList
-        .filter(e => matches(e, filterText, translator))
-        .sort((a, b) => orderEntries(a, b, sortKey, translator));
+    const filteredEntries = useMemo(() =>
+        wordList
+            .map(e => ({ entry: e, score: scoreEntry(e, filterText, translator) }))
+            .filter(s => s.score > 0)
+            .sort((a, b) => {
+                const scoreDiff = b.score - a.score;
+                if (scoreDiff !== 0) return scoreDiff;
+                return orderEntries(a.entry, b.entry, sortKey, translator);
+            })
+            .map(s => s.entry),
+        [filterText, sortKey, translator]);
 
     return (
         <div>
@@ -112,10 +120,35 @@ const createWordListRow = (entry: WordListEntry, translator: Translator) => {
     );
 }
 
-const matches = (entry: WordListEntry, filterText: string, translator: Translator) => {
-    return entry.kanji && entry.kanji.indexOf(filterText) >= 0 ||
-           entry.romaji && matchesString(entry.romaji, filterText) ||
-           entry.meanings && entry.meanings.some(m => matchesString(translator.translate(m), filterText));
+const scoreEntry = (entry: WordListEntry, filterText: string, translator: Translator): number => {
+    if (!filterText) return 1;
+
+    const q = normalizeString(filterText);
+    let best = 0;
+
+    if (entry.romaji) {
+        const r = normalizeString(entry.romaji);
+        if (r === q)
+            return 6;
+        if (r.startsWith(q))
+            best = 5;
+        else if (r.split(/[\s/]+/).some(t => t.startsWith(q)))
+            best = Math.max(best, 4);
+        else if (r.includes(q))
+            best = Math.max(best, 3);
+    }
+
+    if (entry.kanji) {
+        if (entry.kanji === filterText)
+            return 6;
+        if (entry.kanji.includes(filterText))
+            best = Math.max(best, 5);
+    }
+
+    if (best === 0 && entry.meanings?.some(m => normalizeString(translator.translate(m)).includes(q)))
+        best = 1;
+
+    return best;
 }
 
 export default WordList;

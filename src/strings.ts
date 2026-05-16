@@ -26,6 +26,13 @@ const stringsAreEqual = (left: string, leftStart: number, right: string, rightSt
     return true;
 }
 
+export const normalizeString = (s: string): string => {
+    let out = '';
+    for (let i = 0; i < s.length; i++)
+        out += String.fromCharCode(normalizeCharacterCode(s.charCodeAt(i)));
+    return out;
+}
+
 const normalizeCharacterCode = (charCode: number) => {
     if (charCode === 333) // ō
         return 111; // o
