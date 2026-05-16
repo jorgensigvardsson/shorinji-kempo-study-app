@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-16T12:00:00.000Z",
+    changes: [
+      {
+        emoji: "🔧",
+        sv: "Rättade kamokuhyō: angripare och försvarare var ibland förväxlade, och sammansatta aktionssträngar delades upp för tydlighetens skull.",
+        en: "Corrected kamokuhyō: attacker and defender were sometimes swapped, and compound action strings were split for clarity.",
+        tr: "Kamokuhyō düzeltildi: saldırgan ve savunucu zaman zaman karıştırılmıştı; birleşik eylem dizeleri netlik için ayrıldı.",
+        ja: "科目表を修正しました：攻者と守者の記述が入れ替わっている箇所を修正し、複合アクション文字列を明確化のために分割しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-12T21:30:00.000Z",
     changes: [
       {

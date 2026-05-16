@@ -2792,11 +2792,11 @@
             "foot_stance": [],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "försök undkomma sode maki (dori)"
               },
               "defender": {
-                "stance": "gyaku gedan gamae",
-                "action": "försök undkomma sode maki (dori)"
+                "stance": "gyaku gedan gamae"
               }
             },
             "kyohan_pages": [
@@ -3435,11 +3435,11 @@
             ],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
                 "stance": "chūdan gamae",
                 "action": "ippon se nage"
+              },
+              "defender": {
+                "stance": "chūdan gamae"
               }
             },
             "kyohan_pages": [
@@ -3457,11 +3457,11 @@
             ],
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
                 "stance": "chūdan gamae",
                 "action": "ippon se nage"
+              },
+              "defender": {
+                "stance": "chūdan gamae"
               }
             },
             "kyohan_pages": [
@@ -4203,11 +4203,12 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "ippon se nage"
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "ippon se nage, tsuri age ura gatame, ura hiza gatame"
+                "action": "tsuri age ura gatame, ura hiza gatame"
               }
             },
             "references": [
@@ -4328,11 +4329,12 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "böj armbågen och gör motstånd"
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "böj armbågen och gör motstånd; henka från okuri gote"
+                "action": "henka från okuri gote"
               }
             },
             "references": [
@@ -4371,11 +4373,12 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "vänd runt och försök undkomma"
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "vänd runt och försök undkomma; henka från okuri gote"
+                "action": "henka från okuri gote"
               }
             },
             "references": [
@@ -4449,10 +4452,10 @@
             "variations": [],
             "technique_group": "rakan ken",
             "roles": {
-              "attacker": {},
-              "defender": {
+              "attacker": {
                 "action": "övre kragen, dra"
-              }
+              },
+              "defender": {}
             },
             "kyohan_pages": [
               302
@@ -4485,10 +4488,10 @@
             "variations": [],
             "technique_group": "rakan ken",
             "roles": {
-              "attacker": {},
-              "defender": {
+              "attacker": {
                 "action": "dra i båda kragarna & zu tsuki (skallning), eller tryck"
-              }
+              },
+              "defender": {}
             },
             "kyohan_pages": [
               302
@@ -4602,9 +4605,11 @@
             "variations": [],
             "technique_group": "rakan ken",
             "roles": {
-              "attacker": {},
+              "attacker": {
+                "action": "övre kragen, dra"
+              },
               "defender": {
-                "action": "övre kragen, dra; tembin gatame (ura)"
+                "action": "tembin gatame (ura)"
               }
             },
             "references": [
@@ -4639,9 +4644,11 @@
             "variations": [],
             "technique_group": "rakan ken",
             "roles": {
-              "attacker": {},
+              "attacker": {
+                "action": "övre kragen, tryck"
+              },
               "defender": {
-                "action": "övre kragen, tryck; använd tembin och kasta"
+                "action": "använd tembin och kasta"
               }
             },
             "references": [
@@ -6109,11 +6116,12 @@
             "technique_group": "goka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "ippon se nage eller gyaku tembin"
               },
               "defender": {
                 "stance": "chūdan gamae",
-                "action": "ippon se nage eller gyaku tembin, kannuki gatame"
+                "action": "kannuki gatame"
               }
             },
             "references": [
@@ -6155,11 +6163,11 @@
             "technique_group": "goka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
+                "stance": "chūdan gamae",
+                "action": "hira ken uchi komi"
               },
               "defender": {
-                "stance": "ichiji gamae",
-                "action": "hira ken uchi komi"
+                "stance": "ichiji gamae"
               }
             },
             "kyohan_pages": [
@@ -6235,11 +6243,11 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
                 "stance": "chūdan gamae",
                 "action": "ippon se nage"
+              },
+              "defender": {
+                "stance": "chūdan gamae"
               }
             },
             "references": [
@@ -6284,11 +6292,11 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
                 "stance": "chūdan gamae",
                 "action": "ippon se nage"
+              },
+              "defender": {
+                "stance": "chūdan gamae"
               }
             },
             "references": [
@@ -6333,11 +6341,11 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
                 "stance": "chūdan gamae",
                 "action": "ippon se nage"
+              },
+              "defender": {
+                "stance": "chūdan gamae"
               }
             },
             "references": [
@@ -6383,11 +6391,11 @@
             "technique_group": "ryūka ken",
             "roles": {
               "attacker": {
-                "stance": "chūdan gamae"
-              },
-              "defender": {
                 "stance": "chūdan gamae",
                 "action": "ippon se nage"
+              },
+              "defender": {
+                "stance": "chūdan gamae"
               }
             },
             "references": [
@@ -6789,9 +6797,11 @@
             "variations": [],
             "technique_group": "kongō ken",
             "roles": {
-              "attacker": {},
+              "attacker": {
+                "action": "vänd runt och försök undkomma"
+              },
               "defender": {
-                "action": "vänd runt och försök undkomma; henka från okuri gote"
+                "action": "henka från okuri gote"
               }
             },
             "references": [
