@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-16T13:00:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan utökad med 52 ord hämtade från hōkei-namnen: teknikbyggstenar (okuri, otoshi, kiri, jime, nami, yubi m.fl.), positioner (uwa, shita, tate, se, han, ryō), natur och djur (tora, tsubame, konoha, hangetsu, mikazuki, ryū, yahazu) och specialtermer (tekubi, kinteki, suigetsu, hagai, kumade, kusshin, idori, chōji, sankaku m.fl.).",
+        en: "Word list expanded with 52 entries drawn from hōkei names: technique building blocks (okuri, otoshi, kiri, jime, nami, yubi, etc.), positions (uwa, shita, tate, se, han, ryō), nature and animals (tora, tsubame, konoha, hangetsu, mikazuki, ryū, yahazu), and specialist terms (tekubi, kinteki, suigetsu, hagai, kumade, kusshin, idori, chōji, sankaku, etc.).",
+        tr: "Kelime listesi, hōkei adlarından alınan 52 girişle genişletildi: teknik yapı taşları (okuri, otoshi, kiri, jime, nami, yubi vb.), konumlar (uwa, shita, tate, se, han, ryō), doğa ve hayvanlar (tora, tsubame, konoha, hangetsu, mikazuki, ryū, yahazu) ve uzman terimler (tekubi, kinteki, suigetsu, hagai, kumade, kusshin, idori, chōji, sankaku vb.).",
+        ja: "法形の名称から52語を抽出して単語リストを拡充しました：技の構成要素（送り・落とし・切り・絞め・波・指など）、位置（上・下・立て・背・半・両）、自然・動物（虎・燕・木の葉・半月・三日月・龍・矢筈）、専門用語（手首・金的・水月・羽交い・熊手・屈身・居捕り・丁字・三角など）。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-16T12:00:00.000Z",
     changes: [
       {

@@ -3925,5 +3925,421 @@
     "meanings": [
       "tyst meditation (görs i början och slutet av varje träningspass)"
     ]
+  },
+  {
+    "index": 486,
+    "kanji": "送り",
+    "romaji": "okuri",
+    "meanings": [
+      "skjutande framåt, glidande mot motståndaren (prefix; t.ex. okuri gote, okuri tembin, okuri yubi gaeshi)"
+    ]
+  },
+  {
+    "index": 487,
+    "kanji": "落とし",
+    "romaji": "otoshi",
+    "meanings": [
+      "nedkastning, nedfall (suffix; t.ex. hiki otoshi = dragfall, tsuri otoshi = liftfall, maki otoshi)"
+    ]
+  },
+  {
+    "index": 488,
+    "kanji": "切り",
+    "romaji": "kiri",
+    "meanings": [
+      "skärning, snitt (t.ex. kiri kaeshi = skärande återvändning, kiri gote, kiri nuki)"
+    ]
+  },
+  {
+    "index": 489,
+    "kanji": "絞め",
+    "romaji": "jime",
+    "meanings": [
+      "strypning, kvävning (t.ex. kubi jime = halsstrypning, hagai jime, ken jime dori)"
+    ]
+  },
+  {
+    "index": 490,
+    "kanji": "波",
+    "romaji": "nami",
+    "meanings": [
+      "våg (t.ex. nami gaeshi = vågformig återvändning; som i kinteki geri hiza uke nami gaeshi)"
+    ]
+  },
+  {
+    "index": 491,
+    "kanji": "指",
+    "romaji": "yubi",
+    "meanings": [
+      "finger (t.ex. yubi gaeshi = fingeråtervändning, okuri yubi gaeshi, yubi gatame)"
+    ]
+  },
+  {
+    "index": 492,
+    "kanji": "倒し",
+    "romaji": "taoshi/daoshi",
+    "meanings": [
+      "välta, fälla (t.ex. tora daoshi = tigerfällning, suigetsu gaeshi oshi taoshi, hasami daoshi)"
+    ]
+  },
+  {
+    "index": 493,
+    "kanji": "掬い",
+    "romaji": "sukui",
+    "meanings": [
+      "skopa, ösa upp (t.ex. sukui nage = skovlkast; som i hangetsu gaeshi sukui kubi nage)"
+    ]
+  },
+  {
+    "index": 494,
+    "kanji": "刈り",
+    "romaji": "kari",
+    "meanings": [
+      "skördande, räfsande med foten (t.ex. kari ashi = skördande fot; som i mikazuki gaeshi kari ashi, ushiro kari taoshi)"
+    ]
+  },
+  {
+    "index": 495,
+    "kanji": "振り",
+    "romaji": "furi",
+    "meanings": [
+      "svängning, skakning (t.ex. furi zuki = svängande stöt, tantō furi age ryūsui geri)"
+    ]
+  },
+  {
+    "index": 496,
+    "kanji": "握り",
+    "romaji": "nigiri",
+    "meanings": [
+      "grepp, fast tag (t.ex. nigiri gaeshi = greppåtervändning)"
+    ]
+  },
+  {
+    "index": 497,
+    "kanji": "廻し",
+    "romaji": "mawashi",
+    "meanings": [
+      "roterande, cirkulärt svängande (t.ex. mawashi geri = rundspark)"
+    ]
+  },
+  {
+    "index": 498,
+    "kanji": "略",
+    "romaji": "ryaku",
+    "meanings": [
+      "förenklad, förkortad form (t.ex. ryaku jūji gote = förenklat korslås)"
+    ]
+  },
+  {
+    "index": 499,
+    "kanji": "攻め",
+    "romaji": "zeme",
+    "meanings": [
+      "offensivt tryck, pressande attack (t.ex. okuri hiji zeme = skjutande armbågstryck)"
+    ]
+  },
+  {
+    "index": 500,
+    "kanji": "押さえ",
+    "romaji": "osae",
+    "meanings": [
+      "trycka ned, hålla fast, fixera (t.ex. osae kannuki nage soto/uchi = fixerande bomkast)"
+    ]
+  },
+  {
+    "index": 501,
+    "kanji": "挫き",
+    "romaji": "kujiki",
+    "meanings": [
+      "krossande, brutande (t.ex. koshi kujiki = höftledskrossning)"
+    ]
+  },
+  {
+    "index": 502,
+    "kanji": "上",
+    "romaji": "uwa",
+    "meanings": [
+      "övre, ovanpå (t.ex. uwa uke = övre block; jfr jōdan för stridsnivå övre del)"
+    ]
+  },
+  {
+    "index": 503,
+    "kanji": "下",
+    "romaji": "shita",
+    "meanings": [
+      "nedre, under (t.ex. shita uke = nedre block, shita uke geri; jfr gedan)"
+    ]
+  },
+  {
+    "index": 504,
+    "kanji": "立て",
+    "romaji": "tate",
+    "meanings": [
+      "stående, vertikal (t.ex. tate gasshō gatame = stående samhandsgrepp)"
+    ]
+  },
+  {
+    "index": 505,
+    "kanji": "背",
+    "romaji": "se",
+    "meanings": [
+      "ryggen (t.ex. ippon se nage = enhandigt ryggkast, uwa uke se nage)"
+    ]
+  },
+  {
+    "index": 506,
+    "kanji": "半",
+    "romaji": "han",
+    "meanings": [
+      "halv (t.ex. han tenshin = halvvridning, han tenkan = halvrotation; ingår i hangetsu = halvmåne)"
+    ]
+  },
+  {
+    "index": 507,
+    "kanji": "両",
+    "romaji": "ryō",
+    "meanings": [
+      "båda (t.ex. ryō muna otoshi = bröstfall med båda händer; jfr ryōte = båda händerna)"
+    ]
+  },
+  {
+    "index": 508,
+    "kanji": "虎",
+    "romaji": "tora",
+    "meanings": [
+      "tiger (t.ex. tora daoshi = tigerfällning)"
+    ]
+  },
+  {
+    "index": 509,
+    "kanji": "燕",
+    "romaji": "tsubame",
+    "meanings": [
+      "svala (fågelart); t.ex. tsubame gaeshi = svalans vändning (snabb returrörelse)"
+    ]
+  },
+  {
+    "index": 510,
+    "kanji": "木の葉",
+    "romaji": "konoha",
+    "meanings": [
+      "löv (t.ex. konoha gaeshi = lövformig återvändning, konoha chōji, okuri gasshō konoha nage)"
+    ]
+  },
+  {
+    "index": 511,
+    "kanji": "半月",
+    "romaji": "hangetsu",
+    "meanings": [
+      "halvmåne (t.ex. hangetsu geri = halvmånespark, hangetsu gaeshi, hangetsu kubi nage)"
+    ]
+  },
+  {
+    "index": 512,
+    "kanji": "三日月",
+    "romaji": "mikazuki",
+    "meanings": [
+      "skärmåne, mångest (t.ex. mikazuki gaeshi kari ashi)"
+    ]
+  },
+  {
+    "index": 513,
+    "kanji": "龍",
+    "romaji": "ryū",
+    "meanings": [
+      "drake (t.ex. ryū nage = drakekast; jfr ryūsui = flödande vatten med annat tecken)"
+    ]
+  },
+  {
+    "index": 514,
+    "kanji": "矢筈",
+    "romaji": "yahazu",
+    "meanings": [
+      "pilens kluvna bakände, pilskåra (t.ex. yahazu nage — kast med Y-formad handrörelse)"
+    ]
+  },
+  {
+    "index": 515,
+    "kanji": "手首",
+    "romaji": "tekubi",
+    "meanings": [
+      "handled (t.ex. tekubi dori = handledsgrepp)"
+    ]
+  },
+  {
+    "index": 516,
+    "kanji": "髪",
+    "romaji": "kami/gami",
+    "meanings": [
+      "hår (t.ex. mae gami dori = grepp framifrån i håret)"
+    ]
+  },
+  {
+    "index": 517,
+    "kanji": "金的",
+    "romaji": "kinteki",
+    "meanings": [
+      "grenen, skrevet (viktig vital punkt); bokstavligen \"guldmål\" (t.ex. kinteki geri = spark mot grenen)"
+    ]
+  },
+  {
+    "index": 518,
+    "kanji": "水月",
+    "romaji": "suigetsu",
+    "meanings": [
+      "solar plexus (viktig vital punkt); bokstavligen \"vattenmåne\" (t.ex. suigetsu gaeshi oshi taoshi)"
+    ]
+  },
+  {
+    "index": 519,
+    "kanji": "羽交い",
+    "romaji": "hagai",
+    "meanings": [
+      "armarna fastlåsta bakifrån (t.ex. hagai jime = strypning med armarna fastlåsta bakifrån)"
+    ]
+  },
+  {
+    "index": 520,
+    "kanji": "熊手",
+    "romaji": "kumade",
+    "meanings": [
+      "räfshanden, björntassen (krokiga fingrar som rake; t.ex. kumade gaeshi, omote kumade gaeshi)"
+    ]
+  },
+  {
+    "index": 521,
+    "kanji": "屈身",
+    "romaji": "kusshin",
+    "meanings": [
+      "böja kroppen, ducka/sänka kroppen (t.ex. kusshin geri = duckande spark, kusshin uke = duckande block)"
+    ]
+  },
+  {
+    "index": 522,
+    "kanji": "居捕り",
+    "romaji": "idori",
+    "meanings": [
+      "tekniker utförda från sittande läge (t.ex. idori gyaku gote, idori okuri gote, idori oshi gote)"
+    ]
+  },
+  {
+    "index": 523,
+    "kanji": "上膊",
+    "romaji": "jōhaku",
+    "meanings": [
+      "överarm, armen ovanför armbågen (t.ex. jōhaku dori = grepp i överarmen, jōhaku nuki)"
+    ]
+  },
+  {
+    "index": 524,
+    "kanji": "丁字",
+    "romaji": "chōji",
+    "meanings": [
+      "T-form (teknik med tag i T-vinkel vid armbågen; t.ex. chōji dori = T-formsteknik, chōji nage = T-formskast)"
+    ]
+  },
+  {
+    "index": 525,
+    "kanji": "吊り",
+    "romaji": "tsuri",
+    "meanings": [
+      "lyfta, hänga upp (t.ex. tsuri age dori = lyftande uppgrepp, tsuri otoshi = lyftfallskast)"
+    ]
+  },
+  {
+    "index": 526,
+    "kanji": "三角",
+    "romaji": "sankaku",
+    "meanings": [
+      "triangel (t.ex. sankaku nuki = triangelfrigörelse)"
+    ]
+  },
+  {
+    "index": 527,
+    "kanji": "挟み",
+    "romaji": "hasami",
+    "meanings": [
+      "sax, klämning (t.ex. hasami daoshi = saxfällning, hasami uke = saxblock)"
+    ]
+  },
+  {
+    "index": 528,
+    "kanji": "開身",
+    "romaji": "kaishin",
+    "meanings": [
+      "öppna kroppen, sidosteg (t.ex. kaishin zuki = stöt med öppnande sidosteg; 開 = öppen, 身 = kropp)"
+    ]
+  },
+  {
+    "index": 529,
+    "kanji": "振捨",
+    "romaji": "furisute",
+    "meanings": [
+      "skaka av och kasta, slita loss och slunga (t.ex. furisute omote nage = slita loss och kasta framifrån)"
+    ]
+  },
+  {
+    "index": 530,
+    "kanji": "短刀",
+    "romaji": "tantō",
+    "meanings": [
+      "kort kniv, dolk (vapen; t.ex. tantō furi age ryūsui geri)"
+    ]
+  },
+  {
+    "index": 531,
+    "kanji": "天",
+    "romaji": "ten",
+    "meanings": [
+      "himmel (teknikserienivå; jfr chi = jord 地; t.ex. tsuki ten ichi = stöt-himlelnivå ett, furi ten ni)"
+    ]
+  },
+  {
+    "index": 532,
+    "kanji": "伏虎",
+    "romaji": "fukko",
+    "meanings": [
+      "liggande tiger (teknikfamilj; 伏 = liggande, 虎 = tiger; t.ex. fukko chi ni, fukko daoshi)"
+    ]
+  },
+  {
+    "index": 533,
+    "kanji": "口",
+    "romaji": "kuchi/guchi",
+    "meanings": [
+      "mun, öppning (t.ex. sode guchi dori = grepp i ärmöppningen, sode guchi maki)"
+    ]
+  },
+  {
+    "index": 534,
+    "kanji": "待ち",
+    "romaji": "machi",
+    "meanings": [
+      "vänta, invänta (t.ex. machi geri = väntande spark — spark mot en annalkande motståndare)"
+    ]
+  },
+  {
+    "index": 535,
+    "kanji": "輪",
+    "romaji": "wa",
+    "meanings": [
+      "ring, cirkel (t.ex. morote wa nuki = tvåhändig ringfrigörelse)"
+    ]
+  },
+  {
+    "index": 536,
+    "kanji": "四組",
+    "romaji": "shikumi",
+    "meanings": [
+      "fyra grupper (teknikkategori i jūhō; t.ex. shikumi koshi nage, shikumi nai tembin)"
+    ]
+  },
+  {
+    "index": 537,
+    "kanji": "守法",
+    "romaji": "shuhō",
+    "meanings": [
+      "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)"
+    ]
   }
 ]
