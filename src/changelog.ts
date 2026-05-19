@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-19T19:45:28.000Z",
+    changes: [
+      {
+        emoji: "🏠",
+        sv: "När appen är installerad på telefonen och öppnas igen efter mer än 10 minuters paus, börjar den från startsidan istället för där du var. I vanlig webbläsare påverkas ingenting.",
+        en: "When the app is installed on your phone and reopened after more than 10 minutes idle, it starts at the home page instead of where you left off. No change when used in a regular browser.",
+        tr: "Uygulama telefonunuza yüklendiğinde ve 10 dakikadan fazla bir aradan sonra yeniden açıldığında, kaldığınız yer yerine ana sayfadan başlar. Normal tarayıcıda kullanımda hiçbir şey değişmez.",
+        ja: "アプリを端末にインストールしている場合、10分以上経ってから再度開くと、前回の場所ではなくホーム画面から始まります。通常のブラウザでは動作に変化はありません。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-19T19:33:43.000Z",
     changes: [
       {

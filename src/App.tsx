@@ -22,6 +22,13 @@ interface Props {
   ranksData: HokeiRanks;
 }
 
+const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
+
+function isStandalonePwa(): boolean {
+  return window.matchMedia("(display-mode: standalone)").matches
+    || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+}
+
 function App(props: Props) {
   const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
@@ -29,6 +36,25 @@ function App(props: Props) {
   const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const translations = useContext(TranslationsContext);
   const translator = new TranslatorImplementation(translations, language);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isStandalonePwa()) return;
+    let hiddenAt: number | null = null;
+    const handler = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAt = Date.now();
+      } else if (document.visibilityState === "visible" && hiddenAt !== null) {
+        const elapsed = Date.now() - hiddenAt;
+        hiddenAt = null;
+        if (elapsed >= STANDALONE_IDLE_RESET_MS) {
+          navigate("/", { replace: true });
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
+  }, [navigate]);
   const routes = getRoutes(
     gradePlans.find(l => l.grade === nextGrade)!,
     gradePlans,
