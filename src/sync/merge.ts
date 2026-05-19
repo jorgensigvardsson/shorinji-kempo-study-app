@@ -1,4 +1,4 @@
-import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type HokeiRankEntry } from "../persistence/schema";
+import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry } from "../persistence/schema";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -42,6 +42,7 @@ export function mergeDocuments(
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     notes: mergeNotes(baseDocument.data.notes ?? {}, local.data.notes ?? {}, remote.data.notes ?? {}, local, remote),
     hokeiRanks: mergeHokeiRanks(baseDocument.data.hokeiRanks ?? {}, local.data.hokeiRanks ?? {}, remote.data.hokeiRanks ?? {}, local, remote),
+    knownFlashCards: mergeKnownFlashCards(baseDocument.data.knownFlashCards ?? {}, local.data.knownFlashCards ?? {}, remote.data.knownFlashCards ?? {}),
   };
 
   if (mergedData.notes.__conflictMarker) {
@@ -64,7 +65,7 @@ export function mergeDocuments(
     conflictDetected,
   };
 
-  function mergeScalar<TKey extends Exclude<keyof AppDataState, "notes">>(key: TKey): AppDataState[TKey] {
+  function mergeScalar<TKey extends Exclude<keyof AppDataState, "notes" | "knownFlashCards">>(key: TKey): AppDataState[TKey] {
     const baseValue = baseDocument.data[key];
     const localValue = local.data[key];
     const remoteValue = remote.data[key];
@@ -171,6 +172,60 @@ function mergeHokeiRanks(
   }
 
   return result;
+}
+
+function mergeKnownFlashCards(
+  base: Record<string, FlashCardKnownEntry>,
+  local: Record<string, FlashCardKnownEntry>,
+  remote: Record<string, FlashCardKnownEntry>,
+): Record<string, FlashCardKnownEntry> {
+  const result: Record<string, FlashCardKnownEntry> = {};
+  const allKeys = new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)]);
+  for (const key of allKeys) {
+    const baseEntry = validFlashCardEntry(readOptional(base as Record<string, unknown>, key));
+    const localEntry = validFlashCardEntry(readOptional(local as Record<string, unknown>, key));
+    const remoteEntry = validFlashCardEntry(readOptional(remote as Record<string, unknown>, key));
+
+    const localChanged = !flashCardEntriesEqual(localEntry, baseEntry);
+    const remoteChanged = !flashCardEntriesEqual(remoteEntry, baseEntry);
+
+    if (localChanged && remoteChanged) {
+      if (!localEntry && remoteEntry) { result[key] = remoteEntry; continue; }
+      if (localEntry && !remoteEntry) { result[key] = localEntry; continue; }
+      if (localEntry && remoteEntry) {
+        result[key] = parseTimestamp(localEntry.updatedAt) >= parseTimestamp(remoteEntry.updatedAt)
+          ? localEntry
+          : remoteEntry;
+      }
+      continue;
+    }
+
+    if (localChanged) {
+      if (localEntry) result[key] = localEntry;
+      continue;
+    }
+
+    if (remoteChanged) {
+      if (remoteEntry) result[key] = remoteEntry;
+      continue;
+    }
+
+    if (baseEntry) result[key] = baseEntry;
+  }
+  return result;
+}
+
+function flashCardEntriesEqual(a: FlashCardKnownEntry | undefined, b: FlashCardKnownEntry | undefined): boolean {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return a.known === b.known && a.updatedAt === b.updatedAt;
+}
+
+function validFlashCardEntry(e: unknown): FlashCardKnownEntry | undefined {
+  if (typeof e !== "object" || e === null || Array.isArray(e)) return undefined;
+  const c = e as Record<string, unknown>;
+  if (typeof c.known !== "boolean" || typeof c.updatedAt !== "string") return undefined;
+  return e as FlashCardKnownEntry;
 }
 
 function newerByTimestamp(

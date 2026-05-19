@@ -27,6 +27,7 @@ export class AppDataStore {
       hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
       hokeiListSelection: new Map<number, DataChangedCallback<"hokeiListSelection">>(),
       quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
+      knownFlashCards: new Map<number, DataChangedCallback<"knownFlashCards">>(),
     };
   }
 
@@ -151,6 +152,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
       hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
+      knownFlashCards: isFlashCardKnownRecord(input.data?.knownFlashCards) ? input.data.knownFlashCards : fallback.data.knownFlashCards,
     },
   };
 }
@@ -170,6 +172,16 @@ function isWeekAnchor(value: unknown): value is { week: number; anchorDate: stri
 
   const candidate = value as { week?: unknown; anchorDate?: unknown };
   return typeof candidate.week === "number" && Number.isFinite(candidate.week) && typeof candidate.anchorDate === "string";
+}
+
+function isFlashCardKnownRecord(value: unknown): value is Record<string, { known: boolean; updatedAt: string }> {
+  if (!isRecord(value)) return false;
+  for (const entry of Object.values(value)) {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) return false;
+    const candidate = entry as { known?: unknown; updatedAt?: unknown };
+    if (typeof candidate.known !== "boolean" || typeof candidate.updatedAt !== "string") return false;
+  }
+  return true;
 }
 
 function isRankRecord(value: unknown): value is Record<string, { value: 1 | 2 | 3; updatedAt: string }> {

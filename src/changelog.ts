@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-19T19:33:43.000Z",
+    changes: [
+      {
+        emoji: "🎴",
+        sv: "Svep ett flashkort åt valfritt håll (eller tryck på \"Kan det\") för att markera det som inlärt. Inlärda kort visas inte längre i högen, men du kan när som helst öppna listan med inlärda kort för att rensa eller plocka bort enskilda kort. Listan synkroniseras mellan dina enheter.",
+        en: "Swipe a flashcard in any direction (or press \"I know it\") to mark it as learned. Learned cards no longer appear in the deck, but you can open the list of learned cards at any time to clear them or remove individual entries. The list syncs across your devices.",
+        tr: "Bir bilgi kartını öğrenildi olarak işaretlemek için herhangi bir yöne sürükleyin (veya \"Biliyorum\"a basın). Öğrenilen kartlar artık destede görünmez; ancak öğrenilen kartlar listesini istediğiniz zaman açarak tümünü temizleyebilir veya tek tek kaldırabilirsiniz. Liste cihazlarınız arasında senkronize edilir.",
+        ja: "フラッシュカードを任意の方向にスワイプ（または「分かった」をタップ）すると習得済みとして記録されます。習得済みのカードはデッキに表示されなくなりますが、習得済みカード一覧をいつでも開いて、全件削除や個別削除ができます。一覧は端末間で同期されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-16T16:30:00.000Z",
     changes: [
       {

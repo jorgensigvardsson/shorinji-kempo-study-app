@@ -10,6 +10,11 @@ export interface HokeiRankEntry {
   updatedAt: string;
 }
 
+export interface FlashCardKnownEntry {
+  known: boolean;
+  updatedAt: string;
+}
+
 export interface CurrentWeekAnchor {
   week: number;
   anchorDate: string; // YYYY-MM-DD in local time
@@ -26,6 +31,7 @@ export interface AppDataState {
   hokeiRanks: Record<string, HokeiRankEntry>;
   hokeiListSelection: string;
   quizStreakHighScore: number;
+  knownFlashCards: Record<string, FlashCardKnownEntry>;
 }
 
 export interface AppDataDocument {
@@ -59,6 +65,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       hokeiRanks: {},
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
+      knownFlashCards: {},
     },
   };
 }

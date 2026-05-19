@@ -189,10 +189,12 @@ class SyncManager {
     }
 
     this.setState({ status: "syncing", message: "Synkar..." });
-    const localDocument = this.store.getDocument();
-    debugLog(`[sync] Starting sync with ${provider}. Local updatedAt: ${localDocument.updatedAt}`);
 
     const remoteDocument = await client.downloadDocument();
+
+    // Read local AFTER the async download so any changes made during the download are included.
+    const localDocument = this.store.getDocument();
+    debugLog(`[sync] Starting sync with ${provider}. Local updatedAt: ${localDocument.updatedAt}`);
 
     if (!remoteDocument) {
       debugLog("[sync] No remote document found — uploading local as initial.");

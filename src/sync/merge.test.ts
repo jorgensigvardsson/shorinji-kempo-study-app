@@ -17,6 +17,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       hokeiRanks: {},
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
+      knownFlashCards: {},
     },
     ...overrides,
   };
@@ -253,6 +254,60 @@ describe("mergeDocuments — old-version documents missing new fields", () => {
     const result = mergeDocuments(base, local, remote);
     expect(result.document.data.hokeiListSelection).toBe("up-to-own");
     expect(result.conflictDetected).toBe(false);
+  });
+});
+
+describe("mergeDocuments — knownFlashCards", () => {
+  const known = (updatedAt: string) => ({ known: true, updatedAt });
+  const unlearned = (updatedAt: string) => ({ known: false, updatedAt });
+
+  it("local addition is preserved when remote is empty", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: { "42": known(NEW) } } });
+    const remote = makeDoc({ updatedAt: OLD });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.knownFlashCards).toEqual({ "42": known(NEW) });
+  });
+
+  it("local swipe wins over stale remote tombstone (3-way merge with base reflecting tombstone)", () => {
+    // Reproduces the user-reported bug: base has card marked known:false (an old tombstone),
+    // local swipes the card (known:true with current time), remote still has the tombstone.
+    // Local changed from base, remote did not — local must win regardless of timestamps.
+    const TOMBSTONE = "2099-01-01T00:00:00.000Z"; // remote tombstone with future timestamp
+    const SWIPE = "2024-06-01T00:00:00.000Z"; // swipe with earlier timestamp than tombstone
+    const base = makeDoc({ updatedAt: OLD, data: { ...makeDoc({ updatedAt: OLD }).data, knownFlashCards: { "42": unlearned(TOMBSTONE) } } });
+    const local = makeDoc({ updatedAt: SWIPE, data: { ...base.data, knownFlashCards: { "42": known(SWIPE) } } });
+    const remote = makeDoc({ updatedAt: OLD, data: { ...base.data, knownFlashCards: { "42": unlearned(TOMBSTONE) } } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.knownFlashCards["42"]).toEqual(known(SWIPE));
+  });
+
+  it("local removal wins over stale remote known entry (3-way merge)", () => {
+    // Base had card as known. User removes locally (sets known:false). Remote still says known:true.
+    const base = makeDoc({ updatedAt: OLD, data: { ...makeDoc({ updatedAt: OLD }).data, knownFlashCards: { "42": known(OLD) } } });
+    const local = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: { "42": unlearned(NEW) } } });
+    const remote = makeDoc({ updatedAt: OLD, data: { ...base.data, knownFlashCards: { "42": known(OLD) } } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.knownFlashCards["42"]).toEqual(unlearned(NEW));
+  });
+
+  it("both sides changed differently from base — newer entry wins", () => {
+    const T1 = "2024-06-01T00:00:00.000Z";
+    const T2 = "2024-07-01T00:00:00.000Z";
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: { "42": known(T1) } } });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: { "42": unlearned(T2) } } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.knownFlashCards["42"]).toEqual(unlearned(T2));
+  });
+
+  it("old-format string array on remote is ignored", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: { "42": known(NEW) } } });
+    // Simulate a document persisted by the original implementation (string array format).
+    const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: ["1", "2"] as unknown as Record<string, never> } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.knownFlashCards["42"]).toEqual(known(NEW));
   });
 });
 
