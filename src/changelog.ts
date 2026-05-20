@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-20T10:00:00.000Z",
+    changes: [
+      {
+        emoji: "🪳",
+        sv: "Ett fel har åtgärdats där molnsynkroniseringen i onödan laddade upp data – även när ingenting hade ändrats – på grund av att fältordningen i dokumentet skilde sig åt efter en sammanslagning.",
+        en: "Fixed a bug where cloud sync would unnecessarily upload data — even when nothing had changed — because field ordering in the document differed after a merge.",
+        tr: "Birleştirme sonrasında belgede alan sıralaması farklılığı nedeniyle hiçbir şey değişmemiş olsa bile bulut senkronizasyonunun gereksiz yere veri yükleyeceği bir hata düzeltildi.",
+        ja: "マージ後にドキュメントのフィールド順序が異なるため、何も変更されていないにもかかわらずクラウド同期が不必要にデータをアップロードしてしまうバグを修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-20T08:12:00.000Z",
     changes: [
       {
