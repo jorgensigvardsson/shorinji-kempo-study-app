@@ -26,7 +26,7 @@ const WordList = () => {
 
     return (
         <div>
-            <div className="app-grid-panel">
+            <div className="mb-3">
                 <Form.Control placeholder={translator.translate("Filtrera...")}
                             value={filterText} onChange={e => setFilterText(e.target.value)}
                             name="filter"/>

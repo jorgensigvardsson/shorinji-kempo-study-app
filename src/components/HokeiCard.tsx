@@ -274,9 +274,11 @@ const renderKyohan = (translator: Translator, hokei: HokeiMoment) => {
                     </th>
                 </tr>
             </thead>
-            <tr>
-                <td>{hokei.kyohan_pages.map(k => translator.translate(k)).join(', ')}</td>
-            </tr>
+            <tbody>
+                <tr>
+                    <td>{hokei.kyohan_pages.map(k => translator.translate(k)).join(', ')}</td>
+                </tr>
+            </tbody>
         </table>
     )
 }

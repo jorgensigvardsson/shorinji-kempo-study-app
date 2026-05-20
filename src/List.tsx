@@ -51,8 +51,8 @@ const List = (props: Props) => {
                                     .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText));
 
     return (
-        <div>
-            <div className="app-grid-panel">
+        <>
+            <div className="mb-4">
                 <div>
                     <Form.Select value={selection} onChange={e => {
                         const newSelection = e.target.value as Selection;
@@ -80,7 +80,7 @@ const List = (props: Props) => {
                 </div>
             </div>
             {renderHokeis(filteredHokeis, notesData, ranksData)}
-        </div>
+        </>
     )
 }
 

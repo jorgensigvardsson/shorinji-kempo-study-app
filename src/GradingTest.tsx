@@ -126,19 +126,16 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
     const manual = selectedGrade ? allGrades[selectedGrade] : undefined;
     if (!manual) {
         return (
-            <Card className="app-grid-panel">
-                <Card.Body>
-                    <p className="text-muted mb-0">{translator.translate("Information för graderingstest saknas.")}</p>
-                </Card.Body>
-            </Card>
+            <div className="grading-test-page">
+                <p className="text-muted mb-0">{translator.translate("Information för graderingstest saknas.")}</p>
+            </div>
         );
     }
 
     const closeItem = () => { setSelectedSectionIndex(null); setSelectedItem(null); };
 
     return (
-        <Card className="app-grid-panel">
-            <Card.Body>
+        <div className="grading-test-page">
                 <Form.Select
                     className="mb-3"
                     value={selectedGrade}
@@ -194,8 +191,7 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
                         </div>
                     );
                 })}
-            </Card.Body>
-        </Card>
+        </div>
     );
 };
 

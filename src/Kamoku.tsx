@@ -78,8 +78,8 @@ const Kamoku = (props: Props) => {
 
 
     return (
-        <div className="d-print-none">
-            <div className="app-grid-panel">
+        <>
+            <div className="mb-4">
                 <Form.Group className="mb-3" controlId="level">
                     <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
                         <option value={myGrade} key={myGrade}>{translator.translate("Min nästa grad")}: {gradeLabel(myGrade, translator)}</option>
@@ -108,7 +108,7 @@ const Kamoku = (props: Props) => {
             {yondanWeek?.moment && <HokeiCard key="ym" hokei={adaptYondanMoment(yondanWeek.moment)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
             {godanWeek && <HokeiCard key="gm" hokei={adaptGodanMoment(godanWeek.moment)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
             {kyushoZemeWeek && <HokeiCard key="kz" hokei={adaptKyushoZeme(kyushoZemeWeek.zeme)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
-        </div>
+        </>
     )
 }
 

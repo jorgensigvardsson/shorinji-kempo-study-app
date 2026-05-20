@@ -1,4 +1,5 @@
 import { Badge, Button } from "react-bootstrap";
+import { XLg } from "react-bootstrap-icons";
 import { useContext, useMemo, useState } from "react";
 import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
@@ -59,28 +60,26 @@ const Groups = (props: Props) => {
 
     if (selectedGroup) {
         return (
-            <div>
-                <div className="groups-detail groups-detail-enter">
-                    <div className="groups-detail-head mb-3">
-                        <div>
-                            <h2 className="groups-detail-title mb-1">{selectedGroup.translated}</h2>
-                            {!translator.isJapanese && <div className="groups-detail-subtitle">{selectedGroup.japanese}</div>}
-                        </div>
-                        <div className="d-flex align-items-center gap-2">
-                            <Badge className="groups-count-badge">{selectedGroup.hokeis.length}</Badge>
-                            <Button variant="outline-secondary" onClick={() => setSelectedGroupKey(null)}>
-                                {translator.translate("Stäng")}
-                            </Button>
-                        </div>
-                    </div>
+            <div className="groups-detail-enter">
+                <div className="groups-detail-head m-2">
                     <div>
-                        {selectedGroup.hokeis.map(h => (
-                            <div style={{ fontSize: "smaller" }} key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`}>
-                                <HokeiCard hokei={h.moment} gradeName={h.grade} className="m-1"
-                                           notesData={notesData} ranksData={ranksData} />
-                            </div>
-                        ))}
+                        <h2 className="groups-detail-title mb-1">{selectedGroup.translated}</h2>
+                        {!translator.isJapanese && <div className="groups-detail-subtitle">{selectedGroup.japanese}</div>}
                     </div>
+                    <div className="d-flex align-items-center gap-2">
+                        <Badge className="groups-count-badge">{selectedGroup.hokeis.length}</Badge>
+                        <Button variant="link" className="text-body p-0" onClick={() => setSelectedGroupKey(null)} aria-label={translator.translate("Stäng")}>
+                            <XLg size={18} />
+                        </Button>
+                    </div>
+                </div>
+                <div>
+                    {selectedGroup.hokeis.map(h => (
+                        <div key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`} className="mb-3">
+                            <HokeiCard hokei={h.moment} gradeName={h.grade} className="m-1"
+                                        notesData={notesData} ranksData={ranksData} />
+                        </div>
+                    ))}
                 </div>
             </div>
         );
@@ -106,7 +105,7 @@ const Groups = (props: Props) => {
         };
     });
 
-    return <Grid items={items} />;
+    return <Grid items={items} className="gap-3 mt-2"/>;
 }
 
 export default Groups;
