@@ -17,4 +17,18 @@ jobs:
 
       - run: npm ci
 
-      - run: npm test
+      - run: npx vitest run --config vitest.config.ts --reporter=default --reporter=junit --outputFile=test-results.xml
+        continue-on-error: true
+        id: run-tests
+
+      - uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Vitest
+          path: test-results.xml
+          reporter: jest-junit
+          fail-on-error: false
+
+      - name: Fail job if tests failed
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1
