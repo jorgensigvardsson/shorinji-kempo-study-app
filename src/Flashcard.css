@@ -6,6 +6,7 @@
 }
 
 .flashcard-drag-wrapper {
+  position: relative;
   touch-action: none;
   user-select: none;
   cursor: grab;
@@ -13,6 +14,37 @@
 
 .flashcard-drag-wrapper:active {
   cursor: grabbing;
+}
+
+.flashcard-swipe-indicator {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.flashcard-swipe-indicator-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: var(--bs-body-bg);
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.25);
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.flashcard-swipe-indicator.is-known .flashcard-swipe-indicator-icon {
+  color: var(--bs-success);
+}
+
+.flashcard-swipe-indicator.is-next .flashcard-swipe-indicator-icon {
+  color: var(--bs-primary);
 }
 
 .flashcard-scene {

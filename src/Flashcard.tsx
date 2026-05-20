@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, Card, Form, Modal } from "react-bootstrap";
+import { ArrowLeftRight, CheckCircleFill } from "react-bootstrap-icons";
 import { TranslatorContext, type Translator } from "./i18n";
 import type { WordListEntry } from "./data";
 import { getAppDataStore } from "./persistence/store";
@@ -28,6 +29,13 @@ const flashCards: FlashCardEntry[] = (wordList as WordListEntry[])
     }));
 
 const SWIPE_THRESHOLD = 80;
+
+type PendingAction = "none" | "known" | "next";
+
+function actionForSwipe(dx: number, dy: number): PendingAction {
+    if (Math.sqrt(dx * dx + dy * dy) < SWIPE_THRESHOLD) return "none";
+    return Math.abs(dy) > Math.abs(dx) ? "known" : "next";
+}
 
 function pickRandom(cards: FlashCardEntry[], excludeId?: number): number | null {
     if (cards.length === 0) return null;
@@ -66,6 +74,7 @@ const Flashcard = () => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [isFlying, setIsFlying] = useState(false);
+    const [pendingAction, setPendingAction] = useState<PendingAction>("none");
     const [showLearnedModal, setShowLearnedModal] = useState(false);
     const [selectedForRemoval, setSelectedForRemoval] = useState<Set<string>>(new Set());
 
@@ -91,7 +100,17 @@ const Flashcard = () => {
         setIsFlying(false);
         setIsDragging(false);
         setDragOffset({ x: 0, y: 0 });
+        setPendingAction("none");
         setCurrentCardId(pickRandom(flashCards.filter(c => !updated[String(c.id)]?.known), cardId));
+        setShowBack(false);
+    };
+
+    const commitNextCard = (cardId: number) => {
+        setIsFlying(false);
+        setIsDragging(false);
+        setDragOffset({ x: 0, y: 0 });
+        setPendingAction("none");
+        setCurrentCardId(pickRandom(flashCards.filter(c => !knownFlashCardsRef.current[String(c.id)]?.known), cardId));
         setShowBack(false);
     };
 
@@ -121,6 +140,7 @@ const Flashcard = () => {
             hasDraggedRef.current = true;
             setIsDragging(true);
             setDragOffset({ x: dx, y: dy });
+            setPendingAction(actionForSwipe(dx, dy));
         }
     };
 
@@ -128,24 +148,26 @@ const Flashcard = () => {
         if (!dragStartRef.current) return;
         const dx = e.clientX - dragStartRef.current.x;
         const dy = e.clientY - dragStartRef.current.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
         dragStartRef.current = null;
 
         if (!hasDraggedRef.current) {
             setIsDragging(false);
+            setPendingAction("none");
             if (!isFlying) setShowBack(b => !b);
             return;
         }
 
         setIsDragging(false);
 
-        if (dist >= SWIPE_THRESHOLD && currentCard) {
+        const action = actionForSwipe(dx, dy);
+        if (action !== "none" && currentCard) {
             setDragOffset({ x: dx * 8, y: dy * 8 });
             setIsFlying(true);
             const cardId = currentCard.id;
-            setTimeout(() => commitMarkKnown(cardId), 400);
+            setTimeout(() => action === "known" ? commitMarkKnown(cardId) : commitNextCard(cardId), 400);
         } else {
             setDragOffset({ x: 0, y: 0 });
+            setPendingAction("none");
         }
     };
 
@@ -154,6 +176,7 @@ const Flashcard = () => {
         hasDraggedRef.current = false;
         setIsDragging(false);
         setDragOffset({ x: 0, y: 0 });
+        setPendingAction("none");
     };
 
     const toggleSelectForRemoval = (id: string) => {
@@ -298,6 +321,13 @@ const Flashcard = () => {
                         </div>
                     </div>
                 </div>
+                {isDragging && pendingAction !== "none" && (
+                    <div className={`flashcard-swipe-indicator is-${pendingAction}`}>
+                        <span className="flashcard-swipe-indicator-icon">
+                            {pendingAction === "known" ? <CheckCircleFill /> : <ArrowLeftRight />}
+                        </span>
+                    </div>
+                )}
             </div>
 
             <div className="flashcard-actions">

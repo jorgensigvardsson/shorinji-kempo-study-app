@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-20T08:12:00.000Z",
+    changes: [
+      {
+        emoji: "↔️",
+        sv: "Svepgesterna för flashkort är omarbetade: svep åt sidan för att gå till nästa kort, svep upp/ner för att markera kortet som inlärt. En ikon visas mitt i kortet och visar vad som händer när du släpper.",
+        en: "Flashcard swipe gestures redesigned: swipe sideways to go to the next card, swipe up/down to mark the card as learned. An icon appears in the middle of the card showing what will happen when you release.",
+        tr: "Bilgi kartı kaydırma hareketleri yeniden tasarlandı: sonraki karta geçmek için yana, öğrenildi olarak işaretlemek için yukarı/aşağı kaydırın. Bıraktığınızda ne olacağını gösteren bir simge kartın ortasında belirir.",
+        ja: "フラッシュカードのスワイプ操作を刷新しました。横にスワイプで次のカードへ、上下にスワイプで習得済みマーク。離したときの動作を示すアイコンがカード中央に表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-19T19:45:28.000Z",
     changes: [
       {
