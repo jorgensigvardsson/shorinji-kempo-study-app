@@ -7,10 +7,11 @@ interface Props extends React.PropsWithChildren {
     footer?: React.ReactNode;
     className?: string;
     showCollapse?: boolean;
+    inlineChevron?: boolean;
 }
 
 const CollapsibleCard = (props: Props) => {
-    const { className, header, footer, showCollapse, children } = props;
+    const { className, header, footer, showCollapse, inlineChevron, children } = props;
     const [open, setOpen] = useState(false);
 
     let style = {};
@@ -22,10 +23,10 @@ const CollapsibleCard = (props: Props) => {
     return (
         <Card className={cardClassName}>
             <Card.Header className="border-bottom-0" onClick={() => setOpen(!open)} style={style}>
-                <div className="collapsible-card-header">
+                <div className={`collapsible-card-header${inlineChevron ? " collapsible-card-header--inline" : ""}`}>
                     <div>{header}</div>
                     {(showCollapse ?? true) && (
-                    <div className="collapsible-card-chevron">
+                        <div className="collapsible-card-chevron">
                             {open ? <ChevronDoubleUp size={13} /> : <ChevronDoubleDown size={13} />}
                         </div>
                     )}

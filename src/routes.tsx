@@ -64,7 +64,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         showInMainMenu: true
     }, {
         path: "/grading-test",
-        component: () => <GradingTest grade={gradePlan.grade} allGradePlans={allGradePlans} />,
+        component: () => <GradingTest grade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} />,
         menuText: translator.translate("Graderingstest"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,

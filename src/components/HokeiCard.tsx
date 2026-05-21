@@ -13,48 +13,73 @@ import type { HokeiRankValue } from "../persistence/schema";
 
 interface HokeiCardProps {
     hokei: HokeiMoment;
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
+    notesData?: HokeiNotes;
+    ranksData?: HokeiRanks;
     className?: string;
     gradeName?: GradeName;
+    compact?: boolean;
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, notesData, ranksData, gradeName } = props;
+    const { hokei, className, notesData, ranksData, gradeName, compact } = props;
     const translator = useContext(TranslatorContext);
-    const [hasNotes, setHasNotes] = useState(!!notesData.getNotes(hokei.hokei_name));
-    const [rank, setRank] = useState<HokeiRankValue | null>(ranksData.getRank(hokei.hokei_name));
+    const [hasNotes, setHasNotes] = useState(notesData ? !!notesData.getNotes(hokei.hokei_name) : false);
+    const [rank, setRank] = useState<HokeiRankValue | null>(ranksData ? ranksData.getRank(hokei.hokei_name) : null);
 
-    useEffect(() => notesData.registerListener(hokei.hokei_name, note => setHasNotes(!!note)), [notesData]);
-    useEffect(() => ranksData.registerListener(hokei.hokei_name, setRank), [ranksData, hokei.hokei_name]);
+    useEffect(() => {
+        if (!notesData) return;
+        return notesData.registerListener(hokei.hokei_name, note => setHasNotes(!!note));
+    }, [notesData, hokei.hokei_name]);
+    useEffect(() => {
+        if (!ranksData) return;
+        return ranksData.registerListener(hokei.hokei_name, setRank);
+    }, [ranksData, hokei.hokei_name]);
 
-    const options: HeadOptions = {
-        badges: []
-    };
-
-    if(gradeName) {
-        options.badges!.push({ text: humanGradeName(gradeName), variant: gradeNameVariant(gradeName) })
+    if (compact) {
+        const name = translator.isJapanese
+            ? translator.japanese(hokei.hokei_name)
+            : translator.translate(hokei.hokei_name, { capitalize: true });
+        const kanji = !translator.isJapanese ? translator.japanese(hokei.hokei_name) : null;
+        const showKanji = kanji && kanji !== hokei.hokei_name;
+        const compactHeader = (
+            <span style={{ fontSize: "1em" }}>
+                {name}
+                {showKanji && <span className="text-muted ms-2" style={{ fontSize: "0.85em" }}>{kanji}</span>}
+            </span>
+        );
+        return (
+            <CollapsibleCard header={compactHeader} inlineChevron
+                             footer={notesData ? <CardFooter notesData={notesData} hokei={hokei}/> : undefined}
+                             className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
+                <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}
+                    <HokeiIndividualsElement hokei={hokei}/>
+                </div>
+            </CollapsibleCard>
+        );
     }
 
+    const options: HeadOptions = { badges: [] };
+    if (gradeName)
+        options.badges!.push({ text: humanGradeName(gradeName), variant: gradeNameVariant(gradeName) });
     options.badges!.push(...(hokei.variations ?? []).map(v => ({ variant: "secondary", text: v })));
     if (hokei.technique_group)
         options.badges!.push({ text: hokei.technique_group, variant: "primary" });
-
     if (hasNotes)
         options.icons = [<ChatFill key="has-notes"/>];
-
-    options.rightNode = (
-        <StarRating
-            value={rank}
-            onChange={(value) => ranksData.setRank(hokei.hokei_name, value)}
-            groupLabel={translator.translate("Rankning")}
-            getLabel={(value) => translator.translate(`Nivå ${value}`)}
-        />
-    );
+    if (ranksData)
+        options.rightNode = (
+            <StarRating
+                value={rank}
+                onChange={(value) => ranksData.setRank(hokei.hokei_name, value)}
+                groupLabel={translator.translate("Rankning")}
+                getLabel={(value) => translator.translate(`Nivå ${value}`)}
+            />
+        );
 
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
-                         footer={<CardFooter notesData={notesData} hokei={hokei}/>}
+                         footer={notesData ? <CardFooter notesData={notesData} hokei={hokei}/> : undefined}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}

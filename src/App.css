@@ -56,6 +56,17 @@
   opacity: 0.9;
 }
 
+.collapsible-card-header--inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.collapsible-card-header--inline .collapsible-card-chevron {
+  width: auto;
+  flex-shrink: 0;
+}
+
 .menu-item {
   display: flex;
   align-items: center;

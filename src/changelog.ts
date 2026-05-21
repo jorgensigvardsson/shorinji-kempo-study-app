@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-21T12:00:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Graderingstestsidan har fått en ny detaljvy – tryck på ett ämne för att se det i helskärm. Kumi embu och hōkei kamoku visar nu kompakta hokeikort direkt i listan.",
+        en: "The grading test page has a new detail view – tap a subject to see it full screen. Kumi embu and hōkei kamoku now show compact hokei cards inline.",
+        tr: "Derecelendirme testi sayfasında yeni bir detay görünümü var – tam ekranda görmek için bir konuya dokunun. Kumi embu ve hōkei kamoku artık satır içinde kompakt hokei kartları gösteriyor.",
+        ja: "段位審査ページに新しい詳細ビューが追加されました。科目をタップすると全画面で表示されます。組演武と法形科目では、コンパクトな法形カードがリスト内に表示されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-20T10:00:00.000Z",
     changes: [
       {

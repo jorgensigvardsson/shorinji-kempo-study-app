@@ -1,16 +1,20 @@
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Badge, Button, Form } from "react-bootstrap";
 import { XLg } from "react-bootstrap-icons";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext, type Translator } from "./i18n";
-import { humanGradeName, type GradeName, type GradePlan } from "./data";
+import { humanGradeName, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment } from "./data";
+import HokeiCard from "./components/HokeiCard";
+import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import gradingExamInformation from "./assets/grading-exam-information.json";
 import "./GradingTest.css";
 
 interface GradingTestProps {
     grade: GradeName | undefined;
     allGradePlans: GradePlan[];
+    notesData: HokeiNotes;
+    ranksData: HokeiRanks;
 }
 
 interface Term {
@@ -102,11 +106,13 @@ function itemDisplay(item: Item, translator: Translator): ItemDisplay {
     };
 }
 
+const sentenceCase = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
 function hasExpandableContent(item: Item): boolean {
     return !!(item.annotations?.length || item.techniqueGroups?.length || item.items?.length);
 }
 
-const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
+const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
 
     const availableGrades = allGradePlans.filter(plan => allGrades[plan.grade] !== undefined);
@@ -115,6 +121,16 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
     const [selectedGrade, setSelectedGrade] = useState<GradeName | undefined>(defaultGrade);
     const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+    const hokeiMap = useMemo(() => {
+        const map = new Map<string, HokeiMoment>();
+        for (const plan of allGradePlans)
+            for (const week of plan.weeks)
+                if ("moments" in week)
+                    for (const m of week.moments.filter(isHokeiMoment))
+                        map.set(m.hokei_name, m);
+        return map;
+    }, [allGradePlans]);
 
     const gradeLabel = (name: GradeName): string => {
         const humanName = humanGradeName(name);
@@ -152,34 +168,34 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
                     ))}
                 </Form.Select>
                 <h2>{translator.translate(manual.title)}</h2>
-                {manual.term && !translator.isJapanese && <div className="text-muted small mb-3">{manual.term.romaji}</div>}
+                {manual.term && !translator.isJapanese && <div className="text-muted small mb-3">{sentenceCase(manual.term.romaji)}</div>}
 
                 {selectedItem !== null && selectedSectionIndex !== null ? (
                     <div className="grading-section-body grading-detail-enter">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <h3 className="mb-0" style={{ textTransform: "capitalize" }}>
-                                    {translator.translate(manual.sections[selectedSectionIndex].title)}
+                                <h3 className="mb-0">
+                                    {sentenceCase(translator.translate(manual.sections[selectedSectionIndex].title))}
                                 </h3>
                                 {!translator.isJapanese && manual.sections[selectedSectionIndex].term?.romaji && (
-                                    <div className="text-muted small">· {manual.sections[selectedSectionIndex].term!.romaji}</div>
+                                    <div className="text-muted small">{sentenceCase(manual.sections[selectedSectionIndex].term!.romaji)}</div>
                                 )}
                             </div>
                             <Button variant="link" size="sm" onClick={closeItem} aria-label="Stäng" className="text-body p-0">
                                 <XLg size={14} />
                             </Button>
                         </div>
-                        <ItemDetail item={selectedItem} translator={translator} />
+                        <ItemDetail item={selectedItem} translator={translator} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
                     </div>
                 ) : (
                     manual.sections.map((section, si) => {
                         const gridItems: GridItem[] = section.items.map((item, i) => {
                             const display = itemDisplay(item, translator);
                             const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
-                            const subtitle = subtitleParts.length > 0 ? subtitleParts.join(" · ") : undefined;
+                            const subtitle = subtitleParts.length > 0 ? sentenceCase(subtitleParts.join(" · ")) : undefined;
                             return {
                                 key: `item-${si}-${i}`,
-                                title: display.primary,
+                                title: sentenceCase(display.primary),
                                 subtitle,
                                 badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
                                 onSelect: hasExpandableContent(item) ? () => { setSelectedSectionIndex(si); setSelectedItem(item); } : undefined,
@@ -189,9 +205,9 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
                             <div key={`section-${si}`} className={si > 0 ? "mt-4" : ""}>
                                 <div className="d-flex justify-content-between align-items-center mb-2">
                                     <div>
-                                        <h3 className="mb-0" style={{ textTransform: "capitalize" }}>{translator.translate(section.title)}</h3>
+                                        <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
                                         {!translator.isJapanese && section.term?.romaji && (
-                                            <span className="text-muted small ms-2">· {section.term.romaji}</span>
+                                            <span className="text-muted small">{sentenceCase(section.term.romaji)}</span>
                                         )}
                                     </div>
                                 </div>
@@ -207,14 +223,14 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
 };
 
 
-const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }) => {
+const ItemDetail = ({ item, translator, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; hokeiMap: Map<string, HokeiMoment>; notesData: HokeiNotes; ranksData: HokeiRanks }) => {
     const display = itemDisplay(item, translator);
 
     return (
         <div>
             <div className="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <h5 className="mb-0">{display.primary}</h5>
+                    <h5 className="mb-0">{sentenceCase(display.primary)}</h5>
                     {display.gloss && <div className="text-muted small">({display.gloss})</div>}
                     {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
                     {display.kanji && <div className="text-muted small">{display.kanji}</div>}
@@ -227,7 +243,7 @@ const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }
             ))}
             <div className="d-flex flex-column gap-2">
                 {item.items?.map((subItem, i) => (
-                    <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} />
+                    <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
                 ))}
             </div>
         </div>
@@ -236,9 +252,20 @@ const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }
 
 const emojiNumbers = ["", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
 
-const SubItemCard = ({ item, translator, showEmojiNumbers }: { item: Item; translator: Translator; showEmojiNumbers?: boolean }) => {
+function extractHokeis(romaji: string, hokeiMap: Map<string, HokeiMoment>): HokeiMoment[] {
+    return romaji.replace(/\s*\(.*$/, '').trim()
+        .split(/\s*&\s*/)
+        .map(p => p.split(/\s+-\s+/)[0].trim())
+        .map(p => hokeiMap.get(p))
+        .filter((h): h is HokeiMoment => !!h);
+}
+
+const SubItemCard = ({ item, translator, showEmojiNumbers, showHokeiCards, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; notesData?: HokeiNotes; ranksData?: HokeiRanks }) => {
     const display = itemDisplay(item, translator);
-    const hasContent = hasExpandableContent(item);
+    const hokeis = showHokeiCards && hokeiMap && item.term?.romaji
+        ? extractHokeis(item.term.romaji, hokeiMap)
+        : [];
+    const hasContent = hasExpandableContent(item) || hokeis.length > 0;
     const numEmoji = showEmojiNumbers && item.numbering?.style === "paren" && item.numbering.value != null
         ? (emojiNumbers[item.numbering.value] ?? `(${item.numbering.value})`)
         : undefined;
@@ -247,7 +274,7 @@ const SubItemCard = ({ item, translator, showEmojiNumbers }: { item: Item; trans
         <div className="d-flex justify-content-between align-items-start w-100">
             <div>
                 {numEmoji && <span className="me-2">{numEmoji}</span>}
-                <span className="fw-semibold">{display.primary}</span>
+                <span className="fw-semibold">{sentenceCase(display.primary)}</span>
                 {display.gloss && <span className="text-muted ms-1 small">({display.gloss})</span>}
                 {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
                 {display.kanji && <div className="text-muted small">{display.kanji}</div>}
@@ -261,10 +288,18 @@ const SubItemCard = ({ item, translator, showEmojiNumbers }: { item: Item; trans
             className="hokei-card"
             header={header}
             showCollapse={hasContent}
+            inlineChevron
         >
             {item.annotations?.map((ann, i) => (
                 <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
             ))}
+            {hokeis.length > 0 && (
+                <div className="d-flex flex-column gap-2 mt-2">
+                    {hokeis.map(h => (
+                        <HokeiCard key={h.hokei_name} hokei={h} compact notesData={notesData} ranksData={ranksData} />
+                    ))}
+                </div>
+            )}
             {item.techniqueGroups?.map((group, gi) => (
                 <div key={gi} className="mb-2">
                     {group.context?.text && (
