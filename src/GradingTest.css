@@ -17,6 +17,10 @@
   animation: grading-fade-slide 180ms ease-out forwards;
 }
 
+.grading-detail-enter {
+  animation: grading-fade-slide 200ms ease-out forwards;
+}
+
 .grading-section-body .app-grid-title {
   font-size: 1rem;
 }

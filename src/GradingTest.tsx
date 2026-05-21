@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Badge, Button, Card, Form } from "react-bootstrap";
+import { Badge, Button, Form } from "react-bootstrap";
 import { XLg } from "react-bootstrap-icons";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
@@ -153,44 +153,55 @@ const GradingTest = ({ grade, allGradePlans }: GradingTestProps) => {
                 </Form.Select>
                 <h2>{translator.translate(manual.title)}</h2>
                 {manual.term && !translator.isJapanese && <div className="text-muted small mb-3">{manual.term.romaji}</div>}
-                {manual.sections.map((section, si) => {
-                    const isExpanded = selectedSectionIndex === si && selectedItem !== null;
-                    const gridItems: GridItem[] = section.items.map((item, i) => {
-                        const display = itemDisplay(item, translator);
-                        const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
-                        const subtitle = subtitleParts.length > 0 ? subtitleParts.join(" · ") : undefined;
-                        return {
-                            key: `item-${si}-${i}`,
-                            title: display.primary,
-                            subtitle,
-                            badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
-                            onSelect: hasExpandableContent(item) ? () => { setSelectedSectionIndex(si); setSelectedItem(item); } : undefined,
-                        };
-                    });
-                    return (
-                        <div key={`section-${si}`} className={si > 0 ? "mt-4" : ""}>
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                                <div>
-                                    <span className="fw-semibold fs-5" style={{ textTransform: "capitalize" }}>{translator.translate(section.title)}</span>
-                                    {!translator.isJapanese && section.term?.romaji && (
-                                        <span className="text-muted small ms-2">· {section.term.romaji}</span>
-                                    )}
-                                </div>
-                                {isExpanded && (
-                                    <Button variant="link" size="sm" onClick={closeItem} aria-label="Stäng" className="text-body p-0">
-                                        <XLg size={14} />
-                                    </Button>
+
+                {selectedItem !== null && selectedSectionIndex !== null ? (
+                    <div className="grading-section-body grading-detail-enter">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h3 className="mb-0" style={{ textTransform: "capitalize" }}>
+                                    {translator.translate(manual.sections[selectedSectionIndex].title)}
+                                </h3>
+                                {!translator.isJapanese && manual.sections[selectedSectionIndex].term?.romaji && (
+                                    <div className="text-muted small">· {manual.sections[selectedSectionIndex].term!.romaji}</div>
                                 )}
                             </div>
-                            <div key={isExpanded ? `detail-${si}` : `grid-${si}`} className="grading-section-body">
-                                {isExpanded
-                                    ? <ItemDetail item={selectedItem!} translator={translator} />
-                                    : <Grid items={gridItems} />
-                                }
-                            </div>
+                            <Button variant="link" size="sm" onClick={closeItem} aria-label="Stäng" className="text-body p-0">
+                                <XLg size={14} />
+                            </Button>
                         </div>
-                    );
-                })}
+                        <ItemDetail item={selectedItem} translator={translator} />
+                    </div>
+                ) : (
+                    manual.sections.map((section, si) => {
+                        const gridItems: GridItem[] = section.items.map((item, i) => {
+                            const display = itemDisplay(item, translator);
+                            const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
+                            const subtitle = subtitleParts.length > 0 ? subtitleParts.join(" · ") : undefined;
+                            return {
+                                key: `item-${si}-${i}`,
+                                title: display.primary,
+                                subtitle,
+                                badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
+                                onSelect: hasExpandableContent(item) ? () => { setSelectedSectionIndex(si); setSelectedItem(item); } : undefined,
+                            };
+                        });
+                        return (
+                            <div key={`section-${si}`} className={si > 0 ? "mt-4" : ""}>
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <h3 className="mb-0" style={{ textTransform: "capitalize" }}>{translator.translate(section.title)}</h3>
+                                        {!translator.isJapanese && section.term?.romaji && (
+                                            <span className="text-muted small ms-2">· {section.term.romaji}</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="grading-section-body">
+                                    <Grid items={gridItems} />
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
         </div>
     );
 };
@@ -200,28 +211,26 @@ const ItemDetail = ({ item, translator }: { item: Item; translator: Translator }
     const display = itemDisplay(item, translator);
 
     return (
-        <Card className="app-grid-card">
-            <Card.Body>
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <h3 className="mb-0">{display.primary}</h3>
-                        {display.gloss && <div className="text-muted small">({display.gloss})</div>}
-                        {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
-                        {display.kanji && <div className="text-muted small">{display.kanji}</div>}
-                    </div>
-                    {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
+        <div>
+            <div className="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h5 className="mb-0">{display.primary}</h5>
+                    {display.gloss && <div className="text-muted small">({display.gloss})</div>}
+                    {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
+                    {display.kanji && <div className="text-muted small">{display.kanji}</div>}
                 </div>
-                {item.description && <p className="mb-2">{translator.translate(item.description)}</p>}
-                {item.annotations?.map((ann, i) => (
-                    <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
+                {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
+            </div>
+            {item.description && <p className="mb-2">{translator.translate(item.description)}</p>}
+            {item.annotations?.map((ann, i) => (
+                <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
+            ))}
+            <div className="d-flex flex-column gap-2">
+                {item.items?.map((subItem, i) => (
+                    <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} />
                 ))}
-                <div className="d-flex flex-column gap-2">
-                    {item.items?.map((subItem, i) => (
-                        <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} />
-                    ))}
-                </div>
-            </Card.Body>
-        </Card>
+            </div>
+        </div>
     );
 };
 
