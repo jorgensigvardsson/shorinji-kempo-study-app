@@ -209,7 +209,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   int(token.AccessTokenTTL.Seconds()),
 	})
 
-	http.Redirect(w, r, h.frontendURL, http.StatusFound)
+	http.Redirect(w, r, h.frontendURL+"?auth_success=1", http.StatusFound)
 }
 
 func (h *Handler) me(w http.ResponseWriter, r *http.Request) {

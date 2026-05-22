@@ -3,6 +3,7 @@ import type { AppDataDocument, SyncProvider } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
 import { GoogleDriveClient } from "./google-drive";
 import { OneDriveClient } from "./onedrive";
+import { BackendSyncClient } from "./backend";
 import { AuthExpiredError, type SyncResult, type SyncState } from "./types";
 
 const debug = import.meta.env.VITE_DEBUG === "true";
@@ -19,6 +20,7 @@ class SyncManager {
   private readonly store = getAppDataStore();
   private readonly oneDriveClient = new OneDriveClient();
   private readonly googleDriveClient = new GoogleDriveClient();
+  private readonly backendClient = new BackendSyncClient();
   private state: SyncState = {
     status: "local_only",
     message: null,
@@ -93,16 +95,29 @@ class SyncManager {
         status: "error",
         message: provider === "onedrive"
           ? "Sätt VITE_ONEDRIVE_CLIENT_ID för att aktivera synk med OneDrive."
-          : "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive.",
+          : provider === "google-drive"
+          ? "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive."
+          : "Backend-synk är inte konfigurerad.",
       });
       return;
     }
 
     this.setState({
       status: "connecting",
-      message: provider === "onedrive" ? "Ansluter till OneDrive..." : "Ansluter till Google Drive...",
+      message: provider === "onedrive"
+        ? "Ansluter till OneDrive..."
+        : provider === "google-drive"
+        ? "Ansluter till Google Drive..."
+        : "Ansluter till backend...",
     });
     await client.beginAuthorization();
+  }
+
+  // beginBackendAuthorization is called by the sign-in UI (Phase 4).
+  // It sets the email on the backend client and redirects to the auth service.
+  beginBackendAuthorization(email: string): void {
+    this.backendClient.setEmail(email);
+    this.backendClient.beginAuthorization().catch(err => this.handleSyncError(err));
   }
 
   disconnect(): void {
@@ -110,6 +125,13 @@ class SyncManager {
     const client = this.cloudClient(provider);
     if (client) {
       client.disconnect();
+    }
+
+    if (provider === "backend") {
+      // Backend sync is identity-bound — revert to local on sign-out.
+      // handleProviderChanged fires via the subscription and sets status to local_only.
+      this.store.set("syncProvider", "local");
+      return;
     }
 
     this.setState({
@@ -183,7 +205,9 @@ class SyncManager {
         status: "disconnected",
         message: provider === "onedrive"
           ? "Anslut till OneDrive först."
-          : "Anslut till Google Drive först.",
+          : provider === "google-drive"
+          ? "Anslut till Google Drive först."
+          : "Inte ansluten till backend.",
       });
       return { conflictDetected: false, pushedLocalChanges: false };
     }
@@ -261,6 +285,23 @@ class SyncManager {
     const provider = this.store.get("syncProvider");
     debugLog(`[sync] handleProviderChanged: provider=${provider}`);
 
+    // Detect post-login redirect from the auth service (?auth_success=1).
+    // This fires regardless of the current provider so the switch is automatic.
+    if (provider !== "backend") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("auth_success")) {
+        params.delete("auth_success");
+        const q = params.toString();
+        window.history.replaceState(
+          {},
+          "",
+          window.location.pathname + (q ? "?" + q : "") + window.location.hash
+        );
+        this.store.set("syncProvider", "backend");
+        return; // handleProviderChanged fires again via subscription with provider="backend"
+      }
+    }
+
     if (provider === "local") {
       this.clearScheduledSync();
       this.setState({
@@ -286,7 +327,9 @@ class SyncManager {
         status: "error",
         message: provider === "onedrive"
           ? "Sätt VITE_ONEDRIVE_CLIENT_ID för att aktivera synk med OneDrive."
-          : "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive.",
+          : provider === "google-drive"
+          ? "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive."
+          : "Backend-synk är inte konfigurerad.",
       });
       return;
     }
@@ -308,7 +351,11 @@ class SyncManager {
 
     this.setState({
       status: "connected",
-      message: provider === "onedrive" ? "Ansluten till OneDrive." : "Ansluten till Google Drive.",
+      message: provider === "onedrive"
+        ? "Ansluten till OneDrive."
+        : provider === "google-drive"
+        ? "Ansluten till Google Drive."
+        : "Ansluten till backend.",
     });
     await this.syncNow();
   }
@@ -407,6 +454,8 @@ class SyncManager {
         return this.oneDriveClient;
       case "google-drive":
         return this.googleDriveClient;
+      case "backend":
+        return this.backendClient;
       default:
         return null;
     }

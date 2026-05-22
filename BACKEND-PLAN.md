@@ -375,6 +375,17 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 
 ---
 
+## Deployment Policy
+
+**Staging:** No backend services. The staging environment is for testing app (frontend) quality
+only; nobody should be storing personal data there. Backend sign-in is simply unavailable on
+staging — the identity choice UI is hidden and `BackendSyncClient` is not wired up.
+This keeps staging costs at zero and removes GDPR concerns for the test environment.
+
+**Production:** Full backend stack (auth + persistence), Cosmos DB, HTTPS, rate limiting.
+
+---
+
 ## Open Questions
 - Which OIDC providers beyond Google and Microsoft?
 - Deployment topology: same host, separate containers, Azure Container Apps?
