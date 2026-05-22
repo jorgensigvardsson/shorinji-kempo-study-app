@@ -8,6 +8,13 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1500,
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: ['import', 'if-function', 'global-builtin', 'color-functions'],
+      },
+    },
+  },
   plugins: [
     mkcert(),
     react({
