@@ -16,11 +16,34 @@ import (
 
 func main() {
 	addr := flag.String("addr", ":8080", "listen address")
-	dataDir := flag.String("data-dir", "data", "directory for document storage")
+
+	// Storage backend selection
+	storage := flag.String("storage", "file", "storage backend: file | cosmosdb")
+
+	// File backend flags
+	dataDir := flag.String("data-dir", "data", "directory for document storage (file backend)")
+
+	// CosmosDB backend flags
+	cosmosEndpoint  := flag.String("cosmosdb-endpoint", "", "Cosmos DB account endpoint URL")
+	cosmosKey       := flag.String("cosmosdb-key", "", "Cosmos DB account key")
+	cosmosDatabase  := flag.String("cosmosdb-database", "", "Cosmos DB database name")
+	cosmosContainer := flag.String("cosmosdb-container", "", "Cosmos DB container name")
+
 	flag.Parse()
 
-	// "default" is a placeholder key until authentication provides a real user identity.
-	s := store.NewFileStore(*dataDir, "default")
+	var s store.Store
+	switch *storage {
+	case "file":
+		// "default" is a placeholder key until authentication provides a real user identity.
+		s = store.NewFileStore(*dataDir, "default")
+	case "cosmosdb":
+		if *cosmosEndpoint == "" || *cosmosKey == "" || *cosmosDatabase == "" || *cosmosContainer == "" {
+			log.Fatal("cosmosdb backend requires --cosmosdb-endpoint, --cosmosdb-key, --cosmosdb-database, and --cosmosdb-container")
+		}
+		s = store.NewCosmosDBStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer)
+	default:
+		log.Fatalf("unknown storage backend %q (choose file or cosmosdb)", *storage)
+	}
 
 	mux := http.NewServeMux()
 	api.NewHandler(s).Register(mux)
