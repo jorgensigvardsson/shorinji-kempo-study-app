@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Modal } from "react-bootstrap";
-import { Film, PlayCircle, Youtube } from "react-bootstrap-icons";
+import { Film, Youtube } from "react-bootstrap-icons";
 import { noTranslate, TranslatorContext } from "../i18n";
 import type { Video } from "../data";
 
@@ -29,19 +29,13 @@ const VideoLink = ({ video, className }: VideoLinkProps) => {
 
     return (
         <div className={`p-2 border border-primary rounded ${className ?? ""}`.trim()}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", alignItems: "center", gap: "0.5rem" }}>
-                <div style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: "0.5rem" }}>
+                <div role={id ? "button" : undefined}
+                     style={{ display: "flex", alignItems: "center", minWidth: 0, cursor: id ? "pointer" : "default" }}
+                     onClick={id ? () => setShow(true) : undefined}>
                     <Film className="text-primary" style={{ marginRight: "0.5em", flexShrink: 0 }} />
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
                 </div>
-                {id
-                    ? <span role="button" className="text-primary" style={{ cursor: "pointer", display: "flex", alignItems: "center", whiteSpace: "nowrap" }}
-                            onClick={() => setShow(true)}>
-                        <PlayCircle style={{ marginRight: "0.35em", display: "block" }} />
-                        {translator.translate("Visa")}
-                      </span>
-                    : <span />
-                }
                 <a href={video.url} target="_blank" rel="noopener noreferrer"
                    className="text-primary text-decoration-none" style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
                     <Youtube style={{ marginRight: "0.35em", display: "block" }} />

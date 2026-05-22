@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-22T15:15:00.000Z",
+    changes: [
+      {
+        emoji: "📱",
+        sv: "Videoknapparna är nu klickbara i sin helhet – tryck var som helst på knappen för att spela upp videon direkt i appen. YouTube-länken öppnar fortfarande YouTube i en ny flik.",
+        en: "Video buttons are now fully clickable – tap anywhere on the button to play the video inside the app. The YouTube link still opens YouTube in a new tab.",
+        tr: "Video düğmeleri artık tamamen tıklanabilir – videoyu uygulama içinde oynatmak için düğmenin herhangi bir yerine dokunun. YouTube bağlantısı hâlâ YouTube'u yeni bir sekmede açıyor.",
+        ja: "動画ボタン全体がクリック可能になりました。ボタンのどこをタップしてもアプリ内で動画が再生されます。YouTubeリンクは引き続き新しいタブでYouTubeを開きます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-22T14:30:00.000Z",
     changes: [
       {
