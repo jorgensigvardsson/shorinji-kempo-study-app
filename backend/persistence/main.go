@@ -27,6 +27,7 @@ func main() {
 	addr            := flag.String("addr",               env("SERVICE_LISTEN_ADDRESS", ":8080"),                        "listen address")
 	storage         := flag.String("storage",            env("SERVICE_STORAGE",        "file"),                         "storage backend: file | cosmosdb")
 	dataDir         := flag.String("data-dir",           env("SERVICE_DATA_DIR",       "data"),                         "directory for document storage (file backend)")
+	frontendURL     := flag.String("frontend-url",       env("SERVICE_FRONTEND_URL",   "http://localhost:5173"),        "frontend origin for CORS")
 	jwksURL         := flag.String("jwks-url",           env("AUTH_JWKS_URL",          "http://localhost:8081/.well-known/jwks.json"), "auth service JWKS endpoint")
 	cosmosEndpoint  := flag.String("cosmosdb-endpoint",  env("COSMOS_DB_ENDPOINT",     ""),                             "Cosmos DB account endpoint URL")
 	cosmosKey       := flag.String("cosmosdb-key",       env("COSMOS_DB_KEY",          ""),                             "Cosmos DB account key")
@@ -57,7 +58,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	api.NewHandler(s, keyCache).Register(mux)
+	api.NewHandler(s, keyCache, *frontendURL).Register(mux)
 
 	srv := &http.Server{Addr: *addr, Handler: mux}
 

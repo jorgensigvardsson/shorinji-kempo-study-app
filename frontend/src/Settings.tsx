@@ -59,7 +59,9 @@ const Settings = (props: Props) => {
             ? "Google Drive"
             : syncProvider === "dropbox"
                 ? "Dropbox"
-                : translator.translate("Ingen");
+                : syncProvider === "backend"
+                    ? "Backend"
+                    : translator.translate("Ingen");
     const lastSyncedLabel = syncState.lastSyncedAt
         ? new Date(syncState.lastSyncedAt).toLocaleString()
         : translator.translate("Aldrig");
@@ -194,82 +196,132 @@ const Settings = (props: Props) => {
 
             <Form.Group className="mb-3" controlId="settingsSyncProvider">
                 <Form.Label>{translator.translate("Synk")}</Form.Label>
-                {!isConnected && (
+
+                {syncProvider === "backend" ? (
+                    // Backend provider: no dropdown, just status + disconnect/sync
                     <>
-                        <Dropdown onSelect={eventKey => eventKey && setSyncProvider(eventKey as SyncProvider)}>
-                            <Dropdown.Toggle as="button" type="button" className="form-select settings-provider-select-toggle">
-                                <ProviderLogo logo={selectedSyncProvider.logo} />
-                                <span>{selectedSyncProvider.label}</span>
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu className="w-100 settings-provider-menu">
-                                {syncProviderOptions.map(option => (
-                                    <Dropdown.Item
-                                        key={option.value}
-                                        eventKey={option.value}
-                                        active={option.value === syncProvider}
-                                        className="settings-provider-option"
-                                    >
-                                        <ProviderLogo logo={option.logo} />
-                                        <span>{option.label}</span>
-                                    </Dropdown.Item>
-                                ))}
-                            </Dropdown.Menu>
-                        </Dropdown>
-                        {syncProvider !== "local" && (
-                            <>
-                                {syncState.status === "auth_expired" && (
-                                    <Form.Text className="d-block mt-2 text-warning">
-                                        {translator.translate("Anslutningen till {0} har gått ut.", { params: [providerLabel] })}
-                                    </Form.Text>
-                                )}
-                                <div className="mt-2 d-flex gap-2">
+                        {(syncState.status === "auth_expired" || syncState.status === "disconnected") && (
+                            <Form.Text className="d-block mt-2 text-warning">
+                                {translator.translate("Sessionen har gått ut. Logga in igen.")}
+                            </Form.Text>
+                        )}
+                        {isConnected && (
+                            <Form.Text className="d-block mt-2">
+                                {translator.translate("Ansluten till")} {providerLabel}, {translator.translate("senast synkad")} {lastSyncedLabel}{syncStateLabel}
+                            </Form.Text>
+                        )}
+                        <div className="mt-2 d-flex gap-2">
+                            {(syncState.status === "auth_expired" || syncState.status === "disconnected") && (
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => getSyncManager().disconnect()}
+                                >
+                                    {translator.translate("Logga in igen")}
+                                </Button>
+                            )}
+                            {isConnected && (
+                                <>
                                     <Button
-                                        variant="outline-primary"
+                                        variant="outline-secondary"
                                         size="sm"
-                                        onClick={() => getSyncManager().connect()}
+                                        onClick={() => getSyncManager().disconnect()}
+                                    >
+                                        {translator.translate("Koppla från")}
+                                    </Button>
+                                    <Button
+                                        variant="outline-success"
+                                        size="sm"
+                                        onClick={() => { void getSyncManager().syncNow(); }}
                                         disabled={syncState.status === "connecting" || syncState.status === "syncing"}
                                     >
-                                        {translator.translate("Anslut")}
+                                        {translator.translate("Synka nu")}
                                     </Button>
-                                </div>
-                                {syncProvider === "onedrive" && (
-                                    <Form.Text className="d-block mt-2">
-                                        {translator.translate("OneDrive-anslutningar behöver förnyas var 24:e timme.")}
-                                    </Form.Text>
+                                </>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    // OneDrive / Google Drive / local: existing dropdown UI
+                    <>
+                        {!isConnected && (
+                            <>
+                                <Dropdown onSelect={eventKey => eventKey && setSyncProvider(eventKey as SyncProvider)}>
+                                    <Dropdown.Toggle as="button" type="button" className="form-select settings-provider-select-toggle">
+                                        <ProviderLogo logo={selectedSyncProvider.logo} />
+                                        <span>{selectedSyncProvider.label}</span>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu className="w-100 settings-provider-menu">
+                                        {syncProviderOptions.map(option => (
+                                            <Dropdown.Item
+                                                key={option.value}
+                                                eventKey={option.value}
+                                                active={option.value === syncProvider}
+                                                className="settings-provider-option"
+                                            >
+                                                <ProviderLogo logo={option.logo} />
+                                                <span>{option.label}</span>
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                                {syncProvider !== "local" && (
+                                    <>
+                                        {syncState.status === "auth_expired" && (
+                                            <Form.Text className="d-block mt-2 text-warning">
+                                                {translator.translate("Anslutningen till {0} har gått ut.", { params: [providerLabel] })}
+                                            </Form.Text>
+                                        )}
+                                        <div className="mt-2 d-flex gap-2">
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                onClick={() => getSyncManager().connect()}
+                                                disabled={syncState.status === "connecting" || syncState.status === "syncing"}
+                                            >
+                                                {translator.translate("Anslut")}
+                                            </Button>
+                                        </div>
+                                        {syncProvider === "onedrive" && (
+                                            <Form.Text className="d-block mt-2">
+                                                {translator.translate("OneDrive-anslutningar behöver förnyas var 24:e timme.")}
+                                            </Form.Text>
+                                        )}
+                                    </>
                                 )}
                             </>
                         )}
+                        {isConnected && (
+                            <>
+                                <Form.Text className="d-block mt-2">
+                                    {translator.translate("Ansluten till")} {providerLabel}, {translator.translate("senast synkad")} {lastSyncedLabel}{syncStateLabel}
+                                </Form.Text>
+                                <div className="mt-2 d-flex gap-2">
+                                    <Button
+                                        variant="outline-secondary"
+                                        size="sm"
+                                        onClick={() => getSyncManager().disconnect()}
+                                    >
+                                        {translator.translate("Koppla från")}
+                                    </Button>
+                                    <Button
+                                        variant="outline-success"
+                                        size="sm"
+                                        onClick={() => { void getSyncManager().syncNow(); }}
+                                        disabled={syncState.status === "connecting" || syncState.status === "syncing"}
+                                    >
+                                        {translator.translate("Synka nu")}
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                        {syncProvider === "google-drive" && (
+                            <Form.Text className="d-block mt-2 text-warning">
+                                <ExclamationTriangleFill className="me-1" />
+                                {translator.translate("Support för Google Drive är fortfarande beta")}
+                            </Form.Text>
+                        )}
                     </>
-                )}
-                {isConnected && (
-                    <>
-                        <Form.Text className="d-block mt-2">
-                            {translator.translate("Ansluten till")} {providerLabel}, {translator.translate("senast synkad")} {lastSyncedLabel}{syncStateLabel}
-                        </Form.Text>
-                        <div className="mt-2 d-flex gap-2">
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={() => getSyncManager().disconnect()}
-                            >
-                                {translator.translate("Koppla från")}
-                            </Button>
-                            <Button
-                                variant="outline-success"
-                                size="sm"
-                                onClick={() => { void getSyncManager().syncNow(); }}
-                                disabled={syncState.status === "connecting" || syncState.status === "syncing"}
-                            >
-                                {translator.translate("Synka nu")}
-                            </Button>
-                        </div>
-                    </>
-                )}
-                {syncProvider === "google-drive" && (
-                    <Form.Text className="d-block mt-2 text-warning">
-                        <ExclamationTriangleFill className="me-1" />
-                        {translator.translate("Support för Google Drive är fortfarande beta")}
-                    </Form.Text>
                 )}
             </Form.Group>
             <Form.Group className="mb-3">

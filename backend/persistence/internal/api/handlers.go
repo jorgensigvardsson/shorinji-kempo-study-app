@@ -9,18 +9,21 @@ import (
 )
 
 type Handler struct {
-	store store.Store
-	jwks  KeySource
+	store       store.Store
+	jwks        KeySource
+	frontendURL string
 }
 
-func NewHandler(s store.Store, ks KeySource) *Handler {
-	return &Handler{store: s, jwks: ks}
+func NewHandler(s store.Store, ks KeySource, frontendURL string) *Handler {
+	return &Handler{store: s, jwks: ks, frontendURL: frontendURL}
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /healthz", h.healthz)
-	mux.Handle("GET /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.getDocument)))
-	mux.Handle("PUT /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.putDocument)))
+	inner := http.NewServeMux()
+	inner.HandleFunc("GET /healthz", h.healthz)
+	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.getDocument)))
+	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.putDocument)))
+	mux.Handle("/", corsMiddleware(h.frontendURL, inner))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {

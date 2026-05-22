@@ -10,6 +10,7 @@ import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 import { ArrowClockwise, ArrowLeftRight, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState } from './hooks';
 import { getSyncManager } from './sync/manager';
+import { SignInModal } from './SignInModal';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 
@@ -23,6 +24,8 @@ interface Props {
 }
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
+const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
+const IDENTITY_CHOICE_KEY = "identity-choice-made";
 
 function isStandalonePwa(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches
@@ -71,6 +74,23 @@ function App(props: Props) {
   useEffect(() => gradeData.registerListener(g => setNextGrade(g)), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
 
+  const { syncProvider } = useSyncProvider();
+  const [showSignIn, setShowSignIn] = useState(
+    () => BACKEND_ENABLED && localStorage.getItem(IDENTITY_CHOICE_KEY) !== "true"
+  );
+  // Auto-hide when the user completes sign-in (provider switches to "backend").
+  useEffect(() => {
+    if (syncProvider === "backend") {
+      localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
+      setShowSignIn(false);
+    }
+  }, [syncProvider]);
+
+  const handleContinueAnonymously = () => {
+    localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
+    setShowSignIn(false);
+  };
+
   return (
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
@@ -80,6 +100,11 @@ function App(props: Props) {
           <Outlet />
         </div>
         <AppToasts translator={translator} />
+        <SignInModal
+          translator={translator}
+          show={showSignIn}
+          onContinueAnonymously={handleContinueAnonymously}
+        />
       </div>
     </TranslatorContext.Provider>
   )

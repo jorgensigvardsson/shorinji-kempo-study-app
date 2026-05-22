@@ -12,7 +12,8 @@ services:
     ports:
       - "5173:5173"
     environment:
-      VITE_HTTPS: "false"   # disables mkcert; localhost is a secure context anyway
+      VITE_HTTPS: "false"          # disables mkcert; localhost is a secure context anyway
+      VITE_BACKEND_ENABLED: "true" # show sign-in UI; set to "false" (or omit) for staging
 
   auth:
     image: golang:latest
@@ -56,6 +57,7 @@ services:
       - "8080:8080"
     environment:
       SERVICE_LISTEN_ADDRESS: ":8080"
+      SERVICE_FRONTEND_URL: "http://localhost:5173"
       AUTH_JWKS_URL: "http://auth:8081/.well-known/jwks.json"
 
 volumes:
