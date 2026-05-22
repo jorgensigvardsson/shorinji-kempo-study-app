@@ -4,3 +4,6 @@
 *.out
 bin/
 vendor/
+
+# Runtime data (signing keys, user files, documents)
+data/
