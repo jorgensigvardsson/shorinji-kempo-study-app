@@ -9,6 +9,7 @@ import { Collapse, Form } from "react-bootstrap";
 import { ChatFill, ChevronDown, ChevronRight, JournalText } from "react-bootstrap-icons";
 import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import StarRating from "./StarRating";
+import VideoLink from "./VideoLink";
 import type { HokeiRankValue } from "../persistence/schema";
 
 interface HokeiCardProps {
@@ -35,6 +36,16 @@ const HokeiCard = (props: HokeiCardProps) => {
         return ranksData.registerListener(hokei.hokei_name, setRank);
     }, [ranksData, hokei.hokei_name]);
 
+    const videos = hokei.videos ?? [];
+    const footer = (notesData || videos.length > 0) ? (
+        <>
+            {notesData && <CardFooter notesData={notesData} hokei={hokei}/>}
+            {videos.map((video, i) => (
+                <VideoLink key={video.url} video={video} className={(i > 0 || notesData) ? "mt-2" : undefined}/>
+            ))}
+        </>
+    ) : undefined;
+
     if (compact) {
         const name = translator.isJapanese
             ? translator.japanese(hokei.hokei_name)
@@ -49,7 +60,7 @@ const HokeiCard = (props: HokeiCardProps) => {
         );
         return (
             <CollapsibleCard header={compactHeader} inlineChevron
-                             footer={notesData ? <CardFooter notesData={notesData} hokei={hokei}/> : undefined}
+                             footer={footer}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
                 <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}
@@ -79,7 +90,7 @@ const HokeiCard = (props: HokeiCardProps) => {
 
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
-                         footer={notesData ? <CardFooter notesData={notesData} hokei={hokei}/> : undefined}
+                         footer={footer}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}

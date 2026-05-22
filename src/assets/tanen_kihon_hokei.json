@@ -1,0 +1,82 @@
+[
+  {
+    "hokei_name": "tenchi ken dai ikkei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=I-RG-o5o8z4" }],
+    "_ja": "天地拳第一系(単演)"
+  },
+  {
+    "hokei_name": "ryūō ken dai ikkei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=TODPS8MLvH0" }],
+    "_ja": "龍王拳第一系(単演)"
+  },
+  {
+    "hokei_name": "giwa ken dai ikkei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=mUvEDyXJOLw" }],
+    "_ja": "義和拳第一系(単演)"
+  },
+  {
+    "hokei_name": "ryūō ken dai ikkei (sōtai)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=aQJwcZDHX_Q" }],
+    "_ja": "龍王拳第一系(相対)"
+  },
+  {
+    "hokei_name": "tenchi ken dai ikkei (sōtai)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=lIU8DXGWwH0" }],
+    "_ja": "天地拳第一系(相対)"
+  },
+  {
+    "hokei_name": "tenchi ken dai nikei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=zDyfoPsuYfA" }],
+    "_ja": "天地拳第二系(単演)"
+  },
+  {
+    "hokei_name": "tenchi ken dai sankei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=DzQtZ0buI5k" }],
+    "_ja": "天地拳第三系(単演)"
+  },
+  {
+    "hokei_name": "tenchi ken dai yonkei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=G1UmIToZoBk" }],
+    "_ja": "天地拳第四系(単演)"
+  },
+  {
+    "hokei_name": "giwa ken dai nikei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=8H3CTV66Iyw" }],
+    "_ja": "義和拳第二系(単演)"
+  },
+  {
+    "hokei_name": "giwa ken dai ikkei (sōtai)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=0Xifu0BT4Z0" }],
+    "_ja": "義和拳第一系(相対)"
+  },
+  {
+    "hokei_name": "tenchi ken dai nikei (sōtai)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=AMCES_ze-xQ" }],
+    "_ja": "天地拳第二系(相対)"
+  },
+  {
+    "hokei_name": "tenchi ken dai gokei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=w8gmT65705I" }],
+    "_ja": "天地拳第五系(単演)"
+  },
+  {
+    "hokei_name": "tenchi ken dai rokkei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=BbyAyoTp-Fk" }],
+    "_ja": "天地拳第六系(単演)"
+  },
+  {
+    "hokei_name": "byakuren ken dai ikkei (tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=NqzawQ32bsw" }],
+    "_ja": "白蓮拳第一系(単演)"
+  },
+  {
+    "hokei_name": "kō manji ken (manji no kata)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=QG6kjsO6-XM" }],
+    "_ja": "紅卍拳(まんじ之形)"
+  },
+  {
+    "hokei_name": "ryū no kata (gyaku gote tan'en)",
+    "videos": [{ "url": "https://www.youtube.com/watch?v=aQldfuSOiWY" }],
+    "_ja": "龍の形(逆小手単演)"
+  }
+]

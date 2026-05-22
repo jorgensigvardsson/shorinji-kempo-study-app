@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-22T14:30:00.000Z",
+    changes: [
+      {
+        emoji: "🎬",
+        sv: "Videolänkar har lagts till för hokei, kumi embu och tan'en kihon hōkei. Videoknappar visas nu på hokeikort, på graderingssidan och i veckoschemat – med titeln på formen som etikett.",
+        en: "Video links added for hokei, kumi embu, and tan'en kihon hōkei. Video buttons now appear on hokei cards, the grading test page, and the weekly schedule – labelled with the name of the form.",
+        tr: "Hokei, kumi embu ve tan'en kihon hōkei için video bağlantıları eklendi. Video düğmeleri artık hokei kartlarında, derece sınavı sayfasında ve haftalık programda – formun adıyla etiketlenmiş olarak görünüyor.",
+        ja: "法形、組演武、単演基本法形に動画リンクが追加されました。法形カード、段位審査ページ、週間スケジュールに動画ボタンが表示されるようになりました。ボタンには法形の名称が表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-21T12:00:00.000Z",
     changes: [
       {

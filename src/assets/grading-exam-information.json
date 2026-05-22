@@ -995,6 +995,11 @@
                   }
                 ]
               }
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=5oBYs4AnGsg"
+              }
             ]
           },
           {
@@ -1460,6 +1465,11 @@
                 "term": {
                   "romaji": "uwa uke nage - kannuki gatame"
                 }
+              }
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=MkoA_5WuZxU"
               }
             ]
           },
@@ -2033,6 +2043,11 @@
                   "romaji": "kote maki gaeshi - kannuki gatame"
                 }
               }
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=k8u4pQfA3Mo"
+              }
             ]
           },
           {
@@ -2526,6 +2541,11 @@
                 "term": {
                   "romaji": "maki gote (morote) - tembin gatame (ura)"
                 }
+              }
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=29KtwnaKroQ"
               }
             ]
           },
@@ -3030,6 +3050,11 @@
                   "romaji": "jōhaku dori (ryōte)"
                 }
               }
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=-n2APMf3kfg"
+              }
             ]
           },
           {
@@ -3526,6 +3551,11 @@
                 "term": {
                   "romaji": "gyaku gote - mae yubi gatame"
                 }
+              }
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=67UdXHXQKwM"
               }
             ]
           },

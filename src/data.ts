@@ -15,6 +15,12 @@ export function nextGrade(grade: GradeName): GradeName | undefined {
     return idx >= 0 && idx < gradeProgression.length - 1 ? gradeProgression[idx + 1] : undefined;
 }
 
+export interface TanenKihonHokei {
+  hokei_name: string;
+  videos?: Video[];
+  _ja?: string;
+}
+
 export interface GradePlan {
   grade: GradeName;
   note?: string;
@@ -106,6 +112,15 @@ export interface ReviewPreparationWeek {
 
 export type Moment = HokeiMoment | StandardMoment;
 
+/**
+ * A link to a demonstration video. `label` distinguishes multiple videos for
+ * the same item (e.g. a variation); omit it when there is a single video.
+ */
+export interface Video {
+  url: string;
+  label?: string;
+}
+
 export interface HokeiMoment {
   type: "hokei_moment";
   hokei_name: string;
@@ -116,6 +131,7 @@ export interface HokeiMoment {
   roles: Roles;
   references?: string[];
   kyohan_pages: number[];
+  videos?: Video[];
 }
 
 export interface Roles {

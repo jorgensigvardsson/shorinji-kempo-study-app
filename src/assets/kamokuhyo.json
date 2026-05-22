@@ -45,6 +45,11 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=vLuDYdKyfXg"
+              }
             ]
           }
         ]
@@ -81,6 +86,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=V4ZG6neMOU"
+              }
             ]
           }
         ]
@@ -114,7 +124,8 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
-            ]
+            ],
+            "videos": []
           }
         ]
       },
@@ -149,6 +160,11 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=UhXidNE5Xo0"
+              }
             ]
           }
         ]
@@ -184,6 +200,16 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=JST0k2UA2NU",
+                "label": "kumo ashi"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=SNEirT0_ZNw",
+                "label": "jun sagari ashi"
+              }
             ]
           }
         ]
@@ -220,6 +246,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=s8oZaEGFJB8"
+              }
             ]
           },
           {
@@ -245,6 +276,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=lcM3irv-i-4"
+              }
             ]
           }
         ]
@@ -292,6 +328,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=toJFbfk2rrg"
+              }
             ]
           },
           {
@@ -336,6 +377,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=9PxGSOXda2M"
+              }
             ]
           },
           {
@@ -361,6 +407,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=8MxHAplMdTk"
+              }
             ]
           },
           {
@@ -404,6 +455,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=NSDHQVGN89E"
+              }
             ]
           },
           {
@@ -448,6 +504,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=KcIXkhZtwuU"
+              }
             ]
           },
           {
@@ -491,6 +552,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=EhZOUEZjQSg"
+              }
             ]
           },
           {
@@ -533,6 +599,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=THvr2QftY6s"
+              }
             ]
           },
           {
@@ -576,6 +647,11 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=WVg-0GWWuyo"
+              }
             ]
           },
           {
@@ -643,6 +719,12 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=5EYlX7xlHZI",
+                "label": "ura, omote"
+              }
             ]
           },
           {
@@ -668,6 +750,12 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=5EYlX7xlHZI",
+                "label": "ura, omote"
+              }
             ]
           },
           {
@@ -713,6 +801,16 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=hCjDDCA74iE",
+                "label": "keri age"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=TByTPxrWDI8",
+                "label": "mawashi geri"
+              }
             ]
           },
           {
@@ -738,6 +836,16 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=hCjDDCA74iE",
+                "label": "keri age"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=TByTPxrWDI8",
+                "label": "mawashi geri"
+              }
             ]
           },
           {
@@ -783,6 +891,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=f37gnXIKb9g"
+              }
             ]
           },
           {
@@ -825,6 +938,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=sPalbK_K1vk"
+              }
             ]
           },
           {
@@ -872,6 +990,11 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=xP6SnAjs074"
+              }
             ]
           },
           {
@@ -899,6 +1022,11 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=YOYhdDwcm_Q"
+              }
             ]
           },
           {
@@ -944,6 +1072,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Vy3DTbZ1KP0"
+              }
             ]
           },
           {
@@ -969,6 +1102,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=_eLyknUjp3A"
+              }
             ]
           },
           {
@@ -1013,6 +1151,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=5bNYMdTJOmU"
+              }
             ]
           },
           {
@@ -1038,6 +1181,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=iIVuCVHTGaw"
+              }
             ]
           },
           {
@@ -1104,6 +1252,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=AuwojheJkGc"
+              }
             ]
           },
           {
@@ -1147,6 +1300,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=PSlUkrzBB6Y"
+              }
             ]
           },
           {
@@ -1172,6 +1330,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=LkjFoMqMiJM"
+              }
             ]
           },
           {
@@ -1217,6 +1380,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=YyjunIid6uE"
+              }
             ]
           },
           {
@@ -1242,6 +1410,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=EOWdBtaSbuA"
+              }
             ]
           },
           {
@@ -1290,6 +1463,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=WkRuDU-NRPY"
+              }
             ]
           },
           {
@@ -1316,6 +1494,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ipr9uGsUVn0"
+              }
             ]
           },
           {
@@ -1362,6 +1545,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=I31vKUNfHeY"
+              }
             ]
           },
           {
@@ -1406,6 +1594,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=G1SqC_b2qSc"
+              }
             ]
           },
           {
@@ -1429,7 +1622,8 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
-            ]
+            ],
+            "videos": []
           },
           {
             "type": "standard_moment",
@@ -1474,6 +1668,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=r_ncgoWbvdA"
+              }
             ]
           },
           {
@@ -1517,6 +1716,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=CmsK4SIW2bw"
+              }
             ]
           },
           {
@@ -1558,6 +1762,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=3FOz2Gew5F8"
+              }
             ]
           },
           {
@@ -1601,6 +1810,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=xG1Z-_zukPE"
+              }
             ]
           },
           {
@@ -1646,6 +1860,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=3cD5lj9XErg"
+              }
             ]
           },
           {
@@ -1701,6 +1920,11 @@
             },
             "kyohan_pages": [
               225
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=jLauG8bhPLw"
+              }
             ]
           },
           {
@@ -1724,6 +1948,11 @@
             },
             "kyohan_pages": [
               228
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=GXd_L4t_uT8"
+              }
             ]
           },
           {
@@ -1768,6 +1997,11 @@
             },
             "kyohan_pages": [
               224
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=xF-4eSBRZ7Y"
+              }
             ]
           },
           {
@@ -1791,6 +2025,11 @@
             },
             "kyohan_pages": [
               257
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=QmsGXUstakY"
+              }
             ]
           },
           {
@@ -1835,6 +2074,11 @@
             },
             "kyohan_pages": [
               176
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=8Ggxd9dRYl0"
+              }
             ]
           },
           {
@@ -1858,6 +2102,11 @@
             },
             "kyohan_pages": [
               176
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=8SculvuY6Go"
+              }
             ]
           },
           {
@@ -1879,7 +2128,8 @@
                 "action": "kusshin zuki & chūdan furi zuki ni renkō"
               }
             },
-            "kyohan_pages": []
+            "kyohan_pages": [],
+            "videos": []
           },
           {
             "type": "standard_moment",
@@ -1925,6 +2175,16 @@
             },
             "kyohan_pages": [
               227
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=VEbKSevXfZc",
+                "label": "katate"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=YGAG77MP_Kc",
+                "label": "morote"
+              }
             ]
           },
           {
@@ -1950,6 +2210,16 @@
             },
             "kyohan_pages": [
               258
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=JSRZxZszoj4",
+                "label": "katate"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=Rdm1qh852r0",
+                "label": "morote"
+              }
             ]
           },
           {
@@ -1993,6 +2263,11 @@
             },
             "kyohan_pages": [
               183
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=fyXgXa115z4"
+              }
             ]
           },
           {
@@ -2016,6 +2291,11 @@
             },
             "kyohan_pages": [
               183
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=__PR869NqRU"
+              }
             ]
           },
           {
@@ -2064,6 +2344,20 @@
             },
             "kyohan_pages": [
               227
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=OJ9TPNxUH9g",
+                "label": "katate"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=4ai2Ln8rLHQ",
+                "label": "ryote - mae kara"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=yhhvHl9Udzg",
+                "label": "ryote - ushiro kara"
+              }
             ]
           },
           {
@@ -2089,6 +2383,20 @@
             },
             "kyohan_pages": [
               300
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=C6enWQq8g8E",
+                "label": "katate"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=jhEmexwMyrE",
+                "label": "ryote - mae kara no nuki"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=nRahyO7QXFU",
+                "label": "ryote - ushiro kara no nuki"
+              }
             ]
           },
           {
@@ -2132,7 +2440,12 @@
                 "action": "soto oshi uke & keri komi"
               }
             },
-            "kyohan_pages": []
+            "kyohan_pages": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=eHtSAxFObQk"
+              }
+            ]
           },
           {
             "type": "hokei_moment",
@@ -2153,7 +2466,12 @@
                 "action": "uchi oshi uke & sokutō geri"
               }
             },
-            "kyohan_pages": []
+            "kyohan_pages": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=atqWWd07hAY"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -2200,7 +2518,8 @@
             },
             "kyohan_pages": [
               173
-            ]
+            ],
+            "videos": []
           },
           {
             "type": "hokei_moment",
@@ -2223,6 +2542,11 @@
             },
             "kyohan_pages": [
               190
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=C-QhxpRC9Ag"
+              }
             ]
           },
           {
@@ -2265,6 +2589,11 @@
             },
             "kyohan_pages": [
               227
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=bmoI9b30YI0"
+              }
             ]
           },
           {
@@ -2282,6 +2611,11 @@
             },
             "kyohan_pages": [
               248
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=1MmDs1WcUQU"
+              }
             ]
           },
           {
@@ -2328,6 +2662,11 @@
             "kyohan_pages": [
               246,
               286
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=D3cAnN51saA"
+              }
             ]
           },
           {
@@ -2351,7 +2690,8 @@
             },
             "kyohan_pages": [
               250
-            ]
+            ],
+            "videos": []
           },
           {
             "type": "standard_moment",
@@ -2389,6 +2729,11 @@
             },
             "kyohan_pages": [
               257
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=oVOpTjm4gVY"
+              }
             ]
           },
           {
@@ -2408,6 +2753,11 @@
             },
             "kyohan_pages": [
               258
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=8ye7yg1CPMs"
+              }
             ]
           },
           {
@@ -2464,6 +2814,11 @@
             },
             "kyohan_pages": [
               221
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=6nvnM_iOH5M"
+              }
             ]
           },
           {
@@ -2487,6 +2842,11 @@
             },
             "kyohan_pages": [
               223
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=aZxWFFrE0R0"
+              }
             ]
           },
           {
@@ -2526,6 +2886,11 @@
             },
             "kyohan_pages": [
               300
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=O_3EHoImc10"
+              }
             ]
           },
           {
@@ -2544,6 +2909,11 @@
             },
             "kyohan_pages": [
               303
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=blfE3ckNWMc"
+              }
             ]
           },
           {
@@ -2590,6 +2960,11 @@
             },
             "kyohan_pages": [
               192
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=zOwkq04WQ-4"
+              }
             ]
           },
           {
@@ -2613,6 +2988,11 @@
             },
             "kyohan_pages": [
               193
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=QHkVNwfS5Yc"
+              }
             ]
           },
           {
@@ -2656,6 +3036,11 @@
             },
             "kyohan_pages": [
               229
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=WDNzHvYCzK4"
+              }
             ]
           },
           {
@@ -2676,6 +3061,11 @@
             },
             "kyohan_pages": [
               297
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=JqebasEwNfs"
+              }
             ]
           },
           {
@@ -2717,6 +3107,11 @@
             },
             "kyohan_pages": [
               300
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=BBX43kHT6Cc"
+              }
             ]
           },
           {
@@ -2740,6 +3135,11 @@
             },
             "kyohan_pages": [
               180
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=VuWBs-b8_sI"
+              }
             ]
           },
           {
@@ -2781,6 +3181,11 @@
             },
             "kyohan_pages": [
               296
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=bDZ0_Kgj9-g"
+              }
             ]
           },
           {
@@ -2801,6 +3206,11 @@
             },
             "kyohan_pages": [
               298
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=zNZPurxgO7w"
+              }
             ]
           },
           {
@@ -2846,6 +3256,11 @@
             },
             "kyohan_pages": [
               188
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=2dnea8AEFpA"
+              }
             ]
           },
           {
@@ -2869,6 +3284,11 @@
             },
             "kyohan_pages": [
               188
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Cb9pjb0qHN0"
+              }
             ]
           },
           {
@@ -2911,6 +3331,11 @@
             },
             "kyohan_pages": [
               229
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=KuMfS0jzE7E"
+              }
             ]
           },
           {
@@ -2931,6 +3356,11 @@
             },
             "kyohan_pages": [
               302
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=3I-BCjyxd_U"
+              }
             ]
           },
           {
@@ -2972,6 +3402,11 @@
             },
             "kyohan_pages": [
               224
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=k7fomMeUYgk"
+              }
             ]
           },
           {
@@ -2993,6 +3428,11 @@
             },
             "kyohan_pages": [
               258
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=kLwwPK8XcvM"
+              }
             ]
           },
           {
@@ -3038,6 +3478,11 @@
             },
             "kyohan_pages": [
               189
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=G2vjnlguaaE"
+              }
             ]
           },
           {
@@ -3061,6 +3506,11 @@
             },
             "kyohan_pages": [
               189
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=5H-7t0-F9SU"
+              }
             ]
           },
           {
@@ -3104,6 +3554,11 @@
             },
             "kyohan_pages": [
               226
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=-k9oC6BYjUo"
+              }
             ]
           },
           {
@@ -3130,6 +3585,16 @@
             },
             "kyohan_pages": [
               242
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=w0AGa8jYrXg",
+                "label": "katate"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=Kdd1AXMV9xA",
+                "label": "morote"
+              }
             ]
           },
           {
@@ -3185,6 +3650,11 @@
             },
             "kyohan_pages": [
               180
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=vVgHCBe7nwk"
+              }
             ]
           },
           {
@@ -3208,6 +3678,11 @@
             },
             "kyohan_pages": [
               183
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=c5IxwAuoSgU"
+              }
             ]
           },
           {
@@ -3248,6 +3723,11 @@
             },
             "kyohan_pages": [
               277
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=M_8OoqJsaKQ"
+              }
             ]
           },
           {
@@ -3271,6 +3751,11 @@
             },
             "kyohan_pages": [
               223
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=y7KnLeZKes0"
+              }
             ]
           },
           {
@@ -3315,6 +3800,11 @@
             },
             "kyohan_pages": [
               200
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=hLfBndAi4bw"
+              }
             ]
           },
           {
@@ -3338,6 +3828,11 @@
             },
             "kyohan_pages": [
               200
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=gxFRWOwES48"
+              }
             ]
           },
           {
@@ -3381,6 +3876,24 @@
               253,
               254,
               289
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ze9_dTUELHc",
+                "label": "katate omote"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=C_IS08QOci4",
+                "label": "katate ura"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=YeMy2-_ofk0",
+                "label": "ryote omote"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=N3u9O3iGuW8",
+                "label": "ryote ura"
+              }
             ]
           },
           {
@@ -3403,6 +3916,16 @@
             },
             "kyohan_pages": [
               254
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=s88CB2XK2_c",
+                "label": "taoshi"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=rjiJL1fW_SI",
+                "label": "nage"
+              }
             ]
           },
           {
@@ -3444,6 +3967,11 @@
             },
             "kyohan_pages": [
               226
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=J8KQ8yUf1-I"
+              }
             ]
           },
           {
@@ -3466,6 +3994,11 @@
             },
             "kyohan_pages": [
               222
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=MOY5fmYmf5s"
+              }
             ]
           },
           {
@@ -3525,6 +4058,11 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=QBreSswnTcQ"
+              }
             ]
           },
           {
@@ -3568,6 +4106,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=M4PxhrCXTDk"
+              }
             ]
           },
           {
@@ -3615,6 +4158,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=TXNC6AHEe2g"
+              }
             ]
           },
           {
@@ -3661,6 +4209,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=3IuagnzP23k"
+              }
             ]
           },
           {
@@ -3703,6 +4256,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=usR1x8KYKHk"
+              }
             ]
           },
           {
@@ -3747,6 +4305,16 @@
             "foot_stance": [
               "hiraki gamae",
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=hwzQ6o5EqLQ",
+                "label": "katate"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=PMzNDqf3iMk",
+                "label": "ryote"
+              }
             ]
           },
           {
@@ -3794,6 +4362,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=YJHZLcbjZV8"
+              }
             ]
           },
           {
@@ -3837,6 +4410,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Va-vOzQMUuw"
+              }
             ]
           },
           {
@@ -3879,6 +4457,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Kdqp6ugO9vY"
+              }
             ]
           },
           {
@@ -3919,6 +4502,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=qTWwFln7DcE"
+              }
             ]
           },
           {
@@ -3960,6 +4548,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=RFIleA5693A"
+              }
             ]
           },
           {
@@ -4003,6 +4596,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=rcXwhyEYI0I"
+              }
             ]
           },
           {
@@ -4046,6 +4644,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=fXSzT5LJ_cQ"
+              }
             ]
           },
           {
@@ -4089,6 +4692,16 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ZcG_Ev74WCc",
+                "label": "taoshi"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=WCTlFDdvWAc",
+                "label": "nage"
+              }
             ]
           },
           {
@@ -4133,6 +4746,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=WIwLrfAHOfI"
+              }
             ]
           },
           {
@@ -4175,6 +4793,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=jNqaApjQo_8"
+              }
             ]
           },
           {
@@ -4225,7 +4848,8 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
-            ]
+            ],
+            "videos": []
           },
           {
             "type": "standard_moment",
@@ -4263,7 +4887,8 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
-            ]
+            ],
+            "videos": []
           },
           {
             "type": "standard_moment",
@@ -4303,7 +4928,16 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=jEu8tEeDCqM"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=L-O333-WPLE",
+                "label": "shikake"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4347,6 +4981,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=OcKNa2wFVs8"
+              }
             ]
           },
           {
@@ -4391,6 +5030,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=QoXEk9opnpc"
+              }
             ]
           },
           {
@@ -4426,7 +5070,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=wFiG9Iye8LM"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4462,7 +5111,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=_69jubXtZvQ"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4498,7 +5152,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=UCc8H6_75cE"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4540,6 +5199,16 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=2t3s-bb7dLw",
+                "label": "sashi komi ashi"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=bn6NBcKrjTE",
+                "label": "sashi kae ashi"
+              }
             ]
           },
           {
@@ -4580,6 +5249,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=DyNzZRiqRgg"
+              }
             ]
           },
           {
@@ -4620,7 +5294,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=1ipEwN_3SwY"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4659,7 +5338,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=LH74TUX0Skw"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4700,6 +5384,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ldIFolRR2D0"
+              }
             ]
           },
           {
@@ -4741,6 +5430,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Za05dcRQqHM"
+              }
             ]
           },
           {
@@ -4781,6 +5475,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=hALeEx_4V5I"
+              }
             ]
           },
           {
@@ -4824,6 +5523,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Ogu5FWBhlnI"
+              }
             ]
           },
           {
@@ -4865,6 +5569,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=1_E5YbhWl3g"
+              }
             ]
           },
           {
@@ -4903,7 +5612,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": true,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=GhboOTfg87E"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -4944,6 +5658,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=8Q18SwtDvfA"
+              }
             ]
           },
           {
@@ -4985,6 +5704,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=4e_EBiFmHHA"
+              }
             ]
           },
           {
@@ -5033,7 +5757,8 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": []
           },
           {
             "type": "standard_moment",
@@ -5075,6 +5800,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=whHrDJ9iJVQ"
+              }
             ]
           },
           {
@@ -5115,6 +5845,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=9mrZZHWIiQE"
+              }
             ]
           },
           {
@@ -5152,7 +5887,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=0HcgFMd89m0"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5190,7 +5930,12 @@
             "kyohan_pages": [],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=5_s6o59my5U"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5241,7 +5986,17 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=UQp3P7AkyqI",
+                "label": "osae yubi gatame"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=ysbHHvSWgpM",
+                "label": "gyakute gatame"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5286,7 +6041,12 @@
             "kyohan_pages": [],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ez5DZMK2mM0"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5335,6 +6095,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=gdLkw5b2pJc"
+              }
             ]
           },
           {
@@ -5383,6 +6148,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=lwNyHStOni4"
+              }
             ]
           },
           {
@@ -5428,6 +6198,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=_J0s9BH3ZHQ"
+              }
             ]
           },
           {
@@ -5478,6 +6253,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=q5H8kuNSVY8"
+              }
             ]
           },
           {
@@ -5525,6 +6305,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=BbY6jQpUvVA"
+              }
             ]
           },
           {
@@ -5563,6 +6348,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=_SWfs0TH9dM"
+              }
             ]
           },
           {
@@ -5611,6 +6401,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=cs5KJbdjeeY"
+              }
             ]
           },
           {
@@ -5657,7 +6452,17 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=FW4DQ2G35MI",
+                "label": "ura"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=rjemw2U1vhw",
+                "label": "omote"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5701,7 +6506,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ovUE3XMJzDU"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5745,7 +6555,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=LRVu7dqPyyg"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5794,6 +6609,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=jGZ1oHFriVU"
+              }
             ]
           },
           {
@@ -5841,7 +6661,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Mv84d4lIZks"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -5894,6 +6719,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=fI6tnHLNJU0"
+              }
             ]
           },
           {
@@ -5943,6 +6773,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=hvX2D11e80Y"
+              }
             ]
           },
           {
@@ -5993,6 +6828,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ysf_KJtWsDc"
+              }
             ]
           },
           {
@@ -6043,6 +6883,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=PYjPmkr8Hrk"
+              }
             ]
           },
           {
@@ -6088,6 +6933,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=nNy4oWaZ-Ro"
+              }
             ]
           },
           {
@@ -6134,7 +6984,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=7pRdUuASRdc"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6177,6 +7032,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ymfY2rTp4es"
+              }
             ]
           },
           {
@@ -6215,6 +7075,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=LawyIAmVl8E"
+              }
             ]
           },
           {
@@ -6260,6 +7125,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=81TCKBxEoJM"
+              }
             ]
           },
           {
@@ -6309,6 +7179,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=GNt9hfEzS1w"
+              }
             ]
           },
           {
@@ -6358,6 +7233,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=V5h0b1bjnJw"
+              }
             ]
           },
           {
@@ -6408,6 +7288,11 @@
             "ren_hanko": false,
             "foot_stance": [
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=YaMQ2U-pA1E"
+              }
             ]
           },
           {
@@ -6452,7 +7337,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": true,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=Bseyj4zCT2Y"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6497,7 +7387,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": true,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=-BAK7PGu5gs"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6543,6 +7438,11 @@
             "ren_hanko": true,
             "foot_stance": [
               "tai gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=uXTOKek7bbo"
+              }
             ]
           },
           {
@@ -6566,6 +7466,16 @@
             "foot_stance": [
               "tai gamae",
               "hiraki gamae"
+            ],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=ZADrciQqiBo",
+                "label": "soto"
+              },
+              {
+                "url": "https://www.youtube.com/watch?v=Kq_6ISCddwI",
+                "label": "uchi"
+              }
             ]
           },
           {
@@ -6615,7 +7525,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=-93sP_wH0CI"
+              }
+            ]
           },
           {
             "hokei_name": "okuri yubi gaeshi",
@@ -6635,7 +7550,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=EVm1cvHMQ0w"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6675,7 +7595,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=jHoJlMPlSo4"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6714,7 +7639,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=rzAaW34IN1I"
+              }
+            ]
           },
           {
             "hokei_name": "nigiri gaeshi",
@@ -6729,7 +7659,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=-z0OdmAF2vU"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6770,7 +7705,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=IlOYp1Om6bc"
+              }
+            ]
           },
           {
             "type": "standard_moment",
@@ -6812,7 +7752,12 @@
             ],
             "type": "hokei_moment",
             "ren_hanko": false,
-            "foot_stance": []
+            "foot_stance": [],
+            "videos": [
+              {
+                "url": "https://www.youtube.com/watch?v=bm8fHYSPosI"
+              }
+            ]
           },
           {
             "type": "standard_moment",

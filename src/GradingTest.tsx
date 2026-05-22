@@ -4,10 +4,17 @@ import { XLg } from "react-bootstrap-icons";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext, type Translator } from "./i18n";
-import { humanGradeName, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment } from "./data";
+import { humanGradeName, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
+import VideoLink from "./components/VideoLink";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import gradingExamInformation from "./assets/grading-exam-information.json";
+import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
+import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
+
+const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
+    (tanenKihonHokeiData as TanenKihonHokei[]).map(t => [t.hokei_name.trim(), t])
+);
 import "./GradingTest.css";
 
 interface GradingTestProps {
@@ -46,6 +53,7 @@ interface Item {
     annotations?: Annotation[];
     techniqueGroups?: TechniqueGroup[];
     items?: Item[];
+    videos?: Video[];
 }
 
 interface Section {
@@ -246,6 +254,13 @@ const ItemDetail = ({ item, translator, hokeiMap, notesData, ranksData }: { item
                     <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
                 ))}
             </div>
+            {item.videos && item.videos.length > 0 && (
+                <div className="d-flex flex-column gap-2 mt-2">
+                    {item.videos.map(video => (
+                        <VideoLink key={video.url} video={video} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
@@ -265,7 +280,18 @@ const SubItemCard = ({ item, translator, showEmojiNumbers, showHokeiCards, hokei
     const hokeis = showHokeiCards && hokeiMap && item.term?.romaji
         ? extractHokeis(item.term.romaji, hokeiMap)
         : [];
-    const hasContent = hasExpandableContent(item) || hokeis.length > 0;
+    const romaji = item.term?.romaji?.trim() ?? "";
+    const tanenVideos: Video[] = romaji.startsWith("tan'en kihon")
+        ? tanenMatchesToVideos(
+            (item.techniqueGroups ?? [])
+                .flatMap(g => g.techniques)
+                .flatMap(t => findTanenMatches(t.romaji, tanenKihonHokeiMap,
+                    romaji.includes("sōtai") ? "sōtai" : "tan'en"))
+          )
+        : tanenMatchesToVideos(
+            tanenKihonHokeiMap.has(romaji) ? [tanenKihonHokeiMap.get(romaji)!] : []
+          );
+    const hasContent = hasExpandableContent(item) || hokeis.length > 0 || tanenVideos.length > 0;
     const numEmoji = showEmojiNumbers && item.numbering?.style === "paren" && item.numbering.value != null
         ? (emojiNumbers[item.numbering.value] ?? `(${item.numbering.value})`)
         : undefined;
@@ -319,6 +345,13 @@ const SubItemCard = ({ item, translator, showEmojiNumbers, showHokeiCards, hokei
                     </ul>
                 </div>
             ))}
+            {tanenVideos.length > 0 && (
+                <div className="mt-3 d-flex flex-column gap-2">
+                    {tanenVideos.map(v => (
+                        <VideoLink key={v.url} video={v} />
+                    ))}
+                </div>
+            )}
             {item.items?.map((subItem, i) => {
                 const subDisplay = itemDisplay(subItem, translator);
                 const subPrefix = formatNumbering(subItem.numbering);

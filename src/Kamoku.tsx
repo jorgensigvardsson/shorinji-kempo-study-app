@@ -1,11 +1,18 @@
 import { Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
+import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, type TanenKihonHokei, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
 import CollapsibleCard from "./components/CollapsibleCard";
 import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
+import VideoLink from "./components/VideoLink";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
+import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
+import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
+
+const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
+    (tanenKihonHokeiData as TanenKihonHokei[]).map(t => [t.hokei_name.trim(), t])
+);
 import { getAppDataStore } from "./persistence/store";
 import type { CurrentWeekAnchor } from "./persistence/schema";
 import { gradeLabel } from "./strings";
@@ -138,6 +145,10 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
         }
     }
 
+    const tanenVideos = tanenMatchesToVideos(
+        stringEntries.flatMap(entry => findTanenMatches(entry, tanenKihonHokeiMap))
+    );
+
     const hokeiCards = hokeiEntries.flatMap((entry) => {
         const moment = allGradePlans
             .flatMap(p => p.weeks)
@@ -150,11 +161,12 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
         return [<HokeiCard key={`hokei-${entry.hokei_ref}`} hokei={extended} className="mt-2" notesData={notesData} ranksData={ranksData} />];
     });
 
-    const hasContent = bullets.length > 0 || hokeiCards.length > 0;
+    const hasContent = bullets.length > 0 || hokeiCards.length > 0 || tanenVideos.length > 0;
 
     return (
         <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-2 app-grid-card hokei-card" showCollapse={hasContent}>
             {bullets.length > 0 && <ul>{bullets}</ul>}
+            {tanenVideos.map(v => <VideoLink key={v.url} video={v} className="mt-2" />)}
             {hokeiCards}
         </CollapsibleCard>
     );
