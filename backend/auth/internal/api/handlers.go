@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,7 +28,8 @@ type pendingState struct {
 }
 
 type Handler struct {
-	providers   map[string]provider.Provider
+	providers   map[string]provider.Provider // provider name → provider
+	domains     map[string]string            // email domain → provider name
 	users       store.UserStore
 	tokens      *token.Manager
 	frontendURL string
@@ -37,12 +39,14 @@ type Handler struct {
 
 func NewHandler(
 	providers map[string]provider.Provider,
+	domains map[string]string,
 	users store.UserStore,
 	tokens *token.Manager,
 	frontendURL string,
 ) *Handler {
 	h := &Handler{
 		providers:   providers,
+		domains:     domains,
 		users:       users,
 		tokens:      tokens,
 		frontendURL: frontendURL,
@@ -77,11 +81,31 @@ func (h *Handler) jwks(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// login resolves the user's email domain to an OIDC provider and initiates the flow.
+// Query param: email=user@example.com
 func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
-	providerName := r.URL.Query().Get("provider")
+	email := strings.TrimSpace(r.URL.Query().Get("email"))
+	if email == "" {
+		http.Error(w, "email query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	parts := strings.SplitN(email, "@", 2)
+	if len(parts) != 2 || parts[1] == "" {
+		http.Error(w, "invalid email address", http.StatusBadRequest)
+		return
+	}
+	domain := strings.ToLower(parts[1])
+
+	providerName, ok := h.domains[domain]
+	if !ok {
+		http.Error(w, fmt.Sprintf("no identity provider configured for domain %q", domain), http.StatusBadRequest)
+		return
+	}
 	p, ok := h.providers[providerName]
 	if !ok {
-		http.Error(w, fmt.Sprintf("unknown provider %q", providerName), http.StatusBadRequest)
+		log.Printf("domain %q maps to unconfigured provider %q", domain, providerName)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -129,36 +153,49 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := ps.providerName + ":" + info.Sub
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	user, err := h.users.Find(userID)
+	user, err := h.users.FindByLinkedIdentity(ps.providerName, info.Sub)
 	if err != nil {
-		log.Printf("user lookup %q: %v", userID, err)
+		log.Printf("user lookup (%s, %s): %v", ps.providerName, info.Sub, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	if user == nil {
-		log.Printf("enrolling new user %q (%s)", userID, info.Email)
+		uuid, err := newUUID()
+		if err != nil {
+			log.Printf("uuid generation: %v", err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		log.Printf("enrolling new user %s via %s (%s)", uuid, ps.providerName, info.Email)
 		user = &store.User{
-			ID:        userID,
-			Provider:  ps.providerName,
-			Sub:       info.Sub,
-			Email:     info.Email,
+			ID:          uuid,
+			Email:       info.Email,
 			DisplayName: info.DisplayName,
+			LinkedIdentities: map[string]store.LinkedIdentity{
+				ps.providerName: {Sub: info.Sub, Email: info.Email},
+			},
 			CreatedAt: now,
+		}
+	} else {
+		// Keep provider email in sync in case it changed at the provider.
+		user.LinkedIdentities[ps.providerName] = store.LinkedIdentity{
+			Sub:   info.Sub,
+			Email: info.Email,
 		}
 	}
 	user.LastLoginAt = now
+
 	if err := h.users.Save(user); err != nil {
-		log.Printf("user save %q: %v", userID, err)
+		log.Printf("user save %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(userID, info.Email)
+	accessToken, err := h.tokens.Issue(user.ID, user.Email)
 	if err != nil {
-		log.Printf("token issue for %q: %v", userID, err)
+		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -181,7 +218,7 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	user, err := h.users.Find(claims.Subject)
+	user, err := h.users.FindByID(claims.Subject)
 	if err != nil || user == nil {
 		http.Error(w, "user not found", http.StatusNotFound)
 		return
@@ -209,8 +246,7 @@ func (h *Handler) claimsFromRequest(r *http.Request) (*token.Claims, error) {
 	return h.tokens.Verify(cookie.Value)
 }
 
-// sweepExpiredStates periodically removes stale pending OIDC states to prevent
-// unbounded memory growth if login flows are initiated but never completed.
+// sweepExpiredStates periodically removes stale pending OIDC states.
 func (h *Handler) sweepExpiredStates() {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
@@ -230,4 +266,15 @@ func randomString(n int) string {
 	b := make([]byte, n)
 	rand.Read(b)
 	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+// newUUID generates a random UUID v4.
+func newUUID() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	b[6] = (b[6] & 0x0f) | 0x40 // version 4
+	b[8] = (b[8] & 0x3f) | 0x80 // variant RFC 4122
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:]), nil
 }

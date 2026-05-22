@@ -22,16 +22,22 @@ identity is opt-in.
 
 ### Journey B: OIDC Identity (new)
 1. User opens the app → sees choice: "Continue anonymously" or "Sign in"
-2. User picks "Sign in" → selects a provider (Google, Microsoft, ...)
-3. Browser redirects to `GET /auth/login?provider=google` on the auth service
-4. Auth service initiates OIDC flow with the provider
-5. Provider authenticates the user, redirects back to auth service callback
-6. Auth service validates ID token, looks up or enrolls the user, issues a signed JWT
-7. Auth service redirects to the frontend; JWT is delivered as an httpOnly cookie
-8. Frontend detects successful login, switches sync provider to `"backend"`
-9. App syncs data via the persistence service (JWT cookie sent automatically)
-10. Subsequent visits: cookie present → already authenticated, no re-login
-11. JWT expiry: silent refresh via refresh token, or prompt to re-login
+2. User picks "Sign in" → is prompted to enter their email address
+3. Frontend sends the email to `GET /auth/login?email=foo@company.com` on the auth service
+4. Auth service extracts the domain (`company.com`), looks it up in the provider config,
+   and initiates the OIDC flow for that provider (state + nonce generated server-side)
+5. Auth service redirects the browser to the OIDC provider
+6. Provider authenticates the user, redirects back to `GET /auth/callback`
+7. Auth service validates state + nonce, exchanges code for tokens, validates the ID token
+8. Auth service looks up the user by `(provider, sub)` in `linkedIdentities`:
+   - **Existing user:** update `lastLoginAt`, optionally sync latest email from provider
+   - **New user:** generate a UUID, create a user record with this provider linked
+9. Auth service issues a signed JWT (`sub` = our UUID), delivers it as an httpOnly cookie,
+   and redirects to the frontend
+10. Frontend detects successful login, switches sync provider to `"backend"`
+11. App syncs data via the persistence service (JWT cookie sent automatically)
+12. Subsequent visits: cookie present → already authenticated, no re-login
+13. JWT expiry: silent refresh via refresh token, or prompt to re-login
 
 ---
 
@@ -73,8 +79,12 @@ Browser          Frontend App      Auth Service      OIDC Provider     Database
    |          (no cookie - anonymous or prompt)            |               |
    | Click "Sign in"  |                 |                  |               |
    |----------------->|                 |                  |               |
-   | Redirect to GET /auth/login?provider=google           |               |
+   | User types email address           |                  |               |
+   |<-----------------|                 |                  |               |
+   | GET /auth/login?email=foo@co.com   |                  |               |
    |-------------------------------------------------->    |               |
+   |                               Extract domain          |               |
+   |                               Look up provider cfg    |               |
    |                               Build OIDC URL          |               |
    |                               + state + nonce         |               |
    | Redirect to provider                                  |               |
@@ -84,11 +94,14 @@ Browser          Frontend App      Auth Service      OIDC Provider     Database
    | Redirect to /auth/callback?code=...&state=...                        |
    |<----------------------------------------------------------------|     |
    |-------------------------------------------------->|                   |
-   |                               Validate state                          |
+   |                               Validate state+nonce                    |
    |                               Exchange code for tokens                |
    |                               Validate ID token                       |
-   |                               Look up / enroll user ----------------->|
-   |                               Issue JWT                               |
+   |                               FindByLinkedIdentity(provider, sub)     |
+   |                               ---------------------------------->|    |
+   |                               <----------------------------------|    |
+   |                               Enroll if new (gen UUID) ---------->|   |
+   |                               Issue JWT (sub=UUID)                    |
    | Redirect to frontend, set httpOnly cookies         |               |
    |<--------------------------------------------------|                   |
    | App resumes; sync provider = "backend"            |               |
@@ -101,22 +114,54 @@ Browser          Frontend App      Auth Service      OIDC Provider     Database
 ### User Record (Cosmos DB — `users` container)
 ```json
 {
-  "id":          "google:1234567890",
-  "provider":    "google",
-  "sub":         "1234567890",
-  "email":       "user@example.com",
+  "id":          "550e8400-e29b-41d4-a716-446655440000",
+  "email":       "jane@example.com",
   "displayName": "Jane Doe",
+  "linkedIdentities": {
+    "google":    { "sub": "1234567890", "email": "jane@gmail.com" },
+    "microsoft": { "sub": "abcdef1234", "email": "jane@company.com" }
+  },
   "createdAt":   "2026-05-22T18:00:00Z",
   "lastLoginAt": "2026-05-22T18:00:00Z"
 }
 ```
-`id` is `"{provider}:{sub}"` — stable across logins, unique per provider.
+- `id` is a server-generated UUID — stable regardless of which provider the user logs in with
+- `email` is the user's preferred contact address, editable independently of any provider email
+- `linkedIdentities` maps provider name → `{sub, email}` for each linked provider;
+  a user may link additional providers after first login
+- Lookup by provider: scan `linkedIdentities[provider].sub`; only done at login time,
+  then UUID is used for everything else
+
+### Provider Configuration (server-side, not stored per-user)
+```json
+{
+  "providers": [
+    {
+      "name":     "google",
+      "issuer":   "https://accounts.google.com",
+      "clientId": "...",
+      "domains":  ["gmail.com", "googlemail.com"]
+    },
+    {
+      "name":     "microsoft",
+      "issuer":   "https://login.microsoftonline.com/common/v2.0",
+      "clientId": "...",
+      "domains":  ["outlook.com", "hotmail.com", "live.com", "company.com"]
+    }
+  ]
+}
+```
+- `domains` is the list of email domains that trigger this provider
+- Multiple domains can map to the same provider (e.g. all Microsoft consumer domains)
+- Enterprise tenants add their corporate domain pointing to the Microsoft (or other) provider
+- Provider discovery is driven entirely by the email domain the user types; no provider
+  picker is shown
 
 ### App Data Document (Cosmos DB — `documents` container)
 ```json
 {
-  "id":        "google:1234567890",
-  "userId":    "google:1234567890",
+  "id":        "550e8400-e29b-41d4-a716-446655440000",
+  "userId":    "550e8400-e29b-41d4-a716-446655440000",
   "version":   1,
   "updatedAt": "2026-05-22T18:00:00Z",
   "deviceId":  "...",
@@ -129,13 +174,15 @@ One document per user. The `data` field is opaque to the persistence service.
 ```json
 {
   "iss": "https://auth.shorinji.example.com",
-  "sub": "google:1234567890",
+  "sub": "550e8400-e29b-41d4-a716-446655440000",
   "iat": 1716400000,
-  "exp": 1716403600,
-  "email": "user@example.com"
+  "exp": 1716432800,
+  "email": "jane@example.com"
 }
 ```
-- Access token lifetime: ~1 hour
+- `sub` is our internal UUID, not the provider's `sub` — stable across provider changes
+- `email` is the user's preferred email from their user record
+- Access token lifetime: 8 hours (covers a full training day)
 - Refresh token: opaque, stored server-side, rotated on use
 
 ---
@@ -148,11 +195,13 @@ One document per user. The `data` field is opaque to the persistence service.
 |--------|------|-------------|
 | GET | `/healthz` | Health check |
 | GET | `/.well-known/jwks.json` | Public keys for offline JWT verification |
-| GET | `/auth/login?provider={p}` | Initiate OIDC, redirect to provider |
-| GET | `/auth/callback` | OIDC callback: validate, enroll, issue JWT, redirect to frontend |
+| GET | `/auth/login?email={e}` | Resolve domain → provider, initiate OIDC, redirect |
+| GET | `/auth/callback` | OIDC callback: validate, enroll or look up, issue JWT, redirect to frontend |
 | POST | `/auth/refresh` | Exchange refresh token for new access token |
 | POST | `/auth/logout` | Revoke refresh token, clear cookies |
-| GET | `/auth/me` | Return authenticated user info |
+| GET | `/auth/me` | Return authenticated user info (UUID, email, linkedIdentities) |
+| POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
+| DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; last provider cannot be unlinked) |
 
 ### Persistence Service (`backend/persistence`)
 
@@ -175,8 +224,9 @@ are almost certainly subject to GDPR for EU residents. The following requirement
 ### Data we hold per authenticated user
 | Data | Where | Lawful basis |
 |------|-------|-------------|
-| Provider identity (`sub`, `provider`) | `users` container | Contract (account function) |
-| Email address | `users` container | Contract (account function) |
+| Internal UUID | `users` container | Contract (account function) |
+| Linked identities (`provider`, `sub`, provider email) | `users` container | Contract (account function) |
+| Preferred email address | `users` container | Contract (account function) |
 | Display name | `users` container | Contract (account function) |
 | Login timestamps | `users` container | Legitimate interest (security) |
 | App data (grade, notes, ranks, flashcards, etc.) | `documents` container | Contract (core service) |
@@ -235,16 +285,29 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
   `frontend/src/sync/manager.ts`
   - `downloadDocument()` → `GET /api/v1/document` (cookie sent automatically)
   - `uploadDocument(doc)` → `PUT /api/v1/document`
-  - `isConnected()` → check `/auth/me` or presence of a session marker
-  - `beginAuthorization()` → redirect to `/auth/login?provider=...`
+  - `isConnected()` → check `GET /auth/me`; treat 200 as connected
+  - `beginAuthorization(email)` → redirect to `/auth/login?email=<email>`
   - `completeAuthorizationIfPresent()` → detect post-login redirect from auth service
+  - `disconnect()` → call `POST /auth/logout`
 - The existing debounce / three-way merge / conflict-resolution logic is reused for free
+- **No manual selection in Settings**: authenticated users are always on `"backend"` sync;
+  the sync provider switches automatically on login and reverts on logout.
+  Settings shows the current sync state read-only for authenticated users.
 
 ### Identity choice UI
 - Shown on first visit (or accessible from Settings)
 - "Continue anonymously" → existing behaviour, unchanged
-- "Sign in with Google / Microsoft" → triggers `BackendSyncClient.beginAuthorization()`
+- "Sign in" → shows an email input field; no provider list is presented to the user
+  - User types their email address (e.g. `jane@company.com`)
+  - Frontend calls `BackendSyncClient.beginAuthorization(email)` which redirects to
+    `GET /auth/login?email=jane@company.com`
+  - If the domain is not recognised, the auth service returns an error; frontend shows
+    "Sign-in is not available for this email domain"
 - After login: sync provider auto-switches to `"backend"`
+
+### Account linking (Settings, authenticated users)
+- "Link another account" → shows the same email input; redirects to `/auth/link?email=...`
+- "Unlink {provider}" → calls `DELETE /auth/link/{provider}`; disabled when only one provider is linked
 
 ### Data migration helper *(nice-to-have)*
 - After first OIDC login, if OneDrive or Google Drive data exists, offer "import from cloud"
@@ -268,9 +331,12 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 ### Phase 1 — Auth Service skeleton
 - `backend/auth` Go service (mirrors persistence structure)
 - JWKS endpoint so persistence can verify tokens offline
-- One provider: Google
-- User lookup / enrollment with a file-based stub (same pattern as persistence)
-- JWT issuance, httpOnly cookie delivery
+- Provider config with `domains[]` array; domain-to-provider lookup at login
+- One provider configured: Google (`gmail.com`, `googlemail.com`)
+- Email-based login: `GET /auth/login?email=...` extracts domain → selects provider
+- User model: UUID primary key, `linkedIdentities` map, preferred email
+- `FindByLinkedIdentity(provider, sub)` scan on enrollment / login
+- JWT issuance with `sub` = internal UUID; httpOnly cookie delivery
 
 ### Phase 2 — Persistence: JWT validation
 - Fetch and cache JWKS from auth service on startup
@@ -280,7 +346,8 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 ### Phase 3 — Frontend: BackendSyncClient
 - Implement `BackendSyncClient`
 - Add `"backend"` to `SyncProvider`
-- Wire into the Settings sync-provider picker
+- Sync provider switches to `"backend"` automatically on successful OIDC login;
+  reverts to previous provider on logout — no manual selection ever shown to the user
 
 ### Phase 4 — Identity choice UI
 - First-visit screen: anonymous vs sign in
@@ -316,4 +383,4 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 - Rate limiting / abuse protection on auth endpoints
 
 ---
-*Last updated: 2026-05-22 — added GDPR contact info requirement, authenticated feedback API (POST /api/v1/feedback replaces email for signed-in users)*
+*Last updated: 2026-05-22 — reworked identity model to UUID primary key with linkedIdentities map; login is now email-based (domain → provider discovery); provider config supports multiple domains per provider; JWT sub is our UUID*

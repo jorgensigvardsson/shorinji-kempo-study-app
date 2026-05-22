@@ -10,16 +10,17 @@ import (
 
 type Handler struct {
 	store store.Store
+	jwks  KeySource
 }
 
-func NewHandler(s store.Store) *Handler {
-	return &Handler{store: s}
+func NewHandler(s store.Store, ks KeySource) *Handler {
+	return &Handler{store: s, jwks: ks}
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /healthz", h.healthz)
-	mux.HandleFunc("GET /api/v1/document", h.getDocument)
-	mux.HandleFunc("PUT /api/v1/document", h.putDocument)
+	mux.Handle("GET /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.getDocument)))
+	mux.Handle("PUT /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.putDocument)))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {
@@ -28,9 +29,14 @@ func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
-	doc, err := h.store.Load()
+	userID, ok := userIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	doc, err := h.store.Load(userID)
 	if err != nil {
-		log.Printf("store.Load: %v", err)
+		log.Printf("store.Load(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -43,13 +49,18 @@ func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 	var doc store.Document
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
-	if err := h.store.Save(&doc); err != nil {
-		log.Printf("store.Save: %v", err)
+	if err := h.store.Save(userID, &doc); err != nil {
+		log.Printf("store.Save(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

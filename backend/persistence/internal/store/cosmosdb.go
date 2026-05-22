@@ -21,10 +21,10 @@ func NewCosmosDBStore(endpoint, key, database, container string) *CosmosDBStore 
 	}
 }
 
-func (s *CosmosDBStore) Load() (*Document, error) {
+func (s *CosmosDBStore) Load(userID string) (*Document, error) {
 	return nil, errors.New("CosmosDB storage backend not yet implemented")
 }
 
-func (s *CosmosDBStore) Save(doc *Document) error {
+func (s *CosmosDBStore) Save(userID string, doc *Document) error {
 	return errors.New("CosmosDB storage backend not yet implemented")
 }

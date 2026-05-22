@@ -3,14 +3,14 @@ package store
 import (
 	"encoding/json"
 	"errors"
-	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-// FileUserStore persists users as individual JSON files under a base directory.
-// Each user is stored at <baseDir>/<url-escaped-id>.json.
-// This is intentionally simple; a database replaces it once Cosmos DB is wired in.
+// FileUserStore persists users as individual JSON files named by UUID.
+// FindByLinkedIdentity performs a linear scan — acceptable for small user counts;
+// a database index replaces this once Cosmos DB is wired in.
 type FileUserStore struct {
 	baseDir string
 }
@@ -20,10 +20,10 @@ func NewFileUserStore(baseDir string) *FileUserStore {
 }
 
 func (s *FileUserStore) path(id string) string {
-	return filepath.Join(s.baseDir, url.PathEscape(id)+".json")
+	return filepath.Join(s.baseDir, id+".json")
 }
 
-func (s *FileUserStore) Find(id string) (*User, error) {
+func (s *FileUserStore) FindByID(id string) (*User, error) {
 	data, err := os.ReadFile(s.path(id))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
@@ -36,6 +36,33 @@ func (s *FileUserStore) Find(id string) (*User, error) {
 		return nil, err
 	}
 	return &u, nil
+}
+
+func (s *FileUserStore) FindByLinkedIdentity(providerName, sub string) (*User, error) {
+	entries, err := os.ReadDir(s.baseDir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(s.baseDir, e.Name()))
+		if err != nil {
+			continue
+		}
+		var u User
+		if err := json.Unmarshal(data, &u); err != nil {
+			continue
+		}
+		if ident, ok := u.LinkedIdentities[providerName]; ok && ident.Sub == sub {
+			return &u, nil
+		}
+	}
+	return nil, nil
 }
 
 func (s *FileUserStore) Save(user *User) error {
