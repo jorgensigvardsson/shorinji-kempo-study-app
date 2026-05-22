@@ -161,6 +161,59 @@ One document per user. The `data` field is opaque to the persistence service.
 | GET | `/healthz` | Health check |
 | GET | `/api/v1/document` | Fetch user's document (JWT required) |
 | PUT | `/api/v1/document` | Store user's document (JWT required) |
+| GET | `/api/v1/account/export` | Export all user data as JSON (JWT required) |
+| DELETE | `/api/v1/account` | Delete account: user record, app data, refresh tokens (JWT required) |
+
+---
+
+## GDPR & Legal
+
+The moment we store personal data server-side (email, display name, provider identity) we
+are almost certainly subject to GDPR for EU residents. The following requirements apply.
+
+### Data we hold per authenticated user
+| Data | Where | Lawful basis |
+|------|-------|-------------|
+| Provider identity (`sub`, `provider`) | `users` container | Contract (account function) |
+| Email address | `users` container | Contract (account function) |
+| Display name | `users` container | Contract (account function) |
+| Login timestamps | `users` container | Legitimate interest (security) |
+| App data (grade, notes, ranks, flashcards, etc.) | `documents` container | Contract (core service) |
+| Refresh tokens | server-side store | Contract (session management) |
+
+We do **not** collect passwords, payment data, location, or behavioural tracking.
+
+### User rights we must honour
+
+**Right to erasure (Art. 17)** — "Delete my account"
+- Deletes the user record, all app data, and all active refresh tokens
+- Irreversible; a confirmation step is required in the UI
+- Must complete within 30 days (aim for immediate)
+
+**Right to data portability (Art. 20)** — "Export my data"
+- Returns everything we hold: user record + full app data document, as a single JSON file
+- Extends the existing anonymous export (same format, adds the user record wrapper)
+
+**Right of access (Art. 15)** — covered by `/auth/me` (user record) + data export
+
+**Consent & transparency**
+- Users must explicitly accept the Terms of Service on first OIDC login (checkbox, not pre-ticked)
+- The Privacy Policy must clearly state what is collected, why, retention period, and how to exercise rights
+
+### Legal page updates required
+
+**Privacy Policy** (`frontend/src/PrivacyPolicy.tsx`)
+- Add section for authenticated users: what data is stored, why, and for how long
+- List user rights and how to exercise them (account deletion, export)
+- Identify the data controller
+
+**Terms of Service** (`frontend/src/TermsOfServices.tsx`)
+- Add section covering account creation, acceptable use, and termination
+- Reference the data handling described in the Privacy Policy
+
+**Send Feedback** (wherever implemented in the frontend)
+- Authenticated users: optionally attach their user ID for follow-up (opt-in, not automatic)
+- Must work anonymously too — do not auto-include personal data
 
 ---
 
@@ -186,6 +239,17 @@ One document per user. The `data` field is opaque to the persistence service.
 ### Data migration helper *(nice-to-have)*
 - After first OIDC login, if OneDrive or Google Drive data exists, offer "import from cloud"
 - Uses the existing JSON export/import path + three-way merge
+
+### GDPR controls in Settings (authenticated users only)
+- **Export my data** — calls `GET /api/v1/account/export`, downloads JSON file
+- **Delete my account** — calls `DELETE /api/v1/account` after a confirmation dialog;
+  logs user out and returns to anonymous mode
+- Both controls visible only when signed in; hidden for anonymous users
+
+### Legal page updates
+- **Privacy Policy** — new authenticated-user section (data collected, retention, rights, controller)
+- **Terms of Service** — new account/usage terms section, reference to Privacy Policy
+- **Send Feedback** — opt-in checkbox to attach user ID; never included automatically
 
 ---
 
@@ -217,7 +281,15 @@ One document per user. The `data` field is opaque to the persistence service.
 - Microsoft OIDC (client ID already exists for OneDrive auth)
 - Data migration helper (import from OneDrive / Google Drive)
 
-### Phase 6 — Production hardening
+### Phase 6 — GDPR compliance
+- `GET /api/v1/account/export` — bundle user record + app document into downloadable JSON
+- `DELETE /api/v1/account` — cascade delete: app document → refresh tokens → user record
+- Settings UI: "Export my data" and "Delete my account" controls (authenticated only)
+- Privacy Policy and Terms of Service updated for authenticated users
+- Send Feedback opt-in for user ID attachment
+- ToS acceptance recorded on first login
+
+### Phase 7 — Production hardening
 - Replace file stores with Cosmos DB in both services
 - Refresh token rotation and revocation
 - Config-driven provider list for future additions
@@ -232,4 +304,4 @@ One document per user. The `data` field is opaque to the persistence service.
 - Rate limiting / abuse protection on auth endpoints
 
 ---
-*Last updated: 2026-05-22*
+*Last updated: 2026-05-22 — added GDPR & Legal section, account export/deletion API, legal page update requirements, Phase 6*
