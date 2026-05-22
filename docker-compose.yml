@@ -1,7 +1,7 @@
 services:
 
   frontend:
-    image: node:20-alpine
+    image: node:22-alpine
     working_dir: /app
     # npm install runs on every start so the Linux-built node_modules are current.
     # node_modules is shadowed by a named volume so the Windows copy is never used.
