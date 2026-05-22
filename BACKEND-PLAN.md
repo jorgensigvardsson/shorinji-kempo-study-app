@@ -163,6 +163,7 @@ One document per user. The `data` field is opaque to the persistence service.
 | PUT | `/api/v1/document` | Store user's document (JWT required) |
 | GET | `/api/v1/account/export` | Export all user data as JSON (JWT required) |
 | DELETE | `/api/v1/account` | Delete account: user record, app data, refresh tokens (JWT required) |
+| POST | `/api/v1/feedback` | Submit feedback with user identity attached (JWT required) |
 
 ---
 
@@ -211,9 +212,18 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 - Add section covering account creation, acceptable use, and termination
 - Reference the data handling described in the Privacy Policy
 
-**Send Feedback** (wherever implemented in the frontend)
-- Authenticated users: optionally attach their user ID for follow-up (opt-in, not automatic)
-- Must work anonymously too — do not auto-include personal data
+**Send Feedback**
+- Anonymous users: existing email-based flow, unchanged
+- Authenticated users: POST to backend (`POST /api/v1/feedback`); no email address exposed
+  in the frontend bundle; backend forwards or stores the message server-side
+- User ID attached automatically for authenticated feedback (no opt-in needed — the user
+  chose to be identified by logging in); message content is still voluntary
+
+**Data controller contact (Art. 13 requirement)**
+- The Privacy Policy must identify the data controller by name and provide a contact address
+- This contact address must be reachable for data subject requests (access, erasure, portability)
+- The feedback/contact email already used for the app is the natural choice
+- Must be a real, monitored address — not a no-reply
 
 ---
 
@@ -286,8 +296,10 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 - `DELETE /api/v1/account` — cascade delete: app document → refresh tokens → user record
 - Settings UI: "Export my data" and "Delete my account" controls (authenticated only)
 - Privacy Policy and Terms of Service updated for authenticated users
-- Send Feedback opt-in for user ID attachment
+- `POST /api/v1/feedback` — receive authenticated feedback, forward/store server-side
+- Send Feedback page: authenticated path posts to backend; anonymous path sends email as before
 - ToS acceptance recorded on first login
+- Privacy Policy updated with data controller name and contact address
 
 ### Phase 7 — Production hardening
 - Replace file stores with Cosmos DB in both services
@@ -304,4 +316,4 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 - Rate limiting / abuse protection on auth endpoints
 
 ---
-*Last updated: 2026-05-22 — added GDPR & Legal section, account export/deletion API, legal page update requirements, Phase 6*
+*Last updated: 2026-05-22 — added GDPR contact info requirement, authenticated feedback API (POST /api/v1/feedback replaces email for signed-in users)*
