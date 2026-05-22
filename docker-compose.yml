@@ -17,10 +17,11 @@ services:
   auth:
     image: golang:latest
     working_dir: /app
-    command: go run .
+    # Install air once into the cached go_root volume, then run it.
+    command: sh -c "command -v air || go install github.com/air-verse/air@latest; air"
     volumes:
       - ./backend/auth:/app
-      - go_modules:/root/go/pkg/mod
+      - go_root:/root/go             # covers pkg/mod AND bin — air persisted here
       - go_build:/root/.cache/go-build
       - auth_data:/app/data
     ports:
@@ -36,10 +37,10 @@ services:
   persistence:
     image: golang:latest
     working_dir: /app
-    command: go run .
+    command: sh -c "command -v air || go install github.com/air-verse/air@latest; air"
     volumes:
       - ./backend/persistence:/app
-      - go_modules:/root/go/pkg/mod
+      - go_root:/root/go             # shared with auth — air only installed once
       - go_build:/root/.cache/go-build
       - persistence_data:/app/data
     ports:
@@ -49,7 +50,7 @@ services:
 
 volumes:
   frontend_modules:   # Linux-built node_modules, shadows the Windows copy
-  go_modules:         # shared Go module cache across both backend services
+  go_root:            # shared Go root (module cache + air binary)
   go_build:           # shared Go build cache
   auth_data:          # signing key + user files
   persistence_data:   # document files
