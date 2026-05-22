@@ -16,10 +16,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
+        working-directory: frontend
 
       - run: npx vitest run --config vitest.config.ts --reporter=default --reporter=junit --outputFile=test-results.xml
+        working-directory: frontend
         continue-on-error: true
         id: run-tests
 
@@ -27,7 +30,7 @@ jobs:
         if: always()
         with:
           name: Vitest
-          path: test-results.xml
+          path: frontend/test-results.xml
           reporter: jest-junit
           fail-on-error: false
 

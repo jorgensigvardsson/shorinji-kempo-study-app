@@ -55,12 +55,12 @@ jobs:
             exit 1
           fi
 
-          : > .env.production
+          : > frontend/.env.production
           write_var() {
             local name="$1"
             local value="$2"
             if [ -n "$value" ]; then
-              printf '%s=%s\n' "$name" "$value" >> .env.production
+              printf '%s=%s\n' "$name" "$value" >> frontend/.env.production
             fi
           }
           write_var VITE_DEBUG "$VITE_DEBUG"
@@ -73,7 +73,7 @@ jobs:
           write_var VITE_GOOGLE_REDIRECT_URI "$VITE_GOOGLE_REDIRECT_URI"
 
       - name: Build image
-        run: docker build -t "$IMAGE" .
+        run: docker build -t "$IMAGE" ./frontend
 
       - name: Save and compress image
         run: docker save "$IMAGE" | gzip > image.tar.gz
