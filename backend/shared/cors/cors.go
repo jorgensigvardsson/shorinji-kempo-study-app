@@ -7,6 +7,9 @@ import "net/http"
 // mode requires an explicit origin, not a wildcard.
 func Middleware(allowedOrigin string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Vary: Origin must be set unconditionally so any CDN/proxy knows the response
+		// is origin-dependent and must not serve one origin's cached response to another.
+		w.Header().Add("Vary", "Origin")
 		if r.Header.Get("Origin") == allowedOrigin {
 			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")

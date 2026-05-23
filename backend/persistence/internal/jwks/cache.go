@@ -6,12 +6,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"net/http"
 	"sync"
 	"time"
 )
+
+var jwksHTTPClient = &http.Client{Timeout: 10 * time.Second}
 
 // Cache fetches RSA public keys from a JWKS endpoint and caches them by key ID.
 // On unknown key ID it retries once (handles key rotation); otherwise it refreshes hourly.
@@ -72,7 +75,7 @@ func (c *Cache) lookup(kid string) *rsa.PublicKey {
 
 // Refresh fetches the JWKS from the configured URL and replaces the in-memory keyset.
 func (c *Cache) Refresh() error {
-	resp, err := http.Get(c.url)
+	resp, err := jwksHTTPClient.Get(c.url)
 	if err != nil {
 		return fmt.Errorf("jwks: fetch %s: %w", c.url, err)
 	}
@@ -86,7 +89,9 @@ func (c *Cache) Refresh() error {
 			E   string `json:"e"`
 		} `json:"keys"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+	// 64 KB is well above any real JWKS; cap prevents a slow/large response from
+	// stalling the refresh goroutine indefinitely.
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 64*1024)).Decode(&raw); err != nil {
 		return fmt.Errorf("jwks: parse response: %w", err)
 	}
 

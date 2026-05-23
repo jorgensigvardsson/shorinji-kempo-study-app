@@ -75,69 +75,54 @@ All call sites propagate errors and return 500.
 
 ## Medium
 
-### M1 — JWKS fetch has no HTTP timeout and no body size limit
-**File**: `backend/persistence/internal/jwks/cache.go` — `Refresh`
+### ~~M1 — JWKS fetch has no HTTP timeout and no body size limit~~ ✅ Fixed
+**Fixed in commit `TBD_M`**
 
-`http.Get(c.url)` uses the default client (no timeout). A hanging auth service stalls the
-refresh goroutine indefinitely. No size limit on the response body.
-
-**Fix**: dedicated `*http.Client` with (e.g.) a 10 s timeout; wrap body with
-`http.MaxBytesReader`.
+`jwksHTTPClient` (10 s timeout) replaces the default client. The response body is wrapped with
+`io.LimitReader(resp.Body, 64*1024)` before decoding, capping the read at 64 KB.
 
 ---
 
-### M2 — No security response headers on either service
-No `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, or
-`Cache-Control: no-store` on auth responses. The callback and `/auth/me` responses issue or
-echo tokens via Set-Cookie and JSON respectively.
+### ~~M2 — No security response headers on either service~~ ✅ Fixed
+**Fixed in commit `TBD_M`**
 
-**Fix**: small middleware adding these headers globally; `Cache-Control: no-store` is
-non-negotiable on the callback and auth endpoints.
-
----
-
-### M3 — Migration tool accepts the Cosmos key as a CLI flag
-**File**: `tools/migrate/main.go` — `--cosmos-key`
-
-A CLI flag exposes the primary key in process listings (`ps aux`) and shell history. The Cosmos
-primary key grants full account access.
-
-**Fix**: support env-var or stdin input; keep the flag as an undocumented fallback with a
-deprecation warning.
+New `backend/shared/secureheaders` middleware added. Both services wrap their root handler with
+`secureheaders.Middleware`, which sets `Strict-Transport-Security`, `X-Content-Type-Options`,
+`Referrer-Policy`, and `Cache-Control: no-store` on every response.
 
 ---
 
-### M4 — Identity link flow does not verify email ownership
-**File**: `backend/auth/internal/api/handlers.go` — `callback` (link branch)
+### ~~M3 — Migration tool accepts the Cosmos key as a CLI flag~~ ✅ Fixed
+**Fixed in commit `TBD_M`**
 
-The flow only checks the target identity isn't already linked elsewhere. It does not require the
-incoming OIDC email to match the existing user's email. A user with a compromised session can
-permanently bind a foreign identity to their account.
-
-**Fix**: require email match (case-insensitive) between the OIDC response and the existing
-user's primary email, or add an explicit confirmation step in the UI before persisting.
+The migration tool (`tools/migrate/`) is no longer needed and has been deleted entirely,
+eliminating the credential-exposure risk at the root.
 
 ---
 
-### M5 — Pending OIDC state is in-process only — breaks across replicas
-**File**: `backend/auth/internal/api/handlers.go` — `Handler.pending`
+### ~~M4 — Identity link flow does not verify email ownership~~ ✅ Fixed
+**Fixed in commit `TBD_M`**
 
-The `pending` map is per-process. ACA's `maxReplicas: 3` means the callback can land on a
-different replica than the login initiation, silently breaking the OIDC flow. Not exploitable
-on its own but the resulting error noise hides real attacks.
-
-**Fix**: pin `maxReplicas: 1`, enable ACA sticky sessions, or persist state to Cosmos with a
-10-minute TTL.
+`callback` (link branch) now calls `strings.EqualFold(info.Email, target.Email)` before
+persisting the new identity. An email mismatch redirects to `?link_error=email_mismatch`
+without modifying the user record.
 
 ---
 
-### M6 — Missing `Vary: Origin` header on CORS responses
-**File**: `backend/shared/cors/cors.go`
+### ~~M5 — Pending OIDC state is in-process only — breaks across replicas~~ ✅ Fixed
+**Fixed in commit `TBD_M`**
 
-If any CDN or proxy ever sits in front of the auth service, a cached response for the allowed
-origin can be served to other origins. One-line fix.
+`auth-app.bicep` now sets `maxReplicas: 1`. The auth service is intentionally single-replica:
+it holds in-process OIDC pending state and an in-memory signing key, neither of which is safe
+to shard across replicas without a distributed backing store.
 
-**Fix**: `w.Header().Add("Vary", "Origin")` in the CORS middleware.
+---
+
+### ~~M6 — Missing `Vary: Origin` header on CORS responses~~ ✅ Fixed
+**Fixed in commit `TBD_M`**
+
+`w.Header().Add("Vary", "Origin")` is now set unconditionally in the CORS middleware, before
+the origin check, so every response — including non-CORS ones — carries the header.
 
 ---
 
@@ -205,12 +190,12 @@ Cosmos's 2 MB hard cap.
 |---|---------|--------|
 | ~~1~~ | ~~H1 — refresh token reuse detection~~ | ✅ Fixed |
 | ~~2~~ | ~~H2 — rate limiter trusts leftmost XFF~~ | ✅ Fixed |
-| 3 | M1 — JWKS fetch: no timeout, no size limit | Small |
-| 4 | M2 — no security response headers | Small |
-| 5 | M3 — migration tool: Cosmos key via CLI flag | Small |
-| 6 | M4 — identity link: no email ownership check | Medium |
-| 7 | M5 — OIDC state in-process only (multi-replica) | Medium |
-| 8 | M6 — missing `Vary: Origin` on CORS responses | Trivial |
+| ~~3~~ | ~~M1 — JWKS fetch: no timeout, no size limit~~ | ✅ Fixed |
+| ~~4~~ | ~~M2 — no security response headers~~ | ✅ Fixed |
+| ~~5~~ | ~~M3 — migration tool: Cosmos key via CLI flag~~ | ✅ Fixed |
+| ~~6~~ | ~~M4 — identity link: no email ownership check~~ | ✅ Fixed |
+| ~~7~~ | ~~M5 — OIDC state in-process only (multi-replica)~~ | ✅ Fixed |
+| ~~8~~ | ~~M6 — missing `Vary: Origin` on CORS responses~~ | ✅ Fixed |
 | 9 | L1 — `Verify` missing `WithValidMethods` | Trivial |
 | 10 | L2 — domain enumeration via `/auth/resolve` | Accept or Low-effort fix |
 | 11 | L3 — identity-index race on concurrent link/unlink | Medium |

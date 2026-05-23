@@ -16,6 +16,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/secureheaders"
 )
 
 const (
@@ -79,7 +80,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
 	inner.HandleFunc("GET /auth/link", h.linkAccount)
 	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
-	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
+	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, h.limiter.Middleware(inner))))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {
@@ -223,6 +224,12 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		target, err := h.users.FindByID(ps.linkUserID)
 		if err != nil || target == nil {
 			http.Error(w, "user not found", http.StatusNotFound)
+			return
+		}
+		// M4: require the incoming OIDC email to match the existing account's primary
+		// email (case-insensitive) to prevent a session-hijack binding a foreign identity.
+		if !strings.EqualFold(info.Email, target.Email) {
+			http.Redirect(w, r, h.frontendURL+"?link_error=email_mismatch", http.StatusFound)
 			return
 		}
 		target.LinkedIdentities[ps.providerName] = store.LinkedIdentity{Sub: info.Sub, Email: info.Email}
