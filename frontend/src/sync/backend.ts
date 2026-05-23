@@ -52,6 +52,10 @@ export class BackendSyncClient {
         localStorage.removeItem(authExpiredKey);
         return true;
       }
+      if (resp.status === 401) {
+        // Token has expired or was revoked — mark so handleProviderChanged sets auth_expired.
+        localStorage.setItem(authExpiredKey, "true");
+      }
     } catch {
       // Network error — treat as not connected.
     }

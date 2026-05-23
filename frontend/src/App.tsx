@@ -110,7 +110,7 @@ function App(props: Props) {
           {renderRoutes(routes)}
           <Outlet />
         </div>
-        <AppToasts translator={translator} />
+        <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)} />
       </div>
     </TranslatorContext.Provider>
   )
@@ -228,8 +228,8 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const AppToasts = (props: { translator: Translator }) => {
-  const { translator } = props;
+const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) => {
+  const { translator, onShowLogin } = props;
   const navigate = useNavigate();
   const lang = translator.currentLanguage;
 
@@ -288,6 +288,16 @@ const AppToasts = (props: { translator: Translator }) => {
     : syncProvider === "google-drive" ? "Google Drive"
     : syncProvider === "dropbox" ? "Dropbox"
     : translator.translate("molntjänsten");
+
+  // When the backend session expires, redirect to the login screen instead of
+  // showing a generic "sync disconnected" toast.
+  useEffect(() => {
+    if (syncProvider === "backend" && syncState.status === "auth_expired") {
+      localStorage.removeItem(IDENTITY_CHOICE_KEY);
+      getSyncManager().disconnect();
+      onShowLogin();
+    }
+  }, [syncState.status, syncProvider, onShowLogin]);
 
   return (
     <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
@@ -372,7 +382,7 @@ const AppToasts = (props: { translator: Translator }) => {
           </div>
         </Toast.Body>
       </Toast>
-      <Toast show={syncState.status === "auth_expired"} className="app-update-toast">
+      <Toast show={syncState.status === "auth_expired" && syncProvider !== "backend"} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
             <CloudSlash size={20} />
