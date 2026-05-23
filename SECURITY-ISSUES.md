@@ -129,7 +129,7 @@ the origin check, so every response — including non-CORS ones — carries the 
 ## Low
 
 ### ~~L1 — `Manager.Verify` does not use `WithValidMethods`~~ ✅ Fixed
-**Fixed in commit `TBD_L`**
+**Fixed in commit `dc4219c`**
 
 `jwt.WithValidMethods([]string{"RS256"})` added to `ParseWithClaims` in `Manager.Verify`,
 matching the defence-in-depth already present in the persistence middleware.
@@ -137,7 +137,7 @@ matching the defence-in-depth already present in the persistence middleware.
 ---
 
 ### ~~L2 — `/auth/resolve` enables email-domain enumeration~~ ✅ Fixed
-**Fixed in commit `TBD_L`**
+**Fixed in commit `dc4219c`**
 
 The `/auth/resolve` endpoint was unused by the frontend and has been removed entirely.
 The frontend goes directly to `/auth/login`, which handles unknown domains with a 400.
@@ -145,7 +145,7 @@ The frontend goes directly to `/auth/login`, which handles unknown domains with 
 ---
 
 ### ~~L3 — Race on identity-index sync during concurrent link/unlink~~ ✅ Fixed
-**Fixed in commit `TBD_L`**
+**Fixed in commit `dc4219c`**
 
 `CosmosUserStore.Save` now reads the current user record with `ReadItem` to capture the
 ETag, then passes `IfMatchEtag` to `UpsertItem`. A concurrent write returns 412, which is
@@ -154,7 +154,7 @@ surfaced as a clear error rather than a silent data loss.
 ---
 
 ### ~~L4 — Frontend `isConnected()` reads localStorage only~~ ✅ Fixed
-**Fixed in commit `TBD_L`**
+**Fixed in commit `dc4219c`**
 
 `isConnected()` now also checks `!wasAuthExpired()`. If auth has lapsed and the
 `authExpiredKey` flag is set, the method returns false even if `connectedKey` is still
