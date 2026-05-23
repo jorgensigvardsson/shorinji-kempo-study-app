@@ -76,7 +76,7 @@ All call sites propagate errors and return 500.
 ## Medium
 
 ### ~~M1 — JWKS fetch has no HTTP timeout and no body size limit~~ ✅ Fixed
-**Fixed in commit `TBD_M`**
+**Fixed in commit `ef735ad`**
 
 `jwksHTTPClient` (10 s timeout) replaces the default client. The response body is wrapped with
 `io.LimitReader(resp.Body, 64*1024)` before decoding, capping the read at 64 KB.
@@ -84,7 +84,7 @@ All call sites propagate errors and return 500.
 ---
 
 ### ~~M2 — No security response headers on either service~~ ✅ Fixed
-**Fixed in commit `TBD_M`**
+**Fixed in commit `ef735ad`**
 
 New `backend/shared/secureheaders` middleware added. Both services wrap their root handler with
 `secureheaders.Middleware`, which sets `Strict-Transport-Security`, `X-Content-Type-Options`,
@@ -93,7 +93,7 @@ New `backend/shared/secureheaders` middleware added. Both services wrap their ro
 ---
 
 ### ~~M3 — Migration tool accepts the Cosmos key as a CLI flag~~ ✅ Fixed
-**Fixed in commit `TBD_M`**
+**Fixed in commit `ef735ad`**
 
 The migration tool (`tools/migrate/`) is no longer needed and has been deleted entirely,
 eliminating the credential-exposure risk at the root.
@@ -101,7 +101,7 @@ eliminating the credential-exposure risk at the root.
 ---
 
 ### ~~M4 — Identity link flow does not verify email ownership~~ ✅ Fixed
-**Fixed in commit `TBD_M`**
+**Fixed in commit `ef735ad`**
 
 `callback` (link branch) now calls `strings.EqualFold(info.Email, target.Email)` before
 persisting the new identity. An email mismatch redirects to `?link_error=email_mismatch`
@@ -110,7 +110,7 @@ without modifying the user record.
 ---
 
 ### ~~M5 — Pending OIDC state is in-process only — breaks across replicas~~ ✅ Fixed
-**Fixed in commit `TBD_M`**
+**Fixed in commit `ef735ad`**
 
 `auth-app.bicep` now sets `maxReplicas: 1`. The auth service is intentionally single-replica:
 it holds in-process OIDC pending state and an in-memory signing key, neither of which is safe
@@ -119,7 +119,7 @@ to shard across replicas without a distributed backing store.
 ---
 
 ### ~~M6 — Missing `Vary: Origin` header on CORS responses~~ ✅ Fixed
-**Fixed in commit `TBD_M`**
+**Fixed in commit `ef735ad`**
 
 `w.Header().Add("Vary", "Origin")` is now set unconditionally in the CORS middleware, before
 the origin check, so every response — including non-CORS ones — carries the header.
