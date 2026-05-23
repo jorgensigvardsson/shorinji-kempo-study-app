@@ -75,3 +75,11 @@ func (s *FileUserStore) Save(user *User) error {
 	}
 	return os.WriteFile(s.path(user.ID), data, 0o644)
 }
+
+func (s *FileUserStore) Delete(id string) error {
+	err := os.Remove(s.path(id))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
+}

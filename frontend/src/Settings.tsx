@@ -325,6 +325,10 @@ const providerDisplayName: Record<string, string> = {
 const AccountStatus = (props: { translator: Translator; onShowLogin: () => void }) => {
     const { translator, onShowLogin } = props;
     const info = getSyncManager().getBackendUserInfo();
+    const [confirmDelete, setConfirmDelete] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const providerLabel = info?.providers
         .map(p => providerDisplayName[p] ?? p)
@@ -336,6 +340,32 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
         onShowLogin();
     };
 
+    const handleExport = async () => {
+        setExporting(true);
+        setError(null);
+        try {
+            await getSyncManager().exportAccount();
+        } catch {
+            setError(translator.translate("Export misslyckades. Försök igen."));
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
+        setDeleting(true);
+        setError(null);
+        try {
+            await getSyncManager().deleteAccount();
+            localStorage.removeItem("identity-choice-made");
+            onShowLogin();
+        } catch {
+            setError(translator.translate("Raderingen misslyckades. Försök igen."));
+            setDeleting(false);
+            setConfirmDelete(false);
+        }
+    };
+
     return (
         <>
             {info && (
@@ -345,11 +375,37 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
                     {providerLabel && <> &middot; {providerLabel}</>}
                 </Form.Text>
             )}
-            <div className="mt-1">
-                <Button variant="outline-secondary" size="sm" onClick={handleLogout}>
-                    {translator.translate("Logga ut")}
-                </Button>
-            </div>
+            {error && (
+                <Form.Text className="d-block mt-1 mb-2 text-danger">{error}</Form.Text>
+            )}
+            {!confirmDelete ? (
+                <div className="mt-1 d-flex gap-2 flex-wrap">
+                    <Button variant="outline-secondary" size="sm" onClick={handleLogout}>
+                        {translator.translate("Logga ut")}
+                    </Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => { void handleExport(); }} disabled={exporting}>
+                        {exporting ? translator.translate("Exporterar...") : translator.translate("Exportera mina data")}
+                    </Button>
+                    <Button variant="outline-danger" size="sm" onClick={() => setConfirmDelete(true)}>
+                        {translator.translate("Radera konto")}
+                    </Button>
+                </div>
+            ) : (
+                <div className="mt-1">
+                    <Form.Text className="d-block mb-2 text-danger">
+                        <strong>{translator.translate("Det här kan inte ångras.")}</strong>{" "}
+                        {translator.translate("All din data på servern raderas permanent.")}
+                    </Form.Text>
+                    <div className="d-flex gap-2">
+                        <Button variant="danger" size="sm" onClick={() => { void handleDeleteConfirm(); }} disabled={deleting}>
+                            {deleting ? translator.translate("Raderar...") : translator.translate("Ja, radera mitt konto")}
+                        </Button>
+                        <Button variant="outline-secondary" size="sm" onClick={() => setConfirmDelete(false)} disabled={deleting}>
+                            {translator.translate("Avbryt")}
+                        </Button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

@@ -117,6 +117,15 @@ class SyncManager {
     return this.backendClient.getUserInfo();
   }
 
+  async exportAccount(): Promise<void> {
+    return this.backendClient.exportAccount();
+  }
+
+  async deleteAccount(): Promise<void> {
+    await this.backendClient.deleteAccount();
+    this.store.set("syncProvider", "local");
+  }
+
   // beginBackendAuthorization is called by the sign-in UI (Phase 4).
   // It sets the email on the backend client and redirects to the auth service.
   beginBackendAuthorization(email: string): void {

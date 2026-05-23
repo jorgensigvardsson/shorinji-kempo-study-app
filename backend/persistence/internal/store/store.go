@@ -14,4 +14,5 @@ type Document struct {
 type Store interface {
 	Load(userID string) (*Document, error)
 	Save(userID string, doc *Document) error
+	Delete(userID string) error
 }

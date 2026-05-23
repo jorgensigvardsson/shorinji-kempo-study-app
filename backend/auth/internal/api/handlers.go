@@ -70,6 +70,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/callback", h.callback)
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
+	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
 	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
 }
 
@@ -260,6 +261,27 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     accessCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.claimsFromRequest(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if err := h.users.Delete(claims.Subject); err != nil {
+		log.Printf("deleteAccount %s: %v", claims.Subject, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     accessCookieName,
 		Value:    "",

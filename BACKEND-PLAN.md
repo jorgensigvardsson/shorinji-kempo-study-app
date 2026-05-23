@@ -67,6 +67,27 @@ identity is opt-in.
 
 **Does NOT:** know about OIDC or issue tokens.
 
+### `backend/gdpr` — GDPR Compliance Service *(Phase 6)*
+
+**Responsibilities:**
+- `GET /gdpr/export` — bundle the user record (from auth store) + app data (from persistence
+  store) into a single downloadable JSON archive
+- `DELETE /gdpr/account` — cascade delete: app document → refresh tokens → user record;
+  confirmation token required to prevent accidents
+- Rate limited hard (1 req/min per IP, burst 2); requires valid JWT on all endpoints
+
+**Why a separate service?**
+GDPR requests span *both* the auth store and the persistence store. Adding these endpoints to
+either existing service would require it to reach into the other service's data, violating the
+separation of responsibility. A dedicated service gets credentials to both stores directly and
+is the only component that does cross-store coordination.
+
+In production (Azure Container Apps) this service can run at **min-replicas = 0** — it costs
+nothing until someone actually clicks "delete my account," which happens on the order of once
+or twice per year.
+
+**Does NOT:** issue tokens, handle OIDC, or act as a general data API.
+
 ---
 
 ## OIDC Auth Flow
@@ -210,9 +231,16 @@ One document per user. The `data` field is opaque to the persistence service.
 | GET | `/healthz` | Health check |
 | GET | `/api/v1/document` | Fetch user's document (JWT required) |
 | PUT | `/api/v1/document` | Store user's document (JWT required) |
-| GET | `/api/v1/account/export` | Export all user data as JSON (JWT required) |
-| DELETE | `/api/v1/account` | Delete account: user record, app data, refresh tokens (JWT required) |
 | POST | `/api/v1/feedback` | Submit feedback with user identity attached (JWT required) |
+
+### GDPR Service (`backend/gdpr`) *(Phase 6)*
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/healthz` | Health check |
+| GET | `/gdpr/export` | Export all user data as JSON archive (JWT required) |
+| POST | `/gdpr/account/delete-request` | Issue a deletion confirmation token, email it to the user (JWT required) |
+| DELETE | `/gdpr/account` | Cascade delete after confirmation token (JWT required) |
 
 ---
 
@@ -359,19 +387,64 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 - Data migration helper (import from OneDrive / Google Drive)
 
 ### Phase 6 — GDPR compliance
-- `GET /api/v1/account/export` — bundle user record + app document into downloadable JSON
-- `DELETE /api/v1/account` — cascade delete: app document → refresh tokens → user record
+New `backend/gdpr` Go service (same structure as auth/persistence):
+- `GET /gdpr/export` — reads user record from auth store + app data from persistence store;
+  returns a single JSON archive; requires valid JWT; response as `Content-Disposition: attachment`
+- `DELETE /gdpr/account` — accepts a confirmation token (issued by a prior `POST /gdpr/account/delete-request`);
+  deletes app data, refresh tokens, then user record in that order; returns 204
+- `POST /gdpr/account/delete-request` — issues a short-lived (15 min) confirmation token and
+  emails it to the user's address; prevents accidental deletion
+- All endpoints rate limited (1 req/min per IP, burst 2)
+- Docker Compose: new `gdpr` service; both `auth_data` and `persistence_data` volumes mounted
 - Settings UI: "Export my data" and "Delete my account" controls (authenticated only)
 - Privacy Policy and Terms of Service updated for authenticated users
-- `POST /api/v1/feedback` — receive authenticated feedback, forward/store server-side
+- `POST /api/v1/feedback` on persistence — receive authenticated feedback, forward/store server-side
 - Send Feedback page: authenticated path posts to backend; anonymous path sends email as before
-- ToS acceptance recorded on first login
+- ToS acceptance checkbox recorded on first login (stored in user record)
 - Privacy Policy updated with data controller name and contact address
 
 ### Phase 7 — Production hardening
 - Replace file stores with Cosmos DB in both services
 - Refresh token rotation and revocation
 - Config-driven provider list for future additions
+
+### Phase 8 — More OIDC providers
+Two categories of provider support:
+
+**Email-domain providers** (same `GET /auth/login?email=...` flow; just add more entries to
+provider config):
+- Microsoft / Entra ID — `outlook.com`, `hotmail.com`, `live.com`, plus any enterprise tenant domain
+- Yahoo — `yahoo.com`, `yahoo.co.uk`, etc.
+- Apple — `icloud.com`, `me.com`, `mac.com`
+- Any standard OIDC provider reachable by domain
+
+**Button providers** (no email → domain mapping; user picks from a list):
+These providers do not expose a usable email domain (e.g. GitHub users may use any address).
+The login screen adds explicit buttons for them:
+- GitHub
+- Discord
+- GitLab
+- Facebook
+- LinkedIn
+- Twitch
+- Reddit
+
+Button providers use `GET /auth/login?provider={name}` (no email parameter); the auth service
+bypasses the domain lookup and goes directly to the selected provider.
+
+Account linking works for both categories: an existing user can add a button provider to their
+account via `POST /auth/link?provider={name}`.
+
+### Phase 9 — Deploy to Azure Container Apps
+- Containerise all services (`backend/auth`, `backend/persistence`, `backend/gdpr`) with
+  multi-stage Dockerfiles; push images to GitHub Container Registry (GHCR) via GitHub Actions
+- Provision Azure Container Apps environment (one environment, three container apps)
+- `gdpr` app: **min-replicas = 0**, scale on HTTP traffic — costs nothing at rest
+- `auth` and `persistence`: min-replicas = 1 (always available for active users)
+- Cosmos DB for both user store and document store; connection strings via ACA secrets
+- HTTPS termination handled by ACA ingress; no nginx/reverse proxy needed
+- GitHub Actions deployment workflow: build → push to GHCR → `az containerapp update`
+- Custom domain + managed TLS certificate via ACA domain binding
 
 ---
 
@@ -387,11 +460,8 @@ This keeps staging costs at zero and removes GDPR concerns for the test environm
 ---
 
 ## Open Questions
-- Which OIDC providers beyond Google and Microsoft?
-- Deployment topology: same host, separate containers, Azure Container Apps?
-- Should the frontend show the user's display name / avatar when signed in?
+- Should the frontend show the user's avatar when signed in (Google provides a photo URL)?
 - Multi-device behaviour: when a user signs in on a second device, merge or overwrite?
-- Rate limiting / abuse protection on auth endpoints
 
 ---
-*Last updated: 2026-05-22 — reworked identity model to UUID primary key with linkedIdentities map; login is now email-based (domain → provider discovery); provider config supports multiple domains per provider; JWT sub is our UUID*
+*Last updated: 2026-05-23 — added backend/gdpr service (Phase 6); added Phase 8 (more OIDC providers, button-provider category); added Phase 9 (Azure Container Apps deployment with GHCR, scale-to-zero for gdpr service); resolved open questions on topology and provider list; rate limiting rule added to CLAUDE.md*

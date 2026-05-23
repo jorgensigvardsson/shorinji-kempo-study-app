@@ -25,4 +25,5 @@ type UserStore interface {
 	// or (nil, nil) if no such user exists.
 	FindByLinkedIdentity(provider, sub string) (*User, error)
 	Save(user *User) error
+	Delete(id string) error
 }

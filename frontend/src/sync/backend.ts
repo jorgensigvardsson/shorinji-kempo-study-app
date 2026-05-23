@@ -107,4 +107,37 @@ export class BackendSyncClient {
     }
     if (!resp.ok) throw new Error(`PUT /api/v1/document: ${resp.status}`);
   }
+
+  // Fetches the user record and app document, bundles them as a JSON download.
+  async exportAccount(): Promise<void> {
+    const [meResp, docResp] = await Promise.all([
+      fetch(`${authUrl}/auth/me`, { credentials: "include" }),
+      fetch(`${apiUrl}/api/v1/document`, { credentials: "include" }),
+    ]);
+    if (!meResp.ok) throw new Error(`GET /auth/me: ${meResp.status}`);
+    const userRecord = await meResp.json();
+    const appData = docResp.ok ? await docResp.json() : null;
+
+    const payload = JSON.stringify({ exportedAt: new Date().toISOString(), userRecord, appData }, null, 2);
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shorinji-kempo-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Deletes app data then user record in order, then clears local state.
+  async deleteAccount(): Promise<void> {
+    const docResp = await fetch(`${apiUrl}/api/v1/account`, { method: "DELETE", credentials: "include" });
+    if (!docResp.ok && docResp.status !== 404) throw new Error(`DELETE /api/v1/account: ${docResp.status}`);
+
+    const authResp = await fetch(`${authUrl}/auth/account`, { method: "DELETE", credentials: "include" });
+    if (!authResp.ok) throw new Error(`DELETE /auth/account: ${authResp.status}`);
+
+    localStorage.removeItem(connectedKey);
+    localStorage.removeItem(authExpiredKey);
+    localStorage.removeItem(userInfoKey);
+  }
 }

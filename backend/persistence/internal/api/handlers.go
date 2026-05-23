@@ -26,6 +26,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /healthz", h.healthz)
 	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.getDocument)))
 	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.putDocument)))
+	inner.Handle("DELETE /api/v1/account", authMiddleware(h.jwks, http.HandlerFunc(h.deleteAccount)))
 	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
 }
 
@@ -73,4 +74,18 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(doc)
+}
+
+func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if err := h.store.Delete(userID); err != nil {
+		log.Printf("store.Delete(%s): %v", userID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

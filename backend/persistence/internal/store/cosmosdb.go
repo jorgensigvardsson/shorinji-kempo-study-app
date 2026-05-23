@@ -28,3 +28,7 @@ func (s *CosmosDBStore) Load(userID string) (*Document, error) {
 func (s *CosmosDBStore) Save(userID string, doc *Document) error {
 	return errors.New("CosmosDB storage backend not yet implemented")
 }
+
+func (s *CosmosDBStore) Delete(userID string) error {
+	return errors.New("CosmosDB storage backend not yet implemented")
+}

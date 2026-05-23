@@ -46,3 +46,11 @@ func (s *FileStore) Save(userID string, doc *Document) error {
 	}
 	return os.WriteFile(s.path(userID), data, 0o644)
 }
+
+func (s *FileStore) Delete(userID string) error {
+	err := os.Remove(s.path(userID))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
+}

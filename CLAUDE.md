@@ -17,3 +17,8 @@ When something worth mentioning in README.md has happened (new build steps, tech
 
 ## src/changelog.ts
 Add a changelog entry here before committing. This is user facing, so make it less technical.
+
+## Backend: Rate limiting
+Every backend HTTP endpoint — in every service — must be protected by a rate limiter.
+Use the `backend/shared/ratelimit` package (`IPRateLimiter`). No endpoint may be left unprotected.
+This is a hard requirement: the app runs on the developer's credit card.
