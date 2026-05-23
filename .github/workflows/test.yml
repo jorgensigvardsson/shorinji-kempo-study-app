@@ -5,6 +5,23 @@ on:
   pull_request:
 
 jobs:
+  go-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: |
+            backend/auth/go.sum
+            backend/persistence/go.sum
+            backend/go.work.sum
+
+      - name: Run Go tests
+        run: go test ./...
+        working-directory: backend
+
   test:
     runs-on: ubuntu-latest
     permissions:
