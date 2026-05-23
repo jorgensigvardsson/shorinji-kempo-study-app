@@ -14,6 +14,8 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 )
 
 const (
@@ -33,6 +35,7 @@ type Handler struct {
 	users       store.UserStore
 	tokens      *token.Manager
 	frontendURL string
+	limiter     *ratelimit.IPRateLimiter
 	mu          sync.Mutex
 	pending     map[string]pendingState
 }
@@ -43,6 +46,7 @@ func NewHandler(
 	users store.UserStore,
 	tokens *token.Manager,
 	frontendURL string,
+	limiter *ratelimit.IPRateLimiter,
 ) *Handler {
 	h := &Handler{
 		providers:   providers,
@@ -50,6 +54,7 @@ func NewHandler(
 		users:       users,
 		tokens:      tokens,
 		frontendURL: frontendURL,
+		limiter:     limiter,
 		pending:     make(map[string]pendingState),
 	}
 	go h.sweepExpiredStates()
@@ -65,7 +70,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/callback", h.callback)
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
-	mux.Handle("/", corsMiddleware(h.frontendURL, inner))
+	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {

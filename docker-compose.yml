@@ -17,14 +17,14 @@ services:
 
   auth:
     image: golang:latest
-    working_dir: /app
+    working_dir: /app/auth
     # Install air once into the cached go_root volume, then run it.
     command: sh -c "command -v air || go install github.com/air-verse/air@latest; air"
     volumes:
-      - ./backend/auth:/app
+      - ./backend:/app               # whole backend/ dir so go.work and shared/ are visible
       - go_root:/root/go             # covers pkg/mod AND bin — air persisted here
       - go_build:/root/.cache/go-build
-      - auth_data:/app/data
+      - auth_data:/app/auth/data
     ports:
       - "8081:8081"
     environment:
@@ -34,6 +34,8 @@ services:
       GOOGLE_REDIRECT_URI: "http://localhost:8081/auth/callback"
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      RATE_LIMIT_RPS: "1"
+      RATE_LIMIT_BURST: "5"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8081/healthz"]
       interval: 5s
@@ -43,22 +45,24 @@ services:
 
   persistence:
     image: golang:latest
-    working_dir: /app
+    working_dir: /app/persistence
     command: sh -c "command -v air || go install github.com/air-verse/air@latest; air"
     depends_on:
       auth:
         condition: service_healthy
     volumes:
-      - ./backend/persistence:/app
+      - ./backend:/app               # whole backend/ dir so go.work and shared/ are visible
       - go_root:/root/go             # shared with auth — air only installed once
       - go_build:/root/.cache/go-build
-      - persistence_data:/app/data
+      - persistence_data:/app/persistence/data
     ports:
       - "8080:8080"
     environment:
       SERVICE_LISTEN_ADDRESS: ":8080"
       SERVICE_FRONTEND_URL: "http://localhost:5173"
       AUTH_JWKS_URL: "http://auth:8081/.well-known/jwks.json"
+      RATE_LIMIT_RPS: "2"
+      RATE_LIMIT_BURST: "10"
 
 volumes:
   frontend_modules:   # Linux-built node_modules, shadows the Windows copy

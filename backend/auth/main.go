@@ -5,7 +5,6 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"os"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -15,28 +14,23 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/envutil"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 )
-
-func env(key, fallback string) string {
-	if v, ok := os.LookupEnv(key); ok {
-		return v
-	}
-	return fallback
-}
 
 func main() {
 	// Flag name                 Env var                        Default
-	addr               := flag.String("addr",               env("SERVICE_LISTEN_ADDRESS",   ":8081"),                             "listen address")
-	dataDir            := flag.String("data-dir",           env("SERVICE_DATA_DIR",         "data"),                              "directory for user storage")
-	keyFile            := flag.String("key-file",           env("SERVICE_KEY_FILE",         "data/signing.key"),                  "RSA private key PEM file (generated if absent)")
-	issuer             := flag.String("issuer",             env("SERVICE_ISSUER",           "http://localhost:8081"),             "JWT issuer URL")
-	frontendURL        := flag.String("frontend-url",       env("SERVICE_FRONTEND_URL",     "http://localhost:5173"),             "frontend URL to redirect to after login")
-	googleClientID     := flag.String("google-client-id",   env("GOOGLE_CLIENT_ID",         ""),                                  "Google OAuth client ID")
-	googleClientSecret := flag.String("google-client-secret", env("GOOGLE_CLIENT_SECRET",   ""),                                  "Google OAuth client secret")
-	googleRedirectURI  := flag.String("google-redirect-uri", env("GOOGLE_REDIRECT_URI",     "http://localhost:8081/auth/callback"), "Google OAuth redirect URI")
-	// Comma-separated email domains that route to the Google provider.
-	// Default covers both consumer Gmail domain variants.
-	googleDomains      := flag.String("google-domains",     env("GOOGLE_DOMAINS",           "gmail.com,googlemail.com"),          "comma-separated email domains for Google OIDC")
+	addr               := flag.String("addr",               envutil.String("SERVICE_LISTEN_ADDRESS",   ":8081"),                              "listen address")
+	dataDir            := flag.String("data-dir",           envutil.String("SERVICE_DATA_DIR",         "data"),                               "directory for user storage")
+	keyFile            := flag.String("key-file",           envutil.String("SERVICE_KEY_FILE",         "data/signing.key"),                   "RSA private key PEM file (generated if absent)")
+	issuer             := flag.String("issuer",             envutil.String("SERVICE_ISSUER",           "http://localhost:8081"),              "JWT issuer URL")
+	frontendURL        := flag.String("frontend-url",       envutil.String("SERVICE_FRONTEND_URL",     "http://localhost:5173"),              "frontend URL to redirect to after login")
+	googleClientID     := flag.String("google-client-id",   envutil.String("GOOGLE_CLIENT_ID",         ""),                                   "Google OAuth client ID")
+	googleClientSecret := flag.String("google-client-secret", envutil.String("GOOGLE_CLIENT_SECRET",   ""),                                   "Google OAuth client secret")
+	googleRedirectURI  := flag.String("google-redirect-uri", envutil.String("GOOGLE_REDIRECT_URI",     "http://localhost:8081/auth/callback"), "Google OAuth redirect URI")
+	googleDomains      := flag.String("google-domains",     envutil.String("GOOGLE_DOMAINS",           "gmail.com,googlemail.com"),           "comma-separated email domains for Google OIDC")
+	rateLimitRPS       := flag.Float64("rate-limit-rps",    envutil.Float64("RATE_LIMIT_RPS",          1.0),                                  "max requests per second per IP (0 = disabled)")
+	rateLimitBurst     := flag.Float64("rate-limit-burst",  envutil.Float64("RATE_LIMIT_BURST",        5.0),                                  "rate limit burst size")
 	flag.Parse()
 
 	key, err := token.LoadOrGenerateKey(*keyFile)
@@ -65,12 +59,15 @@ func main() {
 		log.Println("Google OIDC provider disabled (set --google-client-id and --google-client-secret to enable)")
 	}
 
+	limiter := ratelimit.New(*rateLimitRPS, *rateLimitBurst)
+	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
+
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, tokenManager, *frontendURL).Register(mux)
+	api.NewHandler(providers, domains, userStore, tokenManager, *frontendURL, limiter).Register(mux)
 
 	srv := &http.Server{Addr: *addr, Handler: mux}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	go func() {

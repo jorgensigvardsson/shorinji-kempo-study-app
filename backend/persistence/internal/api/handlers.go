@@ -6,16 +6,19 @@ import (
 	"net/http"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 )
 
 type Handler struct {
 	store       store.Store
 	jwks        KeySource
 	frontendURL string
+	limiter     *ratelimit.IPRateLimiter
 }
 
-func NewHandler(s store.Store, ks KeySource, frontendURL string) *Handler {
-	return &Handler{store: s, jwks: ks, frontendURL: frontendURL}
+func NewHandler(s store.Store, ks KeySource, frontendURL string, limiter *ratelimit.IPRateLimiter) *Handler {
+	return &Handler{store: s, jwks: ks, frontendURL: frontendURL, limiter: limiter}
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
@@ -23,7 +26,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /healthz", h.healthz)
 	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.getDocument)))
 	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.putDocument)))
-	mux.Handle("/", corsMiddleware(h.frontendURL, inner))
+	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {

@@ -1,11 +1,11 @@
-package api
+package cors
 
 import "net/http"
 
-// corsMiddleware adds CORS headers for requests from allowedOrigin and handles
+// Middleware adds CORS headers for requests from allowedOrigin and handles
 // preflight OPTIONS requests. Only the configured origin is allowed — credentials
 // mode requires an explicit origin, not a wildcard.
-func corsMiddleware(allowedOrigin string, next http.Handler) http.Handler {
+func Middleware(allowedOrigin string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Origin") == allowedOrigin {
 			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
