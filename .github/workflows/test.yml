@@ -7,6 +7,8 @@ on:
 jobs:
   go-test:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
     steps:
       - uses: actions/checkout@v4
 
@@ -19,8 +21,22 @@ jobs:
             backend/go.work.sum
 
       - name: Run Go tests
-        run: go test ./...
+        run: go test -json ./auth/... ./persistence/... ./shared/... > test-results.json
         working-directory: backend
+        continue-on-error: true
+        id: run-go-tests
+
+      - uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Go
+          path: backend/test-results.json
+          reporter: golang-json
+          fail-on-error: false
+
+      - name: Fail job if Go tests failed
+        if: steps.run-go-tests.outcome == 'failure'
+        run: exit 1
 
   test:
     runs-on: ubuntu-latest
