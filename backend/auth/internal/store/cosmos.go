@@ -95,35 +95,52 @@ func (s *CosmosUserStore) FindByLinkedIdentity(provider, sub string) (*User, err
 	return s.FindByID(item.UserID)
 }
 
-// Save upserts the user record and synchronises the identity index:
-// new identities are added, removed identities are deleted from the index.
+// Save upserts the user record and synchronises the identity index.
+// An ETag guard on the user record detects concurrent modifications and returns
+// an error rather than silently clobbering a concurrent write.
 func (s *CosmosUserStore) Save(user *User) error {
 	ctx := context.Background()
+	pk := azcosmos.NewPartitionKeyString(user.ID)
 
-	// Load previous state to detect removed linked identities.
-	existing, err := s.FindByID(user.ID)
+	// Read the current version for ETag and to detect removed linked identities.
+	var etag *azcore.ETag
+	readResp, err := s.users.ReadItem(ctx, pk, user.ID, nil)
 	if err != nil {
-		return err
-	}
-	if existing != nil {
-		for provider, identity := range existing.LinkedIdentities {
-			if _, stillLinked := user.LinkedIdentities[provider]; !stillLinked {
-				key := identityKey(provider, identity.Sub)
-				pk := azcosmos.NewPartitionKeyString(key)
-				if _, err := s.index.DeleteItem(ctx, pk, key, nil); err != nil {
-					log.Printf("warning: cosmos delete identity index %s/%s: %v", provider, identity.Sub, err)
+		var respErr *azcore.ResponseError
+		if !errors.As(err, &respErr) || respErr.StatusCode != http.StatusNotFound {
+			return fmt.Errorf("cosmos read user %s: %w", user.ID, err)
+		}
+		// New user — no existing record; proceed without ETag or index cleanup.
+	} else {
+		etag = &readResp.ETag
+		var existing User
+		if err := json.Unmarshal(readResp.Value, &existing); err == nil {
+			for provider, identity := range existing.LinkedIdentities {
+				if _, stillLinked := user.LinkedIdentities[provider]; !stillLinked {
+					key := identityKey(provider, identity.Sub)
+					ipk := azcosmos.NewPartitionKeyString(key)
+					if _, err := s.index.DeleteItem(ctx, ipk, key, nil); err != nil {
+						log.Printf("warning: cosmos delete identity index %s/%s: %v", provider, identity.Sub, err)
+					}
 				}
 			}
 		}
 	}
 
-	// Upsert the user record.
 	data, err := json.Marshal(user)
 	if err != nil {
 		return fmt.Errorf("cosmos marshal user %s: %w", user.ID, err)
 	}
-	pk := azcosmos.NewPartitionKeyString(user.ID)
-	if _, err := s.users.UpsertItem(ctx, pk, data, nil); err != nil {
+
+	opts := &azcosmos.ItemOptions{}
+	if etag != nil {
+		opts.IfMatchEtag = etag
+	}
+	if _, err := s.users.UpsertItem(ctx, pk, data, opts); err != nil {
+		var respErr *azcore.ResponseError
+		if errors.As(err, &respErr) && respErr.StatusCode == http.StatusPreconditionFailed {
+			return fmt.Errorf("cosmos save user %s: concurrent modification — retry the operation", user.ID)
+		}
 		return fmt.Errorf("cosmos upsert user %s: %w", user.ID, err)
 	}
 

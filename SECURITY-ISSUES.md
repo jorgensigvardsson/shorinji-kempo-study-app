@@ -128,37 +128,37 @@ the origin check, so every response — including non-CORS ones — carries the 
 
 ## Low
 
-### L1 — `Manager.Verify` does not use `WithValidMethods`
-**File**: `backend/auth/internal/token/jwt.go` — `Verify`
+### ~~L1 — `Manager.Verify` does not use `WithValidMethods`~~ ✅ Fixed
+**Fixed in commit `TBD_L`**
 
-The method type check (`*jwt.SigningMethodRSA`) catches `alg: none` but allows RS384/RS512.
-`jwt.WithValidMethods([]string{"RS256"})` is the documented hardening. The persistence
-middleware already does this correctly.
-
----
-
-### L2 — `/auth/resolve` enables email-domain enumeration
-**File**: `backend/auth/internal/api/handlers.go` — `resolve`
-
-Returns whether a given email domain has a configured OIDC provider. Information disclosure;
-not directly exploitable.
+`jwt.WithValidMethods([]string{"RS256"})` added to `ParseWithClaims` in `Manager.Verify`,
+matching the defence-in-depth already present in the persistence middleware.
 
 ---
 
-### L3 — Race on identity-index sync during concurrent link/unlink
-**File**: `backend/auth/internal/store/cosmos.go` — `Save`
+### ~~L2 — `/auth/resolve` enables email-domain enumeration~~ ✅ Fixed
+**Fixed in commit `TBD_L`**
 
-The load-mutate-save loop has no ETag/optimistic-concurrency guard. Two concurrent operations
-can leave the index inconsistent with the user record. Self-inflicted worst case: a linked
-provider cannot log in until the next successful Save.
+The `/auth/resolve` endpoint was unused by the frontend and has been removed entirely.
+The frontend goes directly to `/auth/login`, which handles unknown domains with a 400.
 
 ---
 
-### L4 — Frontend `isConnected()` reads localStorage only
-**File**: `frontend/src/sync/backend.ts` — `isConnected`
+### ~~L3 — Race on identity-index sync during concurrent link/unlink~~ ✅ Fixed
+**Fixed in commit `TBD_L`**
 
-The UI can show "connected" after the cookie has expired. Server is the source of truth on
-every real request; this is a confusing-state issue, not an exploit.
+`CosmosUserStore.Save` now reads the current user record with `ReadItem` to capture the
+ETag, then passes `IfMatchEtag` to `UpsertItem`. A concurrent write returns 412, which is
+surfaced as a clear error rather than a silent data loss.
+
+---
+
+### ~~L4 — Frontend `isConnected()` reads localStorage only~~ ✅ Fixed
+**Fixed in commit `TBD_L`**
+
+`isConnected()` now also checks `!wasAuthExpired()`. If auth has lapsed and the
+`authExpiredKey` flag is set, the method returns false even if `connectedKey` is still
+present, preventing the stale "connected" UI state.
 
 ---
 
@@ -196,7 +196,7 @@ Cosmos's 2 MB hard cap.
 | ~~6~~ | ~~M4 — identity link: no email ownership check~~ | ✅ Fixed |
 | ~~7~~ | ~~M5 — OIDC state in-process only (multi-replica)~~ | ✅ Fixed |
 | ~~8~~ | ~~M6 — missing `Vary: Origin` on CORS responses~~ | ✅ Fixed |
-| 9 | L1 — `Verify` missing `WithValidMethods` | Trivial |
-| 10 | L2 — domain enumeration via `/auth/resolve` | Accept or Low-effort fix |
-| 11 | L3 — identity-index race on concurrent link/unlink | Medium |
-| 12 | L4 — `isConnected()` reads localStorage only | Low |
+| ~~9~~ | ~~L1 — `Verify` missing `WithValidMethods`~~ | ✅ Fixed |
+| ~~10~~ | ~~L2 — domain enumeration via `/auth/resolve`~~ | ✅ Fixed |
+| ~~11~~ | ~~L3 — identity-index race on concurrent link/unlink~~ | ✅ Fixed |
+| ~~12~~ | ~~L4 — `isConnected()` reads localStorage only~~ | ✅ Fixed |

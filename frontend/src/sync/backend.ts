@@ -104,7 +104,11 @@ export class BackendSyncClient {
   }
 
   isConnected(): boolean {
-    return localStorage.getItem(connectedKey) === "true";
+    // Guard against the race where the cookie expires mid-session but localStorage
+    // still holds the connected flag. completeAuthorizationIfPresent() clears both
+    // keys on 401, but wasAuthExpired() being true means we already know auth lapsed.
+    return localStorage.getItem(connectedKey) === "true"
+      && localStorage.getItem(authExpiredKey) !== "true";
   }
 
   wasAuthExpired(): boolean {

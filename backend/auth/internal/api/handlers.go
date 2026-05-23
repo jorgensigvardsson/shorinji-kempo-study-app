@@ -72,7 +72,6 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /healthz", h.healthz)
 	inner.HandleFunc("GET /.well-known/jwks.json", h.jwks)
 	inner.HandleFunc("GET /auth/login", h.login)
-	inner.HandleFunc("GET /auth/resolve", h.resolve)
 	inner.HandleFunc("GET /auth/callback", h.callback)
 	inner.HandleFunc("POST /auth/refresh", h.refresh)
 	inner.HandleFunc("GET /auth/me", h.me)
@@ -97,30 +96,6 @@ func (h *Handler) jwks(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
-}
-
-// resolve checks whether a domain is supported without initiating the OIDC flow.
-// Used by the frontend for client-side preflight before redirecting.
-// Query param: email=user@example.com
-// Response: 200 {"provider":"google"} or 400 {"error":"..."}
-func (h *Handler) resolve(w http.ResponseWriter, r *http.Request) {
-	email := strings.TrimSpace(r.URL.Query().Get("email"))
-	parts := strings.SplitN(email, "@", 2)
-	if len(parts) != 2 || parts[1] == "" {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"error":"invalid email address"}`, http.StatusBadRequest)
-		return
-	}
-	domain := strings.ToLower(parts[1])
-	providerName, ok := h.domains[domain]
-	if !ok {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, `{"error":"no identity provider configured for domain %q"}`, domain)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"provider":%q}`, providerName)
 }
 
 // login resolves the user's email domain to an OIDC provider and initiates the flow.

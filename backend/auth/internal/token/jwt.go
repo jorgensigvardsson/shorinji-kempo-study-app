@@ -59,7 +59,7 @@ func (m *Manager) Verify(tokenStr string) (*Claims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 		return &m.privateKey.PublicKey, nil
-	}, jwt.WithIssuer(m.issuer), jwt.WithExpirationRequired())
+	}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(m.issuer), jwt.WithExpirationRequired())
 	if err != nil {
 		return nil, err
 	}
