@@ -8,6 +8,13 @@ const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://l
 
 const connectedKey = "sync-backend-connected";
 const authExpiredKey = "sync-backend-auth-expired";
+const userInfoKey = "sync-backend-user";
+
+export interface BackendUserInfo {
+  email: string;
+  displayName: string;
+  providers: string[];
+}
 
 export class BackendSyncClient {
   private pendingEmail: string | null = null;
@@ -35,7 +42,13 @@ export class BackendSyncClient {
     try {
       const resp = await fetch(`${authUrl}/auth/me`, { credentials: "include" });
       if (resp.ok) {
+        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown> };
         localStorage.setItem(connectedKey, "true");
+        localStorage.setItem(userInfoKey, JSON.stringify({
+          email: user.email,
+          displayName: user.displayName,
+          providers: Object.keys(user.linkedIdentities ?? {}),
+        } satisfies BackendUserInfo));
         localStorage.removeItem(authExpiredKey);
         return true;
       }
@@ -44,6 +57,12 @@ export class BackendSyncClient {
     }
     localStorage.removeItem(connectedKey);
     return false;
+  }
+
+  getUserInfo(): BackendUserInfo | null {
+    const raw = localStorage.getItem(userInfoKey);
+    if (!raw) return null;
+    try { return JSON.parse(raw) as BackendUserInfo; } catch { return null; }
   }
 
   isConnected(): boolean {
@@ -59,6 +78,7 @@ export class BackendSyncClient {
     fetch(`${authUrl}/auth/logout`, { method: "POST", credentials: "include" }).catch(() => {});
     localStorage.removeItem(connectedKey);
     localStorage.removeItem(authExpiredKey);
+    localStorage.removeItem(userInfoKey);
   }
 
   async downloadDocument(): Promise<AppDataDocument | null> {

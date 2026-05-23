@@ -3,7 +3,7 @@ import type { AppDataDocument, SyncProvider } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
 import { GoogleDriveClient } from "./google-drive";
 import { OneDriveClient } from "./onedrive";
-import { BackendSyncClient } from "./backend";
+import { BackendSyncClient, type BackendUserInfo } from "./backend";
 import { AuthExpiredError, type SyncResult, type SyncState } from "./types";
 
 const debug = import.meta.env.VITE_DEBUG === "true";
@@ -111,6 +111,10 @@ class SyncManager {
         : "Ansluter till backend...",
     });
     await client.beginAuthorization();
+  }
+
+  getBackendUserInfo(): BackendUserInfo | null {
+    return this.backendClient.getUserInfo();
   }
 
   // beginBackendAuthorization is called by the sign-in UI (Phase 4).
@@ -227,7 +231,7 @@ class SyncManager {
       this.retryCount = 0;
       this.setState({
         status: "connected",
-        message: provider === "onedrive" ? "Synkad med OneDrive." : "Synkad med Google Drive.",
+        message: provider === "onedrive" ? "Synkad med OneDrive." : provider === "google-drive" ? "Synkad med Google Drive." : "Synkad.",
         lastSyncedAt: new Date().toISOString(),
       });
       debugLog("[sync] Initial upload complete.");

@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
+import { Button, Form, Spinner } from "react-bootstrap";
 import type { Translator } from "./i18n";
 import { getSyncManager } from "./sync/manager";
+import "./LoginScreen.css";
 
 const authUrl = (import.meta.env.VITE_AUTH_URL as string | undefined) ?? "http://localhost:8081";
 
 interface Props {
   translator: Translator;
-  show: boolean;
   onContinueAnonymously: () => void;
 }
 
-export function SignInModal({ translator, show, onContinueAnonymously }: Props) {
+export function LoginScreen({ translator, onContinueAnonymously }: Props) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export function SignInModal({ translator, show, onContinueAnonymously }: Props) 
       );
       if (resp.ok) {
         getSyncManager().beginBackendAuthorization(trimmed);
-        // Page will navigate away; keep loading spinner shown.
+        // Page navigates away; keep spinner shown.
       } else {
         setError(translator.translate("Inloggning är inte tillgänglig för den här e-postdomänen."));
         setLoading(false);
@@ -43,14 +43,19 @@ export function SignInModal({ translator, show, onContinueAnonymously }: Props) 
   };
 
   return (
-    <Modal show={show} backdrop="static" centered keyboard={false}>
-      <Modal.Body className="p-4">
-        <p className="text-body-secondary mb-4">
+    <div className="login-screen">
+      <div className="login-screen-card">
+        <div className="login-screen-brand">
+          <img src="/shorinjikempo.png" alt="" className="login-screen-logo" />
+          <span className="login-screen-title">Shorinji Kempo</span>
+        </div>
+
+        <p className="text-body-secondary login-screen-subtitle">
           {translator.translate("Spara dina framsteg på alla enheter genom att logga in.")}
         </p>
 
         <Form onSubmit={(e) => { void handleSignIn(e); }}>
-          <Form.Group className="mb-3" controlId="signInEmail">
+          <Form.Group className="mb-3" controlId="loginEmail">
             <Form.Label>{translator.translate("Din e-postadress")}</Form.Label>
             <Form.Control
               type="email"
@@ -81,7 +86,7 @@ export function SignInModal({ translator, show, onContinueAnonymously }: Props) 
             {translator.translate("Fortsätt anonymt")}
           </Button>
         </div>
-      </Modal.Body>
-    </Modal>
+      </div>
+    </div>
   );
 }

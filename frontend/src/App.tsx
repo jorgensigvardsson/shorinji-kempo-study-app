@@ -10,7 +10,7 @@ import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 import { ArrowClockwise, ArrowLeftRight, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState } from './hooks';
 import { getSyncManager } from './sync/manager';
-import { SignInModal } from './SignInModal';
+import { LoginScreen } from './LoginScreen';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 
@@ -67,7 +67,8 @@ function App(props: Props) {
     textZoom,
     lang => languageData.save(lang),
     g => gradeData.save(g.grade),
-    size => textSizeData.save(size)
+    size => textSizeData.save(size),
+    () => setShowSignIn(true)
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
@@ -91,6 +92,16 @@ function App(props: Props) {
     setShowSignIn(false);
   };
 
+  if (showSignIn) {
+    return (
+      <TranslatorContext.Provider value={translator}>
+        <div style={{ zoom: textZoom }}>
+          <LoginScreen translator={translator} onContinueAnonymously={handleContinueAnonymously} />
+        </div>
+      </TranslatorContext.Provider>
+    );
+  }
+
   return (
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
@@ -100,11 +111,6 @@ function App(props: Props) {
           <Outlet />
         </div>
         <AppToasts translator={translator} />
-        <SignInModal
-          translator={translator}
-          show={showSignIn}
-          onContinueAnonymously={handleContinueAnonymously}
-        />
       </div>
     </TranslatorContext.Provider>
   )

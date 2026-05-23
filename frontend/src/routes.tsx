@@ -38,9 +38,9 @@ export const routeDescription = (route: Route) => {
 }
 
 export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes, ranksData: HokeiRanks,
-                          textSize: number, 
+                          textSize: number,
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
-                          setTextSize: (size: number) => void): Route[] => {
+                          setTextSize: (size: number) => void, onShowLogin: () => void): Route[] => {
     let routes: Route[] = [{
         path: "/",
         component: () => <Start routes={routes.filter(r => r.path && r.path !== "/" && !r.hideOnStartPage)
@@ -96,7 +96,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
     } satisfies Route] : []), {
         path: "/settings",
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={gradePlan} allGradePlans={allGradePlans} translator={translator}
-                                   textSize={textSize} onSetTextSize={setTextSize} />,
+                                   textSize={textSize} onSetTextSize={setTextSize} onShowLogin={onShowLogin} />,
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
