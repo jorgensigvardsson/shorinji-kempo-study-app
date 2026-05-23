@@ -65,6 +65,14 @@ module cosmos 'modules/cosmos.bicep' = {
   }
 }
 
+// Obtain the Cosmos primary key via listKeys() on an existing reference.
+// This keeps the key out of deployment history (module outputs are plain text).
+// cosmosAccountName is a known parameter — using it directly avoids a module-output
+// dependency that Bicep can't resolve at deployment start.
+resource cosmosAccountRef 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' existing = {
+  name: cosmosAccountName
+}
+
 module containerEnv 'modules/container-apps-env.bicep' = {
   name: 'container-apps-env'
   params: {
@@ -83,7 +91,7 @@ module authApp 'modules/auth-app.bicep' = {
     issuerUrl: 'https://${namePrefix}-auth.${containerEnv.outputs.environmentName}.azurecontainerapps.io'
     frontendUrl: 'https://app.shorinji.se'  // update to your actual frontend URL
     cosmosEndpoint: cosmos.outputs.endpoint
-    cosmosKey: cosmos.outputs.primaryKey
+    cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
     googleClientId: googleClientId
     googleClientSecret: googleClientSecret
@@ -104,7 +112,7 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     image: persistenceImage
     authServiceUrl: 'https://${authApp.outputs.fqdn}'
     cosmosEndpoint: cosmos.outputs.endpoint
-    cosmosKey: cosmos.outputs.primaryKey
+    cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
   }
 }

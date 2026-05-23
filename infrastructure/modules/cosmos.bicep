@@ -30,9 +30,16 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   properties: {
     enableFreeTier: true
     databaseAccountOfferType: 'Standard'
+
+    // Keep TLS 1.2 as the minimum — matches the portal's security baseline.
+    minimalTlsVersion: 'Tls12'
+
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
+      maxIntervalInSeconds: 5
+      maxStalenessPrefix: 100
     }
+
     locations: [
       {
         locationName: location
@@ -40,7 +47,30 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
         isZoneRedundant: false
       }
     ]
+
+    // Automatic failover was enabled in the portal; keep it here so a redeploy
+    // doesn't silently disable it.
+    enableAutomaticFailover: true
+    enableMultipleWriteLocations: false
+
     capabilities: []
+
+    // Continuous backup (7-day retention) — this is a one-way upgrade; once set
+    // it cannot be downgraded via ARM. Must be declared here so the pipeline
+    // doesn't try to revert to periodic backup and fail.
+    backupPolicy: {
+      type: 'Continuous'
+      continuousModeProperties: {
+        tier: 'Continuous7Days'
+      }
+    }
+
+    // Free-tier hard cap: 1 000 RU/s total across all containers.
+    // Without this the cap could be lifted on redeploy.
+    capacity: {
+      totalThroughputLimit: 1000
+    }
+
   }
 }
 
@@ -113,7 +143,9 @@ resource documentsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
 }
 
 // Outputs consumed by the container app modules.
+// NOTE: The primary key is intentionally NOT output here — module outputs are
+// stored in plain text in the deployment history. The caller (main.bicep) should
+// obtain the key via an `existing` resource reference and listKeys() directly.
 output accountName string = cosmosAccount.name
 output endpoint string = cosmosAccount.properties.documentEndpoint
-output primaryKey string = cosmosAccount.listKeys().primaryMasterKey
 output databaseName string = databaseName
