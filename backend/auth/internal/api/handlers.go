@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	accessCookieName = "access_token"
-	stateTTL         = 10 * time.Minute
+	accessCookieName  = "access_token"
+	refreshCookieName = "refresh_token"
+	stateTTL          = 10 * time.Minute
 )
 
 type pendingState struct {
@@ -31,32 +32,35 @@ type pendingState struct {
 }
 
 type Handler struct {
-	providers   map[string]provider.Provider // provider name → provider
-	domains     map[string]string            // email domain → provider name
-	users       store.UserStore
-	tokens      *token.Manager
-	frontendURL string
-	limiter     *ratelimit.IPRateLimiter
-	mu          sync.Mutex
-	pending     map[string]pendingState
+	providers     map[string]provider.Provider // provider name → provider
+	domains       map[string]string            // email domain → provider name
+	users         store.UserStore
+	refreshTokens store.RefreshTokenStore
+	tokens        *token.Manager
+	frontendURL   string
+	limiter       *ratelimit.IPRateLimiter
+	mu            sync.Mutex
+	pending       map[string]pendingState
 }
 
 func NewHandler(
 	providers map[string]provider.Provider,
 	domains map[string]string,
 	users store.UserStore,
+	refreshTokens store.RefreshTokenStore,
 	tokens *token.Manager,
 	frontendURL string,
 	limiter *ratelimit.IPRateLimiter,
 ) *Handler {
 	h := &Handler{
-		providers:   providers,
-		domains:     domains,
-		users:       users,
-		tokens:      tokens,
-		frontendURL: frontendURL,
-		limiter:     limiter,
-		pending:     make(map[string]pendingState),
+		providers:     providers,
+		domains:       domains,
+		users:         users,
+		refreshTokens: refreshTokens,
+		tokens:        tokens,
+		frontendURL:   frontendURL,
+		limiter:       limiter,
+		pending:       make(map[string]pendingState),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -69,6 +73,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/login", h.login)
 	inner.HandleFunc("GET /auth/resolve", h.resolve)
 	inner.HandleFunc("GET /auth/callback", h.callback)
+	inner.HandleFunc("POST /auth/refresh", h.refresh)
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
@@ -268,15 +273,14 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     accessCookieName,
-		Value:    accessToken,
-		Path:     "/",
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int(token.AccessTokenTTL.Seconds()),
-	})
+	rt := store.NewRefreshToken(user.ID)
+	if err := h.refreshTokens.Create(rt); err != nil {
+		log.Printf("refresh token create for %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 
+	h.setTokenCookies(w, accessToken, rt.ID)
 	http.Redirect(w, r, h.frontendURL+"?auth_success=1", http.StatusFound)
 }
 
@@ -295,14 +299,61 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie(refreshCookieName)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	rt, err := h.refreshTokens.Find(cookie.Value)
+	if err != nil {
+		log.Printf("refresh token lookup: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if rt == nil {
+		h.clearTokenCookies(w)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Rotate: delete old token, issue new one.
+	if err := h.refreshTokens.Delete(rt.ID); err != nil {
+		log.Printf("refresh token delete %s: %v", rt.ID, err)
+	}
+
+	user, err := h.users.FindByID(rt.UserID)
+	if err != nil || user == nil {
+		h.clearTokenCookies(w)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	newRT := store.NewRefreshToken(user.ID)
+	if err := h.refreshTokens.Create(newRT); err != nil {
+		log.Printf("refresh token create for %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	accessToken, err := h.tokens.Issue(user.ID, user.Email)
+	if err != nil {
+		log.Printf("token issue for %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	h.setTokenCookies(w, accessToken, newRT.ID)
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     accessCookieName,
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		MaxAge:   -1,
-	})
+	if cookie, err := r.Cookie(refreshCookieName); err == nil {
+		if err := h.refreshTokens.Delete(cookie.Value); err != nil {
+			log.Printf("logout: refresh token delete: %v", err)
+		}
+	}
+	h.clearTokenCookies(w)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -312,11 +363,38 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+	if err := h.refreshTokens.DeleteByUserID(claims.Subject); err != nil {
+		log.Printf("deleteAccount refresh tokens %s: %v", claims.Subject, err)
+	}
 	if err := h.users.Delete(claims.Subject); err != nil {
 		log.Printf("deleteAccount %s: %v", claims.Subject, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	h.clearTokenCookies(w)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) setTokenCookies(w http.ResponseWriter, accessToken, refreshToken string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     accessCookieName,
+		Value:    accessToken,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(token.AccessTokenTTL.Seconds()),
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     refreshCookieName,
+		Value:    refreshToken,
+		Path:     "/auth/refresh",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(store.RefreshTokenTTL.Seconds()),
+	})
+}
+
+func (h *Handler) clearTokenCookies(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     accessCookieName,
 		Value:    "",
@@ -324,7 +402,13 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		MaxAge:   -1,
 	})
-	w.WriteHeader(http.StatusNoContent)
+	http.SetCookie(w, &http.Cookie{
+		Name:     refreshCookieName,
+		Value:    "",
+		Path:     "/auth/refresh",
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
 }
 
 // linkAccount initiates an OIDC flow to add another provider identity to the

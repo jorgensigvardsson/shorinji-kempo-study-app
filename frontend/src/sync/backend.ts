@@ -35,12 +35,47 @@ export class BackendSyncClient {
     window.location.href = `${authUrl}/auth/login?email=${encodeURIComponent(this.pendingEmail)}`;
   }
 
+  // Attempts a silent token refresh via the refresh_token cookie.
+  // Returns true if the server issued a new access token.
+  private async tryRefresh(): Promise<boolean> {
+    try {
+      const resp = await fetch(`${authUrl}/auth/refresh`, { method: "POST", credentials: "include" });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  // Fetches with automatic silent refresh on 401. On refresh failure marks auth as expired.
+  private async fetchWithRefresh(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    let resp = await fetch(input, { credentials: "include", ...init });
+    if (resp.status === 401) {
+      const refreshed = await this.tryRefresh();
+      if (refreshed) {
+        resp = await fetch(input, { credentials: "include", ...init });
+      }
+    }
+    if (resp.status === 401) {
+      localStorage.setItem(authExpiredKey, "true");
+      localStorage.removeItem(connectedKey);
+      throw new AuthExpiredError();
+    }
+    return resp;
+  }
+
   // Verifies the current session by calling /auth/me.
   // Returns true if a valid session exists (covers both fresh login and returning users).
   // The caller (SyncManager) handles the ?auth_success=1 redirect detection separately.
   async completeAuthorizationIfPresent(): Promise<boolean> {
     try {
-      const resp = await fetch(`${authUrl}/auth/me`, { credentials: "include" });
+      let resp = await fetch(`${authUrl}/auth/me`, { credentials: "include" });
+      if (resp.status === 401) {
+        // Access token expired — attempt silent refresh before giving up.
+        const refreshed = await this.tryRefresh();
+        if (refreshed) {
+          resp = await fetch(`${authUrl}/auth/me`, { credentials: "include" });
+        }
+      }
       if (resp.ok) {
         const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown> };
         localStorage.setItem(connectedKey, "true");
@@ -53,7 +88,6 @@ export class BackendSyncClient {
         return true;
       }
       if (resp.status === 401) {
-        // Token has expired or was revoked — mark so handleProviderChanged sets auth_expired.
         localStorage.setItem(authExpiredKey, "true");
       }
     } catch {
@@ -86,29 +120,29 @@ export class BackendSyncClient {
   }
 
   async downloadDocument(): Promise<AppDataDocument | null> {
-    const resp = await fetch(`${apiUrl}/api/v1/document`, { credentials: "include" });
+    let resp = await fetch(`${apiUrl}/api/v1/document`, { credentials: "include" });
     if (resp.status === 404) return null;
+    if (resp.status === 401) {
+      const refreshed = await this.tryRefresh();
+      if (refreshed) resp = await fetch(`${apiUrl}/api/v1/document`, { credentials: "include" });
+    }
     if (resp.status === 401) {
       localStorage.setItem(authExpiredKey, "true");
       localStorage.removeItem(connectedKey);
       throw new AuthExpiredError();
     }
+    if (resp.status === 404) return null;
     if (!resp.ok) throw new Error(`GET /api/v1/document: ${resp.status}`);
     return resp.json() as Promise<AppDataDocument>;
   }
 
   async uploadDocument(document: AppDataDocument): Promise<void> {
-    const resp = await fetch(`${apiUrl}/api/v1/document`, {
+    const init: RequestInit = {
       method: "PUT",
-      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(document),
-    });
-    if (resp.status === 401) {
-      localStorage.setItem(authExpiredKey, "true");
-      localStorage.removeItem(connectedKey);
-      throw new AuthExpiredError();
-    }
+    };
+    const resp = await this.fetchWithRefresh(`${apiUrl}/api/v1/document`, init);
     if (!resp.ok) throw new Error(`PUT /api/v1/document: ${resp.status}`);
   }
 
@@ -121,15 +155,7 @@ export class BackendSyncClient {
   // Removes a provider identity from the current account.
   // Refreshes stored user info from /auth/me on success.
   async unlinkProvider(provider: string): Promise<void> {
-    const resp = await fetch(`${authUrl}/auth/link/${encodeURIComponent(provider)}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    if (resp.status === 401) {
-      localStorage.setItem(authExpiredKey, "true");
-      localStorage.removeItem(connectedKey);
-      throw new AuthExpiredError();
-    }
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/link/${encodeURIComponent(provider)}`, { method: "DELETE" });
     if (resp.status === 409) throw new Error("last-provider");
     if (!resp.ok) throw new Error(`DELETE /auth/link/${provider}: ${resp.status}`);
     // Refresh stored user info so the UI reflects the change immediately.

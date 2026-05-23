@@ -12,12 +12,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// AccessTokenTTL is intentionally generous: a typical Shorinji Kempo training
-// session runs 2 hours, but with warm-up, cool-down, and travel it can stretch
-// past 4 hours. 8 hours covers a full training day without forcing mid-session
-// re-authentication. Proper refresh-token rotation (Phase 7) will make this
-// a non-issue in production.
-const AccessTokenTTL = 8 * time.Hour
+// AccessTokenTTL is short-lived; the client uses the refresh token to obtain a
+// new access token transparently before it expires.
+const AccessTokenTTL = 1 * time.Hour
 
 type Claims struct {
 	jwt.RegisteredClaims

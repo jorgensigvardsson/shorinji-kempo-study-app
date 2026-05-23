@@ -37,6 +37,8 @@ services:
       MICROSOFT_REDIRECT_URI: "http://localhost:8081/auth/callback"
       MICROSOFT_CLIENT_ID: "${MICROSOFT_CLIENT_ID}"
       MICROSOFT_CLIENT_SECRET: "${MICROSOFT_CLIENT_SECRET}"
+      COSMOS_ENDPOINT: "${COSMOS_ENDPOINT}"
+      COSMOS_KEY: "${COSMOS_KEY}"
       RATE_LIMIT_RPS: "1"
       RATE_LIMIT_BURST: "5"
     healthcheck:
@@ -63,7 +65,12 @@ services:
     environment:
       SERVICE_LISTEN_ADDRESS: ":8080"
       SERVICE_FRONTEND_URL: "http://localhost:5173"
+      SERVICE_STORAGE: "cosmosdb"
       AUTH_JWKS_URL: "http://auth:8081/.well-known/jwks.json"
+      COSMOS_DB_ENDPOINT: "${COSMOS_ENDPOINT}"
+      COSMOS_DB_KEY: "${COSMOS_KEY}"
+      COSMOS_DB_DATABASE: "shorinji"
+      COSMOS_DB_CONTAINER: "documents"
       RATE_LIMIT_RPS: "2"
       RATE_LIMIT_BURST: "10"
 

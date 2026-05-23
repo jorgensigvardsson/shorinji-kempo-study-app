@@ -40,7 +40,14 @@ func main() {
 		if *cosmosEndpoint == "" || *cosmosKey == "" || *cosmosDatabase == "" || *cosmosContainer == "" {
 			log.Fatal("cosmosdb backend requires --cosmosdb-endpoint, --cosmosdb-key, --cosmosdb-database, and --cosmosdb-container")
 		}
-		s = store.NewCosmosDBStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer)
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer); err != nil {
+			log.Fatalf("cosmos provisioning: %v", err)
+		}
+		cs, err := store.NewCosmosDBStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer)
+		if err != nil {
+			log.Fatalf("init CosmosDB store: %v", err)
+		}
+		s = cs
 	default:
 		log.Fatalf("unknown storage backend %q (choose file or cosmosdb)", *storage)
 	}

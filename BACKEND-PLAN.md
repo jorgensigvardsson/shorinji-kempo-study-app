@@ -423,10 +423,17 @@ New `backend/gdpr` Go service (same structure as auth/persistence):
 - ToS acceptance checkbox recorded on first login (stored in user record)
 - Privacy Policy updated with data controller name and contact address
 
-### Phase 7 — Production hardening
-- Replace file stores with Cosmos DB in both services
-- Refresh token rotation and revocation
-- Config-driven provider list for future additions
+### Phase 7 — Production hardening ✅
+- Cosmos DB stores for both auth (users, identity_index, refresh_tokens) and persistence (documents)
+  - Dual-container identity index for O(1) `FindByLinkedIdentity` lookups without cross-partition queries
+  - Optimised indexing: `none` for point-read-only containers; `consistent` (all paths excluded) for refresh_tokens partition scans
+  - Self-provisioning: services create database and containers on startup if they don't exist
+- Refresh token rotation and revocation: `POST /auth/refresh` rotates on use; logout and account deletion revoke server-side
+- Access token TTL reduced from 8 h → 1 h; frontend silently refreshes on 401 before surfacing `AuthExpiredError`
+- `--key-pem` / `SERVICE_KEY_PEM` flag for secret injection in Azure Container Apps (no file volume needed)
+- Store auto-selection: Cosmos when `COSMOS_ENDPOINT` is set, file store otherwise (dev stays zero-config)
+- Azure infrastructure as code: modular Bicep files for Cosmos DB (free tier), Container Apps Environment, auth and persistence Container Apps
+- `tools/migrate` one-shot tool: provisions Cosmos, migrates file-store data (users + identity index + documents), supports `--dry-run`
 
 ### Phase 8 — More OIDC providers
 Two categories of provider support:
