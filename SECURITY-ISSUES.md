@@ -10,45 +10,30 @@ Severity scale: **Critical → High → Medium → Low → Informational**
 
 ## Critical
 
-### C1 — Logout silently does not revoke the refresh token
-**Files**: `backend/auth/internal/api/handlers.go` — `logout` (line ~350), `setTokenCookies` (line ~378)
+### ~~C1 — Logout silently does not revoke the refresh token~~ ✅ Fixed
+**Fixed in commit `437a476`**
 
-The refresh cookie is set with `Path: "/auth/refresh"`. Browsers therefore don't send it on
-`POST /auth/logout`, so `r.Cookie(refreshCookieName)` returns `ErrNoCookie`, the deletion is
-skipped, and the server-side token persists for up to 30 days.
-
-**Impact**: a stolen refresh token survives the user clicking "Sign out".
-
-**Fix**: read the user ID from the access cookie (path "/") inside `logout` and call
-`refreshTokens.DeleteByUserID(sub)`, or broaden the refresh cookie path to `/auth/` and place
-both endpoints under that prefix.
+The refresh cookie was path-scoped to `/auth/refresh`; browsers don't send it on
+`POST /auth/logout`. `logout` now reads the user ID from the access token cookie (path `/`)
+and calls `refreshTokens.DeleteByUserID(sub)`, revoking all server-side refresh tokens on
+sign-out.
 
 ---
 
-### C2 — Persistence service does not validate JWT issuer or require `exp`
-**File**: `backend/persistence/internal/api/middleware.go` — `authMiddleware`
+### ~~C2 — Persistence service does not validate JWT issuer or require `exp`~~ ✅ Fixed
+**Fixed in commit `437a476`**
 
-`jwt.Parse` is called with only `jwt.WithValidMethods([]string{"RS256"})`. No
-`jwt.WithIssuer(...)` and no `jwt.WithExpirationRequired()`. The middleware accepts any RS256
-token signed by any key in its JWKS cache, regardless of issuer; tokens missing `exp` are also
-accepted.
-
-**Impact**: if the JWKS endpoint is ever misconfigured or DNS-hijacked, arbitrary tokens become
-valid.
-
-**Fix**: add `jwt.WithIssuer(expectedIssuer)` (env-configurable, matching `SERVICE_ISSUER` on
-the auth side) and `jwt.WithExpirationRequired()`.
+`authMiddleware` now passes `jwt.WithIssuer(issuerURL)` and `jwt.WithExpirationRequired()`.
+The expected issuer is configurable via `AUTH_ISSUER_URL` (docker-compose + Bicep wired
+through to the persistence container).
 
 ---
 
-### C3 — Cookies set without the `Secure` flag
-**File**: `backend/auth/internal/api/handlers.go` — `setTokenCookies`, `clearTokenCookies`
+### ~~C3 — Cookies set without the `Secure` flag~~ ✅ Fixed
+**Fixed in commit `437a476`**
 
-Neither function sets `Secure: true`. In any HTTP scenario (mixed-content downgrade,
-staging URL, dev misconfiguration), access and refresh tokens are transmitted in cleartext.
-
-**Fix**: `Secure: true` unconditionally in production. Gate behind an env flag if the dev
-environment uses `http://localhost`.
+`Secure: true` added to both cookies in `setTokenCookies` and `clearTokenCookies`. Browsers
+honour `Secure` on `localhost`, so the dev flow is unaffected.
 
 ---
 
@@ -78,27 +63,19 @@ supplied by the client.
 
 ---
 
-### H3 — `crypto/rand.Read` errors silently ignored
-**Files**:
-- `backend/auth/internal/api/handlers.go` — `randomString` (OIDC state + nonce)
-- `backend/auth/internal/store/refresh.go` — `NewRefreshToken`
+### ~~H3 — `crypto/rand.Read` errors silently ignored~~ ✅ Fixed
+**Fixed in commit `437a476`**
 
-If `rand.Read` fails, these functions return a string of zeros. Predictable state/nonce defeats
-OIDC CSRF protection; a predictable refresh token suffix exposes all tokens for any user whose
-ID is known.
-
-**Fix**: panic or propagate the error — both call sites have existing error-return paths.
+`randomString` now returns `(string, error)`; `NewRefreshToken` returns `(*RefreshToken, error)`.
+All call sites propagate errors and return 500.
 
 ---
 
-### H4 — No request body size limit on `PUT /api/v1/document`
-**File**: `backend/persistence/internal/api/handlers.go` — `putDocument`
+### ~~H4 — No request body size limit on `PUT /api/v1/document`~~ ✅ Fixed
+**Fixed in commit `437a476`**
 
-`json.NewDecoder(r.Body).Decode(&doc)` reads until EOF. An authenticated attacker can stream
-gigabytes; the service OOMs before Cosmos's 2 MB item limit has any effect.
-
-**Fix**: `http.MaxBytesReader(w, r.Body, 1<<20)` (or a config-appropriate ceiling) before
-decoding.
+`putDocument` now wraps the body with `http.MaxBytesReader(w, r.Body, 1<<20)`. Payloads over
+1 MB get a 413 before the JSON decoder runs. This also resolves L5.
 
 ---
 
@@ -108,7 +85,7 @@ decoding.
 **File**: `backend/persistence/internal/jwks/cache.go` — `Refresh`
 
 `http.Get(c.url)` uses the default client (no timeout). A hanging auth service stalls the
-refresh goroutine indefinitely. No `MaxBytesReader` on the response body.
+refresh goroutine indefinitely. No size limit on the response body.
 
 **Fix**: dedicated `*http.Client` with (e.g.) a 10 s timeout; wrap body with
 `http.MaxBytesReader`.
@@ -206,16 +183,18 @@ every real request; this is a confusing-state issue, not an exploit.
 
 ---
 
-### L5 — No per-document size enforcement at the store layer
-Cosmos enforces a 2 MB item limit server-side; there is no earlier enforcement in the
-persistence service code. Combined with H4, Cosmos is the only backstop.
+### ~~L5 — No per-document size enforcement at the store layer~~ ✅ Fixed
+**Fixed as part of H4 in commit `437a476`**
+
+The 1 MB `MaxBytesReader` cap on `PUT /api/v1/document` now enforces a limit well below
+Cosmos's 2 MB hard cap.
 
 ---
 
 ## Informational — Already Handled Well
 
 - Bicep secret handling: `@secure()` parameters routed through `secrets:` + `secretRef:`.
-- Refresh cookie is `HttpOnly`; access cookie is `HttpOnly` with path `/`.
+- Refresh cookie is `HttpOnly` and `Secure`; access cookie is `HttpOnly`, `Secure`, path `/`.
 - Both cookies use `SameSite=Lax` — correct for OIDC redirect flows.
 - `identity_index` uses SHA-256(provider:sub): no Cosmos ID injection via OIDC `sub` values.
 - Refresh token format encodes user ID: no cross-partition queries needed, and the random
@@ -226,15 +205,19 @@ persistence service code. Combined with H4, Cosmos is the only backstop.
 
 ---
 
-## Fix Priority
+## Open Issues — Fix Priority
 
 | # | Finding | Effort |
 |---|---------|--------|
-| 1 | C1 — logout doesn't revoke refresh token | Small |
-| 2 | C2 — persistence missing issuer + exp validation | Small |
-| 3 | C3 — cookies missing `Secure` flag | Trivial |
-| 4 | H3 — rand.Read errors silently ignored | Trivial |
-| 5 | H4 — no body size limit on PUT /api/v1/document | Trivial |
-| 6 | H2 — rate limiter trusts leftmost XFF | Small |
-| 7 | H1 — refresh token reuse detection | Medium |
-| 8 | M1–M6 | Small–Medium each |
+| 1 | H1 — refresh token reuse detection | Medium |
+| 2 | H2 — rate limiter trusts leftmost XFF | Small |
+| 3 | M1 — JWKS fetch: no timeout, no size limit | Small |
+| 4 | M2 — no security response headers | Small |
+| 5 | M3 — migration tool: Cosmos key via CLI flag | Small |
+| 6 | M4 — identity link: no email ownership check | Medium |
+| 7 | M5 — OIDC state in-process only (multi-replica) | Medium |
+| 8 | M6 — missing `Vary: Origin` on CORS responses | Trivial |
+| 9 | L1 — `Verify` missing `WithValidMethods` | Trivial |
+| 10 | L2 — domain enumeration via `/auth/resolve` | Accept or Low-effort fix |
+| 11 | L3 — identity-index race on concurrent link/unlink | Medium |
+| 12 | L4 — `isConnected()` reads localStorage only | Low |
