@@ -76,6 +76,34 @@ func (s *CosmosRefreshTokenStore) Find(tokenID string) (*RefreshToken, error) {
 	return &t, nil
 }
 
+func (s *CosmosRefreshTokenStore) FindByFamilyID(userID, familyID string) (*RefreshToken, error) {
+	ctx := context.Background()
+	pk := azcosmos.NewPartitionKeyString(userID)
+	query := "SELECT * FROM c WHERE c.familyId = @fid"
+	opts := &azcosmos.QueryOptions{
+		QueryParameters: []azcosmos.QueryParameter{{Name: "@fid", Value: familyID}},
+	}
+	pager := s.container.NewQueryItemsPager(query, pk, opts)
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos query refresh tokens by family %s: %w", familyID, err)
+		}
+		for _, raw := range page.Items {
+			var t RefreshToken
+			if err := json.Unmarshal(raw, &t); err != nil {
+				continue
+			}
+			exp, err := time.Parse(time.RFC3339, t.ExpiresAt)
+			if err != nil || time.Now().After(exp) {
+				continue
+			}
+			return &t, nil
+		}
+	}
+	return nil, nil
+}
+
 func (s *CosmosRefreshTokenStore) Delete(tokenID string) error {
 	userID, ok := UserIDFromTokenID(tokenID)
 	if !ok {

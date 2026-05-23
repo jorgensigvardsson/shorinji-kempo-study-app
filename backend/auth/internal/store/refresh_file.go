@@ -72,6 +72,39 @@ func (s *FileRefreshTokenStore) Delete(tokenID string) error {
 	return err
 }
 
+func (s *FileRefreshTokenStore) FindByFamilyID(userID, familyID string) (*RefreshToken, error) {
+	dir := filepath.Join(s.baseDir, userID)
+	entries, err := os.ReadDir(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			continue
+		}
+		var t RefreshToken
+		if err := json.Unmarshal(data, &t); err != nil {
+			continue
+		}
+		if t.FamilyID != familyID {
+			continue
+		}
+		exp, err := time.Parse(time.RFC3339, t.ExpiresAt)
+		if err != nil || time.Now().After(exp) {
+			continue
+		}
+		return &t, nil
+	}
+	return nil, nil
+}
+
 func (s *FileRefreshTokenStore) DeleteByUserID(userID string) error {
 	dir := filepath.Join(s.baseDir, userID)
 	entries, err := os.ReadDir(dir)

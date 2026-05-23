@@ -283,7 +283,13 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rt, err := store.NewRefreshToken(user.ID)
+	familyID, err := store.NewFamilyID()
+	if err != nil {
+		log.Printf("family ID generate for %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	rt, err := store.NewRefreshToken(user.ID, familyID)
 	if err != nil {
 		log.Printf("refresh token generate for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -327,12 +333,28 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if rt == nil {
+		// Token not found — check for token replay (OAuth 2.1 BCP §4.13.2).
+		// If the presented token belongs to a family that still has an active member,
+		// the token was stolen and replayed after rotation → revoke all user tokens.
+		userID, hasUser := store.UserIDFromTokenID(cookie.Value)
+		familyID, hasFamily := store.FamilyIDFromTokenID(cookie.Value)
+		if hasUser && hasFamily {
+			active, ferr := h.refreshTokens.FindByFamilyID(userID, familyID)
+			if ferr != nil {
+				log.Printf("refresh: family lookup %s/%s: %v", userID, familyID, ferr)
+			} else if active != nil {
+				log.Printf("refresh: token replay detected for user %s family %s — revoking all tokens", userID, familyID)
+				if err := h.refreshTokens.DeleteByUserID(userID); err != nil {
+					log.Printf("refresh: revoke all tokens for %s: %v", userID, err)
+				}
+			}
+		}
 		h.clearTokenCookies(w)
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Rotate: delete old token, issue new one.
+	// Rotate: delete old token, issue new one in the same family.
 	if err := h.refreshTokens.Delete(rt.ID); err != nil {
 		log.Printf("refresh token delete %s: %v", rt.ID, err)
 	}
@@ -344,7 +366,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newRT, err := store.NewRefreshToken(user.ID)
+	newRT, err := store.NewRefreshToken(user.ID, rt.FamilyID)
 	if err != nil {
 		log.Printf("refresh token generate for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)

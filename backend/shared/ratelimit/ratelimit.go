@@ -88,13 +88,13 @@ func (l *IPRateLimiter) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-// clientIP extracts the real client IP, respecting X-Forwarded-For from a trusted proxy.
+// clientIP extracts the real client IP from the request.
+// The rightmost X-Forwarded-For value is used: ACA's ingress always appends the
+// real client IP, whereas leftmost values are client-supplied and must not be trusted.
 func clientIP(r *http.Request) string {
 	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if i := strings.IndexByte(xff, ','); i > 0 {
-			return strings.TrimSpace(xff[:i])
-		}
-		return strings.TrimSpace(xff)
+		parts := strings.Split(xff, ",")
+		return strings.TrimSpace(parts[len(parts)-1])
 	}
 	if xri := r.Header.Get("X-Real-IP"); xri != "" {
 		return strings.TrimSpace(xri)

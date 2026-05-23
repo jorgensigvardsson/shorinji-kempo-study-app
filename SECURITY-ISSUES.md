@@ -39,27 +39,21 @@ honour `Secure` on `localhost`, so the dev flow is unaffected.
 
 ## High
 
-### H1 — Refresh token rotation lacks reuse detection
-**File**: `backend/auth/internal/api/handlers.go` — `refresh`
+### ~~H1 — Refresh token rotation lacks reuse detection~~ ✅ Fixed
+**Fixed in commit `TBD_H1H2`**
 
-Rotation is implemented (old token deleted, new one issued), but there is no detection of a
-previously-used token being presented again. A stolen refresh token lets an attacker keep
-rotating indefinitely in parallel with the legitimate user.
-
-**Fix**: per OAuth 2.1 BCP §4.13.2, when a refresh token from a known-deleted "family" is
-presented, revoke all refresh tokens for that user. Requires storing a family ID that persists
-across rotations.
+Token family IDs are now embedded in the token format (`{userID}.{familyID}.{secret}`).
+On rotation the family ID is inherited; on a fresh login a new family ID is generated via
+`NewFamilyID()`. If a deleted token is presented and its family still has an active member,
+all tokens for that user are immediately revoked (OAuth 2.1 BCP §4.13.2).
 
 ---
 
-### H2 — Rate limiter trusts client-supplied `X-Forwarded-For` (leftmost value)
-**File**: `backend/shared/ratelimit/ratelimit.go` — `clientIP`
+### ~~H2 — Rate limiter trusts client-supplied `X-Forwarded-For` (leftmost value)~~ ✅ Fixed
+**Fixed in commit `TBD_H1H2`**
 
-The leftmost XFF value is used as the client IP. ACA's ingress appends to whatever the client
-sent; an attacker sends a different IP on every request, bypassing per-IP limits entirely.
-
-**Fix**: trust the rightmost IP — the one appended by the known trusted proxy, not the one
-supplied by the client.
+`clientIP` now uses the rightmost XFF value — the IP appended by ACA's ingress — instead
+of the leftmost value supplied by the client.
 
 ---
 
@@ -209,8 +203,8 @@ Cosmos's 2 MB hard cap.
 
 | # | Finding | Effort |
 |---|---------|--------|
-| 1 | H1 — refresh token reuse detection | Medium |
-| 2 | H2 — rate limiter trusts leftmost XFF | Small |
+| ~~1~~ | ~~H1 — refresh token reuse detection~~ | ✅ Fixed |
+| ~~2~~ | ~~H2 — rate limiter trusts leftmost XFF~~ | ✅ Fixed |
 | 3 | M1 — JWKS fetch: no timeout, no size limit | Small |
 | 4 | M2 — no security response headers | Small |
 | 5 | M3 — migration tool: Cosmos key via CLI flag | Small |
