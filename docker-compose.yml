@@ -67,6 +67,7 @@ services:
       SERVICE_FRONTEND_URL: "http://localhost:5173"
       SERVICE_STORAGE: "cosmosdb"
       AUTH_JWKS_URL: "http://auth:8081/.well-known/jwks.json"
+      AUTH_ISSUER_URL: "http://localhost:8081"
       COSMOS_DB_ENDPOINT: "${COSMOS_ENDPOINT}"
       COSMOS_DB_KEY: "${COSMOS_KEY}"
       COSMOS_DB_DATABASE: "shorinji"

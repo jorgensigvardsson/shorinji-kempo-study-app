@@ -150,8 +150,18 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	state := randomString(32)
-	nonce := randomString(32)
+	state, err := randomString(32)
+	if err != nil {
+		log.Printf("login: randomString: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	nonce, err := randomString(32)
+	if err != nil {
+		log.Printf("login: randomString: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 
 	h.mu.Lock()
 	h.pending[state] = pendingState{
@@ -273,7 +283,12 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rt := store.NewRefreshToken(user.ID)
+	rt, err := store.NewRefreshToken(user.ID)
+	if err != nil {
+		log.Printf("refresh token generate for %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	if err := h.refreshTokens.Create(rt); err != nil {
 		log.Printf("refresh token create for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -329,7 +344,12 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newRT := store.NewRefreshToken(user.ID)
+	newRT, err := store.NewRefreshToken(user.ID)
+	if err != nil {
+		log.Printf("refresh token generate for %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	if err := h.refreshTokens.Create(newRT); err != nil {
 		log.Printf("refresh token create for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -348,9 +368,11 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	if cookie, err := r.Cookie(refreshCookieName); err == nil {
-		if err := h.refreshTokens.Delete(cookie.Value); err != nil {
-			log.Printf("logout: refresh token delete: %v", err)
+	// The refresh cookie is path-scoped to /auth/refresh and won't arrive here.
+	// Derive the user ID from the access token (path "/") and revoke all their tokens.
+	if claims, err := h.claimsFromRequest(r); err == nil {
+		if err := h.refreshTokens.DeleteByUserID(claims.Subject); err != nil {
+			log.Printf("logout: delete refresh tokens for %s: %v", claims.Subject, err)
 		}
 	}
 	h.clearTokenCookies(w)
@@ -381,6 +403,7 @@ func (h *Handler) setTokenCookies(w http.ResponseWriter, accessToken, refreshTok
 		Value:    accessToken,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(token.AccessTokenTTL.Seconds()),
 	})
@@ -389,6 +412,7 @@ func (h *Handler) setTokenCookies(w http.ResponseWriter, accessToken, refreshTok
 		Value:    refreshToken,
 		Path:     "/auth/refresh",
 		HttpOnly: true,
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(store.RefreshTokenTTL.Seconds()),
 	})
@@ -400,6 +424,7 @@ func (h *Handler) clearTokenCookies(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   true,
 		MaxAge:   -1,
 	})
 	http.SetCookie(w, &http.Cookie{
@@ -407,6 +432,7 @@ func (h *Handler) clearTokenCookies(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/auth/refresh",
 		HttpOnly: true,
+		Secure:   true,
 		MaxAge:   -1,
 	})
 }
@@ -444,8 +470,18 @@ func (h *Handler) linkAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	state := randomString(32)
-	nonce := randomString(32)
+	state, err := randomString(32)
+	if err != nil {
+		log.Printf("linkAccount: randomString: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	nonce, err := randomString(32)
+	if err != nil {
+		log.Printf("linkAccount: randomString: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 
 	h.mu.Lock()
 	h.pending[state] = pendingState{
@@ -518,10 +554,12 @@ func (h *Handler) sweepExpiredStates() {
 	}
 }
 
-func randomString(n int) string {
+func randomString(n int) (string, error) {
 	b := make([]byte, n)
-	rand.Read(b)
-	return base64.RawURLEncoding.EncodeToString(b)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("rand.Read: %w", err)
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
 // newUUID generates a random UUID v4.

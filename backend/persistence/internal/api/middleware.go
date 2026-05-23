@@ -21,7 +21,7 @@ type KeySource interface {
 
 // authMiddleware validates the access_token cookie as an RS256 JWT and puts the
 // sub claim into the request context. Requests without a valid token get 401.
-func authMiddleware(ks KeySource, next http.Handler) http.Handler {
+func authMiddleware(ks KeySource, issuerURL string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("access_token")
 		if err != nil {
@@ -35,7 +35,7 @@ func authMiddleware(ks KeySource, next http.Handler) http.Handler {
 			}
 			kid, _ := t.Header["kid"].(string)
 			return ks.PublicKey(kid)
-		}, jwt.WithValidMethods([]string{"RS256"}))
+		}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(issuerURL), jwt.WithExpirationRequired())
 
 		if err != nil || !token.Valid {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)

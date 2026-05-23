@@ -23,6 +23,7 @@ func main() {
 	dataDir         := flag.String("data-dir",           envutil.String("SERVICE_DATA_DIR",       "data"),                                         "directory for document storage (file backend)")
 	frontendURL     := flag.String("frontend-url",       envutil.String("SERVICE_FRONTEND_URL",   "http://localhost:5173"),                        "frontend origin for CORS")
 	jwksURL         := flag.String("jwks-url",           envutil.String("AUTH_JWKS_URL",          "http://localhost:8081/.well-known/jwks.json"),  "auth service JWKS endpoint")
+	authIssuerURL   := flag.String("auth-issuer-url",    envutil.String("AUTH_ISSUER_URL",         "http://localhost:8081"),                         "expected JWT issuer (must match auth service SERVICE_ISSUER)")
 	cosmosEndpoint  := flag.String("cosmosdb-endpoint",  envutil.String("COSMOS_DB_ENDPOINT",     ""),                                             "Cosmos DB account endpoint URL")
 	cosmosKey       := flag.String("cosmosdb-key",       envutil.String("COSMOS_DB_KEY",          ""),                                             "Cosmos DB account key")
 	cosmosDatabase  := flag.String("cosmosdb-database",  envutil.String("COSMOS_DB_DATABASE",     ""),                                             "Cosmos DB database name")
@@ -64,7 +65,7 @@ func main() {
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
 
 	mux := http.NewServeMux()
-	api.NewHandler(s, keyCache, *frontendURL, limiter).Register(mux)
+	api.NewHandler(s, keyCache, *frontendURL, *authIssuerURL, limiter).Register(mux)
 
 	srv := &http.Server{Addr: *addr, Handler: mux}
 

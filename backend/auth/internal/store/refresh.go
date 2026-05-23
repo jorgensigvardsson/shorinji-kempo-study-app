@@ -3,6 +3,7 @@ package store
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -23,9 +24,11 @@ type RefreshToken struct {
 }
 
 // NewRefreshToken generates a fresh token for the given user.
-func NewRefreshToken(userID string) *RefreshToken {
+func NewRefreshToken(userID string) (*RefreshToken, error) {
 	b := make([]byte, 32)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		return nil, fmt.Errorf("rand.Read: %w", err)
+	}
 	id := userID + "." + base64.RawURLEncoding.EncodeToString(b)
 	now := time.Now().UTC()
 	return &RefreshToken{
@@ -33,7 +36,7 @@ func NewRefreshToken(userID string) *RefreshToken {
 		UserID:    userID,
 		ExpiresAt: now.Add(RefreshTokenTTL).Format(time.RFC3339),
 		CreatedAt: now.Format(time.RFC3339),
-	}
+	}, nil
 }
 
 // UserIDFromTokenID parses the user ID prefix from a token value.

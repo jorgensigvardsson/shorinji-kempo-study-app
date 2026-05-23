@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -14,19 +15,20 @@ type Handler struct {
 	store       store.Store
 	jwks        KeySource
 	frontendURL string
+	issuerURL   string
 	limiter     *ratelimit.IPRateLimiter
 }
 
-func NewHandler(s store.Store, ks KeySource, frontendURL string, limiter *ratelimit.IPRateLimiter) *Handler {
-	return &Handler{store: s, jwks: ks, frontendURL: frontendURL, limiter: limiter}
+func NewHandler(s store.Store, ks KeySource, frontendURL, issuerURL string, limiter *ratelimit.IPRateLimiter) *Handler {
+	return &Handler{store: s, jwks: ks, frontendURL: frontendURL, issuerURL: issuerURL, limiter: limiter}
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
 	inner := http.NewServeMux()
 	inner.HandleFunc("GET /healthz", h.healthz)
-	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.getDocument)))
-	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, http.HandlerFunc(h.putDocument)))
-	inner.Handle("DELETE /api/v1/account", authMiddleware(h.jwks, http.HandlerFunc(h.deleteAccount)))
+	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.getDocument)))
+	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.putDocument)))
+	inner.Handle("DELETE /api/v1/account", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.deleteAccount)))
 	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
 }
 
@@ -61,9 +63,15 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1 MB — Cosmos hard-limits items to 2 MB
 	var doc store.Document
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
-		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			http.Error(w, "request body too large", http.StatusRequestEntityTooLarge)
+		} else {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+		}
 		return
 	}
 	if err := h.store.Save(userID, &doc); err != nil {

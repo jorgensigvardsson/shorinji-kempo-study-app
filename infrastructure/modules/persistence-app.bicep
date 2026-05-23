@@ -16,6 +16,9 @@ param image string
 @description('Auth service public URL, used to fetch JWKS for offline token verification')
 param authServiceUrl string
 
+@description('Expected JWT issuer URL (must match SERVICE_ISSUER on the auth service)')
+param authIssuerUrl string
+
 @description('Cosmos DB endpoint')
 param cosmosEndpoint string
 
@@ -58,6 +61,7 @@ resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'SERVICE_LISTEN_ADDRESS', value: ':8080' }
             { name: 'SERVICE_STORAGE',         value: 'cosmosdb' }
             { name: 'AUTH_JWKS_URL',           value: '${authServiceUrl}/.well-known/jwks.json' }
+            { name: 'AUTH_ISSUER_URL',         value: authIssuerUrl }
             { name: 'COSMOS_DB_ENDPOINT',      value: cosmosEndpoint }
             { name: 'COSMOS_DB_KEY',           secretRef: 'cosmos-key' }
             { name: 'COSMOS_DB_DATABASE',      value: cosmosDatabase }

@@ -111,6 +111,7 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     environmentId: containerEnv.outputs.environmentId
     image: persistenceImage
     authServiceUrl: 'https://${authApp.outputs.fqdn}'
+    authIssuerUrl: 'https://${authApp.outputs.fqdn}'
     cosmosEndpoint: cosmos.outputs.endpoint
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
