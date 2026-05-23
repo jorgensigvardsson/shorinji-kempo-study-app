@@ -40,7 +40,7 @@ honour `Secure` on `localhost`, so the dev flow is unaffected.
 ## High
 
 ### ~~H1 — Refresh token rotation lacks reuse detection~~ ✅ Fixed
-**Fixed in commit `TBD_H1H2`**
+**Fixed in commit `2612a26`**
 
 Token family IDs are now embedded in the token format (`{userID}.{familyID}.{secret}`).
 On rotation the family ID is inherited; on a fresh login a new family ID is generated via
@@ -50,7 +50,7 @@ all tokens for that user are immediately revoked (OAuth 2.1 BCP §4.13.2).
 ---
 
 ### ~~H2 — Rate limiter trusts client-supplied `X-Forwarded-For` (leftmost value)~~ ✅ Fixed
-**Fixed in commit `TBD_H1H2`**
+**Fixed in commit `2612a26`**
 
 `clientIP` now uses the rightmost XFF value — the IP appended by ACA's ingress — instead
 of the leftmost value supplied by the client.
