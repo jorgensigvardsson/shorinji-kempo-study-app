@@ -25,10 +25,14 @@ func main() {
 	keyFile            := flag.String("key-file",           envutil.String("SERVICE_KEY_FILE",         "data/signing.key"),                   "RSA private key PEM file (generated if absent)")
 	issuer             := flag.String("issuer",             envutil.String("SERVICE_ISSUER",           "http://localhost:8081"),              "JWT issuer URL")
 	frontendURL        := flag.String("frontend-url",       envutil.String("SERVICE_FRONTEND_URL",     "http://localhost:5173"),              "frontend URL to redirect to after login")
-	googleClientID     := flag.String("google-client-id",   envutil.String("GOOGLE_CLIENT_ID",         ""),                                   "Google OAuth client ID")
-	googleClientSecret := flag.String("google-client-secret", envutil.String("GOOGLE_CLIENT_SECRET",   ""),                                   "Google OAuth client secret")
-	googleRedirectURI  := flag.String("google-redirect-uri", envutil.String("GOOGLE_REDIRECT_URI",     "http://localhost:8081/auth/callback"), "Google OAuth redirect URI")
-	googleDomains      := flag.String("google-domains",     envutil.String("GOOGLE_DOMAINS",           "gmail.com,googlemail.com"),           "comma-separated email domains for Google OIDC")
+	googleClientID        := flag.String("google-client-id",        envutil.String("GOOGLE_CLIENT_ID",            ""),                                   "Google OAuth client ID")
+	googleClientSecret    := flag.String("google-client-secret",    envutil.String("GOOGLE_CLIENT_SECRET",        ""),                                   "Google OAuth client secret")
+	googleRedirectURI     := flag.String("google-redirect-uri",     envutil.String("GOOGLE_REDIRECT_URI",         "http://localhost:8081/auth/callback"), "Google OAuth redirect URI")
+	googleDomains         := flag.String("google-domains",          envutil.String("GOOGLE_DOMAINS",              "gmail.com,googlemail.com"),           "comma-separated email domains for Google OIDC")
+	microsoftClientID     := flag.String("microsoft-client-id",     envutil.String("MICROSOFT_CLIENT_ID",         ""),                                   "Microsoft OAuth client ID")
+	microsoftClientSecret := flag.String("microsoft-client-secret", envutil.String("MICROSOFT_CLIENT_SECRET",     ""),                                   "Microsoft OAuth client secret")
+	microsoftRedirectURI  := flag.String("microsoft-redirect-uri",  envutil.String("MICROSOFT_REDIRECT_URI",      "http://localhost:8081/auth/callback"), "Microsoft OAuth redirect URI")
+	microsoftDomains      := flag.String("microsoft-domains",       envutil.String("MICROSOFT_DOMAINS",           "outlook.com,hotmail.com,live.com,msn.com"), "comma-separated email domains for Microsoft OIDC")
 	rateLimitRPS       := flag.Float64("rate-limit-rps",    envutil.Float64("RATE_LIMIT_RPS",          1.0),                                  "max requests per second per IP (0 = disabled)")
 	rateLimitBurst     := flag.Float64("rate-limit-burst",  envutil.Float64("RATE_LIMIT_BURST",        5.0),                                  "rate limit burst size")
 	flag.Parse()
@@ -57,6 +61,20 @@ func main() {
 		log.Printf("Google OIDC provider enabled (domains: %s)", *googleDomains)
 	} else {
 		log.Println("Google OIDC provider disabled (set --google-client-id and --google-client-secret to enable)")
+	}
+
+	if *microsoftClientID != "" && *microsoftClientSecret != "" {
+		m, err := provider.NewMicrosoft(context.Background(), *microsoftClientID, *microsoftClientSecret, *microsoftRedirectURI)
+		if err != nil {
+			log.Fatalf("init Microsoft provider: %v", err)
+		}
+		providers["microsoft"] = m
+		for _, d := range splitDomains(*microsoftDomains) {
+			domains[d] = "microsoft"
+		}
+		log.Printf("Microsoft OIDC provider enabled (domains: %s)", *microsoftDomains)
+	} else {
+		log.Println("Microsoft OIDC provider disabled (set --microsoft-client-id and --microsoft-client-secret to enable)")
 	}
 
 	limiter := ratelimit.New(*rateLimitRPS, *rateLimitBurst)

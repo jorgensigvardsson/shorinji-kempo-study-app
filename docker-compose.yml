@@ -34,6 +34,9 @@ services:
       GOOGLE_REDIRECT_URI: "http://localhost:8081/auth/callback"
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      MICROSOFT_REDIRECT_URI: "http://localhost:8081/auth/callback"
+      MICROSOFT_CLIENT_ID: "${MICROSOFT_CLIENT_ID}"
+      MICROSOFT_CLIENT_SECRET: "${MICROSOFT_CLIENT_SECRET}"
       RATE_LIMIT_RPS: "1"
       RATE_LIMIT_BURST: "5"
     healthcheck:

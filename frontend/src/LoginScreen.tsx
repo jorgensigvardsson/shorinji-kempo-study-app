@@ -1,20 +1,55 @@
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
-import type { Translator } from "./i18n";
+import { type Language, TranslationsContext, TranslatorImplementation } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import "./LoginScreen.css";
 
 const authUrl = (import.meta.env.VITE_AUTH_URL as string | undefined) ?? "http://localhost:8081";
 
+const SUPPORTED: Language[] = ["sv", "en", "tr", "ja"];
+
+function detectBrowserLanguage(): Language {
+  for (const lang of navigator.languages ?? [navigator.language]) {
+    const primary = lang.split("-")[0].toLowerCase() as Language;
+    if (SUPPORTED.includes(primary)) return primary;
+  }
+  return "sv";
+}
+
 interface Props {
-  translator: Translator;
   onContinueAnonymously: () => void;
 }
 
-export function LoginScreen({ translator, onContinueAnonymously }: Props) {
+export function LoginScreen({ onContinueAnonymously }: Props) {
+  const translations = useContext(TranslationsContext);
+  const translator = useMemo(
+    () => new TranslatorImplementation(translations, detectBrowserLanguage()),
+    [translations]
+  );
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resolveDomain = async (emailValue: string): Promise<boolean> => {
+    const resp = await fetch(
+      `${authUrl}/auth/resolve?email=${encodeURIComponent(emailValue)}`,
+      { credentials: "include" }
+    );
+    return resp.ok;
+  };
+
+  const handleBlur = async () => {
+    const trimmed = email.trim();
+    // Only validate once the address looks complete (has a non-empty domain part).
+    const atIdx = trimmed.indexOf("@");
+    if (atIdx < 0 || atIdx >= trimmed.length - 1) return;
+    try {
+      const ok = await resolveDomain(trimmed);
+      if (!ok) setError(translator.translate("Inloggning är inte tillgänglig för den här e-postdomänen."));
+    } catch {
+      // Network error during blur — silently ignore; submit will surface it.
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +60,8 @@ export function LoginScreen({ translator, onContinueAnonymously }: Props) {
     setError(null);
 
     try {
-      const resp = await fetch(
-        `${authUrl}/auth/resolve?email=${encodeURIComponent(trimmed)}`,
-        { credentials: "include" }
-      );
-      if (resp.ok) {
+      const ok = await resolveDomain(trimmed);
+      if (ok) {
         getSyncManager().beginBackendAuthorization(trimmed);
         // Page navigates away; keep spinner shown.
       } else {
@@ -60,14 +92,14 @@ export function LoginScreen({ translator, onContinueAnonymously }: Props) {
             <Form.Control
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => { setEmail(e.target.value); setError(null); }}
+              onBlur={() => { void handleBlur(); }}
               placeholder="namn@example.com"
               disabled={loading}
+              isInvalid={error !== null}
               autoFocus
             />
-            {error && (
-              <Form.Text className="text-danger d-block mt-1">{error}</Form.Text>
-            )}
+            <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>
           </Form.Group>
 
           <div className="d-grid mb-2">
@@ -83,7 +115,7 @@ export function LoginScreen({ translator, onContinueAnonymously }: Props) {
 
         <div className="d-grid">
           <Button variant="outline-secondary" onClick={onContinueAnonymously} disabled={loading}>
-            {translator.translate("Fortsätt anonymt")}
+            {translator.translate("Fortsätt utan konto")}
           </Button>
         </div>
       </div>

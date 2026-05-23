@@ -112,6 +112,30 @@ export class BackendSyncClient {
     if (!resp.ok) throw new Error(`PUT /api/v1/document: ${resp.status}`);
   }
 
+  // Initiates an OIDC flow to link another provider identity to the current account.
+  // The browser navigates away; control returns via ?link_success=1 or ?link_error=X.
+  beginLinkAuthorization(email: string): void {
+    window.location.href = `${authUrl}/auth/link?email=${encodeURIComponent(email)}`;
+  }
+
+  // Removes a provider identity from the current account.
+  // Refreshes stored user info from /auth/me on success.
+  async unlinkProvider(provider: string): Promise<void> {
+    const resp = await fetch(`${authUrl}/auth/link/${encodeURIComponent(provider)}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    if (resp.status === 401) {
+      localStorage.setItem(authExpiredKey, "true");
+      localStorage.removeItem(connectedKey);
+      throw new AuthExpiredError();
+    }
+    if (resp.status === 409) throw new Error("last-provider");
+    if (!resp.ok) throw new Error(`DELETE /auth/link/${provider}: ${resp.status}`);
+    // Refresh stored user info so the UI reflects the change immediately.
+    await this.completeAuthorizationIfPresent();
+  }
+
   // Fetches the user record and app document, bundles them as a JSON download.
   async exportAccount(): Promise<void> {
     const [meResp, docResp] = await Promise.all([

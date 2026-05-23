@@ -133,6 +133,23 @@ class SyncManager {
     this.backendClient.beginAuthorization().catch(err => this.handleSyncError(err));
   }
 
+  // beginLinkAuthorization initiates an OIDC flow to link another provider to the
+  // current account. The browser navigates away; the result comes back via URL param.
+  beginLinkAuthorization(email: string): void {
+    this.backendClient.beginLinkAuthorization(email);
+  }
+
+  // unlinkProvider removes a provider from the current account and refreshes user info.
+  async unlinkProvider(provider: string): Promise<void> {
+    await this.backendClient.unlinkProvider(provider);
+  }
+
+  // refreshBackendUserInfo re-fetches /auth/me and updates the stored user info.
+  // Call this after a link redirect to pick up the newly added identity.
+  async refreshBackendUserInfo(): Promise<void> {
+    await this.backendClient.completeAuthorizationIfPresent();
+  }
+
   disconnect(): void {
     const provider = this.store.get("syncProvider");
     const client = this.cloudClient(provider);
@@ -312,6 +329,32 @@ class SyncManager {
         );
         this.store.set("syncProvider", "backend");
         return; // handleProviderChanged fires again via subscription with provider="backend"
+      }
+    }
+
+    // Detect post-link redirect from the auth service (?link_success=1 or ?link_error=X).
+    // Refresh user info and stash the result in sessionStorage for AccountStatus to consume.
+    {
+      const params = new URLSearchParams(window.location.search);
+      const linkSuccess = params.has("link_success");
+      const linkError = params.get("link_error");
+      if (linkSuccess || linkError) {
+        params.delete("link_success");
+        params.delete("link_error");
+        const q = params.toString();
+        window.history.replaceState(
+          {},
+          "",
+          window.location.pathname + (q ? "?" + q : "") + window.location.hash
+        );
+        if (linkSuccess) {
+          await this.backendClient.completeAuthorizationIfPresent();
+          sessionStorage.setItem("link_success", "1");
+        }
+        if (linkError) {
+          sessionStorage.setItem("link_error", linkError);
+        }
+        // Sync state is unchanged — fall through to the normal connected flow.
       }
     }
 

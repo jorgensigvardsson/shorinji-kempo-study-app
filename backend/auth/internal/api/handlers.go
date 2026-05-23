@@ -27,6 +27,7 @@ type pendingState struct {
 	nonce        string
 	providerName string
 	expiresAt    time.Time
+	linkUserID   string // non-empty → identity-link flow; this user gets the new identity added
 }
 
 type Handler struct {
@@ -71,6 +72,8 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
+	inner.HandleFunc("GET /auth/link", h.linkAccount)
+	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
 	mux.Handle("/", cors.Middleware(h.frontendURL, h.limiter.Middleware(inner)))
 }
 
@@ -188,6 +191,38 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now().UTC().Format(time.RFC3339)
 
+	// Identity-link flow: add a new provider to an existing user's account.
+	if ps.linkUserID != "" {
+		// Reject if this identity is already linked to any account (including this one).
+		existing, err := h.users.FindByLinkedIdentity(ps.providerName, info.Sub)
+		if err != nil {
+			log.Printf("link: identity lookup (%s, %s): %v", ps.providerName, info.Sub, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		if existing != nil {
+			http.Redirect(w, r, h.frontendURL+"?link_error=already_linked", http.StatusFound)
+			return
+		}
+
+		target, err := h.users.FindByID(ps.linkUserID)
+		if err != nil || target == nil {
+			http.Error(w, "user not found", http.StatusNotFound)
+			return
+		}
+		target.LinkedIdentities[ps.providerName] = store.LinkedIdentity{Sub: info.Sub, Email: info.Email}
+		target.LastLoginAt = now
+		if err := h.users.Save(target); err != nil {
+			log.Printf("link save %s: %v", target.ID, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		log.Printf("linked %s identity %s to user %s", ps.providerName, info.Sub, target.ID)
+		http.Redirect(w, r, h.frontendURL+"?link_success=1", http.StatusFound)
+		return
+	}
+
+	// Normal login flow.
 	user, err := h.users.FindByLinkedIdentity(ps.providerName, info.Sub)
 	if err != nil {
 		log.Printf("user lookup (%s, %s): %v", ps.providerName, info.Sub, err)
@@ -289,6 +324,89 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		MaxAge:   -1,
 	})
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// linkAccount initiates an OIDC flow to add another provider identity to the
+// currently authenticated user's account.
+func (h *Handler) linkAccount(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.claimsFromRequest(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	email := strings.TrimSpace(r.URL.Query().Get("email"))
+	if email == "" {
+		http.Error(w, "email query parameter is required", http.StatusBadRequest)
+		return
+	}
+	parts := strings.SplitN(email, "@", 2)
+	if len(parts) != 2 || parts[1] == "" {
+		http.Error(w, "invalid email address", http.StatusBadRequest)
+		return
+	}
+	domain := strings.ToLower(parts[1])
+
+	providerName, ok := h.domains[domain]
+	if !ok {
+		http.Error(w, fmt.Sprintf("no identity provider configured for domain %q", domain), http.StatusBadRequest)
+		return
+	}
+	p, ok := h.providers[providerName]
+	if !ok {
+		log.Printf("domain %q maps to unconfigured provider %q", domain, providerName)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	state := randomString(32)
+	nonce := randomString(32)
+
+	h.mu.Lock()
+	h.pending[state] = pendingState{
+		nonce:        nonce,
+		providerName: providerName,
+		expiresAt:    time.Now().Add(stateTTL),
+		linkUserID:   claims.Subject,
+	}
+	h.mu.Unlock()
+
+	http.Redirect(w, r, p.AuthURL(state, nonce), http.StatusFound)
+}
+
+// unlinkProvider removes a provider identity from the authenticated user's account.
+// Returns 409 if it is the user's only linked provider.
+func (h *Handler) unlinkProvider(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.claimsFromRequest(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	providerName := r.PathValue("provider")
+
+	user, err := h.users.FindByID(claims.Subject)
+	if err != nil || user == nil {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+	if _, ok := user.LinkedIdentities[providerName]; !ok {
+		http.Error(w, "provider not linked to this account", http.StatusBadRequest)
+		return
+	}
+	if len(user.LinkedIdentities) <= 1 {
+		http.Error(w, "cannot unlink the only remaining identity provider", http.StatusConflict)
+		return
+	}
+
+	delete(user.LinkedIdentities, providerName)
+	if err := h.users.Save(user); err != nil {
+		log.Printf("unlinkProvider %s/%s: %v", user.ID, providerName, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("unlinked %s identity from user %s", providerName, user.ID)
 	w.WriteHeader(http.StatusNoContent)
 }
 

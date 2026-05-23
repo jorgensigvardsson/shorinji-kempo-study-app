@@ -382,9 +382,29 @@ We do **not** collect passwords, payment data, location, or behavioural tracking
 - Provider picker
 - Post-login redirect handling
 
-### Phase 5 — Microsoft provider + data migration
-- Microsoft OIDC (client ID already exists for OneDrive auth)
-- Data migration helper (import from OneDrive / Google Drive)
+### Phase 5 — Microsoft provider + account linking ✓
+- Microsoft OIDC provider (`backend/auth/internal/provider/microsoft.go`) using the
+  `common` (multi-tenant) endpoint; issuer check skipped and replaced by a prefix
+  assertion against `https://login.microsoftonline.com/`
+- Domains: `outlook.com`, `hotmail.com`, `live.com`, `msn.com`
+- Account linking: `GET /auth/link?email=...` initiates a second OIDC flow for an
+  already-authenticated user; callback adds the identity to the existing account and
+  redirects with `?link_success=1`; uniqueness enforced — an identity already linked
+  to any account is rejected
+- Account unlinking: `DELETE /auth/link/{provider}` removes one identity; returns 409
+  if it would be the last one
+- Settings UI: "Länkade inloggningssätt" section lists providers with per-provider
+  "Koppla bort" buttons and a "Länka" email form; sessionStorage passes
+  link_success/link_error across the OIDC redirect without polluting localStorage
+- Frontend domain validation: `/auth/resolve` called on email field blur; Bootstrap
+  `isInvalid` styling shown immediately without waiting for form submit
+- Login page localisation: always uses `navigator.languages` (browser OS preference)
+  regardless of stored language setting — more appropriate for a page that appears
+  before user identity is established
+- **Data migration descoped**: turns out to be unnecessary. On first backend login the
+  sync manager finds no remote document and uploads local data automatically via the
+  existing three-way merge path — the same behaviour as connecting OneDrive or Google
+  Drive for the first time.
 
 ### Phase 6 — GDPR compliance
 New `backend/gdpr` Go service (same structure as auth/persistence):
@@ -464,4 +484,4 @@ This keeps staging costs at zero and removes GDPR concerns for the test environm
 - Multi-device behaviour: when a user signs in on a second device, merge or overwrite?
 
 ---
-*Last updated: 2026-05-23 — added backend/gdpr service (Phase 6); added Phase 8 (more OIDC providers, button-provider category); added Phase 9 (Azure Container Apps deployment with GHCR, scale-to-zero for gdpr service); resolved open questions on topology and provider list; rate limiting rule added to CLAUDE.md*
+*Last updated: 2026-05-23 — Phase 5 complete: Microsoft OIDC provider (outlook/hotmail/live/msn), account linking/unlinking, frontend domain validation, browser-language login page, data migration descoped (automatic via existing three-way merge)*

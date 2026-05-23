@@ -96,7 +96,7 @@ function App(props: Props) {
     return (
       <TranslatorContext.Provider value={translator}>
         <div style={{ zoom: textZoom }}>
-          <LoginScreen translator={translator} onContinueAnonymously={handleContinueAnonymously} />
+          <LoginScreen onContinueAnonymously={handleContinueAnonymously} />
         </div>
       </TranslatorContext.Provider>
     );

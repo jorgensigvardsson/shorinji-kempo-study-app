@@ -326,15 +326,33 @@ const providerDisplayName: Record<string, string> = {
 
 const AccountStatus = (props: { translator: Translator; onShowLogin: () => void }) => {
     const { translator, onShowLogin } = props;
-    const info = getSyncManager().getBackendUserInfo();
+    const [userInfo, setUserInfo] = useState(() => getSyncManager().getBackendUserInfo());
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [linkEmail, setLinkEmail] = useState("");
+    const [linkError, setLinkError] = useState<string | null>(null);
+    const [linkSuccess, setLinkSuccess] = useState(false);
+    const [unlinkingProvider, setUnlinkingProvider] = useState<string | null>(null);
 
-    const providerLabel = info?.providers
-        .map(p => providerDisplayName[p] ?? p)
-        .join(", ");
+    // Consume link_success / link_error stashed by the sync manager after the redirect.
+    useEffect(() => {
+        const success = sessionStorage.getItem("link_success");
+        const err = sessionStorage.getItem("link_error");
+        sessionStorage.removeItem("link_success");
+        sessionStorage.removeItem("link_error");
+        if (success) {
+            setUserInfo(getSyncManager().getBackendUserInfo());
+            setLinkEmail("");
+            setLinkSuccess(true);
+            const t = setTimeout(() => setLinkSuccess(false), 3500);
+            return () => clearTimeout(t);
+        }
+        if (err === "already_linked") {
+            setLinkError(translator.translate("Den här identiteten är redan kopplad till ett konto."));
+        }
+    }, [translator]);
 
     const handleLogout = () => {
         localStorage.removeItem("identity-choice-made");
@@ -368,15 +386,78 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
         }
     };
 
+    const handleLink = (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = linkEmail.trim();
+        if (!trimmed) return;
+        setLinkError(null);
+        getSyncManager().beginLinkAuthorization(trimmed);
+    };
+
+    const handleUnlink = async (provider: string) => {
+        setUnlinkingProvider(provider);
+        setError(null);
+        try {
+            await getSyncManager().unlinkProvider(provider);
+            setUserInfo(getSyncManager().getBackendUserInfo());
+        } catch (err) {
+            if (err instanceof Error && err.message === "last-provider") {
+                setError(translator.translate("Det går inte att koppla bort den enda inloggningsmetoden."));
+            } else {
+                setError(translator.translate("Kunde inte koppla bort kontot. Försök igen."));
+            }
+        } finally {
+            setUnlinkingProvider(null);
+        }
+    };
+
+    const canUnlink = (userInfo?.providers.length ?? 0) > 1;
+
     return (
         <>
-            {info && (
+            {userInfo && (
                 <Form.Text className="d-block mt-1 mb-2">
-                    {info.displayName && <>{info.displayName}<br /></>}
-                    {info.email}
-                    {providerLabel && <> &middot; {providerLabel}</>}
+                    {userInfo.displayName && <>{userInfo.displayName}<br /></>}
+                    {userInfo.email}
                 </Form.Text>
             )}
+
+            {/* Linked identities */}
+            <Form.Label className="mt-2 mb-1 fw-semibold">{translator.translate("Länkade inloggningssätt")}</Form.Label>
+            {userInfo?.providers.map(p => (
+                <div key={p} className="d-flex align-items-center gap-2 mb-1">
+                    <span className="text-body-secondary" style={{ minWidth: "6rem" }}>{providerDisplayName[p] ?? p}</span>
+                    <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        disabled={!canUnlink || unlinkingProvider !== null}
+                        onClick={() => { void handleUnlink(p); }}
+                    >
+                        {unlinkingProvider === p ? "…" : translator.translate("Koppla bort")}
+                    </Button>
+                </div>
+            ))}
+
+            {/* Link another account */}
+            <Form as="form" onSubmit={(e) => handleLink(e)} className="mt-2 mb-3 d-flex gap-2 align-items-start flex-wrap">
+                <div style={{ flex: "1 1 12rem" }}>
+                    <Form.Control
+                        type="email"
+                        size="sm"
+                        placeholder="namn@example.com"
+                        value={linkEmail}
+                        onChange={e => { setLinkEmail(e.target.value); setLinkError(null); }}
+                        isInvalid={linkError !== null}
+                        isValid={linkSuccess}
+                    />
+                    {linkError && <Form.Control.Feedback type="invalid">{linkError}</Form.Control.Feedback>}
+                    {linkSuccess && <Form.Control.Feedback type="valid">{translator.translate("Konto länkat!")}</Form.Control.Feedback>}
+                </div>
+                <Button type="submit" variant="outline-primary" size="sm" disabled={!linkEmail.trim()}>
+                    {translator.translate("Länka")}
+                </Button>
+            </Form>
+
             {error && (
                 <Form.Text className="d-block mt-1 mb-2 text-danger">{error}</Form.Text>
             )}
