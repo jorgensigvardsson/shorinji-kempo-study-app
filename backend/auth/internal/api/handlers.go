@@ -76,6 +76,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner := http.NewServeMux()
 	inner.HandleFunc("GET /healthz", h.healthz)
 	inner.HandleFunc("GET /.well-known/jwks.json", h.jwks)
+	inner.HandleFunc("GET /auth/resolve", h.resolve)
 	inner.HandleFunc("GET /auth/login", h.login)
 	inner.HandleFunc("GET /auth/callback", h.callback)
 	inner.HandleFunc("POST /auth/refresh", h.refresh)
@@ -101,6 +102,31 @@ func (h *Handler) jwks(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
+}
+
+// resolve reports whether an email domain has a configured OIDC provider, without
+// initiating an OAuth flow. The frontend uses it as a preflight check on the login form.
+// Query param: email=user@example.com
+func (h *Handler) resolve(w http.ResponseWriter, r *http.Request) {
+	email := strings.TrimSpace(r.URL.Query().Get("email"))
+	if email == "" {
+		http.Error(w, "email query parameter is required", http.StatusBadRequest)
+		return
+	}
+	parts := strings.SplitN(email, "@", 2)
+	if len(parts) != 2 || parts[1] == "" {
+		http.Error(w, "invalid email address", http.StatusBadRequest)
+		return
+	}
+	domain := strings.ToLower(parts[1])
+
+	providerName, ok := h.domains[domain]
+	if !ok {
+		http.Error(w, "no identity provider configured for this domain", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"provider": providerName})
 }
 
 // login resolves the user's email domain to an OIDC provider and initiates the flow.

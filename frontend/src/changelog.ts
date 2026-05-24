@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-24T14:06:29.510Z",
+    changes: [
+      {
+        emoji: "🔑",
+        sv: "Fixade inloggningen – e-postadresser kunde inte verifieras eftersom backend saknade en route. Nu fungerar inloggning igen.",
+        en: "Fixed sign-in – email addresses couldn't be verified because the backend was missing a route. Sign-in works again.",
+        tr: "Oturum açma düzeltildi – arka uçta bir rota eksik olduğu için e-posta adresleri doğrulanamıyordu. Oturum açma yeniden çalışıyor.",
+        ja: "サインインを修正しました。バックエンドにルートが不足していたためメールアドレスを確認できませんでした。再びサインインできます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-22T15:15:00.000Z",
     changes: [
       {
