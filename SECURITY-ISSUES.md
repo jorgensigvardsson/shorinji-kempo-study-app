@@ -146,4 +146,39 @@ srv := &http.Server{
 
 ---
 
+## Pre-existing frontend findings (open)
+
+These findings originate from the same independent review but concern the
+frontend and are not addressed in this branch. They are tracked here for
+visibility.
+
+### H3 — Google OAuth client secret exposed in frontend bundle
+
+**Status:** Open
+
+The deploy workflow writes `VITE_GOOGLE_CLIENT_SECRET` into
+`frontend/.env.production`. Vite bakes all `VITE_*` variables into the
+client-side bundle, making the secret publicly readable. Browser-based
+apps cannot keep OAuth client secrets confidential.
+
+**Fix:** Remove `VITE_GOOGLE_CLIENT_SECRET` from the build. Use
+Authorization Code + PKCE (public client, no secret), or proxy Google
+token exchange through the backend.
+
+---
+
+### M4 — No Content Security Policy; cloud tokens stored in localStorage
+
+**Status:** Open
+
+The frontend Nginx config sets no `Content-Security-Policy`, `frame-ancestors`,
+or `Permissions-Policy` headers. OneDrive and Google Drive sync clients store
+access and refresh tokens in `localStorage`, which any XSS payload can read.
+
+**Fix:** Add a strict CSP to the frontend Nginx config. Longer term, move
+cloud-provider token handling into a backend-for-frontend so refresh tokens
+are not stored in browser storage.
+
+---
+
 *Last updated: 2026-05-24*
