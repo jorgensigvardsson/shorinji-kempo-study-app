@@ -89,7 +89,7 @@ module authApp 'modules/auth-app.bicep' = {
     environmentId: containerEnv.outputs.environmentId
     image: authImage
     issuerUrl: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}'
-    frontendUrl: 'https://app.shorinji.se'  // update to your actual frontend URL
+    frontendUrl: 'https://shorinjikempo.cash-it.se'
     cosmosEndpoint: cosmos.outputs.endpoint
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase

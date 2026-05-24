@@ -157,7 +157,9 @@ jobs:
           : > frontend/.env.production
           write_var() {
             local name="$1" value="$2"
-            [ -n "$value" ] && printf '%s=%s\n' "$name" "$value" >> frontend/.env.production
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$name" "$value" >> frontend/.env.production
+            fi
           }
           write_var VITE_AUTH_URL              "$VITE_AUTH_URL"
           write_var VITE_API_URL               "$VITE_API_URL"
