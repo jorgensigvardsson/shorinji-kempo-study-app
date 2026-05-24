@@ -118,17 +118,27 @@ jobs:
 
       - name: Bind custom domain TLS certificates
         run: |
-          # Bicep registers hostnames with bindingType=Disabled; this step issues/renews
-          # managed certs and switches to SniEnabled. Idempotent on re-deployments.
+          # hostname add registers the hostname (idempotent); hostname bind issues/renews
+          # the managed cert and switches bindingType to SniEnabled (also idempotent).
+          RG="${{ vars.AZURE_RESOURCE_GROUP }}"
+          az containerapp hostname add \
+            --hostname auth-shorinjikempo.cash-it.se \
+            --resource-group "$RG" \
+            --name sk-study-app-auth
           az containerapp hostname bind \
             --hostname auth-shorinjikempo.cash-it.se \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --resource-group "$RG" \
             --name sk-study-app-auth \
             --environment sk-study-app-env \
             --validation-method CNAME
+
+          az containerapp hostname add \
+            --hostname persistence-shorinjikempo.cash-it.se \
+            --resource-group "$RG" \
+            --name sk-study-app-persistence
           az containerapp hostname bind \
             --hostname persistence-shorinjikempo.cash-it.se \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --resource-group "$RG" \
             --name sk-study-app-persistence \
             --environment sk-study-app-env \
             --validation-method CNAME
