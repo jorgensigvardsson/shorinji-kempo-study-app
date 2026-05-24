@@ -26,7 +26,8 @@ func main() {
 	keyFile     := flag.String("key-file",     envutil.String("SERVICE_KEY_FILE",       "data/signing.key"),     "RSA private key PEM file (generated if absent)")
 	keyPEM      := flag.String("key-pem",      envutil.String("SERVICE_KEY_PEM",        ""),                     "RSA private key as PEM string (overrides --key-file; use for secret injection in ACA)")
 	issuer      := flag.String("issuer",       envutil.String("SERVICE_ISSUER",         "http://localhost:8081"), "JWT issuer URL")
-	frontendURL := flag.String("frontend-url", envutil.String("SERVICE_FRONTEND_URL",   "http://localhost:5173"), "frontend origin to redirect to after login")
+	frontendURL  := flag.String("frontend-url",  envutil.String("SERVICE_FRONTEND_URL",  "http://localhost:5173"), "frontend origin to redirect to after login")
+	cookieDomain := flag.String("cookie-domain", envutil.String("SERVICE_COOKIE_DOMAIN", ""),                     "domain attribute for auth cookies (e.g. .cash-it.se for cross-subdomain sharing)")
 
 	// ── Cosmos DB ─────────────────────────────────────────────────────────────
 	cosmosEndpoint          := flag.String("cosmos-endpoint",               envutil.String("COSMOS_ENDPOINT",               ""),               "Cosmos DB account endpoint (enables Cosmos stores when set)")
@@ -135,7 +136,7 @@ func main() {
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
 
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, tokenManager, *frontendURL, limiter).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, tokenManager, *frontendURL, *cookieDomain, limiter).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

@@ -29,6 +29,12 @@ param cosmosKey string
 @description('Cosmos DB database name')
 param cosmosDatabase string
 
+@description('Custom domain hostname (e.g. persistence-shorinjikempo.cash-it.se). Leave empty to use the default ACA FQDN.')
+param customDomain string = ''
+
+@description('Resource ID of the managed certificate for the custom domain.')
+param customDomainCertificateId string = ''
+
 resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
@@ -39,6 +45,13 @@ resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 8080
         transport: 'http'
+        customDomains: empty(customDomain) ? [] : [
+          {
+            name: customDomain
+            certificateId: customDomainCertificateId
+            bindingType: 'SniEnabled'
+          }
+        ]
       }
       secrets: [
         { name: 'cosmos-key', value: cosmosKey }

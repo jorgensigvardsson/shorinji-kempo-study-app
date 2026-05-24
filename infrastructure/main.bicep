@@ -57,6 +57,15 @@ param signingKeyPem string
 @description('Public URL of the frontend app, used as the OAuth post-login redirect target')
 param frontendUrl string
 
+@description('Custom hostname for the auth service (e.g. auth-shorinjikempo.cash-it.se)')
+param authCustomDomain string = ''
+
+@description('Custom hostname for the persistence service (e.g. persistence-shorinjikempo.cash-it.se)')
+param persistenceCustomDomain string = ''
+
+@description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se)')
+param cookieDomain string = ''
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -84,6 +93,36 @@ module containerEnv 'modules/container-apps-env.bicep' = {
   }
 }
 
+// Reference the deployed environment so we can attach managed certificates to it.
+// Use the known name directly — parent requires a value calculable at deployment start.
+resource envResource 'Microsoft.App/managedEnvironments@2023-05-01' existing = {
+  name: '${namePrefix}-env'
+}
+
+// Managed TLS certificates for custom domains (CNAME validation — CNAMEs must exist before deploy).
+resource authCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (!empty(authCustomDomain)) {
+  parent: envResource
+  name: 'auth-cert'
+  location: location
+  properties: {
+    subjectName: authCustomDomain
+    domainControlValidation: 'CNAME'
+  }
+}
+
+resource persistenceCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (!empty(persistenceCustomDomain)) {
+  parent: envResource
+  name: 'persistence-cert'
+  location: location
+  properties: {
+    subjectName: persistenceCustomDomain
+    domainControlValidation: 'CNAME'
+  }
+}
+
+var authBaseUrl        = empty(authCustomDomain)        ? 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}'        : 'https://${authCustomDomain}'
+var persistenceBaseUrl = empty(persistenceCustomDomain) ? 'https://${namePrefix}-persistence.${containerEnv.outputs.defaultDomain}' : 'https://${persistenceCustomDomain}'
+
 module authApp 'modules/auth-app.bicep' = {
   name: 'auth-app'
   params: {
@@ -91,18 +130,21 @@ module authApp 'modules/auth-app.bicep' = {
     location: location
     environmentId: containerEnv.outputs.environmentId
     image: authImage
-    issuerUrl: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}'
+    issuerUrl: authBaseUrl
     frontendUrl: frontendUrl
     cosmosEndpoint: cosmos.outputs.endpoint
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
     googleClientId: googleClientId
     googleClientSecret: googleClientSecret
-    googleRedirectUri: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}/auth/callback'
+    googleRedirectUri: '${authBaseUrl}/auth/callback'
     microsoftClientId: microsoftClientId
     microsoftClientSecret: microsoftClientSecret
-    microsoftRedirectUri: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}/auth/callback'
+    microsoftRedirectUri: '${authBaseUrl}/auth/callback'
     signingKeyPem: signingKeyPem
+    customDomain: authCustomDomain
+    customDomainCertificateId: empty(authCustomDomain) ? '' : authCert.id
+    cookieDomain: cookieDomain
   }
 }
 
@@ -113,16 +155,18 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     location: location
     environmentId: containerEnv.outputs.environmentId
     image: persistenceImage
-    authServiceUrl: 'https://${authApp.outputs.fqdn}'
-    authIssuerUrl: 'https://${authApp.outputs.fqdn}'
+    authServiceUrl: authBaseUrl
+    authIssuerUrl: authBaseUrl
     cosmosEndpoint: cosmos.outputs.endpoint
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
+    customDomain: persistenceCustomDomain
+    customDomainCertificateId: empty(persistenceCustomDomain) ? '' : persistenceCert.id
   }
 }
 
 // ── Outputs ───────────────────────────────────────────────────────────────────
 
-output authServiceUrl string = 'https://${authApp.outputs.fqdn}'
-output persistenceServiceUrl string = 'https://${persistenceApp.outputs.fqdn}'
+output authServiceUrl string = authBaseUrl
+output persistenceServiceUrl string = persistenceBaseUrl
 output cosmosEndpoint string = cosmos.outputs.endpoint

@@ -31,6 +31,18 @@
     },
     "signingKeyPem": {
       "value": ""
+    },
+    "frontendUrl": {
+      "value": "https://shorinjikempo.cash-it.se"
+    },
+    "authCustomDomain": {
+      "value": "auth-shorinjikempo.cash-it.se"
+    },
+    "persistenceCustomDomain": {
+      "value": "persistence-shorinjikempo.cash-it.se"
+    },
+    "cookieDomain": {
+      "value": ".cash-it.se"
     }
   }
 }

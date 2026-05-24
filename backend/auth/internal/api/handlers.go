@@ -44,6 +44,7 @@ type Handler struct {
 	refreshTokens store.RefreshTokenStore
 	tokens        *token.Manager
 	frontendURL   string
+	cookieDomain  string
 	limiter       *ratelimit.IPRateLimiter
 	mu            sync.Mutex
 	pending       map[string]pendingState
@@ -56,6 +57,7 @@ func NewHandler(
 	refreshTokens store.RefreshTokenStore,
 	tokens *token.Manager,
 	frontendURL string,
+	cookieDomain string,
 	limiter *ratelimit.IPRateLimiter,
 ) *Handler {
 	h := &Handler{
@@ -65,6 +67,7 @@ func NewHandler(
 		refreshTokens: refreshTokens,
 		tokens:        tokens,
 		frontendURL:   frontendURL,
+		cookieDomain:  cookieDomain,
 		limiter:       limiter,
 		pending:       make(map[string]pendingState),
 	}
@@ -489,6 +492,7 @@ func (h *Handler) setTokenCookies(w http.ResponseWriter, accessToken, refreshTok
 		Name:     accessCookieName,
 		Value:    accessToken,
 		Path:     "/",
+		Domain:   h.cookieDomain,
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
@@ -498,6 +502,7 @@ func (h *Handler) setTokenCookies(w http.ResponseWriter, accessToken, refreshTok
 		Name:     refreshCookieName,
 		Value:    refreshToken,
 		Path:     "/auth/refresh",
+		Domain:   h.cookieDomain,
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
@@ -510,6 +515,7 @@ func (h *Handler) clearTokenCookies(w http.ResponseWriter) {
 		Name:     accessCookieName,
 		Value:    "",
 		Path:     "/",
+		Domain:   h.cookieDomain,
 		HttpOnly: true,
 		Secure:   true,
 		MaxAge:   -1,
@@ -518,6 +524,7 @@ func (h *Handler) clearTokenCookies(w http.ResponseWriter) {
 		Name:     refreshCookieName,
 		Value:    "",
 		Path:     "/auth/refresh",
+		Domain:   h.cookieDomain,
 		HttpOnly: true,
 		Secure:   true,
 		MaxAge:   -1,

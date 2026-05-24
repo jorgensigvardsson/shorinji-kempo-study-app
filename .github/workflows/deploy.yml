@@ -129,8 +129,8 @@ jobs:
 
       - name: Write .env.production
         env:
-          VITE_AUTH_URL:             ${{ needs.deploy-backend.outputs.auth_url }}
-          VITE_API_URL:              ${{ needs.deploy-backend.outputs.api_url }}
+          VITE_AUTH_URL:             ${{ vars.VITE_AUTH_URL }}
+          VITE_API_URL:              ${{ vars.VITE_API_URL }}
           VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'false' }}
           VITE_FEEDBACK_EMAIL:       ${{ secrets.VITE_FEEDBACK_EMAIL }}
           VITE_ONEDRIVE_CLIENT_ID:   ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}

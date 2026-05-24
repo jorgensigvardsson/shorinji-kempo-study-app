@@ -53,6 +53,15 @@ param microsoftRedirectUri string = ''
 @secure()
 param signingKeyPem string
 
+@description('Custom domain hostname (e.g. auth-shorinjikempo.cash-it.se). Leave empty to use the default ACA FQDN.')
+param customDomain string = ''
+
+@description('Resource ID of the managed certificate for the custom domain.')
+param customDomainCertificateId string = ''
+
+@description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se). Leave empty for host-only cookies.')
+param cookieDomain string = ''
+
 resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
@@ -63,6 +72,13 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 8081
         transport: 'http'
+        customDomains: empty(customDomain) ? [] : [
+          {
+            name: customDomain
+            certificateId: customDomainCertificateId
+            bindingType: 'SniEnabled'
+          }
+        ]
       }
       secrets: [
         { name: 'cosmos-key',             value: cosmosKey }
@@ -95,6 +111,7 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'COSMOS_USERS_CONTAINER',        value: 'users' }
             { name: 'COSMOS_IDENTITY_INDEX_CONTAINER', value: 'identity_index' }
             { name: 'COSMOS_TOKENS_CONTAINER',       value: 'refresh_tokens' }
+            { name: 'SERVICE_COOKIE_DOMAIN',         value: cookieDomain }
             { name: 'GOOGLE_CLIENT_ID',              value: googleClientId }
             { name: 'GOOGLE_CLIENT_SECRET',          secretRef: 'google-client-secret' }
             { name: 'GOOGLE_REDIRECT_URI',           value: googleRedirectUri }
