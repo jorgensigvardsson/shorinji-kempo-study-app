@@ -88,17 +88,17 @@ module authApp 'modules/auth-app.bicep' = {
     location: location
     environmentId: containerEnv.outputs.environmentId
     image: authImage
-    issuerUrl: 'https://${namePrefix}-auth.${containerEnv.outputs.environmentName}.azurecontainerapps.io'
+    issuerUrl: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}'
     frontendUrl: 'https://app.shorinji.se'  // update to your actual frontend URL
     cosmosEndpoint: cosmos.outputs.endpoint
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
     googleClientId: googleClientId
     googleClientSecret: googleClientSecret
-    googleRedirectUri: 'https://${namePrefix}-auth.${containerEnv.outputs.environmentName}.azurecontainerapps.io/auth/callback'
+    googleRedirectUri: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}/auth/callback'
     microsoftClientId: microsoftClientId
     microsoftClientSecret: microsoftClientSecret
-    microsoftRedirectUri: 'https://${namePrefix}-auth.${containerEnv.outputs.environmentName}.azurecontainerapps.io/auth/callback'
+    microsoftRedirectUri: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}/auth/callback'
     signingKeyPem: signingKeyPem
   }
 }

@@ -1,53 +1,154 @@
 name: Deploy
 
 on:
-  workflow_run:
-    workflows: ["Test"]
-    branches:
-      - deploy
-    types:
-      - completed
+  push:
+    branches: [deploy]
+
+# id-token: write  — lets the job exchange a GitHub OIDC token for an Azure access token
+# packages: write  — lets the job push images to GHCR
+# contents: read   — lets the job check out code
+permissions:
+  contents: read
+  packages: write
+  id-token: write
 
 jobs:
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  # ── 1. Build backend images and push to GHCR ────────────────────────────────
+  build-backend:
+    runs-on: ubuntu-latest
+    outputs:
+      auth_image:        ${{ steps.build.outputs.auth_image }}
+      persistence_image: ${{ steps.build.outputs.persistence_image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push auth and persistence images
+        id: build
+        run: |
+          set -euo pipefail
+          # GHCR requires lowercase owner
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          AUTH_IMAGE="ghcr.io/${OWNER}/sk-auth:${{ github.sha }}"
+          PERSISTENCE_IMAGE="ghcr.io/${OWNER}/sk-persistence:${{ github.sha }}"
+
+          docker build -f backend/auth/Dockerfile        -t "$AUTH_IMAGE"        backend/
+          docker build -f backend/persistence/Dockerfile -t "$PERSISTENCE_IMAGE" backend/
+          docker push "$AUTH_IMAGE"
+          docker push "$PERSISTENCE_IMAGE"
+
+          echo "auth_image=$AUTH_IMAGE"               >> "$GITHUB_OUTPUT"
+          echo "persistence_image=$PERSISTENCE_IMAGE" >> "$GITHUB_OUTPUT"
+
+  # ── 2. Deploy backend infrastructure via Bicep; capture service URLs ─────────
+  deploy-backend:
+    needs: build-backend
+    runs-on: ubuntu-latest
+    outputs:
+      auth_url: ${{ steps.bicep.outputs.auth_url }}
+      api_url:  ${{ steps.bicep.outputs.api_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Workload identity federation — no stored Azure secret
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id:       ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # Build a parameter override file so jq handles newlines in the PEM correctly.
+      # main.parameters.json supplies namePrefix, location, cosmosDatabase, etc.
+      # This overlay supplies images, OIDC credentials, and the signing key.
+      - name: Build parameter overrides
+        env:
+          AUTH_IMAGE:               ${{ needs.build-backend.outputs.auth_image }}
+          PERSISTENCE_IMAGE:        ${{ needs.build-backend.outputs.persistence_image }}
+          GOOGLE_CLIENT_ID:         ${{ vars.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET:     ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          MICROSOFT_CLIENT_ID:      ${{ vars.MICROSOFT_CLIENT_ID }}
+          MICROSOFT_CLIENT_SECRET:  ${{ secrets.MICROSOFT_CLIENT_SECRET }}
+          SIGNING_KEY_PEM:          ${{ secrets.SIGNING_KEY_PEM }}
+        run: |
+          jq -n \
+            --arg authImage             "$AUTH_IMAGE" \
+            --arg persistenceImage      "$PERSISTENCE_IMAGE" \
+            --arg googleClientId        "$GOOGLE_CLIENT_ID" \
+            --arg googleClientSecret    "$GOOGLE_CLIENT_SECRET" \
+            --arg microsoftClientId     "$MICROSOFT_CLIENT_ID" \
+            --arg microsoftClientSecret "$MICROSOFT_CLIENT_SECRET" \
+            --arg signingKeyPem         "$SIGNING_KEY_PEM" \
+            '{
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+              contentVersion: "1.0.0.0",
+              parameters: {
+                authImage:             {value: $authImage},
+                persistenceImage:      {value: $persistenceImage},
+                googleClientId:        {value: $googleClientId},
+                googleClientSecret:    {value: $googleClientSecret},
+                microsoftClientId:     {value: $microsoftClientId},
+                microsoftClientSecret: {value: $microsoftClientSecret},
+                signingKeyPem:         {value: $signingKeyPem}
+              }
+            }' > /tmp/deploy-params.json
+
+      - name: Deploy infrastructure and capture service URLs
+        id: bicep
+        run: |
+          output=$(az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file  infrastructure/main.bicep \
+            --parameters     @infrastructure/main.parameters.json \
+            --parameters     @/tmp/deploy-params.json \
+            --query          properties.outputs \
+            --output         json)
+
+          echo "auth_url=$(echo "$output" | jq -r '.authServiceUrl.value')"       >> "$GITHUB_OUTPUT"
+          echo "api_url=$(echo "$output" | jq -r '.persistenceServiceUrl.value')" >> "$GITHUB_OUTPUT"
+
+  # ── 3. Build and deploy frontend with backend URLs baked in ─────────────────
+  deploy-frontend:
+    needs: deploy-backend
     runs-on: ubuntu-latest
     env:
-      IMAGE: internal-docker-registry:80/shorinjikempo:latest
-      SSH_HOST: ${{ secrets.SSH_HOST }}      # format: dns-name:port
+      IMAGE:    internal-docker-registry:80/shorinjikempo:latest
+      SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Write .env.production from secrets
+      - name: Write .env.production
         env:
-          VITE_DEBUG: ${{ vars.VITE_DEBUG || 'false' }}
-          VITE_FEEDBACK_EMAIL: ${{ secrets.VITE_FEEDBACK_EMAIL }}
-          VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
-          VITE_ONEDRIVE_TENANT_ID: ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
+          VITE_AUTH_URL:             ${{ needs.deploy-backend.outputs.auth_url }}
+          VITE_API_URL:              ${{ needs.deploy-backend.outputs.api_url }}
+          VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'false' }}
+          VITE_FEEDBACK_EMAIL:       ${{ secrets.VITE_FEEDBACK_EMAIL }}
+          VITE_ONEDRIVE_CLIENT_ID:   ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
+          VITE_ONEDRIVE_TENANT_ID:   ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
           VITE_ONEDRIVE_REDIRECT_URI: ${{ vars.VITE_ONEDRIVE_REDIRECT_URI }}
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_CLIENT_ID:     ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_GOOGLE_CLIENT_SECRET: ${{ secrets.VITE_GOOGLE_CLIENT_SECRET }}
-          VITE_GOOGLE_REDIRECT_URI: ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
+          VITE_GOOGLE_REDIRECT_URI:  ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
         run: |
           set -euo pipefail
           missing=()
           require() {
-            local name="$1"
-            local value="$2"
-            if [ -z "$value" ]; then
-              missing+=("$name")
-            fi
+            local name="$1" value="$2"
+            [ -n "$value" ] || missing+=("$name")
           }
-          # VITE_DEBUG is the only value allowed to be missing (it defaults to "false").
-          # VITE_ONEDRIVE_REDIRECT_URI and VITE_GOOGLE_REDIRECT_URI are optional —
-          # if blank, the app falls back to "<origin>/" at runtime.
-          require VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
+          require VITE_AUTH_URL           "$VITE_AUTH_URL"
+          require VITE_API_URL            "$VITE_API_URL"
+          require VITE_FEEDBACK_EMAIL     "$VITE_FEEDBACK_EMAIL"
           require VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
           require VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
-          require VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
+          require VITE_GOOGLE_CLIENT_ID   "$VITE_GOOGLE_CLIENT_ID"
           require VITE_GOOGLE_CLIENT_SECRET "$VITE_GOOGLE_CLIENT_SECRET"
           if [ ${#missing[@]} -gt 0 ]; then
             echo "::error::Missing required deploy secrets/vars: ${missing[*]}"
@@ -57,20 +158,19 @@ jobs:
 
           : > frontend/.env.production
           write_var() {
-            local name="$1"
-            local value="$2"
-            if [ -n "$value" ]; then
-              printf '%s=%s\n' "$name" "$value" >> frontend/.env.production
-            fi
+            local name="$1" value="$2"
+            [ -n "$value" ] && printf '%s=%s\n' "$name" "$value" >> frontend/.env.production
           }
-          write_var VITE_DEBUG "$VITE_DEBUG"
-          write_var VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
-          write_var VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
-          write_var VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
+          write_var VITE_AUTH_URL              "$VITE_AUTH_URL"
+          write_var VITE_API_URL               "$VITE_API_URL"
+          write_var VITE_DEBUG                 "$VITE_DEBUG"
+          write_var VITE_FEEDBACK_EMAIL        "$VITE_FEEDBACK_EMAIL"
+          write_var VITE_ONEDRIVE_CLIENT_ID    "$VITE_ONEDRIVE_CLIENT_ID"
+          write_var VITE_ONEDRIVE_TENANT_ID    "$VITE_ONEDRIVE_TENANT_ID"
           write_var VITE_ONEDRIVE_REDIRECT_URI "$VITE_ONEDRIVE_REDIRECT_URI"
-          write_var VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
-          write_var VITE_GOOGLE_CLIENT_SECRET "$VITE_GOOGLE_CLIENT_SECRET"
-          write_var VITE_GOOGLE_REDIRECT_URI "$VITE_GOOGLE_REDIRECT_URI"
+          write_var VITE_GOOGLE_CLIENT_ID      "$VITE_GOOGLE_CLIENT_ID"
+          write_var VITE_GOOGLE_CLIENT_SECRET  "$VITE_GOOGLE_CLIENT_SECRET"
+          write_var VITE_GOOGLE_REDIRECT_URI   "$VITE_GOOGLE_REDIRECT_URI"
 
       - name: Build image
         run: docker build -t "$IMAGE" ./frontend
@@ -92,14 +192,14 @@ jobs:
           echo "DEPLOY_HOST=$DEPLOY_HOST" >> "$GITHUB_ENV"
           echo "DEPLOY_PORT=$DEPLOY_PORT" >> "$GITHUB_ENV"
 
-      - name: Copy image to dockernode1
+      - name: Copy image to server
         run: |
           REMOTE_PATH="/tmp/shorinjikempo-${{ github.sha }}.tar.gz"
           scp -i ~/.ssh/id_deploy -P "$DEPLOY_PORT" \
             image.tar.gz "$SSH_USER@$DEPLOY_HOST:$REMOTE_PATH"
           echo "REMOTE_PATH=$REMOTE_PATH" >> "$GITHUB_ENV"
 
-      - name: Load, push, and restart stack on dockernode1
+      - name: Load, push, and restart stack on server
         run: |
           ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" "$SSH_USER@$DEPLOY_HOST" bash -s <<REMOTE
           set -euo pipefail

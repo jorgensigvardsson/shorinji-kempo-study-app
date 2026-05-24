@@ -3,16 +3,19 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
-      "value": "skempo"
+      "value": "sk-study-app"
     },
     "location": {
       "value": "swedencentral"
     },
+    "cosmosAccountName": {
+      "value": "sk-study-app-db"
+    },
     "authImage": {
-      "value": "myregistry.azurecr.io/shorinji-auth:latest"
+      "value": "ghcr.io/jorgensigvardsson/sk-auth:latest"
     },
     "persistenceImage": {
-      "value": "myregistry.azurecr.io/shorinji-persistence:latest"
+      "value": "ghcr.io/jorgensigvardsson/sk-persistence:latest"
     },
     "googleClientId": {
       "value": ""
