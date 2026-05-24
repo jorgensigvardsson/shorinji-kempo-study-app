@@ -11,6 +11,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const testIssuer   = "http://test-issuer"
+const testAudience = "shorinji-persistence"
+
 // staticKeySource implements KeySource for tests using a single fixed RSA key.
 type staticKeySource struct {
 	kid string
@@ -36,7 +39,9 @@ func generateTestKey(t *testing.T) *rsa.PrivateKey {
 func signToken(t *testing.T, key *rsa.PrivateKey, kid, sub string, expiry time.Time) string {
 	t.Helper()
 	claims := jwt.RegisteredClaims{
+		Issuer:    testIssuer,
 		Subject:   sub,
+		Audience:  jwt.ClaimStrings{testAudience},
 		ExpiresAt: jwt.NewNumericDate(expiry),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
@@ -58,7 +63,7 @@ func okHandler(w http.ResponseWriter, r *http.Request) {
 func TestAuthMiddleware_NoCookie_Returns401(t *testing.T) {
 	key := generateTestKey(t)
 	ks := &staticKeySource{kid: "k1", key: &key.PublicKey}
-	h := authMiddleware(ks, http.HandlerFunc(okHandler))
+	h := authMiddleware(ks, testIssuer, http.HandlerFunc(okHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -72,7 +77,7 @@ func TestAuthMiddleware_NoCookie_Returns401(t *testing.T) {
 func TestAuthMiddleware_ValidToken_CallsNextWithSub(t *testing.T) {
 	key := generateTestKey(t)
 	ks := &staticKeySource{kid: "k1", key: &key.PublicKey}
-	h := authMiddleware(ks, http.HandlerFunc(okHandler))
+	h := authMiddleware(ks, testIssuer, http.HandlerFunc(okHandler))
 
 	tokenStr := signToken(t, key, "k1", "user-uuid-123", time.Now().Add(time.Hour))
 
@@ -92,7 +97,7 @@ func TestAuthMiddleware_ValidToken_CallsNextWithSub(t *testing.T) {
 func TestAuthMiddleware_ExpiredToken_Returns401(t *testing.T) {
 	key := generateTestKey(t)
 	ks := &staticKeySource{kid: "k1", key: &key.PublicKey}
-	h := authMiddleware(ks, http.HandlerFunc(okHandler))
+	h := authMiddleware(ks, testIssuer, http.HandlerFunc(okHandler))
 
 	tokenStr := signToken(t, key, "k1", "user-uuid-123", time.Now().Add(-time.Minute))
 
@@ -110,7 +115,7 @@ func TestAuthMiddleware_WrongSigningKey_Returns401(t *testing.T) {
 	signingKey := generateTestKey(t)
 	wrongKey := generateTestKey(t) // different key for verification
 	ks := &staticKeySource{kid: "k1", key: &wrongKey.PublicKey}
-	h := authMiddleware(ks, http.HandlerFunc(okHandler))
+	h := authMiddleware(ks, testIssuer, http.HandlerFunc(okHandler))
 
 	tokenStr := signToken(t, signingKey, "k1", "user-uuid-123", time.Now().Add(time.Hour))
 
@@ -127,7 +132,7 @@ func TestAuthMiddleware_WrongSigningKey_Returns401(t *testing.T) {
 func TestAuthMiddleware_GarbageToken_Returns401(t *testing.T) {
 	key := generateTestKey(t)
 	ks := &staticKeySource{kid: "k1", key: &key.PublicKey}
-	h := authMiddleware(ks, http.HandlerFunc(okHandler))
+	h := authMiddleware(ks, testIssuer, http.HandlerFunc(okHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: "not.a.jwt"})

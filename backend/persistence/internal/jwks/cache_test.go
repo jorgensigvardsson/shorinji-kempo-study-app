@@ -27,7 +27,7 @@ func jwksJSON(kid string, key *rsa.PrivateKey) []byte {
 	e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(key.PublicKey.E)).Bytes())
 	doc := map[string]any{
 		"keys": []map[string]any{
-			{"kty": "RSA", "kid": kid, "n": n, "e": e},
+			{"kty": "RSA", "use": "sig", "alg": "RS256", "kid": kid, "n": n, "e": e},
 		},
 	}
 	b, _ := json.Marshal(doc)
@@ -71,8 +71,8 @@ func TestPublicKey_UnknownKid_TriggersRefresh(t *testing.T) {
 			// Second call (triggered by unknown kid) returns key-B as well.
 			b, _ := json.Marshal(map[string]any{
 				"keys": []map[string]any{
-					{"kty": "RSA", "kid": "key-A", "n": base64.RawURLEncoding.EncodeToString(keyA.PublicKey.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(keyA.PublicKey.E)).Bytes())},
-					{"kty": "RSA", "kid": "key-B", "n": base64.RawURLEncoding.EncodeToString(keyB.PublicKey.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(keyB.PublicKey.E)).Bytes())},
+					{"kty": "RSA", "use": "sig", "alg": "RS256", "kid": "key-A", "n": base64.RawURLEncoding.EncodeToString(keyA.PublicKey.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(keyA.PublicKey.E)).Bytes())},
+					{"kty": "RSA", "use": "sig", "alg": "RS256", "kid": "key-B", "n": base64.RawURLEncoding.EncodeToString(keyB.PublicKey.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(keyB.PublicKey.E)).Bytes())},
 				},
 			})
 			w.Write(b)
