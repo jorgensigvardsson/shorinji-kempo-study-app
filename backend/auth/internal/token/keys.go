@@ -29,12 +29,24 @@ func LoadOrGenerateKey(path string) (*rsa.PrivateKey, error) {
 
 // LoadKeyFromPEM parses an RSA private key from a PEM-encoded string.
 // Use this when the key is injected via environment variable rather than a file.
+// Accepts both PKCS#1 ("RSA PRIVATE KEY") and PKCS#8 ("PRIVATE KEY") formats.
 func LoadKeyFromPEM(pemStr string) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode([]byte(pemStr))
 	if block == nil {
 		return nil, errors.New("failed to decode PEM block from key string")
 	}
-	return x509.ParsePKCS1PrivateKey(block.Bytes)
+	if key, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
+		return key, nil
+	}
+	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	rsaKey, ok := key.(*rsa.PrivateKey)
+	if !ok {
+		return nil, errors.New("PKCS#8 key is not an RSA key")
+	}
+	return rsaKey, nil
 }
 
 func generateAndSave(path string) (*rsa.PrivateKey, error) {
