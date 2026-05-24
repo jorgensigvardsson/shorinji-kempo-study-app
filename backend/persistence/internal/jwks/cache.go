@@ -81,9 +81,15 @@ func (c *Cache) Refresh() error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("jwks: unexpected status %d from %s", resp.StatusCode, c.url)
+	}
+
 	var raw struct {
 		Keys []struct {
 			Kty string `json:"kty"`
+			Use string `json:"use"`
+			Alg string `json:"alg"`
 			Kid string `json:"kid"`
 			N   string `json:"n"`
 			E   string `json:"e"`
@@ -97,7 +103,7 @@ func (c *Cache) Refresh() error {
 
 	keys := make(map[string]*rsa.PublicKey, len(raw.Keys))
 	for _, k := range raw.Keys {
-		if k.Kty != "RSA" || k.Kid == "" {
+		if k.Kty != "RSA" || k.Use != "sig" || k.Alg != "RS256" || k.Kid == "" {
 			continue
 		}
 		key, err := parseRSAPublicKey(k.N, k.E)
@@ -105,6 +111,10 @@ func (c *Cache) Refresh() error {
 			return fmt.Errorf("jwks: parse key %q: %w", k.Kid, err)
 		}
 		keys[k.Kid] = key
+	}
+
+	if len(keys) == 0 {
+		return fmt.Errorf("jwks: response contained no usable RSA RS256 sig keys")
 	}
 
 	c.mu.Lock()

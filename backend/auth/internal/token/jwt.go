@@ -42,6 +42,7 @@ func (m *Manager) Issue(sub, email string) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.issuer,
 			Subject:   sub,
+			Audience:  jwt.ClaimStrings{"shorinji-persistence"},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 		},

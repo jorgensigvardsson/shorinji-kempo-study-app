@@ -103,7 +103,7 @@ secret, and verify by recomputing the HMAC on the presented token.
 
 ### M3 — JWT has no audience claim; JWKS validation is permissive
 
-**Status:** Open
+**Status:** Fixed — TBD_M3M5
 
 Access tokens carry `iss`, `sub`, `iat`, `exp`, and `email` but no `aud` claim.
 The persistence middleware validates RS256, issuer, and expiration but not
@@ -123,7 +123,7 @@ sets, and only accept keys with `kty=RSA`, `use=sig`, `alg=RS256`.
 
 ### M5 — HTTP servers have no read/write/idle timeouts
 
-**Status:** Open
+**Status:** Fixed — TBD_M3M5
 
 Both auth and persistence services create `http.Server` with only `Addr` and
 `Handler` set. No `ReadHeaderTimeout`, `ReadTimeout`, `WriteTimeout`, or
@@ -143,37 +143,6 @@ srv := &http.Server{
     MaxHeaderBytes:    1 << 20,
 }
 ```
-
----
-
-## Low
-
-### L1 — Cosmos DB uses primary master key with container-create permissions
-
-**Status:** Open
-
-The Bicep deployment injects the primary Cosmos master key into both auth and
-persistence services. At startup, each service creates its own databases and
-containers if they do not already exist. A compromised service instance gets full
-Cosmos data-plane power over all containers in the account.
-
-**Fix:** Pre-provision containers with Bicep/Terraform (remove the at-startup
-create logic). Run services with managed identity and Cosmos DB built-in RBAC
-roles scoped to only the containers each service needs.
-
----
-
-### L2 — Unpinned Docker image tags
-
-**Status:** Open
-
-`docker-compose.yml` uses `golang:latest` and installs `air@latest` at container
-startup. Frontend Dockerfiles reference unpinned `node:24-alpine` and
-`nginx:alpine`. The Bicep parameter files deploy `:latest` image tags.
-
-**Fix:** Pin base image tags to specific digests or versioned tags. Pin tool
-versions (`air@v1.x.y`). In production Bicep parameters, deploy immutable image
-digests rather than `:latest`.
 
 ---
 

@@ -35,7 +35,7 @@ func authMiddleware(ks KeySource, issuerURL string, next http.Handler) http.Hand
 			}
 			kid, _ := t.Header["kid"].(string)
 			return ks.PublicKey(kid)
-		}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(issuerURL), jwt.WithExpirationRequired())
+		}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(issuerURL), jwt.WithAudience("shorinji-persistence"), jwt.WithExpirationRequired())
 
 		if err != nil || !token.Valid {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)

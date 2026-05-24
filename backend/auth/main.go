@@ -137,7 +137,15 @@ func main() {
 	mux := http.NewServeMux()
 	api.NewHandler(providers, domains, userStore, refreshStore, tokenManager, *frontendURL, limiter).Register(mux)
 
-	srv := &http.Server{Addr: *addr, Handler: mux}
+	srv := &http.Server{
+		Addr:              *addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
