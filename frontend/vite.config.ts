@@ -16,7 +16,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    mkcert(),
+    ...(process.env.VITE_HTTPS !== 'false' ? [mkcert()] : []),
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],

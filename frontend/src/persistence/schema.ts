@@ -2,7 +2,7 @@ import type { GradeName } from "../data";
 import type { Language } from "../i18n";
 
 export type ThemePreference = "light" | "dark" | "system";
-export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox";
+export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox" | "backend";
 export type HokeiRankValue = 1 | 2 | 3;
 
 export interface HokeiRankEntry {

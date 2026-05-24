@@ -10,6 +10,7 @@ import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 import { ArrowClockwise, ArrowLeftRight, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState } from './hooks';
 import { getSyncManager } from './sync/manager';
+import { LoginScreen } from './LoginScreen';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 
@@ -23,6 +24,8 @@ interface Props {
 }
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
+const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
+const IDENTITY_CHOICE_KEY = "identity-choice-made";
 
 function isStandalonePwa(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches
@@ -64,12 +67,40 @@ function App(props: Props) {
     textZoom,
     lang => languageData.save(lang),
     g => gradeData.save(g.grade),
-    size => textSizeData.save(size)
+    size => textSizeData.save(size),
+    () => setShowSignIn(true)
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
   useEffect(() => gradeData.registerListener(g => setNextGrade(g)), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
+
+  const { syncProvider } = useSyncProvider();
+  const [showSignIn, setShowSignIn] = useState(
+    () => BACKEND_ENABLED && localStorage.getItem(IDENTITY_CHOICE_KEY) !== "true"
+  );
+  // Auto-hide when the user completes sign-in (provider switches to "backend").
+  useEffect(() => {
+    if (syncProvider === "backend") {
+      localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
+      setShowSignIn(false);
+    }
+  }, [syncProvider]);
+
+  const handleContinueAnonymously = () => {
+    localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
+    setShowSignIn(false);
+  };
+
+  if (showSignIn) {
+    return (
+      <TranslatorContext.Provider value={translator}>
+        <div style={{ zoom: textZoom }}>
+          <LoginScreen onContinueAnonymously={handleContinueAnonymously} />
+        </div>
+      </TranslatorContext.Provider>
+    );
+  }
 
   return (
     <TranslatorContext.Provider value={translator}>
@@ -79,7 +110,7 @@ function App(props: Props) {
           {renderRoutes(routes)}
           <Outlet />
         </div>
-        <AppToasts translator={translator} />
+        <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)} />
       </div>
     </TranslatorContext.Provider>
   )
@@ -197,8 +228,8 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const AppToasts = (props: { translator: Translator }) => {
-  const { translator } = props;
+const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) => {
+  const { translator, onShowLogin } = props;
   const navigate = useNavigate();
   const lang = translator.currentLanguage;
 
@@ -257,6 +288,16 @@ const AppToasts = (props: { translator: Translator }) => {
     : syncProvider === "google-drive" ? "Google Drive"
     : syncProvider === "dropbox" ? "Dropbox"
     : translator.translate("molntjänsten");
+
+  // When the backend session expires, redirect to the login screen instead of
+  // showing a generic "sync disconnected" toast.
+  useEffect(() => {
+    if (syncProvider === "backend" && syncState.status === "auth_expired") {
+      localStorage.removeItem(IDENTITY_CHOICE_KEY);
+      getSyncManager().disconnect();
+      onShowLogin();
+    }
+  }, [syncState.status, syncProvider, onShowLogin]);
 
   return (
     <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
@@ -341,7 +382,7 @@ const AppToasts = (props: { translator: Translator }) => {
           </div>
         </Toast.Body>
       </Toast>
-      <Toast show={syncState.status === "auth_expired"} className="app-update-toast">
+      <Toast show={syncState.status === "auth_expired" && syncProvider !== "backend"} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
             <CloudSlash size={20} />

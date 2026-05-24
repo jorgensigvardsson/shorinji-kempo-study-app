@@ -1,0 +1,34 @@
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.login-screen-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-screen-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.login-screen-logo {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+}
+
+.login-screen-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.login-screen-subtitle {
+  margin-bottom: 1.5rem;
+}

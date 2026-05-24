@@ -7,19 +7,22 @@ import (
 	"path/filepath"
 )
 
-// FileStore persists documents as JSON files under a base directory.
-// Each document is stored at <baseDir>/<key>.json.
-// This is intentionally simple; a database replaces it once auth is in place.
+// FileStore persists documents as individual JSON files under a base directory.
+// Each user's document lives at <baseDir>/<userID>.json.
 type FileStore struct {
-	path string
+	baseDir string
 }
 
-func NewFileStore(baseDir, key string) *FileStore {
-	return &FileStore{path: filepath.Join(baseDir, key+".json")}
+func NewFileStore(baseDir string) *FileStore {
+	return &FileStore{baseDir: baseDir}
 }
 
-func (s *FileStore) Load() (*Document, error) {
-	data, err := os.ReadFile(s.path)
+func (s *FileStore) path(userID string) string {
+	return filepath.Join(s.baseDir, userID+".json")
+}
+
+func (s *FileStore) Load(userID string) (*Document, error) {
+	data, err := os.ReadFile(s.path(userID))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
 	}
@@ -33,13 +36,21 @@ func (s *FileStore) Load() (*Document, error) {
 	return &doc, nil
 }
 
-func (s *FileStore) Save(doc *Document) error {
-	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil {
+func (s *FileStore) Save(userID string, doc *Document) error {
+	if err := os.MkdirAll(s.baseDir, 0o755); err != nil {
 		return err
 	}
 	data, err := json.Marshal(doc)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(s.path, data, 0o644)
+	return os.WriteFile(s.path(userID), data, 0o644)
+}
+
+func (s *FileStore) Delete(userID string) error {
+	err := os.Remove(s.path(userID))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
 }

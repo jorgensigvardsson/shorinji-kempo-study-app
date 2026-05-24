@@ -12,6 +12,7 @@ type Document struct {
 }
 
 type Store interface {
-	Load() (*Document, error)
-	Save(doc *Document) error
+	Load(userID string) (*Document, error)
+	Save(userID string, doc *Document) error
+	Delete(userID string) error
 }

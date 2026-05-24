@@ -4,3 +4,9 @@
 *.out
 bin/
 vendor/
+
+# Runtime data (signing keys, user files, documents)
+data/
+
+# air live-reload build output
+tmp/
