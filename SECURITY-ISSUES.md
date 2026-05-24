@@ -121,24 +121,6 @@ sets, and only accept keys with `kty=RSA`, `use=sig`, `alg=RS256`.
 
 ---
 
-### M4 — XFF trust regression: rightmost IP is spoofable without a trusted proxy
-
-**Status:** Open
-
-The rate limiter (`backend/shared/ratelimit/ratelimit.go`) now uses the rightmost
-`X-Forwarded-For` value on the assumption that Azure Container Apps appends the
-real client IP. That assumption holds in production ACA, but the same binary runs
-in Docker Compose / local dev with no trusted proxy normalising headers. A client
-can send `X-Forwarded-For: 1.2.3.4, 5.6.7.8` and the limiter uses `5.6.7.8`,
-allowing IP spoofing to bypass per-IP rate limits.
-
-**Fix:** Make proxy trust explicit. Introduce a `TRUSTED_PROXY_MODE` (or similar)
-environment variable. Only honour `X-Forwarded-For` / `X-Real-IP` when the mode
-is set to `aca` (or when `RemoteAddr` falls within a configured trusted CIDR).
-Otherwise, use `RemoteAddr` directly.
-
----
-
 ### M5 — HTTP servers have no read/write/idle timeouts
 
 **Status:** Open
