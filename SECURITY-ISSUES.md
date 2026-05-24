@@ -169,15 +169,21 @@ needed. The variable has been removed from the deploy workflow entirely.
 
 ### M4 — No Content Security Policy; cloud tokens stored in localStorage
 
-**Status:** Open
+**Status:** Partially fixed — (nginx.conf)
 
-The frontend Nginx config sets no `Content-Security-Policy`, `frame-ancestors`,
-or `Permissions-Policy` headers. OneDrive and Google Drive sync clients store
-access and refresh tokens in `localStorage`, which any XSS payload can read.
+The frontend Nginx config now sets:
+- `Content-Security-Policy`: blocks inline scripts and cross-origin script/style
+  loads; `connect-src https:` allows HTTPS API calls without restricting to
+  specific domains (backend URLs are deployment-specific and unknown at image
+  build time).
+- `X-Frame-Options: DENY` — prevents clickjacking via iframe embedding.
+- `X-Content-Type-Options: nosniff` — prevents MIME-type sniffing.
+- `Referrer-Policy: strict-origin-when-cross-origin`.
 
-**Fix:** Add a strict CSP to the frontend Nginx config. Longer term, move
-cloud-provider token handling into a backend-for-frontend so refresh tokens
-are not stored in browser storage.
+**Remaining:** OneDrive and Google Drive sync clients still store access and
+refresh tokens in `localStorage`. Moving token handling to a
+backend-for-frontend would eliminate this exposure but is a significant
+architectural change. Accepted as a known limitation for now.
 
 ---
 
