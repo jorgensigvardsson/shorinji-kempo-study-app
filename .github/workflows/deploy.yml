@@ -76,6 +76,7 @@ jobs:
           MICROSOFT_CLIENT_ID:      ${{ vars.MICROSOFT_CLIENT_ID }}
           MICROSOFT_CLIENT_SECRET:  ${{ secrets.MICROSOFT_CLIENT_SECRET }}
           SIGNING_KEY_PEM:          ${{ secrets.SIGNING_KEY_PEM }}
+          FRONTEND_URL:             ${{ vars.FRONTEND_URL }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \
@@ -85,6 +86,7 @@ jobs:
             --arg microsoftClientId     "$MICROSOFT_CLIENT_ID" \
             --arg microsoftClientSecret "$MICROSOFT_CLIENT_SECRET" \
             --arg signingKeyPem         "$SIGNING_KEY_PEM" \
+            --arg frontendUrl           "$FRONTEND_URL" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               contentVersion: "1.0.0.0",
@@ -95,7 +97,8 @@ jobs:
                 googleClientSecret:    {value: $googleClientSecret},
                 microsoftClientId:     {value: $microsoftClientId},
                 microsoftClientSecret: {value: $microsoftClientSecret},
-                signingKeyPem:         {value: $signingKeyPem}
+                signingKeyPem:         {value: $signingKeyPem},
+                frontendUrl:           {value: $frontendUrl}
               }
             }' > /tmp/deploy-params.json
 

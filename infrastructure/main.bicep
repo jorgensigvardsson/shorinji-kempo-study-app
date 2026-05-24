@@ -54,6 +54,9 @@ param microsoftClientSecret string = ''
 @secure()
 param signingKeyPem string
 
+@description('Public URL of the frontend app, used as the OAuth post-login redirect target')
+param frontendUrl string
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -89,7 +92,7 @@ module authApp 'modules/auth-app.bicep' = {
     environmentId: containerEnv.outputs.environmentId
     image: authImage
     issuerUrl: 'https://${namePrefix}-auth.${containerEnv.outputs.defaultDomain}'
-    frontendUrl: 'https://shorinjikempo.cash-it.se'
+    frontendUrl: frontendUrl
     cosmosEndpoint: cosmos.outputs.endpoint
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
