@@ -103,7 +103,7 @@ secret, and verify by recomputing the HMAC on the presented token.
 
 ### M3 — JWT has no audience claim; JWKS validation is permissive
 
-**Status:** Fixed — TBD_M3M5
+**Status:** Fixed — c90a555
 
 Access tokens carry `iss`, `sub`, `iat`, `exp`, and `email` but no `aud` claim.
 The persistence middleware validates RS256, issuer, and expiration but not
@@ -123,7 +123,7 @@ sets, and only accept keys with `kty=RSA`, `use=sig`, `alg=RS256`.
 
 ### M5 — HTTP servers have no read/write/idle timeouts
 
-**Status:** Fixed — TBD_M3M5
+**Status:** Fixed — c90a555
 
 Both auth and persistence services create `http.Server` with only `Addr` and
 `Handler` set. No `ReadHeaderTimeout`, `ReadTimeout`, `WriteTimeout`, or
