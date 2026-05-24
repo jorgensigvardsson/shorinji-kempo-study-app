@@ -11,7 +11,7 @@ File-backend findings are excluded; the file backend is not used in production.
 
 ### H1 — OAuth login state is not bound to the browser session
 
-**Status:** Fixed — TBD_H1H2
+**Status:** Fixed — fc04132
 
 The auth service stores OAuth `state` in an in-memory server map, but nothing
 binds the callback to the browser that initiated the flow. An attacker can
@@ -33,7 +33,7 @@ delete it.
 
 ### H2 — Email-domain allowlisting only checked before OAuth, not after
 
-**Status:** Fixed — TBD_H1H2
+**Status:** Fixed — fc04132
 
 `/auth/login` uses the user-supplied email domain to pick an OIDC provider, but
 the callback trusts whatever `info.Email` the provider returns and enrolls that
