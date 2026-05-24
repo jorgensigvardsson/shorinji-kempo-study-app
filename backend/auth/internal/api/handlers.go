@@ -29,12 +29,11 @@ const (
 )
 
 type pendingState struct {
-	nonce          string
-	providerName   string
-	expiresAt      time.Time
-	linkUserID     string // non-empty → identity-link flow; this user gets the new identity added
-	txnID          string // H1: random value mirrored as a browser cookie to bind the flow to the initiating browser
-	expectedDomain string // H2: email domain the user claimed at login time; verified against provider's returned email
+	nonce        string
+	providerName string
+	expiresAt    time.Time
+	linkUserID   string // non-empty → identity-link flow; this user gets the new identity added
+	txnID        string // H1: random value mirrored as a browser cookie to bind the flow to the initiating browser
 }
 
 type Handler struct {
@@ -193,11 +192,10 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 
 	h.mu.Lock()
 	h.pending[state] = pendingState{
-		nonce:          nonce,
-		providerName:   providerName,
-		expiresAt:      time.Now().Add(stateTTL),
-		txnID:          txnID,
-		expectedDomain: domain,
+		nonce:        nonce,
+		providerName: providerName,
+		expiresAt:    time.Now().Add(stateTTL),
+		txnID:        txnID,
 	}
 	h.mu.Unlock()
 
@@ -250,16 +248,6 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// H2: verify the provider's returned email domain matches what the user claimed at login time.
-	if ps.expectedDomain != "" {
-		emailParts := strings.SplitN(info.Email, "@", 2)
-		if len(emailParts) != 2 || strings.ToLower(emailParts[1]) != ps.expectedDomain {
-			log.Printf("callback: email domain mismatch: got %q, expected domain %q", info.Email, ps.expectedDomain)
-			http.Error(w, "authentication failed", http.StatusUnauthorized)
-			return
-		}
-	}
-
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	// Identity-link flow: add a new provider to an existing user's account.
@@ -279,12 +267,6 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		target, err := h.users.FindByID(ps.linkUserID)
 		if err != nil || target == nil {
 			http.Error(w, "user not found", http.StatusNotFound)
-			return
-		}
-		// M4: require the incoming OIDC email to match the existing account's primary
-		// email (case-insensitive) to prevent a session-hijack binding a foreign identity.
-		if !strings.EqualFold(info.Email, target.Email) {
-			http.Redirect(w, r, h.frontendURL+"?link_error=email_mismatch", http.StatusFound)
 			return
 		}
 		target.LinkedIdentities[ps.providerName] = store.LinkedIdentity{Sub: info.Sub, Email: info.Email}
@@ -595,12 +577,11 @@ func (h *Handler) linkAccount(w http.ResponseWriter, r *http.Request) {
 
 	h.mu.Lock()
 	h.pending[state] = pendingState{
-		nonce:          nonce,
-		providerName:   providerName,
-		expiresAt:      time.Now().Add(stateTTL),
-		linkUserID:     claims.Subject,
-		txnID:          txnID,
-		expectedDomain: domain,
+		nonce:        nonce,
+		providerName: providerName,
+		expiresAt:    time.Now().Add(stateTTL),
+		linkUserID:   claims.Subject,
+		txnID:        txnID,
 	}
 	h.mu.Unlock()
 

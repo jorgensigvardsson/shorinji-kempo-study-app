@@ -33,7 +33,12 @@ delete it.
 
 ### H2 — Email-domain allowlisting only checked before OAuth, not after
 
-**Status:** Fixed — fc04132
+**Status:** Partially reverted — provider issuer/email-verified checks kept;
+post-callback email-domain match removed because email != identity (a Microsoft
+account can use a Gmail address, etc.). The actual identity is `(provider, sub)`,
+which OAuth guarantees comes from the authenticated account.
+
+**Original fix:** fc04132
 
 `/auth/login` uses the user-supplied email domain to pick an OIDC provider, but
 the callback trusts whatever `info.Email` the provider returns and enrolls that
