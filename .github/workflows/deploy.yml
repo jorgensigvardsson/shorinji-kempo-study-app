@@ -136,6 +136,7 @@ jobs:
           VITE_ONEDRIVE_CLIENT_ID:   ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
           VITE_ONEDRIVE_TENANT_ID:   ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
           VITE_ONEDRIVE_REDIRECT_URI: ${{ vars.VITE_ONEDRIVE_REDIRECT_URI }}
+          VITE_BACKEND_ENABLED:      "true"
           VITE_GOOGLE_CLIENT_ID:     ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_GOOGLE_REDIRECT_URI:  ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
         run: |
@@ -171,6 +172,7 @@ jobs:
           write_var VITE_ONEDRIVE_CLIENT_ID    "$VITE_ONEDRIVE_CLIENT_ID"
           write_var VITE_ONEDRIVE_TENANT_ID    "$VITE_ONEDRIVE_TENANT_ID"
           write_var VITE_ONEDRIVE_REDIRECT_URI "$VITE_ONEDRIVE_REDIRECT_URI"
+          write_var VITE_BACKEND_ENABLED       "$VITE_BACKEND_ENABLED"
           write_var VITE_GOOGLE_CLIENT_ID      "$VITE_GOOGLE_CLIENT_ID"
           write_var VITE_GOOGLE_REDIRECT_URI   "$VITE_GOOGLE_REDIRECT_URI"
 
