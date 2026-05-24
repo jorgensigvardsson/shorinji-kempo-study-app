@@ -116,6 +116,23 @@ jobs:
           echo "auth_url=$(echo "$output" | jq -r '.authServiceUrl.value')"       >> "$GITHUB_OUTPUT"
           echo "api_url=$(echo "$output" | jq -r '.persistenceServiceUrl.value')" >> "$GITHUB_OUTPUT"
 
+      - name: Bind custom domain TLS certificates
+        run: |
+          # Bicep registers hostnames with bindingType=Disabled; this step issues/renews
+          # managed certs and switches to SniEnabled. Idempotent on re-deployments.
+          az containerapp hostname bind \
+            --hostname auth-shorinjikempo.cash-it.se \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --name sk-study-app-auth \
+            --environment sk-study-app-env \
+            --validation-method CNAME
+          az containerapp hostname bind \
+            --hostname persistence-shorinjikempo.cash-it.se \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --name sk-study-app-persistence \
+            --environment sk-study-app-env \
+            --validation-method CNAME
+
   # ── 3. Build and deploy frontend with backend URLs baked in ─────────────────
   deploy-frontend:
     needs: deploy-backend

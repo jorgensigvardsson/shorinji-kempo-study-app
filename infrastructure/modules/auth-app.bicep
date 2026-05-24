@@ -56,9 +56,6 @@ param signingKeyPem string
 @description('Custom domain hostname (e.g. auth-shorinjikempo.cash-it.se). Leave empty to use the default ACA FQDN.')
 param customDomain string = ''
 
-@description('Resource ID of the managed certificate for the custom domain.')
-param customDomainCertificateId string = ''
-
 @description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se). Leave empty for host-only cookies.')
 param cookieDomain string = ''
 
@@ -75,8 +72,7 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
         customDomains: empty(customDomain) ? [] : [
           {
             name: customDomain
-            certificateId: customDomainCertificateId
-            bindingType: 'SniEnabled'
+            bindingType: 'Disabled'
           }
         ]
       }

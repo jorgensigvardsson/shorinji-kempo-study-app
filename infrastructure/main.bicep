@@ -2,11 +2,13 @@
 //
 // Deploys:
 //   • Cosmos DB account (free tier) with all required containers
-//   • Container Apps Environment (consumption plan, Log Analytics)
+//   • Container Apps Environment (consumption plan)
 //   • auth service Container App        (backend/auth)
 //   • persistence service Container App (backend/persistence)
 //
-// The frontend is hosted elsewhere and is NOT deployed here.
+// Custom domain TLS certificates are NOT managed here. After each Bicep deploy,
+// the workflow runs `az containerapp hostname bind` to (re-)issue managed certs
+// and switch the binding from Disabled to SniEnabled.
 //
 // Usage:
 //   az deployment group create \
@@ -79,8 +81,6 @@ module cosmos 'modules/cosmos.bicep' = {
 
 // Obtain the Cosmos primary key via listKeys() on an existing reference.
 // This keeps the key out of deployment history (module outputs are plain text).
-// cosmosAccountName is a known parameter — using it directly avoids a module-output
-// dependency that Bicep can't resolve at deployment start.
 resource cosmosAccountRef 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' existing = {
   name: cosmosAccountName
 }
@@ -90,33 +90,6 @@ module containerEnv 'modules/container-apps-env.bicep' = {
   params: {
     name: namePrefix
     location: location
-  }
-}
-
-// Reference the deployed environment so we can attach managed certificates to it.
-// Use the known name directly — parent requires a value calculable at deployment start.
-resource envResource 'Microsoft.App/managedEnvironments@2023-05-01' existing = {
-  name: '${namePrefix}-env'
-}
-
-// Managed TLS certificates for custom domains (CNAME validation — CNAMEs must exist before deploy).
-resource authCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (!empty(authCustomDomain)) {
-  parent: envResource
-  name: 'auth-cert'
-  location: location
-  properties: {
-    subjectName: authCustomDomain
-    domainControlValidation: 'CNAME'
-  }
-}
-
-resource persistenceCert 'Microsoft.App/managedEnvironments/managedCertificates@2023-05-01' = if (!empty(persistenceCustomDomain)) {
-  parent: envResource
-  name: 'persistence-cert'
-  location: location
-  properties: {
-    subjectName: persistenceCustomDomain
-    domainControlValidation: 'CNAME'
   }
 }
 
@@ -143,7 +116,6 @@ module authApp 'modules/auth-app.bicep' = {
     microsoftRedirectUri: '${authBaseUrl}/auth/callback'
     signingKeyPem: signingKeyPem
     customDomain: authCustomDomain
-    customDomainCertificateId: empty(authCustomDomain) ? '' : authCert.id
     cookieDomain: cookieDomain
   }
 }
@@ -161,7 +133,6 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
     customDomain: persistenceCustomDomain
-    customDomainCertificateId: empty(persistenceCustomDomain) ? '' : persistenceCert.id
   }
 }
 
