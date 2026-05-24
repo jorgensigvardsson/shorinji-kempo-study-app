@@ -124,7 +124,7 @@ jobs:
           az containerapp hostname add \
             --hostname auth-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
-            --name sk-study-app-auth
+            --name sk-study-app-auth || true
           az containerapp hostname bind \
             --hostname auth-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
@@ -135,7 +135,7 @@ jobs:
           az containerapp hostname add \
             --hostname persistence-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
-            --name sk-study-app-persistence
+            --name sk-study-app-persistence || true
           az containerapp hostname bind \
             --hostname persistence-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
