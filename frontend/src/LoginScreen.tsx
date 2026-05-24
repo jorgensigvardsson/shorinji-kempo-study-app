@@ -1,6 +1,7 @@
 import { useContext, useMemo, useState } from "react";
-import { Button, Form, Spinner } from "react-bootstrap";
+import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { type Language, TranslationsContext, TranslatorImplementation } from "./i18n";
+import PrivacyPolicy from "./PrivacyPolicy";
 import { getSyncManager } from "./sync/manager";
 import "./LoginScreen.css";
 
@@ -29,6 +30,7 @@ export function LoginScreen({ onContinueAnonymously }: Props) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const resolveDomain = async (emailValue: string): Promise<boolean> => {
     const resp = await fetch(
@@ -118,7 +120,27 @@ export function LoginScreen({ onContinueAnonymously }: Props) {
             {translator.translate("Fortsätt utan konto")}
           </Button>
         </div>
+
+        <div className="text-center mt-3">
+          <Button variant="link" size="sm" className="p-0 text-body-secondary" onClick={() => setShowPrivacy(true)}>
+            {translator.translate("Integritetspolicy")}
+          </Button>
+        </div>
       </div>
+
+      <Modal show={showPrivacy} onHide={() => setShowPrivacy(false)} scrollable>
+        <Modal.Header closeButton>
+          <Modal.Title>{translator.translate("Integritetspolicy")}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <PrivacyPolicy authenticated={true} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPrivacy(false)}>
+            {translator.translate("Stäng")}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

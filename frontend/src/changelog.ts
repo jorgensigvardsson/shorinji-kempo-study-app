@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-24T17:30:00.000Z",
+    changes: [
+      {
+        emoji: "🔒",
+        sv: "Integritetspolicyn är nu tillgänglig direkt på inloggningssidan.",
+        en: "The privacy policy is now accessible directly from the login screen.",
+        tr: "Gizlilik politikasına artık doğrudan giriş ekranından erişilebilir.",
+        ja: "プライバシーポリシーがログイン画面から直接確認できるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-24T14:56:38.154Z",
     changes: [
       {

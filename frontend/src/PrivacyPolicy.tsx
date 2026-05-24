@@ -3,9 +3,13 @@ import { TranslatorContext } from "./i18n";
 
 const isAuthenticated = () => localStorage.getItem("sync-backend-connected") === "true";
 
-const PrivacyPolicy = () => {
+interface Props {
+  authenticated?: boolean;
+}
+
+const PrivacyPolicy = ({ authenticated: authenticatedProp }: Props = {}) => {
   const translator = useContext(TranslatorContext);
-  const authenticated = isAuthenticated();
+  const authenticated = authenticatedProp ?? isAuthenticated();
 
   return (
     <div>
