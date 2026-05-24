@@ -22,14 +22,17 @@ import (
 const (
 	accessCookieName  = "access_token"
 	refreshCookieName = "refresh_token"
+	txnCookieName     = "oauth_txn"
 	stateTTL          = 10 * time.Minute
 )
 
 type pendingState struct {
-	nonce        string
-	providerName string
-	expiresAt    time.Time
-	linkUserID   string // non-empty → identity-link flow; this user gets the new identity added
+	nonce          string
+	providerName   string
+	expiresAt      time.Time
+	linkUserID     string // non-empty → identity-link flow; this user gets the new identity added
+	txnID          string // H1: random value mirrored as a browser cookie to bind the flow to the initiating browser
+	expectedDomain string // H2: email domain the user claimed at login time; verified against provider's returned email
 }
 
 type Handler struct {
@@ -138,12 +141,32 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	txnID, err := randomString(32)
+	if err != nil {
+		log.Printf("login: randomString: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// H1: set a short-lived HttpOnly cookie that the callback must echo back,
+	// binding the OIDC round-trip to the browser that initiated it.
+	http.SetCookie(w, &http.Cookie{
+		Name:     txnCookieName,
+		Value:    txnID,
+		Path:     "/auth/callback",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode, // Lax (not Strict) so the cookie arrives on the provider redirect-back
+		MaxAge:   int(stateTTL.Seconds()),
+	})
 
 	h.mu.Lock()
 	h.pending[state] = pendingState{
-		nonce:        nonce,
-		providerName: providerName,
-		expiresAt:    time.Now().Add(stateTTL),
+		nonce:          nonce,
+		providerName:   providerName,
+		expiresAt:      time.Now().Add(stateTTL),
+		txnID:          txnID,
+		expectedDomain: domain,
 	}
 	h.mu.Unlock()
 
@@ -167,6 +190,22 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// H1: verify the transaction cookie matches the one set when the flow was initiated.
+	// Always clear it, even on failure, so it doesn't linger in the browser.
+	txnCookie, txnErr := r.Cookie(txnCookieName)
+	http.SetCookie(w, &http.Cookie{
+		Name:     txnCookieName,
+		Value:    "",
+		Path:     "/auth/callback",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   -1,
+	})
+	if txnErr != nil || txnCookie.Value != ps.txnID {
+		http.Error(w, "invalid or expired state", http.StatusBadRequest)
+		return
+	}
+
 	p, ok := h.providers[ps.providerName]
 	if !ok {
 		http.Error(w, "unknown provider", http.StatusInternalServerError)
@@ -178,6 +217,16 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		log.Printf("OIDC exchange (%s): %v", ps.providerName, err)
 		http.Error(w, "authentication failed", http.StatusUnauthorized)
 		return
+	}
+
+	// H2: verify the provider's returned email domain matches what the user claimed at login time.
+	if ps.expectedDomain != "" {
+		emailParts := strings.SplitN(info.Email, "@", 2)
+		if len(emailParts) != 2 || strings.ToLower(emailParts[1]) != ps.expectedDomain {
+			log.Printf("callback: email domain mismatch: got %q, expected domain %q", info.Email, ps.expectedDomain)
+			http.Error(w, "authentication failed", http.StatusUnauthorized)
+			return
+		}
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -486,13 +535,31 @@ func (h *Handler) linkAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	txnID, err := randomString(32)
+	if err != nil {
+		log.Printf("linkAccount: randomString: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     txnCookieName,
+		Value:    txnID,
+		Path:     "/auth/callback",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(stateTTL.Seconds()),
+	})
 
 	h.mu.Lock()
 	h.pending[state] = pendingState{
-		nonce:        nonce,
-		providerName: providerName,
-		expiresAt:    time.Now().Add(stateTTL),
-		linkUserID:   claims.Subject,
+		nonce:          nonce,
+		providerName:   providerName,
+		expiresAt:      time.Now().Add(stateTTL),
+		linkUserID:     claims.Subject,
+		txnID:          txnID,
+		expectedDomain: domain,
 	}
 	h.mu.Unlock()
 

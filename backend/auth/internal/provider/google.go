@@ -56,12 +56,16 @@ func (g *Google) Exchange(ctx context.Context, code, nonce string) (*UserInfo, e
 		return nil, fmt.Errorf("nonce mismatch")
 	}
 	var claims struct {
-		Sub   string `json:"sub"`
-		Email string `json:"email"`
-		Name  string `json:"name"`
+		Sub           string `json:"sub"`
+		Email         string `json:"email"`
+		Name          string `json:"name"`
+		EmailVerified bool   `json:"email_verified"`
 	}
 	if err := idToken.Claims(&claims); err != nil {
 		return nil, fmt.Errorf("extract claims: %w", err)
+	}
+	if !claims.EmailVerified {
+		return nil, fmt.Errorf("google: email %q is not verified", claims.Email)
 	}
 	return &UserInfo{
 		Sub:         claims.Sub,
