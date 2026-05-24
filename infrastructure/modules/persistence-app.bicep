@@ -32,6 +32,9 @@ param cosmosDatabase string
 @description('Custom domain hostname (e.g. persistence-shorinjikempo.cash-it.se). Leave empty to use the default ACA FQDN.')
 param customDomain string = ''
 
+@description('Frontend origin allowed by CORS')
+param frontendUrl string
+
 
 resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
@@ -69,6 +72,7 @@ resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
           }
           env: [
             { name: 'SERVICE_LISTEN_ADDRESS', value: ':8080' }
+            { name: 'SERVICE_FRONTEND_URL',    value: frontendUrl }
             { name: 'SERVICE_STORAGE',         value: 'cosmosdb' }
             { name: 'AUTH_JWKS_URL',           value: '${authServiceUrl}/.well-known/jwks.json' }
             { name: 'AUTH_ISSUER_URL',         value: authIssuerUrl }

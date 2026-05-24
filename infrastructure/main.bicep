@@ -133,6 +133,7 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
     cosmosDatabase: cosmosDatabase
     customDomain: persistenceCustomDomain
+    frontendUrl: frontendUrl
   }
 }
 
