@@ -146,30 +146,4 @@ srv := &http.Server{
 
 ---
 
-## Out of scope for this branch (pre-existing)
-
-### P1 — Google OAuth client secret exposed in frontend bundle
-
-The existing Google Drive sync client (`frontend/src/sync/google-drive.ts`) reads
-`VITE_GOOGLE_CLIENT_SECRET` and sends it in token-exchange and refresh requests.
-Vite exposes all `VITE_` variables in the built bundle. This predates the backend
-introduction branch and is a separate remediation track.
-
-**Fix:** Use PKCE without a client secret for the browser-side Google Drive flow,
-or move token exchange behind a backend-for-frontend.
-
----
-
-### P2 — No Content Security Policy on the frontend; cloud tokens in localStorage
-
-The Nginx config serving the SPA sets no `Content-Security-Policy`,
-`frame-ancestors`, or `Permissions-Policy`. The OneDrive and Google Drive sync
-clients store access and refresh tokens in `localStorage`, which is readable by
-any XSS. Both predate this branch.
-
-**Fix:** Add a strict CSP to the Nginx config. Longer term, move cloud token
-handling behind a BFF so refresh tokens are not stored in the browser.
-
----
-
 *Last updated: 2026-05-24*
