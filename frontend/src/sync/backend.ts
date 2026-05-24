@@ -152,8 +152,13 @@ export class BackendSyncClient {
 
   // Initiates an OIDC flow to link another provider identity to the current account.
   // The browser navigates away; control returns via ?link_success=1 or ?link_error=X.
+  // Uses a form POST so that SameSite=Lax cookies are not sent on cross-site GET navigations.
   beginLinkAuthorization(email: string): void {
-    window.location.href = `${authUrl}/auth/link?email=${encodeURIComponent(email)}`;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `${authUrl}/auth/link?email=${encodeURIComponent(email)}`;
+    document.body.appendChild(form);
+    form.submit();
   }
 
   // Removes a provider identity from the current account.

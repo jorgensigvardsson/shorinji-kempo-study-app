@@ -8,6 +8,7 @@ import (
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/csrf"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/secureheaders"
 )
@@ -30,7 +31,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.getDocument)))
 	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.putDocument)))
 	inner.Handle("DELETE /api/v1/account", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.deleteAccount)))
-	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, h.limiter.Middleware(inner))))
+	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {

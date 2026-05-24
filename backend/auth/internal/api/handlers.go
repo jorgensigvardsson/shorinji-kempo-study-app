@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/csrf"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/secureheaders"
 )
@@ -80,9 +82,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
-	inner.HandleFunc("GET /auth/link", h.linkAccount)
+	inner.HandleFunc("POST /auth/link", h.linkAccount)
 	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
-	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, h.limiter.Middleware(inner))))
+	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
 func (h *Handler) healthz(w http.ResponseWriter, r *http.Request) {
@@ -357,9 +359,19 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	rt, err := h.refreshTokens.Find(cookie.Value)
+
+	// FindAndDelete atomically reads and deletes the token (ETag-guarded in Cosmos)
+	// so two concurrent refresh requests cannot both rotate the same token.
+	rt, err := h.refreshTokens.FindAndDelete(cookie.Value)
 	if err != nil {
-		log.Printf("refresh token lookup: %v", err)
+		if errors.Is(err, store.ErrConcurrentModification) {
+			// A concurrent request won the rotation race; return 401 so the client
+			// retries with the new cookie set by the winning request.
+			h.clearTokenCookies(w)
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		log.Printf("refresh token find-and-delete: %v", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -385,11 +397,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Rotate: delete old token, issue new one in the same family.
-	if err := h.refreshTokens.Delete(rt.ID); err != nil {
-		log.Printf("refresh token delete %s: %v", rt.ID, err)
-	}
-
+	// Token was atomically deleted by FindAndDelete; issue a new one in the same family.
 	user, err := h.users.FindByID(rt.UserID)
 	if err != nil || user == nil {
 		h.clearTokenCookies(w)

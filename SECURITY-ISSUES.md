@@ -58,7 +58,7 @@ is intended).
 
 ### M1 — CSRF protection missing on mutating cookie-authenticated endpoints
 
-**Status:** Open
+**Status:** Fixed — TBD_M1M2
 
 State-changing endpoints rely on cookies for auth without explicit CSRF
 protection:
@@ -83,7 +83,7 @@ to `POST` before redirecting.
 
 ### M2 — Refresh token rotation is not atomic, and the secret is stored plaintext
 
-**Status:** Open
+**Status:** Fixed — TBD_M1M2
 
 Rotation is find → delete → create. Two concurrent refresh requests can both
 read the same old token before either delete completes, resulting in two valid

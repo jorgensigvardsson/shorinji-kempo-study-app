@@ -72,6 +72,17 @@ func (s *FileRefreshTokenStore) Delete(tokenID string) error {
 	return err
 }
 
+// FindAndDelete is a non-atomic find-then-delete for the file store (dev only).
+// The Cosmos implementation provides the atomic ETag-guarded version for production.
+func (s *FileRefreshTokenStore) FindAndDelete(tokenID string) (*RefreshToken, error) {
+	t, err := s.Find(tokenID)
+	if err != nil || t == nil {
+		return nil, err
+	}
+	_ = s.Delete(tokenID)
+	return t, nil
+}
+
 func (s *FileRefreshTokenStore) FindByFamilyID(userID, familyID string) (*RefreshToken, error) {
 	dir := filepath.Join(s.baseDir, userID)
 	entries, err := os.ReadDir(dir)

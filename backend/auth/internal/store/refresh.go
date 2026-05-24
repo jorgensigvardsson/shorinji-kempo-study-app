@@ -3,10 +3,17 @@ package store
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 )
+
+// ErrConcurrentModification is returned by FindAndDelete when the token was
+// found but an ETag-guarded delete failed, meaning another concurrent refresh
+// request rotated it first. The handler should return 401 without triggering
+// the replay-detection revocation path.
+var ErrConcurrentModification = errors.New("refresh token concurrently modified")
 
 const RefreshTokenTTL = 30 * 24 * time.Hour
 
@@ -83,6 +90,12 @@ type RefreshTokenStore interface {
 	Create(token *RefreshToken) error
 	// Find returns the token if it exists and has not expired, nil otherwise.
 	Find(tokenID string) (*RefreshToken, error)
+	// FindAndDelete atomically reads and deletes a token in a single operation.
+	// Returns the token on success. Returns (nil, nil) if the token does not exist
+	// or has expired. Returns (nil, ErrConcurrentModification) if the token was
+	// found but a concurrent rotation already deleted it — the caller should return
+	// 401 without triggering replay-detection revocation.
+	FindAndDelete(tokenID string) (*RefreshToken, error)
 	// FindByFamilyID returns the active token for a given family, or nil if none.
 	// Used to detect token replay: if a deleted token's family still has an active
 	// member, the deleted token was stolen and replayed.
