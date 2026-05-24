@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-24T14:56:38.154Z",
+    changes: [
+      {
+        emoji: "🔐",
+        sv: "Du kan nu logga in med ditt Google- eller Microsoft-konto och spara dina framsteg i molnet. Dina data synkas automatiskt mellan enheter.",
+        en: "You can now sign in with your Google or Microsoft account and save your progress to the cloud. Your data syncs automatically across devices.",
+        tr: "Artık Google veya Microsoft hesabınızla giriş yapabilir ve ilerlemenizi buluta kaydedebilirsiniz. Verileriniz cihazlar arasında otomatik olarak senkronize edilir.",
+        ja: "GoogleまたはMicrosoftアカウントでサインインし、進捗をクラウドに保存できるようになりました。データはデバイス間で自動的に同期されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-24T14:06:29.510Z",
     changes: [
       {
