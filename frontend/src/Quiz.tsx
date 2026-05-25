@@ -192,9 +192,6 @@ const Quiz = (props: QuizProps) => {
 
       {showBack && (
         <div className="quiz-actions">
-          <Button variant="secondary" onClick={() => setShowBack(false)}>
-            {translator.translate("Tillbaka")}
-          </Button>
           <Button variant="primary" onClick={nextCard}>
             {translator.translate("Nästa kort")}
           </Button>
