@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-25T16:00:00.000Z",
+    changes: [
+      {
+        emoji: "🔔",
+        sv: "Appen kan nu skicka en systemnotis när en ny version är tillgänglig — även när appen är i bakgrunden. Aktivera det i Inställningar.",
+        en: "The app can now send a system notification when a new version is available — even while it's in the background. Enable it in Settings.",
+        tr: "Uygulama artık yeni bir sürüm mevcut olduğunda sistem bildirimi gönderebilir — arka planda bile. Ayarlar'dan etkinleştirin.",
+        ja: "新しいバージョンが利用可能になったときに、アプリがバックグラウンドでもシステム通知を送信できるようになりました。設定から有効にしてください。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-25T14:00:00.000Z",
     changes: [
       {

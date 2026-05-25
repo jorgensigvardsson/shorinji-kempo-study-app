@@ -25,13 +25,15 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       manifest: false,
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       devOptions: {
         enabled: true,
+        type: 'module',
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: 'index.html',
-        navigateFallbackAllowlist: [/^(?!\/_).*/],
       },
     }),
   ],

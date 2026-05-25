@@ -11,6 +11,7 @@ import { toLocalDateKey } from "./utilities/current-week";
 import { DeviceHdd, Download, ExclamationTriangleFill, PersonCircle, Upload } from "react-bootstrap-icons";
 
 const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
+const DEBUG = import.meta.env.VITE_DEBUG === "true";
 import "./Settings.css";
 
 interface Props {
@@ -180,6 +181,11 @@ const Settings = (props: Props) => {
                         )
                     }
                 </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+                <Form.Label>{translator.translate("Uppdateringsnotiser")}</Form.Label>
+                <NotificationPermissionControl translator={translator} />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsCurrentWeek">
@@ -489,6 +495,103 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
                     </div>
                 </div>
             )}
+        </>
+    );
+}
+
+const PREFS_CACHE = 'sk-app-prefs'
+const NOTIF_PREF_KEY = '/notifications-enabled'
+
+async function setNotificationsPref(enabled: boolean) {
+    if (!('caches' in window)) return
+    const cache = await caches.open(PREFS_CACHE)
+    await cache.put(NOTIF_PREF_KEY, new Response(String(enabled)))
+}
+
+const NotificationPermissionControl = ({ translator }: { translator: Translator }) => {
+    const [permission, setPermission] = useState<NotificationPermission>(
+        () => ('Notification' in window ? Notification.permission : 'denied')
+    );
+    const [appEnabled, setAppEnabled] = useState(
+        () => localStorage.getItem('notifications-app-enabled') !== 'false'
+    );
+
+    const applyEnabled = (enabled: boolean) => {
+        setAppEnabled(enabled)
+        localStorage.setItem('notifications-app-enabled', String(enabled))
+        void setNotificationsPref(enabled)
+    }
+
+    if (!('Notification' in window)) {
+        return (
+            <Form.Text className="d-block mt-1">
+                {translator.translate("Den här enheten stöder inte notiser.")}
+            </Form.Text>
+        );
+    }
+
+    const handleTestNotification = () => {
+        void navigator.serviceWorker.ready.then(reg =>
+            reg.showNotification(translator.translate("Ny version tillgänglig"), {
+                body: translator.translate("Det här är en testnotis."),
+                icon: '/android-chrome-192x192.png',
+                badge: '/favicon-32x32.png',
+                tag: 'test-notification',
+            })
+        )
+    }
+
+    if (permission === 'granted') {
+        return appEnabled ? (
+            <>
+                <Form.Text className="d-block mt-1 mb-2">
+                    {translator.translate("Notiser är aktiverade.")}
+                </Form.Text>
+                <div className="d-flex gap-2">
+                    <Button variant="outline-secondary" size="sm" onClick={() => applyEnabled(false)}>
+                        {translator.translate("Inaktivera notiser")}
+                    </Button>
+                    {DEBUG && (
+                        <Button variant="outline-warning" size="sm" onClick={handleTestNotification}>
+                            {translator.translate("Visa en testnotis")}
+                        </Button>
+                    )}
+                </div>
+            </>
+        ) : (
+            <>
+                <Form.Text className="d-block mt-1 mb-2">
+                    {translator.translate("Notiser är inaktiverade.")}
+                </Form.Text>
+                <Button variant="outline-primary" size="sm" onClick={() => applyEnabled(true)}>
+                    {translator.translate("Aktivera notiser")}
+                </Button>
+            </>
+        );
+    }
+
+    if (permission === 'denied') {
+        return (
+            <Form.Text className="d-block mt-1">
+                {translator.translate("Notiser är blockerade. Ändra i webbläsarens inställningar för att aktivera dem.")}
+            </Form.Text>
+        );
+    }
+
+    return (
+        <>
+            <Form.Text className="d-block mt-1 mb-2">
+                {translator.translate("Aktivera notiser för att få ett meddelande i operativsystemet när en ny version av appen är tillgänglig.")}
+            </Form.Text>
+            <Button variant="outline-primary" size="sm"
+                onClick={() => {
+                    void Notification.requestPermission().then(p => {
+                        setPermission(p)
+                        if (p === 'granted') applyEnabled(true)
+                    })
+                }}>
+                {translator.translate("Aktivera notiser")}
+            </Button>
         </>
     );
 }
