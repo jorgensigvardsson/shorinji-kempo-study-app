@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-25T14:00:00.000Z",
+    changes: [
+      {
+        emoji: "🌐",
+        sv: "Ordboken visas nu korrekt på engelska och turkiska — ett antal ord saknade översättningar och visades på svenska istället.",
+        en: "The word list now displays correctly in English and Turkish — several entries were missing translations and fell back to Swedish.",
+        tr: "Kelime listesi artık İngilizce ve Türkçe olarak doğru şekilde görüntüleniyor — bazı girişlerde çeviri eksikti ve İsveççe olarak görünüyordu.",
+        ja: "単語帳が英語とトルコ語で正しく表示されるようになりました。一部の項目に翻訳が不足しており、スウェーデン語にフォールバックしていました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-24T17:30:00.000Z",
     changes: [
       {
