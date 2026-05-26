@@ -132,13 +132,14 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTest
 
     const hokeiMap = useMemo(() => {
         const map = new Map<string, HokeiMoment>();
-        for (const plan of allGradePlans)
-            for (const week of plan.weeks)
-                if ("moments" in week)
-                    for (const m of week.moments.filter(isHokeiMoment))
-                        map.set(m.hokei_name, m);
+        const plan = allGradePlans.find(p => p.grade === selectedGrade);
+        if (!plan) return map;
+        for (const week of plan.weeks)
+            if ("moments" in week)
+                for (const m of week.moments.filter(isHokeiMoment))
+                    map.set(m.hokei_name, m);
         return map;
-    }, [allGradePlans]);
+    }, [allGradePlans, selectedGrade]);
 
     const gradeLabel = (name: GradeName): string => {
         const humanName = humanGradeName(name);

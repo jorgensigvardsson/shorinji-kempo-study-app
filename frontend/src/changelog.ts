@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-26T16:54:29.055Z",
+    changes: [
+      {
+        emoji: "🪳",
+        sv: "Hokei på graderingstestsidan visar nu rätt variant för den valda graden — tidigare kunde varianten från en annan grad smyga in när samma hokei förekommer i flera grader.",
+        en: "Hokei on the grading test page now show the correct variation for the selected grade — previously a variation from a different grade could leak in when the same hokei appears at multiple grades.",
+        tr: "Derecelendirme testi sayfasındaki hokei artık seçilen derece için doğru varyasyonu gösteriyor — daha önce aynı hokei birden fazla derecede göründüğünde farklı bir derecedeki varyasyon araya girebiliyordu.",
+        ja: "段位審査ページの法形が、選択した段位に対応する正しいバリエーションを表示するようになりました。以前は、同じ法形が複数の段位に登場する場合、別の段位のバリエーションが混入することがありました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-25T16:00:00.000Z",
     changes: [
       {
