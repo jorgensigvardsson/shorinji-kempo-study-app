@@ -291,7 +291,7 @@ const Settings = (props: Props) => {
                 </Form.Group>
             )}
 
-            {BACKEND_ENABLED && syncProvider === "local" && (
+            {BACKEND_ENABLED && syncProvider !== "backend" && (
                 <Form.Group className="mb-3" controlId="settingsAccount">
                     <Form.Label>{translator.translate("Konto")}</Form.Label>
                     <Form.Text className="d-block mt-1 mb-2">

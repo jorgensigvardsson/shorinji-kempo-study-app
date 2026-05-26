@@ -13,6 +13,25 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-26T17:23:32.311Z",
+    changes: [
+      {
+        emoji: "🔓",
+        sv: "Inloggningsknappen visas nu i Inställningar även om du redan använder OneDrive eller Google Drive — tidigare gick det inte att byta till kontoinloggning utan att börja om.",
+        en: "The sign-in button now appears in Settings even if you're already using OneDrive or Google Drive — previously there was no way to switch to account sign-in without starting over.",
+        tr: "Giriş düğmesi artık OneDrive veya Google Drive kullanıyor olsanız bile Ayarlar'da görünüyor — daha önce sıfırdan başlamadan hesap girişine geçmek mümkün değildi.",
+        ja: "OneDriveやGoogle Driveを使用中でも、設定画面にサインインボタンが表示されるようになりました。以前は、最初からやり直さずにアカウントサインインに切り替えることができませんでした。",
+      },
+      {
+        emoji: "✨",
+        sv: "Pilen för att fälla ut ett hokeikort har flyttats till övre högra hörnet och håller sig i höjd med första raden av hokei-namnet.",
+        en: "The expand chevron on hokei cards has moved to the upper-right corner and now stays aligned with the first line of the hokei name.",
+        tr: "Hokei kartlarındaki genişletme oku sağ üst köşeye taşındı ve hokei adının ilk satırıyla hizalı kalıyor.",
+        ja: "法形カードの展開シェブロンを右上に移動し、法形名の1行目と揃うようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-26T16:54:29.055Z",
     changes: [
       {

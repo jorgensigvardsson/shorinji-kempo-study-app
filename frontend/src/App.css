@@ -42,29 +42,36 @@
 
 .collapsible-card-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.collapsible-card-header > div:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
 .collapsible-card-chevron {
   display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: flex-end;
+  align-items: center;
+  /* Match the height of one line of the title (font-size 1.4em, default
+     line-height ≈ 1.2) so the icon vertically centers with the title's
+     first line — even when the title wraps. */
+  min-height: calc(1.4em * 1.2);
   line-height: 1;
   color: var(--bs-secondary-color);
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .collapsible-card-header--inline {
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
 }
 
 .collapsible-card-header--inline .collapsible-card-chevron {
-  width: auto;
-  flex-shrink: 0;
+  min-height: 0;
 }
 
 .menu-item {
