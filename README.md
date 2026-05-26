@@ -54,6 +54,7 @@ Required repository secrets:
 - `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
 - `VITE_ONEDRIVE_CLIENT_ID` — OneDrive OAuth public client ID
 - `VITE_GOOGLE_CLIENT_ID` — Google Drive OAuth public client ID
+- `VITE_GOOGLE_CLIENT_SECRET` — Google Drive OAuth client secret. Google's token endpoint requires this for Web-application clients even with PKCE; the secret is baked into the SPA bundle. The dedicated Drive-sync OAuth client must be restricted to the `drive.appdata` scope only.
 
 Optional repository variables (with sensible defaults):
 - `VITE_DEBUG` (default `false`)
