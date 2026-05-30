@@ -4,6 +4,9 @@
 
 .app-route-content {
   padding: 0.5rem;
+  /* Reserve room so the floating stack (toasts + wake-lock card) never covers
+     the last line of content when scrolled to the bottom. 0 when empty. */
+  padding-bottom: calc(0.5rem + var(--floating-stack-reserve, 0px));
   max-width: 48rem;
   margin-left: auto;
   margin-right: auto;
@@ -166,12 +169,41 @@
 }
 
 .app-update-toast-container {
+  /* Bootstrap's .toast-container is position:absolute by default, which pulls
+     it out of the floating stack's flex flow (overlapping the wake-lock card,
+     and contributing 0 to the height the reserve measures). Keep it in flow so
+     it stacks as a normal flex child above the card. */
+  position: static;
+  /* Match the shared item width (override Bootstrap's width: max-content). % is
+     relative to the in-flow stack, so it's zoom-safe; capped to one width. */
+  width: 100%;
+  max-width: 24rem;
+}
+
+.app-floating-stack {
+  position: fixed;
+  /* Pin BOTH edges so the stack's width is derived from the anchored margins
+     rather than a viewport length. Unlike vw/%, anchored edges can't overflow
+     the viewport inside the app's `zoom` wrapper. */
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
   z-index: 1090;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  /* Only the toast/card boxes capture clicks; gaps stay click-through. */
+  pointer-events: none;
 }
 
 .app-update-toast {
   --bs-toast-max-width: auto;
-  max-width: min(28rem, calc(100vw - 2rem));
+  /* One shared width: fill the stack, capped at 24rem. % is relative to the
+     in-flow stack (not the viewport), so it stays correct under `zoom`. */
+  width: 100%;
+  max-width: 24rem;
+  pointer-events: auto;
   color: var(--bs-body-color);
   background: color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-primary-bg-subtle) 8%);
   border: 1px solid color-mix(in srgb, var(--bs-primary) 30%, var(--bs-border-color) 70%);

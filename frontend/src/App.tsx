@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
@@ -8,9 +8,10 @@ import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } 
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 import { ArrowClockwise, ArrowLeftRight, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
-import { useSyncProvider, useSyncState } from './hooks';
+import { useSyncProvider, useSyncState, useWakeLock } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
+import WakeLockToggle from './components/WakeLockToggle';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 
@@ -26,6 +27,9 @@ interface Props {
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
 const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
 const IDENTITY_CHOICE_KEY = "identity-choice-made";
+// Hide the keep-screen-on control entirely where the Screen Wake Lock API is
+// unavailable — there's nothing it could do there.
+const WAKE_LOCK_SUPPORTED = typeof navigator !== "undefined" && "wakeLock" in navigator;
 
 function isStandalonePwa(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches
@@ -92,6 +96,48 @@ function App(props: Props) {
     setShowSignIn(false);
   };
 
+  // Shared "keep screen on" state. GUI-only for now — no real wake lock yet.
+  // Lives here so the drawer toggle (small screens) and the floating toggle
+  // (large screens) reflect the same value.
+  const [keepAwake, setKeepAwake] = useState(false);
+  // Acquire/release the actual Screen Wake Lock to match the toggle.
+  useWakeLock(keepAwake);
+  // Reset to off whenever the route changes, so the toggle can't silently stay
+  // on after the user moves to a different page (the "I forgot it was on" guard).
+  const location = useLocation();
+  useEffect(() => { setKeepAwake(false); }, [location.pathname]);
+
+  // No persistent state across app switches: when the app is hidden, turn the
+  // toggle off so the user must re-activate it on return. This also mirrors the
+  // browser auto-releasing the real wake lock when the tab is hidden.
+  useEffect(() => {
+    const onHidden = () => {
+      if (document.visibilityState === "hidden") setKeepAwake(false);
+    };
+    document.addEventListener("visibilitychange", onHidden);
+    return () => document.removeEventListener("visibilitychange", onHidden);
+  }, []);
+
+  // Reserve space at the bottom of the page equal to the floating stack's
+  // footprint (toasts + the wake-lock card), so the user can scroll the last
+  // line clear of all of it. The stack shrink-wraps its visible children, so the
+  // reserve grows and shrinks as toasts appear/disappear, and collapses to 0
+  // when the stack is empty (e.g. small screens with no toast showing).
+  const floatingRef = useRef<HTMLDivElement>(null);
+  const [floatingReserve, setFloatingReserve] = useState(0);
+  useEffect(() => {
+    const el = floatingRef.current;
+    if (!el) return;
+    const update = () => {
+      const h = el.offsetHeight;
+      setFloatingReserve(h > 0 ? h + 16 : 0); // + 1rem bottom gap (CSS: bottom: 1rem)
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (showSignIn) {
     return (
       <TranslatorContext.Provider value={translator}>
@@ -105,12 +151,22 @@ function App(props: Props) {
   return (
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
-        <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none"/>
-        <div className="app-route-content">
+        <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none"
+          keepAwake={keepAwake} onKeepAwakeChange={setKeepAwake} />
+        <div className="app-route-content" style={{ '--floating-stack-reserve': `${floatingReserve}px` } as CSSProperties}>
           {renderRoutes(routes)}
           <Outlet />
         </div>
-        <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)} />
+        {/* Bottom-right floating stack: transient toasts above, the persistent
+            wake-lock card (lg+) pinned at the corner. The stack's full height is
+            reserved at the bottom of the page (--floating-stack-reserve) so
+            nothing here ever covers content when scrolled to the end. */}
+        <div ref={floatingRef} className="app-floating-stack d-print-none">
+          <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)} />
+          {WAKE_LOCK_SUPPORTED && (
+            <WakeLockToggle variant="card" className="d-none d-lg-block" active={keepAwake} onChange={setKeepAwake} />
+          )}
+        </div>
       </div>
     </TranslatorContext.Provider>
   )
@@ -132,10 +188,12 @@ interface NavbarProps {
   translator: Translator;
   textZoom: number;
   className?: string;
+  keepAwake: boolean;
+  onKeepAwakeChange: (active: boolean) => void;
 }
 
 const AppNavbar = (props: NavbarProps) => {
-  const { routes, className, translator, textZoom } = props;
+  const { routes, className, translator, textZoom, keepAwake, onKeepAwakeChange } = props;
   const [show, setShow] = useState(false);
   const [isDesktopMenu, setIsDesktopMenu] = useState(() => window.matchMedia("(min-width: 992px)").matches);
   const location = useLocation();
@@ -188,6 +246,12 @@ const AppNavbar = (props: NavbarProps) => {
                 </Nav.Link>
               ))}
             </Nav>
+            {/* Drawer toggle, small screens only (the floating one takes over at lg). */}
+            {WAKE_LOCK_SUPPORTED && (
+              <div className="d-lg-none mt-3 px-1">
+                <WakeLockToggle active={keepAwake} onChange={onKeepAwakeChange} className="w-100 justify-content-center" />
+              </div>
+            )}
             <Nav className="me-auto d-none d-lg-flex menu-main-nav" variant="pills">
               {mainMenuRoutes.map((route, index) => route.href ? (
                 <Nav.Link className="menu-item menu-no-wrap" key={index} href={route.href}>
@@ -300,7 +364,7 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) =
   }, [syncState.status, syncProvider, onShowLogin]);
 
   return (
-    <ToastContainer position="bottom-end" className="app-update-toast-container p-3">
+    <ToastContainer className="app-update-toast-container">
       <Toast show={showChangelogToast} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon" aria-hidden="true">

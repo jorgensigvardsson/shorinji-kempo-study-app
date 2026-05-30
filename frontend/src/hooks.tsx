@@ -71,6 +71,37 @@ export function useTheme() {
   };
 }
 
+/**
+ * Holds a Screen Wake Lock while `active` is true, releasing it when `active`
+ * turns false or the component unmounts. No re-acquire on visibility change:
+ * the browser auto-releases the lock when the tab is hidden, and the app already
+ * resets `active` to false on hide, so the user re-activates deliberately.
+ */
+export function useWakeLock(active: boolean) {
+  useEffect(() => {
+    if (!active || !("wakeLock" in navigator)) return;
+
+    let sentinel: WakeLockSentinel | null = null;
+    let released = false;
+
+    navigator.wakeLock.request("screen")
+      .then(s => {
+        // If cleanup already ran before the request resolved, release at once.
+        if (released) { void s.release().catch(() => {}); return; }
+        sentinel = s;
+      })
+      .catch(() => {
+        // Denied — e.g. battery saver, page not visible, or no permission.
+      });
+
+    return () => {
+      released = true;
+      void sentinel?.release().catch(() => {});
+      sentinel = null;
+    };
+  }, [active]);
+}
+
 export function useSyncProvider() {
   const [syncProvider, setSyncProvider] = useState<SyncProvider>(() => getAppDataStore().get("syncProvider"));
 

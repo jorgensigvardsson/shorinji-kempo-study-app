@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-30T18:38:06.382Z",
+    changes: [
+      {
+        emoji: "💡",
+        sv: "Ny knapp för att hålla skärmen tänd, så att den inte slocknar mitt under träningen. Den slås av automatiskt när du lämnar appen eller byter sida.",
+        en: "New control to keep the screen on, so it won't dim in the middle of training. It turns off automatically when you leave the app or switch pages.",
+        tr: "Ekranı açık tutmak için yeni bir düğme; böylece antrenmanın ortasında ekran kapanmaz. Uygulamadan çıktığınızda veya sayfa değiştirdiğinizde otomatik olarak kapanır.",
+        ja: "画面をオンのままにする新しいボタンを追加しました。練習の途中で画面が暗くなりません。アプリを離れたりページを切り替えたりすると自動的にオフになります。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-26T17:23:32.311Z",
     changes: [
       {

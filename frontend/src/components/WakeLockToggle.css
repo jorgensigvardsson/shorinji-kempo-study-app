@@ -1,0 +1,25 @@
+.wake-lock-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.wake-lock-toggle > span {
+    white-space: nowrap;
+}
+
+/* Card variant: rendered with the shared .app-update-toast classes so it
+   matches the app's toasts. Only the switch needs local tweaks. */
+.wake-lock-switch {
+    margin: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+}
+
+.wake-lock-switch .form-check-input {
+    margin-top: 0;
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+}
