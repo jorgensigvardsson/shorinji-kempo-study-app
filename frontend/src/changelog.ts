@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-30T19:47:30.202Z",
+    changes: [
+      {
+        emoji: "🎬",
+        sv: "Inbäddade videoklipp spelas upp igen. En säkerhetsinställning hade av misstag hindrat YouTube-klippen från att visas i appen.",
+        en: "Inline videos play again. A security setting had accidentally stopped the YouTube clips from showing inside the app.",
+        tr: "Gömülü videolar yeniden oynatılıyor. Bir güvenlik ayarı, YouTube kliplerinin uygulama içinde gösterilmesini yanlışlıkla engellemişti.",
+        ja: "埋め込み動画が再び再生されるようになりました。セキュリティ設定の影響で、YouTubeの動画がアプリ内で表示されなくなっていました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-30T19:13:51.338Z",
     changes: [
       {
