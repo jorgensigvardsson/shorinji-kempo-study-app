@@ -131,7 +131,7 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
     }, [notesAreShown]);
 
     return (
-        <div className="p-2 border border-primary rounded">
+        <div className="p-2 rounded hokei-notes-box">
             <div style={{ display: "flex", alignItems: "center", cursor: "pointer", justifyContent: "space-between" }} onClick={() => setNotesAreShown(!notesAreShown)}>
                 <div style={{ display: "flex", alignItems: "center" }} >
                     <JournalText className="text-primary" style={{marginRight: "0.5em", display: "block"}}/>
