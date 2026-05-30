@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-05-30T19:13:51.338Z",
+    changes: [
+      {
+        emoji: "🔍",
+        sv: "När du söker bland hokei visas nu de vars namn matchar din sökning högst upp, före de som bara matchar på innehållet. Tidigare kunde en hokei med sökordet i namnet hamna långt ner i listan.",
+        en: "When you search among hokei, those whose name matches your search now appear at the top, before ones that only match on their content. Previously a hokei with your search term in its name could end up far down the list.",
+        tr: "Hokei arasında arama yaptığınızda, adı aramanızla eşleşenler artık yalnızca içeriğiyle eşleşenlerden önce en üstte görünüyor. Daha önce, arama teriminiz adında geçen bir hokei listenin çok aşağısında kalabiliyordu.",
+        ja: "法形を検索すると、名前が検索語に一致する法形が、内容だけが一致する法形より上に表示されるようになりました。以前は、検索語が名前に含まれる法形でもリストのずっと下に表示されることがありました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-30T18:38:06.382Z",
     changes: [
       {

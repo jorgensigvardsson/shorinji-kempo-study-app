@@ -47,8 +47,14 @@ const List = (props: Props) => {
         });
     }, []);
            
+    // Float hokei whose name matches above those that only match on inner
+    // content. Array.sort is stable, so the existing grade-then-week order is
+    // preserved within each group. With an empty filter every name "matches",
+    // so the ordering is left untouched.
+    const nameMatches = (h: HokeiAndGrade) => matchesString(h.moment.hokei_name, debouncedFilterText);
     const filteredHokeis = allHokeis.filter(l => matchesSelection(l.grade, grade.grade, selection))
-                                    .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText));
+                                    .filter(l => matchesFilterText(l.grade, l.moment, debouncedFilterText))
+                                    .sort((a, b) => Number(nameMatches(b)) - Number(nameMatches(a)));
 
     return (
         <>
