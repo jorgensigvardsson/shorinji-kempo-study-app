@@ -32,6 +32,7 @@ export interface AppDataState {
   hokeiListSelection: string;
   quizStreakHighScore: number;
   knownFlashCards: Record<string, FlashCardKnownEntry>;
+  showKanjiOnHokeiCards: boolean;
 }
 
 export interface AppDataDocument {
@@ -66,6 +67,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
       knownFlashCards: {},
+      showKanjiOnHokeiCards: true,
     },
   };
 }

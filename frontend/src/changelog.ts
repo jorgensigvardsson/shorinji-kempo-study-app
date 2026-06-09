@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-09T00:00:00.000Z",
+    changes: [
+      {
+        emoji: "⚙️",
+        sv: "Nytt inställningsalternativ: välj om kanji ska visas på hokeikort eller inte.",
+        en: "New setting: choose whether kanji is shown on hokei cards.",
+        tr: "Yeni ayar: hokei kartlarında kanji gösterilip gösterilmeyeceğini seçin.",
+        ja: "新しい設定：法形カードに漢字を表示するかどうかを選択できるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-05-30T19:47:30.202Z",
     changes: [
       {

@@ -33,6 +33,7 @@ const Settings = (props: Props) => {
     const syncState = useSyncState();
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
     const [kenshiNumber, setKenshiNumber] = useState(() => store.get("kenshiNumber"));
+    const [showKanjiOnHokeiCards, setShowKanjiOnHokeiCards] = useState(() => store.get("showKanjiOnHokeiCards"));
     const availableWeeks = useMemo(
         () => [...new Set(nextGrade.weeks.map(week => week.week))].sort((a, b) => a - b),
         [nextGrade]
@@ -77,6 +78,7 @@ const Settings = (props: Props) => {
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
     useEffect(() => store.subscribe("kenshiNumber", setKenshiNumber), [store]);
+    useEffect(() => store.subscribe("showKanjiOnHokeiCards", setShowKanjiOnHokeiCards), [store]);
 
     const exportData = () => {
         const { version, data } = store.getDocument();
@@ -156,6 +158,17 @@ const Settings = (props: Props) => {
                     <option value="1.3">{translator.translate("Större")}</option>
                     <option value="1.4">{translator.translate("Störst")}</option>
                 </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="settingsShowKanjiOnHokeiCards">
+                <Form.Check
+                    type="switch"
+                    label={translator.translate("Visa kanji på hokeikort")}
+                    checked={showKanjiOnHokeiCards}
+                    onChange={e => {
+                        store.set("showKanjiOnHokeiCards", e.target.checked);
+                    }}
+                />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsKenshiNumber">
