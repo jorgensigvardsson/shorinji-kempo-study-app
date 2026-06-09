@@ -3,6 +3,7 @@ import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } fro
 import { TranslatorContext } from "./i18n";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
+import { useShowKanji } from "./hooks";
 import { Form } from "react-bootstrap";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
@@ -27,6 +28,7 @@ const List = (props: Props) => {
     const [allHokeis, setAllHokeis] = useState<HokeiAndGrade[]>([]);
 
     const translator = useContext(TranslatorContext);
+    const showKanji = useShowKanji();
 
     useEffect(() => {
         setAllHokeis(
@@ -68,18 +70,18 @@ const List = (props: Props) => {
                         <option value="all">{translator.translate('Alla')}</option>
                         <option value="own">{translator.translate('Endast egna')}</option>
                         <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
-                        <option value="6 kyū">{gradeLabel('6 kyū', translator)}</option>
-                        <option value="5 kyū">{gradeLabel('5 kyū', translator)}</option>
-                        <option value="4 kyū">{gradeLabel('4 kyū', translator)}</option>
-                        <option value="3 kyū">{gradeLabel('3 kyū', translator)}</option>
-                        <option value="2 kyū">{gradeLabel('2 kyū', translator)}</option>
-                        <option value="1 kyū">{gradeLabel('1 kyū', translator)}</option>
-                        <option value="shodan">{gradeLabel('shodan', translator)}</option>
-                        <option value="nidan">{gradeLabel('nidan', translator)}</option>
-                        <option value="sandan">{gradeLabel('sandan', translator)}</option>
-                        <option value="yondan">{gradeLabel('yondan', translator)}</option>
-                        <option value="godan">{gradeLabel('godan', translator)}</option>
-                        <option value="rokudan">{gradeLabel('rokudan', translator)}</option>
+                        <option value="6 kyū">{gradeLabel('6 kyū', translator, showKanji)}</option>
+                        <option value="5 kyū">{gradeLabel('5 kyū', translator, showKanji)}</option>
+                        <option value="4 kyū">{gradeLabel('4 kyū', translator, showKanji)}</option>
+                        <option value="3 kyū">{gradeLabel('3 kyū', translator, showKanji)}</option>
+                        <option value="2 kyū">{gradeLabel('2 kyū', translator, showKanji)}</option>
+                        <option value="1 kyū">{gradeLabel('1 kyū', translator, showKanji)}</option>
+                        <option value="shodan">{gradeLabel('shodan', translator, showKanji)}</option>
+                        <option value="nidan">{gradeLabel('nidan', translator, showKanji)}</option>
+                        <option value="sandan">{gradeLabel('sandan', translator, showKanji)}</option>
+                        <option value="yondan">{gradeLabel('yondan', translator, showKanji)}</option>
+                        <option value="godan">{gradeLabel('godan', translator, showKanji)}</option>
+                        <option value="rokudan">{gradeLabel('rokudan', translator, showKanji)}</option>
                     </Form.Select>
                     <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-3"
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />

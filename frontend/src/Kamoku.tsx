@@ -7,6 +7,7 @@ import { cardHead } from "./utilities/CardUtilities";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
+import { useShowKanji } from "./hooks";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
 
@@ -33,6 +34,7 @@ const Kamoku = (props: Props) => {
     const [todayKey, setTodayKey] = useState(() => toLocalDateKey());
     const [selectedWeek, setSelectedWeek] = useState(() => findSelectedWeekIndex(initialGrade, currentWeekAnchor, toLocalDateKey()));
     const translator = useContext(TranslatorContext);
+    const showKanji = useShowKanji();
     const [grade, setGrade] = useState<GradePlan>(initialGrade);
 
     const setNewGrade = (newGrade: GradePlan) => {
@@ -60,8 +62,10 @@ const Kamoku = (props: Props) => {
     }, [todayKey]);
 
     const optionLabel = (week: Week) => {
-        if (!translator.isJapanese)
-            return `${translator.translate("Vecka")} ${week.week} (${translator.japanese("Vecka")} ${translator.japanese(week.week)})`;
+        if (!translator.isJapanese) {
+            const label = `${translator.translate("Vecka")} ${week.week}`;
+            return showKanji ? `${label} (${translator.japanese("Vecka")} ${translator.japanese(week.week)})` : label;
+        }
         return `${translator.translate("Vecka")} ${translator.translate(week.week)}`;
     }
 
@@ -89,10 +93,10 @@ const Kamoku = (props: Props) => {
             <div className="mb-4">
                 <Form.Group className="mb-3" controlId="level">
                     <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
-                        <option value={myGrade} key={myGrade}>{translator.translate("Min nästa grad")}: {gradeLabel(myGrade, translator)}</option>
+                        <option value={myGrade} key={myGrade}>{translator.translate("Min nästa grad")}: {gradeLabel(myGrade, translator, showKanji)}</option>
                         {
                             allGradePlans.filter(l => l.grade !== myGrade).map(
-                                l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator)}</option>
+                                l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator, showKanji)}</option>
                             )
                         }
                     </Form.Select>
@@ -129,6 +133,7 @@ interface BasicExerciseCardProps {
 
 function BasicExerciseCard(props: BasicExerciseCardProps) {
     const { entries, translator, allGradePlans, notesData, ranksData } = props;
+    const showKanji = useShowKanji();
 
     const stringEntries = entries.filter((e): e is string => typeof e === "string");
     const hokeiEntries = entries.filter(isHokeiRef);
@@ -141,7 +146,8 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
             bullets.push(<li key={k}>{translator.japanese(entry)}</li>);
         } else {
             bullets.push(<li key={k}>{translator.translate(entry)}</li>);
-            bullets.push(<li key={`${k}j`} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(entry)}</li>);
+            if (showKanji)
+                bullets.push(<li key={`${k}j`} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(entry)}</li>);
         }
     }
 
@@ -164,7 +170,7 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
     const hasContent = bullets.length > 0 || hokeiCards.length > 0 || tanenVideos.length > 0;
 
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`)} className="mt-2 app-grid-card hokei-card" showCollapse={hasContent}>
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`, { showKanji })} className="mt-2 app-grid-card hokei-card" showCollapse={hasContent}>
             {bullets.length > 0 && <ul>{bullets}</ul>}
             {tanenVideos.map(v => <VideoLink key={v.url} video={v} className="mt-2" />)}
             {hokeiCards}
@@ -180,6 +186,7 @@ interface OtherCardProps {
 function OtherCard(props: OtherCardProps) {
     // TODO: Re-implement this
     const { translator, other } = props;
+    const showKanji = useShowKanji();
 
     const renderRandori = () => {
         if (other.content.indexOf("randori") < 0)
@@ -198,23 +205,23 @@ function OtherCard(props: OtherCardProps) {
              if (!other.randori && !other.restrictions) {
                 return <>
                     <tr><td>{translator.translate("Randori")}</td></tr>
-                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}</td></tr>
+                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}</td></tr>}
                 </>;
             } else if (other.randori && !other.restrictions) {
                 return <>
                     <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}</td></tr>
-                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}</td></tr>
+                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}</td></tr>}
                 </>
             } else if (!other.randori && other.restrictions) {
                 return <>
                     <tr><td>{translator.translate("Randori")}, {translator.translate(other.restrictions)}</td></tr>
-                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.restrictions)}</td></tr>
+                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.restrictions)}</td></tr>}
                 </>
             }
             else if (other.randori && other.restrictions) {
                 return <>
                     <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}, {translator.translate(other.restrictions)}</td></tr>
-                    <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}, {translator.japanese(other.restrictions)}</td></tr>
+                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}, {translator.japanese(other.restrictions)}</td></tr>}
                 </>
             }
         }
@@ -231,7 +238,7 @@ function OtherCard(props: OtherCardProps) {
         } else {
             return <>
                 <tr><td>{translator.translate("Embu")}</td></tr>
-                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Embu")}</td></tr>
+                {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Embu")}</td></tr>}
             </>;
         }
     }
@@ -240,21 +247,18 @@ function OtherCard(props: OtherCardProps) {
         if (other.content.indexOf("repetition") < 0)
             return null;
 
-        console.log("In it");
         if (translator.isJapanese) {
             return <tr><td>{translator.translate("Repetition")}</td></tr>;
         } else {
             return <>
                 <tr><td>{translator.translate("Repetition")}</td></tr>
-                <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Repetition")}</td></tr>
+                {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Repetition")}</td></tr>}
             </>;
         }
     }
 
-    console.log("Hmm", other.content);
-    
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō`)} className="mt-2 app-grid-card hokei-card">
+        <CollapsibleCard header={cardHead(translator, `Kihon shohō`, { showKanji })} className="mt-2 app-grid-card hokei-card">
             <table className="hokei-individuals-table">
                 <tbody>
                     {renderRandori()}
@@ -272,16 +276,17 @@ interface PreparationWeekCardProps {
 
 function PreparationWeekCard(props: PreparationWeekCardProps) {
     const { translator } = props;
+    const showKanji = useShowKanji();
 
     const text = "Repetition, studier, förberedelse inför gradering";
-    const body = translator.isJapanese 
+    const body = translator.isJapanese
         ? <tr><td>{translator.japanese(text)}</td></tr>
         : <>
             <tr><td>{translator.translate(text)}</td></tr>
-            <tr className="japanese-subtitle text-muted"><td>{translator.japanese(text)}</td></tr>
+            {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese(text)}</td></tr>}
         </>
     return (
-        <CollapsibleCard header={cardHead(translator, `Repetition`)} className="mt-3 app-grid-card hokei-card">
+        <CollapsibleCard header={cardHead(translator, `Repetition`, { showKanji })} className="mt-3 app-grid-card hokei-card">
             <table>
                 <tbody>
                     {body}
@@ -301,6 +306,7 @@ interface StudyTeachCardProps {
 
 function StudyTeachCard(props: StudyTeachCardProps) {
     const { entries, translator, allGradePlans, notesData, ranksData } = props;
+    const showKanji = useShowKanji();
 
     const hokeiCards = entries.flatMap((entry) => {
         const moment = allGradePlans
@@ -315,7 +321,7 @@ function StudyTeachCard(props: StudyTeachCardProps) {
     });
 
     return (
-        <CollapsibleCard header={cardHead(translator, "studera, undervisa")} className="mt-2 app-grid-card hokei-card" showCollapse={hokeiCards.length > 0}>
+        <CollapsibleCard header={cardHead(translator, "studera, undervisa", { showKanji })} className="mt-2 app-grid-card hokei-card" showCollapse={hokeiCards.length > 0}>
             {hokeiCards}
         </CollapsibleCard>
     );

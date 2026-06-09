@@ -20,6 +20,7 @@ export interface HeadOptions {
     icons?: ReactNode[];
     emSize?: number;
     rightNode?: ReactNode;
+    showKanji?: boolean;
 }
 
 interface BadgeProps {
@@ -99,18 +100,23 @@ export const cardHead = (translator: Translator, text: string, options: HeadOpti
         );
     }
 
-    const japaneseNative = translator.japanese(text);
+    const japaneseNative = options.showKanji !== false ? translator.japanese(text) : null;
 
     return (
         <>
             <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                 <div style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
-                <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>{translatedTopBadges}</div>
+                <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>
+                    {!japaneseNative && options.rightNode}
+                    {translatedTopBadges}
+                </div>
             </div>
-            <div style={{ fontSize: `${(options.emSize ?? 1.4) * 0.75}em`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }} className="text-muted">
-                <span>{japaneseNative}</span>
-                <span>{options.rightNode}</span>
-            </div>
+            {japaneseNative && (
+                <div style={{ fontSize: `${(options.emSize ?? 1.4) * 0.75}em`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }} className="text-muted">
+                    <span>{japaneseNative}</span>
+                    <span>{options.rightNode}</span>
+                </div>
+            )}
             <div>{translatedBadges}</div>
         </>
     );

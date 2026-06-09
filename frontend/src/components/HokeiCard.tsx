@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
-import { useTheme } from "../hooks";
+import { useShowKanji, useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
@@ -26,6 +26,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     const translator = useContext(TranslatorContext);
     const [hasNotes, setHasNotes] = useState(notesData ? !!notesData.getNotes(hokei.hokei_name) : false);
     const [rank, setRank] = useState<HokeiRankValue | null>(ranksData ? ranksData.getRank(hokei.hokei_name) : null);
+    const showKanji = useShowKanji();
 
     useEffect(() => {
         if (!notesData) return;
@@ -50,12 +51,12 @@ const HokeiCard = (props: HokeiCardProps) => {
         const name = translator.isJapanese
             ? translator.japanese(hokei.hokei_name)
             : translator.translate(hokei.hokei_name, { capitalize: true });
-        const kanji = !translator.isJapanese ? translator.japanese(hokei.hokei_name) : null;
-        const showKanji = kanji && kanji !== hokei.hokei_name;
+        const kanji = !translator.isJapanese && showKanji ? translator.japanese(hokei.hokei_name) : null;
+        const showKanjiInHeader = kanji && kanji !== hokei.hokei_name;
         const compactHeader = (
             <span style={{ fontSize: "1em" }}>
                 {name}
-                {showKanji && <span className="text-muted ms-2" style={{ fontSize: "0.85em" }}>{kanji}</span>}
+                {showKanjiInHeader && <span className="text-muted ms-2" style={{ fontSize: "0.85em" }}>{kanji}</span>}
             </span>
         );
         return (
@@ -63,14 +64,14 @@ const HokeiCard = (props: HokeiCardProps) => {
                              footer={footer}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
                 <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}
-                    <HokeiIndividualsElement hokei={hokei}/>
+                    {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
+                    <HokeiIndividualsElement hokei={hokei} showKanji={showKanji}/>
                 </div>
             </CollapsibleCard>
         );
     }
 
-    const options: HeadOptions = { badges: [] };
+    const options: HeadOptions = { badges: [], showKanji };
     if (gradeName)
         options.badges!.push({ text: humanGradeName(gradeName), variant: gradeNameVariant(gradeName) });
     options.badges!.push(...(hokei.variations ?? []).map(v => ({ variant: "secondary", text: v })));
@@ -93,8 +94,8 @@ const HokeiCard = (props: HokeiCardProps) => {
                          footer={footer}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
-                {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} />}
-                <HokeiIndividualsElement hokei={hokei}/>
+                {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
+                <HokeiIndividualsElement hokei={hokei} showKanji={showKanji}/>
             </div>
         </CollapsibleCard>
     )
@@ -173,9 +174,10 @@ function gradeNameVariant(v: GradeName): Variant {
 
 interface FootStancesElementProps {
     hokei: HokeiMoment;
+    showKanji: boolean;
 }
 
-const FootStancesElement = ({ hokei }: FootStancesElementProps) => {
+const FootStancesElement = ({ hokei, showKanji }: FootStancesElementProps) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
 
@@ -183,8 +185,9 @@ const FootStancesElement = ({ hokei }: FootStancesElementProps) => {
         return null;
 
     const renderFootStance = (s: string) => {
-        return <tbody key={`${hokei.hokei_name}.${s}`}><tr><td>{translator.translate(s)}</td><td rowSpan={translator.isJapanese ? 1 : 2} className="ps-5">{stanceIcon(effectiveTheme.effectiveTheme, s)}</td></tr>
-                    {!translator.isJapanese && <tr className="japanese-subtitle text-muted"><td>{translator.japanese(s)}</td></tr>}</tbody>;
+        const showJapanese = !translator.isJapanese && showKanji;
+        return <tbody key={`${hokei.hokei_name}.${s}`}><tr><td>{translator.translate(s)}</td><td rowSpan={showJapanese ? 2 : 1} className="ps-5">{stanceIcon(effectiveTheme.effectiveTheme, s)}</td></tr>
+                    {showJapanese && <tr className="japanese-subtitle text-muted"><td>{translator.japanese(s)}</td></tr>}</tbody>;
 
     }
 
@@ -203,24 +206,27 @@ const FootStancesElement = ({ hokei }: FootStancesElementProps) => {
 }
 
 interface HokeiIndividualsElementProps {
-    hokei: HokeiMoment
+    hokei: HokeiMoment;
+    showKanji: boolean;
 }
 
-const HokeiIndividualsElement = ({ hokei }: HokeiIndividualsElementProps) => {
+const HokeiIndividualsElement = ({ hokei, showKanji }: HokeiIndividualsElementProps) => {
     const translator = useContext(TranslatorContext);
 
     return (
         <>
-            {renderStances(translator, hokei)}
-            {renderActions(translator, hokei)}
+            {renderStances(translator, hokei, showKanji)}
+            {renderActions(translator, hokei, showKanji)}
             {renderKyohan(translator, hokei)}
         </>
     )
 }
 
-const renderStances = (translator: Translator, hokei: HokeiMoment) => {
+const renderStances = (translator: Translator, hokei: HokeiMoment, showKanji: boolean) => {
     if (!hokei.roles.attacker.stance && !hokei.roles.defender.stance)
         return null;
+
+    const showJapanese = !translator.isJapanese && showKanji;
 
     return (
         <table className="hokei-individuals-table mb-3">
@@ -232,22 +238,22 @@ const renderStances = (translator: Translator, hokei: HokeiMoment) => {
                 </tr>
             </thead>
             <tbody style={{verticalAlign: "top"}}>
-                {hokei.roles.attacker.stance && 
+                {hokei.roles.attacker.stance &&
                     <tr>
                         <td >{translator.translate("(A)")}</td><td>{translator.translate(hokei.roles.attacker.stance)}</td>
                     </tr>
                 }
-                {hokei.roles.attacker.stance && !translator.isJapanese &&
+                {hokei.roles.attacker.stance && showJapanese &&
                     <tr className="japanese-subtitle text-muted">
                         <td>(攻)</td><td>{translator.japanese(hokei.roles.attacker.stance)}</td>
                     </tr>
                 }
-                {hokei.roles.defender.stance && 
+                {hokei.roles.defender.stance &&
                     <tr>
                         <td>{translator.translate("(F)")}</td><td>{translator.translate(hokei.roles.defender.stance)}</td>
                     </tr>
                 }
-                {hokei.roles.defender.stance && !translator.isJapanese &&
+                {hokei.roles.defender.stance && showJapanese &&
                     <tr className="japanese-subtitle text-muted">
                         <td>(守)</td><td>{translator.japanese(hokei.roles.defender.stance)}</td>
                     </tr>
@@ -257,12 +263,13 @@ const renderStances = (translator: Translator, hokei: HokeiMoment) => {
     );
 }
 
-const renderActions = (translator: Translator, hokei: HokeiMoment) => {
+const renderActions = (translator: Translator, hokei: HokeiMoment, showKanji: boolean) => {
     if (!hokei.roles.attacker.action && !hokei.roles.defender.action)
         return null;
 
     const renhanko = hokei.ren_hanko ? <i> ({translator.translate("ren hankō")})</i> : undefined;
     const japaneseRenhanko = hokei.ren_hanko ? <i> ({translator.japanese("ren hankō")})</i> : undefined;
+    const showJapanese = !translator.isJapanese && showKanji;
 
     return (
         <table className="hokei-individuals-table">
@@ -277,7 +284,7 @@ const renderActions = (translator: Translator, hokei: HokeiMoment) => {
                 <tr>
                     <td>{translator.translate("(A)")}</td><td>{translator.translate(hokei.roles.attacker.action)}</td>
                 </tr>
-                {!translator.isJapanese &&
+                {showJapanese &&
                     <tr className="japanese-subtitle text-muted">
                         <td>(攻)</td><td>{translator.japanese(hokei.roles.attacker.action)}</td>
                     </tr>
@@ -287,7 +294,7 @@ const renderActions = (translator: Translator, hokei: HokeiMoment) => {
                 <tr>
                     <td>{translator.translate("(F)")}</td><td>{translator.translate(hokei.roles.defender.action)}{renhanko}</td>
                 </tr>
-                {!translator.isJapanese &&
+                {showJapanese &&
                     <tr className="japanese-subtitle text-muted">
                         <td>(守)</td><td>{translator.japanese(hokei.roles.defender.action)}{japaneseRenhanko}</td>
                     </tr>

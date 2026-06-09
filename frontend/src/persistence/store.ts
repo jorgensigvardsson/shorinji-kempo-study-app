@@ -28,6 +28,7 @@ export class AppDataStore {
       hokeiListSelection: new Map<number, DataChangedCallback<"hokeiListSelection">>(),
       quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
       knownFlashCards: new Map<number, DataChangedCallback<"knownFlashCards">>(),
+      showKanjiOnHokeiCards: new Map<number, DataChangedCallback<"showKanjiOnHokeiCards">>(),
     };
   }
 
@@ -153,6 +154,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
       knownFlashCards: isFlashCardKnownRecord(input.data?.knownFlashCards) ? input.data.knownFlashCards : fallback.data.knownFlashCards,
+      showKanjiOnHokeiCards: typeof input.data?.showKanjiOnHokeiCards === "boolean" ? input.data.showKanjiOnHokeiCards : fallback.data.showKanjiOnHokeiCards,
     },
   };
 }

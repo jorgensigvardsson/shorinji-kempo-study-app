@@ -18,6 +18,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
       knownFlashCards: {},
+      showKanjiOnHokeiCards: true,
     },
     ...overrides,
   };
@@ -25,8 +26,14 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
 
 function makeOldDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): AppDataDocument {
   const doc = makeDoc(overrides);
-  const { hokeiListSelection: _omit, ...dataWithoutNew } = doc.data;
+  const { hokeiListSelection: _omit, showKanjiOnHokeiCards: _omit2, ...dataWithoutNew } = doc.data;
   return { ...doc, data: dataWithoutNew as AppDataDocument["data"] };
+}
+
+function makeDocWithoutKanji(overrides: Partial<AppDataDocument> & { updatedAt: string }): AppDataDocument {
+  const doc = makeDoc(overrides);
+  const { showKanjiOnHokeiCards: _omit, ...dataWithoutKanji } = doc.data;
+  return { ...doc, data: dataWithoutKanji as AppDataDocument["data"] };
 }
 
 const OLD = "2024-01-01T00:00:00.000Z";
@@ -308,6 +315,35 @@ describe("mergeDocuments — knownFlashCards", () => {
     const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, knownFlashCards: ["1", "2"] as unknown as Record<string, never> } });
     const result = mergeDocuments(base, local, remote);
     expect(result.document.data.knownFlashCards["42"]).toEqual(known(NEW));
+  });
+});
+
+describe("mergeDocuments — showKanjiOnHokeiCards (old-version documents missing the field)", () => {
+  it("local change to false is preserved when remote is an old document without the field", () => {
+    const base = makeDocWithoutKanji({ updatedAt: OLD });
+    const local = makeDoc({ updatedAt: NEW, data: { ...makeDoc({ updatedAt: NEW }).data, showKanjiOnHokeiCards: false } });
+    const remote = makeDocWithoutKanji({ updatedAt: OLD });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.showKanjiOnHokeiCards).toBe(false);
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("no conflict and default true is used when both sides are old documents without the field", () => {
+    const base = makeDocWithoutKanji({ updatedAt: OLD });
+    const local = makeDocWithoutKanji({ updatedAt: NEW });
+    const remote = makeDocWithoutKanji({ updatedAt: OLD });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.showKanjiOnHokeiCards).toBe(true);
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("remote change to false is applied when local is an old document without the field", () => {
+    const base = makeDocWithoutKanji({ updatedAt: OLD });
+    const local = makeDocWithoutKanji({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...makeDoc({ updatedAt: NEW }).data, showKanjiOnHokeiCards: false } });
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.showKanjiOnHokeiCards).toBe(false);
+    expect(result.conflictDetected).toBe(false);
   });
 });
 

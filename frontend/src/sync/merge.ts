@@ -43,6 +43,7 @@ export function mergeDocuments(
     hokeiListSelection: mergeScalar("hokeiListSelection"),
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     knownFlashCards: mergeKnownFlashCards(baseDocument.data.knownFlashCards ?? {}, local.data.knownFlashCards ?? {}, remote.data.knownFlashCards ?? {}),
+    showKanjiOnHokeiCards: mergeScalar("showKanjiOnHokeiCards"),
   };
 
   if (mergedData.notes.__conflictMarker) {
