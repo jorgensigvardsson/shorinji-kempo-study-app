@@ -129,6 +129,9 @@ interface BasicExerciseCardProps {
 
 function BasicExerciseCard(props: BasicExerciseCardProps) {
     const { entries, translator, allGradePlans, notesData, ranksData } = props;
+    const store = getAppDataStore();
+    const [showKanji, setShowKanji] = useState(() => store.get("showKanjiOnHokeiCards"));
+    useEffect(() => store.subscribe("showKanjiOnHokeiCards", setShowKanji), [store]);
 
     const stringEntries = entries.filter((e): e is string => typeof e === "string");
     const hokeiEntries = entries.filter(isHokeiRef);
@@ -141,7 +144,8 @@ function BasicExerciseCard(props: BasicExerciseCardProps) {
             bullets.push(<li key={k}>{translator.japanese(entry)}</li>);
         } else {
             bullets.push(<li key={k}>{translator.translate(entry)}</li>);
-            bullets.push(<li key={`${k}j`} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(entry)}</li>);
+            if (showKanji)
+                bullets.push(<li key={`${k}j`} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(entry)}</li>);
         }
     }
 

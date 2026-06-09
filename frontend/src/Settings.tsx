@@ -160,16 +160,18 @@ const Settings = (props: Props) => {
                 </Form.Select>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="settingsShowKanjiOnHokeiCards">
-                <Form.Check
-                    type="switch"
-                    label={translator.translate("Visa kanji på hokeikort")}
-                    checked={showKanjiOnHokeiCards}
-                    onChange={e => {
-                        store.set("showKanjiOnHokeiCards", e.target.checked);
-                    }}
-                />
-            </Form.Group>
+            {!translator.isJapanese && (
+                <Form.Group className="mb-3" controlId="settingsShowKanjiOnHokeiCards">
+                    <Form.Check
+                        type="switch"
+                        label={translator.translate("Visa kanji på hokeikort")}
+                        checked={showKanjiOnHokeiCards}
+                        onChange={e => {
+                            store.set("showKanjiOnHokeiCards", e.target.checked);
+                        }}
+                    />
+                </Form.Group>
+            )}
 
             <Form.Group className="mb-3" controlId="settingsKenshiNumber">
                 <Form.Label>{translator.translate("Kenshinummer")}</Form.Label>
