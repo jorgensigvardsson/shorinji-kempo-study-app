@@ -102,6 +102,14 @@ export function useWakeLock(active: boolean) {
   }, [active]);
 }
 
+export function useShowKanji() {
+  const [showKanji, setShowKanji] = useState(() => getAppDataStore().get("showKanjiOnHokeiCards"));
+
+  useEffect(() => getAppDataStore().subscribe("showKanjiOnHokeiCards", setShowKanji), []);
+
+  return showKanji;
+}
+
 export function useSyncProvider() {
   const [syncProvider, setSyncProvider] = useState<SyncProvider>(() => getAppDataStore().get("syncProvider"));
 

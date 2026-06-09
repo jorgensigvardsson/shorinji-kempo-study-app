@@ -44,11 +44,13 @@ const normalizeCharacterCode = (charCode: number) => {
     return charCode;
 }
 
-export const gradeLabel = (grade: GradeName, translator: Translator) => {
+export const gradeLabel = (grade: GradeName, translator: Translator, showKanji: boolean = true) => {
     const humanName = humanGradeName(grade);
 
-    if (!translator.isJapanese)
-        return `${translator.translate(humanName, { capitalize: true })} (${translator.japanese(humanName)})`;
+    if (!translator.isJapanese) {
+        const translated = translator.translate(humanName, { capitalize: true });
+        return showKanji ? `${translated} (${translator.japanese(humanName)})` : translated;
+    }
 
     return translator.japanese(humanName);
 }

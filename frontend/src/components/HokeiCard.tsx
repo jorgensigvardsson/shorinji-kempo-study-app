@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
-import { useTheme } from "../hooks";
+import { useShowKanji, useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
@@ -11,7 +11,6 @@ import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import StarRating from "./StarRating";
 import VideoLink from "./VideoLink";
 import type { HokeiRankValue } from "../persistence/schema";
-import { getAppDataStore } from "../persistence/store";
 
 interface HokeiCardProps {
     hokei: HokeiMoment;
@@ -27,8 +26,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     const translator = useContext(TranslatorContext);
     const [hasNotes, setHasNotes] = useState(notesData ? !!notesData.getNotes(hokei.hokei_name) : false);
     const [rank, setRank] = useState<HokeiRankValue | null>(ranksData ? ranksData.getRank(hokei.hokei_name) : null);
-    const store = getAppDataStore();
-    const [showKanji, setShowKanji] = useState(() => store.get("showKanjiOnHokeiCards"));
+    const showKanji = useShowKanji();
 
     useEffect(() => {
         if (!notesData) return;
@@ -38,7 +36,6 @@ const HokeiCard = (props: HokeiCardProps) => {
         if (!ranksData) return;
         return ranksData.registerListener(hokei.hokei_name, setRank);
     }, [ranksData, hokei.hokei_name]);
-    useEffect(() => store.subscribe("showKanjiOnHokeiCards", setShowKanji), [store]);
 
     const videos = hokei.videos ?? [];
     const footer = (notesData || videos.length > 0) ? (
