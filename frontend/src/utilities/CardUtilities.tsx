@@ -106,10 +106,13 @@ export const cardHead = (translator: Translator, text: string, options: HeadOpti
         <>
             <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                 <div style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
-                <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>{translatedTopBadges}</div>
+                <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>
+                    {!japaneseNative && options.rightNode}
+                    {translatedTopBadges}
+                </div>
             </div>
-            {(japaneseNative || options.rightNode) && (
-                <div style={{ fontSize: japaneseNative ? `${(options.emSize ?? 1.4) * 0.75}em` : undefined, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }} className={japaneseNative ? "text-muted" : undefined}>
+            {japaneseNative && (
+                <div style={{ fontSize: `${(options.emSize ?? 1.4) * 0.75}em`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }} className="text-muted">
                     <span>{japaneseNative}</span>
                     <span>{options.rightNode}</span>
                 </div>
