@@ -7,13 +7,14 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
-import { ArrowClockwise, ArrowLeftRight, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
+import { ArrowClockwise, ArrowLeftRight, Bell, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState, useWakeLock } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
 import WakeLockToggle from './components/WakeLockToggle';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
+import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -27,6 +28,7 @@ interface Props {
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
 const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
 const IDENTITY_CHOICE_KEY = "identity-choice-made";
+const NOTIF_PROMPT_DISMISSED_KEY = "notifications-prompt-dismissed";
 // Hide the keep-screen-on control entirely where the Screen Wake Lock API is
 // unavailable — there's nothing it could do there.
 const WAKE_LOCK_SUPPORTED = typeof navigator !== "undefined" && "wakeLock" in navigator;
@@ -309,6 +311,40 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) =
     setShowChangelogToast(false);
   };
 
+  // --- notifications opt-in prompt ---
+  // A one-time shortcut for enabling push notifications, shown to everyone
+  // (signed-in or anonymous, since both can subscribe). The full control lives
+  // in Settings; this is just a nudge. Suppressed once enabled or dismissed.
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+  const [notifBusy, setNotifBusy] = useState(false);
+  useEffect(() => {
+    if (localStorage.getItem(NOTIF_PROMPT_DISMISSED_KEY) === "true") return;
+    if (!isPushSupported() || Notification.permission === "denied") return;
+    let cancelled = false;
+    // Only nudge devices that aren't already subscribed.
+    void getCurrentSubscription().then(sub => {
+      if (!cancelled && sub === null) setShowNotifPrompt(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+  const dismissNotifPrompt = () => {
+    localStorage.setItem(NOTIF_PROMPT_DISMISSED_KEY, "true");
+    setShowNotifPrompt(false);
+  };
+  const enableNotifFromPrompt = async () => {
+    setNotifBusy(true);
+    try {
+      let perm = Notification.permission;
+      if (perm !== "granted") perm = await Notification.requestPermission();
+      if (perm === "granted") await subscribeToPush();
+    } catch {
+      // If anything fails the user can still enable from Settings.
+    } finally {
+      setNotifBusy(false);
+      dismissNotifPrompt();
+    }
+  };
+
   // --- update toast ---
   const [needRefresh, setNeedRefresh] = useState(false);
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
@@ -386,6 +422,27 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) =
               {translator.translate("Visa")}
             </Button>
             <Button size="sm" variant="outline-secondary" onClick={dismissChangelog}>
+              {translator.translate("Stäng")}
+            </Button>
+          </div>
+        </Toast.Body>
+      </Toast>
+      <Toast show={showNotifPrompt} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon" aria-hidden="true">
+            <Bell size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Slå på notiser")}</div>
+            <div className="app-update-toast-text">
+              {translator.translate("Få ett meddelande när en ny version av appen finns. Du kan ändra detta under Inställningar.")}
+            </div>
+          </div>
+          <div className="d-flex flex-column gap-2 app-update-toast-action">
+            <Button size="sm" variant="primary" onClick={() => { void enableNotifFromPrompt(); }} disabled={notifBusy}>
+              {translator.translate("Aktivera notiser")}
+            </Button>
+            <Button size="sm" variant="outline-secondary" onClick={dismissNotifPrompt} disabled={notifBusy}>
               {translator.translate("Stäng")}
             </Button>
           </div>
