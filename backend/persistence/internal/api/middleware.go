@@ -57,3 +57,62 @@ func userIDFromContext(ctx context.Context) (string, bool) {
 	id, ok := ctx.Value(userIDKey).(string)
 	return id, ok && id != ""
 }
+
+// optionalUserID returns the authenticated user's ID from the access_token
+// cookie, or "" if there is no cookie or it doesn't validate. Unlike
+// authMiddleware it never rejects the request — it's used by endpoints that
+// accept anonymous callers but want to associate a user when one is present.
+func optionalUserID(ks KeySource, issuerURL string, r *http.Request) string {
+	cookie, err := r.Cookie("access_token")
+	if err != nil {
+		return ""
+	}
+	token, err := jwt.Parse(cookie.Value, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		kid, _ := t.Header["kid"].(string)
+		return ks.PublicKey(kid)
+	}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(issuerURL), jwt.WithAudience("shorinji-persistence"), jwt.WithExpirationRequired())
+	if err != nil || !token.Valid {
+		return ""
+	}
+	sub, err := token.Claims.GetSubject()
+	if err != nil {
+		return ""
+	}
+	return sub
+}
+
+// hasRole reports whether a valid access_token cookie carries the given role in
+// its "role" claim. Used to gate admin-only actions (e.g. push broadcasts) on a
+// signed-in user rather than a shared secret.
+func hasRole(ks KeySource, issuerURL string, r *http.Request, role string) bool {
+	cookie, err := r.Cookie("access_token")
+	if err != nil {
+		return false
+	}
+	var claims jwt.MapClaims
+	token, err := jwt.ParseWithClaims(cookie.Value, &claims, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		kid, _ := t.Header["kid"].(string)
+		return ks.PublicKey(kid)
+	}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(issuerURL), jwt.WithAudience("shorinji-persistence"), jwt.WithExpirationRequired())
+	if err != nil || !token.Valid {
+		return false
+	}
+	// The "role" claim is a JSON array of role names; tolerate a bare string too.
+	switch v := claims["role"].(type) {
+	case []interface{}:
+		for _, item := range v {
+			if s, ok := item.(string); ok && s == role {
+				return true
+			}
+		}
+	case string:
+		return v == role
+	}
+	return false
+}

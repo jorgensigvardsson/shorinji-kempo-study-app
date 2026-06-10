@@ -11,6 +11,7 @@ import (
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/api"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/jwks"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/push"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/envutil"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
@@ -28,20 +29,27 @@ func main() {
 	cosmosKey       := flag.String("cosmosdb-key",       envutil.String("COSMOS_DB_KEY",          ""),                                             "Cosmos DB account key")
 	cosmosDatabase  := flag.String("cosmosdb-database",  envutil.String("COSMOS_DB_DATABASE",     ""),                                             "Cosmos DB database name")
 	cosmosContainer := flag.String("cosmosdb-container", envutil.String("COSMOS_DB_CONTAINER",    ""),                                             "Cosmos DB container name")
+	pushContainer   := flag.String("cosmosdb-push-container", envutil.String("COSMOS_DB_PUSH_CONTAINER", "pushsubscriptions"),                    "Cosmos DB container name for push subscriptions")
 	rateLimitRPS    := flag.Float64("rate-limit-rps",    envutil.Float64("RATE_LIMIT_RPS",        2.0),                                            "max requests per second per IP (0 = disabled)")
 	rateLimitBurst  := flag.Float64("rate-limit-burst",  envutil.Float64("RATE_LIMIT_BURST",      10.0),                                           "rate limit burst size")
+	vapidPublicKey  := flag.String("vapid-public-key",   envutil.String("VAPID_PUBLIC_KEY",       ""),                                             "VAPID public key (base64url); enables push when set with the private key")
+	vapidPrivateKey := flag.String("vapid-private-key",  envutil.String("VAPID_PRIVATE_KEY",      ""),                                             "VAPID private key (base64url)")
+	vapidSubject    := flag.String("vapid-subject",      envutil.String("VAPID_SUBJECT",          "mailto:jorgen.sigvardsson@gmail.com"),          "VAPID subject (mailto: or site URL)")
+	pushAdminToken  := flag.String("push-admin-token",   envutil.String("PUSH_ADMIN_TOKEN",       ""),                                             "bearer token authorizing POST /push/broadcast")
 
 	flag.Parse()
 
 	var s store.Store
+	var pushStore store.PushStore
 	switch *storage {
 	case "file":
 		s = store.NewFileStore(*dataDir)
+		pushStore = store.NewFilePushStore(*dataDir)
 	case "cosmosdb":
 		if *cosmosEndpoint == "" || *cosmosKey == "" || *cosmosDatabase == "" || *cosmosContainer == "" {
 			log.Fatal("cosmosdb backend requires --cosmosdb-endpoint, --cosmosdb-key, --cosmosdb-database, and --cosmosdb-container")
 		}
-		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer); err != nil {
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer, *pushContainer); err != nil {
 			log.Fatalf("cosmos provisioning: %v", err)
 		}
 		cs, err := store.NewCosmosDBStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer)
@@ -49,6 +57,11 @@ func main() {
 			log.Fatalf("init CosmosDB store: %v", err)
 		}
 		s = cs
+		ps, err := store.NewCosmosPushStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *pushContainer)
+		if err != nil {
+			log.Fatalf("init CosmosDB push store: %v", err)
+		}
+		pushStore = ps
 	default:
 		log.Fatalf("unknown storage backend %q (choose file or cosmosdb)", *storage)
 	}
@@ -64,8 +77,18 @@ func main() {
 	limiter := ratelimit.New(*rateLimitRPS, *rateLimitBurst)
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
 
+	handler := api.NewHandler(s, keyCache, *frontendURL, *authIssuerURL, limiter)
+	if *vapidPublicKey != "" && *vapidPrivateKey != "" {
+		sender := push.New(*vapidPublicKey, *vapidPrivateKey, *vapidSubject)
+		handler.WithPush(pushStore, sender, *pushAdminToken)
+		log.Printf("push notifications enabled (broadcast %s)",
+			map[bool]string{true: "authorized via PUSH_ADMIN_TOKEN", false: "disabled — no PUSH_ADMIN_TOKEN"}[*pushAdminToken != ""])
+	} else {
+		log.Print("push notifications disabled — set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to enable")
+	}
+
 	mux := http.NewServeMux()
-	api.NewHandler(s, keyCache, *frontendURL, *authIssuerURL, limiter).Register(mux)
+	handler.Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

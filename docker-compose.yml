@@ -74,6 +74,12 @@ services:
       COSMOS_DB_CONTAINER: "documents"
       RATE_LIMIT_RPS: "2"
       RATE_LIMIT_BURST: "10"
+      # Web Push — dev-only VAPID key pair (localhost is a secure context).
+      # Generate your own with `npx web-push generate-vapid-keys`. Never reuse these in production.
+      VAPID_PUBLIC_KEY:  "BMFC5ak6g3tvewUomeT9j-88XsBs0H8rS-0jIOi5JWg2QK_ZOan24AyRro7USk33XsqgUKYq_4vqt9dJ5TYXBTw"
+      VAPID_PRIVATE_KEY: "DsidlmkQ3_MmHM9RsbpNp2TqP8Seh-aD4Otm4dTZxZQ"
+      VAPID_SUBJECT:     "mailto:jorgen.sigvardsson@gmail.com"
+      PUSH_ADMIN_TOKEN:  "dev-broadcast-token"
 
 volumes:
   frontend_modules:   # Linux-built node_modules, shadows the Windows copy

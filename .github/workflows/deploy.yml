@@ -77,6 +77,10 @@ jobs:
           MICROSOFT_CLIENT_SECRET:  ${{ secrets.MICROSOFT_CLIENT_SECRET }}
           SIGNING_KEY_PEM:          ${{ secrets.SIGNING_KEY_PEM }}
           FRONTEND_URL:             ${{ vars.FRONTEND_URL }}
+          VAPID_PUBLIC_KEY:         ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY:        ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT:            ${{ vars.VAPID_SUBJECT }}
+          PUSH_ADMIN_TOKEN:         ${{ secrets.PUSH_ADMIN_TOKEN }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \
@@ -87,6 +91,10 @@ jobs:
             --arg microsoftClientSecret "$MICROSOFT_CLIENT_SECRET" \
             --arg signingKeyPem         "$SIGNING_KEY_PEM" \
             --arg frontendUrl           "$FRONTEND_URL" \
+            --arg vapidPublicKey        "$VAPID_PUBLIC_KEY" \
+            --arg vapidPrivateKey       "$VAPID_PRIVATE_KEY" \
+            --arg vapidSubject          "$VAPID_SUBJECT" \
+            --arg pushAdminToken        "$PUSH_ADMIN_TOKEN" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               contentVersion: "1.0.0.0",
@@ -98,7 +106,11 @@ jobs:
                 microsoftClientId:     {value: $microsoftClientId},
                 microsoftClientSecret: {value: $microsoftClientSecret},
                 signingKeyPem:         {value: $signingKeyPem},
-                frontendUrl:           {value: $frontendUrl}
+                frontendUrl:           {value: $frontendUrl},
+                vapidPublicKey:        {value: $vapidPublicKey},
+                vapidPrivateKey:       {value: $vapidPrivateKey},
+                vapidSubject:          {value: $vapidSubject},
+                pushAdminToken:        {value: $pushAdminToken}
               }
             }' > /tmp/deploy-params.json
 
@@ -118,30 +130,60 @@ jobs:
 
       - name: Bind custom domain TLS certificates
         run: |
-          # hostname add registers the hostname (idempotent); hostname bind issues/renews
-          # the managed cert and switches bindingType to SniEnabled (also idempotent).
+          set -uo pipefail
           RG="${{ vars.AZURE_RESOURCE_GROUP }}"
-          az containerapp hostname add \
+
+          # ACA serialises modifications to a container app, so right after a Bicep
+          # revision rollout (or a back-to-back deploy) hostname add/bind can fail with
+          # CustomDomainLockConflict ("another modification is in progress"). Retry just
+          # that case until the prior modification settles; surface any other error.
+          retry_on_lock() {
+            local n=0 max=12 delay=20 out rc
+            while :; do
+              out="$("$@" 2>&1)"; rc=$?
+              if [ "$rc" -eq 0 ]; then
+                [ -n "$out" ] && printf '%s\n' "$out"
+                return 0
+              fi
+              if printf '%s' "$out" | grep -qiE 'CustomDomainLockConflict|another modification is in progress'; then
+                n=$((n + 1))
+                if [ "$n" -ge "$max" ]; then
+                  printf '%s\n' "$out"
+                  echo "::error::Custom domain still locked after $max attempts"
+                  return "$rc"
+                fi
+                echo "Custom domain locked; retry $n/$max in ${delay}s..."
+                sleep "$delay"
+                continue
+              fi
+              printf '%s\n' "$out"
+              return "$rc"
+            done
+          }
+
+          # hostname add registers the hostname (idempotent; "already added" is fine);
+          # hostname bind issues/renews the managed cert and switches to SniEnabled.
+          retry_on_lock az containerapp hostname add \
             --hostname auth-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
             --name sk-study-app-auth || true
-          az containerapp hostname bind \
+          retry_on_lock az containerapp hostname bind \
             --hostname auth-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
             --name sk-study-app-auth \
             --environment sk-study-app-env \
-            --validation-method CNAME
+            --validation-method CNAME || exit 1
 
-          az containerapp hostname add \
+          retry_on_lock az containerapp hostname add \
             --hostname persistence-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
             --name sk-study-app-persistence || true
-          az containerapp hostname bind \
+          retry_on_lock az containerapp hostname bind \
             --hostname persistence-shorinjikempo.cash-it.se \
             --resource-group "$RG" \
             --name sk-study-app-persistence \
             --environment sk-study-app-env \
-            --validation-method CNAME
+            --validation-method CNAME || exit 1
 
   # ── 3. Build and deploy frontend with backend URLs baked in ─────────────────
   deploy-frontend:
@@ -244,3 +286,31 @@ jobs:
           docker compose down
           docker compose up -d
           REMOTE
+
+      # Final step: the deploy succeeded, so tell subscribed users a new version
+      # is live. Non-fatal — a notification hiccup must not fail a good deploy.
+      - name: Notify users of new version
+        env:
+          API_URL:          ${{ needs.deploy-backend.outputs.api_url }}
+          PUSH_ADMIN_TOKEN: ${{ secrets.PUSH_ADMIN_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${PUSH_ADMIN_TOKEN:-}" ]; then
+            echo "PUSH_ADMIN_TOKEN not set — skipping new-version push notification."
+            exit 0
+          fi
+          if [ -z "${API_URL:-}" ]; then
+            echo "::warning::persistence API URL unavailable — skipping new-version push notification."
+            exit 0
+          fi
+          echo "Broadcasting new-version notification via ${API_URL%/}/push/broadcast"
+          status=$(curl -sS -o /tmp/broadcast-resp.json -w '%{http_code}' \
+            -X POST "${API_URL%/}/push/broadcast" \
+            -H "Authorization: Bearer ${PUSH_ADMIN_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"title":"New version available","body":"Open the app to update to the latest version.","url":"/changelog"}') \
+            || { echo "::warning::Broadcast request failed (network error) — users may not have been notified."; exit 0; }
+          echo "Broadcast response (HTTP ${status}): $(cat /tmp/broadcast-resp.json 2>/dev/null)"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "::warning::Broadcast returned HTTP ${status} — users may not have been notified."
+          fi

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/push"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/csrf"
@@ -19,10 +20,24 @@ type Handler struct {
 	frontendURL string
 	issuerURL   string
 	limiter     *ratelimit.IPRateLimiter
+
+	// Push notifications. Nil sender/store means push is unconfigured and its
+	// endpoints are not registered.
+	pushStore      store.PushStore
+	pushSender     *push.Sender
+	pushAdminToken string
 }
 
 func NewHandler(s store.Store, ks KeySource, frontendURL, issuerURL string, limiter *ratelimit.IPRateLimiter) *Handler {
 	return &Handler{store: s, jwks: ks, frontendURL: frontendURL, issuerURL: issuerURL, limiter: limiter}
+}
+
+// WithPush enables the push-notification endpoints. Call before Register.
+func (h *Handler) WithPush(ps store.PushStore, sender *push.Sender, adminToken string) *Handler {
+	h.pushStore = ps
+	h.pushSender = sender
+	h.pushAdminToken = adminToken
+	return h
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
@@ -31,6 +46,16 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.Handle("GET /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.getDocument)))
 	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.putDocument)))
 	inner.Handle("DELETE /api/v1/account", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.deleteAccount)))
+
+	// Web Push — only when configured. subscribe/unsubscribe accept anonymous
+	// callers; broadcast is guarded by a bearer token inside the handler.
+	if h.pushSender != nil && h.pushStore != nil {
+		inner.HandleFunc("GET /push/public-key", h.publicKey)
+		inner.HandleFunc("POST /push/subscribe", h.subscribe)
+		inner.HandleFunc("POST /push/unsubscribe", h.unsubscribe)
+		inner.HandleFunc("POST /push/broadcast", h.broadcast)
+	}
+
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 

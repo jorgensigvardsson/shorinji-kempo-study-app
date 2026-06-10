@@ -22,53 +22,50 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
   }
 })
 
-self.addEventListener('install', (event: ExtendableEvent) => {
-  // self.registration.active is null on the very first install — skip the notification.
-  if (!self.registration.active) return
+// Payload pushed by the backend (see backend/persistence/internal/push).
+interface PushPayload {
+  title?: string
+  body?: string
+  url?: string
+}
+
+// Web Push: the browser's push service wakes the service worker and delivers the
+// VAPID-signed message here, even when the app isn't open. userVisibleOnly means
+// we must show a notification for every push.
+self.addEventListener('push', (event: PushEvent) => {
+  let data: PushPayload = {}
+  try {
+    data = event.data?.json() ?? {}
+  } catch {
+    // Non-JSON payload — fall back to plain text in the body.
+    data = { body: event.data?.text() }
+  }
 
   event.waitUntil(
-    (async () => {
-      if (Notification.permission !== 'granted') return
-
-      // Respect the app-level opt-out stored by the Settings page.
-      const prefsCache = await caches.open('sk-app-prefs')
-      const prefEntry = await prefsCache.match('/notifications-enabled')
-      if (prefEntry && await prefEntry.text() === 'false') return
-
-      // If the user already has the app open and visible, the in-app toast handles it.
-      const clients = await self.clients.matchAll({ type: 'window' })
-      if (clients.some(c => (c as WindowClient).visibilityState === 'visible')) return
-
-      const lang = navigator.language.slice(0, 2)
-      const title = lang === 'sv' ? 'Ny version tillgänglig'
-        : lang === 'ja' ? '新バージョンが利用可能'
-        : lang === 'tr' ? 'Yeni sürüm mevcut'
-        : 'New version available'
-      const body = lang === 'sv' ? 'Klicka för att öppna och uppdatera appen.'
-        : lang === 'ja' ? 'タップしてアプリを開き、更新してください。'
-        : lang === 'tr' ? 'Uygulamayı açmak ve güncellemek için dokunun.'
-        : 'Tap to open the app and update.'
-
-      await self.registration.showNotification(title, {
-        body,
-        icon: '/android-chrome-192x192.png',
-        badge: '/favicon-32x32.png',
-        tag: 'app-update',
-      })
-    })()
+    self.registration.showNotification(data.title ?? 'Shorinji Kempo', {
+      body: data.body,
+      icon: '/android-chrome-192x192.png',
+      badge: '/favicon-32x32.png',
+      data: { url: data.url ?? '/' },
+    })
   )
 })
 
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close()
+  const targetPath = (event.notification.data as { url?: string } | undefined)?.url ?? '/'
+  const targetUrl = new URL(targetPath, self.location.origin).href
+
   event.waitUntil(
     (async () => {
       const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       const app = clients.find(c => c.url.startsWith(self.location.origin))
       if (app) {
-        await (app as WindowClient).focus()
+        const win = app as WindowClient
+        await win.focus()
+        await win.navigate(targetUrl).catch(() => {})
       } else {
-        await self.clients.openWindow(self.location.origin)
+        await self.clients.openWindow(targetUrl)
       }
     })()
   )

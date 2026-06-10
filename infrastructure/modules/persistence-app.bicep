@@ -35,6 +35,22 @@ param customDomain string = ''
 @description('Frontend origin allowed by CORS')
 param frontendUrl string
 
+@description('VAPID public key (base64url) for Web Push. Empty disables push endpoints.')
+param vapidPublicKey string = ''
+
+@description('VAPID private key (base64url) for Web Push.')
+@secure()
+param vapidPrivateKey string = ''
+
+@description('VAPID subject (mailto: or site URL) required by the Web Push protocol.')
+param vapidSubject string = ''
+
+@description('Bearer token authorizing POST /push/broadcast. Empty disables broadcast.')
+@secure()
+param pushAdminToken string = ''
+
+
+var pushEnabled = !empty(vapidPublicKey) && !empty(vapidPrivateKey)
 
 resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
@@ -53,9 +69,17 @@ resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
           }
         ]
       }
-      secrets: [
-        { name: 'cosmos-key', value: cosmosKey }
-      ]
+      secrets: concat(
+        [
+          { name: 'cosmos-key', value: cosmosKey }
+        ],
+        pushEnabled ? [
+          { name: 'vapid-private-key', value: vapidPrivateKey }
+        ] : [],
+        !empty(pushAdminToken) ? [
+          { name: 'push-admin-token', value: pushAdminToken }
+        ] : []
+      )
     }
     template: {
       scale: {
@@ -70,17 +94,27 @@ resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          env: [
-            { name: 'SERVICE_LISTEN_ADDRESS', value: ':8080' }
-            { name: 'SERVICE_FRONTEND_URL',    value: frontendUrl }
-            { name: 'SERVICE_STORAGE',         value: 'cosmosdb' }
-            { name: 'AUTH_JWKS_URL',           value: '${authServiceUrl}/.well-known/jwks.json' }
-            { name: 'AUTH_ISSUER_URL',         value: authIssuerUrl }
-            { name: 'COSMOS_DB_ENDPOINT',      value: cosmosEndpoint }
-            { name: 'COSMOS_DB_KEY',           secretRef: 'cosmos-key' }
-            { name: 'COSMOS_DB_DATABASE',      value: cosmosDatabase }
-            { name: 'COSMOS_DB_CONTAINER',     value: 'documents' }
-          ]
+          env: concat(
+            [
+              { name: 'SERVICE_LISTEN_ADDRESS', value: ':8080' }
+              { name: 'SERVICE_FRONTEND_URL',    value: frontendUrl }
+              { name: 'SERVICE_STORAGE',         value: 'cosmosdb' }
+              { name: 'AUTH_JWKS_URL',           value: '${authServiceUrl}/.well-known/jwks.json' }
+              { name: 'AUTH_ISSUER_URL',         value: authIssuerUrl }
+              { name: 'COSMOS_DB_ENDPOINT',      value: cosmosEndpoint }
+              { name: 'COSMOS_DB_KEY',           secretRef: 'cosmos-key' }
+              { name: 'COSMOS_DB_DATABASE',      value: cosmosDatabase }
+              { name: 'COSMOS_DB_CONTAINER',     value: 'documents' }
+            ],
+            pushEnabled ? [
+              { name: 'VAPID_PUBLIC_KEY',  value: vapidPublicKey }
+              { name: 'VAPID_PRIVATE_KEY', secretRef: 'vapid-private-key' }
+              { name: 'VAPID_SUBJECT',     value: vapidSubject }
+            ] : [],
+            !empty(pushAdminToken) ? [
+              { name: 'PUSH_ADMIN_TOKEN', secretRef: 'push-admin-token' }
+            ] : []
+          )
         }
       ]
     }

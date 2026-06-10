@@ -41,6 +41,7 @@ type Handler struct {
 	domains       map[string]string            // email domain → provider name
 	users         store.UserStore
 	refreshTokens store.RefreshTokenStore
+	roles         store.RoleStore
 	tokens        *token.Manager
 	frontendURL   string
 	cookieDomain  string
@@ -54,6 +55,7 @@ func NewHandler(
 	domains map[string]string,
 	users store.UserStore,
 	refreshTokens store.RefreshTokenStore,
+	roles store.RoleStore,
 	tokens *token.Manager,
 	frontendURL string,
 	cookieDomain string,
@@ -64,6 +66,7 @@ func NewHandler(
 		domains:       domains,
 		users:         users,
 		refreshTokens: refreshTokens,
+		roles:         roles,
 		tokens:        tokens,
 		frontendURL:   frontendURL,
 		cookieDomain:  cookieDomain,
@@ -72,6 +75,17 @@ func NewHandler(
 	}
 	go h.sweepExpiredStates()
 	return h
+}
+
+// rolesFor resolves a user's roles, failing open to no roles so a roles-store
+// outage can never block login (least privilege: no roles ⇒ no admin powers).
+func (h *Handler) rolesFor(email string) []string {
+	roles, err := h.roles.Roles(email)
+	if err != nil {
+		log.Printf("roles lookup for %s: %v", email, err)
+		return nil
+	}
+	return roles
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
@@ -320,7 +334,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email)
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, h.rolesFor(user.Email))
 	if err != nil {
 		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -360,8 +374,17 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user not found", http.StatusNotFound)
 		return
 	}
+	roles := h.rolesFor(user.Email)
+	if roles == nil {
+		roles = []string{} // marshal as [] rather than null for the frontend
+	}
+	// Embed the user so its fields stay flat, then add the roles the frontend
+	// uses to gate admin-only UI.
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(struct {
+		*store.User
+		Roles []string `json:"roles"`
+	}{User: user, Roles: roles})
 }
 
 func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
@@ -428,7 +451,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email)
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, h.rolesFor(user.Email))
 	if err != nil {
 		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
