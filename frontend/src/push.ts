@@ -87,6 +87,31 @@ export async function unsubscribeFromPush(): Promise<void> {
   await sub.unsubscribe();
 }
 
+export interface BroadcastPayload {
+  title: string;
+  body?: string;
+  url?: string;
+}
+
+export interface BroadcastResult {
+  sent: number;
+  pruned: number;
+  failed: number;
+}
+
+// Sends a push notification to every subscriber. Authorized by the signed-in
+// user's session cookie — the backend requires the "admin" role.
+export async function broadcastPush(payload: BroadcastPayload): Promise<BroadcastResult> {
+  const resp = await fetch(`${apiUrl}/push/broadcast`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!resp.ok) throw new Error(`POST /push/broadcast: ${resp.status}`);
+  return resp.json() as Promise<BroadcastResult>;
+}
+
 function applicationServerKeyMatches(sub: PushSubscription, key: Uint8Array<ArrayBuffer>): boolean {
   const existing = sub.options.applicationServerKey;
   if (!existing) return false;

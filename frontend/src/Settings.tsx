@@ -8,7 +8,7 @@ import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
-import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
+import { broadcastPush, getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
 import { DeviceHdd, Download, ExclamationTriangleFill, PersonCircle, Upload } from "react-bootstrap-icons";
 
 const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
@@ -57,6 +57,10 @@ const Settings = (props: Props) => {
 
         return translator.japanese(humanName);
     }
+
+    // Admins (role granted server-side) get the broadcast control. Derived from
+    // the backend session, so it's only ever present for signed-in admin users.
+    const isAdmin = getSyncManager().getBackendUserInfo()?.roles.includes("admin") ?? false;
 
     const isConnected = syncState.status === "connected" || syncState.status === "syncing" || syncState.status === "connecting";
     const providerLabel = syncProvider === "onedrive"
@@ -203,6 +207,13 @@ const Settings = (props: Props) => {
                 <Form.Label>{translator.translate("Uppdateringsnotiser")}</Form.Label>
                 <NotificationPermissionControl translator={translator} />
             </Form.Group>
+
+            {isAdmin && (
+                <Form.Group className="mb-3">
+                    <Form.Label>{translator.translate("Skicka notis till alla")}</Form.Label>
+                    <AdminBroadcastControl translator={translator} />
+                </Form.Group>
+            )}
 
             <Form.Group className="mb-3" controlId="settingsCurrentWeek">
                 <Form.Label>{translator.translate("Aktuell vecka")}</Form.Label>
@@ -644,6 +655,79 @@ const NotificationPermissionControl = ({ translator }: { translator: Translator 
                 {translator.translate("Aktivera notiser")}
             </Button>
             {error && <Form.Text className="d-block mt-2 text-danger">{error}</Form.Text>}
+        </>
+    );
+}
+
+// Admin-only: compose and send a push notification to every subscriber. The
+// backend enforces the "admin" role; this UI is just gated to avoid showing a
+// control that would 401.
+const AdminBroadcastControl = ({ translator }: { translator: Translator }) => {
+    const [title, setTitle] = useState("");
+    const [body, setBody] = useState("");
+    const [url, setUrl] = useState("");
+    const [busy, setBusy] = useState(false);
+    const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmedTitle = title.trim();
+        if (!trimmedTitle || busy) return;
+        setBusy(true);
+        setStatus(null);
+        try {
+            const res = await broadcastPush({
+                title: trimmedTitle,
+                body: body.trim() || undefined,
+                url: url.trim() || undefined,
+            });
+            setStatus({ ok: true, text: translator.translate("Notis skickad till {0} mottagare.", { params: [String(res.sent)] }) });
+            setTitle("");
+            setBody("");
+            setUrl("");
+        } catch {
+            setStatus({ ok: false, text: translator.translate("Det gick inte att skicka notisen. Försök igen.") });
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    return (
+        <>
+            <Form.Text className="d-block mt-1 mb-2">
+                {translator.translate("Skicka ett meddelande till alla enheter som har aktiverat notiser.")}
+            </Form.Text>
+            <Form as="form" onSubmit={(e) => { void submit(e); }}>
+                <Form.Control
+                    className="mb-2"
+                    size="sm"
+                    placeholder={translator.translate("Rubrik")}
+                    value={title}
+                    onChange={e => { setTitle(e.target.value); setStatus(null); }}
+                />
+                <Form.Control
+                    className="mb-2"
+                    size="sm"
+                    placeholder={translator.translate("Meddelande")}
+                    value={body}
+                    onChange={e => setBody(e.target.value)}
+                />
+                <Form.Control
+                    className="mb-2"
+                    size="sm"
+                    placeholder={translator.translate("Länk (valfri)")}
+                    value={url}
+                    onChange={e => setUrl(e.target.value)}
+                />
+                <Button type="submit" variant="outline-primary" size="sm" disabled={busy || !title.trim()}>
+                    {busy ? translator.translate("Skickar…") : translator.translate("Skicka notis")}
+                </Button>
+            </Form>
+            {status && (
+                <Form.Text className={`d-block mt-2 ${status.ok ? "text-success" : "text-danger"}`}>
+                    {status.text}
+                </Form.Text>
+            )}
         </>
     );
 }

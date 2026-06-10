@@ -19,6 +19,9 @@ const AccessTokenTTL = 1 * time.Hour
 type Claims struct {
 	jwt.RegisteredClaims
 	Email string `json:"email"`
+	// Roles carries the user's roles (e.g. "admin"). Emitted as the "role" claim;
+	// omitted entirely when the user has no roles.
+	Roles []string `json:"role,omitempty"`
 }
 
 type Manager struct {
@@ -35,8 +38,8 @@ func NewManager(key *rsa.PrivateKey, issuer string) *Manager {
 	return &Manager{privateKey: key, issuer: issuer, kid: kid}
 }
 
-// Issue mints a signed RS256 access token for the given user.
-func (m *Manager) Issue(sub, email string) (string, error) {
+// Issue mints a signed RS256 access token for the given user, stamping their roles.
+func (m *Manager) Issue(sub, email string, roles []string) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -47,6 +50,7 @@ func (m *Manager) Issue(sub, email string) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 		},
 		Email: email,
+		Roles: roles,
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t.Header["kid"] = m.kid

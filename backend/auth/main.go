@@ -36,6 +36,7 @@ func main() {
 	cosmosUsersContainer    := flag.String("cosmos-users-container",        envutil.String("COSMOS_USERS_CONTAINER",        "users"),          "Cosmos container for user records")
 	cosmosIdentityContainer := flag.String("cosmos-identity-index-container", envutil.String("COSMOS_IDENTITY_INDEX_CONTAINER", "identity_index"), "Cosmos container for identity index")
 	cosmosTokensContainer   := flag.String("cosmos-tokens-container",       envutil.String("COSMOS_TOKENS_CONTAINER",       "refresh_tokens"), "Cosmos container for refresh tokens")
+	cosmosRolesContainer    := flag.String("cosmos-roles-container",        envutil.String("COSMOS_ROLES_CONTAINER",        "roles"),          "Cosmos container for role assignments")
 
 	// ── OIDC Providers ────────────────────────────────────────────────────────
 	googleClientID        := flag.String("google-client-id",        envutil.String("GOOGLE_CLIENT_ID",        ""),                                   "Google OAuth client ID")
@@ -75,9 +76,10 @@ func main() {
 	// ── Stores (file-based by default; Cosmos when endpoint is configured) ────
 	var userStore      store.UserStore
 	var refreshStore   store.RefreshTokenStore
+	var roleStore      store.RoleStore
 
 	if *cosmosEndpoint != "" && *cosmosKey != "" {
-		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer); err != nil {
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer); err != nil {
 			log.Fatalf("cosmos provisioning: %v", err)
 		}
 
@@ -92,10 +94,16 @@ func main() {
 			log.Fatalf("init Cosmos refresh token store: %v", err)
 		}
 		refreshStore = rs
+
+		roleStore, err = store.NewCosmosRoleStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosRolesContainer)
+		if err != nil {
+			log.Fatalf("init Cosmos role store: %v", err)
+		}
 		log.Printf("using Cosmos DB stores (endpoint: %s, database: %s)", *cosmosEndpoint, *cosmosDatabase)
 	} else {
 		userStore    = store.NewFileUserStore(*dataDir)
 		refreshStore = store.NewFileRefreshTokenStore(*dataDir)
+		roleStore    = store.NewFileRoleStore(*dataDir)
 		log.Printf("using file-based stores (data-dir: %s)", *dataDir)
 	}
 
@@ -136,7 +144,7 @@ func main() {
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
 
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, tokenManager, *frontendURL, *cookieDomain, limiter).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, tokenManager, *frontendURL, *cookieDomain, limiter).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

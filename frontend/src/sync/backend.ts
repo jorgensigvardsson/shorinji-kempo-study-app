@@ -14,6 +14,7 @@ export interface BackendUserInfo {
   email: string;
   displayName: string;
   providers: string[];
+  roles: string[];
 }
 
 export class BackendSyncClient {
@@ -77,12 +78,13 @@ export class BackendSyncClient {
         }
       }
       if (resp.ok) {
-        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown> };
+        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[] };
         localStorage.setItem(connectedKey, "true");
         localStorage.setItem(userInfoKey, JSON.stringify({
           email: user.email,
           displayName: user.displayName,
           providers: Object.keys(user.linkedIdentities ?? {}),
+          roles: user.roles ?? [],
         } satisfies BackendUserInfo));
         localStorage.removeItem(authExpiredKey);
         return true;
@@ -100,7 +102,16 @@ export class BackendSyncClient {
   getUserInfo(): BackendUserInfo | null {
     const raw = localStorage.getItem(userInfoKey);
     if (!raw) return null;
-    try { return JSON.parse(raw) as BackendUserInfo; } catch { return null; }
+    try {
+      const parsed = JSON.parse(raw) as Partial<BackendUserInfo>;
+      // Default arrays so values cached before roles existed stay safe to read.
+      return {
+        email: parsed.email ?? "",
+        displayName: parsed.displayName ?? "",
+        providers: parsed.providers ?? [],
+        roles: parsed.roles ?? [],
+      };
+    } catch { return null; }
   }
 
   isConnected(): boolean {

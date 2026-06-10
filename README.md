@@ -59,13 +59,26 @@ npx web-push generate-vapid-keys
 ```
 Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as the `VAPID_PRIVATE_KEY` *secret*. Push endpoints stay disabled until both are present. The dev compose stack ships throwaway keys for `localhost`.
 
-**Sending a broadcast** (e.g. announcing a new version) — call the admin endpoint with the `PUSH_ADMIN_TOKEN` bearer token:
-```bash
-curl -X POST https://persistence-shorinjikempo.cash-it.se/push/broadcast \
-  -H "Authorization: Bearer $PUSH_ADMIN_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"title":"New version available","body":"Open the app to update.","url":"/changelog"}'
+**Sending a broadcast** (e.g. announcing a new version). Two ways, both hit `POST /push/broadcast`:
+
+- **From the app** — a signed-in user with the `admin` role gets a *Skicka notis till alla* form under Settings. The browser session cookie authorizes the call.
+- **From a script/CI** — present the `PUSH_ADMIN_TOKEN` as a bearer token:
+  ```bash
+  curl -X POST https://persistence-shorinjikempo.cash-it.se/push/broadcast \
+    -H "Authorization: Bearer $PUSH_ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"title":"New version available","body":"Open the app to update.","url":"/changelog"}'
+  ```
+
+### Roles & the `admin` role
+
+The auth service stamps a `role` claim onto each access token, read from a Cosmos `roles` container (provisioned automatically on startup) and refreshed on every login and token refresh. The claim is forwarded to the web app via `GET /auth/me` so the UI can show or hide admin-only controls. The persistence service trusts the same claim to authorize broadcasts.
+
+To grant someone the `admin` role, add an item to the `roles` container keyed by their (lowercased) email:
+```json
+{ "id": "someone@example.com", "roles": ["admin"] }
 ```
+The change takes effect on their next login or hourly token refresh. Locally (file-store dev, no Cosmos), the same mapping lives in `backend/auth/data/roles/roles.json`: `{ "someone@example.com": ["admin"] }`.
 
 ## Deployment
 

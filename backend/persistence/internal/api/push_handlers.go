@@ -75,9 +75,10 @@ func (h *Handler) unsubscribe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// broadcast sends a notification to every stored subscription. Guarded by a
-// bearer token (PUSH_ADMIN_TOKEN) — this is the send path the operator triggers
-// e.g. to announce a new app version.
+// broadcast sends a notification to every stored subscription. Authorized either
+// by a signed-in user holding the "admin" role (the web UI) or by the
+// PUSH_ADMIN_TOKEN bearer token (scripts/CI) — this is the send path that
+// announces e.g. a new app version.
 func (h *Handler) broadcast(w http.ResponseWriter, r *http.Request) {
 	if !h.authorizeAdmin(r) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -103,11 +104,15 @@ func (h *Handler) broadcast(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-// authorizeAdmin checks the Authorization: Bearer <token> header against the
-// configured admin token using a constant-time comparison.
+// authorizeAdmin allows the request when the caller is a signed-in user with the
+// "admin" role, or presents the PUSH_ADMIN_TOKEN as a bearer token.
 func (h *Handler) authorizeAdmin(r *http.Request) bool {
+	if hasRole(h.jwks, h.issuerURL, r, "admin") {
+		return true
+	}
+
 	if h.pushAdminToken == "" {
-		return false // no token configured ⇒ broadcast is disabled
+		return false // no shared token configured ⇒ only the admin role works
 	}
 	header := r.Header.Get("Authorization")
 	const prefix = "Bearer "

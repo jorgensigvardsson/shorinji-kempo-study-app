@@ -1,11 +1,14 @@
 package api
 
 import (
+	"crypto/rsa"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/push"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
@@ -134,6 +137,60 @@ func TestBroadcast_NoTokenConfigured_401(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer anything")
 	rec := httptest.NewRecorder()
 	h.broadcast(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("got %d, want 401", rec.Code)
+	}
+}
+
+// signRoleToken mints an access token carrying a "role" claim (a JSON array).
+func signRoleToken(t *testing.T, key *rsa.PrivateKey, kid, sub string, roles []string) string {
+	t.Helper()
+	claims := jwt.MapClaims{
+		"iss":  testIssuer,
+		"sub":  sub,
+		"aud":  testAudience,
+		"exp":  time.Now().Add(time.Hour).Unix(),
+		"iat":  time.Now().Unix(),
+		"role": roles,
+	}
+	tok := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tok.Header["kid"] = kid
+	signed, err := tok.SignedString(key)
+	if err != nil {
+		t.Fatalf("sign role token: %v", err)
+	}
+	return signed
+}
+
+func TestBroadcast_AdminRoleCookie_Authorized(t *testing.T) {
+	// No shared token configured: only the admin role can authorize.
+	h, _, _ := newPushHandler(t, "")
+	key := generateTestKey(t)
+	h.jwks = &staticKeySource{kid: "k1", key: &key.PublicKey}
+
+	tok := signRoleToken(t, key, "k1", "admin-user", []string{"admin"})
+	req := httptest.NewRequest(http.MethodPost, "/push/broadcast", strings.NewReader(`{"title":"hi"}`))
+	req.AddCookie(&http.Cookie{Name: "access_token", Value: tok})
+	rec := httptest.NewRecorder()
+	h.broadcast(rec, req)
+
+	// Authorized: with no subscriptions stored, the broadcast simply reports 0 sent.
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200", rec.Code)
+	}
+}
+
+func TestBroadcast_NonAdminRoleCookie_401(t *testing.T) {
+	h, _, _ := newPushHandler(t, "")
+	key := generateTestKey(t)
+	h.jwks = &staticKeySource{kid: "k1", key: &key.PublicKey}
+
+	tok := signRoleToken(t, key, "k1", "plain-user", []string{"editor"})
+	req := httptest.NewRequest(http.MethodPost, "/push/broadcast", strings.NewReader(`{"title":"hi"}`))
+	req.AddCookie(&http.Cookie{Name: "access_token", Value: tok})
+	rec := httptest.NewRecorder()
+	h.broadcast(rec, req)
+
 	if rec.Code != http.StatusUnauthorized {
 		t.Errorf("got %d, want 401", rec.Code)
 	}
