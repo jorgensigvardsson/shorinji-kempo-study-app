@@ -59,8 +59,9 @@ npx web-push generate-vapid-keys
 ```
 Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as the `VAPID_PRIVATE_KEY` *secret*. Push endpoints stay disabled until both are present. The dev compose stack ships throwaway keys for `localhost`.
 
-**Sending a broadcast** (e.g. announcing a new version). Two ways, both hit `POST /push/broadcast`:
+**Sending a broadcast** (e.g. announcing a new version). Three ways, all hit `POST /push/broadcast`:
 
+- **Automatically on deploy** — the final step of the `deploy` workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) sends a "New version available" notification once the stack restart succeeds. It uses `PUSH_ADMIN_TOKEN`; if that secret is unset the step is skipped, and a failed broadcast only warns (it never fails an otherwise-successful deploy).
 - **From the app** — a signed-in user with the `admin` role gets a *Skicka notis till alla* form under Settings. The browser session cookie authorizes the call.
 - **From a script/CI** — present the `PUSH_ADMIN_TOKEN` as a bearer token:
   ```bash

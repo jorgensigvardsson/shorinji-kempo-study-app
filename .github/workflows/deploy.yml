@@ -256,3 +256,31 @@ jobs:
           docker compose down
           docker compose up -d
           REMOTE
+
+      # Final step: the deploy succeeded, so tell subscribed users a new version
+      # is live. Non-fatal — a notification hiccup must not fail a good deploy.
+      - name: Notify users of new version
+        env:
+          API_URL:          ${{ needs.deploy-backend.outputs.api_url }}
+          PUSH_ADMIN_TOKEN: ${{ secrets.PUSH_ADMIN_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${PUSH_ADMIN_TOKEN:-}" ]; then
+            echo "PUSH_ADMIN_TOKEN not set — skipping new-version push notification."
+            exit 0
+          fi
+          if [ -z "${API_URL:-}" ]; then
+            echo "::warning::persistence API URL unavailable — skipping new-version push notification."
+            exit 0
+          fi
+          echo "Broadcasting new-version notification via ${API_URL%/}/push/broadcast"
+          status=$(curl -sS -o /tmp/broadcast-resp.json -w '%{http_code}' \
+            -X POST "${API_URL%/}/push/broadcast" \
+            -H "Authorization: Bearer ${PUSH_ADMIN_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"title":"New version available","body":"Open the app to update to the latest version.","url":"/changelog"}') \
+            || { echo "::warning::Broadcast request failed (network error) — users may not have been notified."; exit 0; }
+          echo "Broadcast response (HTTP ${status}): $(cat /tmp/broadcast-resp.json 2>/dev/null)"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "::warning::Broadcast returned HTTP ${status} — users may not have been notified."
+          fi
