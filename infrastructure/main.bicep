@@ -68,6 +68,22 @@ param persistenceCustomDomain string = ''
 @description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se)')
 param cookieDomain string = ''
 
+// ── Web Push (VAPID) ──────────────────────────────────────────────────────────
+
+@description('VAPID public key (base64url). Empty disables Web Push. Generate with `npx web-push generate-vapid-keys`.')
+param vapidPublicKey string = ''
+
+@description('VAPID private key (base64url)')
+@secure()
+param vapidPrivateKey string = ''
+
+@description('VAPID subject (mailto: or site URL) required by the Web Push protocol')
+param vapidSubject string = ''
+
+@description('Bearer token authorizing POST /push/broadcast. Empty disables broadcast.')
+@secure()
+param pushAdminToken string = ''
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -134,6 +150,10 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     cosmosDatabase: cosmosDatabase
     customDomain: persistenceCustomDomain
     frontendUrl: frontendUrl
+    vapidPublicKey: vapidPublicKey
+    vapidPrivateKey: vapidPrivateKey
+    vapidSubject: vapidSubject
+    pushAdminToken: pushAdminToken
   }
 }
 

@@ -77,6 +77,10 @@ jobs:
           MICROSOFT_CLIENT_SECRET:  ${{ secrets.MICROSOFT_CLIENT_SECRET }}
           SIGNING_KEY_PEM:          ${{ secrets.SIGNING_KEY_PEM }}
           FRONTEND_URL:             ${{ vars.FRONTEND_URL }}
+          VAPID_PUBLIC_KEY:         ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY:        ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT:            ${{ vars.VAPID_SUBJECT }}
+          PUSH_ADMIN_TOKEN:         ${{ secrets.PUSH_ADMIN_TOKEN }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \
@@ -87,6 +91,10 @@ jobs:
             --arg microsoftClientSecret "$MICROSOFT_CLIENT_SECRET" \
             --arg signingKeyPem         "$SIGNING_KEY_PEM" \
             --arg frontendUrl           "$FRONTEND_URL" \
+            --arg vapidPublicKey        "$VAPID_PUBLIC_KEY" \
+            --arg vapidPrivateKey       "$VAPID_PRIVATE_KEY" \
+            --arg vapidSubject          "$VAPID_SUBJECT" \
+            --arg pushAdminToken        "$PUSH_ADMIN_TOKEN" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               contentVersion: "1.0.0.0",
@@ -98,7 +106,11 @@ jobs:
                 microsoftClientId:     {value: $microsoftClientId},
                 microsoftClientSecret: {value: $microsoftClientSecret},
                 signingKeyPem:         {value: $signingKeyPem},
-                frontendUrl:           {value: $frontendUrl}
+                frontendUrl:           {value: $frontendUrl},
+                vapidPublicKey:        {value: $vapidPublicKey},
+                vapidPrivateKey:       {value: $vapidPrivateKey},
+                vapidSubject:          {value: $vapidSubject},
+                pushAdminToken:        {value: $pushAdminToken}
               }
             }' > /tmp/deploy-params.json
 

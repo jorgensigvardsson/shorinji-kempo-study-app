@@ -12,6 +12,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Flashcards** — spaced-repetition learning tool (non-Japanese languages)
 - **Notes & ratings** — attach personal notes and star ratings to individual techniques
 - **Cloud sync** — data syncs automatically to OneDrive, Google Drive, or Dropbox
+- **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
 - **Multilingual** — Swedish (default/fallback), English, Turkish, Japanese
 
 ## Tech stack
@@ -43,6 +44,29 @@ npm run translations:import -- ja   # three-way merges into translations.json
 
 `translation-exports/` is gitignored. The baseline snapshot is kept alongside the working copy so that concurrent changes on your side are preserved during the merge. Conflicts are marked inline as `<<<CONFLICT OURS: … | THEIRS: …>>>` for manual resolution.
 
+## Push notifications
+
+Notifications use the standard [Web Push Protocol](https://web.dev/articles/push-notifications-overview) with VAPID — no third-party push service, no recurring cost. The browser's own push service (Chrome/FCM, Edge/WNS, Firefox/Mozilla, Safari/APNs) delivers the message; the persistence backend signs it with the VAPID private key.
+
+**Pieces:**
+- The service worker (`frontend/src/sw.ts`) handles the `push` and `notificationclick` events.
+- The persistence service (`backend/persistence`) serves `GET /push/public-key`, stores subscriptions via `POST /push/subscribe` / `POST /push/unsubscribe`, and broadcasts via `POST /push/broadcast`. Subscriptions are anonymous unless an `access_token` cookie ties them to a signed-in user. Dead subscriptions (HTTP 404/410) are pruned automatically.
+- Settings → *Uppdateringsnotiser* lets the user opt in/out. On iOS the app must be added to the Home Screen first (Apple only allows Web Push for installed PWAs).
+
+**Generate VAPID keys once** (stable forever — rotating them invalidates every existing subscription):
+```bash
+npx web-push generate-vapid-keys
+```
+Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as the `VAPID_PRIVATE_KEY` *secret*. Push endpoints stay disabled until both are present. The dev compose stack ships throwaway keys for `localhost`.
+
+**Sending a broadcast** (e.g. announcing a new version) — call the admin endpoint with the `PUSH_ADMIN_TOKEN` bearer token:
+```bash
+curl -X POST https://persistence-shorinjikempo.cash-it.se/push/broadcast \
+  -H "Authorization: Bearer $PUSH_ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"New version available","body":"Open the app to update.","url":"/changelog"}'
+```
+
 ## Deployment
 
 Pushes to the `deploy` branch trigger the GitHub Actions workflow, which builds a Docker image and deploys it to the production host via SSH. See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for details.
@@ -51,12 +75,15 @@ The workflow writes `.env.production` from repository secrets/vars before buildi
 
 Required repository secrets:
 - `SSH_HOST` (`hostname:port`), `SSH_USER`, `SSH_PRIVATE_KEY` — deploy target
+- `VAPID_PRIVATE_KEY` — Web Push VAPID private key (paired with the `VAPID_PUBLIC_KEY` variable)
+- `PUSH_ADMIN_TOKEN` — bearer token authorizing `POST /push/broadcast` (leave unset to disable broadcasts)
 - `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
 - `VITE_ONEDRIVE_CLIENT_ID` — OneDrive OAuth public client ID
 - `VITE_GOOGLE_CLIENT_ID` — Google Drive OAuth public client ID
 - `VITE_GOOGLE_CLIENT_SECRET` — Google Drive OAuth client secret. Google's token endpoint requires this for Web-application clients even with PKCE; the secret is baked into the SPA bundle. The dedicated Drive-sync OAuth client must be restricted to the `drive.appdata` scope only.
 
 Optional repository variables (with sensible defaults):
+- `VAPID_PUBLIC_KEY` — Web Push VAPID public key; `VAPID_SUBJECT` — `mailto:` or site URL for the VAPID claim. Push endpoints stay disabled until the public/private key pair is set.
 - `VITE_DEBUG` (default `false`)
 - `VITE_ONEDRIVE_TENANT_ID` (default `consumers`)
 - `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`

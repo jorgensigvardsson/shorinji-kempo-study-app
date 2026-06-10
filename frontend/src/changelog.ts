@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-10T00:00:00.000Z",
+    changes: [
+      {
+        emoji: "🔔",
+        sv: "Notiser fungerar nu även när appen är stängd. Aktivera dem under Inställningar för att få ett meddelande när det finns nyheter, till exempel när en ny version är tillgänglig. På iPhone och iPad behöver appen först läggas till på hemskärmen.",
+        en: "Notifications now work even when the app is closed. Turn them on under Settings to get a message when there's news, such as when a new version is available. On iPhone and iPad, add the app to your Home Screen first.",
+        tr: "Bildirimler artık uygulama kapalıyken de çalışıyor. Yeni bir sürüm gibi haberler olduğunda mesaj almak için Ayarlar'dan açın. iPhone ve iPad'de önce uygulamayı Ana Ekrana ekleyin.",
+        ja: "アプリを閉じているときも通知が届くようになりました。設定からオンにすると、新しいバージョンが利用可能になったときなどにお知らせします。iPhoneとiPadでは、まずアプリをホーム画面に追加してください。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-09T00:00:00.000Z",
     changes: [
       {

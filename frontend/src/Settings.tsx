@@ -8,6 +8,7 @@ import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
+import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
 import { DeviceHdd, Download, ExclamationTriangleFill, PersonCircle, Upload } from "react-bootstrap-icons";
 
 const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
@@ -514,36 +515,39 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
     );
 }
 
-const PREFS_CACHE = 'sk-app-prefs'
-const NOTIF_PREF_KEY = '/notifications-enabled'
+// iOS Safari only allows Web Push when the PWA is installed to the Home Screen.
+function isIOS(): boolean {
+    const ua = navigator.userAgent;
+    return /iphone|ipad|ipod/i.test(ua)
+        // iPadOS 13+ reports as a Mac; the touch points give it away.
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
 
-async function setNotificationsPref(enabled: boolean) {
-    if (!('caches' in window)) return
-    const cache = await caches.open(PREFS_CACHE)
-    await cache.put(NOTIF_PREF_KEY, new Response(String(enabled)))
+function isStandalone(): boolean {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
 const NotificationPermissionControl = ({ translator }: { translator: Translator }) => {
     const [permission, setPermission] = useState<NotificationPermission>(
         () => ('Notification' in window ? Notification.permission : 'denied')
     );
-    const [appEnabled, setAppEnabled] = useState(
-        () => localStorage.getItem('notifications-app-enabled') !== 'false'
-    );
+    const [subscribed, setSubscribed] = useState<boolean | null>(null);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const applyEnabled = (enabled: boolean) => {
-        setAppEnabled(enabled)
-        localStorage.setItem('notifications-app-enabled', String(enabled))
-        void setNotificationsPref(enabled)
-    }
-
-    if (!('Notification' in window)) {
-        return (
-            <Form.Text className="d-block mt-1">
-                {translator.translate("Den här enheten stöder inte notiser.")}
-            </Form.Text>
-        );
-    }
+    // Reflect the actual push subscription state for this device on mount.
+    useEffect(() => {
+        if (!isPushSupported()) {
+            setSubscribed(false);
+            return;
+        }
+        let cancelled = false;
+        void getCurrentSubscription().then(sub => {
+            if (!cancelled) setSubscribed(sub !== null);
+        });
+        return () => { cancelled = true; };
+    }, []);
 
     const handleTestNotification = () => {
         void navigator.serviceWorker.ready.then(reg =>
@@ -556,32 +560,45 @@ const NotificationPermissionControl = ({ translator }: { translator: Translator 
         )
     }
 
-    if (permission === 'granted') {
-        return appEnabled ? (
-            <>
-                <Form.Text className="d-block mt-1 mb-2">
-                    {translator.translate("Notiser är aktiverade.")}
-                </Form.Text>
-                <div className="d-flex gap-2">
-                    <Button variant="outline-secondary" size="sm" onClick={() => applyEnabled(false)}>
-                        {translator.translate("Inaktivera notiser")}
-                    </Button>
-                    {DEBUG && (
-                        <Button variant="outline-warning" size="sm" onClick={handleTestNotification}>
-                            {translator.translate("Visa en testnotis")}
-                        </Button>
-                    )}
-                </div>
-            </>
-        ) : (
-            <>
-                <Form.Text className="d-block mt-1 mb-2">
-                    {translator.translate("Notiser är inaktiverade.")}
-                </Form.Text>
-                <Button variant="outline-primary" size="sm" onClick={() => applyEnabled(true)}>
-                    {translator.translate("Aktivera notiser")}
-                </Button>
-            </>
+    const enable = async () => {
+        setBusy(true);
+        setError(null);
+        try {
+            let perm = Notification.permission;
+            if (perm !== 'granted') perm = await Notification.requestPermission();
+            setPermission(perm);
+            if (perm !== 'granted') return;
+            await subscribeToPush();
+            setSubscribed(true);
+        } catch {
+            setError(translator.translate("Det gick inte att aktivera notiser. Försök igen."));
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const disable = async () => {
+        setBusy(true);
+        setError(null);
+        try {
+            await unsubscribeFromPush();
+            setSubscribed(false);
+        } catch {
+            setError(translator.translate("Det gick inte att aktivera notiser. Försök igen."));
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    // Web Push unsupported. On iOS-in-browser, point the user at Add to Home Screen;
+    // otherwise the device simply can't do notifications.
+    if (!isPushSupported()) {
+        return (
+            <Form.Text className="d-block mt-1">
+                {isIOS() && !isStandalone()
+                    ? translator.translate("Lägg till appen på hemskärmen för att kunna aktivera notiser.")
+                    : translator.translate("Den här enheten stöder inte notiser.")}
+            </Form.Text>
         );
     }
 
@@ -593,20 +610,40 @@ const NotificationPermissionControl = ({ translator }: { translator: Translator 
         );
     }
 
+    if (subscribed === null) {
+        return null; // still resolving the current subscription state
+    }
+
+    if (subscribed) {
+        return (
+            <>
+                <Form.Text className="d-block mt-1 mb-2">
+                    {translator.translate("Notiser är aktiverade.")}
+                </Form.Text>
+                <div className="d-flex gap-2">
+                    <Button variant="outline-secondary" size="sm" onClick={() => { void disable(); }} disabled={busy}>
+                        {translator.translate("Inaktivera notiser")}
+                    </Button>
+                    {DEBUG && (
+                        <Button variant="outline-warning" size="sm" onClick={handleTestNotification}>
+                            {translator.translate("Visa en testnotis")}
+                        </Button>
+                    )}
+                </div>
+                {error && <Form.Text className="d-block mt-2 text-danger">{error}</Form.Text>}
+            </>
+        );
+    }
+
     return (
         <>
             <Form.Text className="d-block mt-1 mb-2">
                 {translator.translate("Aktivera notiser för att få ett meddelande i operativsystemet när en ny version av appen är tillgänglig.")}
             </Form.Text>
-            <Button variant="outline-primary" size="sm"
-                onClick={() => {
-                    void Notification.requestPermission().then(p => {
-                        setPermission(p)
-                        if (p === 'granted') applyEnabled(true)
-                    })
-                }}>
+            <Button variant="outline-primary" size="sm" onClick={() => { void enable(); }} disabled={busy}>
                 {translator.translate("Aktivera notiser")}
             </Button>
+            {error && <Form.Text className="d-block mt-2 text-danger">{error}</Form.Text>}
         </>
     );
 }
