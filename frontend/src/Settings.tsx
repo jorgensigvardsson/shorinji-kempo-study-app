@@ -165,7 +165,7 @@ const Settings = (props: Props) => {
                 <Form.Group className="mb-3" controlId="settingsShowKanjiOnHokeiCards">
                     <Form.Check
                         type="switch"
-                        label={translator.translate("Visa kanji på hokeikort")}
+                        label={translator.translate("Visa kanji")}
                         checked={showKanjiOnHokeiCards}
                         onChange={e => {
                             store.set("showKanjiOnHokeiCards", e.target.checked);

@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-11T14:23:11.434Z",
+    changes: [
+      {
+        emoji: "🈯",
+        sv: "Graderingstesten visar nu titlar på ditt valda språk med romaji under, och kanji visas bara om du vill. Inställningen som styr kanji heter nu bara ”Visa kanji” och gäller i hela appen, inte bara hokeikorten.",
+        en: "The grading tests now show titles in your chosen language with romaji underneath, and kanji only if you want it. The setting that controls kanji is now simply “Show kanji” and applies throughout the app, not just the hokei cards.",
+        tr: "Derecelendirme sınavları artık başlıkları seçtiğiniz dilde, altında romaji ile gösteriyor ve kanji yalnızca isterseniz görünüyor. Kanji’yi denetleyen ayar artık sadece “Kanji’yi göster” adını taşıyor ve yalnızca hokei kartlarında değil, uygulamanın tamamında geçerli.",
+        ja: "級・段位の審査科目で、タイトルが選んだ言語で表示され、その下にローマ字が並ぶようになりました。漢字は希望する場合のみ表示されます。漢字の表示を切り替える設定は「漢字を表示」という名前になり、法形カードだけでなくアプリ全体に適用されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-11T13:33:12.846Z",
     changes: [
       {

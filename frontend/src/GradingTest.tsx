@@ -4,6 +4,7 @@ import { XLg } from "react-bootstrap-icons";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext, type Translator } from "./i18n";
+import { useShowKanji } from "./hooks";
 import { humanGradeName, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
@@ -92,24 +93,63 @@ interface ItemDisplay {
     gloss?: string;
 }
 
-function itemDisplay(item: Item, translator: Translator): ItemDisplay {
-    const kanji = item.term?.romaji ? translator.japanese(item.term.romaji) : undefined;
-    const kanjiDisplay = kanji !== item.term?.romaji ? kanji : undefined;
+// Subject/category labels are app-level presentation names (not part of the extracted
+// kamokuhyō data), mapping a Japanese term's romaji to a title in the user's language.
+// Anything not listed here is a specific technique/hōkei name and keeps its romaji as title.
+const categoryTitles: Record<string, string> = {
+    "kiso kamoku": "Grunder",
+    "chūshutsu kamoku": "Utvalda tekniker",
+    "kumi embu": "Parembu",
+    "un'yōhō": "Tillämpning",
+    "gōhō un'yōhō": "Tillämpning hårda tekniker",
+    "jūhō un'yōhō": "Tillämpning mjuka tekniker",
+    "gijutsu I": "Teknik I",
+    "gijutsu II": "Teknik II",
+    "hōkei kamoku": "Teknikämnen",
+    "tai gamae, tai sabaki": "Kroppsställning och kroppsföring",
+    "tai gamae, tai sabaki, umpohō": "Kroppsställning, kroppsföring och fotförflyttning",
+    "tai gamae": "Kroppsställning",
+    "tai gamae, fujinhō": "Kroppsställning och fujinhō",
+    "umpohō": "Fotförflyttning",
+    "ukemi": "Fallteknik",
+    "kihon kōgi": "Grundläggande angrepp",
+    "kihon kōgi 1": "Grundläggande angrepp 1",
+    "kihon kōgi 2": "Grundläggande angrepp 2",
+    "kihon bōgi": "Grundläggande försvar",
+    "idō kōgi": "Anfall i rörelse",
+    "idō kōbōgi": "Anfall och försvar i rörelse",
+    "idō kōbōgi (sōtai)": "Anfall och försvar i rörelse (parvis)",
+    "tan'en kihon hōkei": "Grundläggande hōkei (enskild)",
+    "tan'en kihon hōkei (sōtai)": "Grundläggande hōkei (parvis)",
+    "kenkei betsu shitei kamoku": "Utvalda tekniker från kenkei",
+    "rei shiki, sahō": "Etikett och uppförande",
+};
+
+function itemDisplay(item: Item, translator: Translator, showKanji: boolean): ItemDisplay {
+    const romaji = item.term?.romaji?.trim();
+    const kanji = romaji ? translator.japanese(romaji) : undefined;
+    const kanjiDisplay = kanji !== romaji ? kanji : undefined;
+    const shownKanji = !translator.isJapanese && showKanji ? kanjiDisplay : undefined;
     const gloss = item.term?.gloss ? translator.translate(item.term.gloss) : undefined;
-    if (item.text) {
+
+    // Title is always in the user's language: an explicit Swedish `text`, or a category
+    // label looked up from the romaji term. Technique names have neither, so romaji is the title.
+    const titleSource = item.text ?? (romaji ? categoryTitles[romaji] : undefined);
+    if (titleSource) {
         return {
-            primary: translator.translate(item.text),
-            romajiSecondary: translator.isJapanese ? undefined : item.term?.romaji,
-            kanji: translator.isJapanese ? undefined : kanjiDisplay,
-            gloss,
+            primary: translator.translate(titleSource),
+            romajiSecondary: translator.isJapanese ? undefined : romaji,
+            kanji: shownKanji,
+            // A category label's gloss merely restates the title, so drop it there.
+            gloss: item.text ? gloss : undefined,
         };
     }
     if (translator.isJapanese && kanjiDisplay) {
         return { primary: kanjiDisplay, gloss };
     }
     return {
-        primary: item.term?.romaji ?? "",
-        kanji: kanjiDisplay,
+        primary: romaji ?? "",
+        kanji: shownKanji,
         gloss,
     };
 }
@@ -122,6 +162,7 @@ function hasExpandableContent(item: Item): boolean {
 
 const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
+    const showKanji = useShowKanji();
 
     const availableGrades = allGradePlans.filter(plan => allGrades[plan.grade] !== undefined);
     const defaultGrade = grade && allGrades[grade] !== undefined ? grade : availableGrades[0]?.grade;
@@ -194,12 +235,12 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTest
                                 <XLg size={14} />
                             </Button>
                         </div>
-                        <ItemDetail item={selectedItem} translator={translator} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
+                        <ItemDetail item={selectedItem} translator={translator} showKanji={showKanji} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
                     </div>
                 ) : (
                     manual.sections.map((section, si) => {
                         const gridItems: GridItem[] = section.items.map((item, i) => {
-                            const display = itemDisplay(item, translator);
+                            const display = itemDisplay(item, translator, showKanji);
                             const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
                             const subtitle = subtitleParts.length > 0 ? sentenceCase(subtitleParts.join(" · ")) : undefined;
                             return {
@@ -232,8 +273,8 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTest
 };
 
 
-const ItemDetail = ({ item, translator, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; hokeiMap: Map<string, HokeiMoment>; notesData: HokeiNotes; ranksData: HokeiRanks }) => {
-    const display = itemDisplay(item, translator);
+const ItemDetail = ({ item, translator, showKanji, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; notesData: HokeiNotes; ranksData: HokeiRanks }) => {
+    const display = itemDisplay(item, translator, showKanji);
 
     return (
         <div>
@@ -252,7 +293,7 @@ const ItemDetail = ({ item, translator, hokeiMap, notesData, ranksData }: { item
             ))}
             <div className="d-flex flex-column gap-2">
                 {item.items?.map((subItem, i) => (
-                    <SubItemCard key={i} item={subItem} translator={translator} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
+                    <SubItemCard key={i} item={subItem} translator={translator} showKanji={showKanji} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
                 ))}
             </div>
             {item.videos && item.videos.length > 0 && (
@@ -276,8 +317,8 @@ function extractHokeis(romaji: string, hokeiMap: Map<string, HokeiMoment>): Hoke
         .filter((h): h is HokeiMoment => !!h);
 }
 
-const SubItemCard = ({ item, translator, showEmojiNumbers, showHokeiCards, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; notesData?: HokeiNotes; ranksData?: HokeiRanks }) => {
-    const display = itemDisplay(item, translator);
+const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiCards, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; showKanji: boolean; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; notesData?: HokeiNotes; ranksData?: HokeiRanks }) => {
+    const display = itemDisplay(item, translator, showKanji);
     const hokeis = showHokeiCards && hokeiMap && item.term?.romaji
         ? extractHokeis(item.term.romaji, hokeiMap)
         : [];
@@ -339,7 +380,7 @@ const SubItemCard = ({ item, translator, showEmojiNumbers, showHokeiCards, hokei
                             return (
                                 <li key={ti}>
                                     {translator.isJapanese && hasKanji ? techKanji : tech.romaji}
-                                    {!translator.isJapanese && hasKanji && <span className="text-muted ms-1 small">{techKanji}</span>}
+                                    {!translator.isJapanese && showKanji && hasKanji && <span className="text-muted ms-1 small">{techKanji}</span>}
                                 </li>
                             );
                         })}
@@ -354,7 +395,7 @@ const SubItemCard = ({ item, translator, showEmojiNumbers, showHokeiCards, hokei
                 </div>
             )}
             {item.items?.map((subItem, i) => {
-                const subDisplay = itemDisplay(subItem, translator);
+                const subDisplay = itemDisplay(subItem, translator, showKanji);
                 const subPrefix = formatNumbering(subItem.numbering);
                 return (
                     <div key={i} className="ms-2 mb-1">
