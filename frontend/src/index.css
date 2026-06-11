@@ -1,3 +1,13 @@
+:root {
+  /* Soft elevation for borderless card surfaces (replaces 1px outlines). */
+  --app-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-bs-theme="dark"] {
+  /* Shadows barely register on dark surfaces; lean on a deeper, tighter cast. */
+  --app-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 8px rgba(0, 0, 0, 0.40);
+}
+
 img.logo {
   height: 64px;
 }
@@ -28,16 +38,14 @@ table.hokei-individuals-table td {
 .hokei-card .card-body,
 .hokei-card .card-footer {
   background-color: transparent;
+  /* One card surface, no internal dividers — spacing separates the sections. */
+  border: 0;
 }
 
-.hokei-card.is-collapsed .card-header {
-  border-bottom: 0;
-}
-
-.hokei-card.is-expanded .card-header {
-  border-bottom: 1px solid var(--bs-border-color-translucent);
-}
-
-.hokei-card .card-footer {
-  border-top: 1px solid var(--bs-border-color-translucent);
+/* Gold accent for the notes box inside a hokei card. Bootstrap's *-bg-subtle
+   token is shaded toward black, which reads brown in dark mode — so mix the live
+   gold into the body surface to keep the hue, and edge it with a soft gold. */
+.hokei-notes-box {
+  background: color-mix(in srgb, var(--bs-primary) 20%, var(--bs-body-bg));
+  border: 1px solid color-mix(in srgb, var(--bs-primary) 45%, transparent);
 }

@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-11T13:33:12.846Z",
+    changes: [
+      {
+        emoji: "🎨",
+        sv: "Korten har fått en lugnare, mjukare design — de tydliga kanterna är borta och ersatta av en svag skugga, så att sidorna känns mindre rutiga och blir behagligare för ögat.",
+        en: "Cards have a calmer, softer look — the hard outlines are gone, replaced by a gentle shadow, so pages feel less boxy and are easier on the eyes.",
+        tr: "Kartlar daha sakin ve yumuşak bir görünüme kavuştu — keskin çerçeveler kaldırıldı ve yerine hafif bir gölge geldi, böylece sayfalar daha az kutulu görünüyor ve göze daha rahat geliyor.",
+        ja: "カードの見た目がより落ち着いた柔らかなデザインになりました。はっきりした枠線をなくし、淡い影に置き換えたことで、画面の四角さが和らぎ、目にやさしくなりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-10T00:00:00.000Z",
     changes: [
       {
