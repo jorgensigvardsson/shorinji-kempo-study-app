@@ -334,7 +334,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, h.rolesFor(user.Email))
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email))
 	if err != nil {
 		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -451,7 +451,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, h.rolesFor(user.Email))
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email))
 	if err != nil {
 		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
