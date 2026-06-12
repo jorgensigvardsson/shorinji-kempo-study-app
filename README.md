@@ -22,6 +22,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - Bootstrap 5
 - Vitest + Testing Library
 - PWA with service worker for offline use
+- Go backend services for identity (OIDC) and data persistence — see [BACKEND.md](BACKEND.md)
 
 ## Development
 
