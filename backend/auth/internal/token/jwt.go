@@ -19,10 +19,6 @@ const AccessTokenTTL = 1 * time.Hour
 type Claims struct {
 	jwt.RegisteredClaims
 	Email string `json:"email"`
-	// Name carries the user's display name so downstream services can identify
-	// the user without a lookup against the auth user store. Omitted when empty;
-	// consumers fall back to Email.
-	Name string `json:"name,omitempty"`
 	// Roles carries the user's roles (e.g. "admin"). Emitted as the "role" claim;
 	// omitted entirely when the user has no roles.
 	Roles []string `json:"role,omitempty"`
@@ -42,9 +38,8 @@ func NewManager(key *rsa.PrivateKey, issuer string) *Manager {
 	return &Manager{privateKey: key, issuer: issuer, kid: kid}
 }
 
-// Issue mints a signed RS256 access token for the given user, stamping their
-// display name and roles.
-func (m *Manager) Issue(sub, email, name string, roles []string) (string, error) {
+// Issue mints a signed RS256 access token for the given user, stamping their roles.
+func (m *Manager) Issue(sub, email string, roles []string) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -55,7 +50,6 @@ func (m *Manager) Issue(sub, email, name string, roles []string) (string, error)
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 		},
 		Email: email,
-		Name:  name,
 		Roles: roles,
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
