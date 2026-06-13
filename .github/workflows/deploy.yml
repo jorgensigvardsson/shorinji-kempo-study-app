@@ -81,6 +81,8 @@ jobs:
           VAPID_PRIVATE_KEY:        ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT:            ${{ vars.VAPID_SUBJECT }}
           PUSH_ADMIN_TOKEN:         ${{ secrets.PUSH_ADMIN_TOKEN }}
+          ACS_ENDPOINT:             ${{ vars.ACS_ENDPOINT }}
+          ACS_SENDER_ADDRESS:       ${{ vars.ACS_SENDER_ADDRESS }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \
@@ -95,6 +97,8 @@ jobs:
             --arg vapidPrivateKey       "$VAPID_PRIVATE_KEY" \
             --arg vapidSubject          "$VAPID_SUBJECT" \
             --arg pushAdminToken        "$PUSH_ADMIN_TOKEN" \
+            --arg acsEndpoint           "$ACS_ENDPOINT" \
+            --arg acsSenderAddress      "$ACS_SENDER_ADDRESS" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               contentVersion: "1.0.0.0",
@@ -110,7 +114,9 @@ jobs:
                 vapidPublicKey:        {value: $vapidPublicKey},
                 vapidPrivateKey:       {value: $vapidPrivateKey},
                 vapidSubject:          {value: $vapidSubject},
-                pushAdminToken:        {value: $pushAdminToken}
+                pushAdminToken:        {value: $pushAdminToken},
+                acsEndpoint:           {value: $acsEndpoint},
+                acsSenderAddress:      {value: $acsSenderAddress}
               }
             }' > /tmp/deploy-params.json
 

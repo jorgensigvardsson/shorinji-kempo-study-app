@@ -3,40 +3,49 @@ package email
 import (
 	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
+// acsScope is the Entra token audience for the Azure Communication Services data plane.
+const acsScope = "https://communication.azure.com/.default"
+
 // ACSSender sends email through Azure Communication Services' Email REST API,
-// authenticating each request with the resource access key via the HMAC-SHA256
-// scheme ACS requires. It deliberately uses no Azure SDK — a single signed POST
-// keeps the dependency surface (and binary) small.
+// authenticating with a user-assigned managed identity (Entra ID) rather than an
+// access key — no secret is ever held by the service. There is no Go data-plane
+// SDK for ACS Email, so this issues the signed REST call directly: acquire a
+// bearer token for the ACS scope, then POST the message.
 type ACSSender struct {
-	endpoint string // e.g. https://<resource>.communication.azure.com
-	key      []byte // decoded access key
+	endpoint string // e.g. https://<resource>.<region>.communication.azure.com
 	sender   string // verified MailFrom address
+	cred     azcore.TokenCredential
 	client   *http.Client
 }
 
-// NewACSSender builds a sender. endpoint and accessKey come from the ACS
-// resource; senderAddress is the verified MailFrom (managed-domain or custom).
-func NewACSSender(endpoint, accessKey, senderAddress string) (*ACSSender, error) {
-	key, err := base64.StdEncoding.DecodeString(accessKey)
+// NewACSSender builds a sender authenticated by the user-assigned managed identity
+// with the given client ID (the identity attached to the container app). endpoint
+// and senderAddress identify the ACS resource and its verified MailFrom address.
+func NewACSSender(endpoint, senderAddress, identityClientID string) (*ACSSender, error) {
+	opts := &azidentity.ManagedIdentityCredentialOptions{}
+	if identityClientID != "" {
+		opts.ID = azidentity.ClientID(identityClientID)
+	}
+	cred, err := azidentity.NewManagedIdentityCredential(opts)
 	if err != nil {
-		return nil, fmt.Errorf("decode ACS access key: %w", err)
+		return nil, fmt.Errorf("managed identity credential: %w", err)
 	}
 	return &ACSSender{
 		endpoint: strings.TrimRight(endpoint, "/"),
-		key:      key,
 		sender:   senderAddress,
+		cred:     cred,
 		client:   &http.Client{Timeout: 15 * time.Second},
 	}, nil
 }
@@ -71,17 +80,18 @@ func (s *ACSSender) SendVerificationCode(ctx context.Context, to, code, lang str
 		return fmt.Errorf("marshal email request: %w", err)
 	}
 
-	const pathAndQuery = "/emails:send?api-version=2023-03-31"
-	u, err := url.Parse(s.endpoint + pathAndQuery)
+	tok, err := s.cred.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{acsScope}})
 	if err != nil {
-		return fmt.Errorf("parse ACS endpoint: %w", err)
+		return fmt.Errorf("acquire ACS token: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), bytes.NewReader(payload))
+	url := s.endpoint + "/emails:send?api-version=2023-03-31"
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payload))
 	if err != nil {
 		return fmt.Errorf("build ACS request: %w", err)
 	}
-	s.sign(req, u, payload)
+	req.Header.Set("Authorization", "Bearer "+tok.Token)
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := s.client.Do(req)
 	if err != nil {
@@ -95,25 +105,4 @@ func (s *ACSSender) SendVerificationCode(ctx context.Context, to, code, lang str
 		return fmt.Errorf("ACS email send: status %d: %s", resp.StatusCode, strings.TrimSpace(string(snippet)))
 	}
 	return nil
-}
-
-// sign applies the ACS HMAC-SHA256 access-key signature to the request.
-// stringToSign = "POST\n{path?query}\n{date};{host};{base64(sha256(body))}".
-func (s *ACSSender) sign(req *http.Request, u *url.URL, body []byte) {
-	date := time.Now().UTC().Format(http.TimeFormat) // RFC1123 with literal "GMT"
-	host := u.Host
-
-	contentSum := sha256.Sum256(body)
-	contentHash := base64.StdEncoding.EncodeToString(contentSum[:])
-
-	stringToSign := "POST\n" + u.RequestURI() + "\n" + date + ";" + host + ";" + contentHash
-
-	mac := hmac.New(sha256.New, s.key)
-	mac.Write([]byte(stringToSign))
-	signature := base64.StdEncoding.EncodeToString(mac.Sum(nil))
-
-	req.Header.Set("x-ms-date", date)
-	req.Header.Set("x-ms-content-sha256", contentHash)
-	req.Header.Set("Authorization", "HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature="+signature)
-	req.Header.Set("Content-Type", "application/json")
 }

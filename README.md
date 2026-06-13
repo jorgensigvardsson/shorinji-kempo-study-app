@@ -23,7 +23,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - Vitest + Testing Library
 - PWA with service worker for offline use
 - Go backend services for identity (OIDC + email verification codes) and data persistence — see [BACKEND.md](BACKEND.md)
-- Azure Communication Services (Email) for sending verification codes — no SDK, signed REST calls; see [BACKEND.md](BACKEND.md)
+- Azure Communication Services (Email) for sending verification codes — authenticated by a user-assigned managed identity (no stored key); see [BACKEND.md](BACKEND.md)
 
 ## Development
 
