@@ -115,6 +115,39 @@ second OIDC flow; the callback adds the identity to the existing account. Unique
 enforced — an identity already linked to any account is rejected. `DELETE /auth/link/{provider}`
 unlinks one identity and returns 409 if it would be the last one.
 
+### Email (verification code) login
+For email domains **without** a configured OIDC provider, users sign in with a one-time code:
+
+1. `POST /auth/email/start` `{email, language}`. If the domain actually has an OIDC provider it
+   returns `{action:"oidc", provider}` (no email sent). Otherwise it emails a 6-digit code and
+   returns `{action:"existing"}` or `{action:"new"}` (whether the address is already a user).
+2. `POST /auth/email/verify` `{email, code, name}`. On a valid code it looks up or creates the
+   user (storing `name` as `DisplayName` only on creation) and issues the session cookies.
+
+Codes are held **in memory** (single replica, like OIDC pending state): SHA-256 hashed, 10-min
+TTL, max 5 attempts, one active code per address (resend overwrites), swept periodically. The
+linked-identity provider key is `"email"` with `sub` = the lowercased address. `/auth/email/start`
+carries a **global** 1-req-per-5s limiter on top of the per-IP limit to protect the email quota.
+
+Email is sent via **Azure Communication Services** (`internal/email`). There is no Go data-plane
+SDK for ACS Email, so the client issues the REST POST directly, authenticated by the auth service's
+**user-assigned managed identity** (Entra ID) — it acquires a bearer token for
+`https://communication.azure.com/.default` via `azidentity` and sends `Authorization: Bearer`.
+**No access key is ever stored.** When `ACS_ENDPOINT`/`ACS_SENDER_ADDRESS`/`ACS_IDENTITY_CLIENT_ID`
+are unset (local dev), codes are logged to stdout instead. Start on the free Azure-managed sender
+domain (5/min, 10/hour subscription cap); switch to a verified custom domain later by linking it +
+DNS and changing only `ACS_SENDER_ADDRESS`.
+
+The ACS resource and its managed email domain are provisioned **out-of-band** (the managed domain's
+`donotreply@<guid>.azurecomm.net` sender is only known after creation). The deploy pipeline feeds
+`ACS_ENDPOINT` and `ACS_SENDER_ADDRESS` as bicep parameters (GitHub repo *variables*, not secrets).
+Bicep creates a user-assigned managed identity per backend service, attaches each to its container
+app, and grants **only** the auth identity the **Communication and Email Service Owner** role
+(`09976791-48a7-449e-bb21-39d1a415f350`) on the ACS resource (the resource name is derived from the
+endpoint's first DNS label). Persistence gets its own identity but no ACS access. For the pipeline
+to create that role assignment, the GitHub deploy service principal needs **Role Based Access
+Control Administrator** on the resource group (scoped, excluding privileged roles).
+
 ---
 
 ## Data Models
@@ -199,6 +232,8 @@ corporate domain at the appropriate provider.
 | GET | `/auth/resolve` | Check whether an email domain maps to a provider (used for inline form validation) |
 | GET | `/auth/login?email={e}` | Resolve domain → provider, initiate OIDC, redirect |
 | GET | `/auth/callback` | OIDC callback: validate, enroll or look up, issue JWT, redirect to frontend |
+| POST | `/auth/email/start` | Non-OIDC email login: emails a verification code. Returns `{action}` = `oidc` (redirect instead), `existing`, or `new` (collect a name). Globally rate-limited to 1 req / 5 s |
+| POST | `/auth/email/verify` | Verify a code (and name, for new users); creates/looks up the user, issues JWT, sets cookies |
 | POST | `/auth/refresh` | Exchange refresh token for new access token (rotates the refresh token) |
 | POST | `/auth/logout` | Revoke refresh token, clear cookies |
 | GET | `/auth/me` | Return authenticated user info (UUID, email, linkedIdentities) |
@@ -314,8 +349,9 @@ database and containers on startup):
   no manual selection is ever shown
 - Auth state travels in httpOnly cookies; `fetchWithRefresh` retries once after a silent
   `POST /auth/refresh` on 401
-- Email field validation calls `/auth/resolve` on blur, so "sign-in is not available for this
-  domain" appears before form submit
+- The login screen is a small state machine: the user enters an email and submits; OIDC domains
+  redirect, non-OIDC domains move to a code-entry step (with a name field only for new users),
+  driven by the `/auth/email/start` three-way response
 - Settings (authenticated): linked providers list with link/unlink, "Export my data",
   "Delete my account"
 - On first backend login the sync manager finds no remote document and uploads local data
@@ -341,10 +377,13 @@ Pushing to the `deploy` branch runs `.github/workflows/deploy.yml`:
 5. **Announcement** — a push broadcast ("New version available") via `PUSH_ADMIN_TOKEN`;
    non-fatal if it fails
 
-Scaling: auth runs **min 1 / max 1 replica** (OIDC pending state is held in-process);
-persistence runs **min 0 / max 1**, scaling on HTTP traffic. Secrets (signing key, OIDC client
-secrets, VAPID keys) are injected via ACA secrets; the JWT signing key arrives as a PEM string
-(`SERVICE_KEY_PEM`), no file volume needed.
+Scaling: auth runs **min 1 / max 1 replica** (OIDC pending state and verification codes are
+held in-process); persistence runs **min 0 / max 1**, scaling on HTTP traffic. Secrets (signing
+key, OIDC client secrets, VAPID keys) are injected via ACA secrets; the JWT signing key arrives as
+a PEM string (`SERVICE_KEY_PEM`), no file volume needed. Email needs **no secret** — the auth app
+authenticates to ACS with its user-assigned managed identity, taking only the non-secret
+`ACS_ENDPOINT`, `ACS_SENDER_ADDRESS`, and `ACS_IDENTITY_CLIENT_ID` (the last derived in bicep from
+the identity).
 
 `tools/migrate` is a one-shot tool that provisions Cosmos and migrates file-store data
 (users + identity index + documents); supports `--dry-run`.

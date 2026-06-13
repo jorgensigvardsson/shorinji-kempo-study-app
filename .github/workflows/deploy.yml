@@ -64,6 +64,11 @@ jobs:
           tenant-id:       ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      # NB: the Microsoft.ManagedIdentity and Microsoft.Communication resource
+      # providers must be registered on the subscription (one-time, e.g.
+      # `az provider register --namespace Microsoft.ManagedIdentity`). The deploy
+      # principal is resource-group-scoped and cannot register providers itself.
+
       # Build a parameter override file so jq handles newlines in the PEM correctly.
       # main.parameters.json supplies namePrefix, location, cosmosDatabase, etc.
       # This overlay supplies images, OIDC credentials, and the signing key.
@@ -81,6 +86,8 @@ jobs:
           VAPID_PRIVATE_KEY:        ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT:            ${{ vars.VAPID_SUBJECT }}
           PUSH_ADMIN_TOKEN:         ${{ secrets.PUSH_ADMIN_TOKEN }}
+          ACS_ENDPOINT:             ${{ vars.ACS_ENDPOINT }}
+          ACS_SENDER_ADDRESS:       ${{ vars.ACS_SENDER_ADDRESS }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \
@@ -95,6 +102,8 @@ jobs:
             --arg vapidPrivateKey       "$VAPID_PRIVATE_KEY" \
             --arg vapidSubject          "$VAPID_SUBJECT" \
             --arg pushAdminToken        "$PUSH_ADMIN_TOKEN" \
+            --arg acsEndpoint           "$ACS_ENDPOINT" \
+            --arg acsSenderAddress      "$ACS_SENDER_ADDRESS" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               contentVersion: "1.0.0.0",
@@ -110,7 +119,9 @@ jobs:
                 vapidPublicKey:        {value: $vapidPublicKey},
                 vapidPrivateKey:       {value: $vapidPrivateKey},
                 vapidSubject:          {value: $vapidSubject},
-                pushAdminToken:        {value: $pushAdminToken}
+                pushAdminToken:        {value: $pushAdminToken},
+                acsEndpoint:           {value: $acsEndpoint},
+                acsSenderAddress:      {value: $acsSenderAddress}
               }
             }' > /tmp/deploy-params.json
 

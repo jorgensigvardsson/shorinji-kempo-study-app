@@ -49,12 +49,21 @@ param vapidSubject string = ''
 @secure()
 param pushAdminToken string = ''
 
+@description('Resource ID of the user-assigned managed identity to attach to this app')
+param userAssignedIdentityId string
+
 
 var pushEnabled = !empty(vapidPublicKey) && !empty(vapidPrivateKey)
 
 resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentityId}': {}
+    }
+  }
   properties: {
     environmentId: environmentId
     configuration: {

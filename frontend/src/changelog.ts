@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-13T16:08:57.055Z",
+    changes: [
+      {
+        emoji: "📧",
+        sv: "Du kan nu logga in med vilken e-postadress som helst. Har du en adress utan inloggningstjänst (som Google eller Microsoft) skickar vi en kod till din e-post — fyll i koden och ditt namn så är du inne.",
+        en: "You can now sign in with any email address. If your address isn't tied to a login provider (like Google or Microsoft), we'll email you a code — enter the code and your name and you're in.",
+        tr: "Artık herhangi bir e-posta adresiyle giriş yapabilirsiniz. Adresiniz bir giriş sağlayıcısına (Google veya Microsoft gibi) bağlı değilse, size e-postayla bir kod göndeririz — kodu ve adınızı girin, içeridesiniz.",
+        ja: "どのメールアドレスでもログインできるようになりました。Google や Microsoft などのログインサービスに紐づいていないアドレスの場合は、メールでコードをお送りします。コードとお名前を入力すればログイン完了です。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-11T14:23:11.434Z",
     changes: [
       {

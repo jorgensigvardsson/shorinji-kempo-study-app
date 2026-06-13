@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/api"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
@@ -47,6 +48,11 @@ func main() {
 	microsoftClientSecret := flag.String("microsoft-client-secret", envutil.String("MICROSOFT_CLIENT_SECRET", ""),                                   "Microsoft OAuth client secret")
 	microsoftRedirectURI  := flag.String("microsoft-redirect-uri",  envutil.String("MICROSOFT_REDIRECT_URI",  "http://localhost:8081/auth/callback"), "Microsoft OAuth redirect URI")
 	microsoftDomains      := flag.String("microsoft-domains",       envutil.String("MICROSOFT_DOMAINS",       "outlook.com,hotmail.com,live.com,msn.com"), "comma-separated email domains for Microsoft OIDC")
+
+	// ── Email (Azure Communication Services, managed-identity auth) ────────────
+	acsEndpoint   := flag.String("acs-endpoint",            envutil.String("ACS_ENDPOINT",            ""), "Azure Communication Services endpoint (enables email sending when set with sender+identity)")
+	acsSender     := flag.String("acs-sender-address",      envutil.String("ACS_SENDER_ADDRESS",      ""), "verified MailFrom address for verification emails")
+	acsIdentityID := flag.String("acs-identity-client-id",  envutil.String("ACS_IDENTITY_CLIENT_ID",  ""), "client ID of the user-assigned managed identity used to authenticate to ACS")
 
 	// ── Rate limiting ─────────────────────────────────────────────────────────
 	rateLimitRPS   := flag.Float64("rate-limit-rps",   envutil.Float64("RATE_LIMIT_RPS",   1.0), "max requests per second per IP (0 = disabled)")
@@ -139,12 +145,26 @@ func main() {
 		log.Println("Microsoft OIDC provider disabled (set --microsoft-client-id and --microsoft-client-secret to enable)")
 	}
 
+	// ── Email sender (ACS via managed identity when configured; dev stdout otherwise) ──
+	var mailer email.Sender
+	if *acsEndpoint != "" && *acsSender != "" && *acsIdentityID != "" {
+		s, err := email.NewACSSender(*acsEndpoint, *acsSender, *acsIdentityID)
+		if err != nil {
+			log.Fatalf("init ACS email sender: %v", err)
+		}
+		mailer = s
+		log.Printf("email sending via ACS (sender: %s, identity: %s)", *acsSender, *acsIdentityID)
+	} else {
+		mailer = email.LogSender{}
+		log.Println("email sending disabled — verification codes will be logged to stdout (set ACS_ENDPOINT, ACS_SENDER_ADDRESS, ACS_IDENTITY_CLIENT_ID to enable)")
+	}
+
 	// ── HTTP server ───────────────────────────────────────────────────────────
 	limiter := ratelimit.New(*rateLimitRPS, *rateLimitBurst)
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
 
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, tokenManager, *frontendURL, *cookieDomain, limiter).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

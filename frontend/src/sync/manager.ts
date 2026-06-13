@@ -133,6 +133,23 @@ class SyncManager {
     this.backendClient.beginAuthorization().catch(err => this.handleSyncError(err));
   }
 
+  // startEmailAuth / verifyEmailCode drive the email (code) login flow from the
+  // sign-in UI. See BackendSyncClient for the request/response shapes.
+  async startEmailAuth(email: string, language: string) {
+    return this.backendClient.startEmailAuth(email, language);
+  }
+
+  async verifyEmailCode(email: string, code: string, name: string) {
+    return this.backendClient.verifyEmailCode(email, code, name);
+  }
+
+  // completeEmailLogin finalizes a successful code verification. The auth cookies
+  // are already set by the server, so switching the provider to "backend" triggers
+  // the same path as the OIDC ?auth_success redirect (fetch /auth/me, then sync).
+  completeEmailLogin(): void {
+    this.store.set("syncProvider", "backend");
+  }
+
   // beginLinkAuthorization initiates an OIDC flow to link another provider to the
   // current account. The browser navigates away; the result comes back via URL param.
   beginLinkAuthorization(email: string): void {

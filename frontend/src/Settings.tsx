@@ -358,6 +358,17 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
     const [linkSuccess, setLinkSuccess] = useState(false);
     const [unlinkingProvider, setUnlinkingProvider] = useState<string | null>(null);
 
+    // Refresh account info from /auth/me on mount. The email (code) login flow
+    // doesn't reload the page, so the cached user info can be empty or stale when
+    // this panel first renders (OIDC is covered by its post-login page reload).
+    useEffect(() => {
+        let cancelled = false;
+        getSyncManager().refreshBackendUserInfo()
+            .then(() => { if (!cancelled) setUserInfo(getSyncManager().getBackendUserInfo()); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, []);
+
     // Consume link_success / link_error stashed by the sync manager after the redirect.
     useEffect(() => {
         const success = sessionStorage.getItem("link_success");
@@ -448,7 +459,7 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
             <Form.Label className="mt-2 mb-1 fw-semibold">{translator.translate("Länkade inloggningssätt")}</Form.Label>
             {userInfo?.providers.map(p => (
                 <div key={p} className="d-flex align-items-center gap-2 mb-1">
-                    <span className="text-body-secondary" style={{ minWidth: "6rem" }}>{providerDisplayName[p] ?? p}</span>
+                    <span className="text-body-secondary" style={{ minWidth: "6rem" }}>{p === "email" ? translator.translate("E-post") : (providerDisplayName[p] ?? p)}</span>
                     <Button
                         variant="outline-secondary"
                         size="sm"

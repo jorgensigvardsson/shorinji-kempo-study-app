@@ -84,6 +84,51 @@ param vapidSubject string = ''
 @secure()
 param pushAdminToken string = ''
 
+// ── Email (Azure Communication Services) ──────────────────────────────────────
+// The ACS resource and its (managed) email domain are provisioned out-of-band;
+// the pipeline feeds these two values in. Auth authenticates to ACS with its
+// user-assigned managed identity, so no access key is ever stored.
+
+@description('ACS data-plane endpoint, e.g. https://skempo-acs.europe.communication.azure.com. Empty disables email (codes are logged instead).')
+param acsEndpoint string = ''
+
+@description('Verified MailFrom address, e.g. donotreply@<guid>.azurecomm.net')
+param acsSenderAddress string = ''
+
+// ── User-assigned managed identities (one per backend service) ─────────────────
+
+resource authIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${namePrefix}-auth-id'
+  location: location
+}
+
+resource persistenceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${namePrefix}-persistence-id'
+  location: location
+}
+
+// Grant the auth identity permission to send email on the existing ACS resource.
+// The resource name is the first DNS label of the endpoint. Only the auth service
+// needs ACS access; persistence never sends email.
+var acsResourceName = empty(acsEndpoint) ? 'unused' : first(split(replace(replace(acsEndpoint, 'https://', ''), 'http://', ''), '.'))
+
+resource acs 'Microsoft.Communication/communicationServices@2023-04-01' existing = {
+  name: acsResourceName
+}
+
+// "Communication and Email Service Owner" — the built-in role that permits Email send.
+var acsEmailRoleId = '09976791-48a7-449e-bb21-39d1a415f350'
+
+resource acsAuthRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(acsEndpoint)) {
+  name: guid(acs.id, authIdentity.id, acsEmailRoleId)
+  scope: acs
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acsEmailRoleId)
+    principalId: authIdentity.properties.principalId
+    principalType: 'ServicePrincipal' // avoids "principal not found" while Entra replicates the new identity
+  }
+}
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -133,6 +178,10 @@ module authApp 'modules/auth-app.bicep' = {
     signingKeyPem: signingKeyPem
     customDomain: authCustomDomain
     cookieDomain: cookieDomain
+    userAssignedIdentityId: authIdentity.id
+    acsEndpoint: acsEndpoint
+    acsSenderAddress: acsSenderAddress
+    acsIdentityClientId: authIdentity.properties.clientId
   }
 }
 
@@ -154,6 +203,7 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     vapidPrivateKey: vapidPrivateKey
     vapidSubject: vapidSubject
     pushAdminToken: pushAdminToken
+    userAssignedIdentityId: persistenceIdentity.id
   }
 }
 

@@ -59,9 +59,27 @@ param customDomain string = ''
 @description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se). Leave empty for host-only cookies.')
 param cookieDomain string = ''
 
+@description('Resource ID of the user-assigned managed identity to attach to this app')
+param userAssignedIdentityId string
+
+@description('ACS data-plane endpoint (empty disables email; codes are logged instead)')
+param acsEndpoint string = ''
+
+@description('Verified MailFrom address for verification emails')
+param acsSenderAddress string = ''
+
+@description('Client ID of the user-assigned managed identity used to authenticate to ACS')
+param acsIdentityClientId string = ''
+
 resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentityId}': {}
+    }
+  }
   properties: {
     environmentId: environmentId
     configuration: {
@@ -114,6 +132,9 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'MICROSOFT_CLIENT_ID',           value: microsoftClientId }
             { name: 'MICROSOFT_CLIENT_SECRET',       secretRef: 'microsoft-client-secret' }
             { name: 'MICROSOFT_REDIRECT_URI',        value: microsoftRedirectUri }
+            { name: 'ACS_ENDPOINT',                  value: acsEndpoint }
+            { name: 'ACS_SENDER_ADDRESS',            value: acsSenderAddress }
+            { name: 'ACS_IDENTITY_CLIENT_ID',        value: acsIdentityClientId }
           ]
         }
       ]
