@@ -64,6 +64,16 @@ jobs:
           tenant-id:       ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      # Ensure the resource providers the template needs are registered on the
+      # subscription. Idempotent (a no-op once registered); --wait blocks until
+      # the first-time registration completes so the Bicep deploy can't race it.
+      # Microsoft.ManagedIdentity is required for the per-service user-assigned
+      # identities; Microsoft.Communication for the email (ACS) resources.
+      - name: Ensure resource providers are registered
+        run: |
+          az provider register --namespace Microsoft.ManagedIdentity --wait
+          az provider register --namespace Microsoft.Communication --wait
+
       # Build a parameter override file so jq handles newlines in the PEM correctly.
       # main.parameters.json supplies namePrefix, location, cosmosDatabase, etc.
       # This overlay supplies images, OIDC credentials, and the signing key.
