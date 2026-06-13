@@ -2,16 +2,20 @@ package api
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
@@ -26,7 +30,21 @@ const (
 	refreshCookieName = "refresh_token"
 	txnCookieName     = "oauth_txn"
 	stateTTL          = 10 * time.Minute
+
+	// emailProviderName is the linked-identity key for email (code) login. Unlike
+	// OIDC providers there is no OAuth round-trip, so it has no provider.Provider.
+	emailProviderName = "email"
+	emailCodeTTL      = 10 * time.Minute
+	emailCodeMaxTries = 5
 )
+
+// emailCode is a pending verification code, held in memory like OIDC pending
+// state (the auth service runs a single replica).
+type emailCode struct {
+	codeHash  [32]byte
+	expiresAt time.Time
+	attempts  int
+}
 
 type pendingState struct {
 	nonce        string
@@ -43,11 +61,14 @@ type Handler struct {
 	refreshTokens store.RefreshTokenStore
 	roles         store.RoleStore
 	tokens        *token.Manager
+	mailer        email.Sender
 	frontendURL   string
 	cookieDomain  string
 	limiter       *ratelimit.IPRateLimiter
+	emailLimiter  *ratelimit.GlobalRateLimiter // global cap on code-sending (protects the email quota)
 	mu            sync.Mutex
 	pending       map[string]pendingState
+	emailCodes    map[string]emailCode // lowercased email → pending code
 }
 
 func NewHandler(
@@ -57,6 +78,7 @@ func NewHandler(
 	refreshTokens store.RefreshTokenStore,
 	roles store.RoleStore,
 	tokens *token.Manager,
+	mailer email.Sender,
 	frontendURL string,
 	cookieDomain string,
 	limiter *ratelimit.IPRateLimiter,
@@ -68,10 +90,15 @@ func NewHandler(
 		refreshTokens: refreshTokens,
 		roles:         roles,
 		tokens:        tokens,
+		mailer:        mailer,
 		frontendURL:   frontendURL,
 		cookieDomain:  cookieDomain,
 		limiter:       limiter,
-		pending:       make(map[string]pendingState),
+		// Hard product requirement: at most one verification email every 5 s,
+		// globally, to protect the provider quota and the developer's wallet.
+		emailLimiter: ratelimit.NewGlobal(0.2, 1),
+		pending:      make(map[string]pendingState),
+		emailCodes:   make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -96,6 +123,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/login", h.login)
 	inner.HandleFunc("GET /auth/callback", h.callback)
 	inner.HandleFunc("POST /auth/refresh", h.refresh)
+	// Code-sending carries the global rate limit on top of the per-IP one.
+	inner.Handle("POST /auth/email/start", h.emailLimiter.Middleware(http.HandlerFunc(h.emailStart)))
+	inner.HandleFunc("POST /auth/email/verify", h.emailVerify)
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
@@ -334,33 +364,190 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email))
-	if err != nil {
-		log.Printf("token issue for %s: %v", user.ID, err)
+	if err := h.issueSession(w, user); err != nil {
+		log.Printf("callback: issue session %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	http.Redirect(w, r, h.frontendURL+"?auth_success=1", http.StatusFound)
+}
 
+// issueSession mints an access token in a fresh refresh-token family and sets
+// both auth cookies. Shared by the OIDC callback and the email verify flow.
+func (h *Handler) issueSession(w http.ResponseWriter, user *store.User) error {
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email))
+	if err != nil {
+		return fmt.Errorf("token issue: %w", err)
+	}
 	familyID, err := store.NewFamilyID()
 	if err != nil {
-		log.Printf("family ID generate for %s: %v", user.ID, err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
+		return fmt.Errorf("family ID generate: %w", err)
 	}
 	rt, err := store.NewRefreshToken(user.ID, familyID)
 	if err != nil {
-		log.Printf("refresh token generate for %s: %v", user.ID, err)
+		return fmt.Errorf("refresh token generate: %w", err)
+	}
+	if err := h.refreshTokens.Create(rt); err != nil {
+		return fmt.Errorf("refresh token create: %w", err)
+	}
+	h.setTokenCookies(w, accessToken, rt.ID)
+	return nil
+}
+
+// emailStart begins email (code) login for a non-OIDC domain. It returns one of
+// three actions so the frontend knows what to do next:
+//   - "oidc": the domain actually has an OIDC provider — redirect there instead.
+//   - "existing": a code was emailed; the account exists (no name needed).
+//   - "new": a code was emailed; the account is new (collect a name on verify).
+//
+// It is wrapped by the global rate limiter, so at most one code is sent every 5s.
+func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email    string `json:"email"`
+		Language string `json:"language"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	addr := strings.ToLower(strings.TrimSpace(req.Email))
+	parts := strings.SplitN(addr, "@", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		http.Error(w, "invalid email address", http.StatusBadRequest)
+		return
+	}
+	domain := parts[1]
+
+	// OIDC domains never use codes — tell the frontend to redirect.
+	if providerName, ok := h.domains[domain]; ok {
+		writeJSON(w, map[string]string{"action": "oidc", "provider": providerName})
+		return
+	}
+
+	user, err := h.users.FindByLinkedIdentity(emailProviderName, addr)
+	if err != nil {
+		log.Printf("emailStart: user lookup %s: %v", addr, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	if err := h.refreshTokens.Create(rt); err != nil {
-		log.Printf("refresh token create for %s: %v", user.ID, err)
+	isNew := user == nil
+
+	code, err := newNumericCode()
+	if err != nil {
+		log.Printf("emailStart: code generation: %v", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	h.setTokenCookies(w, accessToken, rt.ID)
-	http.Redirect(w, r, h.frontendURL+"?auth_success=1", http.StatusFound)
+	// One active code per address: a resend overwrites the previous one.
+	h.mu.Lock()
+	h.emailCodes[addr] = emailCode{
+		codeHash:  sha256.Sum256([]byte(code)),
+		expiresAt: time.Now().Add(emailCodeTTL),
+	}
+	h.mu.Unlock()
+
+	if err := h.mailer.SendVerificationCode(r.Context(), addr, code, normalizeLang(req.Language)); err != nil {
+		log.Printf("emailStart: send code to %s: %v", addr, err)
+		http.Error(w, "could not send verification email", http.StatusBadGateway)
+		return
+	}
+
+	action := "existing"
+	if isNew {
+		action = "new"
+	}
+	writeJSON(w, map[string]string{"action": action})
+}
+
+// emailVerify checks a verification code and, on success, signs the user in —
+// creating the account (with the submitted name) if it doesn't exist yet.
+func (h *Handler) emailVerify(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+		Code  string `json:"code"`
+		Name  string `json:"name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	addr := strings.ToLower(strings.TrimSpace(req.Email))
+	code := strings.TrimSpace(req.Code)
+	if addr == "" || code == "" {
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "invalid_code"})
+		return
+	}
+
+	h.mu.Lock()
+	ec, ok := h.emailCodes[addr]
+	switch {
+	case !ok || time.Now().After(ec.expiresAt):
+		delete(h.emailCodes, addr) // clear an expired entry if present
+		h.mu.Unlock()
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "invalid_code"})
+		return
+	case ec.attempts >= emailCodeMaxTries:
+		delete(h.emailCodes, addr)
+		h.mu.Unlock()
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "too_many_attempts"})
+		return
+	}
+	got := sha256.Sum256([]byte(code))
+	if subtle.ConstantTimeCompare(ec.codeHash[:], got[:]) != 1 {
+		ec.attempts++
+		h.emailCodes[addr] = ec
+		h.mu.Unlock()
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "invalid_code"})
+		return
+	}
+	delete(h.emailCodes, addr) // success: consume the code
+	h.mu.Unlock()
+
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	// Re-derive existence at verify time (the account may have appeared since the
+	// code was sent); the name is only stored when we actually create the user.
+	user, err := h.users.FindByLinkedIdentity(emailProviderName, addr)
+	if err != nil {
+		log.Printf("emailVerify: user lookup %s: %v", addr, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if user == nil {
+		uuid, err := newUUID()
+		if err != nil {
+			log.Printf("emailVerify: uuid generation: %v", err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		log.Printf("enrolling new user %s via email (%s)", uuid, addr)
+		user = &store.User{
+			ID:          uuid,
+			Email:       addr,
+			DisplayName: strings.TrimSpace(req.Name),
+			LinkedIdentities: map[string]store.LinkedIdentity{
+				emailProviderName: {Sub: addr, Email: addr},
+			},
+			CreatedAt: now,
+		}
+	}
+	user.LastLoginAt = now
+
+	if err := h.users.Save(user); err != nil {
+		log.Printf("emailVerify: user save %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := h.issueSession(w, user); err != nil {
+		log.Printf("emailVerify: issue session %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
@@ -654,7 +841,8 @@ func (h *Handler) claimsFromRequest(r *http.Request) (*token.Claims, error) {
 	return h.tokens.Verify(cookie.Value)
 }
 
-// sweepExpiredStates periodically removes stale pending OIDC states.
+// sweepExpiredStates periodically removes stale pending OIDC states and
+// verification codes.
 func (h *Handler) sweepExpiredStates() {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
@@ -666,7 +854,44 @@ func (h *Handler) sweepExpiredStates() {
 				delete(h.pending, k)
 			}
 		}
+		for k, v := range h.emailCodes {
+			if now.After(v.expiresAt) {
+				delete(h.emailCodes, k)
+			}
+		}
 		h.mu.Unlock()
+	}
+}
+
+// writeJSON encodes v as a 200 JSON response.
+func writeJSON(w http.ResponseWriter, v any) {
+	writeJSONStatus(w, http.StatusOK, v)
+}
+
+// writeJSONStatus encodes v as a JSON response with the given status code.
+func writeJSONStatus(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(v)
+}
+
+// newNumericCode returns a uniformly random 6-digit verification code (zero-padded).
+func newNumericCode() (string, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(1_000_000))
+	if err != nil {
+		return "", fmt.Errorf("rand.Int: %w", err)
+	}
+	return fmt.Sprintf("%06d", n.Int64()), nil
+}
+
+// normalizeLang maps an arbitrary language hint to a supported email-template
+// language, defaulting to English.
+func normalizeLang(lang string) string {
+	switch strings.ToLower(strings.TrimSpace(lang)) {
+	case "sv", "tr", "ja":
+		return strings.ToLower(strings.TrimSpace(lang))
+	default:
+		return "en"
 	}
 }
 

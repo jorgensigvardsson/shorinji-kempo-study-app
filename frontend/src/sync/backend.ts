@@ -17,6 +17,22 @@ export interface BackendUserInfo {
   roles: string[];
 }
 
+// Result of POST /auth/email/start. "oidc" means the domain has an OIDC provider
+// and the caller should redirect there; "existing"/"new" mean a code was emailed
+// (only "new" needs a name collected on verify).
+export type EmailStartResult =
+  | { action: "oidc"; provider: string }
+  | { action: "existing" }
+  | { action: "new" };
+
+// Thrown when the global code-sending rate limit (1 per 5 s) rejects a request.
+export class RateLimitError extends Error {
+  constructor() {
+    super("rate limited");
+    this.name = "RateLimitError";
+  }
+}
+
 export class BackendSyncClient {
   private pendingEmail: string | null = null;
 
@@ -34,6 +50,39 @@ export class BackendSyncClient {
       throw new Error("BackendSyncClient: call setEmail() before beginAuthorization()");
     }
     window.location.href = `${authUrl}/auth/login?email=${encodeURIComponent(this.pendingEmail)}`;
+  }
+
+  // Begins email (code) login: asks the backend to send a verification code (or
+  // tells us to redirect to OIDC). language is the browser's detected language.
+  async startEmailAuth(email: string, language: string): Promise<EmailStartResult> {
+    const resp = await fetch(`${authUrl}/auth/email/start`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, language }),
+    });
+    if (resp.status === 429) throw new RateLimitError();
+    if (!resp.ok) throw new Error(`POST /auth/email/start: ${resp.status}`);
+    return resp.json() as Promise<EmailStartResult>;
+  }
+
+  // Submits a verification code (and, for new users, a name). On success the
+  // server sets the auth cookies; the caller then switches the provider to backend.
+  // Returns the server's error code (e.g. "invalid_code", "too_many_attempts") on
+  // a rejected code.
+  async verifyEmailCode(email: string, code: string, name: string): Promise<{ ok: true } | { ok: false; error: string }> {
+    const resp = await fetch(`${authUrl}/auth/email/verify`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code, name }),
+    });
+    if (resp.ok) return { ok: true };
+    if (resp.status === 400) {
+      const body = await resp.json().catch(() => ({})) as { error?: string };
+      return { ok: false, error: body.error ?? "invalid_code" };
+    }
+    throw new Error(`POST /auth/email/verify: ${resp.status}`);
   }
 
   // Attempts a silent token refresh via the refresh_token cookie.
