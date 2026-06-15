@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
@@ -36,6 +36,66 @@ const WAKE_LOCK_SUPPORTED = typeof navigator !== "undefined" && "wakeLock" in na
 function isStandalonePwa(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches
     || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+}
+
+// Service-worker update handling. Registration and waiting-SW detection run here,
+// at the top of App, so they're active regardless of auth state. When `autoApply`
+// is set (an unauthenticated visitor, e.g. on the login screen) a pending version
+// is applied immediately and silently — there's no in-progress work to protect.
+// In-app users get `needRefresh` instead, surfaced as the "Update" toast, so a
+// new version never interrupts them mid-task.
+function useAppUpdate(autoApply: boolean) {
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
+  useRegisterSW({
+    onNeedRefresh() {
+      setNeedRefresh(true);
+    },
+    onRegisteredSW(_swUrl, registration) {
+      registrationRef.current = registration;
+      if (registration) {
+        if (registration.waiting) {
+          setNeedRefresh(true);
+        }
+        setInterval(() => registration.update(), 60 * 60 * 1000);
+      }
+    },
+  });
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && registrationRef.current?.waiting) {
+        setNeedRefresh(true);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
+
+  // Hand control to the waiting SW and reload once it takes over. Returns false
+  // if there's nothing waiting (so callers know it was a no-op).
+  const activateWaiting = useCallback(() => {
+    const waiting = registrationRef.current?.waiting;
+    if (!waiting) return false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once: true });
+    waiting.postMessage({ type: 'SKIP_WAITING' });
+    return true;
+  }, []);
+
+  // The "Update" toast button: apply and drop the prompt.
+  const applyUpdate = useCallback(() => {
+    if (activateWaiting()) setNeedRefresh(false);
+  }, [activateWaiting]);
+
+  // Unauthenticated visitors (e.g. the login screen) have no in-progress work to
+  // protect, so a pending version is applied immediately and silently — no toast.
+  // This covers both a fresh load with a version already waiting and logging out
+  // while one is pending.
+  useEffect(() => {
+    if (autoApply && needRefresh) activateWaiting();
+  }, [autoApply, needRefresh, activateWaiting]);
+
+  return { needRefresh, applyUpdate };
 }
 
 function App(props: Props) {
@@ -97,6 +157,10 @@ function App(props: Props) {
     localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
     setShowSignIn(false);
   };
+
+  // Auto-apply pending versions for unauthenticated visitors (login screen);
+  // authenticated users get the "Update" toast via the returned needRefresh.
+  const { needRefresh, applyUpdate } = useAppUpdate(showSignIn);
 
   // Shared "keep screen on" state. GUI-only for now — no real wake lock yet.
   // Lives here so the drawer toggle (small screens) and the floating toggle
@@ -164,7 +228,8 @@ function App(props: Props) {
             reserved at the bottom of the page (--floating-stack-reserve) so
             nothing here ever covers content when scrolled to the end. */}
         <div ref={floatingRef} className="app-floating-stack d-print-none">
-          <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)} />
+          <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)}
+            needRefresh={needRefresh} onUpdate={applyUpdate} />
           {WAKE_LOCK_SUPPORTED && (
             <WakeLockToggle variant="card" className="d-none d-lg-block" active={keepAwake} onChange={setKeepAwake} />
           )}
@@ -294,8 +359,8 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) => {
-  const { translator, onShowLogin } = props;
+const AppToasts = (props: { translator: Translator; onShowLogin: () => void; needRefresh: boolean; onUpdate: () => void }) => {
+  const { translator, onShowLogin, needRefresh, onUpdate } = props;
   const navigate = useNavigate();
   const lang = translator.currentLanguage;
 
@@ -346,40 +411,8 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) =
   };
 
   // --- update toast ---
-  const [needRefresh, setNeedRefresh] = useState(false);
-  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
-  useRegisterSW({
-    onNeedRefresh() {
-      setNeedRefresh(true);
-    },
-    onRegisteredSW(_swUrl, registration) {
-      registrationRef.current = registration;
-      if (registration) {
-        if (registration.waiting) {
-          setNeedRefresh(true);
-        }
-        setInterval(() => registration.update(), 60 * 60 * 1000);
-      }
-    },
-  });
-
-  useEffect(() => {
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && registrationRef.current?.waiting) {
-        setNeedRefresh(true);
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, []);
-
-  const handleUpdate = () => {
-    const waiting = registrationRef.current?.waiting;
-    if (!waiting) return;
-    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once: true });
-    waiting.postMessage({ type: 'SKIP_WAITING' });
-    setNeedRefresh(false);
-  };
+  // SW registration and the pending-version state live in App's useAppUpdate hook
+  // (so they run even when unauthenticated); here we just render the prompt.
 
   // --- reconnect toast ---
   const syncState = useSyncState();
@@ -462,7 +495,7 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void }) =
               </a>
             </div>
           </div>
-          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={handleUpdate}>
+          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onUpdate}>
             {translator.translate("Uppdatera")}
           </Button>
         </Toast.Body>

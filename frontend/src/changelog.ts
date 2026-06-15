@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-15T07:40:02.568Z",
+    changes: [
+      {
+        emoji: "🔄",
+        sv: "På inloggningssidan hämtar appen nu den senaste versionen automatiskt, så du alltid loggar in i det nyaste. När du redan är inne får du som vanligt välja själv när du vill uppdatera, så att inget avbryter dig mitt i något.",
+        en: "On the login screen the app now picks up the latest version automatically, so you always sign in to the newest one. While you're signed in you still choose when to update yourself, so nothing interrupts you mid-task.",
+        tr: "Giriş ekranında uygulama artık en son sürümü otomatik olarak alıyor, böylece her zaman en yenisine giriş yaparsınız. Giriş yaptıktan sonra ise güncellemeyi ne zaman yapacağınıza yine siz karar verirsiniz, böylece bir iş sırasında hiçbir şey sizi bölmez.",
+        ja: "ログイン画面では、アプリが最新バージョンを自動で取得するようになり、いつでも最新の状態でログインできます。ログイン後は、これまでどおり更新のタイミングをご自身で選べるので、操作の途中で中断されることはありません。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-13T16:08:57.055Z",
     changes: [
       {
