@@ -167,6 +167,19 @@ class SyncManager {
     await this.backendClient.completeAuthorizationIfPresent();
   }
 
+  // Admin user management (requires the "admin" role; enforced by the backend).
+  async adminListUsers() {
+    return this.backendClient.adminListUsers();
+  }
+
+  async adminUpdateDisplayName(id: string, displayName: string): Promise<void> {
+    await this.backendClient.adminUpdateDisplayName(id, displayName);
+  }
+
+  async adminSetAdmin(id: string, admin: boolean): Promise<void> {
+    await this.backendClient.adminSetAdmin(id, admin);
+  }
+
   disconnect(): void {
     const provider = this.store.get("syncProvider");
     const client = this.cloudClient(provider);

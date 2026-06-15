@@ -65,6 +65,36 @@ func (s *FileUserStore) FindByLinkedIdentity(providerName, sub string) (*User, e
 	return nil, nil
 }
 
+// List scans the base directory and returns every decoded user record. The
+// roles store lives in a subdirectory and the signing key is not a top-level
+// *.json file, so neither is picked up — the same scan profile as
+// FindByLinkedIdentity.
+func (s *FileUserStore) List() ([]*User, error) {
+	entries, err := os.ReadDir(s.baseDir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var users []*User
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(s.baseDir, e.Name()))
+		if err != nil {
+			continue
+		}
+		var u User
+		if err := json.Unmarshal(data, &u); err != nil {
+			continue
+		}
+		users = append(users, &u)
+	}
+	return users, nil
+}
+
 func (s *FileUserStore) Save(user *User) error {
 	if err := os.MkdirAll(s.baseDir, 0o755); err != nil {
 		return err

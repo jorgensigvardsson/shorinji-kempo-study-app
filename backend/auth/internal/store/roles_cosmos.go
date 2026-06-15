@@ -53,3 +53,36 @@ func (s *CosmosRoleStore) Roles(email string) ([]string, error) {
 	}
 	return rec.Roles, nil
 }
+
+// SetRoles upserts the role record for email (id = lowercased email). When roles
+// is empty the item is deleted so empties don't linger. Point operations only,
+// so the roles container's "none" indexing is fine.
+func (s *CosmosRoleStore) SetRoles(email string, roles []string) error {
+	id := NormalizeEmail(email)
+	if id == "" {
+		return nil
+	}
+	ctx := context.Background()
+	pk := azcosmos.NewPartitionKeyString(id)
+
+	if len(roles) == 0 {
+		_, err := s.container.DeleteItem(ctx, pk, id, nil)
+		if err != nil {
+			var respErr *azcore.ResponseError
+			if errors.As(err, &respErr) && respErr.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			return fmt.Errorf("cosmos delete roles %s: %w", id, err)
+		}
+		return nil
+	}
+
+	data, err := json.Marshal(RoleRecord{ID: id, Roles: roles})
+	if err != nil {
+		return fmt.Errorf("cosmos marshal roles %s: %w", id, err)
+	}
+	if _, err := s.container.UpsertItem(ctx, pk, data, nil); err != nil {
+		return fmt.Errorf("cosmos upsert roles %s: %w", id, err)
+	}
+	return nil
+}

@@ -95,6 +95,31 @@ func (s *CosmosUserStore) FindByLinkedIdentity(provider, sub string) (*User, err
 	return s.FindByID(item.UserID)
 }
 
+// List returns every user via a cross-partition scan. The empty partition key
+// makes the query fan out across all partitions. This requires the users
+// container to be query-able (indexing mode != "none" — see ProvisionCosmos);
+// it is intended for low-frequency admin use, not the request path.
+func (s *CosmosUserStore) List() ([]*User, error) {
+	ctx := context.Background()
+	pager := s.users.NewQueryItemsPager("SELECT * FROM c", azcosmos.NewPartitionKey(), nil)
+	var users []*User
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos list users: %w", err)
+		}
+		for _, raw := range page.Items {
+			var u User
+			if err := json.Unmarshal(raw, &u); err != nil {
+				log.Printf("warning: cosmos list users: unmarshal item: %v", err)
+				continue
+			}
+			users = append(users, &u)
+		}
+	}
+	return users, nil
+}
+
 // Save upserts the user record and synchronises the identity index.
 // An ETag guard on the user record detects concurrent modifications and returns
 // an error rather than silently clobbering a concurrent write.

@@ -240,6 +240,15 @@ corporate domain at the appropriate provider.
 | DELETE | `/auth/account` | Delete refresh tokens and the user record (JWT required) |
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
 | DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; 409 if it is the last one) |
+| GET | `/auth/admin/users` | List all users with their roles, linked identities, and an `oidc` flag (admin role required) |
+| PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) (admin) |
+| PUT | `/auth/admin/users/{id}/roles` | Promote/demote a user — body `{admin: bool}`; 409 on self-demotion (admin) |
+
+The `/auth/admin/*` endpoints back the admin-only "Users" page. Authorization is enforced
+per handler (`requireAdmin` checks the `admin` role on the access token); listing is a full
+scan intended for low-frequency admin use, and filtering happens client-side. Promote/demote
+writes the `roles` store, so the change takes effect in a user's token on its next issue
+(login or hourly refresh); `/auth/me` reads roles live, so the admin UI reflects it at once.
 
 ### Persistence Service (`backend/persistence`, port 8080 in dev)
 
@@ -330,7 +339,7 @@ database and containers on startup):
 
 | Container | Service | Notes |
 |-----------|---------|-------|
-| `users` | auth | Point reads by UUID; indexing `none` |
+| `users` | auth | Point reads by UUID; indexing `consistent` with all paths excluded so the admin `SELECT * FROM c` listing works at zero write-time index cost. (An already-provisioned container keeps its old `none` policy — provisioning skips existing containers — so its indexing policy must be updated once out-of-band.) |
 | `identity_index` | auth | O(1) provider→user lookup at login |
 | `roles` | auth | Out-of-band role assignments, keyed by email |
 | `refresh_tokens` | auth | `consistent` indexing (all paths excluded) for partition scans |

@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-15T08:01:42.356Z",
+    changes: [
+      {
+        emoji: "👥",
+        sv: "Administratörer har fått en ny sida ”Användare” där de kan se alla som registrerat sig, söka på namn och e-post, justera visningsnamn och utse andra administratörer.",
+        en: "Administrators get a new “Users” page where they can see everyone who has signed up, search by name and email, adjust display names, and appoint other administrators.",
+        tr: "Yöneticiler için, kaydolan herkesi görebilecekleri, ada ve e-postaya göre arama yapabilecekleri, görünen adları düzenleyebilecekleri ve başka yöneticiler atayabilecekleri yeni bir “Kullanıcılar” sayfası eklendi.",
+        ja: "管理者向けに新しい「ユーザー」ページが追加されました。登録したすべてのユーザーを確認でき、名前やメールで検索したり、表示名を変更したり、他のユーザーを管理者に任命したりできます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-15T07:40:02.568Z",
     changes: [
       {

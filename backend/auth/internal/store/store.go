@@ -24,6 +24,10 @@ type UserStore interface {
 	// FindByLinkedIdentity returns the user whose linkedIdentities[provider].sub == sub,
 	// or (nil, nil) if no such user exists.
 	FindByLinkedIdentity(provider, sub string) (*User, error)
+	// List returns every user record. Used by the admin user-management UI;
+	// callers should expect this to be a full scan, so it is for low-frequency
+	// admin use only, not request-path lookups.
+	List() ([]*User, error)
 	Save(user *User) error
 	Delete(id string) error
 }

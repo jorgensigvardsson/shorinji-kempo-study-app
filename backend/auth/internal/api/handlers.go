@@ -131,6 +131,11 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
 	inner.HandleFunc("POST /auth/link", h.linkAccount)
 	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
+	// Admin-only user management (see admin.go). Authorization is enforced per
+	// handler via requireAdmin; the routes ride the same middleware chain below.
+	inner.HandleFunc("GET /auth/admin/users", h.adminListUsers)
+	inner.HandleFunc("PATCH /auth/admin/users/{id}", h.adminUpdateUser)
+	inner.HandleFunc("PUT /auth/admin/users/{id}/roles", h.adminSetRoles)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 

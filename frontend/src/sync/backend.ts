@@ -17,6 +17,24 @@ export interface BackendUserInfo {
   roles: string[];
 }
 
+// A linked provider identity as returned by the admin user listing.
+export interface AdminLinkedIdentity {
+  sub: string;
+  email: string;
+}
+
+// A user record as returned by GET /auth/admin/users (admin only).
+export interface AdminUser {
+  id: string;
+  email: string;
+  displayName: string;
+  linkedIdentities: Record<string, AdminLinkedIdentity>;
+  roles: string[];
+  oidc: boolean; // true when any linked identity is an OIDC provider (display name not editable)
+  createdAt: string;
+  lastLoginAt: string;
+}
+
 // Result of POST /auth/email/start. "oidc" means the domain has an OIDC provider
 // and the caller should redirect there; "existing"/"new" mean a code was emailed
 // (only "new" needs a name collected on verify).
@@ -229,6 +247,38 @@ export class BackendSyncClient {
     if (!resp.ok) throw new Error(`DELETE /auth/link/${provider}: ${resp.status}`);
     // Refresh stored user info so the UI reflects the change immediately.
     await this.completeAuthorizationIfPresent();
+  }
+
+  // ── Admin: user management (requires the "admin" role; enforced by the backend) ──
+
+  // Lists every user in the system.
+  async adminListUsers(): Promise<AdminUser[]> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users`);
+    if (!resp.ok) throw new Error(`GET /auth/admin/users: ${resp.status}`);
+    return resp.json() as Promise<AdminUser[]>;
+  }
+
+  // Updates a user's display name (only permitted for non-OIDC users; the backend
+  // returns 409 otherwise).
+  async adminUpdateDisplayName(id: string, displayName: string): Promise<void> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ displayName }),
+    });
+    if (!resp.ok) throw new Error(`PATCH /auth/admin/users/${id}: ${resp.status}`);
+  }
+
+  // Promotes (admin=true) or demotes (admin=false) a user. The backend rejects
+  // an admin demoting themselves with 409.
+  async adminSetAdmin(id: string, admin: boolean): Promise<void> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}/roles`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ admin }),
+    });
+    if (resp.status === 409) throw new Error("self-demotion");
+    if (!resp.ok) throw new Error(`PUT /auth/admin/users/${id}/roles: ${resp.status}`);
   }
 
   // Fetches the user record and app document, bundles them as a JSON download.

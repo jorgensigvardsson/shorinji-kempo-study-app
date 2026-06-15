@@ -55,3 +55,49 @@ func TestFileRoleStore_NoFile_Empty(t *testing.T) {
 		t.Errorf("expected no roles, got %v", roles)
 	}
 }
+
+func TestFileRoleStore_SetRoles_RoundTrip(t *testing.T) {
+	s := NewFileRoleStore(t.TempDir())
+
+	if err := s.SetRoles("Admin@Example.com", []string{"admin"}); err != nil {
+		t.Fatalf("SetRoles: %v", err)
+	}
+	roles, err := s.Roles("admin@example.com")
+	if err != nil {
+		t.Fatalf("Roles: %v", err)
+	}
+	if len(roles) != 1 || roles[0] != "admin" {
+		t.Fatalf("expected [admin], got %v", roles)
+	}
+}
+
+func TestFileRoleStore_SetRoles_EmptyRemovesEntry(t *testing.T) {
+	dir := t.TempDir()
+	writeRolesFile(t, dir, `{"admin@example.com": ["admin"], "other@example.com": ["editor"]}`)
+	s := NewFileRoleStore(dir)
+
+	if err := s.SetRoles("admin@example.com", nil); err != nil {
+		t.Fatalf("SetRoles: %v", err)
+	}
+	if roles, _ := s.Roles("admin@example.com"); len(roles) != 0 {
+		t.Fatalf("expected entry removed, got %v", roles)
+	}
+	// Unrelated entries are preserved.
+	if roles, _ := s.Roles("other@example.com"); len(roles) != 1 || roles[0] != "editor" {
+		t.Fatalf("expected other user's roles preserved, got %v", roles)
+	}
+}
+
+func TestFileRoleStore_SetRoles_ReplacesCaseVariant(t *testing.T) {
+	dir := t.TempDir()
+	writeRolesFile(t, dir, `{"Admin@Example.com": ["admin"]}`)
+	s := NewFileRoleStore(dir)
+
+	if err := s.SetRoles("admin@example.com", []string{"admin", "editor"}); err != nil {
+		t.Fatalf("SetRoles: %v", err)
+	}
+	roles, _ := s.Roles("ADMIN@example.com")
+	if len(roles) != 2 {
+		t.Fatalf("expected 2 roles after replacing case variant, got %v", roles)
+	}
+}

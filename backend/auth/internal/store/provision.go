@@ -39,7 +39,6 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		return fmt.Errorf("cosmos database client %q: %w", database, err)
 	}
 
-	// users — all access is point reads (FindByID → ReadItem by /id).
 	// identity_index — all access is point reads; item id = SHA-256(provider:sub),
 	//   so FindByLinkedIdentity is always a direct key lookup, never a query.
 	noIndex := &azcosmos.IndexingPolicy{
@@ -49,10 +48,22 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		ExcludedPaths: []azcosmos.ExcludedPath{},
 	}
 
+	// users — login-path access is all point reads (FindByID → ReadItem by /id),
+	// but the admin user-management UI needs a cross-partition SELECT * FROM c,
+	// which "none" indexing blocks. Use "consistent" with all paths excluded
+	// (the refresh_tokens precedent): zero write-time index overhead while still
+	// permitting the scan.
+	// NOTE: ProvisionCosmos ignores already-existing containers (409), so an
+	// existing users container's indexing policy must be updated out-of-band once.
 	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
 		ID:                     usersContainer,
 		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/id"}, Kind: azcosmos.PartitionKeyKindHash},
-		IndexingPolicy:         noIndex,
+		IndexingPolicy: &azcosmos.IndexingPolicy{
+			Automatic:     true,
+			IndexingMode:  azcosmos.IndexingMode("consistent"),
+			IncludedPaths: []azcosmos.IncludedPath{},
+			ExcludedPaths: []azcosmos.ExcludedPath{{Path: "/*"}},
+		},
 	}, nil); err != nil && !isConflict(err) {
 		return fmt.Errorf("cosmos create container %q: %w", usersContainer, err)
 	}

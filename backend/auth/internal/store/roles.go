@@ -14,6 +14,10 @@ type RoleRecord struct {
 type RoleStore interface {
 	// Roles returns the roles for email, or an empty slice if none are assigned.
 	Roles(email string) ([]string, error)
+	// SetRoles replaces the roles for email. An empty roles slice removes the
+	// assignment entirely so empties don't linger. Used by the admin UI to
+	// promote/demote users.
+	SetRoles(email string, roles []string) error
 }
 
 // NormalizeEmail lowercases and trims an email so role lookups are case-insensitive.

@@ -1,8 +1,9 @@
-import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Megaphone, Newspaper, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Kamoku from "./Kamoku.tsx";
 import Settings from "./Settings.tsx";
 import Broadcast from "./Broadcast.tsx";
+import AdminUsers from "./AdminUsers.tsx";
 import { getSyncManager } from "./sync/manager.ts";
 import { noTranslate, type Language, type Translator } from "./i18n.ts";
 import Groups from "./Groups.tsx";
@@ -103,6 +104,12 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
     }, ...(getSyncManager().getBackendUserInfo()?.roles.includes("admin") ? [{
+        path: "/admin/users",
+        component: () => <AdminUsers />,
+        menuText: translator.translate("Användare"),
+        icon: People,
+        hideOnStartPage: true,
+    } satisfies Route, {
         path: "/broadcast",
         component: () => <Broadcast />,
         menuText: translator.translate("Skicka notis till alla"),
