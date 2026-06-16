@@ -103,15 +103,40 @@ export class BackendSyncClient {
     throw new Error(`POST /auth/email/verify: ${resp.status}`);
   }
 
+  // In-flight refresh shared by all callers in this tab (single-flight).
+  private refreshInFlight: Promise<boolean> | null = null;
+
   // Attempts a silent token refresh via the refresh_token cookie.
   // Returns true if the server issued a new access token.
+  //
+  // Refresh tokens are single-use and rotated on every call, so two refreshes
+  // racing on the same token make the loser look like a replayed (stolen) token
+  // to the server, which then revokes the whole session. We prevent that on two
+  // levels: a per-tab in-flight promise coalesces concurrent callers here, and
+  // the Web Locks API serializes across *other* tabs of the same origin. Because
+  // the browser attaches the current cookie at fetch time, a queued caller always
+  // sends the freshly-rotated token rather than a stale one.
   private async tryRefresh(): Promise<boolean> {
-    try {
-      const resp = await fetch(`${authUrl}/auth/refresh`, { method: "POST", credentials: "include" });
-      return resp.ok;
-    } catch {
-      return false;
+    if (this.refreshInFlight) return this.refreshInFlight;
+    this.refreshInFlight = this.runRefresh().finally(() => { this.refreshInFlight = null; });
+    return this.refreshInFlight;
+  }
+
+  private async runRefresh(): Promise<boolean> {
+    const doFetch = async (): Promise<boolean> => {
+      try {
+        const resp = await fetch(`${authUrl}/auth/refresh`, { method: "POST", credentials: "include" });
+        return resp.ok;
+      } catch {
+        return false;
+      }
+    };
+    // Web Locks serialize across all same-origin tabs; fall back to a plain call
+    // where the API is unavailable (e.g. older Safari).
+    if (typeof navigator !== "undefined" && navigator.locks) {
+      return navigator.locks.request("sk-auth-refresh", doFetch);
     }
+    return doFetch();
   }
 
   // Fetches with automatic silent refresh on 401. On refresh failure marks auth as expired.

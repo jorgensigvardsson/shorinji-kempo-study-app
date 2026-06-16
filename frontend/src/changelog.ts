@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-16T12:33:44.139Z",
+    changes: [
+      {
+        emoji: "🔑",
+        sv: "Rättade ett fel som kunde logga ut dig i onödan när du återvände till en flik efter en stund, särskilt med appen öppen i flera flikar. Inloggningen förnyas nu tyst som det är tänkt.",
+        en: "Fixed a bug that could log you out unnecessarily when returning to a tab after a while, especially with the app open in several tabs. Your session now renews silently as intended.",
+        tr: "Bir süre sonra bir sekmeye döndüğünüzde, özellikle uygulama birden fazla sekmede açıkken sizi gereksiz yere oturumdan çıkarabilen bir hata düzeltildi. Oturumunuz artık amaçlandığı gibi sessizce yenileniyor.",
+        ja: "しばらくしてからタブに戻ったとき、特にアプリを複数のタブで開いている場合に、不必要にログアウトされることがある不具合を修正しました。セッションは意図したとおり静かに更新されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-16T07:19:50.625Z",
     changes: [
       {
