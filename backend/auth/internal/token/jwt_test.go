@@ -20,7 +20,7 @@ func newTestManager(t *testing.T) *Manager {
 func TestIssueVerify_RoundTripsClaims(t *testing.T) {
 	m := newTestManager(t)
 
-	tok, err := m.Issue("user-123", "anna@example.com", "Anna Svensson", []string{"admin"})
+	tok, err := m.Issue("user-123", "anna@example.com", "Anna Svensson", []string{"admin"}, "fam-1")
 	if err != nil {
 		t.Fatalf("Issue: %v", err)
 	}
@@ -31,6 +31,9 @@ func TestIssueVerify_RoundTripsClaims(t *testing.T) {
 	}
 	if claims.Subject != "user-123" {
 		t.Errorf("sub = %q, want user-123", claims.Subject)
+	}
+	if claims.Family != "fam-1" {
+		t.Errorf("family = %q, want fam-1", claims.Family)
 	}
 	if claims.Email != "anna@example.com" {
 		t.Errorf("email = %q, want anna@example.com", claims.Email)
@@ -46,7 +49,7 @@ func TestIssueVerify_RoundTripsClaims(t *testing.T) {
 func TestIssue_EmptyNameOmittedFromPayload(t *testing.T) {
 	m := newTestManager(t)
 
-	tok, err := m.Issue("user-123", "anna@example.com", "", nil)
+	tok, err := m.Issue("user-123", "anna@example.com", "", nil, "")
 	if err != nil {
 		t.Fatalf("Issue: %v", err)
 	}

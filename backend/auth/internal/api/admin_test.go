@@ -12,9 +12,13 @@ import (
 
 // authedRequest builds a request carrying an access-token cookie for a user with
 // the given id/email/roles, so requireAdmin (which reads roles off the token) sees them.
-func authedRequest(t *testing.T, h *Handler, method, path, id, email string, roles []string, body any) *http.Request {
+func authedRequest(t *testing.T, h *Handler, method, path, id, email string, roles []string, body any, family ...string) *http.Request {
 	t.Helper()
-	tok, err := h.tokens.Issue(id, email, "", roles)
+	fam := ""
+	if len(family) > 0 {
+		fam = family[0]
+	}
+	tok, err := h.tokens.Issue(id, email, "", roles, fam)
 	if err != nil {
 		t.Fatalf("issue token: %v", err)
 	}

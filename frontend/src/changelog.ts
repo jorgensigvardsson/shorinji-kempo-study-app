@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-06-16T07:19:50.625Z",
+    changes: [
+      {
+        emoji: "🔒",
+        sv: "Du kan nu logga ut från alla dina andra enheter direkt i inställningarna – din nuvarande enhet förblir inloggad. Administratörer kan dessutom logga ut en användare från sidan ”Användare”.",
+        en: "You can now sign out of all your other devices straight from settings – your current device stays signed in. Administrators can also sign a user out from the “Users” page.",
+        tr: "Artık ayarlardan diğer tüm cihazlarınızdaki oturumu doğrudan kapatabilirsiniz; mevcut cihazınız açık kalır. Yöneticiler ayrıca bir kullanıcının oturumunu “Kullanıcılar” sayfasından kapatabilir.",
+        ja: "設定から、他のすべてのデバイスのログアウトを直接行えるようになりました（現在のデバイスはログインしたままです）。また、管理者は「ユーザー」ページからユーザーをログアウトさせることができます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-15T08:01:42.356Z",
     changes: [
       {

@@ -147,6 +147,36 @@ func (h *Handler) adminSetRoles(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// adminLogoutUser forcibly ends every session for the target user by revoking all
+// of their refresh tokens. The user's current access token keeps working until it
+// expires (≤ AccessTokenTTL); after that they can no longer refresh and are fully
+// logged out. Admin only.
+func (h *Handler) adminLogoutUser(w http.ResponseWriter, r *http.Request) {
+	if h.requireAdmin(w, r) == nil {
+		return
+	}
+	id := r.PathValue("id")
+
+	user, err := h.users.FindByID(id)
+	if err != nil {
+		log.Printf("adminLogoutUser lookup %s: %v", id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if user == nil {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+
+	if err := h.refreshTokens.DeleteByUserID(id); err != nil {
+		log.Printf("adminLogoutUser revoke %s: %v", id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("admin force-logged-out user %s (%s)", id, user.Email)
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // hasOIDCIdentity reports whether the user has any linked identity other than the
 // email (code) provider.
 func hasOIDCIdentity(u *store.User) bool {

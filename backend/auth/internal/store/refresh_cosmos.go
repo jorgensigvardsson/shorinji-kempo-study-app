@@ -250,3 +250,40 @@ func (s *CosmosRefreshTokenStore) DeleteByUserID(userID string) error {
 	}
 	return nil
 }
+
+func (s *CosmosRefreshTokenStore) DeleteByUserIDExceptFamily(userID, keepFamily string) error {
+	ctx := context.Background()
+	pk := azcosmos.NewPartitionKeyString(userID)
+	// Item IDs in this partition are hashes; SELECT c.id retrieves them directly.
+	query := "SELECT c.id FROM c WHERE c.familyId != @keep"
+	opts := &azcosmos.QueryOptions{
+		QueryParameters: []azcosmos.QueryParameter{{Name: "@keep", Value: keepFamily}},
+	}
+	pager := s.container.NewQueryItemsPager(query, pk, opts)
+	var ids []string
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return fmt.Errorf("cosmos query refresh tokens for user %s: %w", userID, err)
+		}
+		for _, raw := range page.Items {
+			var item struct {
+				ID string `json:"id"`
+			}
+			if err := json.Unmarshal(raw, &item); err == nil && item.ID != "" {
+				ids = append(ids, item.ID)
+			}
+		}
+	}
+	for _, id := range ids {
+		_, err := s.container.DeleteItem(ctx, pk, id, nil)
+		if err != nil {
+			var respErr *azcore.ResponseError
+			if errors.As(err, &respErr) && respErr.StatusCode == http.StatusNotFound {
+				continue
+			}
+			return fmt.Errorf("cosmos delete refresh token %s: %w", id, err)
+		}
+	}
+	return nil
+}

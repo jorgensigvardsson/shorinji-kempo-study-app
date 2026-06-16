@@ -128,6 +128,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("POST /auth/email/verify", h.emailVerify)
 	inner.HandleFunc("GET /auth/me", h.me)
 	inner.HandleFunc("POST /auth/logout", h.logout)
+	inner.HandleFunc("POST /auth/sessions/logout-others", h.logoutOtherSessions)
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
 	inner.HandleFunc("POST /auth/link", h.linkAccount)
 	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
@@ -136,6 +137,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/admin/users", h.adminListUsers)
 	inner.HandleFunc("PATCH /auth/admin/users/{id}", h.adminUpdateUser)
 	inner.HandleFunc("PUT /auth/admin/users/{id}/roles", h.adminSetRoles)
+	inner.HandleFunc("POST /auth/admin/users/{id}/logout", h.adminLogoutUser)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
@@ -380,13 +382,13 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 // issueSession mints an access token in a fresh refresh-token family and sets
 // both auth cookies. Shared by the OIDC callback and the email verify flow.
 func (h *Handler) issueSession(w http.ResponseWriter, user *store.User) error {
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email))
-	if err != nil {
-		return fmt.Errorf("token issue: %w", err)
-	}
 	familyID, err := store.NewFamilyID()
 	if err != nil {
 		return fmt.Errorf("family ID generate: %w", err)
+	}
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email), familyID)
+	if err != nil {
+		return fmt.Errorf("token issue: %w", err)
 	}
 	rt, err := store.NewRefreshToken(user.ID, familyID)
 	if err != nil {
@@ -643,7 +645,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email))
+	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email), rt.FamilyID)
 	if err != nil {
 		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -663,6 +665,32 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	h.clearTokenCookies(w)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// logoutOtherSessions revokes every refresh token for the authenticated user
+// except the one belonging to the current session (identified by the "fam"
+// claim). Other devices keep their access token until it expires
+// (≤ AccessTokenTTL), after which they can no longer refresh. The current
+// session is left untouched.
+func (h *Handler) logoutOtherSessions(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.claimsFromRequest(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if claims.Family == "" {
+		// Access token predates the family claim, so we can't tell which session
+		// is "current". Refuse rather than risk logging the caller out too; the
+		// token rotates to one carrying the claim within AccessTokenTTL.
+		http.Error(w, "session not identifiable yet; try again shortly", http.StatusConflict)
+		return
+	}
+	if err := h.refreshTokens.DeleteByUserIDExceptFamily(claims.Subject, claims.Family); err != nil {
+		log.Printf("logoutOtherSessions revoke %s: %v", claims.Subject, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
 

@@ -26,6 +26,11 @@ type Claims struct {
 	// Roles carries the user's roles (e.g. "admin"). Emitted as the "role" claim;
 	// omitted entirely when the user has no roles.
 	Roles []string `json:"role,omitempty"`
+	// Family is the refresh-token family ID of the session this access token
+	// belongs to. It lets authenticated endpoints identify the caller's own
+	// session (e.g. to log out every *other* session). Omitted when empty, which
+	// can happen for access tokens minted before this claim existed.
+	Family string `json:"fam,omitempty"`
 }
 
 type Manager struct {
@@ -43,8 +48,8 @@ func NewManager(key *rsa.PrivateKey, issuer string) *Manager {
 }
 
 // Issue mints a signed RS256 access token for the given user, stamping their
-// display name and roles.
-func (m *Manager) Issue(sub, email, name string, roles []string) (string, error) {
+// display name, roles, and the refresh-token family of the owning session.
+func (m *Manager) Issue(sub, email, name string, roles []string, family string) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -54,9 +59,10 @@ func (m *Manager) Issue(sub, email, name string, roles []string) (string, error)
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 		},
-		Email: email,
-		Name:  name,
-		Roles: roles,
+		Email:  email,
+		Name:   name,
+		Roles:  roles,
+		Family: family,
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t.Header["kid"] = m.kid

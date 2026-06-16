@@ -132,3 +132,33 @@ func (s *FileRefreshTokenStore) DeleteByUserID(userID string) error {
 	}
 	return os.Remove(dir) // best-effort; ignore if not empty
 }
+
+func (s *FileRefreshTokenStore) DeleteByUserIDExceptFamily(userID, keepFamily string) error {
+	dir := filepath.Join(s.baseDir, userID)
+	entries, err := os.ReadDir(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
+			continue
+		}
+		path := filepath.Join(dir, e.Name())
+		data, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		var t RefreshToken
+		if err := json.Unmarshal(data, &t); err != nil {
+			continue
+		}
+		if t.FamilyID == keepFamily {
+			continue
+		}
+		_ = os.Remove(path)
+	}
+	return nil
+}

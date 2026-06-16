@@ -357,6 +357,8 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
     const [linkError, setLinkError] = useState<string | null>(null);
     const [linkSuccess, setLinkSuccess] = useState(false);
     const [unlinkingProvider, setUnlinkingProvider] = useState<string | null>(null);
+    const [loggingOutOthers, setLoggingOutOthers] = useState(false);
+    const [othersMessage, setOthersMessage] = useState<string | null>(null);
 
     // Refresh account info from /auth/me on mount. The email (code) login flow
     // doesn't reload the page, so the cached user info can be empty or stale when
@@ -416,6 +418,24 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
             setError(translator.translate("Raderingen misslyckades. Försök igen."));
             setDeleting(false);
             setConfirmDelete(false);
+        }
+    };
+
+    const handleLogoutOthers = async () => {
+        setLoggingOutOthers(true);
+        setError(null);
+        setOthersMessage(null);
+        try {
+            await getSyncManager().logoutOtherDevices();
+            setOthersMessage(translator.translate("Du har loggats ut på alla andra enheter."));
+        } catch (err) {
+            if (err instanceof Error && err.message === "session-unidentified") {
+                setError(translator.translate("Försök igen om en liten stund."));
+            } else {
+                setError(translator.translate("Kunde inte logga ut på andra enheter. Försök igen."));
+            }
+        } finally {
+            setLoggingOutOthers(false);
         }
     };
 
@@ -494,10 +514,16 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
             {error && (
                 <Form.Text className="d-block mt-1 mb-2 text-danger">{error}</Form.Text>
             )}
+            {othersMessage && (
+                <Form.Text className="d-block mt-1 mb-2 text-success">{othersMessage}</Form.Text>
+            )}
             {!confirmDelete ? (
                 <div className="mt-1 d-flex gap-2 flex-wrap">
                     <Button variant="outline-secondary" size="sm" onClick={handleLogout}>
                         {translator.translate("Logga ut")}
+                    </Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => { void handleLogoutOthers(); }} disabled={loggingOutOthers}>
+                        {loggingOutOthers ? translator.translate("Loggar ut…") : translator.translate("Logga ut på alla andra enheter")}
                     </Button>
                     <Button variant="outline-secondary" size="sm" onClick={() => { void handleExport(); }} disabled={exporting}>
                         {exporting ? translator.translate("Exporterar...") : translator.translate("Exportera mina data")}

@@ -281,6 +281,29 @@ export class BackendSyncClient {
     if (!resp.ok) throw new Error(`PUT /auth/admin/users/${id}/roles: ${resp.status}`);
   }
 
+  // Force-logs-out a user by revoking all their refresh tokens. Their access token
+  // remains valid until it expires (≤ 1 h), after which they can no longer refresh.
+  async adminLogoutUser(id: string): Promise<void> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}/logout`, {
+      method: "POST",
+    });
+    if (!resp.ok) throw new Error(`POST /auth/admin/users/${id}/logout: ${resp.status}`);
+  }
+
+  // ── Session management ──
+
+  // Logs the current user out on every *other* device by revoking all their refresh
+  // tokens except the current session's. Those devices keep their access token until
+  // it expires (≤ 1 h). Throws "session-unidentified" if the current access token
+  // predates the session-tracking claim (the caller should retry after a short wait).
+  async logoutOtherDevices(): Promise<void> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/sessions/logout-others`, {
+      method: "POST",
+    });
+    if (resp.status === 409) throw new Error("session-unidentified");
+    if (!resp.ok) throw new Error(`POST /auth/sessions/logout-others: ${resp.status}`);
+  }
+
   // Fetches the user record and app document, bundles them as a JSON download.
   async exportAccount(): Promise<void> {
     const [meResp, docResp] = await Promise.all([

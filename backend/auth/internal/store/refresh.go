@@ -102,6 +102,11 @@ type RefreshTokenStore interface {
 	FindByFamilyID(userID, familyID string) (*RefreshToken, error)
 	// Delete removes a single token (used during rotation).
 	Delete(tokenID string) error
-	// DeleteByUserID removes all tokens for a user (logout, account deletion).
+	// DeleteByUserID removes all tokens for a user (logout, account deletion,
+	// admin force-logout).
 	DeleteByUserID(userID string) error
+	// DeleteByUserIDExceptFamily removes all of a user's tokens except those in
+	// keepFamily. Used by "log out all other devices": the caller's own session
+	// (identified by its family) survives while every other session is revoked.
+	DeleteByUserIDExceptFamily(userID, keepFamily string) error
 }

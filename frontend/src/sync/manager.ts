@@ -180,6 +180,15 @@ class SyncManager {
     await this.backendClient.adminSetAdmin(id, admin);
   }
 
+  async adminLogoutUser(id: string): Promise<void> {
+    await this.backendClient.adminLogoutUser(id);
+  }
+
+  // Logs the current user out on all other devices (keeps this session).
+  async logoutOtherDevices(): Promise<void> {
+    await this.backendClient.logoutOtherDevices();
+  }
+
   disconnect(): void {
     const provider = this.store.get("syncProvider");
     const client = this.cloudClient(provider);

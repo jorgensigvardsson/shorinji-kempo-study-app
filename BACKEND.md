@@ -211,8 +211,12 @@ One document per user. The `data` field is opaque to the persistence service.
 - Signed RS256; the `kid` header is derived from the public key modulus hash, so it rotates
   automatically with the key
 - Access token lifetime: **1 hour**; the frontend silently refreshes on 401
-- Refresh token: opaque, stored server-side, **30-day** TTL, rotated on every use; logout and
-  account deletion revoke server-side
+- `fam` carries the refresh-token **family** of the session the token belongs to, so any
+  authenticated endpoint can identify the caller's own session (used by "log out other
+  devices"). Omitted on tokens minted before this claim existed
+- Refresh token: opaque, stored server-side, **30-day** TTL, rotated on every use. Revoked
+  server-side by logout, account deletion, admin force-logout (all of a user's tokens), and
+  "log out other devices" (all but the caller's own family)
 
 ### Provider Configuration (server-side, not stored per-user)
 Each provider entry maps a list of email domains to an OIDC issuer + client credentials.
@@ -236,6 +240,7 @@ corporate domain at the appropriate provider.
 | POST | `/auth/email/verify` | Verify a code (and name, for new users); creates/looks up the user, issues JWT, sets cookies |
 | POST | `/auth/refresh` | Exchange refresh token for new access token (rotates the refresh token) |
 | POST | `/auth/logout` | Revoke refresh token, clear cookies |
+| POST | `/auth/sessions/logout-others` | Revoke every refresh token for the caller except the current session's family (JWT required); 409 if the token predates the `fam` claim |
 | GET | `/auth/me` | Return authenticated user info (UUID, email, linkedIdentities) |
 | DELETE | `/auth/account` | Delete refresh tokens and the user record (JWT required) |
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
@@ -243,6 +248,7 @@ corporate domain at the appropriate provider.
 | GET | `/auth/admin/users` | List all users with their roles, linked identities, and an `oidc` flag (admin role required) |
 | PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) (admin) |
 | PUT | `/auth/admin/users/{id}/roles` | Promote/demote a user — body `{admin: bool}`; 409 on self-demotion (admin) |
+| POST | `/auth/admin/users/{id}/logout` | Force-logout a user: revoke all their refresh tokens (admin). Their access token stays valid until it expires (≤ 1 h) |
 
 The `/auth/admin/*` endpoints back the admin-only "Users" page. Authorization is enforced
 per handler (`requireAdmin` checks the `admin` role on the access token); listing is a full
