@@ -10,9 +10,9 @@ jobs:
     permissions:
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
           cache-dependency-path: |
@@ -29,7 +29,7 @@ jobs:
         continue-on-error: true
         id: run-go-tests
 
-      - uses: dorny/test-reporter@v1
+      - uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Go
@@ -46,9 +46,9 @@ jobs:
     permissions:
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -62,7 +62,7 @@ jobs:
         continue-on-error: true
         id: run-tests
 
-      - uses: dorny/test-reporter@v1
+      - uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Vitest
