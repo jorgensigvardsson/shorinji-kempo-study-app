@@ -1,5 +1,7 @@
 // Container App for the auth service (backend/auth).
-// Consumption plan, min-replicas=1 so the service stays warm.
+// Consumption plan. Scales to zero outside the evening window (16:30–22:00
+// Europe/Stockholm) to save cost; a KEDA cron rule keeps one replica warm
+// during that window.
 
 @description('Name of the Container App')
 param name string
@@ -103,8 +105,24 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
     }
     template: {
       scale: {
-        minReplicas: 1
+        minReplicas: 0 // scaled to zero outside the evening window (see cron rule below)
         maxReplicas: 1 // auth service has in-process OIDC pending state; single replica required
+        rules: [
+          {
+            // KEDA cron scaler: request one replica between 16:30 and 22:00
+            // (Europe/Stockholm). Outside this window the app scales to zero.
+            name: 'evening-hours'
+            custom: {
+              type: 'cron'
+              metadata: {
+                timezone: 'Europe/Stockholm'
+                start: '30 16 * * *'
+                end: '0 22 * * *'
+                desiredReplicas: '1'
+              }
+            }
+          }
+        ]
       }
       containers: [
         {

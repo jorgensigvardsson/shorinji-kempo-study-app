@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-07-02T00:00:00.000Z",
+    changes: [
+      {
+        emoji: "🌙",
+        sv: "Inloggningstjänsten vilar nu utanför kvällstid för att spara resurser. Loggar du in på andra tider kan första försöket ta någon extra sekund medan tjänsten vaknar – sedan går allt som vanligt.",
+        en: "The login service now rests outside the evening hours to save resources. If you sign in at other times, the first attempt may take a few extra seconds while it wakes up – after that everything works as usual.",
+        tr: "Giriş hizmeti, kaynak tasarrufu için artık akşam saatleri dışında dinlenmede kalıyor. Başka saatlerde giriş yaparsanız, hizmet uyanırken ilk deneme birkaç saniye daha uzun sürebilir – sonrasında her şey her zamanki gibi çalışır.",
+        ja: "ログインサービスは、リソースを節約するため夜間の時間帯以外は休止するようになりました。それ以外の時間帯にログインすると、サービスが起動するまで最初の試行に数秒ほど余分にかかることがありますが、その後は通常どおり動作します。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-06-16T12:33:44.139Z",
     changes: [
       {
