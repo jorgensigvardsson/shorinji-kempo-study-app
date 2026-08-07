@@ -13,8 +13,10 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
-      SSH_HOST: ${{ secrets.SSH_HOST }}      # format: dns-name:port
-      SSH_USER: ${{ secrets.SSH_USER }}
+      # Host and user are variables, not secrets: they are not sensitive, and
+      # leaving them unmasked makes a failed deploy readable in the logs.
+      SSH_HOST: ${{ vars.SSH_HOST }}      # format: dns-name:port
+      SSH_USER: ${{ vars.SSH_USER }}
       # Web root on the LiteSpeed host, relative to $SSH_USER's home directory.
       DEPLOY_PATH: domains/app-staging.shorinjikempo.net/public_html
       SITE_URL: https://app-staging.shorinjikempo.net

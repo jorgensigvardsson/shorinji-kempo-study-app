@@ -94,13 +94,18 @@ Server rules for the frontend live in [`frontend/public/.htaccess`](frontend/pub
 The workflow writes `.env.production` from repository secrets/vars before building, since `.env.*` files are gitignored.
 
 Required repository secrets:
-- `SSH_HOST` (`hostname:port`), `SSH_USER`, `SSH_PRIVATE_KEY` — deploy target
+- `SSH_PRIVATE_KEY` — private key for the deploy user; its public half belongs in that user's `~/.ssh/authorized_keys` on the web host
 - `VAPID_PRIVATE_KEY` — Web Push VAPID private key (paired with the `VAPID_PUBLIC_KEY` variable)
 - `PUSH_ADMIN_TOKEN` — bearer token authorizing `POST /push/broadcast` (leave unset to disable broadcasts)
 - `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
 - `VITE_ONEDRIVE_CLIENT_ID` — OneDrive OAuth public client ID
 - `VITE_GOOGLE_CLIENT_ID` — Google Drive OAuth public client ID
 - `VITE_GOOGLE_CLIENT_SECRET` — Google Drive OAuth client secret. Google's token endpoint requires this for Web-application clients even with PKCE; the secret is baked into the SPA bundle. The dedicated Drive-sync OAuth client must be restricted to the `drive.appdata` scope only.
+
+Required repository variables (these are *variables*, not secrets — they are not sensitive, and leaving them unmasked keeps deploy logs readable):
+- `SSH_HOST` (`hostname:port`, e.g. `prime4.inleed.net:2020`), `SSH_USER` — deploy target. The port is mandatory; the workflow splits the value on the colon and there is no default.
+- `FRONTEND_URL` — the production origin, no trailing slash. Becomes the backend's CORS allowed origin, which is compared to the browser's `Origin` header by exact string match.
+- `VITE_AUTH_URL`, `VITE_API_URL` — backend service origins, no trailing slash. A trailing slash produces doubled slashes in request paths, which Go's `ServeMux` answers with a 301 — fatal for CORS preflight.
 
 Optional repository variables (with sensible defaults):
 - `VAPID_PUBLIC_KEY` — Web Push VAPID public key; `VAPID_SUBJECT` — `mailto:` or site URL for the VAPID claim. Push endpoints stay disabled until the public/private key pair is set.
