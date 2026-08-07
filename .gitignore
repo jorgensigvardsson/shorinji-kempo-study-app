@@ -1,3 +1,7 @@
 # Local docker-compose environment — copy to .env and fill in values
 .env
 node_modules
+
+# Personal Claude Code settings: machine-specific paths and permission grants.
+# The shared .claude/settings.json stays tracked.
+.claude/settings.local.json
