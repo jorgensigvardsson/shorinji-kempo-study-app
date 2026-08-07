@@ -28,7 +28,7 @@ func main() {
 	keyPEM      := flag.String("key-pem",      envutil.String("SERVICE_KEY_PEM",        ""),                     "RSA private key as PEM string (overrides --key-file; use for secret injection in ACA)")
 	issuer      := flag.String("issuer",       envutil.String("SERVICE_ISSUER",         "http://localhost:8081"), "JWT issuer URL")
 	frontendURL  := flag.String("frontend-url",  envutil.String("SERVICE_FRONTEND_URL",  "http://localhost:5173"), "frontend origin to redirect to after login")
-	cookieDomain := flag.String("cookie-domain", envutil.String("SERVICE_COOKIE_DOMAIN", ""),                     "domain attribute for auth cookies (e.g. .cash-it.se for cross-subdomain sharing)")
+	cookieDomain := flag.String("cookie-domain", envutil.String("SERVICE_COOKIE_DOMAIN", ""),                     "domain attribute for auth cookies (e.g. .app.shorinjikempo.net for cross-subdomain sharing)")
 
 	// ── Cosmos DB ─────────────────────────────────────────────────────────────
 	cosmosEndpoint          := flag.String("cosmos-endpoint",               envutil.String("COSMOS_ENDPOINT",               ""),               "Cosmos DB account endpoint (enables Cosmos stores when set)")

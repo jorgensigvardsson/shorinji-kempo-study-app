@@ -29,7 +29,7 @@ param cosmosKey string
 @description('Cosmos DB database name')
 param cosmosDatabase string
 
-@description('Custom domain hostname (e.g. persistence-shorinjikempo.cash-it.se). Leave empty to use the default ACA FQDN.')
+@description('Custom domain hostname (e.g. persistence.app.shorinjikempo.net). Leave empty to use the default ACA FQDN.')
 param customDomain string = ''
 
 @description('Frontend origin allowed by CORS')

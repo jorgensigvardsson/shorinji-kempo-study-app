@@ -55,10 +55,10 @@ param microsoftRedirectUri string = ''
 @secure()
 param signingKeyPem string
 
-@description('Custom domain hostname (e.g. auth-shorinjikempo.cash-it.se). Leave empty to use the default ACA FQDN.')
+@description('Custom domain hostname (e.g. auth.app.shorinjikempo.net). Leave empty to use the default ACA FQDN.')
 param customDomain string = ''
 
-@description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se). Leave empty for host-only cookies.')
+@description('Cookie Domain attribute for cross-subdomain sharing (e.g. .app.shorinjikempo.net). Leave empty for host-only cookies.')
 param cookieDomain string = ''
 
 @description('Resource ID of the user-assigned managed identity to attach to this app')

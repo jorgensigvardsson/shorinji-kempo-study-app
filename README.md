@@ -67,7 +67,7 @@ Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as
 - **From the app** — a signed-in user with the `admin` role gets a *Skicka notis till alla* form under Settings. The browser session cookie authorizes the call.
 - **From a script/CI** — present the `PUSH_ADMIN_TOKEN` as a bearer token:
   ```bash
-  curl -X POST https://persistence-shorinjikempo.cash-it.se/push/broadcast \
+  curl -X POST https://persistence.app.shorinjikempo.net/push/broadcast \
     -H "Authorization: Bearer $PUSH_ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{"title":"New version available","body":"Open the app to update.","url":"/changelog"}'
@@ -85,7 +85,11 @@ The change takes effect on their next login or hourly token refresh. Locally (fi
 
 ## Deployment
 
-Pushes to the `deploy` branch trigger the GitHub Actions workflow, which builds a Docker image and deploys it to the production host via SSH. See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for details.
+Pushes to the `deploy` branch trigger the GitHub Actions workflow. See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for details.
+
+The backend is built into container images and deployed to Azure Container Apps. The frontend is built with Vite on the runner and `rsync`ed over SSH to the production web host, which runs LiteSpeed and serves the files statically from `~/domains/app.shorinjikempo.net/public_html`. The sync is a full synchronisation (`--delete-after`), so files removed from the build are removed from the web root; `.well-known/` and `cgi-bin/` are excluded so host-managed content survives.
+
+Server rules for the frontend live in [`frontend/public/.htaccess`](frontend/public/.htaccess) — SPA routing, security headers, and cache policy. Vite copies `public/` into `dist/`, so the file ships with the build and lands in the web root automatically.
 
 The workflow writes `.env.production` from repository secrets/vars before building, since `.env.*` files are gitignored.
 
@@ -105,4 +109,4 @@ Optional repository variables (with sensible defaults):
 - `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`
 
 ## Deployment staging
-Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The only thing that differs is that one must push to the branch `deploy-staging`.
+Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host. Staging deploys the frontend only — it does not touch the Azure backend.

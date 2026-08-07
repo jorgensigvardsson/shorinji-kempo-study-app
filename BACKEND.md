@@ -385,10 +385,12 @@ Pushing to the `deploy` branch runs `.github/workflows/deploy.yml`:
 2. **Infrastructure** — `infrastructure/main.bicep` (modules: Cosmos DB free tier, Container
    Apps environment, one container app per service) deployed via `az deployment group create`;
    Azure login uses OIDC workload identity federation (no stored Azure secret)
-3. **Custom domains** — `auth-shorinjikempo.cash-it.se` and
-   `persistence-shorinjikempo.cash-it.se` bound with ACA managed TLS certificates
-4. **Frontend** — built with the backend URLs baked in, shipped as a Docker image over SSH to
-   the frontend host
+3. **Custom domains** — `auth.app.shorinjikempo.net` and
+   `persistence.app.shorinjikempo.net` bound with ACA managed TLS certificates. Both are
+   subdomains of the frontend origin so that session cookies stay same-site; see
+   `cookieDomain` in `infrastructure/main.parameters.json`
+4. **Frontend** — built with the backend URLs baked in, rsynced over SSH to the LiteSpeed
+   web host
 5. **Announcement** — a push broadcast ("New version available") via `PUSH_ADMIN_TOKEN`;
    non-fatal if it fails
 

@@ -59,13 +59,13 @@ param signingKeyPem string
 @description('Public URL of the frontend app, used as the OAuth post-login redirect target')
 param frontendUrl string
 
-@description('Custom hostname for the auth service (e.g. auth-shorinjikempo.cash-it.se)')
+@description('Custom hostname for the auth service (e.g. auth.app.shorinjikempo.net)')
 param authCustomDomain string = ''
 
-@description('Custom hostname for the persistence service (e.g. persistence-shorinjikempo.cash-it.se)')
+@description('Custom hostname for the persistence service (e.g. persistence.app.shorinjikempo.net)')
 param persistenceCustomDomain string = ''
 
-@description('Cookie Domain attribute for cross-subdomain sharing (e.g. .cash-it.se)')
+@description('Cookie Domain attribute for cross-subdomain sharing (e.g. .app.shorinjikempo.net). Must be a parent of both the frontend origin and the service hostnames, or SameSite=Lax cookies will not be sent.')
 param cookieDomain string = ''
 
 // ── Web Push (VAPID) ──────────────────────────────────────────────────────────

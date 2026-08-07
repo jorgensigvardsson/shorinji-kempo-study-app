@@ -33,16 +33,16 @@
       "value": ""
     },
     "frontendUrl": {
-      "value": "https://shorinjikempo.cash-it.se"
+      "value": "https://app.shorinjikempo.net"
     },
     "authCustomDomain": {
-      "value": "auth-shorinjikempo.cash-it.se"
+      "value": "auth.app.shorinjikempo.net"
     },
     "persistenceCustomDomain": {
-      "value": "persistence-shorinjikempo.cash-it.se"
+      "value": "persistence.app.shorinjikempo.net"
     },
     "cookieDomain": {
-      "value": ".cash-it.se"
+      "value": ".app.shorinjikempo.net"
     }
   }
 }

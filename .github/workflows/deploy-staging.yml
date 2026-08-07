@@ -13,13 +13,21 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
-      IMAGE: internal-docker-registry:80/shorinjikempo:latest-staging
       SSH_HOST: ${{ secrets.SSH_HOST }}      # format: dns-name:port
       SSH_USER: ${{ secrets.SSH_USER }}
+      # Web root on the LiteSpeed host, relative to $SSH_USER's home directory.
+      DEPLOY_PATH: domains/app-staging.shorinjikempo.net/public_html
+      SITE_URL: https://app-staging.shorinjikempo.net
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Write .env.production from secrets
         env:
@@ -72,11 +80,20 @@ jobs:
           write_var VITE_GOOGLE_CLIENT_SECRET "$VITE_GOOGLE_CLIENT_SECRET"
           write_var VITE_GOOGLE_REDIRECT_URI "$VITE_GOOGLE_REDIRECT_URI"
 
-      - name: Build image
-        run: docker build -t "$IMAGE" ./frontend
+      - name: Build site
+        run: |
+          npm ci
+          npm run build
+        working-directory: frontend
 
-      - name: Save and compress image
-        run: docker save "$IMAGE" | gzip > image.tar.gz
+      # Staging must stay out of search results. Written into dist/ after the
+      # build rather than kept in frontend/public/, which would ship the same
+      # Disallow to production. The .htaccess rewrite only falls through to
+      # index.html for paths that do not exist on disk, so a real file here is
+      # served as-is.
+      - name: Disallow crawling of staging
+        run: |
+          printf 'User-agent: *\nDisallow: /\n' > frontend/dist/robots.txt
 
       - name: Configure SSH
         env:
@@ -92,21 +109,46 @@ jobs:
           echo "DEPLOY_HOST=$DEPLOY_HOST" >> "$GITHUB_ENV"
           echo "DEPLOY_PORT=$DEPLOY_PORT" >> "$GITHUB_ENV"
 
-      - name: Copy image to dockernode1
+      - name: Check remote prerequisites
         run: |
-          REMOTE_PATH="/tmp/shorinjikempo-staging-${{ github.sha }}.tar.gz"
-          scp -i ~/.ssh/id_deploy -P "$DEPLOY_PORT" \
-            image.tar.gz "$SSH_USER@$DEPLOY_HOST:$REMOTE_PATH"
-          echo "REMOTE_PATH=$REMOTE_PATH" >> "$GITHUB_ENV"
-
-      - name: Load, push, and restart stack on dockernode1
-        run: |
-          ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" "$SSH_USER@$DEPLOY_HOST" bash -s <<REMOTE
           set -euo pipefail
-          trap 'rm -f "$REMOTE_PATH"' EXIT
-          gunzip < "$REMOTE_PATH" | docker load
-          docker push "$IMAGE"
-          cd services/shorinjikempo-staging
-          docker compose down
-          docker compose up -d
-          REMOTE
+          ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" -o IdentitiesOnly=yes \
+            "$SSH_USER@$DEPLOY_HOST" \
+            "command -v rsync >/dev/null && [ -d '$DEPLOY_PATH' ]" \
+            || { echo "::error::Deploy host is missing rsync, or $DEPLOY_PATH does not exist."; exit 1; }
+
+      # Full synchronisation: new files added, changed files updated, files no
+      # longer in the build removed. --delete-after keeps the old build servable
+      # until every new file has landed, so the window of a half-updated site is
+      # as short as rsync can make it.
+      #
+      # .well-known is excluded so the host's certificate renewal (and anything
+      # else it drops there) survives; rsync also protects excluded paths from
+      # --delete, which is exactly what we want.
+      - name: Sync site to web root
+        run: |
+          set -euo pipefail
+          rsync -rlptvz --delete-after --human-readable \
+            --chmod=D755,F644 \
+            --exclude='.well-known/' \
+            --exclude='cgi-bin/' \
+            -e "ssh -i ~/.ssh/id_deploy -p $DEPLOY_PORT -o IdentitiesOnly=yes" \
+            frontend/dist/ "$SSH_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+
+      - name: Verify site is serving
+        run: |
+          set -uo pipefail
+          base="${SITE_URL%/}"
+          fail=0
+          # The root must serve the app shell, and a client-side route must fall
+          # through to it as well — that second check is what proves the
+          # .htaccess rewrite is actually in effect.
+          for path in "/" "/changelog"; do
+            status=$(curl -sS -o /dev/null -w '%{http_code}' "${base}${path}" || echo 000)
+            echo "GET ${base}${path} -> ${status}"
+            [ "$status" = "200" ] || fail=1
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Post-deploy verification failed — the site is not serving as expected."
+            exit 1
+          fi

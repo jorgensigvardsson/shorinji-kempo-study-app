@@ -1,0 +1,61 @@
+# LiteSpeed/Apache configuration for the deployed site.
+#
+# Both production and staging are served statically by LiteSpeed from
+# ~/domains/<site>/public_html, so this file is the only place server behaviour
+# is configured. Vite copies everything under frontend/public/ into dist/, so it
+# ships with the build and lands in the web root automatically.
+
+# ---------------------------------------------------------------------------
+# MIME types the server may not recognise on its own
+# ---------------------------------------------------------------------------
+AddType application/manifest+json .webmanifest
+
+# ---------------------------------------------------------------------------
+# Security headers
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com;"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Cache static assets aggressively. Vite fingerprints these filenames, so a
+    # changed asset always arrives under a new name.
+    <FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$">
+        Header set Cache-Control "public, max-age=86400, immutable"
+    </FilesMatch>
+
+    # The app shell, the service worker and the manifest are NOT fingerprinted.
+    # Caching them would pin clients to a stale build after a deploy. This block
+    # must stay after the one above — the last matching Header set wins.
+    <FilesMatch "^(index\.html|sw\.js|registerSW\.js|site\.webmanifest)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Compression
+#
+# LiteSpeed compresses from its own server-level configuration and ignores
+# mod_deflate directives, so this block is a no-op there. It is kept as a
+# working fallback should the site ever be served by plain Apache.
+# ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain text/html text/css application/javascript application/json image/svg+xml application/manifest+json
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# SPA routing: serve real files, hand everything else to the app shell
+# ---------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Existing files and directories are served as-is.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else is a client-side route: hand back the app shell.
+    RewriteRule ^ index.html [L]
+</IfModule>
