@@ -25,6 +25,12 @@ FROM joseluisq/static-web-server:2
 
 COPY index.html /public/index.html
 
+# Retires the old PWA's service worker, which would otherwise keep serving the
+# cached app shell for every navigation and hide this page entirely. Must be a
+# real file: without it the fallback below would answer /sw.js with HTML, the
+# registration would fail, and the old worker would survive.
+COPY sw.js /public/sw.js
+
 ENV SERVER_PORT=80 \
     SERVER_ROOT=/public \
     SERVER_FALLBACK_PAGE=/public/index.html
