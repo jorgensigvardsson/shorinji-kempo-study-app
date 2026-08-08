@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-08T18:14:40.148Z",
+    changes: [
+      {
+        emoji: "🏠",
+        sv: "Appen har flyttat till en ny adress: app.shorinjikempo.net. Spara gärna om ditt bokmärke. Har du appen installerad på hemskärmen bör du installera om den från den nya adressen. Allt ditt sparade material följer med när du loggar in.",
+        en: "The app has moved to a new address: app.shorinjikempo.net. Please update your bookmark. If you have the app installed on your home screen, reinstall it from the new address. Everything you have saved comes along when you sign in.",
+        tr: "Uygulama yeni bir adrese taşındı: app.shorinjikempo.net. Lütfen yer imininizi güncelleyin. Uygulamayı ana ekranınıza yüklediyseniz, yeni adresten yeniden yükleyin. Kaydettiğiniz her şey giriş yaptığınızda sizinle birlikte gelir.",
+        ja: "アプリは新しいアドレス app.shorinjikempo.net に移転しました。ブックマークの更新をお願いします。ホーム画面にアプリをインストールしている場合は、新しいアドレスから入れ直してください。保存した内容はログインすればそのまま引き継がれます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-07-02T00:00:00.000Z",
     changes: [
       {
