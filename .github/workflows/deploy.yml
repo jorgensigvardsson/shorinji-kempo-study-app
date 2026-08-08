@@ -196,6 +196,45 @@ jobs:
             --environment sk-study-app-env \
             --validation-method CNAME || exit 1
 
+      # A deploy that leaves a service unable to start must fail here — loudly and
+      # before the frontend ships or users are notified. Previously such a failure
+      # only surfaced as a 504 buried in the broadcast step's annotations, with the
+      # run still green.
+      #
+      # Both services scale to zero, so the first request has to wake them: retry
+      # instead of treating a cold start as a failure.
+      - name: Smoke test backend services
+        env:
+          AUTH_URL: ${{ steps.bicep.outputs.auth_url }}
+          API_URL:  ${{ steps.bicep.outputs.api_url }}
+        run: |
+          set -uo pipefail
+          check() {
+            local name="$1" url="$2" want="$3"
+            local n=0 max=12 code=000
+            while [ "$n" -lt "$max" ]; do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$url" || echo 000)
+              if [ "$code" = "$want" ]; then
+                echo "$name: HTTP $code — healthy"
+                return 0
+              fi
+              n=$((n + 1))
+              echo "$name: HTTP $code (attempt $n/$max) — retrying in 15s"
+              sleep 15
+            done
+            echo "::error::$name unhealthy after $max attempts: last status $code from $url"
+            return 1
+          }
+
+          fail=0
+          # JWKS must serve: persistence reads it to validate tokens.
+          check "auth JWKS"   "${AUTH_URL%/}/.well-known/jwks.json" 200 || fail=1
+          # 401 is the healthy answer for an unauthenticated request — it proves the
+          # service is up and the auth middleware is wired, without depending on
+          # push being configured.
+          check "persistence" "${API_URL%/}/api/v1/document"        401 || fail=1
+          exit "$fail"
+
   # ── 3. Build and deploy frontend with backend URLs baked in ─────────────────
   deploy-frontend:
     needs: deploy-backend

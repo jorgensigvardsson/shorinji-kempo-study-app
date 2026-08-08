@@ -28,27 +28,56 @@ func NewCache(url string) *Cache {
 	return &Cache{url: url}
 }
 
-// Start fetches the initial keyset and begins the hourly refresh loop.
-// Returns an error if the initial fetch fails (service won't start with no keys).
-func (c *Cache) Start(ctx context.Context) error {
+// Start fetches the initial keyset and begins the background refresh loop.
+//
+// A failed initial fetch is logged, not fatal. PublicKey refreshes on a cache
+// miss, so the service recovers by itself on the first token validation once
+// the JWKS endpoint is reachable. Failing hard here would turn a transient
+// dependency blip — an auth service still cold-starting from scale-to-zero —
+// into a permanent outage that only a manual revision restart clears.
+func (c *Cache) Start(ctx context.Context) {
 	if err := c.Refresh(); err != nil {
-		return err
+		log.Printf("jwks: initial fetch from %s failed: %v — starting without keys, retrying in the background", c.url, err)
 	}
-	go func() {
-		ticker := time.NewTicker(1 * time.Hour)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				if err := c.Refresh(); err != nil {
-					log.Printf("jwks: refresh failed: %v", err)
-				}
-			case <-ctx.Done():
-				return
+	go c.refreshLoop(ctx)
+}
+
+// refreshLoop retries rapidly (with backoff) until the cache holds keys, then
+// settles into an hourly refresh. Keys are only replaced on a successful fetch,
+// so a later failure leaves the existing keyset serving.
+func (c *Cache) refreshLoop(ctx context.Context) {
+	const (
+		initialBackoff = 2 * time.Second
+		maxInterval    = 1 * time.Hour
+	)
+	backoff := initialBackoff
+
+	for {
+		interval := maxInterval
+		if !c.hasKeys() {
+			interval = backoff
+			if backoff *= 2; backoff > maxInterval {
+				backoff = maxInterval
 			}
 		}
-	}()
-	return nil
+
+		select {
+		case <-time.After(interval):
+			if err := c.Refresh(); err != nil {
+				log.Printf("jwks: refresh failed: %v", err)
+			} else {
+				backoff = initialBackoff
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (c *Cache) hasKeys() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return len(c.keys) > 0
 }
 
 // PublicKey returns the RSA public key for kid.

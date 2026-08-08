@@ -69,10 +69,10 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	// Non-fatal by design: a JWKS endpoint that is briefly unreachable must not
+	// take the service down permanently. See jwks.Cache.Start.
 	keyCache := jwks.NewCache(*jwksURL)
-	if err := keyCache.Start(ctx); err != nil {
-		log.Fatalf("jwks: initial fetch from %s failed: %v", *jwksURL, err)
-	}
+	keyCache.Start(ctx)
 
 	limiter := ratelimit.New(*rateLimitRPS, *rateLimitBurst)
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))

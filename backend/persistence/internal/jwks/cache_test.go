@@ -1,6 +1,7 @@
 package jwks
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
@@ -8,6 +9,7 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 )
 
@@ -125,5 +127,48 @@ func TestRefresh_MalformedJSON_ReturnsError(t *testing.T) {
 	c := NewCache(srv.URL)
 	if err := c.Refresh(); err == nil {
 		t.Error("expected error for malformed JSON, got nil")
+	}
+}
+
+// A JWKS endpoint that is unreachable at startup must not be fatal: the service
+// has to come up and recover on its own once the endpoint returns. This is the
+// production case where persistence cold-starts while the auth service is still
+// waking from scale-to-zero.
+func TestStart_UnreachableEndpoint_RecoversOnDemand(t *testing.T) {
+	key := generateKey(t)
+	var reachable atomic.Bool
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !reachable.Load() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		w.Write(jwksJSON("key-1", key))
+	}))
+	defer srv.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	c := NewCache(srv.URL)
+	c.Start(ctx) // must return rather than fail the process
+
+	if c.hasKeys() {
+		t.Error("expected no keys while the endpoint is down")
+	}
+	if _, err := c.PublicKey("key-1"); err == nil {
+		t.Error("expected an error while the endpoint is down, got nil")
+	}
+
+	reachable.Store(true)
+
+	// PublicKey refreshes on a cache miss, so the next lookup recovers without
+	// waiting for the background loop.
+	got, err := c.PublicKey("key-1")
+	if err != nil {
+		t.Fatalf("PublicKey after recovery: %v", err)
+	}
+	if got.N.Cmp(key.PublicKey.N) != 0 {
+		t.Error("recovered key does not match the original")
 	}
 }
