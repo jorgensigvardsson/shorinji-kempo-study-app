@@ -9,9 +9,13 @@
 # notifications pointing at /changelog. SERVER_FALLBACK_PAGE serves the page with
 # a 200 for every path instead.
 #
+# Listens on 80 so it is a drop-in replacement for the nginx image this tag used
+# to carry — the compose service and any reverse proxy in front of it keep working
+# unchanged.
+#
 # Build and run from this directory:
 #   docker build -t shorinjikempo-migration .
-#   docker run --rm -p 8080:8080 shorinjikempo-migration
+#   docker run --rm -p 8080:80 shorinjikempo-migration
 #
 # The second URL is the interesting one — it is a path that never existed here:
 #   curl -i http://localhost:8080/
@@ -21,8 +25,8 @@ FROM joseluisq/static-web-server:2
 
 COPY index.html /public/index.html
 
-ENV SERVER_PORT=8080 \
+ENV SERVER_PORT=80 \
     SERVER_ROOT=/public \
     SERVER_FALLBACK_PAGE=/public/index.html
 
-EXPOSE 8080
+EXPOSE 80
