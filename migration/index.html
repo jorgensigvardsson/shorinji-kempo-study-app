@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://app.shorinjikempo.net/">
+<title>Appen har flyttat — Shorinji Kempo</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #1c1f23;
+    --muted: #5c636a;
+    --border: #dee2e6;
+    --accent: #0d6efd;
+    --accent-text: #ffffff;
+    --note-bg: #fff8e6;
+    --note-border: #ffe08a;
+    --ok-bg: #e7f5ec;
+    --ok-border: #a7d7ba;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16191d;
+      --card: #1f2429;
+      --text: #e8eaed;
+      --muted: #a3abb2;
+      --border: #333a41;
+      --accent: #4d94ff;
+      --accent-text: #0b0f14;
+      --note-bg: #2c2718;
+      --note-border: #5c4f22;
+      --ok-bg: #17281d;
+      --ok-border: #2f5c3f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 40rem; margin: 0 auto; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 0.75rem; }
+  h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+  p { margin: 0 0 1rem; }
+  p:last-child { margin-bottom: 0; }
+  .muted { color: var(--muted); font-size: 0.9rem; }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-text);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.7rem 1.4rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .url { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+  .note { background: var(--note-bg); border: 1px solid var(--note-border); }
+  .ok { background: var(--ok-bg); border: 1px solid var(--ok-border); }
+  .hidden { display: none; }
+  .langs { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; }
+  .langs button {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; padding: 0 0.4rem; font-size: inherit; font-family: inherit;
+    text-decoration: underline;
+  }
+  .langs button[aria-current="true"] { color: var(--text); font-weight: 600; text-decoration: none; }
+  ol { margin: 0 0 1rem; padding-left: 1.25rem; }
+  li { margin-bottom: 0.5rem; }
+  h3 { font-size: 1rem; margin: 1.5rem 0 0.6rem; }
+  .done {
+    background: var(--ok-bg);
+    border: 1px solid var(--ok-border);
+    border-radius: 0.5rem;
+    padding: 0.7rem 1rem;
+  }
+  .warn {
+    border-left: 3px solid var(--accent);
+    padding-left: 0.85rem;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+  }
+  .ui { font-weight: 600; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <h1 id="h-title">Appen har flyttat</h1>
+    <p id="t-intro"></p>
+    <p><a class="btn" id="t-cta" href="https://app.shorinjikempo.net/">Gå till appen</a></p>
+    <p class="muted"><span id="t-newaddr"></span> <span class="url">app.shorinjikempo.net</span></p>
+  </div>
+
+  <!-- Shown when the user is signed in to an account: nothing to rescue. -->
+  <div class="card ok hidden" id="box-account">
+    <h2 id="t-acc-h"></h2>
+    <p id="t-acc-b"></p>
+  </div>
+
+  <!-- Shown when there is local data and no account. -->
+  <div class="card note hidden" id="box-export">
+    <h2 id="t-exp-h"></h2>
+    <p id="t-exp-b"></p>
+    <p class="muted hidden" id="t-drive"></p>
+    <p class="muted" id="t-summary"></p>
+    <p><button class="btn" id="btn-export"></button></p>
+
+    <p class="done hidden" id="box-done"><strong id="t-done-b"></strong></p>
+
+    <h3 id="t-steps-h"></h3>
+    <ol>
+      <li id="t-step1"></li>
+      <li id="t-step2"></li>
+      <li id="t-step3"></li>
+      <li id="t-step4"></li>
+      <li id="t-step5"></li>
+    </ol>
+    <p class="warn" id="t-warn"></p>
+  </div>
+
+  <div class="langs">
+    <button data-lang="sv">Svenska</button>
+    <button data-lang="en">English</button>
+    <button data-lang="tr">Türkçe</button>
+    <button data-lang="ja">日本語</button>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Storage keys, mirrored from the app:
+  //   app-data-document          persistence/store.ts   (the whole document)
+  //   sync-backend-connected     sync/backend.ts        (signed in to an account)
+  //   sync-backend-auth-expired  sync/backend.ts        (session no longer valid)
+  var DOC_KEY = "app-data-document";
+  var CONNECTED_KEY = "sync-backend-connected";
+  var EXPIRED_KEY = "sync-backend-auth-expired";
+
+  var STRINGS = {
+    sv: {
+      title: "Appen har flyttat",
+      intro: "Shorinji Kempo-appen finns nu på en ny adress. Den här sidan uppdateras inte längre.",
+      cta: "Gå till appen",
+      newaddr: "Ny adress:",
+      accH: "Du är inloggad",
+      accB: "Ditt material är kopplat till ditt konto. Logga bara in på den nya adressen så finns allt kvar — du behöver inte göra något här.",
+      expH: "Du har data på den här sidan",
+      expB: "Du har sparat material här som inte är kopplat till något konto. Det följer inte med automatiskt. Ladda ner det nu och importera det på den nya adressen.",
+      drive: "Ditt material kan också finnas i molntjänsten du anslutit. Den kan du ansluta på nytt på den nya sidan.",
+      exportBtn: "Exportera data",
+      doneB: "Filen har laddats ner — fortsätt med steg 2.",
+      stepsH: "Så här flyttar du din data",
+      step1: "Klicka på ”Exportera data” ovan. Filen laddas ner till din enhet.",
+      step2: "Öppna app.shorinjikempo.net i webbläsaren.",
+      step3: "Tryck på ”Mer” i menyn och välj ”Inställningar”.",
+      step4: "Skrolla ner till ”Exportera/importera data”.",
+      step5: "Klicka på ”Importera” och välj filen du laddade ner i steg 1.",
+      warn: "Importera innan du loggar in. Loggar du in först hämtas din data från kontot i stället, och importvalet visas inte längre.",
+      sumNotes: "anteckningar",
+      sumRanks: "markerade tekniker",
+      sumCards: "flashcards",
+      sumEmpty: "Innehåller dina inställningar.",
+      sumPrefix: "Innehåller:"
+    },
+    en: {
+      title: "The app has moved",
+      intro: "The Shorinji Kempo app now lives at a new address. This page is no longer updated.",
+      cta: "Go to the app",
+      newaddr: "New address:",
+      accH: "You are signed in",
+      accB: "Your material is tied to your account. Just sign in at the new address and everything will be there — nothing to do here.",
+      expH: "You have data on this site",
+      expB: "You have saved material here that is not tied to any account. It will not come along automatically. Download it now and import it at the new address.",
+      drive: "Your material may also be in the cloud service you connected. You can reconnect it on the new site.",
+      exportBtn: "Export data",
+      doneB: "File downloaded — continue with step 2.",
+      stepsH: "How to move your data",
+      step1: "Click “Export data” above. The file downloads to your device.",
+      step2: "Open app.shorinjikempo.net in your browser.",
+      step3: "Tap “More” in the menu and choose “Settings”.",
+      step4: "Scroll down to “Export/import data”.",
+      step5: "Click “Import” and pick the file you downloaded in step 1.",
+      warn: "Import before you sign in. If you sign in first, your data is taken from the account instead and the import option is no longer shown.",
+      sumNotes: "notes",
+      sumRanks: "marked techniques",
+      sumCards: "flash cards",
+      sumEmpty: "Contains your settings.",
+      sumPrefix: "Contains:"
+    },
+    tr: {
+      title: "Uygulama taşındı",
+      intro: "Shorinji Kempo uygulaması artık yeni bir adreste. Bu sayfa artık güncellenmiyor.",
+      cta: "Uygulamaya git",
+      newaddr: "Yeni adres:",
+      accH: "Giriş yapmış durumdasınız",
+      accB: "Materyaliniz hesabınıza bağlı. Yeni adreste giriş yapmanız yeterli, her şey orada olacak — burada yapmanız gereken bir şey yok.",
+      expH: "Bu sitede verileriniz var",
+      expB: "Burada hiçbir hesaba bağlı olmayan kayıtlı materyaliniz var. Otomatik olarak taşınmaz. Şimdi indirin ve yeni adreste içe aktarın.",
+      drive: "Materyaliniz bağladığınız bulut hizmetinde de bulunabilir. Yeni sitede yeniden bağlayabilirsiniz.",
+      exportBtn: "Verileri dışa aktar",
+      doneB: "Dosya indirildi — 2. adımla devam edin.",
+      stepsH: "Verilerinizi nasıl taşırsınız",
+      step1: "Yukarıdaki “Verileri dışa aktar” düğmesine tıklayın. Dosya cihazınıza indirilir.",
+      step2: "Tarayıcınızda app.shorinjikempo.net adresini açın.",
+      step3: "Menüden “Daha fazla” ögesine dokunun ve “Ayarlar” seçeneğini seçin.",
+      step4: "“Veriyi dışa/içe aktar” bölümüne kadar aşağı kaydırın.",
+      step5: "“İçe aktar” seçeneğine tıklayın ve 1. adımda indirdiğiniz dosyayı seçin.",
+      warn: "Giriş yapmadan önce içe aktarın. Önce giriş yaparsanız verileriniz hesaptan alınır ve içe aktarma seçeneği artık görünmez.",
+      sumNotes: "not",
+      sumRanks: "işaretlenmiş teknik",
+      sumCards: "bilgi kartı",
+      sumEmpty: "Ayarlarınızı içerir.",
+      sumPrefix: "İçerik:"
+    },
+    ja: {
+      title: "アプリは移転しました",
+      intro: "少林寺拳法アプリは新しいアドレスに移転しました。このページはもう更新されません。",
+      cta: "アプリへ移動",
+      newaddr: "新しいアドレス:",
+      accH: "ログイン済みです",
+      accB: "あなたのデータはアカウントに紐づいています。新しいアドレスでログインすれば、すべてそのまま残っています。ここで行う操作はありません。",
+      expH: "このサイトにデータがあります",
+      expB: "アカウントに紐づいていないデータが保存されています。自動では引き継がれません。今すぐダウンロードして、新しいアドレスでインポートしてください。",
+      drive: "接続済みのクラウドサービスにもデータがある可能性があります。新しいサイトで再接続できます。",
+      exportBtn: "データを書き出す",
+      doneB: "ファイルをダウンロードしました。手順2に進んでください。",
+      stepsH: "データの移行手順",
+      step1: "上の「データを書き出す」をクリックします。ファイルが端末にダウンロードされます。",
+      step2: "ブラウザで app.shorinjikempo.net を開きます。",
+      step3: "メニューの「その他」から「設定」を選びます。",
+      step4: "「データのエクスポート/インポート」まで下にスクロールします。",
+      step5: "「インポート」をクリックし、手順1でダウンロードしたファイルを選びます。",
+      warn: "ログインする前にインポートしてください。先にログインするとデータはアカウントから読み込まれ、インポートの項目は表示されなくなります。",
+      sumNotes: "件のメモ",
+      sumRanks: "件の技の記録",
+      sumCards: "枚のフラッシュカード",
+      sumEmpty: "設定が含まれます。",
+      sumPrefix: "内容:"
+    }
+  };
+
+  function readDocument() {
+    try {
+      var raw = localStorage.getItem(DOC_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function readFlag(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  // Matches the app's own definition of "signed in" (sync/backend.ts).
+  function isSignedIn() {
+    return readFlag(CONNECTED_KEY) === "true" && readFlag(EXPIRED_KEY) !== "true";
+  }
+
+  function countKeys(value) {
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? Object.keys(value).length
+      : 0;
+  }
+
+  // Defaults alone are not "data" — only things the user actually produced.
+  function hasUserData(doc) {
+    var d = doc && doc.data;
+    if (!d) return false;
+    return countKeys(d.notes) > 0
+      || countKeys(d.hokeiRanks) > 0
+      || countKeys(d.knownFlashCards) > 0
+      || (typeof d.quizStreakHighScore === "number" && d.quizStreakHighScore > 0)
+      || (typeof d.kenshiNumber === "string" && d.kenshiNumber.length > 0)
+      || (d.currentWeekAnchor && typeof d.currentWeekAnchor === "object");
+    }
+
+  function pickLanguage(doc) {
+    var stored = doc && doc.data && doc.data.language;
+    if (stored && STRINGS[stored]) return stored;
+    var nav = (navigator.language || "sv").slice(0, 2).toLowerCase();
+    return STRINGS[nav] ? nav : "sv";
+  }
+
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function show(id, visible) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle("hidden", !visible);
+  }
+
+  var doc = readDocument();
+  var signedIn = isSignedIn();
+  var hasData = hasUserData(doc);
+  var provider = doc && doc.data && doc.data.syncProvider;
+
+  function summarise(s) {
+    var d = (doc && doc.data) || {};
+    var parts = [];
+    var notes = countKeys(d.notes);
+    var ranks = countKeys(d.hokeiRanks);
+    var cards = countKeys(d.knownFlashCards);
+    if (notes) parts.push(notes + " " + s.sumNotes);
+    if (ranks) parts.push(ranks + " " + s.sumRanks);
+    if (cards) parts.push(cards + " " + s.sumCards);
+    return parts.length ? s.sumPrefix + " " + parts.join(", ") : s.sumEmpty;
+  }
+
+  function render(lang) {
+    var s = STRINGS[lang] || STRINGS.sv;
+    document.documentElement.lang = lang;
+    document.title = s.title + " — Shorinji Kempo";
+
+    setText("h-title", s.title);
+    setText("t-intro", s.intro);
+    setText("t-cta", s.cta);
+    setText("t-newaddr", s.newaddr);
+    setText("t-acc-h", s.accH);
+    setText("t-acc-b", s.accB);
+    setText("t-exp-h", s.expH);
+    setText("t-exp-b", s.expB);
+    setText("t-drive", s.drive);
+    setText("btn-export", s.exportBtn);
+    setText("t-done-b", s.doneB);
+    setText("t-steps-h", s.stepsH);
+    setText("t-step1", s.step1);
+    setText("t-step2", s.step2);
+    setText("t-step3", s.step3);
+    setText("t-step4", s.step4);
+    setText("t-step5", s.step5);
+    setText("t-warn", s.warn);
+    setText("t-summary", summarise(s));
+
+    show("box-account", signedIn);
+    show("box-export", !signedIn && hasData);
+    show("t-drive", !signedIn && hasData && (provider === "onedrive" || provider === "google-drive"));
+
+    var buttons = document.querySelectorAll(".langs button");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute("aria-current", String(buttons[i].getAttribute("data-lang") === lang));
+    }
+  }
+
+  // Produces exactly what the app's importer expects: { version, data }.
+  // See importData() in src/Settings.tsx — it reads parsed.version and parsed.data.
+  function exportData() {
+    if (!doc) return;
+    var payload = {
+      version: typeof doc.version === "number" ? doc.version : 1,
+      data: doc.data
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "shorinji-kempo-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Delay revocation: revoking immediately can cancel the download in some browsers.
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+    show("box-done", true);
+  }
+
+  document.getElementById("btn-export").addEventListener("click", exportData);
+
+  var langButtons = document.querySelectorAll(".langs button");
+  for (var i = 0; i < langButtons.length; i++) {
+    langButtons[i].addEventListener("click", function () {
+      render(this.getAttribute("data-lang"));
+    });
+  }
+
+  render(pickLanguage(doc));
+})();
+</script>
+</body>
+</html>
