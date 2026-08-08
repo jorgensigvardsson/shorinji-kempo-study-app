@@ -169,7 +169,6 @@
       accB: "Logga in på den nya adressen så finns ditt synkade material kvar.",
       expH: "Du har data på den här sidan",
       expB: "Du har sparat material här som inte är kopplat till något konto. Det följer inte med automatiskt. Ladda ner det nu och importera det på den nya adressen.",
-      expBAccount: "Ditt material finns på ditt konto, men ändringar du gjort på den här enheten kan ha hunnit sparas lokalt utan att nå kontot innan den gamla sidan slutade fungera. Ladda ner en kopia för säkerhets skull.",
       drive: "Ditt material kan också finnas i molntjänsten du anslutit. Den kan du ansluta på nytt på den nya sidan.",
       exportBtn: "Exportera data",
       doneB: "Filen har laddats ner — fortsätt med steg 2.",
@@ -195,7 +194,6 @@
       accB: "Sign in at the new address and your synced material will be there.",
       expH: "You have data on this site",
       expB: "You have saved material here that is not tied to any account. It will not come along automatically. Download it now and import it at the new address.",
-      expBAccount: "Your material is on your account, but changes made on this device may have been saved locally without reaching the account before the old site stopped working. Download a copy to be safe.",
       drive: "Your material may also be in the cloud service you connected. You can reconnect it on the new site.",
       exportBtn: "Export data",
       doneB: "File downloaded — continue with step 2.",
@@ -221,7 +219,6 @@
       accB: "Yeni adreste giriş yapın; eşitlenmiş materyaliniz orada olacak.",
       expH: "Bu sitede verileriniz var",
       expB: "Burada hiçbir hesaba bağlı olmayan kayıtlı materyaliniz var. Otomatik olarak taşınmaz. Şimdi indirin ve yeni adreste içe aktarın.",
-      expBAccount: "Materyaliniz hesabınızda, ancak bu cihazda yaptığınız değişiklikler, eski site çalışmayı bırakmadan önce hesaba ulaşmadan yalnızca yerel olarak kaydedilmiş olabilir. Güvende olmak için bir kopya indirin.",
       drive: "Materyaliniz bağladığınız bulut hizmetinde de bulunabilir. Yeni sitede yeniden bağlayabilirsiniz.",
       exportBtn: "Verileri dışa aktar",
       doneB: "Dosya indirildi — 2. adımla devam edin.",
@@ -247,7 +244,6 @@
       accB: "新しいアドレスでログインすれば、同期済みのデータはそのまま残っています。",
       expH: "このサイトにデータがあります",
       expB: "アカウントに紐づいていないデータが保存されています。自動では引き継がれません。今すぐダウンロードして、新しいアドレスでインポートしてください。",
-      expBAccount: "データはアカウントに保存されていますが、この端末で行った変更は、旧サイトが停止する前にアカウントへ届かず端末内だけに保存された可能性があります。念のためコピーをダウンロードしてください。",
       drive: "接続済みのクラウドサービスにもデータがある可能性があります。新しいサイトで再接続できます。",
       exportBtn: "データを書き出す",
       doneB: "ファイルをダウンロードしました。手順2に進んでください。",
@@ -380,13 +376,13 @@
     setText("t-warn", s.warn);
     setText("t-summary", summarise(s));
 
-    // The export is offered whenever local data exists, account or not. The old
-    // app kept running after the backend moved, so changes made in that window
-    // never reached the server — an account is no guarantee the data is safe.
-    setText("t-exp-b", account ? s.expBAccount : s.expB);
+    // Account holders are shown only the "sign in over there" box. Offering them
+    // an export as well reads as a warning that something is wrong with their
+    // data, which is confusing for the overwhelming majority whose material did
+    // sync normally.
     show("box-account", account);
-    show("box-export", hasData);
-    show("t-drive", hasData && (provider === "onedrive" || provider === "google-drive"));
+    show("box-export", !account && hasData);
+    show("t-drive", !account && hasData && (provider === "onedrive" || provider === "google-drive"));
 
     var buttons = document.querySelectorAll(".langs button");
     for (var i = 0; i < buttons.length; i++) {
