@@ -157,6 +157,7 @@
   var DOC_KEY = "app-data-document";
   var CONNECTED_KEY = "sync-backend-connected";
   var EXPIRED_KEY = "sync-backend-auth-expired";
+  var USER_KEY = "sync-backend-user";
 
   var STRINGS = {
     sv: {
@@ -164,10 +165,11 @@
       intro: "Shorinji Kempo-appen finns nu på en ny adress. Den här sidan uppdateras inte längre.",
       cta: "Gå till appen",
       newaddr: "Ny adress:",
-      accH: "Du är inloggad",
-      accB: "Ditt material är kopplat till ditt konto. Logga bara in på den nya adressen så finns allt kvar — du behöver inte göra något här.",
+      accH: "Du har ett konto",
+      accB: "Logga in på den nya adressen så finns ditt synkade material kvar.",
       expH: "Du har data på den här sidan",
       expB: "Du har sparat material här som inte är kopplat till något konto. Det följer inte med automatiskt. Ladda ner det nu och importera det på den nya adressen.",
+      expBAccount: "Ditt material finns på ditt konto, men ändringar du gjort på den här enheten kan ha hunnit sparas lokalt utan att nå kontot innan den gamla sidan slutade fungera. Ladda ner en kopia för säkerhets skull.",
       drive: "Ditt material kan också finnas i molntjänsten du anslutit. Den kan du ansluta på nytt på den nya sidan.",
       exportBtn: "Exportera data",
       doneB: "Filen har laddats ner — fortsätt med steg 2.",
@@ -189,10 +191,11 @@
       intro: "The Shorinji Kempo app now lives at a new address. This page is no longer updated.",
       cta: "Go to the app",
       newaddr: "New address:",
-      accH: "You are signed in",
-      accB: "Your material is tied to your account. Just sign in at the new address and everything will be there — nothing to do here.",
+      accH: "You have an account",
+      accB: "Sign in at the new address and your synced material will be there.",
       expH: "You have data on this site",
       expB: "You have saved material here that is not tied to any account. It will not come along automatically. Download it now and import it at the new address.",
+      expBAccount: "Your material is on your account, but changes made on this device may have been saved locally without reaching the account before the old site stopped working. Download a copy to be safe.",
       drive: "Your material may also be in the cloud service you connected. You can reconnect it on the new site.",
       exportBtn: "Export data",
       doneB: "File downloaded — continue with step 2.",
@@ -214,10 +217,11 @@
       intro: "Shorinji Kempo uygulaması artık yeni bir adreste. Bu sayfa artık güncellenmiyor.",
       cta: "Uygulamaya git",
       newaddr: "Yeni adres:",
-      accH: "Giriş yapmış durumdasınız",
-      accB: "Materyaliniz hesabınıza bağlı. Yeni adreste giriş yapmanız yeterli, her şey orada olacak — burada yapmanız gereken bir şey yok.",
+      accH: "Bir hesabınız var",
+      accB: "Yeni adreste giriş yapın; eşitlenmiş materyaliniz orada olacak.",
       expH: "Bu sitede verileriniz var",
       expB: "Burada hiçbir hesaba bağlı olmayan kayıtlı materyaliniz var. Otomatik olarak taşınmaz. Şimdi indirin ve yeni adreste içe aktarın.",
+      expBAccount: "Materyaliniz hesabınızda, ancak bu cihazda yaptığınız değişiklikler, eski site çalışmayı bırakmadan önce hesaba ulaşmadan yalnızca yerel olarak kaydedilmiş olabilir. Güvende olmak için bir kopya indirin.",
       drive: "Materyaliniz bağladığınız bulut hizmetinde de bulunabilir. Yeni sitede yeniden bağlayabilirsiniz.",
       exportBtn: "Verileri dışa aktar",
       doneB: "Dosya indirildi — 2. adımla devam edin.",
@@ -239,10 +243,11 @@
       intro: "少林寺拳法アプリは新しいアドレスに移転しました。このページはもう更新されません。",
       cta: "アプリへ移動",
       newaddr: "新しいアドレス:",
-      accH: "ログイン済みです",
-      accB: "あなたのデータはアカウントに紐づいています。新しいアドレスでログインすれば、すべてそのまま残っています。ここで行う操作はありません。",
+      accH: "アカウントがあります",
+      accB: "新しいアドレスでログインすれば、同期済みのデータはそのまま残っています。",
       expH: "このサイトにデータがあります",
       expB: "アカウントに紐づいていないデータが保存されています。自動では引き継がれません。今すぐダウンロードして、新しいアドレスでインポートしてください。",
+      expBAccount: "データはアカウントに保存されていますが、この端末で行った変更は、旧サイトが停止する前にアカウントへ届かず端末内だけに保存された可能性があります。念のためコピーをダウンロードしてください。",
       drive: "接続済みのクラウドサービスにもデータがある可能性があります。新しいサイトで再接続できます。",
       exportBtn: "データを書き出す",
       doneB: "ファイルをダウンロードしました。手順2に進んでください。",
@@ -274,9 +279,28 @@
     try { return localStorage.getItem(key); } catch (e) { return null; }
   }
 
-  // Matches the app's own definition of "signed in" (sync/backend.ts).
-  function isSignedIn() {
-    return readFlag(CONNECTED_KEY) === "true" && readFlag(EXPIRED_KEY) !== "true";
+  // Whether this person has an account on the backend.
+  //
+  // sync-backend-connected alone is NOT reliable here. completeAuthorizationIfPresent()
+  // in sync/backend.ts removes that key on EVERY failure path, including a caught
+  // network error — so once the backend moved to its new hostnames, the old app's
+  // own failing /auth/me calls wiped the flag from devices that were signed in.
+  //
+  // sync-backend-user survives that path: it is only removed by an explicit
+  // disconnect or account deletion. syncProvider is a third, weaker corroboration.
+  function hasAccount(doc) {
+    if (readFlag(CONNECTED_KEY) === "true" && readFlag(EXPIRED_KEY) !== "true") {
+      return true;
+    }
+    var raw = readFlag(USER_KEY);
+    if (raw) {
+      try {
+        if (JSON.parse(raw).email) return true;
+      } catch (e) {
+        // Unparseable cache — fall through to the syncProvider check.
+      }
+    }
+    return !!(doc && doc.data && doc.data.syncProvider === "backend");
   }
 
   function countKeys(value) {
@@ -315,7 +339,7 @@
   }
 
   var doc = readDocument();
-  var signedIn = isSignedIn();
+  var account = hasAccount(doc);
   var hasData = hasUserData(doc);
   var provider = doc && doc.data && doc.data.syncProvider;
 
@@ -356,9 +380,13 @@
     setText("t-warn", s.warn);
     setText("t-summary", summarise(s));
 
-    show("box-account", signedIn);
-    show("box-export", !signedIn && hasData);
-    show("t-drive", !signedIn && hasData && (provider === "onedrive" || provider === "google-drive"));
+    // The export is offered whenever local data exists, account or not. The old
+    // app kept running after the backend moved, so changes made in that window
+    // never reached the server — an account is no guarantee the data is safe.
+    setText("t-exp-b", account ? s.expBAccount : s.expB);
+    show("box-account", account);
+    show("box-export", hasData);
+    show("t-drive", hasData && (provider === "onedrive" || provider === "google-drive"));
 
     var buttons = document.querySelectorAll(".langs button");
     for (var i = 0; i < buttons.length; i++) {
