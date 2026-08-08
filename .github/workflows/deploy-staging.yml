@@ -107,7 +107,8 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           DEPLOY_HOST="${SSH_HOST%:*}"
           DEPLOY_PORT="${SSH_HOST##*:}"
-          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # stderr is deliberately not discarded — see the note in deploy.yml.
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
           echo "DEPLOY_HOST=$DEPLOY_HOST" >> "$GITHUB_ENV"
           echo "DEPLOY_PORT=$DEPLOY_PORT" >> "$GITHUB_ENV"
 

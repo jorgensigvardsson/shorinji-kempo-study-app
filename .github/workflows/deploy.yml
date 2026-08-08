@@ -323,7 +323,12 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           DEPLOY_HOST="${SSH_HOST%:*}"
           DEPLOY_PORT="${SSH_HOST##*:}"
-          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # stderr is deliberately not discarded. ssh-keyscan is the only command
+          # here that talks to the outside world, and this step runs under `bash -e`,
+          # so a non-zero exit fails the deploy. Swallowing its output once cost a
+          # deploy with no explanation of why. The banner lines it prints are noise
+          # worth living with.
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
           echo "DEPLOY_HOST=$DEPLOY_HOST" >> "$GITHUB_ENV"
           echo "DEPLOY_PORT=$DEPLOY_PORT" >> "$GITHUB_ENV"
 
