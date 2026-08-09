@@ -49,20 +49,16 @@ param vapidSubject string = ''
 @secure()
 param pushAdminToken string = ''
 
-@description('Resource ID of the user-assigned managed identity to attach to this app')
-param userAssignedIdentityId string
-
-
 var pushEnabled = !empty(vapidPublicKey) && !empty(vapidPrivateKey)
 
 resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
+  // Stated explicitly so a deploy detaches the managed identity this app used to
+  // carry. Cosmos is reached with an account key, so nothing here needs an Entra
+  // identity; add one back the day something does.
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${userAssignedIdentityId}': {}
-    }
+    type: 'None'
   }
   properties: {
     environmentId: environmentId

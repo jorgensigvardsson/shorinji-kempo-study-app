@@ -12,7 +12,7 @@ type LinkedIdentity struct {
 // OIDC providers and still land on the same account.
 type User struct {
 	ID               string                    `json:"id"`               // UUID v4
-	Email            string                    `json:"email"`            // preferred contact email (user-editable)
+	Email            string                    `json:"email"`
 	DisplayName      string                    `json:"displayName"`
 	LinkedIdentities map[string]LinkedIdentity `json:"linkedIdentities"` // provider name → identity
 	CreatedAt        string                    `json:"createdAt"`

@@ -64,10 +64,10 @@ jobs:
           tenant-id:       ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      # NB: the Microsoft.ManagedIdentity and Microsoft.Communication resource
-      # providers must be registered on the subscription (one-time, e.g.
-      # `az provider register --namespace Microsoft.ManagedIdentity`). The deploy
-      # principal is resource-group-scoped and cannot register providers itself.
+      # NB: any new resource provider must be registered on the subscription
+      # (one-time, e.g. `az provider register --namespace Microsoft.App`). The
+      # deploy principal is resource-group-scoped and cannot register providers
+      # itself.
 
       # Build a parameter override file so jq handles newlines in the PEM correctly.
       # main.parameters.json supplies namePrefix, location, cosmosDatabase, etc.
@@ -86,8 +86,13 @@ jobs:
           VAPID_PRIVATE_KEY:        ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT:            ${{ vars.VAPID_SUBJECT }}
           PUSH_ADMIN_TOKEN:         ${{ secrets.PUSH_ADMIN_TOKEN }}
-          ACS_ENDPOINT:             ${{ vars.ACS_ENDPOINT }}
-          ACS_SENDER_ADDRESS:       ${{ vars.ACS_SENDER_ADDRESS }}
+          SMTP_HOST:                ${{ vars.SMTP_HOST }}
+          # An unset variable would otherwise override the bicep default with ""
+          SMTP_PORT:                ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USERNAME:            ${{ vars.SMTP_USERNAME }}
+          SMTP_PASSWORD:            ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM:                ${{ vars.SMTP_FROM }}
+          SMTP_TLS:                 ${{ vars.SMTP_TLS || 'starttls' }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \
@@ -102,8 +107,12 @@ jobs:
             --arg vapidPrivateKey       "$VAPID_PRIVATE_KEY" \
             --arg vapidSubject          "$VAPID_SUBJECT" \
             --arg pushAdminToken        "$PUSH_ADMIN_TOKEN" \
-            --arg acsEndpoint           "$ACS_ENDPOINT" \
-            --arg acsSenderAddress      "$ACS_SENDER_ADDRESS" \
+            --arg smtpHost              "$SMTP_HOST" \
+            --arg smtpPort              "$SMTP_PORT" \
+            --arg smtpUsername          "$SMTP_USERNAME" \
+            --arg smtpPassword          "$SMTP_PASSWORD" \
+            --arg smtpFrom              "$SMTP_FROM" \
+            --arg smtpTls               "$SMTP_TLS" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               contentVersion: "1.0.0.0",
@@ -120,8 +129,12 @@ jobs:
                 vapidPrivateKey:       {value: $vapidPrivateKey},
                 vapidSubject:          {value: $vapidSubject},
                 pushAdminToken:        {value: $pushAdminToken},
-                acsEndpoint:           {value: $acsEndpoint},
-                acsSenderAddress:      {value: $acsSenderAddress}
+                smtpHost:              {value: $smtpHost},
+                smtpPort:              {value: $smtpPort},
+                smtpUsername:          {value: $smtpUsername},
+                smtpPassword:          {value: $smtpPassword},
+                smtpFrom:              {value: $smtpFrom},
+                smtpTls:               {value: $smtpTls}
               }
             }' > /tmp/deploy-params.json
 

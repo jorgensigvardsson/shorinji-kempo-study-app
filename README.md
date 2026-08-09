@@ -97,6 +97,7 @@ Required repository secrets:
 - `SSH_PRIVATE_KEY` — private key for the deploy user; its public half belongs in that user's `~/.ssh/authorized_keys` on the web host
 - `VAPID_PRIVATE_KEY` — Web Push VAPID private key (paired with the `VAPID_PUBLIC_KEY` variable)
 - `PUSH_ADMIN_TOKEN` — bearer token authorizing `POST /push/broadcast` (leave unset to disable broadcasts)
+- `SMTP_PASSWORD` — password for the mail relay that sends sign-in codes (leave unset to log codes instead of mailing them)
 - `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
 - `VITE_ONEDRIVE_CLIENT_ID` — OneDrive OAuth public client ID
 - `VITE_GOOGLE_CLIENT_ID` — Google Drive OAuth public client ID
@@ -109,6 +110,8 @@ Required repository variables (these are *variables*, not secrets — they are n
 
 Optional repository variables (with sensible defaults):
 - `VAPID_PUBLIC_KEY` — Web Push VAPID public key; `VAPID_SUBJECT` — `mailto:` or site URL for the VAPID claim. Push endpoints stay disabled until the public/private key pair is set.
+- `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_FROM` — mail relay for email (code) sign-in, paired with the `SMTP_PASSWORD` secret. `SMTP_FROM` may carry a display name: `Shorinji Kempo <noreply@example.com>`. With `SMTP_HOST` or `SMTP_FROM` unset the auth service logs codes to stdout instead of sending them.
+- `SMTP_PORT` (default `587`) and `SMTP_TLS` (default `starttls`) — use `465`/`implicit` for SMTPS. `starttls` refuses to deliver over an unencrypted connection rather than falling back to one.
 - `VITE_DEBUG` (default `false`)
 - `VITE_ONEDRIVE_TENANT_ID` (default `consumers`)
 - `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`

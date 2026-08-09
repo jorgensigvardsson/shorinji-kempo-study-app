@@ -129,24 +129,31 @@ TTL, max 5 attempts, one active code per address (resend overwrites), swept peri
 linked-identity provider key is `"email"` with `sub` = the lowercased address. `/auth/email/start`
 carries a **global** 1-req-per-5s limiter on top of the per-IP limit to protect the email quota.
 
-Email is sent via **Azure Communication Services** (`internal/email`). There is no Go data-plane
-SDK for ACS Email, so the client issues the REST POST directly, authenticated by the auth service's
-**user-assigned managed identity** (Entra ID) — it acquires a bearer token for
-`https://communication.azure.com/.default` via `azidentity` and sends `Authorization: Bearer`.
-**No access key is ever stored.** When `ACS_ENDPOINT`/`ACS_SENDER_ADDRESS`/`ACS_IDENTITY_CLIENT_ID`
-are unset (local dev), codes are logged to stdout instead. Start on the free Azure-managed sender
-domain (5/min, 10/hour subscription cap); switch to a verified custom domain later by linking it +
-DNS and changing only `ACS_SENDER_ADDRESS`.
+Email goes out over plain **SMTP** (`internal/email`, `net/smtp`), configured with:
 
-The ACS resource and its managed email domain are provisioned **out-of-band** (the managed domain's
-`donotreply@<guid>.azurecomm.net` sender is only known after creation). The deploy pipeline feeds
-`ACS_ENDPOINT` and `ACS_SENDER_ADDRESS` as bicep parameters (GitHub repo *variables*, not secrets).
-Bicep creates a user-assigned managed identity per backend service, attaches each to its container
-app, and grants **only** the auth identity the **Communication and Email Service Owner** role
-(`09976791-48a7-449e-bb21-39d1a415f350`) on the ACS resource (the resource name is derived from the
-endpoint's first DNS label). Persistence gets its own identity but no ACS access. For the pipeline
-to create that role assignment, the GitHub deploy service principal needs **Role Based Access
-Control Administrator** on the resource group (scoped, excluding privileged roles).
+| Variable | Meaning |
+|---|---|
+| `SMTP_HOST` | relay hostname |
+| `SMTP_PORT` | `587` for STARTTLS, `465` for implicit TLS (default `587`) |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | credentials; an empty username disables AUTH |
+| `SMTP_FROM` | `noreply@example.com` or `Shorinji Kempo <noreply@example.com>` |
+| `SMTP_TLS` | `starttls` (explicit, the default), `implicit` (SMTPS), or `none` |
+
+Encryption is not optional in practice: `starttls` **fails** if the server does not advertise
+STARTTLS rather than falling back to plaintext, and configuring credentials with `SMTP_TLS=none`
+is refused at startup. AUTH prefers PLAIN and falls back to LOGIN when that is all the server
+offers (common on Exim/cPanel hosts). The client identifies itself in EHLO as the sender's domain,
+since relays routinely reject the `localhost` that `net/smtp` would otherwise send. Messages are
+base64-encoded with a MIME-word subject, because every language we send in has non-ASCII text.
+The recipient is re-parsed with `mail.ParseAddress` before it reaches a header, so a CR/LF in the
+address cannot inject headers of its own.
+
+When `SMTP_HOST`/`SMTP_FROM` are unset (local dev), codes are logged to stdout instead.
+
+The deploy pipeline feeds the host, port, username, sender and TLS mode in as GitHub repo
+*variables* and the password as a repo *secret*, which bicep passes to the container app as an
+ACA secret (`smtp-password`). Neither backend app carries a managed identity: Cosmos is reached
+with an account key and mail with a password.
 
 ---
 
@@ -396,11 +403,8 @@ Pushing to the `deploy` branch runs `.github/workflows/deploy.yml`:
 
 Scaling: auth runs **min 1 / max 1 replica** (OIDC pending state and verification codes are
 held in-process); persistence runs **min 0 / max 1**, scaling on HTTP traffic. Secrets (signing
-key, OIDC client secrets, VAPID keys) are injected via ACA secrets; the JWT signing key arrives as
-a PEM string (`SERVICE_KEY_PEM`), no file volume needed. Email needs **no secret** — the auth app
-authenticates to ACS with its user-assigned managed identity, taking only the non-secret
-`ACS_ENDPOINT`, `ACS_SENDER_ADDRESS`, and `ACS_IDENTITY_CLIENT_ID` (the last derived in bicep from
-the identity).
+key, OIDC client secrets, VAPID keys, SMTP password) are injected via ACA secrets; the JWT signing
+key arrives as a PEM string (`SERVICE_KEY_PEM`), no file volume needed.
 
 `tools/migrate` is a one-shot tool that provisions Cosmos and migrates file-store data
 (users + identity index + documents); supports `--dry-run`.

@@ -84,50 +84,34 @@ param vapidSubject string = ''
 @secure()
 param pushAdminToken string = ''
 
-// ── Email (Azure Communication Services) ──────────────────────────────────────
-// The ACS resource and its (managed) email domain are provisioned out-of-band;
-// the pipeline feeds these two values in. Auth authenticates to ACS with its
-// user-assigned managed identity, so no access key is ever stored.
+// ── Email (SMTP) ──────────────────────────────────────────────────────────────
+// Verification codes go out through an ordinary SMTP relay. The pipeline feeds
+// the host, port, username and sender in as repo variables and the password as a
+// repo secret. Empty smtpHost disables sending (codes are logged instead).
 
-@description('ACS data-plane endpoint, e.g. https://skempo-acs.europe.communication.azure.com. Empty disables email (codes are logged instead).')
-param acsEndpoint string = ''
+@description('SMTP relay hostname. Empty disables email (codes are logged instead).')
+param smtpHost string = ''
 
-@description('Verified MailFrom address, e.g. donotreply@<guid>.azurecomm.net')
-param acsSenderAddress string = ''
+@description('SMTP relay port: 587 for STARTTLS, 465 for implicit TLS')
+param smtpPort string = '587'
 
-// ── User-assigned managed identities (one per backend service) ─────────────────
+@description('SMTP username. Empty disables authentication.')
+param smtpUsername string = ''
 
-resource authIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${namePrefix}-auth-id'
-  location: location
-}
+@description('SMTP password')
+@secure()
+param smtpPassword string = ''
 
-resource persistenceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${namePrefix}-persistence-id'
-  location: location
-}
+@description('Sender address, optionally with a display name: "Shorinji Kempo <noreply@example.com>"')
+param smtpFrom string = ''
 
-// Grant the auth identity permission to send email on the existing ACS resource.
-// The resource name is the first DNS label of the endpoint. Only the auth service
-// needs ACS access; persistence never sends email.
-var acsResourceName = empty(acsEndpoint) ? 'unused' : first(split(replace(replace(acsEndpoint, 'https://', ''), 'http://', ''), '.'))
-
-resource acs 'Microsoft.Communication/communicationServices@2023-04-01' existing = {
-  name: acsResourceName
-}
-
-// "Communication and Email Service Owner" — the built-in role that permits Email send.
-var acsEmailRoleId = '09976791-48a7-449e-bb21-39d1a415f350'
-
-resource acsAuthRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(acsEndpoint)) {
-  name: guid(acs.id, authIdentity.id, acsEmailRoleId)
-  scope: acs
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acsEmailRoleId)
-    principalId: authIdentity.properties.principalId
-    principalType: 'ServicePrincipal' // avoids "principal not found" while Entra replicates the new identity
-  }
-}
+@description('Connection security: starttls (explicit, port 587), implicit (SMTPS, port 465), or none')
+@allowed([
+  'starttls'
+  'implicit'
+  'none'
+])
+param smtpTls string = 'starttls'
 
 // ── Modules ───────────────────────────────────────────────────────────────────
 
@@ -178,10 +162,12 @@ module authApp 'modules/auth-app.bicep' = {
     signingKeyPem: signingKeyPem
     customDomain: authCustomDomain
     cookieDomain: cookieDomain
-    userAssignedIdentityId: authIdentity.id
-    acsEndpoint: acsEndpoint
-    acsSenderAddress: acsSenderAddress
-    acsIdentityClientId: authIdentity.properties.clientId
+    smtpHost: smtpHost
+    smtpPort: smtpPort
+    smtpUsername: smtpUsername
+    smtpPassword: smtpPassword
+    smtpFrom: smtpFrom
+    smtpTls: smtpTls
   }
 }
 
@@ -203,7 +189,6 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     vapidPrivateKey: vapidPrivateKey
     vapidSubject: vapidSubject
     pushAdminToken: pushAdminToken
-    userAssignedIdentityId: persistenceIdentity.id
   }
 }
 

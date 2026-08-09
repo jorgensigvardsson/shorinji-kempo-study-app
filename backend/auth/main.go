@@ -49,10 +49,13 @@ func main() {
 	microsoftRedirectURI  := flag.String("microsoft-redirect-uri",  envutil.String("MICROSOFT_REDIRECT_URI",  "http://localhost:8081/auth/callback"), "Microsoft OAuth redirect URI")
 	microsoftDomains      := flag.String("microsoft-domains",       envutil.String("MICROSOFT_DOMAINS",       "outlook.com,hotmail.com,live.com,msn.com"), "comma-separated email domains for Microsoft OIDC")
 
-	// ── Email (Azure Communication Services, managed-identity auth) ────────────
-	acsEndpoint   := flag.String("acs-endpoint",            envutil.String("ACS_ENDPOINT",            ""), "Azure Communication Services endpoint (enables email sending when set with sender+identity)")
-	acsSender     := flag.String("acs-sender-address",      envutil.String("ACS_SENDER_ADDRESS",      ""), "verified MailFrom address for verification emails")
-	acsIdentityID := flag.String("acs-identity-client-id",  envutil.String("ACS_IDENTITY_CLIENT_ID",  ""), "client ID of the user-assigned managed identity used to authenticate to ACS")
+	// ── Email (SMTP) ──────────────────────────────────────────────────────────
+	smtpHost     := flag.String("smtp-host",     envutil.String("SMTP_HOST",     ""),          "SMTP relay hostname (enables email sending when set together with --smtp-from)")
+	smtpPort     := flag.String("smtp-port",     envutil.String("SMTP_PORT",     "587"),       "SMTP relay port (587 for starttls, 465 for implicit TLS)")
+	smtpUsername := flag.String("smtp-username", envutil.String("SMTP_USERNAME", ""),          "SMTP username (empty disables authentication)")
+	smtpPassword := flag.String("smtp-password", envutil.String("SMTP_PASSWORD", ""),          "SMTP password")
+	smtpFrom     := flag.String("smtp-from",     envutil.String("SMTP_FROM",     ""),          "sender address, optionally with a display name: \"Shorinji Kempo <noreply@example.com>\"")
+	smtpTLS      := flag.String("smtp-tls",      envutil.String("SMTP_TLS",      "starttls"),  "connection security: starttls (explicit, port 587), implicit (SMTPS, port 465), or none")
 
 	// ── Rate limiting ─────────────────────────────────────────────────────────
 	rateLimitRPS   := flag.Float64("rate-limit-rps",   envutil.Float64("RATE_LIMIT_RPS",   1.0), "max requests per second per IP (0 = disabled)")
@@ -145,18 +148,22 @@ func main() {
 		log.Println("Microsoft OIDC provider disabled (set --microsoft-client-id and --microsoft-client-secret to enable)")
 	}
 
-	// ── Email sender (ACS via managed identity when configured; dev stdout otherwise) ──
+	// ── Email sender (SMTP when configured; dev stdout otherwise) ─────────────
 	var mailer email.Sender
-	if *acsEndpoint != "" && *acsSender != "" && *acsIdentityID != "" {
-		s, err := email.NewACSSender(*acsEndpoint, *acsSender, *acsIdentityID)
+	if *smtpHost != "" && *smtpFrom != "" {
+		mode, err := email.ParseTLSMode(*smtpTLS)
 		if err != nil {
-			log.Fatalf("init ACS email sender: %v", err)
+			log.Fatalf("smtp: %v", err)
+		}
+		s, err := email.NewSMTPSender(*smtpHost, *smtpPort, *smtpUsername, *smtpPassword, *smtpFrom, mode)
+		if err != nil {
+			log.Fatalf("init SMTP email sender: %v", err)
 		}
 		mailer = s
-		log.Printf("email sending via ACS (sender: %s, identity: %s)", *acsSender, *acsIdentityID)
+		log.Printf("email sending via SMTP: %s", s.Describe())
 	} else {
 		mailer = email.LogSender{}
-		log.Println("email sending disabled — verification codes will be logged to stdout (set ACS_ENDPOINT, ACS_SENDER_ADDRESS, ACS_IDENTITY_CLIENT_ID to enable)")
+		log.Println("email sending disabled — verification codes will be logged to stdout (set SMTP_HOST and SMTP_FROM to enable)")
 	}
 
 	// ── HTTP server ───────────────────────────────────────────────────────────

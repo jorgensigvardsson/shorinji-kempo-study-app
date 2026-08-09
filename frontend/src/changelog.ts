@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-09T16:17:10.937Z",
+    changes: [
+      {
+        emoji: "✉️",
+        sv: "Inloggningskoder skickas nu från app@shorinjikempo.net. Titta gärna i skräpposten om koden inte dyker upp, och markera den som säker avsändare.",
+        en: "Sign-in codes are now sent from app@shorinjikempo.net. If the code doesn't turn up, look in your spam folder and mark the address as safe.",
+        tr: "Giriş kodları artık app@shorinjikempo.net adresinden gönderiliyor. Kod gelmezse spam klasörünüze bakın ve adresi güvenli olarak işaretleyin.",
+        ja: "ログインコードの送信元が app@shorinjikempo.net になりました。コードが届かない場合は迷惑メールフォルダーをご確認のうえ、このアドレスを安全な送信元として登録してください。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-08T18:14:40.148Z",
     changes: [
       {

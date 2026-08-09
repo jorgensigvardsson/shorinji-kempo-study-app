@@ -61,26 +61,33 @@ param customDomain string = ''
 @description('Cookie Domain attribute for cross-subdomain sharing (e.g. .app.shorinjikempo.net). Leave empty for host-only cookies.')
 param cookieDomain string = ''
 
-@description('Resource ID of the user-assigned managed identity to attach to this app')
-param userAssignedIdentityId string
+@description('SMTP relay hostname (empty disables email; codes are logged instead)')
+param smtpHost string = ''
 
-@description('ACS data-plane endpoint (empty disables email; codes are logged instead)')
-param acsEndpoint string = ''
+@description('SMTP relay port')
+param smtpPort string = '587'
 
-@description('Verified MailFrom address for verification emails')
-param acsSenderAddress string = ''
+@description('SMTP username (empty disables authentication)')
+param smtpUsername string = ''
 
-@description('Client ID of the user-assigned managed identity used to authenticate to ACS')
-param acsIdentityClientId string = ''
+@description('SMTP password')
+@secure()
+param smtpPassword string = ''
+
+@description('Sender address for verification emails, optionally with a display name')
+param smtpFrom string = ''
+
+@description('Connection security: starttls, implicit, or none')
+param smtpTls string = 'starttls'
 
 resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
+  // Stated explicitly so a deploy detaches the managed identity this app used to
+  // carry for ACS. Mail now goes out over SMTP with a password, and Cosmos is
+  // reached with an account key, so nothing here needs an Entra identity.
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${userAssignedIdentityId}': {}
-    }
+    type: 'None'
   }
   properties: {
     environmentId: environmentId
@@ -101,6 +108,7 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
         { name: 'google-client-secret',   value: googleClientSecret }
         { name: 'microsoft-client-secret', value: microsoftClientSecret }
         { name: 'signing-key-pem',        value: signingKeyPem }
+        { name: 'smtp-password',          value: smtpPassword }
       ]
     }
     template: {
@@ -150,9 +158,12 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'MICROSOFT_CLIENT_ID',           value: microsoftClientId }
             { name: 'MICROSOFT_CLIENT_SECRET',       secretRef: 'microsoft-client-secret' }
             { name: 'MICROSOFT_REDIRECT_URI',        value: microsoftRedirectUri }
-            { name: 'ACS_ENDPOINT',                  value: acsEndpoint }
-            { name: 'ACS_SENDER_ADDRESS',            value: acsSenderAddress }
-            { name: 'ACS_IDENTITY_CLIENT_ID',        value: acsIdentityClientId }
+            { name: 'SMTP_HOST',                     value: smtpHost }
+            { name: 'SMTP_PORT',                     value: smtpPort }
+            { name: 'SMTP_USERNAME',                 value: smtpUsername }
+            { name: 'SMTP_PASSWORD',                 secretRef: 'smtp-password' }
+            { name: 'SMTP_FROM',                     value: smtpFrom }
+            { name: 'SMTP_TLS',                      value: smtpTls }
           ]
         }
       ]
