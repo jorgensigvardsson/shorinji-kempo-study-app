@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-09T18:30:00.000Z",
+    changes: [
+      {
+        emoji: "🔑",
+        sv: "Åtgärdat ett problem som kunde logga ut dig i onödan om du inte öppnat appen på ett tag under dagen.",
+        en: "Fixed an issue that could log you out unnecessarily if you hadn't opened the app for a while during the day.",
+        tr: "Gün içinde bir süre uygulamayı açmadıysanız sizi gereksiz yere çıkışa zorlayabilen bir sorun giderildi.",
+        ja: "日中しばらくアプリを開いていないと、不要にログアウトされてしまうことがある問題を修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-09T16:57:41.128Z",
     changes: [
       {
