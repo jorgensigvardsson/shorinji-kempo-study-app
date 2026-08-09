@@ -111,8 +111,11 @@ func (s *SMTPSender) SendVerificationCode(ctx context.Context, to, code, lang st
 		return fmt.Errorf("smtp: invalid recipient address: %w", err)
 	}
 
-	subject, body := render(code, lang)
-	msg, err := s.message(rcpt.Address, subject, body)
+	rendered, err := render(code, lang)
+	if err != nil {
+		return err
+	}
+	msg, err := s.message(rcpt.Address, rendered)
 	if err != nil {
 		return err
 	}
@@ -236,29 +239,64 @@ func (s *SMTPSender) heloName() string {
 	return s.host
 }
 
-// message renders an RFC 5322 message. The body is base64-encoded because every
-// language we send in has non-ASCII text, and 8-bit bodies are not universally
-// accepted.
-func (s *SMTPSender) message(to, subject, body string) ([]byte, error) {
+// message renders an RFC 5322 message carrying both a plain-text and an HTML
+// rendering as multipart/alternative. Plain text comes first: a client picks the
+// last part it understands, so the order is what makes HTML the preferred form
+// while a text-only reader still gets a readable code.
+//
+// Both parts are base64-encoded because every language we send in has non-ASCII
+// text, and 8-bit bodies are not universally accepted.
+//
+// The From display name is the app's name in the recipient's language, so the
+// inbox listing reads the same way the app does.
+func (s *SMTPSender) message(to string, m message) ([]byte, error) {
 	id, err := messageID(s.heloName())
 	if err != nil {
 		return nil, err
 	}
+	boundary, err := mimeBoundary()
+	if err != nil {
+		return nil, err
+	}
+
+	from := mail.Address{Name: m.senderName, Address: s.from.Address}
+	if from.Name == "" {
+		from.Name = s.from.Name // fall back to any name configured in SMTP_FROM
+	}
 
 	var b strings.Builder
-	b.WriteString("From: " + s.from.String() + "\r\n")
+	b.WriteString("From: " + from.String() + "\r\n")
 	b.WriteString("To: " + (&mail.Address{Address: to}).String() + "\r\n")
-	b.WriteString("Subject: " + mime.QEncoding.Encode("utf-8", subject) + "\r\n")
+	b.WriteString("Subject: " + mime.QEncoding.Encode("utf-8", m.subject) + "\r\n")
 	b.WriteString("Date: " + time.Now().Format(time.RFC1123Z) + "\r\n")
 	b.WriteString("Message-ID: " + id + "\r\n")
 	// Tells well-behaved autoresponders not to reply to a login code.
 	b.WriteString("Auto-Submitted: auto-generated\r\n")
 	b.WriteString("MIME-Version: 1.0\r\n")
-	b.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
-	b.WriteString("Content-Transfer-Encoding: base64\r\n")
+	b.WriteString("Content-Type: multipart/alternative; boundary=\"" + boundary + "\"\r\n")
 	b.WriteString("\r\n")
-	b.WriteString(base64Lines(body))
+
+	writePart := func(contentType, body string) {
+		b.WriteString("--" + boundary + "\r\n")
+		b.WriteString("Content-Type: " + contentType + "; charset=UTF-8\r\n")
+		b.WriteString("Content-Transfer-Encoding: base64\r\n")
+		b.WriteString("\r\n")
+		b.WriteString(base64Lines(body))
+	}
+	writePart("text/plain", m.plain)
+	writePart("text/html", m.html)
+	b.WriteString("--" + boundary + "--\r\n")
+
 	return []byte(b.String()), nil
+}
+
+// mimeBoundary returns a delimiter that cannot occur in base64 part bodies.
+func mimeBoundary() (string, error) {
+	var buf [16]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return "", fmt.Errorf("smtp: generate MIME boundary: %w", err)
+	}
+	return "=_sk_" + hex.EncodeToString(buf[:]), nil
 }
 
 func messageID(domain string) (string, error) {

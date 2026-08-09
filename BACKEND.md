@@ -143,10 +143,19 @@ Encryption is not optional in practice: `starttls` **fails** if the server does 
 STARTTLS rather than falling back to plaintext, and configuring credentials with `SMTP_TLS=none`
 is refused at startup. AUTH prefers PLAIN and falls back to LOGIN when that is all the server
 offers (common on Exim/cPanel hosts). The client identifies itself in EHLO as the sender's domain,
-since relays routinely reject the `localhost` that `net/smtp` would otherwise send. Messages are
-base64-encoded with a MIME-word subject, because every language we send in has non-ASCII text.
-The recipient is re-parsed with `mail.ParseAddress` before it reaches a header, so a CR/LF in the
-address cannot inject headers of its own.
+since relays routinely reject the `localhost` that `net/smtp` would otherwise send. The recipient is
+re-parsed with `mail.ParseAddress` before it reaches a header, so a CR/LF in the address cannot
+inject headers of its own.
+
+Each message is **multipart/alternative** — plain text first, HTML second, since a client renders
+the last part it understands. Both parts are base64-encoded with a MIME-word subject, because every
+language we send in has non-ASCII text. The `From` display name is the app's name in the
+recipient's language (matching `frontend/public/site.webmanifest`); the address itself is always
+`SMTP_FROM`, so bounces still work. The HTML carries the app's gold accent on a card, styled with
+inline attributes and layout tables; a `prefers-color-scheme: dark` block in the one `<style>`
+element gives a dark card to clients that honour the **reader's** system theme. The app's own
+theme setting lives in the browser's `localStorage` and is deliberately not plumbed through — see
+`internal/email/email.go`. No images: Gmail blocks `data:` URIs in `<img>`.
 
 When `SMTP_HOST`/`SMTP_FROM` are unset (local dev), codes are logged to stdout instead.
 

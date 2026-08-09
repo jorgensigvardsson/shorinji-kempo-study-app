@@ -11,7 +11,10 @@ import (
 	"encoding/base64"
 	"io"
 	"math/big"
+	"mime"
+	"mime/multipart"
 	"net"
+	"net/mail"
 	"net/textproto"
 	"strings"
 	"sync"
@@ -262,19 +265,56 @@ func throwawayCert(t *testing.T) (tls.Certificate, *x509.CertPool) {
 	return tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key, Leaf: parsed}, pool
 }
 
-// decodeBody returns the decoded message body of a base64 message. textproto's
-// DotReader has already normalised CRLF to LF by the time the server records it.
-func decodeBody(t *testing.T, msg string) string {
+// parseMessage decodes what the server received into its headers and its
+// multipart/alternative parts, in the order they appeared on the wire.
+// textproto's DotReader has already normalised CRLF to LF by the time the
+// server records it, so the message is restored before handing it to net/mail.
+func parseMessage(t *testing.T, raw string) (mail.Header, []mimePart) {
 	t.Helper()
-	_, body, ok := strings.Cut(msg, "\n\n")
-	if !ok {
-		t.Fatalf("message has no body separator:\n%s", msg)
-	}
-	decoded, err := base64.StdEncoding.DecodeString(strings.ReplaceAll(strings.TrimSpace(body), "\n", ""))
+
+	msg, err := mail.ReadMessage(strings.NewReader(strings.ReplaceAll(raw, "\n", "\r\n")))
 	if err != nil {
-		t.Fatalf("decode body: %v", err)
+		t.Fatalf("parse message: %v\n%s", err, raw)
 	}
-	return string(decoded)
+
+	mediaType, params, err := mime.ParseMediaType(msg.Header.Get("Content-Type"))
+	if err != nil {
+		t.Fatalf("parse Content-Type: %v", err)
+	}
+	if mediaType != "multipart/alternative" {
+		t.Fatalf("Content-Type = %q, want multipart/alternative", mediaType)
+	}
+
+	var parts []mimePart
+	mr := multipart.NewReader(msg.Body, params["boundary"])
+	for {
+		p, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatalf("read part: %v", err)
+		}
+		encoded, err := io.ReadAll(p)
+		if err != nil {
+			t.Fatalf("read part body: %v", err)
+		}
+		decoded, err := base64.StdEncoding.DecodeString(strings.ReplaceAll(string(encoded), "\r\n", ""))
+		if err != nil {
+			t.Fatalf("decode part body: %v", err)
+		}
+		mt, _, err := mime.ParseMediaType(p.Header.Get("Content-Type"))
+		if err != nil {
+			t.Fatalf("parse part Content-Type: %v", err)
+		}
+		parts = append(parts, mimePart{contentType: mt, body: string(decoded)})
+	}
+	return msg.Header, parts
+}
+
+type mimePart struct {
+	contentType string
+	body        string
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -302,18 +342,79 @@ func TestSendVerificationCode_ImplicitTLS_PlainAuth(t *testing.T) {
 		t.Errorf("recipients = %v, want [kenshi@example.test]", f.rcpts)
 	}
 
-	if body := decodeBody(t, f.data); !strings.Contains(body, "123456") {
-		t.Errorf("body does not carry the code:\n%s", body)
+	header, parts := parseMessage(t, f.data)
+
+	// Plain text must come first: clients render the last part they understand.
+	if len(parts) != 2 {
+		t.Fatalf("got %d parts, want 2 (plain then HTML)", len(parts))
 	}
+	if parts[0].contentType != "text/plain" || parts[1].contentType != "text/html" {
+		t.Errorf("part order = %q, %q; want text/plain then text/html", parts[0].contentType, parts[1].contentType)
+	}
+	for _, p := range parts {
+		if !strings.Contains(p.body, "123456") {
+			t.Errorf("%s part does not carry the code:\n%s", p.contentType, p.body)
+		}
+	}
+	if !strings.Contains(parts[1].body, "Shorinji Kempo Studieapp") {
+		t.Error("HTML part does not name the app in the recipient's language")
+	}
+
 	// The Swedish subject has non-ASCII in it, so it must be MIME word-encoded
-	// rather than passed through raw.
+	// on the wire — and decode back to the original.
 	if !strings.Contains(f.data, "Subject: =?utf-8?") {
 		t.Errorf("subject is not encoded:\n%s", f.data)
 	}
-	for _, header := range []string{"From: ", "To: ", "Date: ", "Message-ID: ", "MIME-Version: 1.0"} {
-		if !strings.Contains(f.data, header) {
-			t.Errorf("missing %q header:\n%s", header, f.data)
+	subject, err := new(mime.WordDecoder).DecodeHeader(header.Get("Subject"))
+	if err != nil {
+		t.Fatalf("decode subject: %v", err)
+	}
+	if subject != "Din inloggningskod för Shorinji Kempo" {
+		t.Errorf("subject = %q", subject)
+	}
+
+	for _, h := range []string{"From", "To", "Date", "Message-ID", "MIME-Version"} {
+		if header.Get(h) == "" {
+			t.Errorf("missing %s header:\n%s", h, f.data)
 		}
+	}
+}
+
+// The inbox listing should read in the recipient's language while the address
+// stays whatever SMTP_FROM configured.
+func TestSendVerificationCode_LocalizedSenderName(t *testing.T) {
+	for _, tc := range []struct{ lang, want string }{
+		{"sv", "Shorinji Kempo Studieapp"},
+		{"en", "Shorinji Kempo Study App"},
+		{"tr", "Shorinji Kempo Çalışma Uygulaması"},
+		{"ja", "少林寺拳法学習アプリ"},
+		{"xx", "Shorinji Kempo Study App"}, // unknown language falls back to English
+	} {
+		t.Run(tc.lang, func(t *testing.T) {
+			f, s := startFake(t, TLSImplicit, "PLAIN")
+			if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", tc.lang); err != nil {
+				t.Fatalf("SendVerificationCode: %v", err)
+			}
+
+			f.mu.Lock()
+			defer f.mu.Unlock()
+
+			header, _ := parseMessage(t, f.data)
+			from, err := mail.ParseAddress(header.Get("From"))
+			if err != nil {
+				t.Fatalf("parse From %q: %v", header.Get("From"), err)
+			}
+			if from.Name != tc.want {
+				t.Errorf("From display name = %q, want %q", from.Name, tc.want)
+			}
+			if from.Address != "noreply@example.test" {
+				t.Errorf("From address = %q, want noreply@example.test", from.Address)
+			}
+			// The envelope sender is what bounces go to; it must stay the address.
+			if f.from != "noreply@example.test" {
+				t.Errorf("envelope sender = %q", f.from)
+			}
+		})
 	}
 }
 
@@ -329,8 +430,11 @@ func TestSendVerificationCode_StartTLS(t *testing.T) {
 	if !f.wasTLS {
 		t.Error("STARTTLS did not upgrade the connection")
 	}
-	if body := decodeBody(t, f.data); !strings.Contains(body, "654321") {
-		t.Errorf("body does not carry the code:\n%s", body)
+	_, parts := parseMessage(t, f.data)
+	for _, p := range parts {
+		if !strings.Contains(p.body, "654321") {
+			t.Errorf("%s part does not carry the code:\n%s", p.contentType, p.body)
+		}
 	}
 }
 

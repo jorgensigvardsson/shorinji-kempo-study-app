@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-09T16:57:41.128Z",
+    changes: [
+      {
+        emoji: "🎨",
+        sv: "Mejlet med inloggningskoden har fått appens utseende, och avsändaren visas nu på ditt språk.",
+        en: "The sign-in code email now looks like the app, and the sender is shown in your language.",
+        tr: "Giriş kodu e-postası artık uygulamanın görünümünü taşıyor ve gönderen adı kendi dilinizde görünüyor.",
+        ja: "ログインコードのメールがアプリのデザインになり、送信者名がご使用の言語で表示されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-09T16:17:10.937Z",
     changes: [
       {
