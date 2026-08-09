@@ -267,6 +267,11 @@ func (s *SMTPSender) message(to string, m message) ([]byte, error) {
 	var b strings.Builder
 	b.WriteString("From: " + from.String() + "\r\n")
 	b.WriteString("To: " + (&mail.Address{Address: to}).String() + "\r\n")
+	// A human hitting "Reply" would otherwise land in SMTP_FROM's inbox, which
+	// nobody reads. Points at a noreply mailbox on the same domain instead — the
+	// From/envelope address is untouched, so bounces still reach SMTP_FROM as
+	// documented in BACKEND.md.
+	b.WriteString("Reply-To: " + (&mail.Address{Address: "noreply@" + s.heloName()}).String() + "\r\n")
 	b.WriteString("Subject: " + mime.QEncoding.Encode("utf-8", m.subject) + "\r\n")
 	b.WriteString("Date: " + time.Now().Format(time.RFC1123Z) + "\r\n")
 	b.WriteString("Message-ID: " + id + "\r\n")

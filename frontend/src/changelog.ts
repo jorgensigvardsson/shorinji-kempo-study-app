@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-09T21:15:00.000Z",
+    changes: [
+      {
+        emoji: "✉️",
+        sv: "Svar på inloggningsmejlet går inte längre till en obevakad brevlåda.",
+        en: "Replying to the sign-in code email no longer goes to an unmonitored inbox.",
+        tr: "Giriş kodu e-postasına verilen yanıtlar artık izlenmeyen bir gelen kutusuna gitmiyor.",
+        ja: "ログインコードのメールに返信しても、監視されていない受信箱には届かなくなりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-09T18:30:00.000Z",
     changes: [
       {

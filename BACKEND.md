@@ -151,7 +151,8 @@ Each message is **multipart/alternative** — plain text first, HTML second, sin
 the last part it understands. Both parts are base64-encoded with a MIME-word subject, because every
 language we send in has non-ASCII text. The `From` display name is the app's name in the
 recipient's language (matching `frontend/public/site.webmanifest`); the address itself is always
-`SMTP_FROM`, so bounces still work. The HTML carries the app's gold accent on a card, styled with
+`SMTP_FROM`, so bounces still work. `Reply-To` is set to `noreply@<SMTP_FROM's domain>` — a human
+hitting "Reply" lands there instead of in the (unmonitored) `SMTP_FROM` mailbox. The HTML carries the app's gold accent on a card, styled with
 inline attributes and layout tables; a `prefers-color-scheme: dark` block in the one `<style>`
 element gives a dark card to clients that honour the **reader's** system theme. The app's own
 theme setting lives in the browser's `localStorage` and is deliberately not plumbed through — see
