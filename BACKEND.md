@@ -453,9 +453,14 @@ One-time Azure-side setup this doesn't automate:
 - Register `https://auth.app-staging.shorinjikempo.net/auth/callback` as an
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
-- Point `auth.app-staging`, `persistence.app-staging`, and
-  `app-staging.shorinjikempo.net` at the right hosts via DNS (CNAME for the
-  two backend services, per `deploy-staging.yml`'s hostname-bind step).
+- Point `auth.app-staging` and `persistence.app-staging` at the staging
+  Container Apps environment. `--validation-method CNAME` (used in
+  `deploy-staging.yml`'s hostname-bind step, same as prod) needs both a
+  CNAME and a `asuid.<hostname>` TXT ownership-verification record per
+  service — the TXT value is each app's own
+  `properties.customDomainVerificationId` (`az containerapp show`), fetched
+  after the first Bicep deploy creates the apps but before hostname
+  binding runs. `app-staging.shorinjikempo.net` itself already exists.
 
 Required repository configuration beyond what prod already has:
 - Variable `AZURE_RESOURCE_GROUP_STAGING` — the staging resource group name.
