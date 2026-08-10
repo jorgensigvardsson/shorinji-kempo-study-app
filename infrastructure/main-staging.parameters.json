@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "sk-study-app-staging"
+    },
+    "location": {
+      "value": "swedencentral"
+    },
+    "cosmosAccountName": {
+      "value": "sk-study-app-db"
+    },
+    "cosmosResourceGroup": {
+      "value": "sk-study-app"
+    },
+    "cosmosDatabase": {
+      "value": "shorinji-staging"
+    },
+    "authImage": {
+      "value": "ghcr.io/jorgensigvardsson/sk-auth:latest"
+    },
+    "persistenceImage": {
+      "value": "ghcr.io/jorgensigvardsson/sk-persistence:latest"
+    },
+    "googleClientId": {
+      "value": ""
+    },
+    "googleClientSecret": {
+      "value": ""
+    },
+    "microsoftClientId": {
+      "value": ""
+    },
+    "microsoftClientSecret": {
+      "value": ""
+    },
+    "signingKeyPem": {
+      "value": ""
+    },
+    "frontendUrl": {
+      "value": "https://app-staging.shorinjikempo.net"
+    },
+    "authCustomDomain": {
+      "value": "auth.app-staging.shorinjikempo.net"
+    },
+    "persistenceCustomDomain": {
+      "value": "persistence.app-staging.shorinjikempo.net"
+    },
+    "cookieDomain": {
+      "value": ".app-staging.shorinjikempo.net"
+    }
+  }
+}

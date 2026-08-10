@@ -8,9 +8,258 @@ on:
     types:
       - completed
 
+# id-token: write  — lets the job exchange a GitHub OIDC token for an Azure access token
+# packages: write  — lets the job push images to GHCR
+# contents: read   — lets the job check out code
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 jobs:
-  deploy:
+  # ── 1. Build backend images and push to GHCR ────────────────────────────────
+  build-backend:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      auth_image:        ${{ steps.build.outputs.auth_image }}
+      persistence_image: ${{ steps.build.outputs.persistence_image }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push auth and persistence images
+        id: build
+        run: |
+          set -euo pipefail
+          # GHCR requires lowercase owner
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          AUTH_IMAGE="ghcr.io/${OWNER}/sk-auth:staging-${{ github.event.workflow_run.head_sha }}"
+          PERSISTENCE_IMAGE="ghcr.io/${OWNER}/sk-persistence:staging-${{ github.event.workflow_run.head_sha }}"
+
+          docker build -f backend/auth/Dockerfile        -t "$AUTH_IMAGE"        backend/
+          docker build -f backend/persistence/Dockerfile -t "$PERSISTENCE_IMAGE" backend/
+          docker push "$AUTH_IMAGE"
+          docker push "$PERSISTENCE_IMAGE"
+
+          echo "auth_image=$AUTH_IMAGE"               >> "$GITHUB_OUTPUT"
+          echo "persistence_image=$PERSISTENCE_IMAGE" >> "$GITHUB_OUTPUT"
+
+  # ── 2. Deploy backend infrastructure via Bicep; capture service URLs ─────────
+  # Shares prod's Cosmos DB account (see infrastructure/main-staging.bicep) —
+  # only a new database is created, not a new account, so this stays inside
+  # the free tier. Everything else (Container Apps environment, auth,
+  # persistence) is its own isolated resource group.
+  deploy-backend:
+    needs: build-backend
+    runs-on: ubuntu-latest
+    outputs:
+      auth_url: ${{ steps.bicep.outputs.auth_url }}
+      api_url:  ${{ steps.bicep.outputs.api_url }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # Workload identity federation — no stored Azure secret
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id:       ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # NB: the deploy principal needs Contributor on the staging resource
+      # group AND write access to the prod Cosmos account's resource group
+      # (to create the shorinji-staging database there). See BACKEND.md.
+
+      # Build a parameter override file so jq handles newlines in the PEM correctly.
+      # main-staging.parameters.json supplies namePrefix, location, cosmos
+      # account/database names, custom domains, etc. This overlay supplies
+      # images and secrets. SMTP, Google/Microsoft OAuth, and VAPID/push
+      # credentials are intentionally the same ones prod uses — the signing
+      # key is the one exception, kept separate per-environment.
+      - name: Build parameter overrides
+        env:
+          AUTH_IMAGE:               ${{ needs.build-backend.outputs.auth_image }}
+          PERSISTENCE_IMAGE:        ${{ needs.build-backend.outputs.persistence_image }}
+          GOOGLE_CLIENT_ID:         ${{ vars.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET:     ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          MICROSOFT_CLIENT_ID:      ${{ vars.MICROSOFT_CLIENT_ID }}
+          MICROSOFT_CLIENT_SECRET:  ${{ secrets.MICROSOFT_CLIENT_SECRET }}
+          SIGNING_KEY_PEM:          ${{ secrets.STAGING_SIGNING_KEY_PEM }}
+          VAPID_PUBLIC_KEY:         ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY:        ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT:            ${{ vars.VAPID_SUBJECT }}
+          PUSH_ADMIN_TOKEN:         ${{ secrets.PUSH_ADMIN_TOKEN }}
+          SMTP_HOST:                ${{ vars.SMTP_HOST }}
+          # An unset variable would otherwise override the bicep default with ""
+          SMTP_PORT:                ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USERNAME:            ${{ vars.SMTP_USERNAME }}
+          SMTP_PASSWORD:            ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM:                ${{ vars.SMTP_FROM }}
+          SMTP_TLS:                 ${{ vars.SMTP_TLS || 'starttls' }}
+        run: |
+          jq -n \
+            --arg authImage             "$AUTH_IMAGE" \
+            --arg persistenceImage      "$PERSISTENCE_IMAGE" \
+            --arg googleClientId        "$GOOGLE_CLIENT_ID" \
+            --arg googleClientSecret    "$GOOGLE_CLIENT_SECRET" \
+            --arg microsoftClientId     "$MICROSOFT_CLIENT_ID" \
+            --arg microsoftClientSecret "$MICROSOFT_CLIENT_SECRET" \
+            --arg signingKeyPem         "$SIGNING_KEY_PEM" \
+            --arg vapidPublicKey        "$VAPID_PUBLIC_KEY" \
+            --arg vapidPrivateKey       "$VAPID_PRIVATE_KEY" \
+            --arg vapidSubject          "$VAPID_SUBJECT" \
+            --arg pushAdminToken        "$PUSH_ADMIN_TOKEN" \
+            --arg smtpHost              "$SMTP_HOST" \
+            --arg smtpPort              "$SMTP_PORT" \
+            --arg smtpUsername          "$SMTP_USERNAME" \
+            --arg smtpPassword          "$SMTP_PASSWORD" \
+            --arg smtpFrom              "$SMTP_FROM" \
+            --arg smtpTls               "$SMTP_TLS" \
+            '{
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+              contentVersion: "1.0.0.0",
+              parameters: {
+                authImage:             {value: $authImage},
+                persistenceImage:      {value: $persistenceImage},
+                googleClientId:        {value: $googleClientId},
+                googleClientSecret:    {value: $googleClientSecret},
+                microsoftClientId:     {value: $microsoftClientId},
+                microsoftClientSecret: {value: $microsoftClientSecret},
+                signingKeyPem:         {value: $signingKeyPem},
+                vapidPublicKey:        {value: $vapidPublicKey},
+                vapidPrivateKey:       {value: $vapidPrivateKey},
+                vapidSubject:          {value: $vapidSubject},
+                pushAdminToken:        {value: $pushAdminToken},
+                smtpHost:              {value: $smtpHost},
+                smtpPort:              {value: $smtpPort},
+                smtpUsername:          {value: $smtpUsername},
+                smtpPassword:          {value: $smtpPassword},
+                smtpFrom:              {value: $smtpFrom},
+                smtpTls:               {value: $smtpTls}
+              }
+            }' > /tmp/deploy-params-staging.json
+
+      - name: Deploy infrastructure and capture service URLs
+        id: bicep
+        run: |
+          output=$(az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP_STAGING }}" \
+            --template-file  infrastructure/main-staging.bicep \
+            --parameters     @infrastructure/main-staging.parameters.json \
+            --parameters     @/tmp/deploy-params-staging.json \
+            --query          properties.outputs \
+            --output         json)
+
+          echo "auth_url=$(echo "$output" | jq -r '.authServiceUrl.value')"       >> "$GITHUB_OUTPUT"
+          echo "api_url=$(echo "$output" | jq -r '.persistenceServiceUrl.value')" >> "$GITHUB_OUTPUT"
+
+      - name: Bind custom domain TLS certificates
+        run: |
+          set -uo pipefail
+          RG="${{ vars.AZURE_RESOURCE_GROUP_STAGING }}"
+
+          # ACA serialises modifications to a container app, so right after a Bicep
+          # revision rollout (or a back-to-back deploy) hostname add/bind can fail with
+          # CustomDomainLockConflict ("another modification is in progress"). Retry just
+          # that case until the prior modification settles; surface any other error.
+          retry_on_lock() {
+            local n=0 max=12 delay=20 out rc
+            while :; do
+              out="$("$@" 2>&1)"; rc=$?
+              if [ "$rc" -eq 0 ]; then
+                [ -n "$out" ] && printf '%s\n' "$out"
+                return 0
+              fi
+              if printf '%s' "$out" | grep -qiE 'CustomDomainLockConflict|another modification is in progress'; then
+                n=$((n + 1))
+                if [ "$n" -ge "$max" ]; then
+                  printf '%s\n' "$out"
+                  echo "::error::Custom domain still locked after $max attempts"
+                  return "$rc"
+                fi
+                echo "Custom domain locked; retry $n/$max in ${delay}s..."
+                sleep "$delay"
+                continue
+              fi
+              printf '%s\n' "$out"
+              return "$rc"
+            done
+          }
+
+          # hostname add registers the hostname (idempotent; "already added" is fine);
+          # hostname bind issues/renews the managed cert and switches to SniEnabled.
+          retry_on_lock az containerapp hostname add \
+            --hostname auth.app-staging.shorinjikempo.net \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-auth || true
+          retry_on_lock az containerapp hostname bind \
+            --hostname auth.app-staging.shorinjikempo.net \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-auth \
+            --environment sk-study-app-staging-env \
+            --validation-method CNAME || exit 1
+
+          retry_on_lock az containerapp hostname add \
+            --hostname persistence.app-staging.shorinjikempo.net \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-persistence || true
+          retry_on_lock az containerapp hostname bind \
+            --hostname persistence.app-staging.shorinjikempo.net \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-persistence \
+            --environment sk-study-app-staging-env \
+            --validation-method CNAME || exit 1
+
+      # A deploy that leaves a service unable to start must fail here — loudly and
+      # before the frontend ships. Both services scale to zero, so the first
+      # request has to wake them: retry instead of treating a cold start as a
+      # failure.
+      - name: Smoke test backend services
+        env:
+          AUTH_URL: ${{ steps.bicep.outputs.auth_url }}
+          API_URL:  ${{ steps.bicep.outputs.api_url }}
+        run: |
+          set -uo pipefail
+          check() {
+            local name="$1" url="$2" want="$3"
+            local n=0 max=12 code=000
+            while [ "$n" -lt "$max" ]; do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$url" || echo 000)
+              if [ "$code" = "$want" ]; then
+                echo "$name: HTTP $code — healthy"
+                return 0
+              fi
+              n=$((n + 1))
+              echo "$name: HTTP $code (attempt $n/$max) — retrying in 15s"
+              sleep 15
+            done
+            echo "::error::$name unhealthy after $max attempts: last status $code from $url"
+            return 1
+          }
+
+          fail=0
+          # JWKS must serve: persistence reads it to validate tokens.
+          check "auth JWKS"   "${AUTH_URL%/}/.well-known/jwks.json" 200 || fail=1
+          # 401 is the healthy answer for an unauthenticated request — it proves the
+          # service is up and the auth middleware is wired, without depending on
+          # push being configured.
+          check "persistence" "${API_URL%/}/api/v1/document"        401 || fail=1
+          exit "$fail"
+
+  # ── 3. Build and deploy frontend with backend URLs baked in ─────────────────
+  deploy-frontend:
+    needs: deploy-backend
     runs-on: ubuntu-latest
     env:
       # Host and user are variables, not secrets: they are not sensitive, and
@@ -31,16 +280,19 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Write .env.production from secrets
+      - name: Write .env.production
         env:
-          VITE_DEBUG: ${{ vars.VITE_DEBUG || 'true' }}
-          VITE_FEEDBACK_EMAIL: ${{ secrets.VITE_FEEDBACK_EMAIL }}
-          VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
-          VITE_ONEDRIVE_TENANT_ID: ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
+          VITE_AUTH_URL:             ${{ needs.deploy-backend.outputs.auth_url }}
+          VITE_API_URL:              ${{ needs.deploy-backend.outputs.api_url }}
+          VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'true' }}
+          VITE_FEEDBACK_EMAIL:       ${{ secrets.VITE_FEEDBACK_EMAIL }}
+          VITE_ONEDRIVE_CLIENT_ID:   ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
+          VITE_ONEDRIVE_TENANT_ID:   ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
           VITE_ONEDRIVE_REDIRECT_URI: ${{ vars.VITE_ONEDRIVE_REDIRECT_URI }}
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_BACKEND_ENABLED:      "true"
+          VITE_GOOGLE_CLIENT_ID:     ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_GOOGLE_CLIENT_SECRET: ${{ secrets.VITE_GOOGLE_CLIENT_SECRET }}
-          VITE_GOOGLE_REDIRECT_URI: ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
+          VITE_GOOGLE_REDIRECT_URI:  ${{ vars.VITE_GOOGLE_REDIRECT_URI }}
         run: |
           set -euo pipefail
           missing=()
@@ -51,9 +303,11 @@ jobs:
               missing+=("$name")
             fi
           }
-          # VITE_DEBUG is the only value allowed to be missing (it defaults to "false").
+          # VITE_DEBUG is the only value allowed to be missing (it defaults to "true").
           # VITE_ONEDRIVE_REDIRECT_URI and VITE_GOOGLE_REDIRECT_URI are optional —
           # if blank, the app falls back to "<origin>/" at runtime.
+          require VITE_AUTH_URL "$VITE_AUTH_URL"
+          require VITE_API_URL "$VITE_API_URL"
           require VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
           require VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
           require VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
@@ -73,11 +327,14 @@ jobs:
               printf '%s=%s\n' "$name" "$value" >> frontend/.env.production
             fi
           }
+          write_var VITE_AUTH_URL "$VITE_AUTH_URL"
+          write_var VITE_API_URL "$VITE_API_URL"
           write_var VITE_DEBUG "$VITE_DEBUG"
           write_var VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
           write_var VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
           write_var VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
           write_var VITE_ONEDRIVE_REDIRECT_URI "$VITE_ONEDRIVE_REDIRECT_URI"
+          write_var VITE_BACKEND_ENABLED "$VITE_BACKEND_ENABLED"
           write_var VITE_GOOGLE_CLIENT_ID "$VITE_GOOGLE_CLIENT_ID"
           write_var VITE_GOOGLE_CLIENT_SECRET "$VITE_GOOGLE_CLIENT_SECRET"
           write_var VITE_GOOGLE_REDIRECT_URI "$VITE_GOOGLE_REDIRECT_URI"
@@ -154,4 +411,32 @@ jobs:
           if [ "$fail" -ne 0 ]; then
             echo "::error::Post-deploy verification failed — the site is not serving as expected."
             exit 1
+          fi
+
+      # Final step: the deploy succeeded, so tell subscribed users a new version
+      # is live. Non-fatal — a notification hiccup must not fail a good deploy.
+      - name: Notify users of new version
+        env:
+          API_URL:          ${{ needs.deploy-backend.outputs.api_url }}
+          PUSH_ADMIN_TOKEN: ${{ secrets.PUSH_ADMIN_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${PUSH_ADMIN_TOKEN:-}" ]; then
+            echo "PUSH_ADMIN_TOKEN not set — skipping new-version push notification."
+            exit 0
+          fi
+          if [ -z "${API_URL:-}" ]; then
+            echo "::warning::persistence API URL unavailable — skipping new-version push notification."
+            exit 0
+          fi
+          echo "Broadcasting new-version notification via ${API_URL%/}/push/broadcast"
+          status=$(curl -sS -o /tmp/broadcast-resp.json -w '%{http_code}' \
+            -X POST "${API_URL%/}/push/broadcast" \
+            -H "Authorization: Bearer ${PUSH_ADMIN_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"title":"New version available","body":"Open the app to update to the latest version.","url":"/changelog"}') \
+            || { echo "::warning::Broadcast request failed (network error) — users may not have been notified."; exit 0; }
+          echo "Broadcast response (HTTP ${status}): $(cat /tmp/broadcast-resp.json 2>/dev/null)"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "::warning::Broadcast returned HTTP ${status} — users may not have been notified."
           fi

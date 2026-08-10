@@ -420,10 +420,47 @@ key arrives as a PEM string (`SERVICE_KEY_PEM`), no file volume needed.
 (users + identity index + documents); supports `--dry-run`.
 
 ### Staging
-**No backend services.** Staging is for testing frontend quality only; backend sign-in is
-unavailable there (`VITE_BACKEND_ENABLED` unset hides the identity UI and
-`BackendSyncClient` is not wired up). This keeps staging costs at zero and removes GDPR
-concerns for the test environment.
+Staging runs the same backend services as prod, deployed via
+`infrastructure/main-staging.bicep` into its own resource group
+(`sk-study-app-staging`) so an outage or bad deploy there can't touch prod.
+It does **not** get its own Cosmos DB account — Azure allows only one
+free-tier account per subscription, and prod already uses it — instead
+`modules/cosmos-database.bicep` adds a second database (`shorinji-staging`)
+to prod's existing account (`sk-study-app-db`, in the `sk-study-app`
+resource group), deployed cross-resource-group from the staging template.
+Prod's `shorinji` database and staging's `shorinji-staging` database share
+the account's throughput budget (400 RU/s each, well under the free tier's
+1000 RU/s cap) but hold completely separate documents.
+
+Everything except the Cosmos account is environment-specific: staging has
+its own Container Apps environment, its own JWT signing key
+(`STAGING_SIGNING_KEY_PEM`, deliberately not shared with prod so a token
+from one environment is never valid against the other), and its own
+hostnames (`auth.app-staging.shorinjikempo.net`,
+`persistence.app-staging.shorinjikempo.net`). SMTP, Google/Microsoft OAuth,
+and VAPID/push credentials are reused from prod's — staging sends real
+verification emails through the same relay, so treat staging sign-ins like
+real ones.
+
+One-time Azure-side setup this doesn't automate:
+- Create the `sk-study-app-staging` resource group.
+- Grant the deploy principal (`AZURE_CLIENT_ID`) Contributor on
+  `sk-study-app-staging`, plus write access to the `sk-study-app-db` Cosmos
+  account (or the whole `sk-study-app` resource group) so it can create the
+  `shorinji-staging` database and containers there.
+- If OIDC login is scoped by branch, add a federated credential subject for
+  whichever branch triggers this deploy.
+- Register `https://auth.app-staging.shorinjikempo.net/auth/callback` as an
+  additional redirect URI on the existing Google and Microsoft OAuth
+  clients.
+- Point `auth.app-staging`, `persistence.app-staging`, and
+  `app-staging.shorinjikempo.net` at the right hosts via DNS (CNAME for the
+  two backend services, per `deploy-staging.yml`'s hostname-bind step).
+
+Required repository configuration beyond what prod already has:
+- Variable `AZURE_RESOURCE_GROUP_STAGING` — the staging resource group name.
+- Secret `STAGING_SIGNING_KEY_PEM` — a signing key generated the same way as
+  prod's (`openssl genrsa 2048`), but a different key.
 
 ### Local development
 `docker-compose up` starts the frontend (Vite), auth (`:8081`), and persistence (`:8080`)

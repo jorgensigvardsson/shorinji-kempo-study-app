@@ -117,4 +117,6 @@ Optional repository variables (with sensible defaults):
 - `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`
 
 ## Deployment staging
-Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host. Staging deploys the frontend only — it does not touch the Azure backend.
+Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host.
+
+Staging also deploys its own auth and persistence services, into a separate Azure resource group, so backend sign-in and sync can be tested there too. It shares prod's Cosmos DB account rather than provisioning a second one — see [BACKEND.md](BACKEND.md#staging) for the full setup, including the one-time Azure configuration it doesn't automate.
