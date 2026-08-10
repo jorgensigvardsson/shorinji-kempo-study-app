@@ -448,8 +448,12 @@ One-time Azure-side setup this doesn't automate:
   `sk-study-app-staging`, plus write access to the `sk-study-app-db` Cosmos
   account (or the whole `sk-study-app` resource group) so it can create the
   `shorinji-staging` database and containers there.
-- If OIDC login is scoped by branch, add a federated credential subject for
-  whichever branch triggers this deploy.
+- If OIDC login is scoped by branch, add a federated credential with
+  subject `repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/main`
+  — **not** `deploy-staging`. `deploy-staging.yml`'s Azure login runs inside
+  a `workflow_run` job, and GitHub always executes those in the default
+  branch's context, so the OIDC token's subject is `ref:refs/heads/main`
+  regardless of which branch actually pushed the triggering commit.
 - Register `https://auth.app-staging.shorinjikempo.net/auth/callback` as an
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
