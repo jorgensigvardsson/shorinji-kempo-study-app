@@ -403,9 +403,11 @@ Pushing to the `deploy` branch runs `.github/workflows/deploy.yml`:
    Apps environment, one container app per service) deployed via `az deployment group create`;
    Azure login uses OIDC workload identity federation (no stored Azure secret)
 3. **Custom domains** — `auth.app.shorinjikempo.net` and
-   `persistence.app.shorinjikempo.net` bound with ACA managed TLS certificates. Both are
-   subdomains of the frontend origin so that session cookies stay same-site; see
-   `cookieDomain` in `infrastructure/main.parameters.json`
+   `persistence.app.shorinjikempo.net`, bound to a certificate `renew-certs.yml` issues via
+   Let's Encrypt (DNS-01 through DirectAdmin's API) and uploads as a bring-your-own
+   certificate — not ACA's own managed-certificate issuance; see the Staging section below
+   for why. Both are subdomains of the frontend origin so that session cookies stay
+   same-site; see `cookieDomain` in `infrastructure/main.parameters.json`
 4. **Frontend** — built with the backend URLs baked in, rsynced over SSH to the LiteSpeed
    web host
 5. **Announcement** — a push broadcast ("New version available") via `PUSH_ADMIN_TOKEN`;
@@ -474,39 +476,45 @@ One-time Azure-side setup this doesn't automate:
   `properties.customDomainVerificationId` (`az containerapp show`), fetched
   after the first Bicep deploy creates the apps but before hostname binding
   runs. `app-staging.shorinjikempo.net` itself already exists.
-- TLS for these two hostnames comes from `renew-staging-certs.yml`, not
-  Azure's managed-certificate issuance (`--validation-method CNAME`) — that
-  repeatedly failed with a generic "Operation timed out." error and turned
-  out to be a known Azure Container Apps platform reliability issue with no
-  customer-side fix. Instead, `renew-staging-certs.yml` runs Let's Encrypt's
-  DNS-01 challenge against DirectAdmin's API (Inleed's hosting panel is
-  DirectAdmin-based) via `certbot` + `certbot-dns-directadmin`, and uploads
-  the result as a bring-your-own certificate
-  (`az containerapp env certificate upload`). `deploy-staging.yml`'s
-  hostname-bind step then binds against that uploaded cert
-  (`sk-study-app-staging-cert`) rather than requesting a managed one.
+- TLS for these two hostnames — and, since it was generalized, prod's as well
+  — comes from `renew-certs.yml`, not Azure's managed-certificate issuance
+  (`--validation-method CNAME`). Staging's managed certs repeatedly failed
+  with a generic "Operation timed out." error; it looked like a known Azure
+  Container Apps platform reliability issue at first, but turned out to be
+  the CNAME-target bug above — prod's managed certs were actually healthy
+  when this was built, and got switched over anyway for consistency between
+  the two pipelines. `renew-certs.yml` runs Let's Encrypt's DNS-01 challenge
+  against DirectAdmin's API (Inleed's hosting panel is DirectAdmin-based) via
+  `certbot` + `certbot-dns-directadmin` for both environments (a matrix job,
+  same DirectAdmin credentials, differing only in resource group/app
+  names/hostnames), and uploads the result as a bring-your-own certificate
+  (`az containerapp env certificate upload`). `deploy-staging.yml` and
+  `deploy.yml`'s hostname-bind steps then bind against that uploaded cert
+  (`sk-study-app-staging-cert` / `sk-study-app-cert`) rather than requesting
+  a managed one.
   - Create a DirectAdmin Login Key (Kundzon → hosting service → DirectAdmin
     details; if "current password" is rejected, set a fresh DirectAdmin
     password there first — it isn't guaranteed to match your Kundzon
     password) scoped to exactly: `CMD_API_LOGIN_TEST`, `CMD_API_DNS_CONTROL`,
     `CMD_API_SHOW_DOMAINS`, `CMD_API_DOMAIN_POINTER`.
-  - This workflow runs on `schedule:`, not `workflow_run`, so (unlike
-    `deploy-staging.yml`) it must be merged to `main` to actually fire —
-    GitHub always evaluates a workflow's schedule using the copy of the file
-    on the default branch.
+  - This workflow runs on `schedule:`, not `workflow_run`/`push`, so (unlike
+    `deploy-staging.yml`/`deploy.yml`) it must be merged to `main` to
+    actually fire — GitHub always evaluates a workflow's schedule using the
+    copy of the file on the default branch.
   - Bootstrap: run it once manually (workflow_dispatch) before the next
-    `deploy-staging.yml` run reaches its hostname-bind step, since that step
-    now expects `sk-study-app-staging-cert` to already exist.
+    `deploy-staging.yml`/`deploy.yml` run reaches its hostname-bind step,
+    since that step expects the corresponding cert to already exist.
 
-Required repository configuration beyond what prod already has:
+Required repository configuration beyond what prod already had before staging existed:
 - Variable `AZURE_RESOURCE_GROUP_STAGING` — the staging resource group name.
 - Secret `STAGING_SIGNING_KEY_PEM` — a signing key generated the same way as
   prod's (`openssl genrsa 2048`), but a different key.
 - Variables `DIRECTADMIN_SERVER` (e.g. `https://s001.example.com:2222`) and
   `DIRECTADMIN_USERNAME`, and secret `DIRECTADMIN_LOGIN_KEY` — the scoped
-  Login Key described above.
+  Login Key described above. Shared by both matrix legs of
+  `renew-certs.yml`, not staging-specific.
 - Variable `ACME_CONTACT_EMAIL` — contact address for the Let's Encrypt
-  account used by `renew-staging-certs.yml`.
+  account used by `renew-certs.yml`. Also shared, not staging-specific.
 
 ### Local development
 `docker-compose up` starts the frontend (Vite), auth (`:8081`), and persistence (`:8080`)
