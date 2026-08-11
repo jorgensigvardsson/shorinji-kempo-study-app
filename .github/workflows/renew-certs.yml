@@ -199,10 +199,17 @@ jobs:
           set -uo pipefail
           fail=0
           check() {
-            local url="$1"
-            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$url" || echo 000)
+            local url="$1" code
+            # GitHub Actions runs `run:` blocks under `bash -e`; a bare
+            # `test && action` returns the test's own (falsy) status on the
+            # healthy path and aborts the script right there. `code=$(...) ||
+            # code=000` and an `if` (exempt from errexit on its condition)
+            # avoid that.
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$url") || code=000
             echo "$url -> HTTP $code"
-            [ "$code" = "000" ] && fail=1
+            if [ "$code" = "000" ]; then
+              fail=1
+            fi
           }
           check "https://${AUTH_HOSTNAME}/.well-known/jwks.json"
           check "https://${PERSISTENCE_HOSTNAME}/api/v1/document"
