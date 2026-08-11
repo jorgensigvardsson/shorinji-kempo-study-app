@@ -458,12 +458,22 @@ One-time Azure-side setup this doesn't automate:
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
 - Point `auth.app-staging` and `persistence.app-staging` at the staging
-  Container Apps environment: both need a CNAME to the environment's default
-  domain, plus a `asuid.<hostname>` TXT ownership-verification record — the
-  TXT value is each app's own `properties.customDomainVerificationId`
-  (`az containerapp show`), fetched after the first Bicep deploy creates the
-  apps but before hostname binding runs. `app-staging.shorinjikempo.net`
-  itself already exists.
+  Container Apps environment: each needs a CNAME to **its own app's default
+  FQDN** (`az containerapp show --query properties.configuration.ingress.fqdn`,
+  e.g. `sk-study-app-staging-auth.<env-default-domain>`) — **not** to the bare
+  environment default domain (`az containerapp env show --query
+  properties.defaultDomain`) on its own. The environment's default domain has
+  no A/AAAA record of its own; only the per-app hostnames under it do. Pointing
+  the CNAME at the bare environment domain looks fine (it resolves, and
+  `hostname add`'s ownership check doesn't care) but silently dead-ends DNS
+  resolution — this was the actual root cause of the "Operation timed out."
+  managed-certificate failures below, not an Azure platform bug as first
+  suspected; it just took issuing a real certificate via a different path to
+  expose it. Each hostname also needs a `asuid.<hostname>` TXT
+  ownership-verification record — the TXT value is each app's own
+  `properties.customDomainVerificationId` (`az containerapp show`), fetched
+  after the first Bicep deploy creates the apps but before hostname binding
+  runs. `app-staging.shorinjikempo.net` itself already exists.
 - TLS for these two hostnames comes from `renew-staging-certs.yml`, not
   Azure's managed-certificate issuance (`--validation-method CNAME`) — that
   repeatedly failed with a generic "Operation timed out." error and turned
