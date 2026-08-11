@@ -458,18 +458,45 @@ One-time Azure-side setup this doesn't automate:
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
 - Point `auth.app-staging` and `persistence.app-staging` at the staging
-  Container Apps environment. `--validation-method CNAME` (used in
-  `deploy-staging.yml`'s hostname-bind step, same as prod) needs both a
-  CNAME and a `asuid.<hostname>` TXT ownership-verification record per
-  service — the TXT value is each app's own
-  `properties.customDomainVerificationId` (`az containerapp show`), fetched
-  after the first Bicep deploy creates the apps but before hostname
-  binding runs. `app-staging.shorinjikempo.net` itself already exists.
+  Container Apps environment: both need a CNAME to the environment's default
+  domain, plus a `asuid.<hostname>` TXT ownership-verification record — the
+  TXT value is each app's own `properties.customDomainVerificationId`
+  (`az containerapp show`), fetched after the first Bicep deploy creates the
+  apps but before hostname binding runs. `app-staging.shorinjikempo.net`
+  itself already exists.
+- TLS for these two hostnames comes from `renew-staging-certs.yml`, not
+  Azure's managed-certificate issuance (`--validation-method CNAME`) — that
+  repeatedly failed with a generic "Operation timed out." error and turned
+  out to be a known Azure Container Apps platform reliability issue with no
+  customer-side fix. Instead, `renew-staging-certs.yml` runs Let's Encrypt's
+  DNS-01 challenge against DirectAdmin's API (Inleed's hosting panel is
+  DirectAdmin-based) via `certbot` + `certbot-dns-directadmin`, and uploads
+  the result as a bring-your-own certificate
+  (`az containerapp env certificate upload`). `deploy-staging.yml`'s
+  hostname-bind step then binds against that uploaded cert
+  (`sk-study-app-staging-cert`) rather than requesting a managed one.
+  - Create a DirectAdmin Login Key (Kundzon → hosting service → DirectAdmin
+    details; if "current password" is rejected, set a fresh DirectAdmin
+    password there first — it isn't guaranteed to match your Kundzon
+    password) scoped to exactly: `CMD_API_LOGIN_TEST`, `CMD_API_DNS_CONTROL`,
+    `CMD_API_SHOW_DOMAINS`, `CMD_API_DOMAIN_POINTER`.
+  - This workflow runs on `schedule:`, not `workflow_run`, so (unlike
+    `deploy-staging.yml`) it must be merged to `main` to actually fire —
+    GitHub always evaluates a workflow's schedule using the copy of the file
+    on the default branch.
+  - Bootstrap: run it once manually (workflow_dispatch) before the next
+    `deploy-staging.yml` run reaches its hostname-bind step, since that step
+    now expects `sk-study-app-staging-cert` to already exist.
 
 Required repository configuration beyond what prod already has:
 - Variable `AZURE_RESOURCE_GROUP_STAGING` — the staging resource group name.
 - Secret `STAGING_SIGNING_KEY_PEM` — a signing key generated the same way as
   prod's (`openssl genrsa 2048`), but a different key.
+- Variables `DIRECTADMIN_SERVER` (e.g. `https://s001.example.com:2222`) and
+  `DIRECTADMIN_USERNAME`, and secret `DIRECTADMIN_LOGIN_KEY` — the scoped
+  Login Key described above.
+- Variable `ACME_CONTACT_EMAIL` — contact address for the Let's Encrypt
+  account used by `renew-staging-certs.yml`.
 
 ### Local development
 `docker-compose up` starts the frontend (Vite), auth (`:8081`), and persistence (`:8080`)

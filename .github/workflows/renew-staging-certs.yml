@@ -1,0 +1,183 @@
+name: Renew-Staging-Certs
+#
+# Issues/renews TLS certificates for the staging backend's custom domains via
+# Let's Encrypt (DNS-01, using DirectAdmin's API through certbot-dns-directadmin)
+# and uploads them as bring-your-own certificates on the Container Apps
+# environment. This replaces Azure's own managed-certificate issuance, which
+# has repeatedly failed with a generic "Operation timed out." error for these
+# two hostnames — see BACKEND.md#staging.
+#
+# Runs on a schedule rather than being triggered by a deploy, so it must be
+# merged to main to actually fire: GitHub always evaluates a workflow's
+# `schedule:` trigger using the copy of this file on the repo's default
+# branch, regardless of which branch is "current" for staging otherwise.
+#
+# One-time bootstrap: run this manually (workflow_dispatch) once before
+# relying on deploy-staging.yml's hostname bind step, which binds against the
+# certificate this workflow uploads and will fail if it doesn't exist yet.
+
+on:
+  schedule:
+    # Monthly gives a wide safety margin under Let's Encrypt's current 90-day
+    # certificate lifetime, and stays safe as LE phases lifetimes down to 45
+    # days over the next couple of years.
+    - cron: '0 3 1 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AUTH_HOSTNAME: auth.app-staging.shorinjikempo.net
+  PERSISTENCE_HOSTNAME: persistence.app-staging.shorinjikempo.net
+  CERT_NAME: sk-study-app-staging-cert
+
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install certbot + DirectAdmin DNS plugin
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/certbot-venv"
+          # shellcheck disable=SC1091
+          source "$RUNNER_TEMP/certbot-venv/bin/activate"
+          pip install --quiet certbot certbot-dns-directadmin
+          echo "$RUNNER_TEMP/certbot-venv/bin" >> "$GITHUB_PATH"
+
+      - name: Write DirectAdmin API credentials
+        env:
+          DIRECTADMIN_SERVER:    ${{ vars.DIRECTADMIN_SERVER }}
+          DIRECTADMIN_USERNAME:  ${{ vars.DIRECTADMIN_USERNAME }}
+          DIRECTADMIN_LOGIN_KEY: ${{ secrets.DIRECTADMIN_LOGIN_KEY }}
+        run: |
+          set -euo pipefail
+          for name in DIRECTADMIN_SERVER DIRECTADMIN_USERNAME DIRECTADMIN_LOGIN_KEY; do
+            [ -n "${!name}" ] || { echo "::error::$name is not set — see BACKEND.md#staging"; exit 1; }
+          done
+          cat > "$RUNNER_TEMP/directadmin.ini" <<EOF
+          dns_directadmin_url = ${DIRECTADMIN_SERVER}
+          dns_directadmin_username = ${DIRECTADMIN_USERNAME}
+          dns_directadmin_password = ${DIRECTADMIN_LOGIN_KEY}
+          EOF
+          chmod 600 "$RUNNER_TEMP/directadmin.ini"
+
+      - name: Request certificate (DNS-01 via DirectAdmin)
+        env:
+          ACME_CONTACT_EMAIL: ${{ vars.ACME_CONTACT_EMAIL }}
+        run: |
+          set -euo pipefail
+          [ -n "$ACME_CONTACT_EMAIL" ] || { echo "::error::ACME_CONTACT_EMAIL is not set — see BACKEND.md#staging"; exit 1; }
+          certbot certonly \
+            --non-interactive --agree-tos -m "$ACME_CONTACT_EMAIL" \
+            --authenticator dns-directadmin \
+            --dns-directadmin-credentials "$RUNNER_TEMP/directadmin.ini" \
+            --dns-directadmin-propagation-seconds 60 \
+            --config-dir "$RUNNER_TEMP/le-config" \
+            --work-dir   "$RUNNER_TEMP/le-work" \
+            --logs-dir   "$RUNNER_TEMP/le-logs" \
+            --cert-name sk-study-app-staging \
+            -d "$AUTH_HOSTNAME" \
+            -d "$PERSISTENCE_HOSTNAME"
+
+      - name: Package as PFX
+        run: |
+          set -euo pipefail
+          live="$RUNNER_TEMP/le-config/live/sk-study-app-staging"
+          PFX_PASSWORD="$(openssl rand -base64 24)"
+          openssl pkcs12 -export \
+            -in "$live/fullchain.pem" \
+            -inkey "$live/privkey.pem" \
+            -passout "pass:${PFX_PASSWORD}" \
+            -out "$RUNNER_TEMP/staging.pfx"
+          # Masked so it never appears in logs, and available to later steps.
+          echo "::add-mask::$PFX_PASSWORD"
+          echo "PFX_PASSWORD=$PFX_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id:       ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Upload certificate to the Container Apps environment
+        run: |
+          set -euo pipefail
+          az containerapp env certificate upload \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP_STAGING }}" \
+            --name sk-study-app-staging-env \
+            --certificate-file "$RUNNER_TEMP/staging.pfx" \
+            --certificate-password "$PFX_PASSWORD" \
+            --certificate-name "$CERT_NAME"
+
+      - name: Bind hostnames to the uploaded certificate
+        run: |
+          set -uo pipefail
+          RG="${{ vars.AZURE_RESOURCE_GROUP_STAGING }}"
+
+          # ACA serialises modifications to a container app; a bind can transiently
+          # fail with CustomDomainLockConflict if another change is mid-flight.
+          retry_on_lock() {
+            local n=0 max=12 delay=20 out rc
+            while :; do
+              out="$("$@" 2>&1)"; rc=$?
+              if [ "$rc" -eq 0 ]; then
+                [ -n "$out" ] && printf '%s\n' "$out"
+                return 0
+              fi
+              if printf '%s' "$out" | grep -qiE 'CustomDomainLockConflict|another modification is in progress'; then
+                n=$((n + 1))
+                if [ "$n" -ge "$max" ]; then
+                  printf '%s\n' "$out"
+                  echo "::error::Custom domain still locked after $max attempts"
+                  return "$rc"
+                fi
+                echo "Custom domain locked; retry $n/$max in ${delay}s..."
+                sleep "$delay"
+                continue
+              fi
+              printf '%s\n' "$out"
+              return "$rc"
+            done
+          }
+
+          retry_on_lock az containerapp hostname add \
+            --hostname "$AUTH_HOSTNAME" \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-auth || true
+          retry_on_lock az containerapp hostname bind \
+            --hostname "$AUTH_HOSTNAME" \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-auth \
+            --environment sk-study-app-staging-env \
+            --certificate "$CERT_NAME" || exit 1
+
+          retry_on_lock az containerapp hostname add \
+            --hostname "$PERSISTENCE_HOSTNAME" \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-persistence || true
+          retry_on_lock az containerapp hostname bind \
+            --hostname "$PERSISTENCE_HOSTNAME" \
+            --resource-group "$RG" \
+            --name sk-study-app-staging-persistence \
+            --environment sk-study-app-staging-env \
+            --certificate "$CERT_NAME" || exit 1
+
+      - name: Verify TLS is serving on both hostnames
+        run: |
+          set -uo pipefail
+          fail=0
+          check() {
+            local url="$1"
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$url" || echo 000)
+            echo "$url -> HTTP $code"
+            [ "$code" = "000" ] && fail=1
+          }
+          check "https://${AUTH_HOSTNAME}/.well-known/jwks.json"
+          check "https://${PERSISTENCE_HOSTNAME}/api/v1/document"
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::TLS handshake or connection failed on at least one hostname after binding."
+            exit 1
+          fi
