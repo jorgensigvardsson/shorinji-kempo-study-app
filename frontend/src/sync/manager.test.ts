@@ -19,7 +19,6 @@ async function flushPromises() {
 }
 
 type MockClient = {
-  canUse: ReturnType<typeof vi.fn>;
   beginAuthorization: ReturnType<typeof vi.fn>;
   completeAuthorizationIfPresent: ReturnType<typeof vi.fn>;
   isConnected: ReturnType<typeof vi.fn>;
@@ -31,7 +30,6 @@ type MockClient = {
 
 function makeMockClient(): MockClient {
   return {
-    canUse: vi.fn().mockReturnValue(true),
     beginAuthorization: vi.fn().mockResolvedValue(undefined),
     completeAuthorizationIfPresent: vi.fn().mockResolvedValue(false),
     isConnected: vi.fn().mockReturnValue(true),
@@ -51,7 +49,7 @@ type MockStore = {
   subscribeDocument: ReturnType<typeof vi.fn>;
 };
 
-function makeMockStore(provider = "google-drive", doc?: AppDataDocument): MockStore {
+function makeMockStore(provider = "backend", doc?: AppDataDocument): MockStore {
   const localDoc = doc ?? makeDoc();
   return {
     get: vi.fn((key: string) =>
@@ -68,8 +66,7 @@ function makeMockStore(provider = "google-drive", doc?: AppDataDocument): MockSt
 // ─── test suite ───────────────────────────────────────────────────────────────
 
 describe("SyncManager", () => {
-  let mockGoogleClient: MockClient;
-  let mockOneDriveClient: MockClient;
+  let mockBackendClient: MockClient;
   let mockStore: MockStore;
   let getSyncManager: typeof import("./manager").getSyncManager;
   // Dynamically imported after vi.resetModules() so instanceof checks match the fresh module.
@@ -77,15 +74,13 @@ describe("SyncManager", () => {
 
   beforeEach(async () => {
     localStorage.clear();
-    mockGoogleClient = makeMockClient();
-    mockOneDriveClient = makeMockClient();
+    mockBackendClient = makeMockClient();
     mockStore = makeMockStore();
 
     vi.resetModules();
-    // Regular functions (not arrow functions) are required here — arrow functions cannot be
-    // used as constructors, and SyncManager instantiates these with `new`.
-    vi.doMock("./google-drive", () => ({ GoogleDriveClient: function() { return mockGoogleClient; } }));
-    vi.doMock("./onedrive", () => ({ OneDriveClient: function() { return mockOneDriveClient; } }));
+    // A regular function (not an arrow function) is required here — arrow functions cannot
+    // be used as constructors, and SyncManager instantiates this with `new`.
+    vi.doMock("./backend", () => ({ BackendSyncClient: function() { return mockBackendClient; } }));
     vi.doMock("../persistence/store", () => ({ getAppDataStore: function() { return mockStore; } }));
 
     ({ getSyncManager } = await import("./manager"));
@@ -145,23 +140,17 @@ describe("SyncManager", () => {
   // ─── syncNow ──────────────────────────────────────────────────────────────
 
   describe("syncNow", () => {
-    it("returns local_only result and sets status when provider is 'local'", async () => {
+    it("returns local_only result and sets status when signed out", async () => {
       mockStore.get.mockReturnValue("local");
       const manager = getSyncManager();
       const result = await manager.syncNow();
       expect(result).toEqual({ conflictDetected: false, pushedLocalChanges: false });
       expect(manager.getState().status).toBe("local_only");
-    });
-
-    it("sets disconnected when provider is 'dropbox' (unimplemented)", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "dropbox" : undefined);
-      const manager = getSyncManager();
-      await manager.syncNow();
-      expect(manager.getState().status).toBe("disconnected");
+      expect(mockBackendClient.downloadDocument).not.toHaveBeenCalled();
     });
 
     it("sets disconnected when the client is not connected", async () => {
-      mockGoogleClient.isConnected.mockReturnValue(false);
+      mockBackendClient.isConnected.mockReturnValue(false);
       const manager = getSyncManager();
       await manager.syncNow();
       expect(manager.getState().status).toBe("disconnected");
@@ -170,12 +159,12 @@ describe("SyncManager", () => {
     it("uploads local doc as initial when no remote document exists", async () => {
       const localDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z" });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(null);
+      mockBackendClient.downloadDocument.mockResolvedValue(null);
 
       const manager = getSyncManager();
       const result = await manager.syncNow();
 
-      expect(mockGoogleClient.uploadDocument).toHaveBeenCalledWith(localDoc);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc);
       expect(result.pushedLocalChanges).toBe(true);
       expect(result.conflictDetected).toBe(false);
       expect(manager.getState().status).toBe("connected");
@@ -183,11 +172,11 @@ describe("SyncManager", () => {
 
     it("saves base document to localStorage after initial upload", async () => {
       mockStore.getDocument.mockReturnValue(makeDoc());
-      mockGoogleClient.downloadDocument.mockResolvedValue(null);
+      mockBackendClient.downloadDocument.mockResolvedValue(null);
 
       await getSyncManager().syncNow();
 
-      expect(localStorage.getItem("sync-base-document:google-drive")).not.toBeNull();
+      expect(localStorage.getItem("sync-base-document:backend")).not.toBeNull();
     });
 
     it("applies remote changes to local store when remote is newer", async () => {
@@ -197,7 +186,7 @@ describe("SyncManager", () => {
         data: { ...localDoc.data, grade: "nidan" as const },
       });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
 
       const manager = getSyncManager();
       await manager.syncNow();
@@ -213,11 +202,11 @@ describe("SyncManager", () => {
         data: { ...remoteDoc.data, grade: "sandan" as const },
       });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
 
       const result = await getSyncManager().syncNow();
 
-      expect(mockGoogleClient.uploadDocument).toHaveBeenCalled();
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalled();
       expect(result.pushedLocalChanges).toBe(true);
     });
 
@@ -225,109 +214,64 @@ describe("SyncManager", () => {
       // First sync normalises the document key order and saves the base.
       const doc = makeDoc();
       mockStore.getDocument.mockReturnValue(doc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(null);
+      mockBackendClient.downloadDocument.mockResolvedValue(null);
       const manager = getSyncManager();
       await manager.syncNow(); // initial upload
 
       // Second sync: remote is the doc we just uploaded; local is the normalised form.
-      const uploaded = mockGoogleClient.uploadDocument.mock.calls[0][0] as AppDataDocument;
+      const uploaded = mockBackendClient.uploadDocument.mock.calls[0][0] as AppDataDocument;
       mockStore.getDocument.mockReturnValue(uploaded);
-      mockGoogleClient.downloadDocument.mockResolvedValue(uploaded);
-      mockGoogleClient.uploadDocument.mockClear();
+      mockBackendClient.downloadDocument.mockResolvedValue(uploaded);
+      mockBackendClient.uploadDocument.mockClear();
       mockStore.setDocument.mockClear();
 
       await manager.syncNow();
 
       expect(mockStore.setDocument).not.toHaveBeenCalled();
-      expect(mockGoogleClient.uploadDocument).not.toHaveBeenCalled();
+      expect(mockBackendClient.uploadDocument).not.toHaveBeenCalled();
       expect(manager.getState().status).toBe("connected");
     });
 
     it("detects conflict and sets conflict_resolution state", async () => {
       const baseDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
-      localStorage.setItem("sync-base-document:google-drive", JSON.stringify(baseDoc));
+      localStorage.setItem("sync-base-document:backend", JSON.stringify(baseDoc));
 
       const localDoc = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "nidan" as const } });
       const remoteDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "sandan" as const } });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
 
       const manager = getSyncManager();
       const result = await manager.syncNow();
 
       expect(result.conflictDetected).toBe(true);
       expect(manager.getState().status).toBe("conflict_resolution");
-      expect(mockGoogleClient.uploadDocument).not.toHaveBeenCalled();
+      expect(mockBackendClient.uploadDocument).not.toHaveBeenCalled();
     });
 
     it("backs up local document to localStorage when conflict is detected", async () => {
       const baseDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
-      localStorage.setItem("sync-base-document:google-drive", JSON.stringify(baseDoc));
+      localStorage.setItem("sync-base-document:backend", JSON.stringify(baseDoc));
 
       const localDoc = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "nidan" as const } });
       const remoteDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "sandan" as const } });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
 
       await getSyncManager().syncNow();
 
-      const backupKeys = Object.keys(localStorage).filter(k => k.startsWith("sync-backup:google-drive:"));
+      const backupKeys = Object.keys(localStorage).filter(k => k.startsWith("sync-backup:backend:"));
       expect(backupKeys.length).toBeGreaterThan(0);
-    });
-  });
-
-  // ─── connect ──────────────────────────────────────────────────────────────
-
-  describe("connect", () => {
-    it("calls beginAuthorization when client canUse() is true", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "google-drive" : undefined);
-      await getSyncManager().connect();
-      expect(mockGoogleClient.beginAuthorization).toHaveBeenCalled();
-    });
-
-    it("sets error state when client.canUse() returns false", async () => {
-      mockGoogleClient.canUse.mockReturnValue(false);
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "google-drive" : undefined);
-
-      const manager = getSyncManager();
-      await manager.connect();
-
-      expect(manager.getState().status).toBe("error");
-    });
-
-    it("sets disconnected state for an unimplemented provider", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "dropbox" : undefined);
-      const manager = getSyncManager();
-      await manager.connect();
-      expect(manager.getState().status).toBe("disconnected");
     });
   });
 
   // ─── disconnect ───────────────────────────────────────────────────────────
 
   describe("disconnect", () => {
-    it("sets local_only state when provider is 'local'", () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
-      const manager = getSyncManager();
-      manager.disconnect();
-      expect(manager.getState().status).toBe("local_only");
-      expect(manager.getState().message).toBeNull();
-    });
-
-    it("sets disconnected state and calls client.disconnect() for google-drive", () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "google-drive" : undefined);
-      const manager = getSyncManager();
-      manager.disconnect();
-      expect(manager.getState().status).toBe("disconnected");
-      expect(mockGoogleClient.disconnect).toHaveBeenCalled();
-    });
-
-    it("sets disconnected state and calls client.disconnect() for onedrive", () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "onedrive" : undefined);
-      const manager = getSyncManager();
-      manager.disconnect();
-      expect(manager.getState().status).toBe("disconnected");
-      expect(mockOneDriveClient.disconnect).toHaveBeenCalled();
+    it("drops the backend session and reverts the provider to local", () => {
+      getSyncManager().disconnect();
+      expect(mockBackendClient.disconnect).toHaveBeenCalled();
+      expect(mockStore.set).toHaveBeenCalledWith("syncProvider", "local");
     });
   });
 
@@ -342,12 +286,12 @@ describe("SyncManager", () => {
 
     async function enterConflict() {
       const baseDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
-      localStorage.setItem("sync-base-document:google-drive", JSON.stringify(baseDoc));
+      localStorage.setItem("sync-base-document:backend", JSON.stringify(baseDoc));
 
       const localDoc = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "nidan" as const } });
       const remoteDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "sandan" as const } });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockGoogleClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
 
       const manager = getSyncManager();
       await manager.syncNow();
@@ -356,23 +300,23 @@ describe("SyncManager", () => {
 
     it("applies local doc and uploads when choice is 'local'", async () => {
       const { manager, localDoc } = await enterConflict();
-      mockGoogleClient.uploadDocument.mockClear();
+      mockBackendClient.uploadDocument.mockClear();
 
       await manager.resolveConflict("local");
 
       expect(mockStore.setDocument).toHaveBeenCalledWith(localDoc);
-      expect(mockGoogleClient.uploadDocument).toHaveBeenCalledWith(localDoc);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc);
       expect(manager.getState().status).toBe("connected");
     });
 
     it("applies remote doc and uploads when choice is 'remote'", async () => {
       const { manager, remoteDoc } = await enterConflict();
-      mockGoogleClient.uploadDocument.mockClear();
+      mockBackendClient.uploadDocument.mockClear();
 
       await manager.resolveConflict("remote");
 
       expect(mockStore.setDocument).toHaveBeenCalledWith(remoteDoc);
-      expect(mockGoogleClient.uploadDocument).toHaveBeenCalledWith(remoteDoc);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(remoteDoc);
       expect(manager.getState().status).toBe("connected");
     });
 
@@ -387,7 +331,7 @@ describe("SyncManager", () => {
 
   describe("retrySync / error handling", () => {
     it("sets error state when syncNow throws a transient error via retrySync", async () => {
-      mockGoogleClient.downloadDocument.mockRejectedValue(new Error("network failure"));
+      mockBackendClient.downloadDocument.mockRejectedValue(new Error("network failure"));
       mockStore.getDocument.mockReturnValue(makeDoc());
 
       const manager = getSyncManager();
@@ -399,7 +343,7 @@ describe("SyncManager", () => {
     });
 
     it("sets auth_expired state (not error) when AuthExpiredError is thrown", async () => {
-      mockGoogleClient.downloadDocument.mockRejectedValue(new AuthExpiredError());
+      mockBackendClient.downloadDocument.mockRejectedValue(new AuthExpiredError());
       mockStore.getDocument.mockReturnValue(makeDoc());
 
       const manager = getSyncManager();
@@ -412,7 +356,7 @@ describe("SyncManager", () => {
     it("schedules a retry after a transient error", async () => {
       vi.useFakeTimers();
 
-      mockGoogleClient.downloadDocument
+      mockBackendClient.downloadDocument
         .mockRejectedValueOnce(new Error("temp fail"))
         .mockResolvedValue(null);
       mockStore.getDocument.mockReturnValue(makeDoc());
@@ -434,7 +378,7 @@ describe("SyncManager", () => {
     it("does not retry on AuthExpiredError", async () => {
       vi.useFakeTimers();
 
-      mockGoogleClient.downloadDocument.mockRejectedValue(new AuthExpiredError());
+      mockBackendClient.downloadDocument.mockRejectedValue(new AuthExpiredError());
       mockStore.getDocument.mockReturnValue(makeDoc());
 
       const manager = getSyncManager();
@@ -447,7 +391,7 @@ describe("SyncManager", () => {
       await flushPromises();
 
       // Should still be auth_expired — no retry scheduled.
-      expect(mockGoogleClient.downloadDocument).toHaveBeenCalledTimes(1);
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(1);
       vi.useRealTimers();
     });
   });
@@ -465,7 +409,7 @@ describe("SyncManager", () => {
       expect(mockStore.subscribeDocument).toHaveBeenCalledTimes(1);
     });
 
-    it("sets local_only state when provider is 'local' on start", async () => {
+    it("sets local_only state when signed out on start", async () => {
       mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
       const manager = getSyncManager();
       manager.start();
@@ -474,8 +418,8 @@ describe("SyncManager", () => {
     });
 
     it("sets auth_expired state when client.wasAuthExpired() is true on start", async () => {
-      mockGoogleClient.isConnected.mockReturnValue(false);
-      mockGoogleClient.wasAuthExpired.mockReturnValue(true);
+      mockBackendClient.isConnected.mockReturnValue(false);
+      mockBackendClient.wasAuthExpired.mockReturnValue(true);
 
       const manager = getSyncManager();
       manager.start();
@@ -485,8 +429,8 @@ describe("SyncManager", () => {
     });
 
     it("sets disconnected state when client is not connected and auth not expired", async () => {
-      mockGoogleClient.isConnected.mockReturnValue(false);
-      mockGoogleClient.wasAuthExpired.mockReturnValue(false);
+      mockBackendClient.isConnected.mockReturnValue(false);
+      mockBackendClient.wasAuthExpired.mockReturnValue(false);
 
       const manager = getSyncManager();
       manager.start();
@@ -496,16 +440,35 @@ describe("SyncManager", () => {
     });
 
     it("calls syncNow when client is connected after start", async () => {
-      mockGoogleClient.isConnected.mockReturnValue(true);
-      mockGoogleClient.downloadDocument.mockResolvedValue(null);
+      mockBackendClient.isConnected.mockReturnValue(true);
+      mockBackendClient.downloadDocument.mockResolvedValue(null);
       mockStore.getDocument.mockReturnValue(makeDoc());
 
       const manager = getSyncManager();
       manager.start();
       await flushPromises();
 
-      expect(mockGoogleClient.downloadDocument).toHaveBeenCalled();
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalled();
       expect(manager.getState().status).toBe("connected");
+    });
+
+    it("clears leftover cloud-storage sync data on start", async () => {
+      localStorage.setItem("sync-onedrive-token", "{}");
+      localStorage.setItem("sync-google-drive-token", "{}");
+      localStorage.setItem("sync-base-document:onedrive", "{}");
+      localStorage.setItem("sync-backup:google-drive:2024-01-01T00:00:00.000Z", "{}");
+      localStorage.setItem("sync-base-document:backend", "{}");
+
+      const manager = getSyncManager();
+      manager.start();
+      await flushPromises();
+
+      expect(localStorage.getItem("sync-onedrive-token")).toBeNull();
+      expect(localStorage.getItem("sync-google-drive-token")).toBeNull();
+      expect(localStorage.getItem("sync-base-document:onedrive")).toBeNull();
+      expect(localStorage.getItem("sync-backup:google-drive:2024-01-01T00:00:00.000Z")).toBeNull();
+      // The backend's own base document must survive the purge.
+      expect(localStorage.getItem("sync-base-document:backend")).not.toBeNull();
     });
   });
 });

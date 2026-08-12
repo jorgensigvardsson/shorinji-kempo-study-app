@@ -47,11 +47,13 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.Handle("PUT /api/v1/document", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.putDocument)))
 	inner.Handle("DELETE /api/v1/account", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.deleteAccount)))
 
-	// Web Push — only when configured. subscribe/unsubscribe accept anonymous
-	// callers; broadcast is guarded by a bearer token inside the handler.
+	// Web Push — only when configured. subscribe requires a signed-in user (the
+	// app has no anonymous mode); unsubscribe stays open so a device can always
+	// drop its own endpoint, even after the session is gone; broadcast is guarded
+	// by a bearer token or the admin role inside the handler.
 	if h.pushSender != nil && h.pushStore != nil {
 		inner.HandleFunc("GET /push/public-key", h.publicKey)
-		inner.HandleFunc("POST /push/subscribe", h.subscribe)
+		inner.Handle("POST /push/subscribe", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.subscribe)))
 		inner.HandleFunc("POST /push/unsubscribe", h.unsubscribe)
 		inner.HandleFunc("POST /push/broadcast", h.broadcast)
 	}

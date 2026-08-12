@@ -7,7 +7,7 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
-import { ArrowClockwise, ArrowLeftRight, Bell, CloudSlash, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
+import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState, useWakeLock } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
@@ -27,8 +27,6 @@ interface Props {
 }
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
-const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
-const IDENTITY_CHOICE_KEY = "identity-choice-made";
 const NOTIF_PROMPT_DISMISSED_KEY = "notifications-prompt-dismissed";
 // Hide the keep-screen-on control entirely where the Screen Wake Lock API is
 // unavailable — there's nothing it could do there.
@@ -134,30 +132,18 @@ function App(props: Props) {
     textZoom,
     lang => languageData.save(lang),
     g => gradeData.save(g.grade),
-    size => textSizeData.save(size),
-    () => setShowSignIn(true)
+    size => textSizeData.save(size)
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
   useEffect(() => gradeData.registerListener(g => setNextGrade(g)), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
 
+  // An account is required: everything below the login screen assumes a signed-in
+  // user, so the provider doubles as the gate. Signing out (or a session that
+  // can't be renewed) sets it back to "local" and the login screen returns.
   const { syncProvider } = useSyncProvider();
-  const [showSignIn, setShowSignIn] = useState(
-    () => BACKEND_ENABLED && localStorage.getItem(IDENTITY_CHOICE_KEY) !== "true"
-  );
-  // Auto-hide when the user completes sign-in (provider switches to "backend").
-  useEffect(() => {
-    if (syncProvider === "backend") {
-      localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
-      setShowSignIn(false);
-    }
-  }, [syncProvider]);
-
-  const handleContinueAnonymously = () => {
-    localStorage.setItem(IDENTITY_CHOICE_KEY, "true");
-    setShowSignIn(false);
-  };
+  const showSignIn = syncProvider !== "backend";
 
   // Auto-apply pending versions for unauthenticated visitors (login screen);
   // authenticated users get the "Update" toast via the returned needRefresh.
@@ -209,7 +195,7 @@ function App(props: Props) {
     return (
       <TranslatorContext.Provider value={translator}>
         <div style={{ zoom: textZoom }}>
-          <LoginScreen onContinueAnonymously={handleContinueAnonymously} />
+          <LoginScreen />
         </div>
       </TranslatorContext.Provider>
     );
@@ -229,8 +215,7 @@ function App(props: Props) {
             reserved at the bottom of the page (--floating-stack-reserve) so
             nothing here ever covers content when scrolled to the end. */}
         <div ref={floatingRef} className="app-floating-stack d-print-none">
-          <AppToasts translator={translator} onShowLogin={() => setShowSignIn(true)}
-            needRefresh={needRefresh} onUpdate={applyUpdate} />
+          <AppToasts translator={translator} needRefresh={needRefresh} onUpdate={applyUpdate} />
           {WAKE_LOCK_SUPPORTED && (
             <WakeLockToggle variant="card" className="d-none d-lg-block" active={keepAwake} onChange={setKeepAwake} />
           )}
@@ -346,8 +331,8 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const AppToasts = (props: { translator: Translator; onShowLogin: () => void; needRefresh: boolean; onUpdate: () => void }) => {
-  const { translator, onShowLogin, needRefresh, onUpdate } = props;
+const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpdate: () => void }) => {
+  const { translator, needRefresh, onUpdate } = props;
   const navigate = useNavigate();
   const lang = translator.currentLanguage;
 
@@ -364,8 +349,7 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void; nee
   };
 
   // --- notifications opt-in prompt ---
-  // A one-time shortcut for enabling push notifications, shown to everyone
-  // (signed-in or anonymous, since both can subscribe). The full control lives
+  // A one-time shortcut for enabling push notifications. The full control lives
   // in Settings; this is just a nudge. Suppressed once enabled or dismissed.
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const [notifBusy, setNotifBusy] = useState(false);
@@ -401,23 +385,16 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void; nee
   // SW registration and the pending-version state live in App's useAppUpdate hook
   // (so they run even when unauthenticated); here we just render the prompt.
 
-  // --- reconnect toast ---
+  // --- sync toasts ---
   const syncState = useSyncState();
-  const { syncProvider } = useSyncProvider();
-  const providerLabel = syncProvider === "onedrive" ? "OneDrive"
-    : syncProvider === "google-drive" ? "Google Drive"
-    : syncProvider === "dropbox" ? "Dropbox"
-    : translator.translate("molntjänsten");
 
-  // When the backend session expires, redirect to the login screen instead of
-  // showing a generic "sync disconnected" toast.
+  // An expired session can't be renewed silently, so sign out — that flips the
+  // provider back to "local" and App swaps in the login screen.
   useEffect(() => {
-    if (syncProvider === "backend" && syncState.status === "auth_expired") {
-      localStorage.removeItem(IDENTITY_CHOICE_KEY);
+    if (syncState.status === "auth_expired") {
       getSyncManager().disconnect();
-      onShowLogin();
     }
-  }, [syncState.status, syncProvider, onShowLogin]);
+  }, [syncState.status]);
 
   return (
     <ToastContainer className="app-update-toast-container">
@@ -494,7 +471,7 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void; nee
           </div>
           <div className="app-update-toast-copy">
             <div className="app-update-toast-title">{translator.translate("Synkfel")}</div>
-            <div className="app-update-toast-text">{translator.translate("Kunde inte synka med {0}. Försöker igen automatiskt.", { params: [providerLabel] })}</div>
+            <div className="app-update-toast-text">{translator.translate("Kunde inte synka med servern. Försöker igen automatiskt.")}</div>
           </div>
           <Button size="sm" variant="warning" className="app-update-toast-action"
             onClick={() => getSyncManager().retrySync()}>
@@ -521,21 +498,6 @@ const AppToasts = (props: { translator: Translator; onShowLogin: () => void; nee
               {translator.translate("Den andra enheten")}
             </Button>
           </div>
-        </Toast.Body>
-      </Toast>
-      <Toast show={syncState.status === "auth_expired" && syncProvider !== "backend"} className="app-update-toast">
-        <Toast.Body className="app-update-toast-body">
-          <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
-            <CloudSlash size={20} />
-          </div>
-          <div className="app-update-toast-copy">
-            <div className="app-update-toast-title">{translator.translate("Synken har kopplats från")}</div>
-            <div className="app-update-toast-text">{translator.translate("Anslutningen till {0} har gått ut.", { params: [providerLabel] })}</div>
-          </div>
-          <Button size="sm" variant="primary" className="app-update-toast-action"
-            onClick={() => getSyncManager().connect()}>
-            {translator.translate("Anslut igen")}
-          </Button>
         </Toast.Body>
       </Toast>
     </ToastContainer>

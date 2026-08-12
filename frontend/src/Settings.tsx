@@ -1,19 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Dropdown, Form } from "react-bootstrap";
-import { useSyncProvider, useSyncState, useTheme } from "./hooks";
+import { Button, Form } from "react-bootstrap";
+import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
-import type { CurrentWeekAnchor, SyncProvider } from "./persistence/schema";
+import type { CurrentWeekAnchor } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
-import { DeviceHdd, Download, ExclamationTriangleFill, PersonCircle, Upload } from "react-bootstrap-icons";
+import { Download, Upload } from "react-bootstrap-icons";
 
-const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === "true";
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
-import "./Settings.css";
 
 interface Props {
     translator: Translator;
@@ -23,15 +21,12 @@ interface Props {
     onSetLanguage: (lang: Language) => void;
     onSetGrade: (grade: GradePlan) => void;
     onSetTextSize: (textSize: number) => void;
-    onShowLogin: () => void;
 }
 
 const Settings = (props: Props) => {
-    const { translator, nextGrade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize, onShowLogin } = props;
+    const { translator, nextGrade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
     const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
-    const { syncProvider, setSyncProvider } = useSyncProvider();
-    const syncState = useSyncState();
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
     const [kenshiNumber, setKenshiNumber] = useState(() => store.get("kenshiNumber"));
     const [showKanjiOnHokeiCards, setShowKanjiOnHokeiCards] = useState(() => store.get("showKanjiOnHokeiCards"));
@@ -57,25 +52,6 @@ const Settings = (props: Props) => {
 
         return translator.japanese(humanName);
     }
-
-    const isConnected = syncState.status === "connected" || syncState.status === "syncing" || syncState.status === "connecting";
-    const providerLabel = syncProvider === "onedrive"
-        ? "OneDrive"
-        : syncProvider === "google-drive"
-            ? "Google Drive"
-            : syncProvider === "dropbox"
-                ? "Dropbox"
-                : translator.translate("Ingen");
-    const lastSyncedLabel = syncState.lastSyncedAt
-        ? new Date(syncState.lastSyncedAt).toLocaleString()
-        : translator.translate("Aldrig");
-    const syncStateLabel = syncState.message ? `, ${translator.translate(syncState.message)}` : null;
-    const syncProviderOptions: { value: SyncProvider; label: string; logo?: string }[] = [
-        { value: "local", label: translator.translate("Ingen") },
-        { value: "onedrive", label: "OneDrive", logo: "/onedrive-logo.svg" },
-        { value: "google-drive", label: "Google Drive", logo: "/google-drive-logo.svg" },
-    ];
-    const selectedSyncProvider = syncProviderOptions.find(option => option.value === syncProvider) ?? syncProviderOptions[0];
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
     useEffect(() => store.subscribe("kenshiNumber", setKenshiNumber), [store]);
@@ -217,126 +193,27 @@ const Settings = (props: Props) => {
                 </Form.Text>
             </Form.Group>
 
-            {syncProvider !== "backend" && (
-                <Form.Group className="mb-3" controlId="settingsSyncProvider">
-                    <Form.Label>{translator.translate("Synk")}</Form.Label>
-                    {!isConnected && (
-                        <>
-                            <Dropdown onSelect={eventKey => eventKey && setSyncProvider(eventKey as SyncProvider)}>
-                                <Dropdown.Toggle as="button" type="button" className="form-select settings-provider-select-toggle">
-                                    <ProviderLogo logo={selectedSyncProvider.logo} />
-                                    <span>{selectedSyncProvider.label}</span>
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu className="w-100 settings-provider-menu">
-                                    {syncProviderOptions.map(option => (
-                                        <Dropdown.Item
-                                            key={option.value}
-                                            eventKey={option.value}
-                                            active={option.value === syncProvider}
-                                            className="settings-provider-option"
-                                        >
-                                            <ProviderLogo logo={option.logo} />
-                                            <span>{option.label}</span>
-                                        </Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
-                            </Dropdown>
-                            {syncProvider !== "local" && (
-                                <>
-                                    {syncState.status === "auth_expired" && (
-                                        <Form.Text className="d-block mt-2 text-warning">
-                                            {translator.translate("Anslutningen till {0} har gått ut.", { params: [providerLabel] })}
-                                        </Form.Text>
-                                    )}
-                                    <div className="mt-2 d-flex gap-2">
-                                        <Button
-                                            variant="outline-primary"
-                                            size="sm"
-                                            onClick={() => getSyncManager().connect()}
-                                            disabled={syncState.status === "connecting" || syncState.status === "syncing"}
-                                        >
-                                            {translator.translate("Anslut")}
-                                        </Button>
-                                    </div>
-                                    {syncProvider === "onedrive" && (
-                                        <Form.Text className="d-block mt-2">
-                                            {translator.translate("OneDrive-anslutningar behöver förnyas var 24:e timme.")}
-                                        </Form.Text>
-                                    )}
-                                </>
-                            )}
-                        </>
-                    )}
-                    {isConnected && (
-                        <>
-                            <Form.Text className="d-block mt-2">
-                                {translator.translate("Ansluten till")} {providerLabel}, {translator.translate("senast synkad")} {lastSyncedLabel}{syncStateLabel}
-                            </Form.Text>
-                            <div className="mt-2 d-flex gap-2">
-                                <Button
-                                    variant="outline-secondary"
-                                    size="sm"
-                                    onClick={() => getSyncManager().disconnect()}
-                                >
-                                    {translator.translate("Koppla från")}
-                                </Button>
-                                <Button
-                                    variant="outline-success"
-                                    size="sm"
-                                    onClick={() => { void getSyncManager().syncNow(); }}
-                                    disabled={syncState.status === "connecting" || syncState.status === "syncing"}
-                                >
-                                    {translator.translate("Synka nu")}
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                    {syncProvider === "google-drive" && (
-                        <Form.Text className="d-block mt-2 text-warning">
-                            <ExclamationTriangleFill className="me-1" />
-                            {translator.translate("Support för Google Drive är fortfarande beta")}
-                        </Form.Text>
-                    )}
-                </Form.Group>
-            )}
+            <Form.Group className="mb-3" controlId="settingsAccount">
+                <Form.Label>{translator.translate("Konto")}</Form.Label>
+                <AccountStatus translator={translator} />
+            </Form.Group>
 
-            {syncProvider === "backend" && (
-                <Form.Group className="mb-3" controlId="settingsAccount">
-                    <Form.Label>{translator.translate("Konto")}</Form.Label>
-                    <AccountStatus translator={translator} onShowLogin={onShowLogin} />
-                </Form.Group>
-            )}
-
-            {BACKEND_ENABLED && syncProvider !== "backend" && (
-                <Form.Group className="mb-3" controlId="settingsAccount">
-                    <Form.Label>{translator.translate("Konto")}</Form.Label>
-                    <Form.Text className="d-block mt-1 mb-2">
-                        {translator.translate("Spara dina framsteg på alla enheter genom att logga in.")}
-                    </Form.Text>
-                    <Button variant="outline-primary" size="sm" onClick={onShowLogin}>
-                        <PersonCircle className="me-2" />
-                        {translator.translate("Logga in")}
+            <Form.Group className="mb-3">
+                <Form.Label>{translator.translate("Exportera/importera data")}</Form.Label>
+                <Form.Text className="d-block mt-1 mb-2">
+                    {translator.translate("Ladda ner en säkerhetskopia av all din data, eller importera data från en tidigare nedladdning. Detta kan användas för att spara inställningar, dina anteckningar, dina självvärderingar, och annan information du samlat ihop.")}
+                </Form.Text>
+                <div className="d-flex gap-2">
+                    <Button variant="outline-secondary" size="sm" onClick={exportData}>
+                        <Download className="me-2" />
+                        {translator.translate("Ladda ner")}
                     </Button>
-                </Form.Group>
-            )}
-            {syncProvider !== "backend" && (
-                <Form.Group className="mb-3">
-                    <Form.Label>{translator.translate("Exportera/importera data")}</Form.Label>
-                    <Form.Text className="d-block mt-1 mb-2">
-                        {translator.translate("Ladda ner en säkerhetskopia av all din data, eller importera data från en tidigare nedladdning. Detta kan användas för att spara inställningar, dina anteckningar, dina självvärderingar, och annan information du samlat ihop. T.ex. kan detta användas när du inte använder en molntjänst som t.ex OneDrive, men vill kunna ta med den här informationen till en ny dator, eller telefon.")}
-                    </Form.Text>
-                    <div className="d-flex gap-2">
-                        <Button variant="outline-secondary" size="sm" onClick={exportData}>
-                            <Download className="me-2" />
-                            {translator.translate("Ladda ner")}
-                        </Button>
-                        <Button variant="outline-secondary" size="sm" onClick={importData}>
-                            <Upload className="me-2" />
-                            {translator.translate("Importera")}
-                        </Button>
-                    </div>
-                </Form.Group>
-            )}
+                    <Button variant="outline-secondary" size="sm" onClick={importData}>
+                        <Upload className="me-2" />
+                        {translator.translate("Importera")}
+                    </Button>
+                </div>
+            </Form.Group>
         </div>
     )
 }
@@ -346,8 +223,8 @@ const providerDisplayName: Record<string, string> = {
     "microsoft": "Microsoft",
 };
 
-const AccountStatus = (props: { translator: Translator; onShowLogin: () => void }) => {
-    const { translator, onShowLogin } = props;
+const AccountStatus = (props: { translator: Translator }) => {
+    const { translator } = props;
     const [userInfo, setUserInfo] = useState(() => getSyncManager().getBackendUserInfo());
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -389,10 +266,10 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
         }
     }, [translator]);
 
+    // Signing out flips the sync provider back to "local", which is what makes
+    // App swap the whole UI for the login screen.
     const handleLogout = () => {
-        localStorage.removeItem("identity-choice-made");
         getSyncManager().disconnect();
-        onShowLogin();
     };
 
     const handleExport = async () => {
@@ -412,8 +289,6 @@ const AccountStatus = (props: { translator: Translator; onShowLogin: () => void 
         setError(null);
         try {
             await getSyncManager().deleteAccount();
-            localStorage.removeItem("identity-choice-made");
-            onShowLogin();
         } catch {
             setError(translator.translate("Raderingen misslyckades. Försök igen."));
             setDeleting(false);
@@ -683,14 +558,6 @@ const NotificationPermissionControl = ({ translator }: { translator: Translator 
             {error && <Form.Text className="d-block mt-2 text-danger">{error}</Form.Text>}
         </>
     );
-}
-
-const ProviderLogo = (props: { logo?: string }) => {
-    const { logo } = props;
-
-    return logo
-        ? <img src={logo} alt="" className="settings-provider-logo" />
-        : <DeviceHdd className="settings-provider-logo-placeholder" aria-hidden="true" />;
 }
 
 export default Settings;

@@ -120,7 +120,6 @@
   <div class="card note hidden" id="box-export">
     <h2 id="t-exp-h"></h2>
     <p id="t-exp-b"></p>
-    <p class="muted hidden" id="t-drive"></p>
     <p class="muted" id="t-summary"></p>
     <p><button class="btn" id="btn-export"></button></p>
 
@@ -171,7 +170,6 @@
       expHAccount: "Saknas något?",
       expB: "Ditt material finns bara här, på den här enheten. Ladda ner det och ta med det till den nya adressen.",
       expBAccount: "Om din data inte ser rätt ut på den nya sidan kan du ladda ner den härifrån och importera den där.",
-      drive: "Ditt material kan också finnas i molntjänsten du anslutit. Den kan du ansluta på nytt på den nya sidan.",
       exportBtn: "Ladda ner data",
       doneB: "Filen har laddats ner — fortsätt med steg 2.",
       stepsH: "Så här flyttar du din data",
@@ -198,7 +196,6 @@
       expHAccount: "Something missing?",
       expB: "Your material is only here, on this device. Download it and take it with you to the new address.",
       expBAccount: "If your data doesn't look right on the new site, you can download it here and import it there.",
-      drive: "Your material may also be in the cloud service you connected. You can reconnect it on the new site.",
       exportBtn: "Download data",
       doneB: "File downloaded — continue with step 2.",
       stepsH: "How to move your data",
@@ -225,7 +222,6 @@
       expHAccount: "Eksik bir şey mi var?",
       expB: "Materyaliniz yalnızca burada, bu cihazda. İndirin ve yeni adrese götürün.",
       expBAccount: "Verileriniz yeni sitede doğru görünmüyorsa, buradan indirip orada içe aktarabilirsiniz.",
-      drive: "Materyaliniz bağladığınız bulut hizmetinde de bulunabilir. Yeni sitede yeniden bağlayabilirsiniz.",
       exportBtn: "Verileri indir",
       doneB: "Dosya indirildi — 2. adımla devam edin.",
       stepsH: "Verilerinizi nasıl taşırsınız",
@@ -252,7 +248,6 @@
       expHAccount: "内容が足りませんか？",
       expB: "データはこの端末だけに保存されています。ダウンロードして、新しいアドレスへ持っていってください。",
       expBAccount: "新しいサイトでデータが正しく表示されない場合は、ここからダウンロードして、新しいサイトでインポートできます。",
-      drive: "接続済みのクラウドサービスにもデータがある可能性があります。新しいサイトで再接続できます。",
       exportBtn: "データをダウンロード",
       doneB: "ファイルをダウンロードしました。手順2に進んでください。",
       stepsH: "データの移行手順",
@@ -345,7 +340,6 @@
   var doc = readDocument();
   var account = hasAccount(doc);
   var hasData = hasUserData(doc);
-  var provider = doc && doc.data && doc.data.syncProvider;
 
   function summarise(s) {
     var d = (doc && doc.data) || {};
@@ -372,7 +366,6 @@
     setText("t-acc-b", s.accB);
     setText("t-exp-h", s.expH);
     setText("t-exp-b", s.expB);
-    setText("t-drive", s.drive);
     setText("btn-export", s.exportBtn);
     setText("t-done-b", s.doneB);
     setText("t-steps-h", s.stepsH);
@@ -391,7 +384,6 @@
     setText("t-exp-b", account ? s.expBAccount : s.expB);
     show("box-account", account);
     show("box-export", hasData);
-    show("t-drive", !account && hasData && (provider === "onedrive" || provider === "google-drive"));
 
     var buttons = document.querySelectorAll(".langs button");
     for (var i = 0; i < buttons.length; i++) {

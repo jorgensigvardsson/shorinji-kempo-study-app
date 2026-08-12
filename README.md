@@ -14,7 +14,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Quiz** — rapid-fire questions testing technique names and terminology, with streak counter and synced all-time high score
 - **Flashcards** — spaced-repetition learning tool (non-Japanese languages)
 - **Focused technique cards** — calm full-card practice view, Dojo mode, notes, videos, and self-assessment
-- **Cloud sync** — data syncs automatically to OneDrive, Google Drive, or Dropbox
+- **Accounts** — sign in with an email code (or Google/Microsoft, when the address belongs to one); an account is required to use the app, and study data syncs automatically to the backend across devices
 - **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
 - **Multilingual** — Swedish (default/fallback), English, Turkish, Japanese
 
@@ -37,6 +37,22 @@ npm test          # run tests
 npm run build     # production build
 ```
 
+The app requires an account, so the dev server alone stops at the login screen — the auth
+service must be reachable on `localhost:8081` before you can get in. Bring the backend up
+from the repository root:
+
+```bash
+docker compose up                      # frontend + auth + persistence
+docker compose up auth persistence     # backends only, alongside your own `npm run dev`
+```
+
+Compose reads Google/Microsoft OIDC credentials from a `.env` file in the repository root
+(`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`);
+without them those providers stay disabled and every address falls back to an emailed code.
+With no SMTP relay configured the auth service logs the code to stdout instead of sending it.
+Pointing the dev server at the staging or production backend instead is not an option: their
+CORS allowed origin is an exact match against `FRONTEND_URL`, so `localhost:5173` is rejected.
+
 ## Translation workflow
 
 To send a language section to an external translator who doesn't use git:
@@ -55,7 +71,7 @@ Notifications use the standard [Web Push Protocol](https://web.dev/articles/push
 
 **Pieces:**
 - The service worker (`frontend/src/sw.ts`) handles the `push` and `notificationclick` events.
-- The persistence service (`backend/persistence`) serves `GET /push/public-key`, stores subscriptions via `POST /push/subscribe` / `POST /push/unsubscribe`, and broadcasts via `POST /push/broadcast`. Subscriptions are anonymous unless an `access_token` cookie ties them to a signed-in user. Dead subscriptions (HTTP 404/410) are pruned automatically.
+- The persistence service (`backend/persistence`) serves `GET /push/public-key`, stores subscriptions via `POST /push/subscribe` / `POST /push/unsubscribe`, and broadcasts via `POST /push/broadcast`. Subscribing requires a signed-in session, so every subscription is tied to a user; unsubscribing does not, so a device can always drop its own endpoint. Dead subscriptions (HTTP 404/410) are pruned automatically.
 - Settings → *Uppdateringsnotiser* lets the user opt in/out. On iOS the app must be added to the Home Screen first (Apple only allows Web Push for installed PWAs).
 
 **Generate VAPID keys once** (stable forever — rotating them invalidates every existing subscription):
@@ -104,9 +120,6 @@ Required repository secrets:
 - `PUSH_ADMIN_TOKEN` — bearer token authorizing `POST /push/broadcast` (leave unset to disable broadcasts)
 - `SMTP_PASSWORD` — password for the mail relay that sends sign-in codes (leave unset to log codes instead of mailing them)
 - `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
-- `VITE_ONEDRIVE_CLIENT_ID` — OneDrive OAuth public client ID
-- `VITE_GOOGLE_CLIENT_ID` — Google Drive OAuth public client ID
-- `VITE_GOOGLE_CLIENT_SECRET` — Google Drive OAuth client secret. Google's token endpoint requires this for Web-application clients even with PKCE; the secret is baked into the SPA bundle. The dedicated Drive-sync OAuth client must be restricted to the `drive.appdata` scope only.
 
 Required repository variables (these are *variables*, not secrets — they are not sensitive, and leaving them unmasked keeps deploy logs readable):
 - `SSH_HOST` (`hostname:port`, e.g. `prime4.inleed.net:2020`), `SSH_USER` — deploy target. The port is mandatory; the workflow splits the value on the colon and there is no default.
@@ -118,8 +131,6 @@ Optional repository variables (with sensible defaults):
 - `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_FROM` — mail relay for email (code) sign-in, paired with the `SMTP_PASSWORD` secret. `SMTP_FROM` may carry a display name: `Shorinji Kempo <noreply@example.com>`. With `SMTP_HOST` or `SMTP_FROM` unset the auth service logs codes to stdout instead of sending them.
 - `SMTP_PORT` (default `587`) and `SMTP_TLS` (default `starttls`) — use `465`/`implicit` for SMTPS. `starttls` refuses to deliver over an unencrypted connection rather than falling back to one.
 - `VITE_DEBUG` (default `false`)
-- `VITE_ONEDRIVE_TENANT_ID` (default `consumers`)
-- `VITE_ONEDRIVE_REDIRECT_URI`, `VITE_GOOGLE_REDIRECT_URI` — only set if the redirect URI differs from `<origin>/`
 
 ## Deployment staging
 Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host.

@@ -102,13 +102,13 @@ describe("useSyncProvider", () => {
   let store: ReturnType<typeof makeStore>;
 
   beforeEach(() => {
-    store = makeStore({ syncProvider: "google_drive" });
+    store = makeStore({ syncProvider: "backend" });
     vi.mocked(getAppDataStore).mockReturnValue(store as never);
   });
 
   it("reads the current syncProvider from the store", () => {
     const { result } = renderHook(() => useSyncProvider());
-    expect(result.current.syncProvider).toBe("google_drive");
+    expect(result.current.syncProvider).toBe("backend");
   });
 
   it("setSyncProvider updates the returned provider", () => {
@@ -119,8 +119,8 @@ describe("useSyncProvider", () => {
 
   it("reflects a store-driven external change", () => {
     const { result } = renderHook(() => useSyncProvider());
-    act(() => store.set("syncProvider", "onedrive"));
-    expect(result.current.syncProvider).toBe("onedrive");
+    act(() => store.set("syncProvider", "local"));
+    expect(result.current.syncProvider).toBe("local");
   });
 });
 

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"crypto/rsa"
 	"net/http"
 	"net/http/httptest"
@@ -42,10 +43,16 @@ func TestPublicKey_ReturnsVAPIDKey(t *testing.T) {
 	}
 }
 
-func TestSubscribe_StoresSubscription(t *testing.T) {
+// asUser attaches a user ID the way authMiddleware does, so handler-level tests
+// can run without minting a token.
+func asUser(req *http.Request, userID string) *http.Request {
+	return req.WithContext(context.WithValue(req.Context(), userIDKey, userID))
+}
+
+func TestSubscribe_StoresSubscriptionForUser(t *testing.T) {
 	h, _, ps := newPushHandler(t, "")
 	body := `{"endpoint":"https://push.example/x","keys":{"p256dh":"pk","auth":"ak"}}`
-	req := httptest.NewRequest(http.MethodPost, "/push/subscribe", strings.NewReader(body))
+	req := asUser(httptest.NewRequest(http.MethodPost, "/push/subscribe", strings.NewReader(body)), "user-7")
 	rec := httptest.NewRecorder()
 	h.subscribe(rec, req)
 
@@ -56,8 +63,24 @@ func TestSubscribe_StoresSubscription(t *testing.T) {
 	if err != nil || len(subs) != 1 {
 		t.Fatalf("expected 1 stored sub, got %d (err=%v)", len(subs), err)
 	}
-	if subs[0].P256dh != "pk" || subs[0].Auth != "ak" || subs[0].UserID != "" {
+	if subs[0].P256dh != "pk" || subs[0].Auth != "ak" || subs[0].UserID != "user-7" {
 		t.Errorf("stored sub mismatch: %+v", subs[0])
+	}
+}
+
+// The app has no anonymous mode, so subscribing is gated by authMiddleware.
+func TestSubscribe_WithoutSession_401(t *testing.T) {
+	h, _, ps := newPushHandler(t, "")
+	body := `{"endpoint":"https://push.example/x","keys":{"p256dh":"pk","auth":"ak"}}`
+	req := httptest.NewRequest(http.MethodPost, "/push/subscribe", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	authMiddleware(h.jwks, testIssuer, http.HandlerFunc(h.subscribe)).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("got %d, want 401", rec.Code)
+	}
+	if subs, _ := ps.ListSubscriptions(); len(subs) != 0 {
+		t.Errorf("expected nothing stored, got %+v", subs)
 	}
 }
 
@@ -72,7 +95,7 @@ func TestSubscribe_AssociatesUserFromCookie(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/push/subscribe", strings.NewReader(body))
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: tok})
 	rec := httptest.NewRecorder()
-	h.subscribe(rec, req)
+	authMiddleware(h.jwks, testIssuer, http.HandlerFunc(h.subscribe)).ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("got %d, want 201", rec.Code)
@@ -85,7 +108,7 @@ func TestSubscribe_AssociatesUserFromCookie(t *testing.T) {
 
 func TestSubscribe_MissingFields_400(t *testing.T) {
 	h, _, _ := newPushHandler(t, "")
-	req := httptest.NewRequest(http.MethodPost, "/push/subscribe", strings.NewReader(`{"endpoint":"https://x"}`))
+	req := asUser(httptest.NewRequest(http.MethodPost, "/push/subscribe", strings.NewReader(`{"endpoint":"https://x"}`)), "user-7")
 	rec := httptest.NewRecorder()
 	h.subscribe(rec, req)
 	if rec.Code != http.StatusBadRequest {

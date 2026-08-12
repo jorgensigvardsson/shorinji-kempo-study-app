@@ -13,7 +13,6 @@ services:
       - "5173:5173"
     environment:
       VITE_HTTPS: "false"          # disables mkcert; localhost is a secure context anyway
-      VITE_BACKEND_ENABLED: "true" # show sign-in UI; set to "false" (or omit) for staging
 
   auth:
     image: golang:latest

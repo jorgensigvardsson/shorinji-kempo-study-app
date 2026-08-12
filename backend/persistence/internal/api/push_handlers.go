@@ -26,9 +26,15 @@ func (h *Handler) publicKey(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(h.pushSender.PublicKey()))
 }
 
-// subscribe upserts a push subscription. It accepts anonymous callers; when a
-// valid access_token cookie is present the subscription is tagged with the user.
+// subscribe upserts a push subscription for the signed-in user. Callers reach it
+// through authMiddleware, so the user ID is always in the request context.
 func (h *Handler) subscribe(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	r.Body = http.MaxBytesReader(w, r.Body, 4<<10) // subscriptions are tiny
 	var body browserSubscription
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -45,7 +51,7 @@ func (h *Handler) subscribe(w http.ResponseWriter, r *http.Request) {
 		Endpoint:   body.Endpoint,
 		P256dh:     body.Keys.P256dh,
 		Auth:       body.Keys.Auth,
-		UserID:     optionalUserID(h.jwks, h.issuerURL, r),
+		UserID:     userID,
 		CreatedAt:  now,
 		LastSeenAt: now,
 	}

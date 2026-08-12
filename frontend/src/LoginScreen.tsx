@@ -25,14 +25,10 @@ function detectBrowserLanguage(): Language {
   return "sv";
 }
 
-interface Props {
-  onContinueAnonymously: () => void;
-}
-
 // "email": collecting the address. "code": a code was emailed and we're awaiting it.
 type Phase = "email" | "code";
 
-export function LoginScreen({ onContinueAnonymously }: Props) {
+export function LoginScreen() {
   const translations = useContext(TranslationsContext);
   // Detection picks the initial language; the links below let the user override it.
   const [language, setLanguage] = useState<Language>(detectBrowserLanguage);
@@ -218,13 +214,7 @@ export function LoginScreen({ onContinueAnonymously }: Props) {
 
         <hr />
 
-        <div className="d-grid">
-          <Button variant="outline-secondary" onClick={onContinueAnonymously} disabled={loading}>
-            {translator.translate("Fortsätt utan konto")}
-          </Button>
-        </div>
-
-        <div className="text-center mt-3">
+        <div className="text-center">
           <Button variant="link" size="sm" className="p-0 text-body-secondary" onClick={() => setShowPrivacy(true)}>
             {translator.translate("Integritetspolicy")}
           </Button>
@@ -250,7 +240,7 @@ export function LoginScreen({ onContinueAnonymously }: Props) {
           <Modal.Title>{translator.translate("Integritetspolicy")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <PrivacyPolicy authenticated={true} />
+          <PrivacyPolicy />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowPrivacy(false)}>

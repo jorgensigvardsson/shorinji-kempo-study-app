@@ -2,7 +2,8 @@ import type { GradeName } from "../data";
 import type { Language } from "../i18n";
 
 export type ThemePreference = "light" | "dark" | "system";
-export type SyncProvider = "local" | "onedrive" | "google-drive" | "dropbox" | "backend";
+// "local" means signed out — the document lives only in this browser.
+export type SyncProvider = "local" | "backend";
 export type HokeiRankValue = 1 | 2 | 3;
 
 export interface HokeiRankEntry {

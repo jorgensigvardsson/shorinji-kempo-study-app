@@ -13,6 +13,32 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-12T19:56:04.413Z",
+    changes: [
+      {
+        emoji: "🔐",
+        sv: "Appen kräver nu ett konto. Det räcker med din e-postadress för att logga in, och dina anteckningar, självskattningar och inställningar följer med till alla dina enheter automatiskt.",
+        en: "The app now requires an account. Your email address is enough to sign in, and your notes, self-assessments, and settings follow you to all your devices automatically.",
+        tr: "Uygulama artık bir hesap gerektiriyor. Giriş yapmak için e-posta adresiniz yeterli; notlarınız, öz değerlendirmeleriniz ve ayarlarınız tüm cihazlarınıza otomatik olarak taşınır.",
+        ja: "アプリの利用にアカウントが必要になりました。ログインはメールアドレスだけででき、メモ・自己評価・設定はすべての端末に自動で引き継がれます。",
+      },
+      {
+        emoji: "☁️",
+        sv: "Synk mot OneDrive och Google Drive har tagits bort. Den behövdes när appen saknade egen server, men nu sköts allt automatiskt när du är inloggad — inget att koppla in eller förnya.",
+        en: "Syncing to OneDrive and Google Drive has been removed. It was needed back when the app had no server of its own; now everything is handled automatically while you're signed in — nothing to connect or renew.",
+        tr: "OneDrive ve Google Drive senkronizasyonu kaldırıldı. Uygulamanın kendi sunucusu yokken gerekliydi; artık giriş yaptığınızda her şey otomatik olarak hallediliyor — bağlanacak veya yenileyecek bir şey yok.",
+        ja: "OneDrive と Google ドライブへの同期を廃止しました。アプリに専用サーバーがなかった頃は必要でしたが、今はログインしていればすべて自動で同期され、接続や再認証の手間はありません。",
+      },
+      {
+        emoji: "💾",
+        sv: "Du kan fortfarande ladda ner en säkerhetskopia av dina data, eller importera en tidigare nedladdning, under Inställningar.",
+        en: "You can still download a backup of your data, or import an earlier download, under Settings.",
+        tr: "Ayarlar bölümünden verilerinizin bir yedeğini indirmeye veya daha önce indirdiğiniz bir yedeği içe aktarmaya devam edebilirsiniz.",
+        ja: "設定からデータのバックアップをダウンロードしたり、以前のバックアップを読み込んだりすることは引き続き可能です。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-12T18:30:00.000Z",
     changes: [
       {

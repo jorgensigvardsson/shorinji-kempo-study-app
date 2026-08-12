@@ -1,8 +1,8 @@
 # Shorinji Kempo App — Backend Architecture
 
-The app is client-first: user data lives locally and syncs to OneDrive, Google Drive, or our
-own backend. Backend identity is **opt-in** — the anonymous / OneDrive / Google Drive flows
-work without any backend interaction.
+The app is client-first: user data lives locally and syncs to our own backend. An account is
+**required** — the app shows the login screen until a session exists, and every device holds
+a full local copy of the document that the backend keeps in step.
 
 The backend consists of two Go services plus shared packages:
 
@@ -78,7 +78,7 @@ Browser          Frontend App      Auth Service      OIDC Provider     Database
    |                  |                 |                  |               |
    | Open app         |                 |                  |               |
    |----------------->|                 |                  |               |
-   |          (no cookie - anonymous or prompt)            |               |
+   |          (no cookie - login screen is shown)          |               |
    | Click "Sign in"  |                 |                  |               |
    |----------------->|                 |                  |               |
    | User types email address           |                  |               |
@@ -282,7 +282,7 @@ writes the `roles` store, so the change takes effect in a user's token on its ne
 | PUT | `/api/v1/document` | Store user's document (JWT required) |
 | DELETE | `/api/v1/account` | Delete the user's app data document (JWT required) |
 | GET | `/push/public-key` | VAPID public key for browser push subscription |
-| POST | `/push/subscribe` | Upsert a push subscription (anonymous allowed; tagged with user if signed in) |
+| POST | `/push/subscribe` | Upsert a push subscription, tagged with the caller (JWT required) |
 | POST | `/push/unsubscribe` | Remove a push subscription by endpoint |
 | POST | `/push/broadcast` | Send a notification to all subscriptions (admin role or `PUSH_ADMIN_TOKEN` bearer) |
 
@@ -319,7 +319,7 @@ stores; it proved unnecessary.)
 **Right to erasure (Art. 17)** — "Delete my account" in Settings:
 after a confirmation dialog, the frontend calls `DELETE /api/v1/account` (app document),
 then `DELETE /auth/account` (refresh tokens, then user record), then clears local auth
-state and returns the app to anonymous mode. Deletion is immediate and irreversible.
+state and returns the app to the login screen. Deletion is immediate and irreversible.
 
 **Right to data portability (Art. 20)** — "Export my data" in Settings:
 the frontend fetches `/auth/me` and `/api/v1/document` and bundles them client-side into a
@@ -373,12 +373,12 @@ database and containers on startup):
 
 ## Frontend Integration
 
-- `"backend"` is a `SyncProvider` in `frontend/src/persistence/schema.ts`;
-  `BackendSyncClient` (`frontend/src/sync/backend.ts`) implements the same `CloudSyncClient`
-  interface as OneDrive and Google Drive, so debounce / three-way merge / conflict resolution
-  are reused as-is
-- The sync provider switches to `"backend"` automatically on login and reverts on logout —
-  no manual selection is ever shown
+- `SyncProvider` in `frontend/src/persistence/schema.ts` is `"local" | "backend"`;
+  `BackendSyncClient` (`frontend/src/sync/backend.ts`) is the only sync client, driving the
+  debounce / three-way merge / conflict resolution in `SyncManager`
+- The sync provider switches to `"backend"` automatically on login and reverts to `"local"`
+  on logout — never selected by hand. It doubles as the gate: `"local"` means signed out, so
+  `App` renders the login screen instead of the app
 - Auth state travels in httpOnly cookies; `fetchWithRefresh` retries once after a silent
   `POST /auth/refresh` on 401
 - The login screen is a small state machine: the user enters an email and submits; OIDC domains

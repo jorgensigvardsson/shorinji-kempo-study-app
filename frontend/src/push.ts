@@ -40,7 +40,8 @@ export async function getCurrentSubscription(): Promise<PushSubscription | null>
   return reg.pushManager.getSubscription();
 }
 
-// Subscribes this device to push and registers it with the backend.
+// Subscribes this device to push and registers it with the backend, which
+// requires a signed-in session and ties the subscription to that user.
 // Caller is responsible for having obtained notification permission first.
 export async function subscribeToPush(): Promise<void> {
   const reg = await navigator.serviceWorker.ready;
@@ -64,7 +65,7 @@ export async function subscribeToPush(): Promise<void> {
   const resp = await fetch(`${apiUrl}/push/subscribe`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // sends access_token cookie so the sub can be tied to a user
+    credentials: "include", // access_token cookie — the endpoint rejects anonymous callers
     body: JSON.stringify(sub.toJSON()),
   });
   if (!resp.ok) throw new Error(`POST /push/subscribe: ${resp.status}`);

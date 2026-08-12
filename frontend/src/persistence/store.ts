@@ -148,7 +148,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       currentWeekAnchor: isWeekAnchor(input.data?.currentWeekAnchor)
         ? input.data.currentWeekAnchor
         : fallback.data.currentWeekAnchor,
-      syncProvider: input.data?.syncProvider ?? fallback.data.syncProvider,
+      syncProvider: isSyncProvider(input.data?.syncProvider) ? input.data.syncProvider : fallback.data.syncProvider,
       kenshiNumber: isKenshiNumber(input.data?.kenshiNumber) ? input.data.kenshiNumber : fallback.data.kenshiNumber,
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
@@ -161,6 +161,13 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
         : fallback.data.weeklyPlanCompletions,
     },
   };
+}
+
+// Documents written before cloud-storage sync was removed can still name a
+// provider we no longer have ("onedrive", "google-drive", "dropbox"); those fall
+// back to "local", i.e. signed out.
+function isSyncProvider(value: unknown): value is AppDataState["syncProvider"] {
+  return value === "local" || value === "backend";
 }
 
 function isKenshiNumber(value: unknown): value is string | undefined {

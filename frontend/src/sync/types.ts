@@ -1,4 +1,4 @@
-export type SyncStatus = "local_only" | "disconnected" | "connecting" | "connected" | "syncing" | "error" | "auth_expired" | "conflict_resolution";
+export type SyncStatus = "local_only" | "disconnected" | "connected" | "syncing" | "error" | "auth_expired" | "conflict_resolution";
 
 export class AuthExpiredError extends Error {
   constructor() {

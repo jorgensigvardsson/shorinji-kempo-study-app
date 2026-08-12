@@ -1,8 +1,6 @@
 import { getAppDataStore } from "../persistence/store";
-import type { AppDataDocument, SyncProvider } from "../persistence/schema";
+import type { AppDataDocument } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
-import { GoogleDriveClient } from "./google-drive";
-import { OneDriveClient } from "./onedrive";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
 import { AuthExpiredError, type SyncResult, type SyncState } from "./types";
 
@@ -13,13 +11,33 @@ const debugWarn = (...args: unknown[]) => { if (debug) console.warn(...args); };
 type SyncStateListener = (state: SyncState) => void;
 type Unsubscribe = () => void;
 
-const baseDocumentStoragePrefix = "sync-base-document:";
-const backupStoragePrefix = "sync-backup:";
+const baseDocumentStorageKey = "sync-base-document:backend";
+const backupStoragePrefix = "sync-backup:backend:";
+
+// Storage left behind by the removed OneDrive/Google Drive sync: OAuth tokens,
+// PKCE state and their per-provider base documents and conflict backups. Cleared
+// once on start so no stale credentials linger in localStorage.
+const legacyStorageKeys = [
+  "sync-onedrive-token",
+  "sync-onedrive-pkce",
+  "sync-onedrive-auth-expired",
+  "sync-google-drive-token",
+  "sync-google-drive-pkce",
+  "sync-google-drive-auth-expired",
+  "sync-base-document:onedrive",
+  "sync-base-document:google-drive",
+  "sync-base-document:dropbox",
+  "sync-base-document:local",
+];
+const legacyStoragePrefixes = [
+  "sync-backup:onedrive:",
+  "sync-backup:google-drive:",
+  "sync-backup:dropbox:",
+  "sync-backup:local:",
+];
 
 class SyncManager {
   private readonly store = getAppDataStore();
-  private readonly oneDriveClient = new OneDriveClient();
-  private readonly googleDriveClient = new GoogleDriveClient();
   private readonly backendClient = new BackendSyncClient();
   private state: SyncState = {
     status: "local_only",
@@ -45,6 +63,8 @@ class SyncManager {
       return;
     }
     this.started = true;
+
+    purgeLegacySyncStorage();
 
     this.store.subscribe("syncProvider", () => {
       this.handleProviderChanged().catch(error => this.handleSyncError(error));
@@ -79,40 +99,6 @@ class SyncManager {
     };
   }
 
-  async connect(): Promise<void> {
-    const provider = this.store.get("syncProvider");
-    const client = this.cloudClient(provider);
-    if (!client) {
-      this.setState({
-        status: "disconnected",
-        message: "Den här leverantören är inte implementerad än.",
-      });
-      return;
-    }
-
-    if (!client.canUse()) {
-      this.setState({
-        status: "error",
-        message: provider === "onedrive"
-          ? "Sätt VITE_ONEDRIVE_CLIENT_ID för att aktivera synk med OneDrive."
-          : provider === "google-drive"
-          ? "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive."
-          : "Backend-synk är inte konfigurerad.",
-      });
-      return;
-    }
-
-    this.setState({
-      status: "connecting",
-      message: provider === "onedrive"
-        ? "Ansluter till OneDrive..."
-        : provider === "google-drive"
-        ? "Ansluter till Google Drive..."
-        : "Ansluter till backend...",
-    });
-    await client.beginAuthorization();
-  }
-
   getBackendUserInfo(): BackendUserInfo | null {
     return this.backendClient.getUserInfo();
   }
@@ -126,8 +112,8 @@ class SyncManager {
     this.store.set("syncProvider", "local");
   }
 
-  // beginBackendAuthorization is called by the sign-in UI (Phase 4).
-  // It sets the email on the backend client and redirects to the auth service.
+  // beginBackendAuthorization is called by the sign-in UI. It sets the email on
+  // the backend client and redirects to the auth service.
   beginBackendAuthorization(email: string): void {
     this.backendClient.setEmail(email);
     this.backendClient.beginAuthorization().catch(err => this.handleSyncError(err));
@@ -189,24 +175,11 @@ class SyncManager {
     await this.backendClient.logoutOtherDevices();
   }
 
+  // Signs out: drops the backend session and reverts to local-only storage.
+  // handleProviderChanged fires via the subscription and sets status to local_only.
   disconnect(): void {
-    const provider = this.store.get("syncProvider");
-    const client = this.cloudClient(provider);
-    if (client) {
-      client.disconnect();
-    }
-
-    if (provider === "backend") {
-      // Backend sync is identity-bound — revert to local on sign-out.
-      // handleProviderChanged fires via the subscription and sets status to local_only.
-      this.store.set("syncProvider", "local");
-      return;
-    }
-
-    this.setState({
-      status: provider === "local" ? "local_only" : "disconnected",
-      message: provider === "local" ? null : "Frånkopplad.",
-    });
+    this.backendClient.disconnect();
+    this.store.set("syncProvider", "local");
   }
 
   retrySync(): void {
@@ -223,8 +196,6 @@ class SyncManager {
     this.pendingRemoteDocument = null;
 
     const chosen = choice === "local" ? localDoc : remoteDoc;
-    const provider = this.store.get("syncProvider");
-    const client = this.cloudClient(provider);
 
     this.setState({ status: "syncing", message: "Synkar..." });
 
@@ -233,9 +204,9 @@ class SyncManager {
     this.isApplyingRemoteDocument = false;
 
     try {
-      if (client?.isConnected()) {
-        await client.uploadDocument(chosen);
-        this.saveBaseDocument(provider, chosen);
+      if (this.backendClient.isConnected()) {
+        await this.backendClient.uploadDocument(chosen);
+        this.saveBaseDocument(chosen);
       }
     } catch (error) {
       this.handleSyncError(error);
@@ -254,49 +225,33 @@ class SyncManager {
   async syncNow(): Promise<SyncResult> {
     this.clearRetryTimer();
     const provider = this.store.get("syncProvider");
-    if (provider === "local") {
+    if (provider !== "backend") {
       this.setState({ status: "local_only", message: null });
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
-    const client = this.cloudClient(provider);
-    if (!client) {
-      this.setState({
-        status: "disconnected",
-        message: "Den här leverantören är inte implementerad än.",
-      });
-      return { conflictDetected: false, pushedLocalChanges: false };
-    }
-
-    if (!client.isConnected()) {
-      debugWarn(`[sync] syncNow() called but client is not connected (provider: ${provider}). Token missing?`);
-      this.setState({
-        status: "disconnected",
-        message: provider === "onedrive"
-          ? "Anslut till OneDrive först."
-          : provider === "google-drive"
-          ? "Anslut till Google Drive först."
-          : "Inte ansluten till backend.",
-      });
+    if (!this.backendClient.isConnected()) {
+      debugWarn("[sync] syncNow() called but the backend client is not connected. Token missing?");
+      this.setState({ status: "disconnected", message: "Inte ansluten till backend." });
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
     this.setState({ status: "syncing", message: "Synkar..." });
 
-    const remoteDocument = await client.downloadDocument();
+    const remoteDocument = await this.backendClient.downloadDocument();
 
     // Read local AFTER the async download so any changes made during the download are included.
     const localDocument = this.store.getDocument();
-    debugLog(`[sync] Starting sync with ${provider}. Local updatedAt: ${localDocument.updatedAt}`);
+    debugLog(`[sync] Starting sync. Local updatedAt: ${localDocument.updatedAt}`);
 
     if (!remoteDocument) {
       debugLog("[sync] No remote document found — uploading local as initial.");
-      await client.uploadDocument(localDocument);
-      this.saveBaseDocument(provider, localDocument);
+      await this.backendClient.uploadDocument(localDocument);
+      this.saveBaseDocument(localDocument);
       this.retryCount = 0;
       this.setState({
         status: "connected",
-        message: provider === "onedrive" ? "Synkad med OneDrive." : provider === "google-drive" ? "Synkad med Google Drive." : "Synkad.",
+        message: "Synkad.",
         lastSyncedAt: new Date().toISOString(),
       });
       debugLog("[sync] Initial upload complete.");
@@ -305,7 +260,7 @@ class SyncManager {
 
     debugLog(`[sync] Remote document found. Remote updatedAt: ${remoteDocument.updatedAt}`);
 
-    const baseDocument = this.readBaseDocument(provider);
+    const baseDocument = this.readBaseDocument();
     const mergeResult = mergeDocuments(baseDocument, localDocument, remoteDocument);
     const mergedDocument = mergeResult.document;
 
@@ -316,7 +271,7 @@ class SyncManager {
 
     if (mergeResult.conflictDetected) {
       debugWarn("[sync] Conflict detected — asking user to resolve.");
-      this.backupDocument(localDocument, provider);
+      this.backupDocument(localDocument);
       this.pendingLocalDocument = localDocument;
       this.pendingRemoteDocument = remoteDocument;
       this.setState({ status: "conflict_resolution", message: null });
@@ -331,12 +286,12 @@ class SyncManager {
     }
 
     if (mergedDiffersFromRemote) {
-      await client.uploadDocument(mergedDocument);
+      await this.backendClient.uploadDocument(mergedDocument);
       debugLog("[sync] Uploaded merged document to remote.");
     }
 
     this.retryCount = 0;
-    this.saveBaseDocument(provider, mergedDocument);
+    this.saveBaseDocument(mergedDocument);
     this.setState({
       status: "connected",
       message: "Synkad.",
@@ -397,7 +352,7 @@ class SyncManager {
       }
     }
 
-    if (provider === "local") {
+    if (provider !== "backend") {
       this.clearScheduledSync();
       this.setState({
         status: "local_only",
@@ -406,34 +361,11 @@ class SyncManager {
       return;
     }
 
-    const client = this.cloudClient(provider);
-    if (!client) {
-      this.clearScheduledSync();
-      this.setState({
-        status: "disconnected",
-        message: "Den här leverantören är inte implementerad än.",
-      });
-      return;
-    }
+    const authCompleted = await this.backendClient.completeAuthorizationIfPresent();
+    debugLog(`[sync] completeAuthorizationIfPresent: ${authCompleted}, isConnected: ${this.backendClient.isConnected()}`);
 
-    if (!client.canUse()) {
-      debugWarn(`[sync] Client for ${provider} cannot be used (missing env var?)`);
-      this.setState({
-        status: "error",
-        message: provider === "onedrive"
-          ? "Sätt VITE_ONEDRIVE_CLIENT_ID för att aktivera synk med OneDrive."
-          : provider === "google-drive"
-          ? "Sätt VITE_GOOGLE_CLIENT_ID för att aktivera synk med Google Drive."
-          : "Backend-synk är inte konfigurerad.",
-      });
-      return;
-    }
-
-    const authCompleted = await client.completeAuthorizationIfPresent();
-    debugLog(`[sync] completeAuthorizationIfPresent: ${authCompleted}, isConnected: ${client.isConnected()}`);
-
-    if (!client.isConnected()) {
-      if (client.wasAuthExpired()) {
+    if (!this.backendClient.isConnected()) {
+      if (this.backendClient.wasAuthExpired()) {
         this.setState({ status: "auth_expired", message: null, error: null });
       } else {
         this.setState({
@@ -444,20 +376,13 @@ class SyncManager {
       return;
     }
 
-    this.setState({
-      status: "connected",
-      message: provider === "onedrive"
-        ? "Ansluten till OneDrive."
-        : provider === "google-drive"
-        ? "Ansluten till Google Drive."
-        : "Ansluten till backend.",
-    });
+    this.setState({ status: "connected", message: "Ansluten till backend." });
     await this.syncNow();
   }
 
   private scheduleBackgroundSync(): void {
     const provider = this.store.get("syncProvider");
-    if (provider === "local" || this.state.status === "error" || this.state.status === "connecting" || this.state.status === "conflict_resolution") {
+    if (provider !== "backend" || this.state.status === "error" || this.state.status === "conflict_resolution") {
       return;
     }
 
@@ -481,12 +406,12 @@ class SyncManager {
     }
   }
 
-  private saveBaseDocument(provider: SyncProvider, document: AppDataDocument): void {
-    localStorage.setItem(`${baseDocumentStoragePrefix}${provider}`, JSON.stringify(document));
+  private saveBaseDocument(document: AppDataDocument): void {
+    localStorage.setItem(baseDocumentStorageKey, JSON.stringify(document));
   }
 
-  private readBaseDocument(provider: SyncProvider): AppDataDocument | null {
-    const raw = localStorage.getItem(`${baseDocumentStoragePrefix}${provider}`);
+  private readBaseDocument(): AppDataDocument | null {
+    const raw = localStorage.getItem(baseDocumentStorageKey);
     if (!raw) {
       return null;
     }
@@ -498,12 +423,11 @@ class SyncManager {
     }
   }
 
-  private backupDocument(document: AppDataDocument, provider: SyncProvider): void {
-    const prefix = `${backupStoragePrefix}${provider}:`;
-    const key = `${prefix}${new Date().toISOString()}`;
+  private backupDocument(document: AppDataDocument): void {
+    const key = `${backupStoragePrefix}${new Date().toISOString()}`;
     localStorage.setItem(key, JSON.stringify(document));
 
-    const allKeys = Object.keys(localStorage).filter(k => k.startsWith(prefix)).sort();
+    const allKeys = Object.keys(localStorage).filter(k => k.startsWith(backupStoragePrefix)).sort();
     for (const old of allKeys.slice(0, -5)) {
       localStorage.removeItem(old);
     }
@@ -542,19 +466,6 @@ class SyncManager {
       listener(snapshot);
     }
   }
-
-  private cloudClient(provider: SyncProvider): CloudSyncClient | null {
-    switch (provider) {
-      case "onedrive":
-        return this.oneDriveClient;
-      case "google-drive":
-        return this.googleDriveClient;
-      case "backend":
-        return this.backendClient;
-      default:
-        return null;
-    }
-  }
 }
 
 let syncManager: SyncManager | null = null;
@@ -571,13 +482,14 @@ function areEqual<T>(a: T, b: T): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-interface CloudSyncClient {
-  canUse(): boolean;
-  beginAuthorization(): Promise<void>;
-  completeAuthorizationIfPresent(): Promise<boolean>;
-  isConnected(): boolean;
-  wasAuthExpired(): boolean;
-  disconnect(): void;
-  downloadDocument(): Promise<AppDataDocument | null>;
-  uploadDocument(document: AppDataDocument): Promise<void>;
+function purgeLegacySyncStorage(): void {
+  for (const key of legacyStorageKeys) {
+    localStorage.removeItem(key);
+  }
+
+  for (const key of Object.keys(localStorage)) {
+    if (legacyStoragePrefixes.some(prefix => key.startsWith(prefix))) {
+      localStorage.removeItem(key);
+    }
+  }
 }
