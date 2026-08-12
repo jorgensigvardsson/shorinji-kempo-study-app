@@ -1,0 +1,10 @@
+.staging-badge {
+  position: fixed;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 1030;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  user-select: none;
+}

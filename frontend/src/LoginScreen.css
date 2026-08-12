@@ -32,3 +32,26 @@
 .login-screen-subtitle {
   margin-bottom: 1.5rem;
 }
+
+.login-screen-langs {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.login-screen-lang-btn {
+  background: none;
+  border: none;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  padding: 0 0.4rem;
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+.login-screen-lang-btn[aria-current="true"] {
+  color: var(--bs-body-color);
+  font-weight: 600;
+  text-decoration: none;
+}

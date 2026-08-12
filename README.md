@@ -93,6 +93,8 @@ Server rules for the frontend live in [`frontend/public/.htaccess`](frontend/pub
 
 The workflow writes `.env.production` from repository secrets/vars before building, since `.env.*` files are gitignored.
 
+TLS for the backend's custom domains (`auth.app.shorinjikempo.net`, `persistence.app.shorinjikempo.net`) comes from a separate scheduled workflow, [`.github/workflows/renew-certs.yml`](.github/workflows/renew-certs.yml), which issues certificates via Let's Encrypt (DNS-01 through DirectAdmin's API) and uploads them as bring-your-own certificates rather than relying on Azure Container Apps' own managed-certificate issuance. See [`BACKEND.md`](BACKEND.md) for why and how.
+
 Required repository secrets:
 - `SSH_PRIVATE_KEY` — private key for the deploy user; its public half belongs in that user's `~/.ssh/authorized_keys` on the web host
 - `VAPID_PRIVATE_KEY` — Web Push VAPID private key (paired with the `VAPID_PUBLIC_KEY` variable)
@@ -120,3 +122,5 @@ Optional repository variables (with sensible defaults):
 Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host.
 
 Staging also deploys its own auth and persistence services, into a separate Azure resource group, so backend sign-in and sync can be tested there too. It shares prod's Cosmos DB account rather than provisioning a second one — see [BACKEND.md](BACKEND.md#staging) for the full setup, including the one-time Azure configuration it doesn't automate.
+
+The staging build sets `VITE_ENVIRONMENT=staging`, which shows a small "Staging environment" label fixed to the bottom-left corner of every screen — a quick visual cue that staging and prod would otherwise not have, since they're built from the same code.

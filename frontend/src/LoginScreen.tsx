@@ -1,12 +1,21 @@
 import { useContext, useMemo, useState } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { type Language, TranslationsContext, TranslatorImplementation } from "./i18n";
+import { type Language, noTranslate, TranslationsContext, TranslatorImplementation } from "./i18n";
 import PrivacyPolicy from "./PrivacyPolicy";
 import { getSyncManager } from "./sync/manager";
 import { RateLimitError } from "./sync/backend";
 import "./LoginScreen.css";
 
 const SUPPORTED: Language[] = ["sv", "en", "tr", "ja"];
+
+// Each language's own name for itself, so it stays recognizable no matter
+// which language is currently selected — never run through the translator.
+const LANGUAGE_NAMES: Record<Language, string> = {
+  sv: "Svenska",
+  en: "English",
+  tr: "Türkçe",
+  ja: "日本語",
+};
 
 function detectBrowserLanguage(): Language {
   for (const lang of navigator.languages ?? [navigator.language]) {
@@ -25,7 +34,8 @@ type Phase = "email" | "code";
 
 export function LoginScreen({ onContinueAnonymously }: Props) {
   const translations = useContext(TranslationsContext);
-  const language = useMemo(detectBrowserLanguage, []);
+  // Detection picks the initial language; the links below let the user override it.
+  const [language, setLanguage] = useState<Language>(detectBrowserLanguage);
   const translator = useMemo(
     () => new TranslatorImplementation(translations, language),
     [translations, language]
@@ -218,6 +228,20 @@ export function LoginScreen({ onContinueAnonymously }: Props) {
           <Button variant="link" size="sm" className="p-0 text-body-secondary" onClick={() => setShowPrivacy(true)}>
             {translator.translate("Integritetspolicy")}
           </Button>
+        </div>
+
+        <div className="login-screen-langs">
+          {SUPPORTED.map(lang => (
+            <button
+              key={lang}
+              type="button"
+              className="login-screen-lang-btn"
+              aria-current={lang === language}
+              onClick={() => setLanguage(lang)}
+            >
+              {noTranslate(LANGUAGE_NAMES[lang])}
+            </button>
+          ))}
         </div>
       </div>
 

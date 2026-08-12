@@ -186,7 +186,9 @@ jobs:
           }
 
           # hostname add registers the hostname (idempotent; "already added" is fine);
-          # hostname bind issues/renews the managed cert and switches to SniEnabled.
+          # hostname bind attaches it to the cert renew-certs.yml uploads
+          # (sk-study-app-cert) rather than Azure's own managed-certificate
+          # issuance — see BACKEND.md.
           retry_on_lock az containerapp hostname add \
             --hostname auth.app.shorinjikempo.net \
             --resource-group "$RG" \
@@ -196,7 +198,7 @@ jobs:
             --resource-group "$RG" \
             --name sk-study-app-auth \
             --environment sk-study-app-env \
-            --validation-method CNAME || exit 1
+            --certificate sk-study-app-cert || exit 1
 
           retry_on_lock az containerapp hostname add \
             --hostname persistence.app.shorinjikempo.net \
@@ -207,7 +209,7 @@ jobs:
             --resource-group "$RG" \
             --name sk-study-app-persistence \
             --environment sk-study-app-env \
-            --validation-method CNAME || exit 1
+            --certificate sk-study-app-cert || exit 1
 
       # A deploy that leaves a service unable to start must fail here — loudly and
       # before the frontend ships or users are notified. Previously such a failure

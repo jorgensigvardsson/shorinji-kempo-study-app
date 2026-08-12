@@ -198,7 +198,12 @@ jobs:
           }
 
           # hostname add registers the hostname (idempotent; "already added" is fine);
-          # hostname bind issues/renews the managed cert and switches to SniEnabled.
+          # hostname bind attaches it to the cert renew-staging-certs.yml uploads
+          # (sk-study-app-staging-cert). Azure's own managed-certificate issuance
+          # (--validation-method CNAME) proved unreliable for these hostnames —
+          # see BACKEND.md#staging — so binding here relies on that cert already
+          # existing; run renew-staging-certs.yml once manually before the first
+          # deploy that reaches this step.
           retry_on_lock az containerapp hostname add \
             --hostname auth.app-staging.shorinjikempo.net \
             --resource-group "$RG" \
@@ -208,7 +213,7 @@ jobs:
             --resource-group "$RG" \
             --name sk-study-app-staging-auth \
             --environment sk-study-app-staging-env \
-            --validation-method CNAME || exit 1
+            --certificate sk-study-app-staging-cert || exit 1
 
           retry_on_lock az containerapp hostname add \
             --hostname persistence.app-staging.shorinjikempo.net \
@@ -219,7 +224,7 @@ jobs:
             --resource-group "$RG" \
             --name sk-study-app-staging-persistence \
             --environment sk-study-app-staging-env \
-            --validation-method CNAME || exit 1
+            --certificate sk-study-app-staging-cert || exit 1
 
       # A deploy that leaves a service unable to start must fail here — loudly and
       # before the frontend ships. Both services scale to zero, so the first
@@ -285,6 +290,7 @@ jobs:
           VITE_AUTH_URL:             ${{ needs.deploy-backend.outputs.auth_url }}
           VITE_API_URL:              ${{ needs.deploy-backend.outputs.api_url }}
           VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'true' }}
+          VITE_ENVIRONMENT:          staging
           VITE_FEEDBACK_EMAIL:       ${{ secrets.VITE_FEEDBACK_EMAIL }}
           VITE_ONEDRIVE_CLIENT_ID:   ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
           VITE_ONEDRIVE_TENANT_ID:   ${{ vars.VITE_ONEDRIVE_TENANT_ID || 'consumers' }}
@@ -330,6 +336,7 @@ jobs:
           write_var VITE_AUTH_URL "$VITE_AUTH_URL"
           write_var VITE_API_URL "$VITE_API_URL"
           write_var VITE_DEBUG "$VITE_DEBUG"
+          write_var VITE_ENVIRONMENT "$VITE_ENVIRONMENT"
           write_var VITE_FEEDBACK_EMAIL "$VITE_FEEDBACK_EMAIL"
           write_var VITE_ONEDRIVE_CLIENT_ID "$VITE_ONEDRIVE_CLIENT_ID"
           write_var VITE_ONEDRIVE_TENANT_ID "$VITE_ONEDRIVE_TENANT_ID"
