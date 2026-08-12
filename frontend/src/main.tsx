@@ -1,5 +1,6 @@
 import { StrictMode, type ReactNode } from 'react'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import StagingBadge from './components/StagingBadge.tsx'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/bootstrap-theme.scss';
@@ -31,6 +32,7 @@ function mountRoot() {
                  gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}/>
           </TranslationsContext>
         </BrowserRouter>
+        <StagingBadge />
       </ErrorBoundary>
     </StrictMode>
   )
