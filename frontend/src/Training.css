@@ -1,0 +1,192 @@
+.training-page-header {
+  padding: 2.25rem 0.25rem 2rem;
+}
+
+.training-page-header h1 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.training-page-header p {
+  max-width: 34rem;
+  margin: 0.6rem 0 0;
+  color: var(--bs-secondary-color);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.training-view-content {
+  padding-top: 0.25rem;
+}
+
+.training-subview-header {
+  padding-top: 0.5rem;
+}
+
+.training-landing-header {
+  padding-top: 0.5rem;
+}
+
+.training-choice-grid {
+  gap: 0.75rem 1.5rem;
+}
+
+.training-choice-grid .app-grid-card {
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  box-shadow: none;
+}
+
+.training-choice-grid .app-grid-card-interactive:hover,
+.training-choice-grid .app-grid-card-interactive:focus-visible {
+  transform: none;
+  background: var(--bs-tertiary-bg);
+  box-shadow: none;
+}
+
+.training-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.65rem 0 0.5rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+.training-back:hover,
+.training-back:focus-visible {
+  color: var(--bs-emphasis-color);
+}
+
+@media (max-width: 35rem) {
+  .training-page-header {
+    padding: 1.5rem 0.25rem 1.4rem;
+  }
+
+}
+
+.training-list-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1.5rem;
+  padding: 1.25rem 0 1rem;
+}
+
+.training-list-controls.is-single {
+  grid-template-columns: minmax(0, 32rem);
+}
+
+.training-list-filters {
+  max-width: 32rem;
+}
+
+.training-list-dojo-toggle {
+  margin-top: 0.35rem;
+  color: var(--bs-secondary-color);
+  white-space: nowrap;
+}
+
+@media (max-width: 35rem) {
+  .training-list-controls {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .training-list-dojo-toggle {
+    margin-top: 0;
+  }
+}
+
+.dojo-card {
+  border-radius: 0.65rem;
+}
+
+.dojo-card .card-header {
+  padding: 1rem 1.1rem 0.8rem;
+}
+
+.dojo-card-title {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.dojo-card .card-body {
+  padding: 0.85rem 1.1rem 1.15rem;
+}
+
+.dojo-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dojo-foot-images {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dojo-foot-images .stance-icon {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.dojo-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.dojo-role {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 0.75rem;
+  min-width: 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.dojo-role strong {
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dojo-card .card-footer {
+  padding: 0.75rem 1.1rem 1rem;
+}
+
+.dojo-card .hokei-notes-box,
+.dojo-card .card-footer > div[class*="border-primary"] {
+  border: 0 !important;
+  border-top: 1px solid var(--bs-border-color) !important;
+  border-radius: 0 !important;
+  background: transparent;
+  padding: 0.65rem 0 !important;
+}
+
+.dojo-card .card-footer .p-2 {
+  padding: 0.65rem 0 !important;
+}
+
+@media (max-width: 35rem) {
+  .dojo-role {
+    grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 0.5rem;
+    font-size: 1rem;
+  }
+}

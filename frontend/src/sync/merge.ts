@@ -1,4 +1,4 @@
-import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry } from "../persistence/schema";
+import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry, type WeeklyPlanCompletionEntry } from "../persistence/schema";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -44,6 +44,14 @@ export function mergeDocuments(
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     knownFlashCards: mergeKnownFlashCards(baseDocument.data.knownFlashCards ?? {}, local.data.knownFlashCards ?? {}, remote.data.knownFlashCards ?? {}),
     showKanjiOnHokeiCards: mergeScalar("showKanjiOnHokeiCards"),
+    embuDraft: mergeScalar("embuDraft"),
+    weeklyPlanCompletions: mergeWeeklyPlanCompletions(
+      baseDocument.data.weeklyPlanCompletions ?? {},
+      local.data.weeklyPlanCompletions ?? {},
+      remote.data.weeklyPlanCompletions ?? {},
+      local,
+      remote,
+    ),
   };
 
   if (mergedData.notes.__conflictMarker) {
@@ -213,6 +221,43 @@ function mergeKnownFlashCards(
 
     if (baseEntry) result[key] = baseEntry;
   }
+  return result;
+}
+
+function mergeWeeklyPlanCompletions(
+  base: Record<string, WeeklyPlanCompletionEntry>,
+  local: Record<string, WeeklyPlanCompletionEntry>,
+  remote: Record<string, WeeklyPlanCompletionEntry>,
+  localDocument: AppDataDocument,
+  remoteDocument: AppDataDocument,
+): Record<string, WeeklyPlanCompletionEntry> {
+  const result: Record<string, WeeklyPlanCompletionEntry> = {};
+  const allKeys = new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)]);
+
+  for (const key of allKeys) {
+    const baseEntry = readOptional(base, key);
+    const localEntry = readOptional(local, key);
+    const remoteEntry = readOptional(remote, key);
+    const localChanged = !areEqual(localEntry, baseEntry);
+    const remoteChanged = !areEqual(remoteEntry, baseEntry);
+    let chosen: WeeklyPlanCompletionEntry | undefined;
+
+    if (localChanged && remoteChanged) {
+      if (areEqual(localEntry, remoteEntry)) chosen = localEntry;
+      else if (localEntry && remoteEntry) {
+        chosen = parseTimestamp(localEntry.completedAt) >= parseTimestamp(remoteEntry.completedAt)
+          ? localEntry
+          : remoteEntry;
+      } else {
+        chosen = newerOf(localDocument, remoteDocument) === localDocument ? localEntry : remoteEntry;
+      }
+    } else if (localChanged) chosen = localEntry;
+    else if (remoteChanged) chosen = remoteEntry;
+    else chosen = baseEntry;
+
+    if (chosen) result[key] = chosen;
+  }
+
   return result;
 }
 

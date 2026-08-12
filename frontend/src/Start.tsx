@@ -1,6 +1,5 @@
 import { useContext, type ComponentType } from "react";
 import { useNavigate } from "react-router";
-import { Card } from "react-bootstrap";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 
@@ -29,13 +28,11 @@ const Start = (props: Props) => {
     }));
 
     return (
-        <div>
-            <Card className="app-grid-panel mb-2">
-                <Card.Body>
-                    <h2>{translator.translate("Vad vill du göra idag?")}</h2>
-                </Card.Body>
-            </Card>
-            <Grid items={items} />
+        <div className="start-screen">
+            <header className="start-intro">
+                <h1>{translator.translate("Vad vill du göra idag?")}</h1>
+            </header>
+            <Grid items={items} className="start-grid" />
         </div>
     );
 };

@@ -1,70 +1,65 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import StarRating from "./StarRating";
 import type { HokeiRankValue } from "../persistence/schema";
 
-const getLabel = (v: HokeiRankValue) => ({ 1: "Beginner", 2: "Intermediate", 3: "Advanced" }[v]);
+const getLabel = (value: HokeiRankValue) => ({
+  1: "Needs practice",
+  2: "Practising",
+  3: "Confident",
+}[value]);
 
-describe("StarRating", () => {
-  it("renders 3 star buttons", () => {
-    render(<StarRating value={null} onChange={() => {}} groupLabel="Rating" getLabel={getLabel} />);
-    expect(screen.getAllByRole("button")).toHaveLength(3);
+const renderAssessment = (value: HokeiRankValue | null, onChange = () => undefined) => render(
+  <StarRating
+    value={value}
+    onChange={onChange}
+    groupLabel="Self-assessment"
+    emptyLabel="Not assessed"
+    getLabel={getLabel}
+  />,
+);
+
+describe("self-assessment control", () => {
+  it("shows only the current status while closed", () => {
+    renderAssessment(2);
+
+    expect(screen.getByRole("button", { name: "Self-assessment: Practising" })).toBeTruthy();
+    expect(screen.queryByRole("radio")).toBeNull();
   });
 
-  it("labels each button via getLabel", () => {
-    render(<StarRating value={null} onChange={() => {}} groupLabel="Rating" getLabel={getLabel} />);
-    expect(screen.getByRole("button", { name: "Beginner" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Intermediate" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Advanced" })).toBeDefined();
+  it("shows a calm unassessed state when no value is stored", () => {
+    renderAssessment(null);
+
+    expect(screen.getByRole("button", { name: "Self-assessment: Not assessed" })).toBeTruthy();
   });
 
-  it("has groupLabel as the accessible group label", () => {
-    render(<StarRating value={null} onChange={() => {}} groupLabel="My Rating" getLabel={getLabel} />);
-    expect(screen.getByRole("group", { name: "My Rating" })).toBeDefined();
+  it("opens the semantic choices without toggling the surrounding card", () => {
+    renderAssessment(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Self-assessment: Needs practice" }));
+
+    expect(screen.getAllByRole("radio")).toHaveLength(4);
+    expect(screen.getByRole("radio", { name: "Needs practice" }).getAttribute("aria-checked")).toBe("true");
   });
 
-  it("aria-pressed is true only for the current value", () => {
-    render(<StarRating value={2} onChange={() => {}} groupLabel="Rating" getLabel={getLabel} />);
-    expect(screen.getByRole("button", { name: "Beginner" }).getAttribute("aria-pressed")).toBe("false");
-    expect(screen.getByRole("button", { name: "Intermediate" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByRole("button", { name: "Advanced" }).getAttribute("aria-pressed")).toBe("false");
-  });
-
-  it("all aria-pressed are false when value is null", () => {
-    render(<StarRating value={null} onChange={() => {}} groupLabel="Rating" getLabel={getLabel} />);
-    for (const btn of screen.getAllByRole("button")) {
-      expect(btn.getAttribute("aria-pressed")).toBe("false");
-    }
-  });
-
-  it("calls onChange with the star value when clicked", () => {
+  it("stores the selected assessment and closes the choices", () => {
     const onChange = vi.fn();
-    render(<StarRating value={null} onChange={onChange} groupLabel="Rating" getLabel={getLabel} />);
-    fireEvent.click(screen.getByRole("button", { name: "Advanced" }));
+    renderAssessment(null, onChange);
+    fireEvent.click(screen.getByRole("button", { name: "Self-assessment: Not assessed" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: "Confident" }));
+
     expect(onChange).toHaveBeenCalledWith(3);
+    expect(screen.queryByRole("radio")).toBeNull();
   });
 
-  it("calls onChange with null when the current star is clicked again (toggle off)", () => {
+  it("can clear a stored assessment", () => {
     const onChange = vi.fn();
-    render(<StarRating value={2} onChange={onChange} groupLabel="Rating" getLabel={getLabel} />);
-    fireEvent.click(screen.getByRole("button", { name: "Intermediate" }));
+    renderAssessment(2, onChange);
+    fireEvent.click(screen.getByRole("button", { name: "Self-assessment: Practising" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: "Not assessed" }));
+
     expect(onChange).toHaveBeenCalledWith(null);
-  });
-
-  it("calls onChange with the new value when a different star is clicked", () => {
-    const onChange = vi.fn();
-    render(<StarRating value={1} onChange={onChange} groupLabel="Rating" getLabel={getLabel} />);
-    fireEvent.click(screen.getByRole("button", { name: "Advanced" }));
-    expect(onChange).toHaveBeenCalledWith(3);
-  });
-
-  it("shows stars 1..value as filled and the rest as empty", () => {
-    const { container } = render(
-      <StarRating value={2} onChange={() => {}} groupLabel="Rating" getLabel={getLabel} />
-    );
-    const filled = container.querySelectorAll(".star-icon.is-filled");
-    const empty = container.querySelectorAll(".star-icon.is-empty");
-    expect(filled).toHaveLength(2);
-    expect(empty).toHaveLength(1);
   });
 });

@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Modal } from "react-bootstrap";
-import { Film, Youtube } from "react-bootstrap-icons";
+import { Youtube } from "react-bootstrap-icons";
 import { noTranslate, TranslatorContext } from "../i18n";
 import type { Video } from "../data";
 
@@ -29,15 +29,14 @@ const VideoLink = ({ video, className }: VideoLinkProps) => {
 
     return (
         <div className={`p-2 border border-primary rounded ${className ?? ""}`.trim()}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: "0.5rem" }}>
-                <div role={id ? "button" : undefined}
-                     style={{ display: "flex", alignItems: "center", minWidth: 0, cursor: id ? "pointer" : "default" }}
+            <div style={{ display: "grid", gridTemplateColumns: video.label ? "1fr auto" : "1fr", alignItems: "center", gap: "0.5rem" }}>
+                {video.label && <div role={id ? "button" : undefined}
+                     style={{ minWidth: 0, cursor: id ? "pointer" : "default" }}
                      onClick={id ? () => setShow(true) : undefined}>
-                    <Film className="text-primary" style={{ marginRight: "0.5em", flexShrink: 0 }} />
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
-                </div>
+                    <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+                </div>}
                 <a href={video.url} target="_blank" rel="noopener noreferrer"
-                   className="text-primary text-decoration-none" style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
+                   className="text-primary text-decoration-none" style={{ display: "flex", alignItems: "center", justifySelf: video.label ? "auto" : "start", whiteSpace: "nowrap" }}>
                     <Youtube style={{ marginRight: "0.35em", display: "block" }} />
                     {noTranslate("YouTube")}
                 </a>

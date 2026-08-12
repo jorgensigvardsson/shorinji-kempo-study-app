@@ -1,0 +1,332 @@
+.kamoku-page-header {
+  padding: 0.5rem 0.25rem 1.35rem;
+}
+
+.kamoku-page-header h1 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.kamoku-page-header p {
+  max-width: 42rem;
+  margin: 0.7rem 0 0;
+  color: var(--bs-secondary-color);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.kamoku-controls {
+  margin-bottom: 2.5rem !important;
+  padding: 1.25rem 0 1rem;
+}
+
+.kamoku-primary-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.kamoku-grade-line {
+  display: flex;
+  flex: 0 1 24rem;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.kamoku-grade-label {
+  margin: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  font-weight: 550;
+}
+
+.kamoku-grade-select {
+  width: 100%;
+  border-color: var(--bs-border-color);
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.kamoku-dojo-toggle {
+  margin: 0 0 0.45rem;
+  color: var(--bs-emphasis-color);
+  white-space: nowrap;
+}
+
+.kamoku-week-navigation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.65rem;
+}
+
+.kamoku-week-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  padding: 0.45rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+.kamoku-week-button-previous {
+  justify-self: start;
+}
+
+.kamoku-week-button-next {
+  justify-self: end;
+}
+
+.kamoku-week-button:hover:not(:disabled),
+.kamoku-week-button:focus-visible:not(:disabled) {
+  color: var(--bs-emphasis-color);
+}
+
+.kamoku-week-button:disabled {
+  color: var(--bs-tertiary-color);
+  cursor: not-allowed;
+}
+
+.kamoku-week-position {
+  display: block;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.kamoku-week-center {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.kamoku-week-completion-group {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.kamoku-week-completion,
+.kamoku-week-completion-clear {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-tertiary-color);
+  font: inherit;
+}
+
+.kamoku-week-completion {
+  gap: 0.3rem;
+  font-size: 0.76rem;
+}
+
+.kamoku-week-completion svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.kamoku-week-completion:hover,
+.kamoku-week-completion:focus-visible,
+.kamoku-week-completion.is-complete {
+  color: var(--bs-secondary-color);
+}
+
+.kamoku-week-completion.is-complete svg {
+  color: var(--bs-primary);
+}
+
+.kamoku-week-completion-clear {
+  width: 1.25rem;
+  height: 1.25rem;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  font-size: 0.7rem;
+}
+
+.kamoku-week-completion-group:hover .kamoku-week-completion-clear,
+.kamoku-week-completion-group:focus-within .kamoku-week-completion-clear,
+.kamoku-week-completion-clear:focus-visible {
+  opacity: 0.65;
+}
+
+.kamoku-week-completion-clear:hover,
+.kamoku-week-completion-clear:focus-visible {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .kamoku-week-completion-clear {
+    opacity: 0.5;
+  }
+}
+
+.kamoku-week-total {
+  margin-left: 0.2rem;
+  color: var(--bs-secondary-color);
+  font-family: var(--bs-body-font-family);
+  font-size: 0.72em;
+  font-weight: 400;
+}
+
+.kamoku-week-focus {
+  margin: 0 0.25rem 3rem;
+}
+
+.kamoku-focus-eyebrow,
+.kamoku-section-title {
+  margin: 0;
+  color: var(--bs-primary);
+  font-family: var(--bs-body-font-family);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.kamoku-focus-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 2rem 3rem;
+  margin-top: 1.25rem;
+}
+
+.kamoku-focus-group h3 {
+  margin: 0 0 0.85rem;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: 1.12rem;
+  font-weight: 600;
+}
+
+.kamoku-focus-group ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kamoku-focus-group li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--bs-body-color);
+  line-height: 1.5;
+}
+
+.kamoku-focus-group li::before {
+  position: absolute;
+  top: 0.72em;
+  left: 0;
+  width: 0.35rem;
+  height: 1px;
+  background: var(--bs-primary);
+  content: "";
+}
+
+.kamoku-focus-japanese {
+  display: block;
+  margin-top: 0.12rem;
+  color: var(--bs-tertiary-color);
+  font-size: 0.82em;
+  line-height: 1.35;
+}
+
+.kamoku-focus-videos {
+  align-self: start;
+}
+
+.kamoku-focus-video {
+  max-width: 20rem;
+  padding: 0.25rem 0 !important;
+  border: 0 !important;
+  background: transparent;
+}
+
+.kamoku-technique-section {
+  margin-top: 2.75rem;
+}
+
+.kamoku-technique-section + .kamoku-technique-section {
+  margin-top: 3.25rem;
+}
+
+.kamoku-section-title {
+  margin: 0 0.25rem 1rem;
+  color: var(--bs-secondary-color);
+}
+
+@media (max-width: 35rem) {
+  .kamoku-page-header {
+    padding-top: 0.25rem;
+  }
+
+  .kamoku-page-header p {
+    font-size: 1rem;
+  }
+
+  .kamoku-controls {
+    padding-top: 1rem;
+  }
+
+  .kamoku-primary-controls {
+    gap: 0.8rem;
+  }
+
+  .kamoku-grade-line {
+    flex: 1 1 0;
+  }
+
+  .kamoku-grade-select {
+    min-width: 0;
+  }
+
+  .kamoku-dojo-toggle {
+    flex: 0 0 auto;
+    font-size: 0.93rem;
+  }
+
+  .kamoku-week-navigation {
+    gap: 0.65rem;
+    margin-top: 1.4rem;
+  }
+
+  .kamoku-week-button {
+    gap: 0.35rem;
+    font-size: 0.95rem;
+  }
+
+  .kamoku-week-position {
+    font-size: 1.15rem;
+  }
+
+  .kamoku-week-focus {
+    margin-bottom: 2.5rem;
+  }
+
+  .kamoku-focus-groups {
+    gap: 1.75rem;
+  }
+}

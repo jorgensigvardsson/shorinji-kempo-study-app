@@ -61,3 +61,33 @@
 .wordlist-table tbody tr:hover {
   background: color-mix(in srgb, var(--bs-primary-bg-subtle) 35%, transparent 65%);
 }
+
+.wordlist-missing-lookups {
+  max-width: 36rem;
+  margin-top: 2rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.wordlist-missing-lookups summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.wordlist-missing-lookups p {
+  margin: 0.65rem 0;
+}
+
+.wordlist-missing-lookups ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wordlist-missing-lookups li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--bs-border-color);
+}

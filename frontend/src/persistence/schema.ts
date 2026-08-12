@@ -15,9 +15,27 @@ export interface FlashCardKnownEntry {
   updatedAt: string;
 }
 
+export interface WeeklyPlanCompletionEntry {
+  completedAt: string;
+}
+
 export interface CurrentWeekAnchor {
   week: number;
   anchorDate: string; // YYYY-MM-DD in local time
+}
+
+export interface EmbuDraftStep {
+  id: string;
+  hokeiName: string;
+  grade: GradeName;
+  week: number;
+  momentIndex: number;
+  transition: string;
+}
+
+export interface EmbuDraft {
+  notes: string;
+  steps: EmbuDraftStep[];
 }
 
 export interface AppDataState {
@@ -33,6 +51,8 @@ export interface AppDataState {
   quizStreakHighScore: number;
   knownFlashCards: Record<string, FlashCardKnownEntry>;
   showKanjiOnHokeiCards: boolean;
+  embuDraft: EmbuDraft;
+  weeklyPlanCompletions: Record<string, WeeklyPlanCompletionEntry>;
 }
 
 export interface AppDataDocument {
@@ -68,6 +88,8 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       quizStreakHighScore: 0,
       knownFlashCards: {},
       showKanjiOnHokeiCards: true,
+      embuDraft: { notes: "", steps: [] },
+      weeklyPlanCompletions: {},
     },
   };
 }

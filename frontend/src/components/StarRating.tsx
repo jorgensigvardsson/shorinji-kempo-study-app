@@ -1,4 +1,4 @@
-import type { MouseEvent } from "react";
+import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 import type { HokeiRankValue } from "../persistence/schema";
 import "./StarRating.css";
 
@@ -6,49 +6,82 @@ interface Props {
   value: HokeiRankValue | null;
   onChange: (value: HokeiRankValue | null) => void;
   groupLabel: string;
+  emptyLabel: string;
   getLabel: (value: HokeiRankValue) => string;
 }
 
-const STAR_VALUES: HokeiRankValue[] = [1, 2, 3];
+const ASSESSMENT_VALUES: Array<HokeiRankValue | null> = [null, 1, 2, 3];
 
-const StarRating = ({ value, onChange, groupLabel, getLabel }: Props) => {
-  const stopHeaderToggle = (event: MouseEvent) => {
+const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel }: Props) => {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const currentLabel = value === null ? emptyLabel : getLabel(value);
+  const stopHeaderToggle = (event: SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
   };
 
-  return (
-    <div className="star-rating" role="group" aria-label={groupLabel}>
-      {STAR_VALUES.map((starValue) => {
-        const filled = value !== null && starValue <= value;
-        const label = getLabel(starValue);
+  useEffect(() => {
+    if (!open) return;
 
-        return (
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  return (
+    <div className="self-assessment" role="group" aria-label={groupLabel} ref={rootRef}>
+      <button
+        type="button"
+        className="self-assessment-trigger"
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label={`${groupLabel}: ${currentLabel}`}
+        onMouseDown={stopHeaderToggle}
+        onClick={event => {
+          stopHeaderToggle(event);
+          setOpen(current => !current);
+        }}
+      >
+        <span className={`self-assessment-dot value-${value ?? "none"}`} aria-hidden="true" />
+        <span>{currentLabel}</span>
+      </button>
+      {open && (
+        <div className="self-assessment-menu" role="radiogroup" aria-label={groupLabel}>
+          {ASSESSMENT_VALUES.map(assessmentValue => {
+            const label = assessmentValue === null ? emptyLabel : getLabel(assessmentValue);
+            return (
           <button
-            key={starValue}
+            key={assessmentValue ?? "none"}
             type="button"
-            className="star-rating-button"
+            className="self-assessment-option"
             onMouseDown={stopHeaderToggle}
             onClick={(event) => {
               stopHeaderToggle(event);
-              onChange(value === starValue ? null : starValue);
+              onChange(assessmentValue);
+              setOpen(false);
             }}
-            title={label}
-            aria-label={label}
-            aria-pressed={value === starValue}
+            role="radio"
+            aria-checked={value === assessmentValue}
           >
-            <StarIcon filled={filled} />
+            <span className={`self-assessment-dot value-${assessmentValue ?? "none"}`} aria-hidden="true" />
+            <span>{label}</span>
           </button>
-        );
-      })}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
-
-const StarIcon = ({ filled }: { filled: boolean }) => (
-  <svg className={`star-icon ${filled ? "is-filled" : "is-empty"}`} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 2.9l2.68 5.43 5.99.87-4.33 4.22 1.02 5.96L12 16.56 6.64 19.38l1.02-5.96-4.33-4.22 5.99-.87L12 2.9z" />
-  </svg>
-);
 
 export default StarRating;

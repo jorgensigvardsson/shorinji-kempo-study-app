@@ -29,6 +29,8 @@ export class AppDataStore {
       quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
       knownFlashCards: new Map<number, DataChangedCallback<"knownFlashCards">>(),
       showKanjiOnHokeiCards: new Map<number, DataChangedCallback<"showKanjiOnHokeiCards">>(),
+      embuDraft: new Map<number, DataChangedCallback<"embuDraft">>(),
+      weeklyPlanCompletions: new Map<number, DataChangedCallback<"weeklyPlanCompletions">>(),
     };
   }
 
@@ -155,6 +157,10 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
       knownFlashCards: isFlashCardKnownRecord(input.data?.knownFlashCards) ? input.data.knownFlashCards : fallback.data.knownFlashCards,
       showKanjiOnHokeiCards: typeof input.data?.showKanjiOnHokeiCards === "boolean" ? input.data.showKanjiOnHokeiCards : fallback.data.showKanjiOnHokeiCards,
+      embuDraft: isEmbuDraft(input.data?.embuDraft) ? input.data.embuDraft : fallback.data.embuDraft,
+      weeklyPlanCompletions: isWeeklyPlanCompletionRecord(input.data?.weeklyPlanCompletions)
+        ? input.data.weeklyPlanCompletions
+        : fallback.data.weeklyPlanCompletions,
     },
   };
 }
@@ -203,4 +209,37 @@ function isRankRecord(value: unknown): value is Record<string, { value: 1 | 2 | 
   }
 
   return true;
+}
+
+function isEmbuDraft(value: unknown): value is AppDataState["embuDraft"] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as { notes?: unknown; steps?: unknown };
+  if (typeof candidate.notes !== "string" || !Array.isArray(candidate.steps)) {
+    return false;
+  }
+
+  return candidate.steps.every(step => {
+    if (typeof step !== "object" || step === null || Array.isArray(step)) return false;
+    const item = step as Record<string, unknown>;
+    return typeof item.id === "string"
+      && typeof item.hokeiName === "string"
+      && typeof item.grade === "string"
+      && typeof item.week === "number"
+      && Number.isFinite(item.week)
+      && typeof item.momentIndex === "number"
+      && Number.isFinite(item.momentIndex)
+      && typeof item.transition === "string";
+  });
+}
+
+function isWeeklyPlanCompletionRecord(value: unknown): value is AppDataState["weeklyPlanCompletions"] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  return Object.values(value).every(entry => {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) return false;
+    const completedAt = (entry as { completedAt?: unknown }).completedAt;
+    return typeof completedAt === "string" && Number.isFinite(Date.parse(completedAt));
+  });
 }
