@@ -1,11 +1,23 @@
 :root {
-  /* Soft elevation for borderless card surfaces (replaces 1px outlines). */
-  --app-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --app-display-font: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  --app-card-border: rgba(73, 62, 44, 0.14);
+  --app-card-shadow: 0 1px 2px rgba(65, 52, 34, 0.04), 0 8px 22px rgba(65, 52, 34, 0.06);
 }
 
 [data-bs-theme="dark"] {
-  /* Shadows barely register on dark surfaces; lean on a deeper, tighter cast. */
-  --app-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 8px rgba(0, 0, 0, 0.40);
+  --app-card-border: #303845;
+  --app-card-shadow: 0 1px 0 rgba(255, 255, 255, 0.025), 0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+h1,
+h2,
+h3,
+.app-navbar-title,
+.app-offcanvas-title,
+.kamoku-card-name,
+.card-head-title,
+.dojo-card-title {
+  font-family: var(--app-display-font);
 }
 
 img.logo {

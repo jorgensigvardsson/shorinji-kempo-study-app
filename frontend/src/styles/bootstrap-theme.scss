@@ -1,23 +1,32 @@
 @import "bootstrap/scss/functions";
 
-// Primary gold tuned for contrast in each color mode
-$primary-light-gold: #dfbe5a;
-$primary-dark-gold: #f3d36c;
+// Washi by day, deep ink by night. The two modes share warm type and a
+// restrained brass accent, while their surfaces carry the atmosphere.
+$primary-light-gold: #9a712d;
+$primary-dark-gold: #ddb84a;
 
 // Light theme palette (compiled into Bootstrap component styles)
 $primary: $primary-light-gold;
-$secondary: #6c757d;
+$secondary: #716e65;
 $success: #2f9e44;
 $info: #1971c2;
 $warning: #e67700;
 $danger: #c2413a;
+$body-bg: #f2eee4;
+$body-color: #35342f;
+$body-secondary-color: #716e65;
+$body-secondary-bg: #ebe5d9;
+$body-tertiary-color: #999286;
+$body-tertiary-bg: #f8f4ec;
+$emphasis-color: #24231f;
+$border-color: #c8c0b1;
 
 @import "bootstrap/scss/bootstrap";
 
 // Dark theme palette (runtime overrides when data-bs-theme="dark")
 $dark-theme-colors: (
   "primary": $primary-dark-gold,
-  "secondary": #9ca3af,
+  "secondary": #969eac,
   "success": #69db7c,
   "info": #74c0fc,
   "warning": #ffc078,
@@ -25,6 +34,21 @@ $dark-theme-colors: (
 );
 
 @include color-mode(dark, true) {
+  --#{$prefix}body-bg: #0e1319;
+  --#{$prefix}body-bg-rgb: 14, 19, 25;
+  --#{$prefix}body-color: #eeeae2;
+  --#{$prefix}body-color-rgb: 238, 234, 226;
+  --#{$prefix}emphasis-color: #f7f3eb;
+  --#{$prefix}emphasis-color-rgb: 247, 243, 235;
+  --#{$prefix}secondary-color: #969eac;
+  --#{$prefix}tertiary-color: #707988;
+  --#{$prefix}secondary-bg: #151b22;
+  --#{$prefix}secondary-bg-rgb: 21, 27, 34;
+  --#{$prefix}tertiary-bg: #1b212a;
+  --#{$prefix}tertiary-bg-rgb: 27, 33, 42;
+  --#{$prefix}border-color: #303845;
+  --#{$prefix}border-color-translucent: rgba(238, 234, 226, 0.12);
+
   @each $name, $value in $dark-theme-colors {
     --#{$prefix}#{$name}: #{$value};
     --#{$prefix}#{$name}-rgb: #{to-rgb($value)};

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } from "./data";
 import { TranslatorContext } from "./i18n";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
@@ -14,6 +14,9 @@ interface Props {
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
+    dojoMode?: boolean;
+    onDojoModeChange: (enabled: boolean) => void;
+    showDojoToggle?: boolean;
 }
 
 type Selection = "all" | "own" | "up-to-own" | GradeName;
@@ -21,22 +24,22 @@ type Selection = "all" | "own" | "up-to-own" | GradeName;
 const selectionData = load<string>("hokeiListSelection", "own");
 
 const List = (props: Props) => {
-    const { grade, allGradePlans, notesData, ranksData } = props;
+    const { grade, allGradePlans, notesData, ranksData, dojoMode = false, onDojoModeChange, showDojoToggle = true } = props;
     const [selection, setSelection] = useState<Selection>((selectionData.data ?? "own") as Selection);
     const [filterText, setFilterText] = useState<string>("");
     const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
-    const [allHokeis, setAllHokeis] = useState<HokeiAndGrade[]>([]);
-
     const translator = useContext(TranslatorContext);
     const showKanji = useShowKanji();
 
-    useEffect(() => {
-        setAllHokeis(
-            allGradePlans.flatMap(grade => grade.weeks.map(w => ({week: w.week, grade: grade.grade, moments: getHokeiMoments(w)})))
-                         .flatMap(({week, grade, moments}) => moments.map((moment, momentIndex) => ({ week, grade, moment, momentIndex})))
-                         .sort(compareGradeThenWeek)
-        )
-    }, [allGradePlans]);
+    const allHokeis = useMemo(() =>
+        allGradePlans.flatMap(gradePlan => gradePlan.weeks.map(week => ({
+            week: week.week,
+            grade: gradePlan.grade,
+            moments: getHokeiMoments(week),
+        })))
+            .flatMap(({week, grade, moments}) => moments.map((moment, momentIndex) => ({week, grade, moment, momentIndex})))
+            .sort(compareGradeThenWeek),
+    [allGradePlans]);
 
     useEffect(() => {
         const timeoutId = window.setTimeout(() => setDebouncedFilterText(filterText), 500);
@@ -60,8 +63,8 @@ const List = (props: Props) => {
 
     return (
         <>
-            <div className="mb-4">
-                <div>
+            <div className={`training-list-controls training-view-controls mb-4${showDojoToggle ? "" : " is-single"}`}>
+                <div className="training-list-filters">
                     <Form.Select value={selection} onChange={e => {
                         const newSelection = e.target.value as Selection;
                         selectionData.save(newSelection);
@@ -83,11 +86,19 @@ const List = (props: Props) => {
                         <option value="godan">{gradeLabel('godan', translator, showKanji)}</option>
                         <option value="rokudan">{gradeLabel('rokudan', translator, showKanji)}</option>
                     </Form.Select>
-                    <Form.Control placeholder={translator.translate("Filtrera...")} className="mt-3"
+                    <Form.Control placeholder={translator.translate("Sök...")} className="mt-3"
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />
                 </div>
+                {showDojoToggle && <Form.Check
+                    className="training-list-dojo-toggle"
+                    type="switch"
+                    id="dojo-mode"
+                    label={translator.translate("Dojo-läge")}
+                    checked={dojoMode}
+                    onChange={event => onDojoModeChange(event.target.checked)}
+                />}
             </div>
-            {renderHokeis(filteredHokeis, notesData, ranksData)}
+            {renderHokeis(filteredHokeis, notesData, ranksData, dojoMode)}
         </>
     )
 }
@@ -122,10 +133,10 @@ interface HokeiAndGrade {
     moment: HokeiMoment;
     momentIndex: number;
 }
-const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes, ranksData: HokeiRanks) => {
+const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes, ranksData: HokeiRanks, dojoMode: boolean) => {
     return hokeis.map(h => (
         <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-2"
-                        notesData={notesData} ranksData={ranksData}/>
+                        notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} kamokuLayout/>
     ))
 }
 

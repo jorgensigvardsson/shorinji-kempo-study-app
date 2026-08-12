@@ -1,13 +1,13 @@
 import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Navigate } from "react-router-dom";
 import type { GradePlan } from "./data.ts";
-import Kamoku from "./Kamoku.tsx";
+import Training from "./Training.tsx";
 import Settings from "./Settings.tsx";
 import Broadcast from "./Broadcast.tsx";
 import AdminUsers from "./AdminUsers.tsx";
 import { getSyncManager } from "./sync/manager.ts";
 import { noTranslate, type Language, type Translator } from "./i18n.ts";
 import Groups from "./Groups.tsx";
-import List from "./List.tsx";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
@@ -17,16 +17,18 @@ import Flashcard from "./Flashcard.tsx";
 import TermsOfServices from "./TermsOfServices.tsx";
 import PrivacyPolicy from "./PrivacyPolicy.tsx";
 import Changelog from "./Changelog.tsx";
+import Theory, { TheoryToolPage } from "./Theory.tsx";
 
 export interface Route {
     path?: string;
-    component?: React.ComponentType<any>;
+    component?: React.ComponentType;
     href?: string;
     menuText: string | (() => string);
     startDescription?: string | (() => string);
     icon: Icon;
     showInMainMenu?: boolean;
     hideOnStartPage?: boolean;
+    hideFromMenu?: boolean;
 }
 
 export const routeText = (route: Route) => { 
@@ -44,7 +46,7 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
                           textSize: number,
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
                           setTextSize: (size: number) => void, onShowLogin: () => void): Route[] => {
-    let routes: Route[] = [{
+    const routes: Route[] = [{
         path: "/",
         component: () => <Start routes={routes.filter(r => r.path && r.path !== "/" && !r.hideOnStartPage)
                                               .map(r => ({ path: r.path!, title: routeText(r), description: routeDescription(r), icon: r.icon }))} />,
@@ -53,18 +55,26 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         showInMainMenu: true
     }, {
         path: "/kamoku",
-        component: () => <Kamoku myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/>,
-        menuText: translator.translate("Kamoku"),
-        startDescription: translator.translate("Träna veckans innehåll utifrån din grad."),
+        component: () => <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/>,
+        menuText: translator.translate("Träning"),
+        startDescription: translator.translate("Välj mellan veckans träning och fri träning."),
         icon: Book,
         showInMainMenu: true
     }, {
+        path: "/theory",
+        component: () => <Theory showLanguageTools={!translator.isJapanese} />,
+        menuText: translator.translate("Teori"),
+        startDescription: translator.translate("Studera ord och begrepp i lugn takt."),
+        icon: JournalText,
+        showInMainMenu: true,
+    }, {
         path: "/list",
-        component: () => <List allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} grade={gradePlan}/>,
+        component: () => <Navigate to="/kamoku?view=free&area=hokei" replace />,
         menuText: translator.translate("Alla hokei"),
         startDescription: translator.translate("Bläddra bland alla hokei och filtrera på nivå."),
         icon: ListUl,
-        showInMainMenu: true
+        hideOnStartPage: true,
+        hideFromMenu: true
     }, {
         path: "/grading-test",
         component: () => <GradingTest grade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} />,
@@ -80,22 +90,28 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         icon: Collection
     }, ...(!translator.isJapanese ? [{
         path: "/word-list",
-        component: () => <WordList />,
+        component: () => <TheoryToolPage><WordList /></TheoryToolPage>,
         menuText: translator.translate("Ordlista"),
         startDescription: translator.translate("Slå upp ord på kanji, romaji och betydelse."),
-        icon: JournalText
+        icon: JournalText,
+        hideOnStartPage: true,
+        hideFromMenu: true,
     } satisfies Route] : []), {
         path: "/quiz",
-        component: () => <Quiz myGrade={gradePlan.grade}/>,
+        component: () => <TheoryToolPage><Quiz myGrade={gradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Quiz"),
         startDescription: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
-        icon: QuestionSquare
+        icon: QuestionSquare,
+        hideOnStartPage: true,
+        hideFromMenu: true,
     }, ...(!translator.isJapanese ? [{
         path: "/flashcard",
-        component: () => <Flashcard />,
+        component: () => <TheoryToolPage><Flashcard /></TheoryToolPage>,
         menuText: translator.translate("Flashkort"),
         startDescription: translator.translate("Öva med kort och bygg minnet steg för steg."),
-        icon: CardHeading
+        icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
     } satisfies Route] : []), {
         path: "/settings",
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={gradePlan} allGradePlans={allGradePlans} translator={translator}

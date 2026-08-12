@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CollapsibleCard from "./CollapsibleCard";
 
 describe("CollapsibleCard", () => {
@@ -32,6 +32,21 @@ describe("CollapsibleCard", () => {
     expect(container.querySelector(".card")?.classList.contains("is-collapsed")).toBe(true);
   });
 
+  it("does not expand when a user has selected text in the header", () => {
+    const { container } = render(<CollapsibleCard header="Selectable header">body</CollapsibleCard>);
+    const text = screen.getByText("Selectable header");
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    fireEvent.click(text);
+
+    expect(container.querySelector(".card")?.classList.contains("is-collapsed")).toBe(true);
+    selection.removeAllRanges();
+  });
+
   it("shows a chevron by default", () => {
     const { container } = render(<CollapsibleCard header="H">body</CollapsibleCard>);
     expect(container.querySelector(".collapsible-card-chevron")).not.toBeNull();
@@ -56,5 +71,37 @@ describe("CollapsibleCard", () => {
       <CollapsibleCard header="H" className="my-custom-class">body</CollapsibleCard>
     );
     expect(container.querySelector(".my-custom-class")).not.toBeNull();
+  });
+
+  it("spotlights and focuses the card until it is closed", async () => {
+    const { container } = render(
+      <CollapsibleCard header="Focused technique" focusOnOpen>body</CollapsibleCard>
+    );
+
+    fireEvent.click(screen.getByText("Focused technique"));
+    const header = container.querySelector<HTMLElement>(".card-header");
+
+    expect(document.body.classList.contains("card-focus-active")).toBe(true);
+    expect(container.querySelector(".focus-card.is-expanded")).not.toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(header));
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(document.body.classList.contains("card-focus-active")).toBe(false);
+    expect(container.querySelector(".focus-card.is-collapsed")).not.toBeNull();
+  });
+
+  it("uses history navigation to close a focused card without reopening it", () => {
+    const { container } = render(
+      <CollapsibleCard header="History technique" focusOnOpen>body</CollapsibleCard>
+    );
+
+    fireEvent.click(screen.getByText("History technique"));
+    expect(container.querySelector(".focus-card.is-expanded")).not.toBeNull();
+
+    fireEvent.popState(window);
+    expect(container.querySelector(".focus-card.is-collapsed")).not.toBeNull();
+
+    fireEvent.popState(window);
+    expect(container.querySelector(".focus-card.is-collapsed")).not.toBeNull();
   });
 });

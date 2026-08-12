@@ -1,0 +1,63 @@
+.theory-page-header {
+  padding: 0.5rem 0.25rem 2rem;
+}
+
+.theory-page-header h1 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.theory-page-header p {
+  max-width: 34rem;
+  margin: 0.6rem 0 0;
+  color: var(--bs-secondary-color);
+  line-height: 1.5;
+}
+
+.theory-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.65rem 0 0.5rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+.theory-back:hover,
+.theory-back:focus-visible {
+  color: var(--bs-emphasis-color);
+}
+
+.theory-choice-grid {
+  gap: 0.75rem 1.5rem;
+}
+
+.theory-choice-grid .app-grid-card {
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  box-shadow: none;
+}
+
+.theory-choice-grid .app-grid-card-interactive:hover,
+.theory-choice-grid .app-grid-card-interactive:focus-visible {
+  transform: none;
+  background: var(--bs-tertiary-bg);
+  box-shadow: none;
+}
+
+.theory-tool-page > .theory-back {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 35rem) {
+  .theory-page-header {
+    padding-bottom: 1.4rem;
+  }
+}

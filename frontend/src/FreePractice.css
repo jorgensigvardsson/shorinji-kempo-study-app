@@ -1,0 +1,545 @@
+.free-practice-intro {
+  padding: 1.25rem 0.25rem 1.5rem;
+}
+
+.free-practice-intro h1,
+.free-practice-area-header h1 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: clamp(1.55rem, 4vw, 2rem);
+  font-weight: 600;
+}
+
+.free-practice-intro h1:focus,
+.free-practice-area-header h1:focus {
+  outline: 0;
+}
+
+.free-practice-intro p,
+.free-practice-area-header p {
+  margin: 0.45rem 0 0;
+  color: var(--bs-secondary-color);
+}
+
+.free-practice-grid {
+  gap: 0.75rem 1.5rem;
+}
+
+.free-practice-grid .app-grid-card {
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  box-shadow: none;
+}
+
+.free-practice-grid .app-grid-card-interactive:hover,
+.free-practice-grid .app-grid-card-interactive:focus-visible {
+  transform: none;
+  background: var(--bs-tertiary-bg);
+  box-shadow: none;
+}
+
+.free-practice-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.65rem 0 1.25rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+.free-practice-back:hover,
+.free-practice-back:focus-visible {
+  color: var(--bs-emphasis-color);
+}
+
+.free-practice-area-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding: 0 0.25rem;
+}
+
+.free-practice-dojo-toggle {
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+}
+
+.free-practice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 2rem;
+}
+
+.free-practice-grade-control {
+  width: min(100%, 24rem);
+}
+
+.free-practice-grade-control .form-label {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.free-practice-section > h3,
+.free-practice-section-heading h3 {
+  margin: 0 0 0.85rem;
+  color: var(--bs-emphasis-color);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.free-practice-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.free-practice-section-heading h3 {
+  margin: 0;
+}
+
+.free-practice-section-heading .form-select {
+  width: auto;
+  min-width: 10rem;
+}
+
+.free-practice-item-list,
+.free-practice-sequence-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.free-practice-item-list > li,
+.free-practice-sequence-list > li {
+  padding: 0.9rem 0.25rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.free-practice-item-list > li:first-child,
+.free-practice-sequence-list > li:first-child {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.free-practice-item-list strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-weight: 600;
+}
+
+.free-practice-term {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.free-practice-term-japanese,
+.free-practice-step-note,
+.free-practice-source-note {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.free-practice-step-note {
+  margin-top: 0.35rem;
+}
+
+.free-practice-source-note {
+  max-width: 42rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.embu-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.embu-builder-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin-bottom: -0.8rem;
+}
+
+.embu-builder-heading h3 {
+  margin: 0;
+}
+
+.embu-experimental-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--bs-warning-text-emphasis);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.embu-experimental-label svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.embu-experimental-note {
+  width: min(100%, 42rem);
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 2px solid var(--bs-warning-border-subtle);
+  background: rgba(var(--bs-warning-rgb), 0.08);
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.embu-overall-notes,
+.embu-technique-picker,
+.embu-draft-steps {
+  width: min(100%, 42rem);
+}
+
+.embu-builder .form-label {
+  margin-bottom: 0.45rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.embu-technique-picker {
+  position: relative;
+}
+
+.embu-search-field {
+  position: relative;
+}
+
+.embu-search-field > svg {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0.85rem;
+  translate: 0 -50%;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+}
+
+.embu-search-field .form-control {
+  padding-left: 2.5rem;
+}
+
+.embu-suggestions {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.55rem;
+  background: var(--bs-body-bg);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12);
+}
+
+.embu-suggestions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  color: var(--bs-body-color);
+  text-align: left;
+}
+
+.embu-suggestions button:last-child {
+  border-bottom: 0;
+}
+
+.embu-suggestions button:hover,
+.embu-suggestions button.is-active {
+  background: var(--bs-tertiary-bg);
+}
+
+.embu-suggestions button > span:last-child {
+  flex: 0 0 auto;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+}
+
+.embu-no-results,
+.embu-empty-state {
+  margin: 0.65rem 0 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.embu-empty-state {
+  width: min(100%, 42rem);
+  margin: 0;
+  padding: 1.25rem 0;
+  border-block: 1px solid var(--bs-border-color);
+}
+
+.embu-draft-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.embu-draft-steps > li {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.embu-draft-steps > li:last-child {
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.embu-step-row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 4.2rem;
+}
+
+.embu-step-number {
+  color: var(--bs-secondary-color);
+  text-align: center;
+}
+
+.embu-step-technique {
+  min-width: 0;
+  padding: 0.7rem 0.35rem;
+  border: 0;
+  background: transparent;
+  color: var(--bs-emphasis-color);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+}
+
+.embu-step-technique:hover:not(:disabled),
+.embu-step-technique:focus-visible {
+  color: var(--bs-primary);
+}
+
+.embu-step-actions {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.embu-step-actions button {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bs-secondary-color);
+}
+
+.embu-step-actions button:hover:not(:disabled),
+.embu-step-actions button:focus-visible {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+}
+
+.embu-step-actions button:disabled {
+  opacity: 0.25;
+}
+
+.embu-transition {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.45rem;
+  padding: 0 0 1rem;
+}
+
+.embu-transition > span {
+  padding-top: 0.55rem;
+  color: var(--bs-secondary-color);
+  text-align: center;
+}
+
+.embu-transition .form-control {
+  min-height: 3.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.kihon-practice-proposal {
+  gap: 2.5rem;
+}
+
+.kihon-design-note {
+  max-width: 42rem;
+  margin: 0;
+  color: var(--bs-secondary-color);
+  line-height: 1.5;
+}
+
+.kihon-practice-group > h3 {
+  margin-bottom: 1.15rem;
+}
+
+.kihon-practice-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem;
+}
+
+.kihon-technique-list {
+  min-width: 0;
+}
+
+.kihon-technique-list > h4 {
+  margin: 0 0 0.65rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.kihon-technique-list .free-practice-item-list > li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kihon-technique-list .free-practice-term {
+  min-width: 0;
+}
+
+.free-practice-item-grade {
+  flex: 0 0 auto;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.free-practice-form-groups {
+  gap: 3rem;
+}
+
+.practice-form-mode > h3 {
+  margin-bottom: 1.35rem;
+}
+
+.practice-form-family-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.practice-form-family > h4 {
+  margin: 0 0 0.65rem;
+  color: var(--bs-secondary-color);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.randori-practice-groups {
+  gap: 2.75rem;
+}
+
+.randori-theme-group > h3 {
+  margin-bottom: 1.15rem;
+}
+
+.randori-theme-list > li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.randori-theme-list .free-practice-term {
+  min-width: 0;
+}
+
+.free-practice-sequence-list {
+  counter-reset: practice-step;
+}
+
+.free-practice-sequence-list > li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: 0.5rem;
+  counter-increment: practice-step;
+}
+
+.free-practice-sequence-list > li::before {
+  content: counter(practice-step) ".";
+  grid-row: 1 / span 2;
+  color: var(--bs-secondary-color);
+}
+
+.kumi-embu-step-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-body-color);
+  font: inherit;
+  text-align: left;
+}
+
+.kumi-embu-step-button:hover,
+.kumi-embu-step-button:focus-visible {
+  color: var(--bs-primary);
+}
+
+.kumi-embu-inline-term {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+@media (max-width: 35rem) {
+  .free-practice-area-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .free-practice-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .free-practice-section-heading .form-select {
+    width: 100%;
+  }
+
+  .kihon-practice-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .embu-step-row {
+    grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  }
+
+  .embu-step-actions button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .embu-suggestions button {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}

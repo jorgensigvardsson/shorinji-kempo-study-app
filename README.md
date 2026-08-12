@@ -4,13 +4,16 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 
 ## Features
 
-- **Kamoku** — weekly training schedule by grade, with techniques and forms organized per session
-- **All Hokei** — browse and filter all techniques across all grades
+- **Training** — choose between a grade-based weekly plan and free practice, with app-style back navigation that preserves your place
+- **Weekly progress** — mark a training week as completed and retain its completion date across synced devices
+- **Free practice** — focused areas for Kihon, Hokei, Tan'en/Sōtai, Randori, and Embu/Kumi-embu
+- **Experimental Embu builder** — assemble an Embu from existing techniques with transitions and notes; drafts are intentionally local-only while the permanent data model is designed
 - **Technique Groups** — explore techniques organized by category
-- **Word List** — searchable dictionary of kanji, romaji, and technique terminology
+- **Theory** — a shared entrance for the word list, quiz, and flashcards
+- **Word List** — searchable dictionary of kanji, romaji, and technique terminology, with compact in-place lookup from selected or long-pressed text
 - **Quiz** — rapid-fire questions testing technique names and terminology, with streak counter and synced all-time high score
 - **Flashcards** — spaced-repetition learning tool (non-Japanese languages)
-- **Notes & ratings** — attach personal notes and star ratings to individual techniques
+- **Focused technique cards** — calm full-card practice view, Dojo mode, notes, videos, and self-assessment
 - **Cloud sync** — data syncs automatically to OneDrive, Google Drive, or Dropbox
 - **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
 - **Multilingual** — Swedish (default/fallback), English, Turkish, Japanese

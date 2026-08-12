@@ -29,6 +29,7 @@ export class AppDataStore {
       quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
       knownFlashCards: new Map<number, DataChangedCallback<"knownFlashCards">>(),
       showKanjiOnHokeiCards: new Map<number, DataChangedCallback<"showKanjiOnHokeiCards">>(),
+      weeklyPlanCompletions: new Map<number, DataChangedCallback<"weeklyPlanCompletions">>(),
     };
   }
 
@@ -155,6 +156,9 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
       knownFlashCards: isFlashCardKnownRecord(input.data?.knownFlashCards) ? input.data.knownFlashCards : fallback.data.knownFlashCards,
       showKanjiOnHokeiCards: typeof input.data?.showKanjiOnHokeiCards === "boolean" ? input.data.showKanjiOnHokeiCards : fallback.data.showKanjiOnHokeiCards,
+      weeklyPlanCompletions: isWeeklyPlanCompletionRecord(input.data?.weeklyPlanCompletions)
+        ? input.data.weeklyPlanCompletions
+        : fallback.data.weeklyPlanCompletions,
     },
   };
 }
@@ -203,4 +207,13 @@ function isRankRecord(value: unknown): value is Record<string, { value: 1 | 2 | 
   }
 
   return true;
+}
+
+function isWeeklyPlanCompletionRecord(value: unknown): value is AppDataState["weeklyPlanCompletions"] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  return Object.values(value).every(entry => {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) return false;
+    const completedAt = (entry as { completedAt?: unknown }).completedAt;
+    return typeof completedAt === "string" && Number.isFinite(Date.parse(completedAt));
+  });
 }

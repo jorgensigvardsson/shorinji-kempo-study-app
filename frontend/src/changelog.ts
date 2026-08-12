@@ -13,6 +13,53 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-12T18:30:00.000Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Appen har fått tydligare ingångar för träning och teori. Under Träning väljer du nu mellan veckans träning och fri träning, medan ordlista, quiz och flashkort finns samlade under Teori.",
+        en: "The app now has clearer entrances for training and theory. Under Training you can choose between the weekly plan and free practice, while the word list, quiz, and flashcards are gathered under Theory.",
+        tr: "Uygulamada antrenman ve teori için daha anlaşılır girişler var. Antrenman altında haftalık plan ile serbest çalışma arasında seçim yapabilir; sözlük, quiz ve bilgi kartlarını Teori altında bulabilirsiniz.",
+        ja: "練習と学習への入口がより分かりやすくなりました。「練習」では週間メニューと自由練習を選べ、用語集・クイズ・フラッシュカードは「学習」にまとめられています。",
+      },
+      {
+        emoji: "🥋",
+        sv: "Fri träning samlar Kihon, Hokei, Tan’en och Sōtai, Randori samt Embu och Kumi-embu. Du kan växla mellan områden utan att tappa det du höll på med.",
+        en: "Free practice brings together Kihon, Hokei, Tan'en and Sōtai, Randori, and Embu and Kumi-embu. You can move between areas without losing what you were doing.",
+        tr: "Serbest çalışma; Kihon, Hokei, Tan'en ve Sōtai, Randori ile Embu ve Kumi-embu bölümlerini bir araya getiriyor. Yaptığınız çalışmayı kaybetmeden bölümler arasında geçiş yapabilirsiniz.",
+        ja: "自由練習に、基本・法形・単演と相対・乱捕り・演武と組演武がまとまりました。途中の状態を保ったまま各分野を行き来できます。",
+      },
+      {
+        emoji: "📅",
+        sv: "Veckans träning visar veckans fokus tydligare och låter dig markera en vecka som tränad. Markeringen sparas tillsammans med datumet så att det blir lättare att hålla reda på var du är.",
+        en: "Weekly training presents the week's focus more clearly and lets you mark a week as completed. The completion date is saved, making it easier to keep track of where you are.",
+        tr: "Haftalık antrenman, haftanın odağını daha açık gösteriyor ve bir haftayı tamamlandı olarak işaretlemenizi sağlıyor. Nerede kaldığınızı takip edebilmeniz için tamamlanma tarihi de kaydediliyor.",
+        ja: "週間練習では、その週の重点がより分かりやすく表示され、練習済みとして記録できるようになりました。完了日も保存されるため、進み具合を確認しやすくなります。",
+      },
+      {
+        emoji: "🎴",
+        sv: "Teknikkorten har fått ett lugnare fokusläge och tydligare självskattning. När ett kort är öppet stänger bakåtknappen eller bakåtgesten kortet först, i stället för att lämna sidan.",
+        en: "Technique cards now have a calmer focus view and clearer self-assessment. When a card is open, the Back button or gesture closes the card first instead of leaving the page.",
+        tr: "Teknik kartları artık daha sakin bir odak görünümüne ve daha anlaşılır öz değerlendirmeye sahip. Bir kart açıkken geri düğmesi veya geri hareketi sayfadan çıkmak yerine önce kartı kapatır.",
+        ja: "技のカードに、より落ち着いた集中表示と分かりやすい自己評価が加わりました。カードを開いているときは、戻るボタンや戻るジェスチャーでページを離れず、まずカードが閉じます。",
+      },
+      {
+        emoji: "🔎",
+        sv: "Ord och begrepp kan slås upp direkt utan att lämna sidan: markera text på dator eller håll fingret på ett ord på mobilen för att öppna en liten ordlisteruta.",
+        en: "Words and terms can now be looked up without leaving the page: select text on a computer or press and hold a word on mobile to open a small dictionary panel.",
+        tr: "Artık sayfadan ayrılmadan kelime ve terim arayabilirsiniz: bilgisayarda metni seçin veya mobilde bir kelimeye basılı tutarak küçük sözlük penceresini açın.",
+        ja: "ページを離れずに言葉や用語を調べられるようになりました。パソコンでは文字を選択し、スマートフォンでは言葉を長押しすると、小さな用語集が開きます。",
+      },
+      {
+        emoji: "⚠️",
+        sv: "Under Embu finns en första experimentell prototyp för att bygga en egen Embu av befintliga tekniker. Utkastet sparas bara på den här enheten och kommer att försvinna när prototypen ersätts av den färdiga lösningen.",
+        en: "Embu now includes an early experimental prototype for building your own Embu from existing techniques. The draft is saved only on this device and will be lost when the prototype is replaced by the finished solution.",
+        tr: "Embu bölümünde mevcut tekniklerden kendi Embu'nuzu oluşturmanız için erken aşamada deneysel bir prototip bulunuyor. Taslak yalnızca bu cihazda saklanır ve prototip tamamlanmış çözümle değiştirildiğinde kaybolur.",
+        ja: "演武には、既存の技から自分の演武を組み立てる初期段階の実験的な試作機能が追加されました。下書きはこの端末にのみ保存され、正式版に置き換わる際に失われます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-12T12:00:00.000Z",
     changes: [
       {

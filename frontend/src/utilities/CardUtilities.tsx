@@ -89,7 +89,7 @@ export const cardHead = (translator: Translator, text: string, options: HeadOpti
         return (
             <>
                 <div style={{display: "flex", alignItems: "baseline", justifyContent: "space-between"}}>
-                    <div style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
+                    <div className="card-head-title" style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
                     <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>
                         {options.rightNode}
                         {translatedTopBadges}
@@ -105,7 +105,7 @@ export const cardHead = (translator: Translator, text: string, options: HeadOpti
     return (
         <>
             <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                <div style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
+                <div className="card-head-title" style={{fontSize: `${options.emSize ?? 1.4}em`}}>{translated}&nbsp;&nbsp;{options.icons}</div>
                 <div style={{paddingRight: "0.5em", display: "flex", alignItems: "center", gap: "0.5rem"}}>
                     {!japaneseNative && options.rightNode}
                     {translatedTopBadges}

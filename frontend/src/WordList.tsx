@@ -1,10 +1,11 @@
 import type { WordListEntry } from "./data";
 import wordList from './assets/word-list.json';
 import { Button, ButtonGroup, Form } from "react-bootstrap";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { normalizeString } from "./strings";
 import { TranslatorContext, type Translator } from "./i18n";
 import "./WordList.css";
+import { getMissingWordLookups, missingWordLookupsChanged } from "./missing-word-lookups";
 
 type SortKey = "kanji" | "romaji" | "meaning";
 
@@ -12,6 +13,7 @@ const WordList = () => {
     const translator = useContext(TranslatorContext);
     const [filterText, setFilterText] = useState("");
     const [sortKey, setSortKey] = useState<SortKey>("romaji");
+    const [missingLookups, setMissingLookups] = useState(() => getMissingWordLookups());
     const filteredEntries = useMemo(() =>
         wordList
             .map(e => ({ entry: e, score: scoreEntry(e, filterText, translator) }))
@@ -23,6 +25,16 @@ const WordList = () => {
             })
             .map(s => s.entry),
         [filterText, sortKey, translator]);
+
+    useEffect(() => {
+        const refreshMissingLookups = () => setMissingLookups(getMissingWordLookups());
+        window.addEventListener(missingWordLookupsChanged, refreshMissingLookups);
+        window.addEventListener("storage", refreshMissingLookups);
+        return () => {
+            window.removeEventListener(missingWordLookupsChanged, refreshMissingLookups);
+            window.removeEventListener("storage", refreshMissingLookups);
+        };
+    }, []);
 
     return (
         <div>
@@ -69,6 +81,21 @@ const WordList = () => {
                         </tbody>
                     </table>
                 </div>
+            )}
+
+            {missingLookups.length > 0 && (
+                <details className="wordlist-missing-lookups">
+                    <summary>{translator.translate("Saknade uppslag på den här enheten")} ({missingLookups.length})</summary>
+                    <p>{translator.translate("Dessa ord hittades inte och har endast sparats lokalt.")}</p>
+                    <ul>
+                        {missingLookups.map(lookup => (
+                            <li key={lookup.term}>
+                                <span>{lookup.term}</span>
+                                <span>{lookup.count}×</span>
+                            </li>
+                        ))}
+                    </ul>
+                </details>
             )}
         </div>
     )

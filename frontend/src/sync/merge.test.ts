@@ -19,6 +19,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       quizStreakHighScore: 0,
       knownFlashCards: {},
       showKanjiOnHokeiCards: true,
+      weeklyPlanCompletions: {},
     },
     ...overrides,
   };
@@ -26,13 +27,19 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
 
 function makeOldDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): AppDataDocument {
   const doc = makeDoc(overrides);
-  const { hokeiListSelection: _omit, showKanjiOnHokeiCards: _omit2, ...dataWithoutNew } = doc.data;
+  const dataWithoutNew = Object.fromEntries(
+    Object.entries(doc.data).filter(
+      ([key]) => key !== "hokeiListSelection" && key !== "showKanjiOnHokeiCards",
+    ),
+  );
   return { ...doc, data: dataWithoutNew as AppDataDocument["data"] };
 }
 
 function makeDocWithoutKanji(overrides: Partial<AppDataDocument> & { updatedAt: string }): AppDataDocument {
   const doc = makeDoc(overrides);
-  const { showKanjiOnHokeiCards: _omit, ...dataWithoutKanji } = doc.data;
+  const dataWithoutKanji = Object.fromEntries(
+    Object.entries(doc.data).filter(([key]) => key !== "showKanjiOnHokeiCards"),
+  );
   return { ...doc, data: dataWithoutKanji as AppDataDocument["data"] };
 }
 
@@ -40,6 +47,17 @@ const OLD = "2024-01-01T00:00:00.000Z";
 const NEW = "2024-06-01T00:00:00.000Z";
 
 describe("mergeDocuments — null base", () => {
+  it("drops legacy Embu drafts from synchronized documents", () => {
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW });
+    (local.data as AppDataDocument["data"] & { embuDraft: unknown }).embuDraft = { notes: "local", steps: [] };
+    (remote.data as AppDataDocument["data"] & { embuDraft: unknown }).embuDraft = { notes: "remote", steps: [] };
+
+    const result = mergeDocuments(null, local, remote);
+
+    expect("embuDraft" in result.document.data).toBe(false);
+  });
+
   it("remote non-default data is applied when local is at defaults", () => {
     const defaults = makeDoc({ updatedAt: OLD }).data;
     const local = makeDoc({ updatedAt: OLD });
@@ -344,6 +362,38 @@ describe("mergeDocuments — showKanjiOnHokeiCards (old-version documents missin
     const result = mergeDocuments(base, local, remote);
     expect(result.document.data.showKanjiOnHokeiCards).toBe(false);
     expect(result.conflictDetected).toBe(false);
+  });
+});
+
+describe("mergeDocuments — weekly-plan completions", () => {
+  it("keeps completed weeks added independently on two devices", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({
+      updatedAt: NEW,
+      data: { ...base.data, weeklyPlanCompletions: { "6 kyū|1": { completedAt: "2024-06-01T10:00:00.000Z" } } },
+    });
+    const remote = makeDoc({
+      updatedAt: NEW,
+      data: { ...base.data, weeklyPlanCompletions: { "6 kyū|2": { completedAt: "2024-06-02T10:00:00.000Z" } } },
+    });
+
+    const result = mergeDocuments(base, local, remote);
+    expect(Object.keys(result.document.data.weeklyPlanCompletions).sort()).toEqual(["6 kyū|1", "6 kyū|2"]);
+  });
+
+  it("keeps the latest completion time when both devices mark the same week", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({
+      updatedAt: NEW,
+      data: { ...base.data, weeklyPlanCompletions: { "6 kyū|1": { completedAt: "2024-06-01T10:00:00.000Z" } } },
+    });
+    const remote = makeDoc({
+      updatedAt: NEW,
+      data: { ...base.data, weeklyPlanCompletions: { "6 kyū|1": { completedAt: "2024-06-03T10:00:00.000Z" } } },
+    });
+
+    const result = mergeDocuments(base, local, remote);
+    expect(result.document.data.weeklyPlanCompletions["6 kyū|1"].completedAt).toBe("2024-06-03T10:00:00.000Z");
   });
 });
 

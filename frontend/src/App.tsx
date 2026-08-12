@@ -15,6 +15,7 @@ import WakeLockToggle from './components/WakeLockToggle';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
+import SelectionWordLookup from './components/SelectionWordLookup';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -234,6 +235,7 @@ function App(props: Props) {
             <WakeLockToggle variant="card" className="d-none d-lg-block" active={keepAwake} onChange={setKeepAwake} />
           )}
         </div>
+        <SelectionWordLookup />
       </div>
     </TranslatorContext.Provider>
   )
@@ -262,33 +264,18 @@ interface NavbarProps {
 const AppNavbar = (props: NavbarProps) => {
   const { routes, className, translator, textZoom, keepAwake, onKeepAwakeChange } = props;
   const [show, setShow] = useState(false);
-  const [isDesktopMenu, setIsDesktopMenu] = useState(() => window.matchMedia("(min-width: 992px)").matches);
   const location = useLocation();
-  const normalizedPath = location.pathname.endsWith("/") && location.pathname.length > 1
-    ? location.pathname.slice(0, -1)
-    : location.pathname;
-  const mainMenuRoutes = routes.filter(route => route.showInMainMenu);
-  const dropdownRoutes = routes.filter(route => !route.showInMainMenu);
+  const visibleMenuRoutes = routes.filter(route => !route.hideFromMenu);
+  const mainMenuRoutes = visibleMenuRoutes.filter(route => route.showInMainMenu);
+  const dropdownRoutes = visibleMenuRoutes.filter(route => !route.showInMainMenu);
   const isDropdownActive = dropdownRoutes.some(route => route.path && location.pathname === route.path);
-  const activeRoute = routes.find(route => route.path === normalizedPath);
-  const navbarTitle = isDesktopMenu
-    ? translator.translate("Shorinji Kempo")
-    : (activeRoute ? routeText(activeRoute) : translator.translate("Shorinji Kempo"));
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 992px)");
-    const onChange = (event: MediaQueryListEvent) => setIsDesktopMenu(event.matches);
-    setIsDesktopMenu(media.matches);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, []);
 
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
-        <Navbar.Brand href="/" className="app-navbar-brand">
+        <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand">
           <img src="/shorinjikempo.png" className="logo" />
-          <span className="app-navbar-title">{navbarTitle}</span>
+          <span className="app-navbar-title">{translator.translate("Shorinji Kempo")}</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow(true)} />
         <Navbar.Offcanvas id="basic-navbar-nav" placement="end" style={{ zoom: textZoom }}
@@ -301,7 +288,7 @@ const AppNavbar = (props: NavbarProps) => {
           </Offcanvas.Header>
           <Offcanvas.Body>
             <Nav className="me-auto d-lg-none" variant="pills">
-              {routes.map((route, index) => route.href ? (
+              {visibleMenuRoutes.map((route, index) => route.href ? (
                 <Nav.Link className="menu-item" key={index} href={route.href} onClick={() => setShow(false)}>
                   {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
                   {routeText(route)}

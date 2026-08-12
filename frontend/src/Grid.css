@@ -5,7 +5,7 @@
 }
 
 .app-grid-card {
-  border: 0;
+  border: 1px solid var(--app-card-border);
   border-radius: 1rem;
   background: var(--bs-tertiary-bg);
   box-shadow: var(--app-card-shadow);
@@ -75,4 +75,49 @@
   background: var(--bs-tertiary-bg);
   box-shadow: var(--app-card-shadow);
   padding: 1rem;
+}
+
+.start-context {
+  display: flex;
+  align-items: center;
+  margin: 0.65rem 0 0.5rem;
+  padding: 0.35rem 0;
+  color: var(--bs-secondary-color);
+  font-family: var(--app-display-font);
+}
+
+.start-intro {
+  padding: 0.5rem 0.25rem 1.25rem;
+}
+
+.start-intro h1 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.start-grid {
+  gap: 0.75rem 1.5rem;
+}
+
+.start-grid .app-grid-card {
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  box-shadow: none;
+}
+
+.start-grid .app-grid-card-interactive:hover,
+.start-grid .app-grid-card-interactive:focus-visible {
+  transform: none;
+  background: var(--bs-tertiary-bg);
+  box-shadow: none;
+}
+
+@media (max-width: 35rem) {
+  .start-intro {
+    padding-bottom: 1.4rem;
+  }
 }

@@ -6,11 +6,18 @@ import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
 import { Collapse, Form } from "react-bootstrap";
-import { ChatFill, ChevronDown, ChevronRight, JournalText } from "react-bootstrap-icons";
+import { ChatFill, ChevronDown, ChevronRight, JournalText, PersonFill, ShieldFill } from "react-bootstrap-icons";
 import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import StarRating from "./StarRating";
 import VideoLink from "./VideoLink";
 import type { HokeiRankValue } from "../persistence/schema";
+import "./HokeiCard.css";
+
+const assessmentLabels: Record<HokeiRankValue, string> = {
+    1: "Behöver träna",
+    2: "Övar",
+    3: "Sitter",
+};
 
 interface HokeiCardProps {
     hokei: HokeiMoment;
@@ -19,10 +26,14 @@ interface HokeiCardProps {
     className?: string;
     gradeName?: GradeName;
     compact?: boolean;
+    dojoMode?: boolean;
+    kamokuLayout?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, notesData, ranksData, gradeName, compact } = props;
+    const { hokei, className, notesData, ranksData, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange } = props;
     const translator = useContext(TranslatorContext);
     const [hasNotes, setHasNotes] = useState(notesData ? !!notesData.getNotes(hokei.hokei_name) : false);
     const [rank, setRank] = useState<HokeiRankValue | null>(ranksData ? ranksData.getRank(hokei.hokei_name) : null);
@@ -47,6 +58,43 @@ const HokeiCard = (props: HokeiCardProps) => {
         </>
     ) : undefined;
 
+    const kamokuFooter = (notesData || videos.length > 0) ? (
+        <div className="kamoku-card-footer-actions">
+            {notesData && <CardFooter notesData={notesData} hokei={hokei}/>}
+            {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-video-link" />)}
+        </div>
+    ) : undefined;
+
+    if (dojoMode) {
+        return (
+            <CollapsibleCard
+                header={<DojoCardHeader hokei={hokei} />}
+                footer={footer}
+                focusOnOpen
+                defaultOpen={defaultOpen}
+                onOpenChange={onOpenChange}
+                className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
+            >
+                <DojoCardBody hokei={hokei} />
+            </CollapsibleCard>
+        );
+    }
+
+    if (kamokuLayout) {
+        return (
+            <CollapsibleCard
+                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} ranksData={ranksData} />}
+                footer={kamokuFooter}
+                focusOnOpen
+                defaultOpen={defaultOpen}
+                onOpenChange={onOpenChange}
+                className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
+            >
+                <KamokuCardBody hokei={hokei} />
+            </CollapsibleCard>
+        );
+    }
+
     if (compact) {
         const name = translator.isJapanese
             ? translator.japanese(hokei.hokei_name)
@@ -62,6 +110,9 @@ const HokeiCard = (props: HokeiCardProps) => {
         return (
             <CollapsibleCard header={compactHeader} inlineChevron
                              footer={footer}
+                             focusOnOpen
+                             defaultOpen={defaultOpen}
+                             onOpenChange={onOpenChange}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
                 <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
@@ -84,14 +135,18 @@ const HokeiCard = (props: HokeiCardProps) => {
             <StarRating
                 value={rank}
                 onChange={(value) => ranksData.setRank(hokei.hokei_name, value)}
-                groupLabel={translator.translate("Rankning")}
-                getLabel={(value) => translator.translate(`Nivå ${value}`)}
+                groupLabel={translator.translate("Självskattning")}
+                emptyLabel={translator.translate("Ej bedömd")}
+                getLabel={(value) => translator.translate(assessmentLabels[value])}
             />
         );
 
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
                          footer={footer}
+                         focusOnOpen
+                         defaultOpen={defaultOpen}
+                         onOpenChange={onOpenChange}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
@@ -100,6 +155,139 @@ const HokeiCard = (props: HokeiCardProps) => {
         </CollapsibleCard>
     )
 }
+
+interface KamokuCardHeaderProps {
+    hokei: HokeiMoment;
+    gradeName?: GradeName;
+    rank: HokeiRankValue | null;
+    ranksData?: HokeiRanks;
+}
+
+const KamokuCardHeader = ({ hokei, gradeName, rank, ranksData }: KamokuCardHeaderProps) => {
+    const translator = useContext(TranslatorContext);
+    const showKanji = useShowKanji();
+    const name = translator.isJapanese ? translator.japanese(hokei.hokei_name) : translator.translate(hokei.hokei_name, { capitalize: true });
+    const japaneseName = !translator.isJapanese && showKanji ? translator.japanese(hokei.hokei_name) : null;
+
+    return (
+        <div className="kamoku-card-header-content">
+            <div className="kamoku-card-name-row">
+                <div>
+                    <div className="kamoku-card-name">{name}</div>
+                    {japaneseName && <div className="kamoku-card-japanese">{japaneseName}</div>}
+                </div>
+                {ranksData && <StarRating value={rank} onChange={value => ranksData.setRank(hokei.hokei_name, value)}
+                                           groupLabel={translator.translate("Självskattning")} emptyLabel={translator.translate("Ej bedömd")}
+                                           getLabel={value => translator.translate(assessmentLabels[value])} />}
+            </div>
+            {(gradeName || hokei.variations.length > 0 || hokei.technique_group || hokei.kyohan_pages.length > 0) && (
+                <div className="kamoku-card-metadata">
+                    {gradeName && <span className="kamoku-card-level-tag">{humanGradeName(gradeName)}</span>}
+                    {hokei.variations.map(variation => <span key={variation}>{translator.translate(variation)}</span>)}
+                    {hokei.technique_group && <span>{translator.translate(hokei.technique_group)}</span>}
+                    {hokei.kyohan_pages.length > 0 && <span className="kamoku-card-kyohan">{translator.translate("Kyohan")} {hokei.kyohan_pages.map(page => translator.translate(page)).join(", ")}</span>}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
+    const translator = useContext(TranslatorContext);
+    const name = translator.isJapanese
+        ? translator.japanese(hokei.hokei_name)
+        : translator.explicitTranslate("en", hokei.hokei_name, { capitalize: true });
+    const variationLabel = (variation: string) => translator.isJapanese
+        ? translator.translate(variation)
+        : translator.explicitTranslate("en", variation);
+
+    return (
+        <div className="kamoku-card-header-content dojo-card-header-content">
+            <div className="kamoku-card-name">{name}</div>
+            {hokei.variations.length > 0 && (
+                <div className="kamoku-card-metadata dojo-card-variations">
+                    {hokei.variations.map(variation => <span key={variation}>{variationLabel(variation)}</span>)}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const KamokuCardBody = ({ hokei }: { hokei: HokeiMoment }) => {
+    const translator = useContext(TranslatorContext);
+    const showKanji = useShowKanji();
+    const effectiveTheme = useTheme();
+    const renderValue = (value?: string, suffix?: React.ReactNode) => value ? (
+        <span className="kamoku-card-value">
+            <span>{translator.translate(value)}{suffix}</span>
+            {!translator.isJapanese && showKanji && <span className="kamoku-card-value-japanese">{translator.japanese(value)}</span>}
+        </span>
+    ) : <span className="kamoku-card-empty">-</span>;
+    const renderRole = (role: HokeiMoment["roles"]["attacker"], Icon: typeof PersonFill, label: string) => (
+        <div className="kamoku-card-role-row">
+            <Icon className="kamoku-card-role-icon" aria-label={translator.translate(label)} />
+            {renderValue(role.stance)}
+            {renderValue(role.action, label === "(F)" && hokei.ren_hanko
+                ? <i> ({translator.translate("ren hankō")})</i>
+                : undefined)}
+        </div>
+    );
+
+    return (
+        <div className="kamoku-card-sequence">
+            <div className="kamoku-card-stage kamoku-card-foot-stage">
+                <div className="kamoku-card-stage-label">{translator.translate("Uppställning")}</div>
+                <div className="kamoku-card-foot-stances">
+                    {hokei.foot_stance?.map(stance => (
+                        <div className="kamoku-card-foot-stance" key={stance}>
+                            <img className="stance-icon" src={`/${stance.toLowerCase().replace(/\s+/g, '_')}${effectiveTheme.effectiveTheme === "dark" ? "_dark" : ""}.png`} alt="" />
+                            <span>{renderValue(stance)}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="kamoku-card-technique-table">
+                <div className="kamoku-card-column-headings" aria-hidden="true">
+                    <span />
+                    <span>{translator.translate("Stans")}</span>
+                    <span>{translator.translate("Utförande")}</span>
+                </div>
+                <div className="kamoku-card-role-rows">
+                    {renderRole(hokei.roles.attacker, PersonFill, "(A)")}
+                    {renderRole(hokei.roles.defender, ShieldFill, "(F)")}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DojoCardBody = ({ hokei }: { hokei: HokeiMoment }) => {
+    const translator = useContext(TranslatorContext);
+    const effectiveTheme = useTheme();
+    const renderRole = (label: string, role: HokeiMoment["roles"]["attacker"]) => (
+        <div className="dojo-role">
+            <strong>{translator.translate(label)}</strong>
+            {role.stance && <div>{translator.translate(role.stance)}</div>}
+            {role.action && <div>{translator.translate(role.action)}{label === "(F)" && hokei.ren_hanko && <i> ({translator.translate("ren hankō")})</i>}</div>}
+        </div>
+    );
+
+    return (
+        <div className="dojo-card-body">
+            {hokei.foot_stance && hokei.foot_stance.length > 0 && (
+                <div className="dojo-foot-images" aria-label={translator.translate("Uppställning")}>
+                    {hokei.foot_stance.map(stance => (
+                        <img key={stance} className="stance-icon" src={`/${stance.toLowerCase().replace(/\s+/g, '_')}${effectiveTheme.effectiveTheme === "dark" ? "_dark" : ""}.png`} alt="" />
+                    ))}
+                </div>
+            )}
+            <div className="dojo-roles">
+                {renderRole("(A)", hokei.roles.attacker)}
+                {renderRole("(F)", hokei.roles.defender)}
+            </div>
+        </div>
+    );
+};
 
 interface CardFooterProps {
     hokei: HokeiMoment;
@@ -112,7 +300,7 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
     const notesRef = useRef<HTMLTextAreaElement>(null);
     const translator = useContext(TranslatorContext);
     
-    useEffect(() => notesData.registerListener(hokei.hokei_name, note => setNotes(note)), [notesData]);
+    useEffect(() => notesData.registerListener(hokei.hokei_name, note => setNotes(note)), [notesData, hokei.hokei_name]);
 
     const persistNotes = () => {
         let processedNotes = notes;
@@ -131,11 +319,11 @@ const CardFooter = ({hokei, notesData}: CardFooterProps) => {
     }, [notesAreShown]);
 
     return (
-        <div className="p-2 rounded hokei-notes-box">
+        <div className={`p-2 rounded hokei-notes-box${notesAreShown ? " is-open" : ""}`}>
             <div style={{ display: "flex", alignItems: "center", cursor: "pointer", justifyContent: "space-between" }} onClick={() => setNotesAreShown(!notesAreShown)}>
                 <div style={{ display: "flex", alignItems: "center" }} >
                     <JournalText className="text-primary" style={{marginRight: "0.5em", display: "block"}}/>
-                    {translator.translate(notes ? 'Mina anteckningar' : 'Lägg till anteckningar')}
+                    {translator.translate(notes ? "Mina anteckningar" : "Anteckningar")}
                 </div>
                 <div>
                     {notesAreShown && <ChevronDown style={{marginLeft: "0.5rem", display: "block"}}/>}

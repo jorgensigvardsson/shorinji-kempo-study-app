@@ -1,9 +1,7 @@
 import { Form } from "react-bootstrap";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { type GradePlan, type GradeName, type Week, type StandardMoment, type KihonShohoEntry, type HokeiMoment, type HokeiRef, type TanenKihonHokei, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
-import CollapsibleCard from "./components/CollapsibleCard";
-import { cardHead } from "./utilities/CardUtilities";
+import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
@@ -15,22 +13,28 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
     (tanenKihonHokeiData as TanenKihonHokei[]).map(t => [t.hokei_name.trim(), t])
 );
 import { getAppDataStore } from "./persistence/store";
-import type { CurrentWeekAnchor } from "./persistence/schema";
+import type { CurrentWeekAnchor, WeeklyPlanCompletionEntry } from "./persistence/schema";
 import { gradeLabel } from "./strings";
 import { resolveCurrentWeekNumber, toLocalDateKey } from "./utilities/current-week";
+import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
+import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
+import "./Kamoku.css";
 
 export interface Props {
     myGrade: GradeName;
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
+    dojoMode?: boolean;
+    onDojoModeChange: (enabled: boolean) => void;
 }
 
 const Kamoku = (props: Props) => {
-    const { myGrade, allGradePlans, notesData, ranksData } = props;
+    const { myGrade, allGradePlans, notesData, ranksData, dojoMode = false, onDojoModeChange } = props;
     const store = getAppDataStore();
     const initialGrade = allGradePlans.find(l => l.grade == myGrade)!;
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
+    const [weeklyPlanCompletions, setWeeklyPlanCompletions] = useState(() => store.get("weeklyPlanCompletions"));
     const [todayKey, setTodayKey] = useState(() => toLocalDateKey());
     const [selectedWeek, setSelectedWeek] = useState(() => findSelectedWeekIndex(initialGrade, currentWeekAnchor, toLocalDateKey()));
     const translator = useContext(TranslatorContext);
@@ -43,6 +47,7 @@ const Kamoku = (props: Props) => {
     }
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
+    useEffect(() => store.subscribe("weeklyPlanCompletions", setWeeklyPlanCompletions), [store]);
 
     useEffect(() => {
         setSelectedWeek(findSelectedWeekIndex(grade, currentWeekAnchor, todayKey));
@@ -61,271 +66,390 @@ const Kamoku = (props: Props) => {
         return () => window.clearTimeout(timerId);
     }, [todayKey]);
 
-    const optionLabel = (week: Week) => {
-        if (!translator.isJapanese) {
-            const label = `${translator.translate("Vecka")} ${week.week}`;
-            return showKanji ? `${label} (${translator.japanese("Vecka")} ${translator.japanese(week.week)})` : label;
-        }
-        return `${translator.translate("Vecka")} ${translator.translate(week.week)}`;
-    }
-
-    const basicExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
-        ? (grade.weeks[selectedWeek].kihon_shoho ?? [])
+    const selectedWeekData = grade.weeks[selectedWeek];
+    const selectedWeekNumber = selectedWeekData.week;
+    const foundationalWeek = selectedWeekData.type === "kihon_only" || selectedWeekData.type === "regular_week"
+        ? selectedWeekData
         : null;
+    const basicReferences = (foundationalWeek?.kihon_shoho ?? []).filter(isHokeiRef);
+    const hokeiExercises = foundationalWeek
+        ? foundationalWeek.moments.filter(isHokeiMoment).map((hokei, index) => ({
+            key: `${grade.grade}.${selectedWeekNumber}.hokei.${index}.${hokei.hokei_name}`,
+            hokei,
+        }))
+        : [];
+    const yondanWeek = isYondanWeek(selectedWeekData) ? selectedWeekData : null;
+    const godanWeek = isGodanWeek(selectedWeekData) ? selectedWeekData : null;
+    const kyushoZemeWeek = isKyushoZemeWeek(selectedWeekData) ? selectedWeekData : null;
+    const primaryTechniques = [
+        ...hokeiExercises,
+        ...(yondanWeek?.moment ? [{ key: `${grade.grade}.${selectedWeekNumber}.yondan`, hokei: adaptYondanMoment(yondanWeek.moment) }] : []),
+        ...(godanWeek ? [{ key: `${grade.grade}.${selectedWeekNumber}.godan`, hokei: adaptGodanMoment(godanWeek.moment) }] : []),
+        ...(kyushoZemeWeek ? [{ key: `${grade.grade}.${selectedWeekNumber}.kyusho`, hokei: adaptKyushoZeme(kyushoZemeWeek.zeme) }] : []),
+    ];
+    const completionKey = weeklyPlanCompletionKey(grade.grade, selectedWeekNumber);
+    const completion = weeklyPlanCompletions[completionKey];
 
-    const hokeiExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
-        ? grade.weeks[selectedWeek].moments.filter(m => "hokei_name" in m).map((m, mi) => ({ key: `${grade.grade}.${selectedWeek}.${m.hokei_name}).${mi}`, hokei: m }))
-        : null;
+    const markWeekCompleted = () => {
+        store.set("weeklyPlanCompletions", {
+            ...weeklyPlanCompletions,
+            [completionKey]: { completedAt: new Date().toISOString() },
+        });
+    };
 
-    const otherExercises = grade.weeks[selectedWeek].type === "kihon_only" || grade.weeks[selectedWeek].type === "regular_week"
-        ? grade.weeks[selectedWeek].moments.filter(m => "type" in m && m.type === "standard_moment").map((m, mi) => ({ key: `${grade.grade}.${selectedWeek}.standard.${mi}`, moment: m as StandardMoment}))
-        : null;
-
-    const preparationExercisesWeek = grade.weeks[selectedWeek].type === "review_preparation_week";
-
-    const yondanWeek = isYondanWeek(grade.weeks[selectedWeek]) ? grade.weeks[selectedWeek] : null;
-    const godanWeek = isGodanWeek(grade.weeks[selectedWeek]) ? grade.weeks[selectedWeek] : null;
-    const kyushoZemeWeek = isKyushoZemeWeek(grade.weeks[selectedWeek]) ? grade.weeks[selectedWeek] : null;
+    const clearWeekCompletion = () => {
+        const nextCompletions = { ...weeklyPlanCompletions };
+        delete nextCompletions[completionKey];
+        store.set("weeklyPlanCompletions", nextCompletions);
+    };
 
 
     return (
         <>
-            <div className="mb-4">
-                <Form.Group className="mb-3" controlId="level">
-                    <Form.Select onChange={e => setNewGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={grade.grade}>
-                        <option value={myGrade} key={myGrade}>{translator.translate("Min nästa grad")}: {gradeLabel(myGrade, translator, showKanji)}</option>
-                        {
-                            allGradePlans.filter(l => l.grade !== myGrade).map(
-                                l => <option value={l.grade} key={l.grade}>{gradeLabel(l.grade, translator, showKanji)}</option>
-                            )
-                        }
-                    </Form.Select>
-                </Form.Group>
-                <Form.Select
-                    value={selectedWeek}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWeek(parseInt(e.target.value))}
-                    name="week-selector"
-                >
-                    {grade.weeks.map((week, index) => (
-                        <option key={index} value={index}>{optionLabel(week)}</option>)
-                    )}
-                </Form.Select>
+            <header className="kamoku-page-header">
+                <h1>{translator.translate("Veckoplan")}</h1>
+                <p>{weekIntroduction(selectedWeekData, translator)}</p>
+            </header>
+            <div className="kamoku-controls training-view-controls mb-4">
+                <div className="kamoku-primary-controls">
+                    <div className="kamoku-grade-line">
+                        <Form.Label htmlFor="kamoku-grade-select" className="kamoku-grade-label">
+                            {translator.translate("Grad")}
+                        </Form.Label>
+                        <Form.Select
+                            id="kamoku-grade-select"
+                            className="kamoku-grade-select"
+                            value={grade.grade}
+                            onChange={event => setNewGrade(allGradePlans.find(plan => plan.grade === event.target.value)!)}
+                        >
+                            {allGradePlans.map(plan => (
+                                <option value={plan.grade} key={plan.grade}>{gradeLabel(plan.grade, translator, showKanji)}</option>
+                            ))}
+                        </Form.Select>
+                    </div>
+                    <Form.Check
+                        className="kamoku-dojo-toggle"
+                        type="switch"
+                        id="dojo-mode"
+                        label={translator.translate("Dojo-läge")}
+                        checked={dojoMode}
+                        onChange={event => onDojoModeChange(event.target.checked)}
+                    />
+                </div>
+                <div className="kamoku-week-navigation">
+                    <button
+                        type="button"
+                        className="kamoku-week-button kamoku-week-button-previous"
+                        aria-label={translator.translate("Föregående vecka")}
+                        disabled={selectedWeek === 0}
+                        onClick={() => setSelectedWeek(selectedWeek - 1)}
+                    >
+                        <ArrowLeft aria-hidden="true" />
+                        <span>{translator.translate("Föregående")}</span>
+                    </button>
+                    <div className="kamoku-week-center">
+                        <span className="kamoku-week-position">
+                            <span>{translator.translate("Vecka")} {selectedWeekNumber}</span>
+                            <span className="kamoku-week-total"> {translator.translate("av")} {grade.weeks.length}</span>
+                        </span>
+                        <WeekCompletionControl
+                            key={completionKey}
+                            completion={completion}
+                            grade={grade.grade}
+                            week={selectedWeekNumber}
+                            translator={translator}
+                            onMark={markWeekCompleted}
+                            onClear={clearWeekCompletion}
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        className="kamoku-week-button kamoku-week-button-next"
+                        aria-label={translator.translate("Nästa vecka")}
+                        disabled={selectedWeek === grade.weeks.length - 1}
+                        onClick={() => setSelectedWeek(selectedWeek + 1)}
+                    >
+                        <span>{translator.translate("Nästa")}</span>
+                        <ArrowRight aria-hidden="true" />
+                    </button>
+                </div>
             </div>
-            {basicExercises && <BasicExerciseCard key={"be"} translator={translator} entries={basicExercises} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} />}
-            {hokeiExercises && hokeiExercises.map((he) => <HokeiCard key={he.key} hokei={he.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} />)}
-            {otherExercises && otherExercises.map((oe) => <OtherCard key={oe.key} translator={translator} other={oe.moment} />)}
-            {preparationExercisesWeek && <PreparationWeekCard translator={translator} />}
-            {yondanWeek && <StudyTeachCard key="st" translator={translator} entries={yondanWeek.study_teach} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} />}
-            {yondanWeek?.moment && <HokeiCard key="ym" hokei={adaptYondanMoment(yondanWeek.moment)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
-            {godanWeek && <HokeiCard key="gm" hokei={adaptGodanMoment(godanWeek.moment)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
-            {kyushoZemeWeek && <HokeiCard key="kz" hokei={adaptKyushoZeme(kyushoZemeWeek.zeme)} className="mt-2" notesData={notesData} ranksData={ranksData} />}
+            <WeeklyFocus week={selectedWeekData} translator={translator} dojoMode={dojoMode} />
+            {basicReferences.length > 0 && (
+                <ReferencedTechniqueSection
+                    title="Repetitionstekniker"
+                    entries={basicReferences}
+                    allGradePlans={allGradePlans}
+                    notesData={notesData}
+                    ranksData={ranksData}
+                    dojoMode={dojoMode}
+                />
+            )}
+            {yondanWeek && (
+                <ReferencedTechniqueSection
+                    title="Studera och undervisa"
+                    entries={yondanWeek.study_teach}
+                    allGradePlans={allGradePlans}
+                    notesData={notesData}
+                    ranksData={ranksData}
+                    dojoMode={dojoMode}
+                />
+            )}
+            {primaryTechniques.length > 0 && (
+                <section className="kamoku-technique-section" aria-labelledby="kamoku-techniques-heading">
+                    <h2 id="kamoku-techniques-heading" className="kamoku-section-title">{translator.translate("Tekniker")}</h2>
+                    {primaryTechniques.map(entry => (
+                        <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} kamokuLayout />
+                    ))}
+                </section>
+            )}
         </>
     )
 }
 
-interface BasicExerciseCardProps {
+const weeklyPlanCompletionKey = (grade: GradeName, week: number): string => `${grade}|${week}`;
+
+interface WeekCompletionControlProps {
+    completion?: WeeklyPlanCompletionEntry;
+    grade: GradeName;
+    week: number;
     translator: Translator;
-    entries: KihonShohoEntry[];
-    allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
+    onMark: () => void;
+    onClear: () => void;
 }
 
-function BasicExerciseCard(props: BasicExerciseCardProps) {
-    const { entries, translator, allGradePlans, notesData, ranksData } = props;
-    const showKanji = useShowKanji();
+const WeekCompletionControl = ({ completion, grade, week, translator, onMark, onClear }: WeekCompletionControlProps) => {
+    const [detailsMode, setDetailsMode] = useState<"closed" | "preview" | "pinned">("closed");
+    const groupRef = useRef<HTMLDivElement>(null);
 
-    const stringEntries = entries.filter((e): e is string => typeof e === "string");
-    const hokeiEntries = entries.filter(isHokeiRef);
+    useEffect(() => {
+        if (detailsMode === "closed") return;
 
-    const bullets: React.ReactNode[] = [];
-    let bulletKey = 0;
-    for (const entry of stringEntries) {
-        const k = bulletKey++;
-        if (translator.isJapanese) {
-            bullets.push(<li key={k}>{translator.japanese(entry)}</li>);
-        } else {
-            bullets.push(<li key={k}>{translator.translate(entry)}</li>);
-            if (showKanji)
-                bullets.push(<li key={`${k}j`} style={{ listStyle: "none", fontSize: "small" }} className="text-muted">{translator.japanese(entry)}</li>);
-        }
+        const closeOutside = (event: PointerEvent) => {
+            if (!groupRef.current?.contains(event.target as Node)) setDetailsMode("closed");
+        };
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setDetailsMode("closed");
+        };
+        document.addEventListener("pointerdown", closeOutside);
+        document.addEventListener("keydown", closeOnEscape);
+        return () => {
+            document.removeEventListener("pointerdown", closeOutside);
+            document.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [detailsMode]);
+
+    if (!completion) {
+        return (
+            <button type="button" className="kamoku-week-completion" onClick={onMark}>
+                <Circle aria-hidden="true" />
+                <span>{translator.translate("Markera som tränad")}</span>
+            </button>
+        );
     }
 
-    const tanenVideos = tanenMatchesToVideos(
-        stringEntries.flatMap(entry => findTanenMatches(entry, tanenKihonHokeiMap))
-    );
-
-    const hokeiCards = hokeiEntries.flatMap((entry) => {
-        const moment = allGradePlans
-            .flatMap(p => p.weeks)
-            .flatMap((w): HokeiMoment[] => ("moments" in w) ? w.moments.filter(isHokeiMoment) : [])
-            .find(m => m.hokei_name === entry.hokei_ref);
-        if (!moment) return [];
-        const extended: HokeiMoment = entry.variants.length > 0
-            ? { ...moment, variations: [...(moment.variations ?? []), ...entry.variants] }
-            : moment;
-        return [<HokeiCard key={`hokei-${entry.hokei_ref}`} hokei={extended} className="mt-2" notesData={notesData} ranksData={ranksData} />];
+    const completedLabel = translator.translate("Klarmarkerad {0}", {
+        params: [formatCompletionDate(completion.completedAt, translator.currentLanguage)],
     });
-
-    const hasContent = bullets.length > 0 || hokeiCards.length > 0 || tanenVideos.length > 0;
-
-    return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō, repetition, studier`, { showKanji })} className="mt-2 app-grid-card hokei-card" showCollapse={hasContent}>
-            {bullets.length > 0 && <ul>{bullets}</ul>}
-            {tanenVideos.map(v => <VideoLink key={v.url} video={v} className="mt-2" />)}
-            {hokeiCards}
-        </CollapsibleCard>
-    );
-}
-
-interface OtherCardProps {
-    translator: Translator;
-    other: StandardMoment;
-}
-
-function OtherCard(props: OtherCardProps) {
-    // TODO: Re-implement this
-    const { translator, other } = props;
-    const showKanji = useShowKanji();
-
-    const renderRandori = () => {
-        if (other.content.indexOf("randori") < 0)
-            return null;
-
-        if (translator.isJapanese) {
-            if (!other.randori && !other.restrictions)
-                return <tr><td>{translator.translate("Randori")}</td></tr>;
-            else if (other.randori && !other.restrictions)
-                return <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}</td></tr>;
-            else if (!other.randori && other.restrictions)
-                return <tr><td>{translator.translate("Randori")}, {translator.translate(other.restrictions)}</td></tr>;
-            else if (other.randori && other.restrictions)
-                return <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}, {translator.translate(other.restrictions)}</td></tr>;
-        } else {
-             if (!other.randori && !other.restrictions) {
-                return <>
-                    <tr><td>{translator.translate("Randori")}</td></tr>
-                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}</td></tr>}
-                </>;
-            } else if (other.randori && !other.restrictions) {
-                return <>
-                    <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}</td></tr>
-                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}</td></tr>}
-                </>
-            } else if (!other.randori && other.restrictions) {
-                return <>
-                    <tr><td>{translator.translate("Randori")}, {translator.translate(other.restrictions)}</td></tr>
-                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.restrictions)}</td></tr>}
-                </>
-            }
-            else if (other.randori && other.restrictions) {
-                return <>
-                    <tr><td>{translator.translate("Randori")}, {translator.translate(other.randori)}, {translator.translate(other.restrictions)}</td></tr>
-                    {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Randori")}, {translator.japanese(other.randori)}, {translator.japanese(other.restrictions)}</td></tr>}
-                </>
-            }
-        }
-
-        return null;
-    }
-
-    const renderEmbu = () => {
-        if (other.content.indexOf("embu") < 0)
-            return null;
-
-        if (translator.isJapanese) {
-            return <tr><td>{translator.translate("Embu")}</td></tr>;
-        } else {
-            return <>
-                <tr><td>{translator.translate("Embu")}</td></tr>
-                {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Embu")}</td></tr>}
-            </>;
-        }
-    }
-
-    const renderExamPreparation = () => {
-        if (other.content.indexOf("repetition") < 0)
-            return null;
-
-        if (translator.isJapanese) {
-            return <tr><td>{translator.translate("Repetition")}</td></tr>;
-        } else {
-            return <>
-                <tr><td>{translator.translate("Repetition")}</td></tr>
-                {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese("Repetition")}</td></tr>}
-            </>;
-        }
-    }
+    const detailsId = `week-completion-${grade.replace(/\s+/g, "-")}-${week}`;
+    const detailsAreOpen = detailsMode !== "closed";
 
     return (
-        <CollapsibleCard header={cardHead(translator, `Kihon shohō`, { showKanji })} className="mt-2 app-grid-card hokei-card">
-            <table className="hokei-individuals-table">
-                <tbody>
-                    {renderRandori()}
-                    {renderEmbu()}
-                    {renderExamPreparation()}
-                </tbody>
-            </table>
-        </CollapsibleCard>
+        <div
+            ref={groupRef}
+            className="kamoku-week-completion-group"
+            onPointerEnter={event => {
+                if (event.pointerType === "mouse") {
+                    setDetailsMode(current => current === "closed" ? "preview" : current);
+                }
+            }}
+            onPointerLeave={event => {
+                if (event.pointerType === "mouse") {
+                    setDetailsMode(current => current === "preview" ? "closed" : current);
+                }
+            }}
+            onFocusCapture={() => setDetailsMode(current => current === "closed" ? "preview" : current)}
+            onBlurCapture={event => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDetailsMode("closed");
+            }}
+        >
+            <button
+                type="button"
+                className="kamoku-week-completion is-complete"
+                aria-label={translator.translate("Visa när vecka {0} klarmarkerades", { params: [String(week)] })}
+                aria-expanded={detailsAreOpen}
+                aria-controls={detailsId}
+                onClick={() => setDetailsMode(current => current === "pinned" ? "closed" : "pinned")}
+            >
+                <Check2 aria-hidden="true" />
+                <span>{translator.translate("Tränad")}</span>
+            </button>
+            {detailsAreOpen && (
+                <div id={detailsId} className="kamoku-week-completion-details" role="dialog" aria-label={completedLabel}>
+                    <span>{completedLabel}</span>
+                <button
+                    type="button"
+                    className="kamoku-week-completion-clear"
+                    onClick={() => {
+                        setDetailsMode("closed");
+                        onClear();
+                    }}
+                >
+                    <ArrowCounterclockwise aria-hidden="true" />
+                    <span>{translator.translate("Ta bort klarmarkering")}</span>
+                </button>
+                </div>
+            )}
+        </div>
     );
+};
+
+const formatCompletionDate = (value: string, language: Translator["currentLanguage"]): string => {
+    const locale = language === "sv" ? "sv-SE" : language === "en" ? "en-GB" : language === "tr" ? "tr-TR" : "ja-JP";
+    return new Intl.DateTimeFormat(locale, { dateStyle: "long", timeStyle: "short" }).format(new Date(value));
+};
+
+interface FocusLine {
+    key: string;
+    primary: string;
+    japanese?: string;
 }
 
-interface PreparationWeekCardProps {
-    translator: Translator;
+interface FocusGroup {
+    title: string;
+    lines: FocusLine[];
 }
 
-function PreparationWeekCard(props: PreparationWeekCardProps) {
-    const { translator } = props;
-    const showKanji = useShowKanji();
+const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: Translator; dojoMode: boolean }) => {
+    const showKanji = useShowKanji() && !dojoMode && !translator.isJapanese;
+    const groups: FocusGroup[] = [];
+    let sourceStrings: string[] = [];
 
-    const text = "Repetition, studier, förberedelse inför gradering";
-    const body = translator.isJapanese
-        ? <tr><td>{translator.japanese(text)}</td></tr>
-        : <>
-            <tr><td>{translator.translate(text)}</td></tr>
-            {showKanji && <tr className="japanese-subtitle text-muted"><td>{translator.japanese(text)}</td></tr>}
-        </>
+    if (week.type === "regular_week" || week.type === "kihon_only") {
+        const kihonEntries = week.kihon_shoho ?? [];
+        sourceStrings = kihonEntries.filter((entry): entry is string => typeof entry === "string");
+        const references = kihonEntries.filter(isHokeiRef);
+        const standardMoments = week.moments.filter((moment): moment is StandardMoment => moment.type === "standard_moment");
+
+        if (sourceStrings.length > 0) {
+            groups.push({
+                title: "Veckans grundarbete",
+                lines: sourceStrings.map((value, index) => focusLine(`basic-${index}`, value, translator, showKanji)),
+            });
+        }
+        if (references.length > 0) {
+            groups.push({
+                title: "Repetitionstekniker",
+                lines: references.map((entry, index) => ({
+                    key: `reference-${index}`,
+                    primary: hokeiReferenceLabel(entry, translator, false),
+                    japanese: showKanji ? hokeiReferenceLabel(entry, translator, true) : undefined,
+                })),
+            });
+        }
+        if (standardMoments.length > 0) {
+            groups.push({
+                title: "Återkommande delar",
+                lines: standardMoments.map((moment, index) => ({
+                    key: `standard-${index}`,
+                    primary: standardMomentLabel(moment, translator, false),
+                    japanese: showKanji ? standardMomentLabel(moment, translator, true) : undefined,
+                })),
+            });
+        }
+    } else if (week.type === "review_preparation_week") {
+        groups.push({
+            title: "Veckans fokus",
+            lines: week.content.map((value, index) => focusLine(`review-${index}`, value, translator, showKanji)),
+        });
+    } else if (week.type === "yondan_week") {
+        groups.push({
+            title: "Studera och undervisa",
+            lines: week.study_teach.map((entry, index) => ({
+                key: `study-${index}`,
+                primary: hokeiReferenceLabel(entry, translator, false),
+                japanese: showKanji ? hokeiReferenceLabel(entry, translator, true) : undefined,
+            })),
+        });
+    }
+
+    const videos = tanenMatchesToVideos(
+        sourceStrings.flatMap(entry => findTanenMatches(entry, tanenKihonHokeiMap)),
+    );
+
+    if (groups.length === 0 && videos.length === 0) return null;
+
     return (
-        <CollapsibleCard header={cardHead(translator, `Repetition`, { showKanji })} className="mt-3 app-grid-card hokei-card">
-            <table>
-                <tbody>
-                    {body}
-                </tbody>
-            </table>            
-        </CollapsibleCard>
+        <section className="kamoku-week-focus" aria-labelledby="kamoku-week-focus-heading">
+            <h2 id="kamoku-week-focus-heading" className="kamoku-focus-eyebrow">
+                {translator.translate("Veckans innehåll")}
+            </h2>
+            <div className="kamoku-focus-groups">
+                {groups.map(group => (
+                    <section key={group.title} className="kamoku-focus-group">
+                        <h3>{translator.translate(group.title)}</h3>
+                        <ul>
+                            {group.lines.map(line => (
+                                <li key={line.key}>
+                                    <span>{line.primary}</span>
+                                    {line.japanese && <span className="kamoku-focus-japanese">{line.japanese}</span>}
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                ))}
+                {videos.length > 0 && (
+                    <section className="kamoku-focus-group kamoku-focus-videos">
+                        <h3>{translator.translate("Videostöd")}</h3>
+                        {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-focus-video" />)}
+                    </section>
+                )}
+            </div>
+        </section>
     );
-}
+};
 
-interface StudyTeachCardProps {
-    translator: Translator;
+interface ReferencedTechniqueSectionProps {
+    title: string;
     entries: HokeiRef[];
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
+    dojoMode: boolean;
 }
 
-function StudyTeachCard(props: StudyTeachCardProps) {
-    const { entries, translator, allGradePlans, notesData, ranksData } = props;
-    const showKanji = useShowKanji();
-
-    const hokeiCards = entries.flatMap((entry) => {
+const ReferencedTechniqueSection = ({ title, entries, allGradePlans, notesData, ranksData, dojoMode }: ReferencedTechniqueSectionProps) => {
+    const translator = useContext(TranslatorContext);
+    const techniques = entries.flatMap((entry, index) => {
         const moment = allGradePlans
-            .flatMap(p => p.weeks)
-            .flatMap((w): HokeiMoment[] => ("moments" in w) ? w.moments.filter(isHokeiMoment) : [])
-            .find(m => m.hokei_name === entry.hokei_ref);
+            .flatMap(plan => plan.weeks)
+            .flatMap((week): HokeiMoment[] => "moments" in week ? week.moments.filter(isHokeiMoment) : [])
+            .find(candidate => candidate.hokei_name === entry.hokei_ref);
         if (!moment) return [];
-        const extended: HokeiMoment = entry.variants.length > 0
+
+        const hokei: HokeiMoment = entry.variants.length > 0
             ? { ...moment, variations: [...(moment.variations ?? []), ...entry.variants] }
             : moment;
-        return [<HokeiCard key={`st-${entry.hokei_ref}`} hokei={extended} className="mt-2" notesData={notesData} ranksData={ranksData} />];
+        return [{ key: `${title}.${entry.hokei_ref}.${index}`, hokei }];
     });
 
+    if (techniques.length === 0) return null;
+
     return (
-        <CollapsibleCard header={cardHead(translator, "studera, undervisa", { showKanji })} className="mt-2 app-grid-card hokei-card" showCollapse={hokeiCards.length > 0}>
-            {hokeiCards}
-        </CollapsibleCard>
+        <section className="kamoku-technique-section">
+            <h2 className="kamoku-section-title">{translator.translate(title)}</h2>
+            {techniques.map(entry => (
+                <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} kamokuLayout />
+            ))}
+        </section>
     );
-}
+};
+
+const focusLine = (key: string, value: string, translator: Translator, showKanji: boolean): FocusLine => ({
+    key,
+    primary: localizeSourceTerm(value, translator, false),
+    japanese: showKanji ? localizeSourceTerm(value, translator, true) : undefined,
+});
 
 export default Kamoku;
 
