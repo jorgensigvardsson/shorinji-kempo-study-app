@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-12T12:00:00.000Z",
+    changes: [
+      {
+        emoji: "🌐",
+        sv: "Inloggningssidan har fått språklänkar längst ner – välj Svenska, English, Türkçe eller 日本語 direkt, oavsett vad appen annars skulle ha valt åt dig.",
+        en: "The login screen now has language links at the bottom — pick Svenska, English, Türkçe, or 日本語 directly, regardless of what the app would otherwise have chosen for you.",
+        tr: "Giriş ekranının altına dil bağlantıları eklendi — uygulamanın sizin için seçtiği dilden bağımsız olarak doğrudan Svenska, English, Türkçe veya 日本語'yi seçebilirsiniz.",
+        ja: "ログイン画面の下部に言語リンクが追加されました。アプリが自動的に選んだ言語に関わらず、Svenska、English、Türkçe、日本語を直接選択できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-09T21:15:00.000Z",
     changes: [
       {
