@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ListUl, People, Search, Trash } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, People, Search, Trash } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei, Video } from "./data";
 import { getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
@@ -12,8 +12,7 @@ import { useShowKanji } from "./hooks";
 import { gradeLabel, matchesString, normalizeString } from "./strings";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
-import type { EmbuDraft, EmbuDraftStep } from "./persistence/schema";
-import { getAppDataStore } from "./persistence/store";
+import { loadExperimentalEmbuDraft, type EmbuDraft, type EmbuDraftStep } from "./persistence/experimental-embu-draft";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import gradingExamInformation from "./assets/grading-exam-information.json";
 import type { PracticeArea } from "./practice-area";
@@ -35,6 +34,7 @@ interface Props {
     ranksData: HokeiRanks;
     activeArea: PracticeArea | null;
     onAreaChange: (area: PracticeArea | null) => void;
+    onBack: () => void;
     dojoMode: boolean;
     onDojoModeChange: (enabled: boolean) => void;
 }
@@ -57,7 +57,7 @@ const areaDefinitions: AreaDefinition[] = [
 const tanenKihonHokei = tanenKihonHokeiData as TanenKihonHokei[];
 
 const FreePractice = (props: Props) => {
-    const { activeArea, onAreaChange, dojoMode, onDojoModeChange } = props;
+    const { activeArea, onAreaChange, onBack, dojoMode, onDojoModeChange } = props;
     const translator = useContext(TranslatorContext);
     const [visitedAreas, setVisitedAreas] = useState<Set<PracticeArea>>(() =>
         new Set(activeArea ? [activeArea] : []));
@@ -89,6 +89,12 @@ const FreePractice = (props: Props) => {
         onAreaChange(nextArea);
     };
 
+    const returnToOverview = () => {
+        if (activeArea) scrollPositions.current[activeArea] = window.scrollY;
+        pendingScrollTarget.current = "overview";
+        onBack();
+    };
+
     const items: GridItem[] = areaDefinitions.map(area => ({
         key: area.key,
         title: translator.translate(area.title),
@@ -110,7 +116,7 @@ const FreePractice = (props: Props) => {
                 <Grid items={items} className="free-practice-grid" />
             </section>
             <section className="free-practice-area" hidden={activeArea === null}>
-                <button type="button" className="free-practice-back" onClick={() => selectArea(null)}>
+                <button type="button" className="free-practice-back" onClick={returnToOverview}>
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate("Alla träningsområden")}</span>
                 </button>
@@ -184,6 +190,9 @@ const KihonArea = ({ myGrade, allGradePlans, dojoMode }: KihonAreaProps) => {
 
     return (
         <div className="free-practice-content kihon-practice-proposal">
+            <p className="kihon-design-note">
+                {translator.translate("Den här sidan är fortfarande under utformning och kan ändras när som helst.")}
+            </p>
             <Form.Group className="free-practice-grade-control" controlId="free-practice-kihon-grade">
                 <Form.Label>{translator.translate("Visa tekniker upp till grad")}</Form.Label>
                 <Form.Select value={selectedGrade} onChange={event => setSelectedGrade(event.target.value as GradeName)}>
@@ -194,13 +203,6 @@ const KihonArea = ({ myGrade, allGradePlans, dojoMode }: KihonAreaProps) => {
                     ))}
                 </Form.Select>
             </Form.Group>
-
-            {!dojoMode && (
-                <p className="kihon-review-note">
-                    <strong>{translator.translate("Förslag för granskning")}</strong>
-                    <span>{translator.translate("Listan är sammanställd från Kamokuhyo och graderingsunderlaget och ska granskas med Sensei.")}</span>
-                </p>
-            )}
 
             <section className="free-practice-section kihon-practice-group">
                 <h3>{translator.translate("Kaisoku dachi / Byakuren chūdan gamae")}</h3>
@@ -222,11 +224,6 @@ const KihonArea = ({ myGrade, allGradePlans, dojoMode }: KihonAreaProps) => {
 
             <section className="free-practice-section kihon-practice-group">
                 <h3>{translator.translate("Kōbōgi och idō kōbōgi")}</h3>
-                {!dojoMode && (
-                    <p className="free-practice-source-note">
-                        {translator.translate("Källbaserade exempel som hålls separata tills upplägget har granskats med Sensei.")}
-                    </p>
-                )}
                 <div className="kihon-practice-columns">
                     <KihonTechniqueList title="Kōbōgi" items={koboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
                     <KihonTechniqueList title="Idō kōbōgi" items={idoKoboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
@@ -510,8 +507,8 @@ const resolveKumiEmbuTermParts = (value: string, techniques: EmbuTechnique[]): K
 const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "notesData" | "ranksData" | "dojoMode">) => {
     const translator = useContext(TranslatorContext);
     const showKanji = useShowKanji();
-    const store = getAppDataStore();
-    const [draft, setDraft] = useState<EmbuDraft>(() => store.get("embuDraft"));
+    const draftData = useMemo(() => loadExperimentalEmbuDraft(), []);
+    const [draft, setDraft] = useState<EmbuDraft>(() => draftData.data);
     const [query, setQuery] = useState("");
     const [activeSuggestion, setActiveSuggestion] = useState(0);
     const [preview, setPreview] = useState<EmbuPreview | null>(null);
@@ -550,11 +547,11 @@ const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pi
     const [selectedGrade, setSelectedGrade] = useState<GradeName | undefined>(defaultGrade);
     const selected = sequences.find(entry => entry.grade === selectedGrade) ?? sequences[0];
 
-    useEffect(() => store.subscribe("embuDraft", setDraft), [store]);
+    useEffect(() => draftData.registerListener(setDraft), [draftData]);
 
     const saveDraft = (nextDraft: EmbuDraft) => {
         setDraft(nextDraft);
-        store.set("embuDraft", nextDraft);
+        draftData.save(nextDraft);
     };
 
     const addTechnique = (technique: EmbuTechnique) => {
@@ -606,7 +603,16 @@ const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pi
     return (
         <div className="free-practice-content">
             <section className="free-practice-section embu-builder">
-                <h3>{translator.translate("Bygg embu")}</h3>
+                <div className="embu-builder-heading">
+                    <h3>{translator.translate("Bygg embu")}</h3>
+                    <span className="embu-experimental-label">
+                        <ExclamationTriangle aria-hidden="true" />
+                        {translator.translate("Experimentell")}
+                    </span>
+                </div>
+                <p className="embu-experimental-note">
+                    {translator.translate("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")}
+                </p>
                 <p className="free-practice-source-note">
                     {translator.translate("Sätt ihop din embu med tekniker och egna övergångar. Utkastet sparas automatiskt.")}
                 </p>

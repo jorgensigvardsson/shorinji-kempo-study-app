@@ -62,7 +62,7 @@ const Training = (props: Props) => {
             }
             if (nextView !== "free") nextParams.delete("area");
             return nextParams;
-        }, { replace: true });
+        });
     };
 
     const selectPracticeArea = (area: PracticeArea | null) => {
@@ -72,7 +72,7 @@ const Training = (props: Props) => {
             if (area) nextParams.set("area", area);
             else nextParams.delete("area");
             return nextParams;
-        }, { replace: true });
+        });
     };
 
     const choices: GridItem[] = [
@@ -95,7 +95,7 @@ const Training = (props: Props) => {
     return (
         <div className="training-page">
             <section hidden={view !== "landing"}>
-                <button type="button" className="training-back" onClick={() => navigate("/")}>
+                <button type="button" className="training-back" onClick={() => navigate(-1)}>
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate("Träning eller teori")}</span>
                 </button>
@@ -107,7 +107,7 @@ const Training = (props: Props) => {
             </section>
 
             {view !== "landing" && (view === "plan" || activePracticeArea === null) && (
-                <button type="button" className="training-back" onClick={() => selectView(null)}>
+                <button type="button" className="training-back" onClick={() => navigate(-1)}>
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate("Träningsval")}</span>
                 </button>
@@ -121,7 +121,14 @@ const Training = (props: Props) => {
                 )}
                 {visitedViews.has("free") && (
                     <div hidden={view !== "free"}>
-                        <FreePractice {...props} activeArea={activePracticeArea} onAreaChange={selectPracticeArea} dojoMode={dojoMode} onDojoModeChange={setDojoMode} />
+                        <FreePractice
+                            {...props}
+                            activeArea={activePracticeArea}
+                            onAreaChange={selectPracticeArea}
+                            onBack={() => navigate(-1)}
+                            dojoMode={dojoMode}
+                            onDojoModeChange={setDojoMode}
+                        />
                     </div>
                 )}
             </main>

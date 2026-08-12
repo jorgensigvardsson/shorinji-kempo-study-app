@@ -19,7 +19,6 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       quizStreakHighScore: 0,
       knownFlashCards: {},
       showKanjiOnHokeiCards: true,
-      embuDraft: { notes: "", steps: [] },
       weeklyPlanCompletions: {},
     },
     ...overrides,
@@ -48,6 +47,17 @@ const OLD = "2024-01-01T00:00:00.000Z";
 const NEW = "2024-06-01T00:00:00.000Z";
 
 describe("mergeDocuments — null base", () => {
+  it("drops legacy Embu drafts from synchronized documents", () => {
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW });
+    (local.data as AppDataDocument["data"] & { embuDraft: unknown }).embuDraft = { notes: "local", steps: [] };
+    (remote.data as AppDataDocument["data"] & { embuDraft: unknown }).embuDraft = { notes: "remote", steps: [] };
+
+    const result = mergeDocuments(null, local, remote);
+
+    expect("embuDraft" in result.document.data).toBe(false);
+  });
+
   it("remote non-default data is applied when local is at defaults", () => {
     const defaults = makeDoc({ updatedAt: OLD }).data;
     const local = makeDoc({ updatedAt: OLD });

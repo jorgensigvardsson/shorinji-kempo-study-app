@@ -1,19 +1,23 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, useLocation } from "react-router-dom";
+import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Theory, { TheoryToolPage } from "./Theory";
 
 const LocationProbe = () => {
   const location = useLocation();
-  return <output data-testid="location">{location.pathname}</output>;
+  const navigate = useNavigate();
+  return <>
+    <output data-testid="location">{location.pathname}</output>
+    <button type="button" onClick={() => navigate(-1)}>Browser back</button>
+  </>;
 };
 
 describe("Theory", () => {
   it("groups Word list, Quiz, and Flashcards under Theory", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={["/theory"]}>
+      <MemoryRouter initialEntries={["/", "/theory"]} initialIndex={1}>
         <Theory showLanguageTools />
         <LocationProbe />
       </MemoryRouter>,
@@ -26,12 +30,18 @@ describe("Theory", () => {
 
     await user.click(screen.getByRole("button", { name: /Quiz/i }));
     expect(screen.getByTestId("location").textContent).toBe("/quiz");
+
+    await user.click(screen.getByRole("button", { name: "Browser back" }));
+    expect(screen.getByTestId("location").textContent).toBe("/theory");
+
+    await user.click(screen.getByRole("button", { name: "Browser back" }));
+    expect(screen.getByTestId("location").textContent).toBe("/");
   });
 
   it("returns from a theory tool to the Theory page", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={["/quiz"]}>
+      <MemoryRouter initialEntries={["/theory", "/quiz"]} initialIndex={1}>
         <TheoryToolPage><div>Quiz content</div></TheoryToolPage>
         <LocationProbe />
       </MemoryRouter>,
@@ -39,6 +49,19 @@ describe("Theory", () => {
 
     await user.click(screen.getByRole("button", { name: "Teori" }));
     expect(screen.getByTestId("location").textContent).toBe("/theory");
+  });
+
+  it("returns from Theory through the existing app history", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/", "/theory"]} initialIndex={1}>
+        <Theory showLanguageTools />
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Träning eller teori" }));
+    expect(screen.getByTestId("location").textContent).toBe("/");
   });
 
   it("keeps language-dependent tools hidden when Japanese is the main language", () => {

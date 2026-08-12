@@ -89,4 +89,19 @@ describe("CollapsibleCard", () => {
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
     expect(container.querySelector(".focus-card.is-collapsed")).not.toBeNull();
   });
+
+  it("uses history navigation to close a focused card without reopening it", () => {
+    const { container } = render(
+      <CollapsibleCard header="History technique" focusOnOpen>body</CollapsibleCard>
+    );
+
+    fireEvent.click(screen.getByText("History technique"));
+    expect(container.querySelector(".focus-card.is-expanded")).not.toBeNull();
+
+    fireEvent.popState(window);
+    expect(container.querySelector(".focus-card.is-collapsed")).not.toBeNull();
+
+    fireEvent.popState(window);
+    expect(container.querySelector(".focus-card.is-collapsed")).not.toBeNull();
+  });
 });

@@ -138,7 +138,7 @@ describe("Kamoku weekly plan", () => {
     expect(onDojoModeChange).toHaveBeenCalledWith(true);
   });
 
-  it("marks a grade week as practised and reveals its timestamp discreetly", async () => {
+  it("marks a grade week as practised and opens a stable editable completion panel", async () => {
     const user = userEvent.setup();
     render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} onDojoModeChange={() => undefined} />);
 
@@ -150,9 +150,13 @@ describe("Kamoku weekly plan", () => {
     expect(screen.getByText("Tränad")).toBeTruthy();
 
     await user.hover(completed);
-    expect((await screen.findByRole("tooltip")).textContent).toContain("Klarmarkerad");
+    expect((await screen.findByRole("dialog")).textContent).toContain("Klarmarkerad");
 
-    await user.click(screen.getByRole("button", { name: "Ta bort klarmarkering för vecka 1" }));
+    await user.click(completed);
+    await user.unhover(completed);
+    expect(screen.getByRole("dialog").textContent).toContain("Klarmarkerad");
+
+    await user.click(screen.getByRole("button", { name: "Ta bort klarmarkering" }));
     expect(getAppDataStore().get("weeklyPlanCompletions")).toEqual({});
     expect(screen.getByRole("button", { name: "Markera som tränad" })).toBeTruthy();
   });

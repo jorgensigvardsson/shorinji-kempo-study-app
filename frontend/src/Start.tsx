@@ -1,5 +1,5 @@
 import { useContext, type ComponentType } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 
@@ -29,6 +29,9 @@ const Start = (props: Props) => {
 
     return (
         <div className="start-screen">
+            <div className="start-context" aria-label={translator.translate("Gasshō")}>
+                {translator.translate("Gasshō")}
+            </div>
             <header className="start-intro">
                 <h1>{translator.translate("Vad vill du göra idag?")}</h1>
             </header>

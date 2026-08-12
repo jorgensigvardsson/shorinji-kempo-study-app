@@ -44,7 +44,6 @@ export function mergeDocuments(
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     knownFlashCards: mergeKnownFlashCards(baseDocument.data.knownFlashCards ?? {}, local.data.knownFlashCards ?? {}, remote.data.knownFlashCards ?? {}),
     showKanjiOnHokeiCards: mergeScalar("showKanjiOnHokeiCards"),
-    embuDraft: mergeScalar("embuDraft"),
     weeklyPlanCompletions: mergeWeeklyPlanCompletions(
       baseDocument.data.weeklyPlanCompletions ?? {},
       local.data.weeklyPlanCompletions ?? {},

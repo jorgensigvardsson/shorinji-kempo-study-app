@@ -117,13 +117,12 @@
 }
 
 .kamoku-week-completion-group {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.15rem;
 }
 
-.kamoku-week-completion,
-.kamoku-week-completion-clear {
+.kamoku-week-completion {
   display: inline-flex;
   align-items: center;
   padding: 0;
@@ -153,32 +152,44 @@
   color: var(--bs-primary);
 }
 
-.kamoku-week-completion-clear {
-  width: 1.25rem;
-  height: 1.25rem;
-  justify-content: center;
-  border-radius: 50%;
-  opacity: 0;
-  font-size: 0.7rem;
+.kamoku-week-completion-details {
+  position: absolute;
+  z-index: 1080;
+  top: calc(100% + 0.45rem);
+  left: 50%;
+  display: flex;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 1.5rem));
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem;
+  translate: -50% 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.55rem;
+  background: var(--bs-body-bg);
+  box-shadow: var(--app-card-shadow);
+  color: var(--bs-body-color);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
-.kamoku-week-completion-group:hover .kamoku-week-completion-clear,
-.kamoku-week-completion-group:focus-within .kamoku-week-completion-clear,
-.kamoku-week-completion-clear:focus-visible {
-  opacity: 0.65;
+.kamoku-week-completion-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
 }
 
 .kamoku-week-completion-clear:hover,
 .kamoku-week-completion-clear:focus-visible {
-  background: var(--bs-tertiary-bg);
   color: var(--bs-emphasis-color);
-  opacity: 1;
-}
-
-@media (hover: none) {
-  .kamoku-week-completion-clear {
-    opacity: 0.5;
-  }
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .kamoku-week-total {

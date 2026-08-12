@@ -1,16 +1,31 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GradePlan } from "./data";
 import FreePractice from "./FreePractice";
-import { getAppDataStore } from "./persistence/store";
+import { experimentalEmbuDraftStorageKey } from "./persistence/experimental-embu-draft";
 import type { PracticeArea } from "./practice-area";
 
 const plans: GradePlan[] = [
   { grade: "1 kyū", weeks: [] },
   { grade: "2 kyū", weeks: [] },
 ];
+
+const HistoryControls = () => {
+  return <>
+    <button type="button" onClick={() => window.dispatchEvent(new PopStateEvent("popstate"))}>Browser back</button>
+    <button type="button" onClick={() => window.dispatchEvent(new PopStateEvent("popstate"))}>Browser forward</button>
+  </>;
+};
+
+const renderPractice = (ui: ReactNode) => render(
+  <MemoryRouter>
+    {ui}
+    <HistoryControls />
+  </MemoryRouter>,
+);
 
 const FreePracticeHarness = () => {
   const [activeArea, setActiveArea] = useState<PracticeArea | null>(null);
@@ -24,6 +39,7 @@ const FreePracticeHarness = () => {
       ranksData={null!}
       activeArea={activeArea}
       onAreaChange={setActiveArea}
+      onBack={() => setActiveArea(null)}
       dojoMode={dojoMode}
       onDojoModeChange={setDojoMode}
     />
@@ -76,6 +92,7 @@ const RandoriHarness = () => (
     ranksData={null!}
     activeArea="randori"
     onAreaChange={() => undefined}
+    onBack={() => undefined}
     dojoMode={false}
     onDojoModeChange={() => undefined}
   />
@@ -119,6 +136,7 @@ const EmbuHarness = () => (
     ranksData={null!}
     activeArea="embu"
     onAreaChange={() => undefined}
+    onBack={() => undefined}
     dojoMode={false}
     onDojoModeChange={() => undefined}
   />
@@ -162,13 +180,14 @@ const KumiEmbuLinkHarness = () => (
     ranksData={null!}
     activeArea="embu"
     onAreaChange={() => undefined}
+    onBack={() => undefined}
     dojoMode={false}
     onDojoModeChange={() => undefined}
   />
 );
 
 beforeEach(() => {
-  getAppDataStore().set("embuDraft", { notes: "", steps: [] });
+  localStorage.removeItem(experimentalEmbuDraftStorageKey);
 });
 
 afterEach(() => {
@@ -177,7 +196,7 @@ afterEach(() => {
 
 describe("FreePractice", () => {
   it("offers calm entrances to all current practice areas", () => {
-    render(<FreePracticeHarness />);
+    renderPractice(<FreePracticeHarness />);
 
     expect(screen.getByRole("button", { name: /Kihon/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /^Hokei/i })).toBeTruthy();
@@ -188,11 +207,12 @@ describe("FreePractice", () => {
 
   it("shows the proposed Kihon lists up to the selected grade", async () => {
     const user = userEvent.setup();
-    render(<FreePracticeHarness />);
+    renderPractice(<FreePracticeHarness />);
 
     await user.click(screen.getByRole("button", { name: /Kihon/i }));
 
-    expect(screen.getByText("Förslag för granskning")).toBeTruthy();
+    expect(screen.getByText("Den här sidan är fortfarande under utformning och kan ändras när som helst.")).toBeTruthy();
+    expect(screen.queryByText(/Sensei/)).toBeNull();
     expect(screen.getByRole("heading", { name: "Kaisoku dachi / Byakuren chūdan gamae" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Hidari/migi mae" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Uke och kontring" })).toBeTruthy();
@@ -211,7 +231,7 @@ describe("FreePractice", () => {
 
   it("groups all Tan'en and Sōtai forms by family without losing entries", async () => {
     const user = userEvent.setup();
-    render(<FreePracticeHarness />);
+    renderPractice(<FreePracticeHarness />);
 
     await user.click(screen.getByRole("button", { name: /Tan'en och sōtai/i }));
 
@@ -232,7 +252,7 @@ describe("FreePractice", () => {
   });
 
   it("shows the complete Randori progression with Gōhō before Jūhō and first grades", () => {
-    render(<RandoriHarness />);
+    renderPractice(<RandoriHarness />);
 
     const gohoHeading = screen.getByRole("heading", { name: "gōhō" });
     const juhoHeading = screen.getByRole("heading", { name: "jūhō" });
@@ -253,8 +273,10 @@ describe("FreePractice", () => {
 
   it("builds and autosaves one embu with searchable, movable steps", async () => {
     const user = userEvent.setup();
-    render(<EmbuHarness />);
+    renderPractice(<EmbuHarness />);
 
+    expect(screen.getByText("Experimentell").querySelector("svg")).toBeTruthy();
+    expect(screen.getByText("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")).toBeTruthy();
     const search = screen.getByRole("combobox", { name: "Lägg till teknik" });
     await user.type(search, "gyak");
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
@@ -265,7 +287,7 @@ describe("FreePractice", () => {
     await user.type(screen.getByRole("textbox", { name: "Övergång efter shita uke geri" }), "Byt sida lugnt");
     await user.type(screen.getByRole("textbox", { name: "Anteckningar för hela embun" }), "Arbeta med rytmen");
 
-    const saved = getAppDataStore().get("embuDraft");
+    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!);
     expect(saved.notes).toBe("Arbeta med rytmen");
     expect(saved.steps.map(step => step.hokeiName)).toEqual(["shita uke geri", "gyaku gote"]);
     expect(saved.steps[0].transition).toBe("Byt sida lugnt");
@@ -273,7 +295,7 @@ describe("FreePractice", () => {
 
   it("opens a selected embu technique as a focused technique card", async () => {
     const user = userEvent.setup();
-    render(<EmbuHarness />);
+    renderPractice(<EmbuHarness />);
 
     const search = screen.getByRole("combobox", { name: "Lägg till teknik" });
     await user.type(search, "gyak");
@@ -281,13 +303,16 @@ describe("FreePractice", () => {
     await user.click(screen.getByRole("button", { name: "Visa teknik gyaku gote" }));
 
     await waitFor(() => expect(document.body.classList.contains("card-focus-active")).toBe(true));
-    await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Browser back" }));
     await waitFor(() => expect(document.body.classList.contains("card-focus-active")).toBe(false));
+
+    await user.click(screen.getByRole("button", { name: "Browser forward" }));
+    expect(document.body.classList.contains("card-focus-active")).toBe(false);
   });
 
   it("links both existing technique cards in a composite kumi-embu step", async () => {
     const user = userEvent.setup();
-    render(<KumiEmbuLinkHarness />);
+    renderPractice(<KumiEmbuLinkHarness />);
 
     expect(screen.getByRole("button", { name: /Visa teknik Tai ten ichi/i })).toBeTruthy();
     const keriTenSan = screen.getByRole("button", { name: /Visa teknik Keri ten san/i });
@@ -301,7 +326,7 @@ describe("FreePractice", () => {
   it("returns to all areas in one action and remembers area state for the session", async () => {
     vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     const user = userEvent.setup();
-    render(<FreePracticeHarness />);
+    renderPractice(<FreePracticeHarness />);
 
     await user.click(screen.getByRole("button", { name: /Embu och kumi-embu/i }));
     const gradeSelect = screen.getByRole("combobox", { name: "Grad" }) as HTMLSelectElement;
@@ -313,7 +338,7 @@ describe("FreePractice", () => {
 
     await user.click(screen.getByRole("button", { name: /Kihon/i }));
     expect((screen.getByRole("checkbox", { name: "Dojo-läge" }) as HTMLInputElement).checked).toBe(true);
-    expect(screen.queryByText("Förslag för granskning")).toBeNull();
+    expect(screen.getByText("Den här sidan är fortfarande under utformning och kan ändras när som helst.")).toBeTruthy();
     expect(screen.queryByText("Från 6 kyū")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Alla träningsområden" }));
 

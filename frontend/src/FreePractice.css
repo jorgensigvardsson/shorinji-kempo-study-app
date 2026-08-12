@@ -164,8 +164,42 @@
   gap: 1.5rem;
 }
 
-.embu-builder > h3 {
+.embu-builder-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
   margin-bottom: -0.8rem;
+}
+
+.embu-builder-heading h3 {
+  margin: 0;
+}
+
+.embu-experimental-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--bs-warning-text-emphasis);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.embu-experimental-label svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.embu-experimental-note {
+  width: min(100%, 42rem);
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 2px solid var(--bs-warning-border-subtle);
+  background: rgba(var(--bs-warning-rgb), 0.08);
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .embu-overall-notes,
@@ -351,29 +385,15 @@
   gap: 2.5rem;
 }
 
-.kihon-review-note {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.kihon-design-note {
   max-width: 42rem;
-  margin: -0.75rem 0 0;
-  padding: 0.15rem 0 0.15rem 1rem;
-  border-inline-start: 0.2rem solid var(--bs-primary);
+  margin: 0;
   color: var(--bs-secondary-color);
   line-height: 1.5;
 }
 
-.kihon-review-note strong {
-  color: var(--bs-emphasis-color);
-  font-weight: 600;
-}
-
 .kihon-practice-group > h3 {
   margin-bottom: 1.15rem;
-}
-
-.kihon-practice-group > .free-practice-source-note {
-  margin: -0.45rem 0 1.15rem;
 }
 
 .kihon-practice-columns {

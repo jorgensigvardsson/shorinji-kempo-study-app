@@ -38,7 +38,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
 
     return (
         <div className="theory-page">
-            <button type="button" className="theory-back" onClick={() => navigate("/")}>
+            <button type="button" className="theory-back" onClick={() => navigate(-1)}>
                 <ArrowLeft aria-hidden="true" />
                 <span>{translator.translate("Träning eller teori")}</span>
             </button>
@@ -57,7 +57,7 @@ export const TheoryToolPage = ({ children }: { children: ReactNode }) => {
 
     return (
         <div className="theory-tool-page">
-            <button type="button" className="theory-back" onClick={() => navigate("/theory")}>
+            <button type="button" className="theory-back" onClick={() => navigate(-1)}>
                 <ArrowLeft aria-hidden="true" />
                 <span>{translator.translate("Teori")}</span>
             </button>

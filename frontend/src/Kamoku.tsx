@@ -1,5 +1,5 @@
-import { Form, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { useContext, useEffect, useState } from "react";
+import { Form } from "react-bootstrap";
+import { useContext, useEffect, useRef, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
 import HokeiCard from "./components/HokeiCard";
@@ -219,6 +219,26 @@ interface WeekCompletionControlProps {
 }
 
 const WeekCompletionControl = ({ completion, grade, week, translator, onMark, onClear }: WeekCompletionControlProps) => {
+    const [detailsMode, setDetailsMode] = useState<"closed" | "preview" | "pinned">("closed");
+    const groupRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (detailsMode === "closed") return;
+
+        const closeOutside = (event: PointerEvent) => {
+            if (!groupRef.current?.contains(event.target as Node)) setDetailsMode("closed");
+        };
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setDetailsMode("closed");
+        };
+        document.addEventListener("pointerdown", closeOutside);
+        document.addEventListener("keydown", closeOnEscape);
+        return () => {
+            document.removeEventListener("pointerdown", closeOutside);
+            document.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [detailsMode]);
+
     if (!completion) {
         return (
             <button type="button" className="kamoku-week-completion" onClick={onMark}>
@@ -231,33 +251,55 @@ const WeekCompletionControl = ({ completion, grade, week, translator, onMark, on
     const completedLabel = translator.translate("Klarmarkerad {0}", {
         params: [formatCompletionDate(completion.completedAt, translator.currentLanguage)],
     });
-    const tooltipId = `week-completion-${grade.replace(/\s+/g, "-")}-${week}`;
+    const detailsId = `week-completion-${grade.replace(/\s+/g, "-")}-${week}`;
+    const detailsAreOpen = detailsMode !== "closed";
 
     return (
-        <div className="kamoku-week-completion-group">
-            <OverlayTrigger
-                placement="bottom"
-                trigger={["hover", "focus", "click"]}
-                overlay={<Tooltip id={tooltipId}>{completedLabel}</Tooltip>}
-            >
-                <button
-                    type="button"
-                    className="kamoku-week-completion is-complete"
-                    aria-label={translator.translate("Visa när vecka {0} klarmarkerades", { params: [String(week)] })}
-                >
-                    <Check2 aria-hidden="true" />
-                    <span>{translator.translate("Tränad")}</span>
-                </button>
-            </OverlayTrigger>
+        <div
+            ref={groupRef}
+            className="kamoku-week-completion-group"
+            onPointerEnter={event => {
+                if (event.pointerType === "mouse") {
+                    setDetailsMode(current => current === "closed" ? "preview" : current);
+                }
+            }}
+            onPointerLeave={event => {
+                if (event.pointerType === "mouse") {
+                    setDetailsMode(current => current === "preview" ? "closed" : current);
+                }
+            }}
+            onFocusCapture={() => setDetailsMode(current => current === "closed" ? "preview" : current)}
+            onBlurCapture={event => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDetailsMode("closed");
+            }}
+        >
             <button
                 type="button"
-                className="kamoku-week-completion-clear"
-                aria-label={translator.translate("Ta bort klarmarkering för vecka {0}", { params: [String(week)] })}
-                title={translator.translate("Ta bort klarmarkering")}
-                onClick={onClear}
+                className="kamoku-week-completion is-complete"
+                aria-label={translator.translate("Visa när vecka {0} klarmarkerades", { params: [String(week)] })}
+                aria-expanded={detailsAreOpen}
+                aria-controls={detailsId}
+                onClick={() => setDetailsMode(current => current === "pinned" ? "closed" : "pinned")}
             >
-                <ArrowCounterclockwise aria-hidden="true" />
+                <Check2 aria-hidden="true" />
+                <span>{translator.translate("Tränad")}</span>
             </button>
+            {detailsAreOpen && (
+                <div id={detailsId} className="kamoku-week-completion-details" role="dialog" aria-label={completedLabel}>
+                    <span>{completedLabel}</span>
+                <button
+                    type="button"
+                    className="kamoku-week-completion-clear"
+                    onClick={() => {
+                        setDetailsMode("closed");
+                        onClear();
+                    }}
+                >
+                    <ArrowCounterclockwise aria-hidden="true" />
+                    <span>{translator.translate("Ta bort klarmarkering")}</span>
+                </button>
+                </div>
+            )}
         </div>
     );
 };

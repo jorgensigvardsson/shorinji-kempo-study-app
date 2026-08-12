@@ -273,7 +273,7 @@ const AppNavbar = (props: NavbarProps) => {
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
-        <Navbar.Brand href="/" className="app-navbar-brand">
+        <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand">
           <img src="/shorinjikempo.png" className="logo" />
           <span className="app-navbar-title">{translator.translate("Shorinji Kempo")}</span>
         </Navbar.Brand>

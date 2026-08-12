@@ -12,6 +12,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
 - [ ] Apply the calmer full-card layout to the All hokei section after comparing it in Kamoku
 - [ ] Allow users to fill in missing stance/action fields as personal overrides without modifying the canonical Kamokuhyo source data; include editing, clearing, persistence/sync, and a clear distinction between source content and personal additions
 - [ ] Collaboratively define calmer Shorinji Kempo theme colors and fonts before applying them across the app
+- [ ] Add an optional preferred name in Settings and store it in the synced backend app data; let the user edit or clear it, use it only for the start-page greeting `Gasshō, {name}`, and retain plain `Gasshō` when no name is set
 - [ ] Audit the app's global text-zoom layout on narrow screens; the current whole-page zoom can push the right edge of controls and cards beyond the viewport, including the Dojo-mode control in the weekly plan
 - [ ] Add an option to show all techniques up to the user’s next grade, while keeping the focused weekly-plan view
 - [ ] Find a clear home in the future Study/Train structure for the existing tan’en and sōtai techniques and videos
@@ -22,6 +23,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
 - [x] Let touch users long-press a word for the compact dictionary without expanding its collapsible card; keep desktop text selection and normal click/keyboard expansion
 - [x] Add a calm, persistent way to mark a weekly-plan session as completed, keyed by grade and week, with the completion timestamp revealed only through a subtle hover/focus tooltip (and tap on touch devices)
 - [ ] Decide whether weekly-plan progress should keep a history of repeat sessions, and whether it needs a broader reset function beyond clearing one week at a time
+- [ ] Design the permanent Embu data model before enabling backend synchronization: the experimental “Bygg en egen embu” draft is intentionally stored only in local browser storage, must stay outside the growing Cosmos app-data document, and may be discarded/reset when the experimental feature is replaced by the final architecture
 - [ ] Audit every card type in Dojo mode—including weekly themes, repetition, kihon, hokei, randori, and embu/kumi-embu—and hide secondary kanji/Japanese translations when the selected app language is not Japanese; when Japanese is the main language, keep the Japanese text as the primary card content
 - [x] Present broad weekly practice instructions—such as repetition, randori, embu, studies, and preparation for grading—as warm, source-grounded page copy and an open weekly overview instead of technique-like cards; preserve exact details such as randori type and restriction, while keeping individual techniques as the only expandable cards
 - [ ] Explore the start-page and intro navigation together:

@@ -28,15 +28,6 @@ describe("AppDataStore — initial state", () => {
     expect(store.get("grade")).toBe("nidan");
   });
 
-  it("adds an empty embu draft to older saved documents", () => {
-    const current = createDefaultAppDataDocument();
-    const oldData = { ...current.data } as Partial<AppDataDocument["data"]>;
-    delete oldData.embuDraft;
-    const store = makeStore({ ...current, data: oldData as AppDataDocument["data"] });
-
-    expect(store.get("embuDraft")).toEqual({ notes: "", steps: [] });
-  });
-
   it("adds empty weekly-plan completions to older saved documents", () => {
     const current = createDefaultAppDataDocument();
     const oldData = { ...current.data } as Partial<AppDataDocument["data"]>;
