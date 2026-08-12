@@ -3,12 +3,14 @@ package api
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/jwks"
 )
 
 const testIssuer   = "http://test-issuer"
@@ -25,6 +27,14 @@ func (s *staticKeySource) PublicKey(kid string) (*rsa.PublicKey, error) {
 		return s.key, nil
 	}
 	return nil, nil // unknown kid
+}
+
+// unavailableKeySource implements KeySource for the case where the JWKS
+// endpoint cannot be reached, so no verdict on the token is possible.
+type unavailableKeySource struct{}
+
+func (unavailableKeySource) PublicKey(string) (*rsa.PublicKey, error) {
+	return nil, fmt.Errorf("%w: dial tcp: i/o timeout", jwks.ErrUnavailable)
 }
 
 func generateTestKey(t *testing.T) *rsa.PrivateKey {
@@ -121,6 +131,61 @@ func TestAuthMiddleware_WrongSigningKey_Returns401(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: tokenStr})
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("got %d, want 401", rec.Code)
+	}
+}
+
+// The regression this guards: an unreachable JWKS endpoint used to surface as a
+// flat 401, which the frontend reads as "session expired" and acts on by logging
+// the user out — despite a perfectly good token and refresh cookie.
+func TestAuthMiddleware_KeySourceUnavailable_Returns503(t *testing.T) {
+	key := generateTestKey(t)
+	h := authMiddleware(unavailableKeySource{}, testIssuer, http.HandlerFunc(okHandler))
+
+	tokenStr := signToken(t, key, "k1", "user-uuid-123", time.Now().Add(time.Hour))
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "access_token", Value: tokenStr})
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("got %d, want 503", rec.Code)
+	}
+	if got := rec.Header().Get("Retry-After"); got == "" {
+		t.Error("expected a Retry-After header on the 503")
+	}
+}
+
+// Without the signing key the claims cannot be trusted, so an expired-looking
+// token is still an open question, not a verdict. 503 keeps the session alive;
+// the client retries and gets a truthful 401 once the key source is back.
+func TestAuthMiddleware_ExpiredTokenAndKeySourceUnavailable_Returns503(t *testing.T) {
+	key := generateTestKey(t)
+	h := authMiddleware(unavailableKeySource{}, testIssuer, http.HandlerFunc(okHandler))
+
+	tokenStr := signToken(t, key, "k1", "user-uuid-123", time.Now().Add(-time.Minute))
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "access_token", Value: tokenStr})
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("got %d, want 503", rec.Code)
+	}
+}
+
+// A cookie-less request needs no key lookup, so an unavailable key source must
+// not turn a plain unauthenticated request into a 503.
+func TestAuthMiddleware_NoCookieAndKeySourceUnavailable_Returns401(t *testing.T) {
+	h := authMiddleware(unavailableKeySource{}, testIssuer, http.HandlerFunc(okHandler))
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 

@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,7 +15,18 @@ import (
 	"time"
 )
 
-var jwksHTTPClient = &http.Client{Timeout: 10 * time.Second}
+// The auth service scales to zero, so a JWKS fetch may be what wakes it. A cold
+// start there has been measured at ~23s, and a client timeout shorter than that
+// turns an ordinary wake-up into a key-resolution failure — which used to
+// surface as a spurious 401 and log the user out. Allow generous headroom.
+var jwksHTTPClient = &http.Client{Timeout: 45 * time.Second}
+
+// ErrUnavailable reports that a key could not be resolved because the JWKS
+// endpoint could not be reached, as opposed to the key genuinely not existing.
+// It lets callers tell "I cannot verify this token right now" (a server-side
+// problem, and temporary) apart from "this token is not valid" (a client
+// problem), which are otherwise indistinguishable at the HTTP layer.
+var ErrUnavailable = errors.New("jwks: key source unavailable")
 
 // Cache fetches RSA public keys from a JWKS endpoint and caches them by key ID.
 // On unknown key ID it retries once (handles key rotation); otherwise it refreshes hourly.
@@ -82,13 +94,17 @@ func (c *Cache) hasKeys() bool {
 
 // PublicKey returns the RSA public key for kid.
 // On a cache miss it attempts one refresh before returning an error.
+//
+// A failed refresh yields ErrUnavailable: the kid may well be legitimate and we
+// simply could not check. Only a *successful* refresh that still lacks the kid
+// proves the key is genuinely unknown.
 func (c *Cache) PublicKey(kid string) (*rsa.PublicKey, error) {
 	if key := c.lookup(kid); key != nil {
 		return key, nil
 	}
 	// Unknown kid — might be a freshly rotated key; try once more.
 	if err := c.Refresh(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrUnavailable, err)
 	}
 	if key := c.lookup(kid); key != nil {
 		return key, nil

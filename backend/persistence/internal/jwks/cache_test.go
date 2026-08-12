@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
@@ -115,6 +116,27 @@ func TestPublicKey_TrulyUnknownKid_ReturnsError(t *testing.T) {
 	_, err := c.PublicKey("does-not-exist")
 	if err == nil {
 		t.Error("expected error for unknown kid, got nil")
+	}
+	// The endpoint answered, so the key really is unknown — this must not be
+	// reported as unavailability, which callers translate into a retryable 503.
+	if errors.Is(err, ErrUnavailable) {
+		t.Errorf("unknown kid reported as ErrUnavailable: %v", err)
+	}
+}
+
+// A key that cannot be looked up because the endpoint is unreachable must be
+// distinguishable from one that is genuinely absent: the first is a temporary
+// server-side fault, the second is a bad token.
+func TestPublicKey_UnreachableEndpoint_ReturnsErrUnavailable(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer srv.Close()
+
+	c := NewCache(srv.URL)
+	_, err := c.PublicKey("key-1")
+	if !errors.Is(err, ErrUnavailable) {
+		t.Errorf("got %v, want it to wrap ErrUnavailable", err)
 	}
 }
 
