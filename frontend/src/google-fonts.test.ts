@@ -42,32 +42,56 @@ describe("applyFontFamily", () => {
     afterEach(() => {
         applyFontFamily("body", null);
         applyFontFamily("heading", null);
+        applyFontFamily("kanji", null);
     });
 
-    it("sets only the target's own CSS variable and link, leaving the other target untouched", () => {
+    it("sets only the target's own CSS variables and link, leaving the other targets untouched", () => {
         applyFontFamily("body", "Roboto");
 
-        expect(document.documentElement.style.getPropertyValue("--bs-body-font-family")).toContain("Roboto");
-        expect(document.documentElement.style.getPropertyValue("--app-display-font")).toBe("");
+        expect(document.documentElement.style.getPropertyValue("--app-body-face")).toContain("Roboto");
+        expect(document.documentElement.style.getPropertyValue("--app-display-face")).toBe("");
+        expect(document.documentElement.style.getPropertyValue("--app-kanji-font")).toBe("");
         expect(document.getElementById("google-fonts-picker-body")).not.toBeNull();
         expect(document.getElementById("google-fonts-picker-heading")).toBeNull();
+        expect(document.getElementById("google-fonts-picker-kanji")).toBeNull();
     });
 
-    it("lets body and heading carry different fonts at the same time", () => {
-        applyFontFamily("body", "Roboto");
+    it("sets the chosen family's generic keyword as the stack's closing fallback", () => {
         applyFontFamily("heading", "Playfair Display");
 
-        expect(document.documentElement.style.getPropertyValue("--bs-body-font-family")).toContain("Roboto");
-        expect(document.documentElement.style.getPropertyValue("--app-display-font")).toContain("Playfair Display");
+        expect(document.documentElement.style.getPropertyValue("--app-display-fallback")).toBe("serif");
     });
 
-    it("removing one target's font doesn't affect the other", () => {
+    it("gives the kanji target no fallback variable of its own", () => {
+        // A generic keyword there resolves to the OS default face, which on a
+        // CJK-capable system draws the kanji itself -- cutting off everything
+        // listed below it in the stack.
+        applyFontFamily("kanji", "Noto Sans JP");
+
+        expect(document.documentElement.style.getPropertyValue("--app-kanji-font")).toContain("Noto Sans JP");
+        expect(document.documentElement.style.getPropertyValue("--app-kanji-fallback")).toBe("");
+    });
+
+    it("lets body, heading and kanji carry different fonts at the same time", () => {
         applyFontFamily("body", "Roboto");
         applyFontFamily("heading", "Playfair Display");
+        applyFontFamily("kanji", "Noto Sans JP");
+
+        expect(document.documentElement.style.getPropertyValue("--app-body-face")).toContain("Roboto");
+        expect(document.documentElement.style.getPropertyValue("--app-display-face")).toContain("Playfair Display");
+        expect(document.documentElement.style.getPropertyValue("--app-kanji-font")).toContain("Noto Sans JP");
+    });
+
+    it("removing one target's font doesn't affect the others", () => {
+        applyFontFamily("body", "Roboto");
+        applyFontFamily("heading", "Playfair Display");
+        applyFontFamily("kanji", "Noto Sans JP");
 
         applyFontFamily("body", null);
 
-        expect(document.documentElement.style.getPropertyValue("--bs-body-font-family")).toBe("");
-        expect(document.documentElement.style.getPropertyValue("--app-display-font")).toContain("Playfair Display");
+        expect(document.documentElement.style.getPropertyValue("--app-body-face")).toBe("");
+        expect(document.documentElement.style.getPropertyValue("--app-body-fallback")).toBe("");
+        expect(document.documentElement.style.getPropertyValue("--app-display-face")).toContain("Playfair Display");
+        expect(document.documentElement.style.getPropertyValue("--app-kanji-font")).toContain("Noto Sans JP");
     });
 });

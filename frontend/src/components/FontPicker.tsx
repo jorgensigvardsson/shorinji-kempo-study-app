@@ -4,7 +4,7 @@ import { noTranslate } from "../i18n";
 import { allGoogleFonts, filterGoogleFonts, type FontCategory, type FontFilter } from "../google-fonts";
 
 interface Props {
-    // Distinguishes this picker's controls (e.g. "Body"/"Heading") when more
+    // Distinguishes this picker's controls (e.g. "Body"/"Heading"/"Kanji") when more
     // than one is rendered at once -- otherwise every instance would share
     // the same aria-labels, which is both an accessibility bug and makes
     // them impossible to tell apart in tests.

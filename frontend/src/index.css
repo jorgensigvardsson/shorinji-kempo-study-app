@@ -1,5 +1,36 @@
+/* Type stacks are assembled in three layers so kanji/kana can carry a font of
+   their own without any markup, per-element rules or text scanning: Latin
+   faces first, Japanese faces after them, generic keyword last. The Latin
+   faces have no CJK glyphs, so the browser falls through to the Japanese ones
+   character by character.
+
+   The generic keyword goes last for a reason: it resolves to one specific
+   face chosen by the OS, and on a system whose default sans/serif covers CJK
+   (macOS, a Japanese Windows, a CJK-first fontconfig) that face would render
+   the kanji and nothing listed after it would ever be reached. Behind the
+   generic, the Japanese layer would work on some machines and silently do
+   nothing on others; in front of it, it works everywhere.
+
+   Each layer is its own custom property so the experimental font picker (see
+   src/google-fonts.ts) can override one without disturbing the others:
+     --app-body-face / --app-display-face   Latin faces ("Body"/"Heading" font)
+     --app-kanji-font                       Japanese faces ("Kanji" font)
+     --app-*-fallback                       generic keyword of the picked font
+
+   --app-kanji-font is deliberately left undeclared: each stack carries its own
+   Japanese default in the var() fallback instead -- gothic for body copy,
+   mincho for headings, matching what the browser resolved to before the
+   layer existed -- and picking a kanji font takes over both at once. */
 :root {
-  --app-display-font: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  /* Bootstrap's own $font-family-sans-serif, minus its trailing generic and
+     emoji faces (they move to the end of --app-body-font-stack, below the
+     Japanese layer). Kept in sync by hand -- see styles/bootstrap-theme.scss,
+     which feeds this stack back into $font-family-sans-serif. */
+  --app-body-face: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial;
+  --app-display-face: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia;
+
+  --app-body-font-stack: var(--app-body-face), var(--app-kanji-font, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo), var(--app-body-fallback, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --app-display-font: var(--app-display-face), var(--app-kanji-font, "Yu Mincho", "Hiragino Mincho ProN"), var(--app-display-fallback, serif);
   --app-card-border: rgba(73, 62, 44, 0.14);
   --app-card-shadow: 0 1px 2px rgba(65, 52, 34, 0.04), 0 8px 22px rgba(65, 52, 34, 0.06);
 }

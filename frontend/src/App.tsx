@@ -28,6 +28,7 @@ interface Props {
   ranksData: HokeiRanks;
   bodyFontFamilyData: Data<string>;
   headingFontFamilyData: Data<string>;
+  kanjiFontFamilyData: Data<string>;
 }
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
@@ -98,15 +99,21 @@ function useAppUpdate(autoApply: boolean) {
 }
 
 function App(props: Props) {
-  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData, bodyFontFamilyData, headingFontFamilyData } = props;
+  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData, bodyFontFamilyData, headingFontFamilyData, kanjiFontFamilyData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ bodyFontFamily, setBodyFontFamily ] = useState<string>(bodyFontFamilyData.data);
   const [ headingFontFamily, setHeadingFontFamily ] = useState<string>(headingFontFamilyData.data);
+  const [ kanjiFontFamily, setKanjiFontFamily ] = useState<string>(kanjiFontFamilyData.data);
   // Session-only (not persisted): just needs to survive the toolbar's own
   // auto-collapse-on-navigate behavior, not a page reload.
   const [ bodyFontFilter, setBodyFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "" });
   const [ headingFontFilter, setHeadingFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "" });
+  // The kanji picker starts filtered to the Japanese subset: a font without
+  // kanji/kana glyphs would leave the app looking untouched (Japanese text just
+  // falls through it to the next face in the stack), which reads as a bug.
+  // Clearing the language filter is still allowed, it's only the starting point.
+  const [ kanjiFontFilter, setKanjiFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "japanese" });
   const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const [ displayGrade, setDisplayGrade ] = useState<GradeName>(gradeData.data);
   const translations = useContext(TranslationsContext);
@@ -155,10 +162,12 @@ function App(props: Props) {
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
   useEffect(() => bodyFontFamilyData.registerListener(f => setBodyFontFamily(f)), [bodyFontFamilyData]);
   useEffect(() => headingFontFamilyData.registerListener(f => setHeadingFontFamily(f)), [headingFontFamilyData]);
+  useEffect(() => kanjiFontFamilyData.registerListener(f => setKanjiFontFamily(f)), [kanjiFontFamilyData]);
   // Re-applies on every mount too, so a previously-chosen font survives a reload
   // (the <link> tag and :root overrides don't persist across page loads on their own).
   useEffect(() => applyFontFamily("body", bodyFontFamily || null), [bodyFontFamily]);
   useEffect(() => applyFontFamily("heading", headingFontFamily || null), [headingFontFamily]);
+  useEffect(() => applyFontFamily("kanji", kanjiFontFamily || null), [kanjiFontFamily]);
 
   // An account is required: everything below the login screen assumes a signed-in
   // user, so the provider doubles as the gate. Signing out (or a session that
@@ -256,6 +265,9 @@ function App(props: Props) {
             : undefined}
           headingFontPicker={isFontPickerEnabled
             ? { value: headingFontFamily, onChange: f => headingFontFamilyData.save(f), filter: headingFontFilter, onFilterChange: setHeadingFontFilter }
+            : undefined}
+          kanjiFontPicker={isFontPickerEnabled
+            ? { value: kanjiFontFamily, onChange: f => kanjiFontFamilyData.save(f), filter: kanjiFontFilter, onFilterChange: setKanjiFontFilter }
             : undefined}
         />
         <SelectionWordLookup />

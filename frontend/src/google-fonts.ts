@@ -30,7 +30,7 @@ export const filterGoogleFonts = (fonts: GoogleFont[], filter: FontFilter): Goog
         && (filter.subset === "" || font.subsets.includes(filter.subset)));
 };
 
-// Generic fallback appended after the chosen family, in case the web font
+// Generic keyword that closes the chosen family's stack, in case the web font
 // fails to load. Google's own category taxonomy has no generic keyword for
 // "display", so it falls back to serif — most display fonts are decorative
 // serif/slab faces.
@@ -50,33 +50,55 @@ export const allGoogleFonts = googleFontsData as GoogleFont[];
 export const findGoogleFont = (family: string): GoogleFont | undefined =>
     allGoogleFonts.find(font => font.family === family);
 
-// Body text and headings are picked independently (they're different design
-// decisions -- e.g. a display face for headings paired with a plain one for
-// body copy), so each target gets its own <link> and its own CSS variable.
-export type FontTarget = "body" | "heading";
+// Body text, headings and Japanese text are picked independently (they're
+// different design decisions -- e.g. a display face for headings paired with a
+// plain one for body copy, and a Japanese face that has to work under both), so
+// each target gets its own <link> and its own CSS variable(s).
+//
+// "kanji" covers kanji, hiragana and katakana alike: it is applied by ordering
+// rather than by tagging the text, so the browser picks it per character for
+// anything the Latin faces cannot render -- no markup and no script detection.
+// It therefore has no target of its own in the stacks; it slots into both the
+// body and the heading stack. See the comment at the top of src/index.css.
+export type FontTarget = "body" | "heading" | "kanji";
 
-const cssVarByTarget: Record<FontTarget, string> = {
-    body: "--bs-body-font-family",
-    heading: "--app-display-font",
+interface TargetCssVars {
+    // Holds the family name alone. The stacks in index.css put the layers in
+    // the order that makes per-character fallback work.
+    face: string;
+    // Where the family's generic keyword goes, when the stack has a slot for
+    // it. "kanji" has none on purpose: the body/display generic already
+    // follows the Japanese layer in every stack, so it doubles as the kanji
+    // font's fallback -- and a generic of its own, sitting that high up, would
+    // on a CJK-capable system render the kanji itself and cut off everything
+    // below it (see the comment at the top of src/index.css).
+    fallback?: string;
+}
+
+const cssVarsByTarget: Record<FontTarget, TargetCssVars> = {
+    body: { face: "--app-body-face", fallback: "--app-body-fallback" },
+    heading: { face: "--app-display-face", fallback: "--app-display-fallback" },
+    kanji: { face: "--app-kanji-font" },
 };
 
 const fontLinkId = (target: FontTarget) => `google-fonts-picker-${target}`;
 
 // Loads the chosen family from Google Fonts (or removes it) and overrides the
-// app's font for that target. Both --bs-body-font-family and --app-display-font
-// are declared at :root, so the override must be set on document.documentElement
-// itself -- most descendants below <body> just inherit body's already-resolved
-// font-family rather than re-reading the custom property, so setting it any
-// lower in the tree (e.g. via a React inline style) would silently do nothing.
+// app's font for that target. The variables are all declared at :root, so the
+// override must be set on document.documentElement itself -- most descendants
+// below <body> just inherit body's already-resolved font-family rather than
+// re-reading the custom property, so setting it any lower in the tree (e.g. via
+// a React inline style) would silently do nothing.
 export const applyFontFamily = (target: FontTarget, family: string | null): void => {
     const linkId = fontLinkId(target);
-    const cssVar = cssVarByTarget[target];
+    const { face, fallback } = cssVarsByTarget[target];
     const existingLink = document.getElementById(linkId) as HTMLLinkElement | null;
     const font = family ? findGoogleFont(family) : undefined;
 
     if (!family || !font) {
         existingLink?.remove();
-        document.documentElement.style.removeProperty(cssVar);
+        document.documentElement.style.removeProperty(face);
+        if (fallback) document.documentElement.style.removeProperty(fallback);
         return;
     }
 
@@ -86,5 +108,6 @@ export const applyFontFamily = (target: FontTarget, family: string | null): void
     link.href = googleFontsCssUrl(font.family);
     if (!existingLink) document.head.appendChild(link);
 
-    document.documentElement.style.setProperty(cssVar, `"${font.family}", ${genericFallback[font.category]}`);
+    document.documentElement.style.setProperty(face, `"${font.family}"`);
+    if (fallback) document.documentElement.style.setProperty(fallback, genericFallback[font.category]);
 };

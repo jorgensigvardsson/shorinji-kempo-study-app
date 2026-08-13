@@ -21,6 +21,7 @@ const renderControls = (overrides: Partial<React.ComponentProps<typeof TrainingC
     onTrainingModeChange: vi.fn(),
     bodyFontPicker: undefined,
     headingFontPicker: undefined,
+    kanjiFontPicker: undefined,
     ...overrides,
   };
   render(<MemoryRouter><TrainingControls {...props} /></MemoryRouter>);
@@ -86,23 +87,43 @@ describe("TrainingControls", () => {
     expect(onChange).toHaveBeenCalledWith("Roboto");
   });
 
-  it("shows both font pickers together, independently", async () => {
+  it("shows all three font pickers together, independently", async () => {
     const user = userEvent.setup();
     const onBodyChange = vi.fn();
     const onHeadingChange = vi.fn();
+    const onKanjiChange = vi.fn();
     renderControls({
       showGrade: false,
       showTrainingMode: false,
       bodyFontPicker: { value: "", onChange: onBodyChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
       headingFontPicker: { value: "", onChange: onHeadingChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
+      kanjiFontPicker: { value: "", onChange: onKanjiChange, filter: { search: "", category: "", subset: "japanese" }, onFilterChange: vi.fn() },
     });
 
     await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
     await user.selectOptions(screen.getByRole("combobox", { name: "Body font" }), "Roboto");
     await user.selectOptions(screen.getByRole("combobox", { name: "Heading font" }), "Playfair Display");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Kanji font" }), "Noto Sans JP");
 
     expect(onBodyChange).toHaveBeenCalledWith("Roboto");
     expect(onHeadingChange).toHaveBeenCalledWith("Playfair Display");
+    expect(onKanjiChange).toHaveBeenCalledWith("Noto Sans JP");
+  });
+
+  it("offers the kanji picker only fonts that can actually render Japanese, when filtered to it", async () => {
+    const user = userEvent.setup();
+    renderControls({
+      showGrade: false,
+      showTrainingMode: false,
+      kanjiFontPicker: { value: "", onChange: vi.fn(), filter: { search: "", category: "", subset: "japanese" }, onFilterChange: vi.fn() },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
+    const options = screen.getByRole("combobox", { name: "Kanji font" }).querySelectorAll("option");
+    const families = [...options].map(option => option.textContent);
+
+    expect(families).toContain("Noto Sans JP");
+    expect(families).not.toContain("Roboto");
   });
 
   // The panel unmounts its contents whenever it collapses (including the

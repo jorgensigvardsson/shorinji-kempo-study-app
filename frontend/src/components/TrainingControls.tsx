@@ -20,11 +20,13 @@ interface Props {
     trainingMode: boolean;
     onTrainingModeChange: (active: boolean) => void;
     // Experimental font pickers (see src/google-fonts.ts's isFontPickerEnabled),
-    // one for body text and one for headings -- undefined hides that one.
-    // filter/onFilterChange live here (not as FontPicker's own state) because
-    // this panel unmounts on every route change, which would otherwise reset them.
+    // one for body text, one for headings and one for kanji/kana -- undefined
+    // hides that one. filter/onFilterChange live here (not as FontPicker's own
+    // state) because this panel unmounts on every route change, which would
+    // otherwise reset them.
     bodyFontPicker?: FontPickerProps;
     headingFontPicker?: FontPickerProps;
+    kanjiFontPicker?: FontPickerProps;
 }
 
 interface FontPickerProps {
@@ -44,6 +46,7 @@ const TrainingControls = ({
     onTrainingModeChange,
     bodyFontPicker,
     headingFontPicker,
+    kanjiFontPicker,
 }: Props) => {
     const translator = useContext(TranslatorContext);
     const location = useLocation();
@@ -73,7 +76,7 @@ const TrainingControls = ({
         };
     }, [expanded]);
 
-    if (!showGrade && !showTrainingMode && !bodyFontPicker && !headingFontPicker) return null;
+    if (!showGrade && !showTrainingMode && !bodyFontPicker && !headingFontPicker && !kanjiFontPicker) return null;
 
     const dismissIntro = () => {
         localStorage.setItem(TRAINING_MODE_INTRO_KEY, "true");
@@ -144,6 +147,18 @@ const TrainingControls = ({
                                         onChange={headingFontPicker.onChange}
                                         filter={headingFontPicker.filter}
                                         onFilterChange={headingFontPicker.onFilterChange}
+                                    />
+                                </Form.Group>
+                            )}
+                            {kanjiFontPicker && (
+                                <Form.Group className="training-controls-font" controlId="global-font-family-kanji">
+                                    <Form.Label>{noTranslate("Kanji font")}</Form.Label>
+                                    <FontPicker
+                                        label="Kanji"
+                                        value={kanjiFontPicker.value}
+                                        onChange={kanjiFontPicker.onChange}
+                                        filter={kanjiFontPicker.filter}
+                                        onFilterChange={kanjiFontPicker.onFilterChange}
                                     />
                                 </Form.Group>
                             )}

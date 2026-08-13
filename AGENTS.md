@@ -15,6 +15,18 @@ Any user-visible string passed to `translator.translate()` must have a correspon
 
 Strings wrapped with `noTranslate()` (imported from `frontend/src/i18n.ts`) are intentionally fixed in an unspecified language and must never be passed to `translator.translate()` or added to `translations.json`. The function is an identity marker — its purpose is to signal that translation is explicitly unwanted.
 
+## Fonts: kanji, hiragana and katakana
+
+Japanese text carries its own font, separate from the body and heading fonts. Nothing marks it up as Japanese — no class, no `<span>`, no script detection. It works purely through the order of the font stack: the Latin faces come first, the Japanese faces sit behind them, and the browser falls through per character for anything the Latin faces cannot draw. Japanese mixed into a Latin sentence is handled by the same mechanism, mid-word.
+
+So writing Japanese text needs no special treatment at all — but **declaring `font-family` does**:
+
+- Use the composed stacks: `var(--bs-body-font-family)` for body text, `var(--app-display-font)` for headings. Both already carry the Japanese layer.
+- Never hand-roll a stack in a CSS rule (`font-family: Georgia, serif`). Any element styled that way loses the kanji font silently — Latin looks right, so it is easy to miss.
+- Never put a generic keyword (`serif`, `sans-serif`) in front of the Japanese layer. A generic resolves to the OS default face, which on a CJK-capable system draws the kanji itself and cuts off everything listed after it. The generic belongs at the very end.
+
+To add another Latin face to a stack, extend `--app-body-face`/`--app-display-face` in `frontend/src/index.css` rather than the composed variables. The layers, and which of them the experimental font picker overrides, are documented at the top of that file.
+
 ## README.md
 
 When something worth mentioning in `README.md` has happened, such as new build steps, tech stack changes, or features, note it there. Also use it to understand how deployments are done.

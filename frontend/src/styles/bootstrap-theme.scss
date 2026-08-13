@@ -1,5 +1,13 @@
 @import "bootstrap/scss/functions";
 
+// Body text runs through index.css's layered stack (Latin faces, then Japanese
+// faces, then a generic) rather than Bootstrap's flat one, so kanji and kana
+// can carry their own font -- see the comment at the top of src/index.css.
+// This is the only place it can be done: Bootstrap declares
+// --bs-font-sans-serif on :root, and its stylesheet is loaded after index.css,
+// so redefining the variable there would lose to it.
+$font-family-sans-serif: var(--app-body-font-stack);
+
 // Washi by day, deep ink by night. The two modes share warm type and a
 // restrained brass accent, while their surfaces carry the atmosphere.
 $primary-light-gold: #9a712d;

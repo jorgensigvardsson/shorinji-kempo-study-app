@@ -61,13 +61,23 @@ CORS allowed origin is an exact match against `FRONTEND_URL`, so `localhost:5173
 Active with `VITE_DEBUG=true` locally, or automatically on staging (`VITE_ENVIRONMENT=staging`)
 so it can be tried without a local build — see `isFontPickerEnabled` in
 `frontend/src/google-fonts.ts`, the single flag every integration point checks. It never
-activates in production. When active, two font pickers appear in the floating toolbar
+activates in production. When active, three font pickers appear in the floating toolbar
 (bottom-left, normally only shown on grading/training-mode pages) — one for body text, one
-for headings, changed independently — that swap the app's fonts live, per-device — useful for
-trying candidates without a rebuild. Each filters a bundled snapshot of Google Fonts metadata
-(`frontend/src/assets/google-fonts.json`) by name, category, and language, the same way
-fonts.google.com's own filters work, and loads the chosen font from Google Fonts' key-free CSS
-endpoint. The choices are stored in plain `localStorage`, not synced to the backend.
+for headings, one for kanji/hiragana/katakana, changed independently — that swap the app's
+fonts live, per-device — useful for trying candidates without a rebuild. Each filters a
+bundled snapshot of Google Fonts metadata (`frontend/src/assets/google-fonts.json`) by name,
+category, and language, the same way fonts.google.com's own filters work, and loads the
+chosen font from Google Fonts' key-free CSS endpoint. The choices are stored in plain
+`localStorage`, not synced to the backend.
+
+The kanji font applies to Japanese text everywhere, headings included, and needs no markup:
+the font stacks list the Latin faces first and the Japanese ones behind them, so the browser
+falls through per character for anything the Latin faces cannot draw — mid-sentence and
+mid-word alike. Leave it on "Default" and the app looks exactly as it did before the layer
+existed (gothic for body copy, mincho for headings). The kanji picker starts filtered to the
+Japanese language subset, since a font without kanji glyphs would appear to do nothing at
+all. `frontend/src/index.css` documents how the layers fit together, and `AGENTS.md` covers
+what this means when writing new CSS.
 
 Loading a font reaches two Google origins — `fonts.googleapis.com` for the stylesheet and
 `fonts.gstatic.com` for the font files it references — and the `Content-Security-Policy` in
