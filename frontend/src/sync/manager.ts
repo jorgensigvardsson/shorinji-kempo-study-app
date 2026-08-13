@@ -112,8 +112,8 @@ class SyncManager {
     this.store.set("syncProvider", "local");
   }
 
-  async submitFeedback(message: string): Promise<void> {
-    return this.backendClient.submitFeedback(message);
+  async submitFeedback(message: string, language: string): Promise<void> {
+    return this.backendClient.submitFeedback(message, language);
   }
 
   // beginBackendAuthorization is called by the sign-in UI. It sets the email on

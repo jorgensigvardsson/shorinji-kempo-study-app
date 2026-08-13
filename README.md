@@ -133,6 +133,8 @@ Optional repository variables (with sensible defaults):
 - `SMTP_PORT` (default `587`) and `SMTP_TLS` (default `starttls`) — use `465`/`implicit` for SMTPS. `starttls` refuses to deliver over an unencrypted connection rather than falling back to one.
 - `VITE_DEBUG` (default `false`)
 
+`VITE_APP_VERSION` is not something you set — the workflow writes it automatically as the deployed commit SHA (the same one used to tag the backend images), so it's not listed above. It's included with feedback submissions purely as triage context.
+
 ## Deployment staging
 Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host.
 

@@ -5,6 +5,9 @@ import { AuthExpiredError } from "./types";
 // In development both services run on localhost via Docker Compose.
 const authUrl = (import.meta.env.VITE_AUTH_URL as string | undefined) ?? "http://localhost:8081";
 const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8080";
+// Build identifier (the deployed commit SHA) baked in by CI; used only to give
+// feedback submissions context. Falls back to "dev" for local builds.
+const appVersion = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? "dev";
 
 const connectedKey = "sync-backend-connected";
 const authExpiredKey = "sync-backend-auth-expired";
@@ -350,12 +353,14 @@ export class BackendSyncClient {
   }
 
   // Submits in-app feedback. The backend attributes it to the signed-in user
-  // and emails it to the configured recipients.
-  async submitFeedback(message: string): Promise<void> {
+  // and emails it to the configured recipients, along with context (app
+  // version, language, and — read server-side from the request — user agent)
+  // to help with triage.
+  async submitFeedback(message: string, language: string): Promise<void> {
     const resp = await this.fetchWithRefresh(`${authUrl}/auth/feedback`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, language, appVersion }),
     });
     if (resp.status === 429) throw new RateLimitError();
     if (!resp.ok) throw new Error(`POST /auth/feedback: ${resp.status}`);

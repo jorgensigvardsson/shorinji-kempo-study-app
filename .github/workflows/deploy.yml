@@ -278,6 +278,9 @@ jobs:
           VITE_AUTH_URL:             ${{ vars.VITE_AUTH_URL }}
           VITE_API_URL:              ${{ vars.VITE_API_URL }}
           VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'false' }}
+          # Identifies this build in feedback submissions; same SHA used to tag
+          # the backend images built in the build-backend job above.
+          VITE_APP_VERSION:          ${{ github.sha }}
         run: |
           set -euo pipefail
           missing=()
@@ -303,6 +306,7 @@ jobs:
           write_var VITE_AUTH_URL              "$VITE_AUTH_URL"
           write_var VITE_API_URL               "$VITE_API_URL"
           write_var VITE_DEBUG                 "$VITE_DEBUG"
+          write_var VITE_APP_VERSION           "$VITE_APP_VERSION"
 
       - name: Build site
         run: |

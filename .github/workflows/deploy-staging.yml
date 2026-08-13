@@ -294,6 +294,9 @@ jobs:
           VITE_API_URL:              ${{ needs.deploy-backend.outputs.api_url }}
           VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'true' }}
           VITE_ENVIRONMENT:          staging
+          # Identifies this build in feedback submissions; same SHA used to tag
+          # the backend images built in the build-backend job above.
+          VITE_APP_VERSION:          ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
           missing=()
@@ -325,6 +328,7 @@ jobs:
           write_var VITE_API_URL "$VITE_API_URL"
           write_var VITE_DEBUG "$VITE_DEBUG"
           write_var VITE_ENVIRONMENT "$VITE_ENVIRONMENT"
+          write_var VITE_APP_VERSION "$VITE_APP_VERSION"
 
       - name: Build site
         run: |

@@ -21,7 +21,7 @@ const Feedback = () => {
         setBusy(true);
         setStatus(null);
         try {
-            await getSyncManager().submitFeedback(trimmed);
+            await getSyncManager().submitFeedback(trimmed, translator.currentLanguage);
             setStatus({ ok: true, text: translator.translate("Tack för din feedback!") });
             setMessage("");
         } catch (err) {

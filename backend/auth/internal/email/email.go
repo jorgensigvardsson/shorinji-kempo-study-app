@@ -17,9 +17,24 @@ type Sender interface {
 	SendVerificationCode(ctx context.Context, to, code, lang string) error
 
 	// SendFeedback relays an in-app feedback submission to the given recipients.
-	// submitterName/submitterEmail identify the signed-in user who submitted it,
+	SendFeedback(ctx context.Context, to []string, submission FeedbackSubmission) error
+}
+
+// FeedbackSubmission is one in-app feedback submission, along with the context
+// that helps a maintainer triage it.
+type FeedbackSubmission struct {
+	// SubmitterName/SubmitterEmail identify the signed-in user who submitted it,
 	// so the recipient can reply directly to them.
-	SendFeedback(ctx context.Context, to []string, submitterName, submitterEmail, feedback string) error
+	SubmitterName  string
+	SubmitterEmail string
+	// AppVersion is the frontend build identifier the submitter was running
+	// (see frontend/src/sync/backend.ts); "unknown" if the client didn't send one.
+	AppVersion string
+	// Language is the submitter's selected UI language ("sv", "en", "tr", "ja").
+	Language string
+	// UserAgent is read server-side from the request, not client-supplied.
+	UserAgent string
+	Message   string
 }
 
 // localized holds one language's worth of copy. The pieces are kept separate
@@ -203,6 +218,11 @@ var feedbackHTMLTemplate = template.Must(template.New("feedback").Parse(`<!DOCTY
     <div style="font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#6c757d;">Shorinji Kempo Study App</div>
     <div style="margin-top:6px;font-size:20px;font-weight:600;color:#212529;">App feedback</div>
     <p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:#6c757d;">From {{.SubmitterName}} &lt;{{.SubmitterEmail}}&gt;</p>
+    <p style="margin:8px 0 0;font-size:12px;line-height:1.6;color:#6c757d;">
+      App version: {{.AppVersion}}<br>
+      Language: {{.Language}}<br>
+      User agent: {{.UserAgent}}
+    </p>
   </td></tr>
   <tr><td style="padding:20px 28px 28px 28px;">
     <div style="background:#faf3df;border:1px solid #efdca9;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.5;color:#212529;">{{.Feedback}}</div>
@@ -217,17 +237,20 @@ var feedbackHTMLTemplate = template.Must(template.New("feedback").Parse(`<!DOCTY
 // renderFeedback builds a feedback-notification email for the site's maintainer.
 // It is deliberately English-only and unlocalized: the recipient is a developer,
 // not the app's end user.
-func renderFeedback(submitterName, submitterEmail, feedback string) (message, error) {
-	subject := fmt.Sprintf("App feedback from %s <%s>", submitterName, submitterEmail)
+func renderFeedback(fb FeedbackSubmission) (message, error) {
+	subject := fmt.Sprintf("App feedback from %s <%s>", fb.SubmitterName, fb.SubmitterEmail)
 
 	var html bytes.Buffer
 	err := feedbackHTMLTemplate.Execute(&html, struct {
-		Subject, SubmitterName, SubmitterEmail, Feedback string
+		Subject, SubmitterName, SubmitterEmail, AppVersion, Language, UserAgent, Feedback string
 	}{
 		Subject:        subject,
-		SubmitterName:  submitterName,
-		SubmitterEmail: submitterEmail,
-		Feedback:       feedback,
+		SubmitterName:  fb.SubmitterName,
+		SubmitterEmail: fb.SubmitterEmail,
+		AppVersion:     fb.AppVersion,
+		Language:       fb.Language,
+		UserAgent:      fb.UserAgent,
+		Feedback:       fb.Message,
 	})
 	if err != nil {
 		return message{}, fmt.Errorf("render feedback email: %w", err)
@@ -236,9 +259,10 @@ func renderFeedback(submitterName, submitterEmail, feedback string) (message, er
 	return message{
 		senderName: "Shorinji Kempo Study App",
 		subject:    subject,
-		plain:      fmt.Sprintf("From %s <%s>\n\n%s\n", submitterName, submitterEmail, feedback),
-		html:       html.String(),
-		replyTo:    submitterEmail,
+		plain: fmt.Sprintf("From %s <%s>\nApp version: %s\nLanguage: %s\nUser agent: %s\n\n%s\n",
+			fb.SubmitterName, fb.SubmitterEmail, fb.AppVersion, fb.Language, fb.UserAgent, fb.Message),
+		html:    html.String(),
+		replyTo: fb.SubmitterEmail,
 	}, nil
 }
 
@@ -251,7 +275,8 @@ func (LogSender) SendVerificationCode(_ context.Context, to, code, lang string) 
 	return nil
 }
 
-func (LogSender) SendFeedback(_ context.Context, to []string, submitterName, submitterEmail, feedback string) error {
-	log.Printf("[email:dev] feedback from %s <%s> for %v:\n%s", submitterName, submitterEmail, to, feedback)
+func (LogSender) SendFeedback(_ context.Context, to []string, fb FeedbackSubmission) error {
+	log.Printf("[email:dev] feedback from %s <%s> (app %s, lang %s, ua %q) for %v:\n%s",
+		fb.SubmitterName, fb.SubmitterEmail, fb.AppVersion, fb.Language, fb.UserAgent, to, fb.Message)
 	return nil
 }

@@ -62,11 +62,11 @@ func TestSubmitFeedback_Success(t *testing.T) {
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("status = %d, want 204", rec.Code)
 	}
-	if sender.feedbackMessage != "Great app!" {
-		t.Errorf("feedback message = %q, want trimmed %q", sender.feedbackMessage, "Great app!")
+	if sender.feedbackSubmission.Message != "Great app!" {
+		t.Errorf("feedback message = %q, want trimmed %q", sender.feedbackSubmission.Message, "Great app!")
 	}
-	if sender.feedbackSubmitterName != "Kenshi" || sender.feedbackSubmitterEmail != "kenshi@example.org" {
-		t.Errorf("submitter = %q <%s>, want Kenshi <kenshi@example.org>", sender.feedbackSubmitterName, sender.feedbackSubmitterEmail)
+	if sender.feedbackSubmission.SubmitterName != "Kenshi" || sender.feedbackSubmission.SubmitterEmail != "kenshi@example.org" {
+		t.Errorf("submitter = %q <%s>, want Kenshi <kenshi@example.org>", sender.feedbackSubmission.SubmitterName, sender.feedbackSubmission.SubmitterEmail)
 	}
 	if len(sender.feedbackTo) != 1 || sender.feedbackTo[0] != defaultFeedbackRecipients[0] {
 		t.Errorf("recipients = %v, want %v", sender.feedbackTo, defaultFeedbackRecipients)
@@ -88,8 +88,65 @@ func TestSubmitFeedback_FallsBackToEmailWhenNoDisplayName(t *testing.T) {
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("status = %d, want 204", rec.Code)
 	}
-	if sender.feedbackSubmitterName != "noname@example.org" {
-		t.Errorf("submitter name = %q, want fallback to email", sender.feedbackSubmitterName)
+	if sender.feedbackSubmission.SubmitterName != "noname@example.org" {
+		t.Errorf("submitter name = %q, want fallback to email", sender.feedbackSubmission.SubmitterName)
+	}
+}
+
+// Language and app version come from the request body; user agent comes from
+// the request itself (the client can't spoof it independently of the
+// connection actually making the call). All three are best-effort context, so
+// missing/unset values fall back to "unknown" rather than failing the request.
+func TestSubmitFeedback_IncludesContextFields(t *testing.T) {
+	sender := &fakeSender{}
+	h := newTestHandler(t, sender)
+	seedUser(t, h, &store.User{ID: "u1", Email: "u1@example.org", DisplayName: "Kenshi"})
+
+	req := authedRequest(t, h, http.MethodPost, "/auth/feedback", "u1", "u1@example.org", nil,
+		map[string]string{"message": "feedback", "language": "SV", "appVersion": "abc1234"})
+	req.Header.Set("User-Agent", "TestAgent/1.0")
+	rec := httptest.NewRecorder()
+	h.submitFeedback(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want 204", rec.Code)
+	}
+	sub := sender.feedbackSubmission
+	if sub.Language != "sv" {
+		t.Errorf("language = %q, want normalized sv", sub.Language)
+	}
+	if sub.AppVersion != "abc1234" {
+		t.Errorf("appVersion = %q, want abc1234", sub.AppVersion)
+	}
+	if sub.UserAgent != "TestAgent/1.0" {
+		t.Errorf("userAgent = %q, want TestAgent/1.0", sub.UserAgent)
+	}
+}
+
+func TestSubmitFeedback_ContextFieldsDefaultToUnknown(t *testing.T) {
+	sender := &fakeSender{}
+	h := newTestHandler(t, sender)
+	seedUser(t, h, &store.User{ID: "u1", Email: "u1@example.org", DisplayName: "Kenshi"})
+
+	req := authedRequest(t, h, http.MethodPost, "/auth/feedback", "u1", "u1@example.org", nil,
+		map[string]string{"message": "feedback"})
+	req.Header.Del("User-Agent")
+	rec := httptest.NewRecorder()
+	h.submitFeedback(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want 204", rec.Code)
+	}
+	sub := sender.feedbackSubmission
+	if sub.AppVersion != "unknown" {
+		t.Errorf("appVersion = %q, want unknown", sub.AppVersion)
+	}
+	if sub.UserAgent != "unknown" {
+		t.Errorf("userAgent = %q, want unknown", sub.UserAgent)
+	}
+	// Language falls back to "en" via normalizeLang, same as email/start.
+	if sub.Language != "en" {
+		t.Errorf("language = %q, want en", sub.Language)
 	}
 }
 

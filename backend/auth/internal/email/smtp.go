@@ -125,7 +125,7 @@ func (s *SMTPSender) SendVerificationCode(ctx context.Context, to, code, lang st
 // SendFeedback relays an in-app feedback submission to every configured
 // recipient, with Reply-To set to the submitter's own address so a maintainer
 // can reply straight to them.
-func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, submitterName, submitterEmail, feedback string) error {
+func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, fb FeedbackSubmission) error {
 	if len(to) == 0 {
 		return errors.New("smtp: no feedback recipients configured")
 	}
@@ -137,14 +137,15 @@ func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, submitterNam
 		}
 		rcpts = append(rcpts, parsed.Address)
 	}
-	// submitterEmail comes from the authenticated user's account record, but it
+	// SubmitterEmail comes from the authenticated user's account record, but it
 	// still lands in a header, so it gets the same validation as any recipient.
-	replyTo, err := mail.ParseAddress(submitterEmail)
+	replyTo, err := mail.ParseAddress(fb.SubmitterEmail)
 	if err != nil {
 		return fmt.Errorf("smtp: invalid submitter address: %w", err)
 	}
+	fb.SubmitterEmail = replyTo.Address
 
-	rendered, err := renderFeedback(submitterName, replyTo.Address, feedback)
+	rendered, err := renderFeedback(fb)
 	if err != nil {
 		return err
 	}

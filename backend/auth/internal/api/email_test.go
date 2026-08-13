@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
@@ -22,9 +23,9 @@ type fakeSender struct {
 	to, code, lang string
 	err            error
 
-	feedbackTo                                                     []string
-	feedbackSubmitterName, feedbackSubmitterEmail, feedbackMessage string
-	feedbackErr                                                    error
+	feedbackTo         []string
+	feedbackSubmission email.FeedbackSubmission
+	feedbackErr        error
 }
 
 func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string) error {
@@ -32,9 +33,9 @@ func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang stri
 	return f.err
 }
 
-func (f *fakeSender) SendFeedback(_ context.Context, to []string, submitterName, submitterEmail, feedback string) error {
+func (f *fakeSender) SendFeedback(_ context.Context, to []string, submission email.FeedbackSubmission) error {
 	f.feedbackTo = to
-	f.feedbackSubmitterName, f.feedbackSubmitterEmail, f.feedbackMessage = submitterName, submitterEmail, feedback
+	f.feedbackSubmission = submission
 	return f.feedbackErr
 }
 

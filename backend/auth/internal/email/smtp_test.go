@@ -528,7 +528,14 @@ func TestSendFeedback_MultipleRecipientsAndReplyTo(t *testing.T) {
 
 	err := s.SendFeedback(context.Background(),
 		[]string{"maintainer1@example.test", "maintainer2@example.test"},
-		"Kenshi", "kenshi@example.test", "This app is great, but X could be better.")
+		FeedbackSubmission{
+			SubmitterName:  "Kenshi",
+			SubmitterEmail: "kenshi@example.test",
+			AppVersion:     "abc1234",
+			Language:       "en",
+			UserAgent:      "TestAgent/1.0",
+			Message:        "This app is great, but X could be better.",
+		})
 	if err != nil {
 		t.Fatalf("SendFeedback: %v", err)
 	}
@@ -558,6 +565,9 @@ func TestSendFeedback_MultipleRecipientsAndReplyTo(t *testing.T) {
 		if !strings.Contains(p.body, "Kenshi") || !strings.Contains(p.body, "X could be better") {
 			t.Errorf("%s part is missing submitter/message content:\n%s", p.contentType, p.body)
 		}
+		if !strings.Contains(p.body, "abc1234") || !strings.Contains(p.body, "TestAgent/1.0") {
+			t.Errorf("%s part is missing app version/user agent context:\n%s", p.contentType, p.body)
+		}
 	}
 }
 
@@ -566,8 +576,11 @@ func TestSendFeedback_MultipleRecipientsAndReplyTo(t *testing.T) {
 func TestSendFeedback_RejectsHeaderInjectionInSubmitterAddress(t *testing.T) {
 	f, s := startFake(t, TLSImplicit, "PLAIN")
 
-	err := s.SendFeedback(context.Background(), []string{"maintainer@example.test"},
-		"Kenshi", "kenshi\r\nBcc: attacker@evil.test@example.test", "feedback")
+	err := s.SendFeedback(context.Background(), []string{"maintainer@example.test"}, FeedbackSubmission{
+		SubmitterName:  "Kenshi",
+		SubmitterEmail: "kenshi\r\nBcc: attacker@evil.test@example.test",
+		Message:        "feedback",
+	})
 	if err == nil {
 		t.Fatal("accepted a submitter address containing CRLF")
 	}
@@ -582,7 +595,10 @@ func TestSendFeedback_RejectsHeaderInjectionInSubmitterAddress(t *testing.T) {
 func TestSendFeedback_NoRecipients(t *testing.T) {
 	_, s := startFake(t, TLSImplicit, "PLAIN")
 
-	if err := s.SendFeedback(context.Background(), nil, "Kenshi", "kenshi@example.test", "feedback"); err == nil {
+	err := s.SendFeedback(context.Background(), nil, FeedbackSubmission{
+		SubmitterName: "Kenshi", SubmitterEmail: "kenshi@example.test", Message: "feedback",
+	})
+	if err == nil {
 		t.Fatal("SendFeedback with no recipients should fail")
 	}
 }

@@ -880,6 +880,11 @@ func (h *Handler) unlinkProvider(w http.ResponseWriter, r *http.Request) {
 // outgoing email (or someone's inbox).
 const feedbackMaxLen = 4000
 
+// feedbackMetaMaxLen bounds the client-supplied context fields (app version).
+// They're attacker-controlled request-body values, so even though they only
+// ever land in an email body (never a header), they get a sane cap too.
+const feedbackMetaMaxLen = 200
+
 // submitFeedback relays an in-app feedback submission by email to the
 // configured recipients. Requires a valid session so the message can be
 // attributed (and replied to) — feedback is not accepted anonymously.
@@ -898,7 +903,9 @@ func (h *Handler) submitFeedback(w http.ResponseWriter, r *http.Request) {
 
 	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
 	var req struct {
-		Message string `json:"message"`
+		Message    string `json:"message"`
+		Language   string `json:"language"`
+		AppVersion string `json:"appVersion"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -926,7 +933,19 @@ func (h *Handler) submitFeedback(w http.ResponseWriter, r *http.Request) {
 		submitterName = user.Email
 	}
 
-	if err := h.mailer.SendFeedback(r.Context(), h.feedbackRecipients, submitterName, user.Email, message); err != nil {
+	submission := email.FeedbackSubmission{
+		SubmitterName:  submitterName,
+		SubmitterEmail: user.Email,
+		AppVersion:     truncatedOrUnknown(req.AppVersion, feedbackMetaMaxLen),
+		Language:       normalizeLang(req.Language),
+		// The User-Agent header comes from the request itself, not the client-
+		// supplied body, so it can't be spoofed independently of the connection
+		// that's actually making the call.
+		UserAgent: truncatedOrUnknown(r.UserAgent(), feedbackMetaMaxLen),
+		Message:   message,
+	}
+
+	if err := h.mailer.SendFeedback(r.Context(), h.feedbackRecipients, submission); err != nil {
 		log.Printf("submitFeedback: send from %s: %v", user.Email, err)
 		http.Error(w, "could not send feedback", http.StatusBadGateway)
 		return
@@ -983,6 +1002,21 @@ func newNumericCode() (string, error) {
 		return "", fmt.Errorf("rand.Int: %w", err)
 	}
 	return fmt.Sprintf("%06d", n.Int64()), nil
+}
+
+// truncatedOrUnknown trims s, caps it at maxLen runes, and falls back to
+// "unknown" when empty — used for client-supplied context fields on feedback
+// submissions that are nice-to-have but never required.
+func truncatedOrUnknown(s string, maxLen int) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "unknown"
+	}
+	runes := []rune(s)
+	if len(runes) > maxLen {
+		return string(runes[:maxLen])
+	}
+	return s
 }
 
 // normalizeLang maps an arbitrary language hint to a supported email-template
