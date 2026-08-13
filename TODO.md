@@ -19,12 +19,14 @@ Ideas and follow-up tasks to park without interrupting the current task.
 - [ ] Ask Sensei whether `sashikae sokuō geri` in the grading material is a misspelling of `sashikae sokutō geri`; keep the two source spellings unchanged and separate until this has been confirmed
 - [ ] Review the proposed Free practice → Kihon lists with Sensei: starting-position groups, named uke/counter techniques, first-grade labels, and the separate kōbōgi/idō kōbōgi examples; correct the curated proposal without changing the canonical source data
 - [ ] Fine-tune the Kihon page under Training: review whether more headings are needed and whether techniques currently listed farther down should instead be grouped under Kaisoku/Byakuren chūdan gamae or another appropriate starting position
-- [ ] Separate the grading-test material into a theoretical part under Theory and a practical training part under Training; preserve every requirement, note, sequence, video, and link while deciding how shared material should be presented without duplication
+- [x] Separate the grading-test material into a theoretical part under Theory and a practical training part under Training; preserve every requirement, note, sequence, video, and link while deciding how shared material should be presented without duplication
+- [ ] Audit and remove other obsolete compatibility routes and redirects; preserving legacy URLs is not required. `/groups` was removed when Technique groups moved under Theory.
 - [x] Let touch users long-press a word for the compact dictionary without expanding its collapsible card; keep desktop text selection and normal click/keyboard expansion
 - [x] Add a calm, persistent way to mark a weekly-plan session as completed, keyed by grade and week, with the completion timestamp revealed only through a subtle hover/focus tooltip (and tap on touch devices)
 - [ ] Decide whether weekly-plan progress should keep a history of repeat sessions, and whether it needs a broader reset function beyond clearing one week at a time
 - [ ] Design the permanent Embu data model before enabling backend synchronization: the experimental “Bygg en egen embu” draft is intentionally stored only in local browser storage, must stay outside the growing Cosmos app-data document, and may be discarded/reset when the experimental feature is replaced by the final architecture
 - [ ] Audit every card type in Dojo mode—including weekly themes, repetition, kihon, hokei, randori, and embu/kumi-embu—and hide secondary kanji/Japanese translations when the selected app language is not Japanese; when Japanese is the main language, keep the Japanese text as the primary card content
+- [ ] Define and fine-tune what Training mode (Dojo presentation) changes on every page where it is available: increase text size, remove irrelevant information, preserve essential training instructions and controls, and review each affected page separately before applying broader rules
 - [x] Present broad weekly practice instructions—such as repetition, randori, embu, studies, and preparation for grading—as warm, source-grounded page copy and an open weekly overview instead of technique-like cards; preserve exact details such as randori type and restriction, while keeping individual techniques as the only expandable cards
 - [ ] Explore the start-page and intro navigation together:
   - Begin with “What do you want to do today?” and clear entrances for studying or training
@@ -33,6 +35,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
   - Map every existing study and training feature into the new entrances so no content or workflow becomes duplicated, hidden, or stranded
   - Decide whether the question appears on every visit, whether the app remembers the user’s choice, and how someone resumes their most recent activity
   - Decide the wording, grouping, and whether this should be a new app section before implementing it
+- [ ] Merge `test.yml` and `deploy-staging.yml`/`deploy.yml` into a single workflow triggered directly by `push` (test job gating a `needs:`-dependent deploy job), instead of linking them via `workflow_run`. `workflow_run`-triggered workflows always execute using the workflow YAML from the default branch (`main`), never the branch that pushed — so any deploy-workflow change only takes effect once it's merged to `main`, which silently broke a staging deploy on 2026-08-13 (a new `FEEDBACK_EMAIL` parameter got dropped because `main`'s copy of `deploy-staging.yml` didn't know about it yet). A `push`-triggered workflow always uses the pushed branch's own file.
 
 ## Questions for the next design session
 

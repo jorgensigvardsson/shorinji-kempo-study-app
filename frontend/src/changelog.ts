@@ -13,6 +13,25 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-13T07:55:16.602Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Teknikgrupper finns nu under Teori. Graderingsinformationen är uppdelad så att teoriämnen finns under Teori och teknikämnen under Träning.",
+        en: "Technique groups are now under Theory. Grading information is split so that theory subjects are under Theory and technical subjects are under Training.",
+        tr: "Teknik grupları artık Teori bölümünde. Derecelendirme bilgileri, teorik konular Teori altında ve teknik konular Antrenman altında olacak şekilde ayrıldı.",
+        ja: "技術グループは「学習」に移動しました。昇格考試情報は、学科科目を「学習」、技術科目を「練習」で確認できるように分けました。",
+      },
+      {
+        emoji: "🎚️",
+        sv: "Gradväljaren och Träningsläge har samlats i en diskret flytande knapp som bara visas där den behövs. Träningsläget förenklar träningsvyn och håller skärmen vaken när enheten stöder det.",
+        en: "The grade selector and Training mode are now gathered in a discreet floating button that only appears where needed. Training mode simplifies the training view and keeps the screen awake when supported by the device.",
+        tr: "Seviye seçici ve Antrenman modu, yalnızca gerektiği yerlerde görünen sade bir yüzen düğmede birleştirildi. Antrenman modu antrenman görünümünü sadeleştirir ve cihaz destekliyorsa ekranı açık tutar.",
+        ja: "表示する級・段の選択と練習モードを、必要なページだけに現れる控えめなフローティングボタンにまとめました。練習モードでは練習画面を簡潔にし、対応端末では画面が消えないようにします。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-13T04:31:20.000Z",
     changes: [
       {

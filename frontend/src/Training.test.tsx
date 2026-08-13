@@ -5,10 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import Training from "./Training";
 
 vi.mock("./Kamoku", () => ({
-  default: ({ dojoMode, onDojoModeChange }: { dojoMode?: boolean; onDojoModeChange: (enabled: boolean) => void }) => (
-    <div data-testid="weekly-plan" data-dojo-mode={String(dojoMode)}>
-      <input type="checkbox" aria-label="Dojo-läge" checked={dojoMode} onChange={event => onDojoModeChange(event.target.checked)} />
-    </div>
+  default: ({ dojoMode }: { dojoMode?: boolean }) => (
+    <div data-testid="weekly-plan" data-dojo-mode={String(dojoMode)} />
   ),
 }));
 
@@ -27,23 +25,24 @@ const LocationProbe = () => {
   </>;
 };
 
-const renderTraining = (initialEntry = "/kamoku", includeStartEntry = false) => render(
+const renderTraining = (initialEntry = "/kamoku", includeStartEntry = false, dojoMode = false) => render(
   <MemoryRouter
     initialEntries={includeStartEntry ? ["/", initialEntry] : [initialEntry]}
     initialIndex={includeStartEntry ? 1 : 0}
   >
-    <Training myGrade="6 kyū" allGradePlans={[]} notesData={null!} ranksData={null!} />
+    <Training myGrade="6 kyū" allGradePlans={[]} notesData={null!} ranksData={null!} dojoMode={dojoMode} />
     <LocationProbe />
   </MemoryRouter>,
 );
 
 describe("Training", () => {
-  it("opens with only weekly and free-practice choices", () => {
+  it("opens with weekly, free-practice, and grading choices", () => {
     renderTraining();
 
     expect(screen.getByRole("heading", { name: "Träning" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Veckans träning/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Fri träning/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Gradering/i })).toBeTruthy();
     expect(screen.queryByText("Alla tekniker")).toBeNull();
     expect(screen.queryByTestId("weekly-plan")).toBeNull();
   });
@@ -109,12 +108,11 @@ describe("Training", () => {
     expect(screen.queryByText("Alla tekniker")).toBeNull();
   });
 
-  it("keeps dojo mode enabled while moving from weekly to free practice", async () => {
+  it("keeps the global training mode while moving from weekly to free practice", async () => {
     const user = userEvent.setup();
-    renderTraining();
+    renderTraining("/kamoku", false, true);
 
     await user.click(screen.getByRole("button", { name: /Veckans träning/i }));
-    await user.click(screen.getByRole("checkbox", { name: "Dojo-läge" }));
     expect(screen.getByTestId("weekly-plan").getAttribute("data-dojo-mode")).toBe("true");
 
     await user.click(screen.getByRole("button", { name: "Träningsval" }));

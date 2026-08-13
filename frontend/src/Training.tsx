@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
-import { ArrowLeft, Book, Collection } from "react-bootstrap-icons";
+import { ArrowLeft, Award, Book, Collection } from "react-bootstrap-icons";
 import Kamoku from "./Kamoku";
 import FreePractice from "./FreePractice";
 import { isPracticeArea, type PracticeArea } from "./practice-area";
@@ -15,6 +15,7 @@ interface Props {
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
+    dojoMode?: boolean;
 }
 
 type TrainingView = "landing" | "plan" | "free";
@@ -23,7 +24,7 @@ const Training = (props: Props) => {
     const translator = useContext(TranslatorContext);
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [dojoMode, setDojoMode] = useState(false);
+    const dojoMode = props.dojoMode ?? false;
     const requestedView = searchParams.get("view");
     const isLegacyAllHokei = requestedView === "all";
     const view: TrainingView = requestedView === "plan"
@@ -90,6 +91,13 @@ const Training = (props: Props) => {
             icon: <Collection />,
             onSelect: () => selectView("free"),
         },
+        {
+            key: "grading",
+            title: translator.translate("Gradering"),
+            subtitle: translator.translate("Se krav inför nästa gradering."),
+            icon: <Award />,
+            onSelect: () => navigate("/training/grading"),
+        },
     ];
 
     return (
@@ -116,7 +124,7 @@ const Training = (props: Props) => {
             <main className="training-view-content" hidden={view === "landing"}>
                 {visitedViews.has("plan") && (
                     <div hidden={view !== "plan"}>
-                        <Kamoku {...props} dojoMode={dojoMode} onDojoModeChange={setDojoMode} />
+                        <Kamoku {...props} dojoMode={dojoMode} />
                     </div>
                 )}
                 {visitedViews.has("free") && (
@@ -127,11 +135,25 @@ const Training = (props: Props) => {
                             onAreaChange={selectPracticeArea}
                             onBack={() => navigate(-1)}
                             dojoMode={dojoMode}
-                            onDojoModeChange={setDojoMode}
                         />
                     </div>
                 )}
             </main>
+        </div>
+    );
+};
+
+export const TrainingToolPage = ({ children }: { children: ReactNode }) => {
+    const translator = useContext(TranslatorContext);
+    const navigate = useNavigate();
+
+    return (
+        <div className="training-page">
+            <button type="button" className="training-back" onClick={() => navigate(-1)}>
+                <ArrowLeft aria-hidden="true" />
+                <span>{translator.translate("Träning")}</span>
+            </button>
+            {children}
         </div>
     );
 };
