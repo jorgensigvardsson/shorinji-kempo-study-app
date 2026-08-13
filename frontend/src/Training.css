@@ -91,20 +91,10 @@
   max-width: 32rem;
 }
 
-.training-list-dojo-toggle {
-  margin-top: 0.35rem;
-  color: var(--bs-secondary-color);
-  white-space: nowrap;
-}
-
 @media (max-width: 35rem) {
   .training-list-controls {
     grid-template-columns: 1fr;
     gap: 1rem;
-  }
-
-  .training-list-dojo-toggle {
-    margin-top: 0;
   }
 }
 

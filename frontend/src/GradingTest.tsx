@@ -1,11 +1,11 @@
 import { useContext, useMemo, useState } from "react";
-import { Badge, Button, Form } from "react-bootstrap";
+import { Badge, Button } from "react-bootstrap";
 import { XLg } from "react-bootstrap-icons";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext, type Translator } from "./i18n";
 import { useShowKanji } from "./hooks";
-import { humanGradeName, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
+import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
@@ -23,6 +23,8 @@ interface GradingTestProps {
     allGradePlans: GradePlan[];
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
+    subject: "theory" | "technical";
+    dojoMode?: boolean;
 }
 
 interface Term {
@@ -160,16 +162,12 @@ function hasExpandableContent(item: Item): boolean {
     return !!(item.annotations?.length || item.techniqueGroups?.length || item.items?.length);
 }
 
-const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTestProps) => {
+const GradingTest = ({ grade, allGradePlans, notesData, ranksData, subject, dojoMode = false }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
-
-    const availableGrades = allGradePlans.filter(plan => allGrades[plan.grade] !== undefined);
-    const defaultGrade = grade && allGrades[grade] !== undefined ? grade : availableGrades[0]?.grade;
-
-    const [selectedGrade, setSelectedGrade] = useState<GradeName | undefined>(defaultGrade);
-    const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null);
-    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+    const showKanji = useShowKanji() && !dojoMode;
+    const selectedGrade = grade && allGrades[grade] !== undefined ? grade : undefined;
+    const [selection, setSelection] = useState<{ grade: GradeName; sectionIndex: number; item: Item } | null>(null);
+    const activeSelection = selection?.grade === selectedGrade ? selection : null;
 
     const hokeiMap = useMemo(() => {
         const map = new Map<string, HokeiMoment>();
@@ -182,13 +180,6 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTest
         return map;
     }, [allGradePlans, selectedGrade]);
 
-    const gradeLabel = (name: GradeName): string => {
-        const humanName = humanGradeName(name);
-        if (!translator.isJapanese)
-            return `${translator.translate(humanName, { capitalize: true })} (${translator.japanese(humanName)})`;
-        return translator.japanese(humanName);
-    };
-
     const manual = selectedGrade ? allGrades[selectedGrade] : undefined;
     if (!manual) {
         return (
@@ -198,61 +189,53 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTest
         );
     }
 
-    const closeItem = () => { setSelectedSectionIndex(null); setSelectedItem(null); };
+    const subjectTerm = subject === "theory" ? "gakka kamoku" : "gijutsu kamoku";
+    const sections = manual.sections
+        .map((section, sectionIndex) => ({ section, sectionIndex }))
+        .filter(({ section }) => section.term?.romaji === subjectTerm);
+
+    const closeItem = () => setSelection(null);
 
     return (
-        <div className="grading-test-page">
-                <Form.Select
-                    className="mb-3"
-                    value={selectedGrade}
-                    onChange={e => {
-                        setSelectedGrade(e.target.value as GradeName);
-                        setSelectedSectionIndex(null);
-                        setSelectedItem(null);
-                    }}
-                >
-                    {availableGrades.map(plan => (
-                        <option key={plan.grade} value={plan.grade}>
-                            {gradeLabel(plan.grade)}
-                        </option>
-                    ))}
-                </Form.Select>
+        <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
                 <h2>{translator.translate(manual.title)}</h2>
                 {manual.term && !translator.isJapanese && <div className="text-muted small mb-3">{sentenceCase(manual.term.romaji)}</div>}
 
-                {selectedItem !== null && selectedSectionIndex !== null ? (
+                {activeSelection !== null ? (
                     <div className="grading-section-body grading-detail-enter">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 <h3 className="mb-0">
-                                    {sentenceCase(translator.translate(manual.sections[selectedSectionIndex].title))}
+                                    {sentenceCase(translator.translate(manual.sections[activeSelection.sectionIndex].title))}
                                 </h3>
-                                {!translator.isJapanese && manual.sections[selectedSectionIndex].term?.romaji && (
-                                    <div className="text-muted small">{sentenceCase(manual.sections[selectedSectionIndex].term!.romaji)}</div>
+                                {!translator.isJapanese && manual.sections[activeSelection.sectionIndex].term?.romaji && (
+                                    <div className="text-muted small">{sentenceCase(manual.sections[activeSelection.sectionIndex].term!.romaji)}</div>
                                 )}
                             </div>
                             <Button variant="link" size="sm" onClick={closeItem} aria-label="Stäng" className="text-body p-0">
                                 <XLg size={14} />
                             </Button>
                         </div>
-                        <ItemDetail item={selectedItem} translator={translator} showKanji={showKanji} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
+                        <ItemDetail item={activeSelection.item} translator={translator} showKanji={showKanji} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} />
                     </div>
                 ) : (
-                    manual.sections.map((section, si) => {
+                    sections.map(({ section, sectionIndex }) => {
                         const gridItems: GridItem[] = section.items.map((item, i) => {
                             const display = itemDisplay(item, translator, showKanji);
                             const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
                             const subtitle = subtitleParts.length > 0 ? sentenceCase(subtitleParts.join(" · ")) : undefined;
                             return {
-                                key: `item-${si}-${i}`,
+                                key: `item-${sectionIndex}-${i}`,
                                 title: sentenceCase(display.primary),
                                 subtitle,
                                 badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
-                                onSelect: hasExpandableContent(item) ? () => { setSelectedSectionIndex(si); setSelectedItem(item); } : undefined,
+                                onSelect: hasExpandableContent(item) && selectedGrade
+                                    ? () => setSelection({ grade: selectedGrade, sectionIndex, item })
+                                    : undefined,
                             };
                         });
                         return (
-                            <div key={`section-${si}`} className={si > 0 ? "mt-4" : ""}>
+                            <div key={`section-${sectionIndex}`}>
                                 <div className="d-flex justify-content-between align-items-center mb-2">
                                     <div>
                                         <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
@@ -273,7 +256,7 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData }: GradingTest
 };
 
 
-const ItemDetail = ({ item, translator, showKanji, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; notesData: HokeiNotes; ranksData: HokeiRanks }) => {
+const ItemDetail = ({ item, translator, showKanji, hokeiMap, notesData, ranksData, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; notesData: HokeiNotes; ranksData: HokeiRanks; dojoMode: boolean }) => {
     const display = itemDisplay(item, translator, showKanji);
 
     return (
@@ -293,7 +276,7 @@ const ItemDetail = ({ item, translator, showKanji, hokeiMap, notesData, ranksDat
             ))}
             <div className="d-flex flex-column gap-2">
                 {item.items?.map((subItem, i) => (
-                    <SubItemCard key={i} item={subItem} translator={translator} showKanji={showKanji} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} />
+                    <SubItemCard key={i} item={subItem} translator={translator} showKanji={showKanji} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} />
                 ))}
             </div>
             {item.videos && item.videos.length > 0 && (
@@ -317,7 +300,7 @@ function extractHokeis(romaji: string, hokeiMap: Map<string, HokeiMoment>): Hoke
         .filter((h): h is HokeiMoment => !!h);
 }
 
-const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiCards, hokeiMap, notesData, ranksData }: { item: Item; translator: Translator; showKanji: boolean; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; notesData?: HokeiNotes; ranksData?: HokeiRanks }) => {
+const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiCards, hokeiMap, notesData, ranksData, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; notesData?: HokeiNotes; ranksData?: HokeiRanks; dojoMode: boolean }) => {
     const display = itemDisplay(item, translator, showKanji);
     const hokeis = showHokeiCards && hokeiMap && item.term?.romaji
         ? extractHokeis(item.term.romaji, hokeiMap)
@@ -364,7 +347,7 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
             {hokeis.length > 0 && (
                 <div className="d-flex flex-column gap-2 mt-2">
                     {hokeis.map(h => (
-                        <HokeiCard key={h.hokei_name} hokei={h} compact notesData={notesData} ranksData={ranksData} />
+                        <HokeiCard key={h.hokei_name} hokei={h} compact notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} />
                     ))}
                 </div>
             )}

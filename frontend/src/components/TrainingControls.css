@@ -1,0 +1,129 @@
+.training-controls-layer {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  left: 1rem;
+  z-index: 1035;
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.training-controls {
+  display: flex;
+  max-width: 100%;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.training-controls.is-expanded {
+  max-width: min(100%, 27rem);
+}
+
+.training-controls-trigger {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border-radius: 50%;
+  box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.2);
+}
+
+.training-controls-trigger.btn-outline-secondary {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+}
+
+.training-controls-trigger.btn-outline-secondary:hover,
+.training-controls-trigger.btn-outline-secondary:focus-visible {
+  color: var(--bs-emphasis-color);
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--bs-secondary-color);
+}
+
+.training-controls-trigger.btn-outline-warning {
+  color: var(--bs-warning-text-emphasis);
+  background-color: var(--bs-warning-bg-subtle);
+  border-color: var(--bs-warning-border-subtle);
+}
+
+.training-controls-trigger.btn-outline-warning:hover,
+.training-controls-trigger.btn-outline-warning:focus-visible {
+  color: var(--bs-warning-text-emphasis);
+  background-color: color-mix(in srgb, var(--bs-warning-bg-subtle) 88%, var(--bs-warning) 12%);
+  border-color: var(--bs-warning);
+}
+
+.training-controls-panel {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 2.6rem;
+  min-width: 0;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  background: var(--bs-body-bg);
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.2);
+}
+
+.training-controls-grade {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.training-controls-grade .form-label {
+  margin: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.training-controls-grade .form-select {
+  width: auto;
+  min-width: 7rem;
+}
+
+.training-controls-mode {
+  margin: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 30rem) {
+  .training-controls {
+    align-items: flex-end;
+  }
+
+  .training-controls-panel {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+  }
+
+  .training-controls-grade {
+    min-width: 0;
+  }
+
+  .training-controls-grade .form-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .training-controls-grade .form-select {
+    max-width: 100%;
+    min-width: 6.5rem;
+  }
+}

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GradePlan, HokeiMoment } from "./data";
@@ -38,15 +38,15 @@ beforeEach(() => {
 });
 
 describe("Kamoku weekly plan", () => {
-  it("shows the selected grade in the controls but does not repeat it on every technique card", () => {
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} onDojoModeChange={() => undefined} />);
+  it("uses the selected global grade without repeating it on every technique card", () => {
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />);
 
-    expect((screen.getByRole("combobox", { name: "Grad" }) as HTMLSelectElement).value).toBe("6 kyū");
+    expect(screen.queryByRole("combobox", { name: "Grad" })).toBeNull();
     expect(screen.getByTestId("weekly-hokei").getAttribute("data-grade")).toBe("");
   });
 
   it("presents the weekly focus openly above the technique cards", () => {
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} onDojoModeChange={() => undefined} />);
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />);
 
     expect(screen.getByRole("heading", { name: "Veckoplan" })).toBeTruthy();
     expect(screen.getByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeTruthy();
@@ -78,7 +78,7 @@ describe("Kamoku weekly plan", () => {
       }],
     };
 
-    render(<Kamoku myGrade="5 kyū" allGradePlans={[mixedPlan]} notesData={null!} ranksData={null!} onDojoModeChange={() => undefined} />);
+    render(<Kamoku myGrade="5 kyū" allGradePlans={[mixedPlan]} notesData={null!} ranksData={null!} />);
 
     expect(screen.getByText(/Randori i jūhō med fokus på nuki waza från seitai gamae/)).toBeTruthy();
     expect(screen.getByText("Randori · jūhō — nuki waza från seitai gamae · Embu · Repetition")).toBeTruthy();
@@ -96,7 +96,7 @@ describe("Kamoku weekly plan", () => {
       }],
     };
 
-    render(<Kamoku myGrade="nidan" allGradePlans={[reviewPlan]} notesData={null!} ranksData={null!} onDojoModeChange={() => undefined} />);
+    render(<Kamoku myGrade="nidan" allGradePlans={[reviewPlan]} notesData={null!} ranksData={null!} />);
 
     expect(screen.getByText("En vecka för att samla ihop det du arbetat med: repetition, studier och förberedelse inför gradering.")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Veckans fokus" })).toBeTruthy();
@@ -121,26 +121,22 @@ describe("Kamoku weekly plan", () => {
     }
   });
 
-  it("groups grade and dojo mode above the week navigation", () => {
-    const onDojoModeChange = vi.fn();
+  it("leaves grade and training mode to the global control", () => {
     const { container } = render(
-      <Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} onDojoModeChange={onDojoModeChange} />,
+      <Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />,
     );
 
     const controls = container.querySelector(".kamoku-controls");
-    const primaryControls = controls?.querySelector(".kamoku-primary-controls");
-    expect(primaryControls?.querySelector("#kamoku-grade-select")).not.toBeNull();
-    expect(primaryControls?.querySelector("#dojo-mode")).not.toBeNull();
+    expect(controls?.querySelector("#kamoku-grade-select")).toBeNull();
+    expect(controls?.querySelector("#dojo-mode")).toBeNull();
     expect(controls?.querySelector(".kamoku-week-navigation")).not.toBeNull();
     expect(screen.getByText("Vecka 1")).toBeTruthy();
     expect(screen.getByText("av 1")).toBeTruthy();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Dojo-läge" }));
-    expect(onDojoModeChange).toHaveBeenCalledWith(true);
   });
 
   it("marks a grade week as practised and opens a stable editable completion panel", async () => {
     const user = userEvent.setup();
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} onDojoModeChange={() => undefined} />);
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />);
 
     await user.click(screen.getByRole("button", { name: "Markera som tränad" }));
 

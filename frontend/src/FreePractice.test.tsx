@@ -29,20 +29,25 @@ const renderPractice = (ui: ReactNode) => render(
 
 const FreePracticeHarness = () => {
   const [activeArea, setActiveArea] = useState<PracticeArea | null>(null);
+  const [myGrade, setMyGrade] = useState<"1 kyū" | "2 kyū">("2 kyū");
   const [dojoMode, setDojoMode] = useState(false);
 
   return (
-    <FreePractice
-      myGrade="2 kyū"
-      allGradePlans={plans}
-      notesData={null!}
-      ranksData={null!}
-      activeArea={activeArea}
-      onAreaChange={setActiveArea}
-      onBack={() => setActiveArea(null)}
-      dojoMode={dojoMode}
-      onDojoModeChange={setDojoMode}
-    />
+    <>
+      <button type="button" onClick={() => setMyGrade("1 kyū")}>Testa global grad 1 kyū</button>
+      <button type="button" onClick={() => setDojoMode(current => !current)}>Testa globalt träningsläge</button>
+      <output data-testid="global-state">{myGrade}|{String(dojoMode)}</output>
+      <FreePractice
+        myGrade={myGrade}
+        allGradePlans={plans}
+        notesData={null!}
+        ranksData={null!}
+        activeArea={activeArea}
+        onAreaChange={setActiveArea}
+        onBack={() => setActiveArea(null)}
+        dojoMode={dojoMode}
+      />
+    </>
   );
 };
 
@@ -94,7 +99,6 @@ const RandoriHarness = () => (
     onAreaChange={() => undefined}
     onBack={() => undefined}
     dojoMode={false}
-    onDojoModeChange={() => undefined}
   />
 );
 
@@ -138,7 +142,6 @@ const EmbuHarness = () => (
     onAreaChange={() => undefined}
     onBack={() => undefined}
     dojoMode={false}
-    onDojoModeChange={() => undefined}
   />
 );
 
@@ -182,7 +185,6 @@ const KumiEmbuLinkHarness = () => (
     onAreaChange={() => undefined}
     onBack={() => undefined}
     dojoMode={false}
-    onDojoModeChange={() => undefined}
   />
 );
 
@@ -224,7 +226,7 @@ describe("FreePractice", () => {
     expect(screen.queryByText(/^Från (?:\d+ kyū|Shodan|Nidan|Sandan|Yondan|Godan)$/)).toBeNull();
     expect(screen.getAllByText("6 kyū").length).toBeGreaterThan(0);
 
-    await user.selectOptions(screen.getByRole("combobox", { name: "Visa tekniker upp till grad" }), "1 kyū");
+    await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
     expect(screen.getByText("harai uke geri")).toBeTruthy();
     expect(screen.getByText("ren geri")).toBeTruthy();
   });
@@ -323,27 +325,27 @@ describe("FreePractice", () => {
     await user.keyboard("{Escape}");
   });
 
-  it("returns to all areas in one action and remembers area state for the session", async () => {
+  it("returns to all areas and keeps global grade and training mode for the session", async () => {
     vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     const user = userEvent.setup();
     renderPractice(<FreePracticeHarness />);
 
     await user.click(screen.getByRole("button", { name: /Embu och kumi-embu/i }));
-    const gradeSelect = screen.getByRole("combobox", { name: "Grad" }) as HTMLSelectElement;
-    await user.selectOptions(gradeSelect, "1 kyū");
-    await user.click(screen.getByRole("checkbox", { name: "Dojo-läge" }));
+    await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Testa globalt träningsläge" }));
 
     await user.click(screen.getByRole("button", { name: "Alla träningsområden" }));
     expect(screen.getByRole("heading", { name: "Fri träning" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /Kihon/i }));
-    expect((screen.getByRole("checkbox", { name: "Dojo-läge" }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByTestId("global-state").textContent).toBe("1 kyū|true");
+    expect(screen.getByText("harai uke geri")).toBeTruthy();
     expect(screen.getByText("Den här sidan är fortfarande under utformning och kan ändras när som helst.")).toBeTruthy();
     expect(screen.queryByText("Från 6 kyū")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Alla träningsområden" }));
 
     await user.click(screen.getByRole("button", { name: /Embu och kumi-embu/i }));
-    expect((screen.getByRole("combobox", { name: "Grad" }) as HTMLSelectElement).value).toBe("1 kyū");
-    expect((screen.getByRole("checkbox", { name: "Dojo-läge" }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByTestId("global-state").textContent).toBe("1 kyū|true");
+    expect(screen.queryByRole("combobox", { name: "Grad" })).toBeNull();
   });
 });

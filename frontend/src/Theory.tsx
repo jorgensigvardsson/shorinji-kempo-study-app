@@ -1,5 +1,5 @@
 import { useContext, type ReactNode } from "react";
-import { ArrowLeft, CardHeading, JournalText, QuestionSquare } from "react-bootstrap-icons";
+import { ArrowLeft, Award, CardHeading, Collection, JournalText, QuestionSquare } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
@@ -13,6 +13,20 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
     const translator = useContext(TranslatorContext);
     const navigate = useNavigate();
     const items: GridItem[] = [
+        {
+            key: "technique-groups",
+            title: translator.translate("Teknikgrupper"),
+            subtitle: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
+            icon: <Collection />,
+            onSelect: () => navigate("/theory/groups"),
+        },
+        {
+            key: "grading",
+            title: translator.translate("Gradering"),
+            subtitle: translator.translate("Se krav inför nästa gradering."),
+            icon: <Award />,
+            onSelect: () => navigate("/theory/grading"),
+        },
         ...(showLanguageTools ? [{
             key: "word-list",
             title: translator.translate("Ordlista"),

@@ -15,8 +15,6 @@ interface Props {
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
     dojoMode?: boolean;
-    onDojoModeChange: (enabled: boolean) => void;
-    showDojoToggle?: boolean;
 }
 
 type Selection = "all" | "own" | "up-to-own" | GradeName;
@@ -24,7 +22,7 @@ type Selection = "all" | "own" | "up-to-own" | GradeName;
 const selectionData = load<string>("hokeiListSelection", "own");
 
 const List = (props: Props) => {
-    const { grade, allGradePlans, notesData, ranksData, dojoMode = false, onDojoModeChange, showDojoToggle = true } = props;
+    const { grade, allGradePlans, notesData, ranksData, dojoMode = false } = props;
     const [selection, setSelection] = useState<Selection>((selectionData.data ?? "own") as Selection);
     const [filterText, setFilterText] = useState<string>("");
     const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
@@ -63,7 +61,7 @@ const List = (props: Props) => {
 
     return (
         <>
-            <div className={`training-list-controls training-view-controls mb-4${showDojoToggle ? "" : " is-single"}`}>
+            <div className="training-list-controls training-view-controls mb-4 is-single">
                 <div className="training-list-filters">
                     <Form.Select value={selection} onChange={e => {
                         const newSelection = e.target.value as Selection;
@@ -89,14 +87,6 @@ const List = (props: Props) => {
                     <Form.Control placeholder={translator.translate("Sök...")} className="mt-3"
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />
                 </div>
-                {showDojoToggle && <Form.Check
-                    className="training-list-dojo-toggle"
-                    type="switch"
-                    id="dojo-mode"
-                    label={translator.translate("Dojo-läge")}
-                    checked={dojoMode}
-                    onChange={event => onDojoModeChange(event.target.checked)}
-                />}
             </div>
             {renderHokeis(filteredHokeis, notesData, ranksData, dojoMode)}
         </>
