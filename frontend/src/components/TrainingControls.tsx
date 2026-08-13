@@ -5,6 +5,8 @@ import { useLocation } from "react-router-dom";
 import type { GradeName, GradePlan } from "../data";
 import { noTranslate, TranslatorContext } from "../i18n";
 import { gradeLabel } from "../strings";
+import FontPicker from "./FontPicker";
+import type { FontFilter } from "../google-fonts";
 import "./TrainingControls.css";
 
 const TRAINING_MODE_INTRO_KEY = "training-mode-intro-seen";
@@ -17,6 +19,12 @@ interface Props {
     showTrainingMode: boolean;
     trainingMode: boolean;
     onTrainingModeChange: (active: boolean) => void;
+    // Experimental font picker (see src/google-fonts.ts's isFontPickerEnabled);
+    // undefined hides it. Kept as one prop so removing the feature later is a
+    // single deletion here plus whatever passes it in from App.tsx. filter/
+    // onFilterChange live here (not as FontPicker's own state) because this
+    // panel unmounts on every route change, which would otherwise reset them.
+    fontPicker?: { value: string; onChange: (family: string) => void; filter: FontFilter; onFilterChange: (filter: FontFilter) => void };
 }
 
 const TrainingControls = ({
@@ -27,6 +35,7 @@ const TrainingControls = ({
     showTrainingMode,
     trainingMode,
     onTrainingModeChange,
+    fontPicker,
 }: Props) => {
     const translator = useContext(TranslatorContext);
     const location = useLocation();
@@ -56,7 +65,7 @@ const TrainingControls = ({
         };
     }, [expanded]);
 
-    if (!showGrade && !showTrainingMode) return null;
+    if (!showGrade && !showTrainingMode && !fontPicker) return null;
 
     const dismissIntro = () => {
         localStorage.setItem(TRAINING_MODE_INTRO_KEY, "true");
@@ -105,6 +114,17 @@ const TrainingControls = ({
                                     checked={trainingMode}
                                     onChange={event => onTrainingModeChange(event.target.checked)}
                                 />
+                            )}
+                            {fontPicker && (
+                                <Form.Group className="training-controls-font" controlId="global-font-family">
+                                    <Form.Label>{noTranslate("Font")}</Form.Label>
+                                    <FontPicker
+                                        value={fontPicker.value}
+                                        onChange={fontPicker.onChange}
+                                        filter={fontPicker.filter}
+                                        onFilterChange={fontPicker.onFilterChange}
+                                    />
+                                </Form.Group>
                             )}
                         </div>
                     )}

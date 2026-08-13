@@ -17,6 +17,7 @@ import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
+import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -25,6 +26,7 @@ interface Props {
   languageData: Data<Language>;
   notesData: HokeiNotes;
   ranksData: HokeiRanks;
+  fontFamilyData: Data<string>;
 }
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
@@ -95,9 +97,13 @@ function useAppUpdate(autoApply: boolean) {
 }
 
 function App(props: Props) {
-  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData } = props;
+  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData, fontFamilyData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
+  const [ fontFamily, setFontFamily ] = useState<string>(fontFamilyData.data);
+  // Session-only (not persisted): just needs to survive the toolbar's own
+  // auto-collapse-on-navigate behavior, not a page reload.
+  const [ fontFilter, setFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "" });
   const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const [ displayGrade, setDisplayGrade ] = useState<GradeName>(gradeData.data);
   const translations = useContext(TranslationsContext);
@@ -144,6 +150,10 @@ function App(props: Props) {
     setDisplayGrade(g);
   }), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
+  useEffect(() => fontFamilyData.registerListener(f => setFontFamily(f)), [fontFamilyData]);
+  // Re-applies on every mount too, so a previously-chosen font survives a reload
+  // (the <link> tag and :root overrides don't persist across page loads on their own).
+  useEffect(() => applyFontFamily(fontFamily || null), [fontFamily]);
 
   // An account is required: everything below the login screen assumes a signed-in
   // user, so the provider doubles as the gate. Signing out (or a session that
@@ -217,7 +227,7 @@ function App(props: Props) {
         <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none" />
         <div className="app-route-content" style={{
           '--floating-stack-reserve': `${floatingReserve}px`,
-          '--training-controls-reserve': controlContext.showGrade || controlContext.showTrainingMode ? '4.75rem' : '0px',
+          '--training-controls-reserve': controlContext.showGrade || controlContext.showTrainingMode || isFontPickerEnabled ? '4.75rem' : '0px',
         } as CSSProperties}>
           {renderRoutes(routes)}
           <Outlet />
@@ -236,6 +246,9 @@ function App(props: Props) {
           showTrainingMode={controlContext.showTrainingMode}
           trainingMode={trainingMode}
           onTrainingModeChange={setTrainingMode}
+          fontPicker={isFontPickerEnabled
+            ? { value: fontFamily, onChange: f => fontFamilyData.save(f), filter: fontFilter, onFilterChange: setFontFilter }
+            : undefined}
         />
         <SelectionWordLookup />
       </div>

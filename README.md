@@ -56,6 +56,48 @@ With no SMTP relay configured the auth service logs the code to stdout instead o
 Pointing the dev server at the staging or production backend instead is not an option: their
 CORS allowed origin is an exact match against `FRONTEND_URL`, so `localhost:5173` is rejected.
 
+### Experimental font picker
+
+Active with `VITE_DEBUG=true` locally, or automatically on staging (`VITE_ENVIRONMENT=staging`)
+so it can be tried without a local build — see `isFontPickerEnabled` in
+`frontend/src/google-fonts.ts`, the single flag every integration point checks. It never
+activates in production. When active, a font picker appears in the floating toolbar
+(bottom-left, normally only shown on grading/training-mode pages) that swaps the app's
+global font live, per-device — useful for trying candidates without a rebuild. It filters a
+bundled snapshot of Google Fonts metadata (`frontend/src/assets/google-fonts.json`) by name,
+category, and language, the same way fonts.google.com's own filters work, and loads the
+chosen font from Google Fonts' key-free CSS endpoint. The choice is stored in plain
+`localStorage`, not synced to the backend.
+
+The snapshot is static and only needs regenerating occasionally (font families rarely
+change). To refresh it:
+
+```bash
+GOOGLE_FONTS_API_KEY=<key> npm run fonts:fetch   # from frontend/
+```
+
+Get a free key from [Google Cloud Console](https://console.cloud.google.com) (enable the
+Fonts Developer API). The key is only used locally to regenerate the JSON file — it's never
+written to disk, committed, or shipped in the app; loading a chosen font at runtime uses
+Google's public, key-free stylesheet endpoint.
+
+**This is temporary** — once one font is chosen, delete it:
+- Delete `frontend/src/google-fonts.ts` (+ `.test.ts`), `frontend/src/components/FontPicker.tsx`
+  (+ `.test.tsx`), `frontend/src/persistence/font-family.ts`,
+  `frontend/src/assets/google-fonts.json`, and `frontend/scripts/fetch-google-fonts.ts`.
+- Remove the `fonts:fetch` line from `frontend/package.json` scripts.
+- In `frontend/src/components/TrainingControls.tsx`/`.css`: remove the `fontPicker` prop, the
+  `FontPicker` import, the `{fontPicker && (...)}` block, and the `.training-controls-font`/
+  `.font-picker*` CSS rules.
+- In `frontend/src/App.tsx`: remove the `fontFamilyData` prop/state/effects, the `fontFilter`
+  state, the `applyFontFamily`/`isFontPickerEnabled` import and usage, and drop
+  `isFontPickerEnabled` from the `--training-controls-reserve` calculation.
+- In `frontend/src/main.tsx`: remove the `fontFamilyData` load and prop.
+- Delete this README section.
+- Hardcode the chosen font: set `$font-family-base`/`$font-family-sans-serif` in
+  `frontend/src/styles/bootstrap-theme.scss` (or add an `@font-face`/Google Fonts `<link>` if
+  it's a web font) rather than relying on any of the above.
+
 ## Translation workflow
 
 To send a language section to an external translator who doesn't use git:

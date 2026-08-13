@@ -79,7 +79,8 @@
   gap: 0.45rem;
 }
 
-.training-controls-grade .form-label {
+.training-controls-grade .form-label,
+.training-controls-font .form-label {
   margin: 0;
   color: var(--bs-secondary-color);
   font-size: 0.8rem;
@@ -94,6 +95,32 @@
 .training-controls-mode {
   margin: 0;
   white-space: nowrap;
+}
+
+/* Experimental, VITE_DEBUG-only font picker (see src/components/FontPicker.tsx). */
+.training-controls-font {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.font-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 12rem;
+  max-width: 100%;
+}
+
+.font-picker-filters {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.font-picker-filters .form-select {
+  min-width: 0;
+  flex: 1 1 0;
 }
 
 @media (max-width: 30rem) {

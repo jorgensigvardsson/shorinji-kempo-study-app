@@ -12,7 +12,8 @@
     "test:watch": "vitest --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "translations:export": "tsx scripts/translations-export.ts",
-    "translations:import": "tsx scripts/translations-import.ts"
+    "translations:import": "tsx scripts/translations-import.ts",
+    "fonts:fetch": "tsx scripts/fetch-google-fonts.ts"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

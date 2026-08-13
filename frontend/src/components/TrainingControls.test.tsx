@@ -19,6 +19,7 @@ const renderControls = (overrides: Partial<React.ComponentProps<typeof TrainingC
     showTrainingMode: true,
     trainingMode: false,
     onTrainingModeChange: vi.fn(),
+    fontPicker: undefined,
     ...overrides,
   };
   render(<MemoryRouter><TrainingControls {...props} /></MemoryRouter>);
@@ -66,5 +67,49 @@ describe("TrainingControls", () => {
   it("stays hidden where neither control is relevant", () => {
     renderControls({ showGrade: false, showTrainingMode: false });
     expect(screen.queryByRole("button", { name: "Träningsverktyg" })).toBeNull();
+  });
+
+  it("shows the font picker on its own when no other control applies", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    renderControls({
+      showGrade: false,
+      showTrainingMode: false,
+      fontPicker: { value: "", onChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
+    });
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Font" }), "Roboto");
+
+    expect(onChange).toHaveBeenCalledWith("Roboto");
+  });
+
+  // The panel unmounts its contents whenever it collapses (including the
+  // auto-collapse that happens on every route change), so the filter state
+  // must come from a prop the caller keeps alive elsewhere, not from
+  // FontPicker's own state — otherwise it would reset on every navigation.
+  it("keeps showing the caller's filter state across a collapse/reopen cycle", async () => {
+    const user = userEvent.setup();
+    renderControls({
+      showGrade: false,
+      showTrainingMode: false,
+      fontPicker: {
+        value: "",
+        onChange: vi.fn(),
+        filter: { search: "robo", category: "", subset: "" },
+        onFilterChange: vi.fn(),
+      },
+    });
+
+    const trigger = screen.getByRole("button", { name: "Träningsverktyg" });
+    await user.click(trigger); // open
+    expect((screen.getByPlaceholderText("Search fonts…") as HTMLInputElement).value).toBe("robo");
+
+    await user.click(trigger); // collapse — unmounts the panel
+    expect(screen.queryByPlaceholderText("Search fonts…")).toBeNull();
+
+    await user.click(trigger); // reopen — remounts it
+    expect((screen.getByPlaceholderText("Search fonts…") as HTMLInputElement).value).toBe("robo");
   });
 });

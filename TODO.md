@@ -12,6 +12,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
 - [ ] Apply the calmer full-card layout to the All hokei section after comparing it in Kamoku
 - [ ] Allow users to fill in missing stance/action fields as personal overrides without modifying the canonical Kamokuhyo source data; include editing, clearing, persistence/sync, and a clear distinction between source content and personal additions
 - [ ] Collaboratively define calmer Shorinji Kempo theme colors and fonts before applying them across the app
+- [ ] Once a font is settled on (see the experimental font picker, VITE_DEBUG/staging only), remove it and hardcode the choice — full removal checklist in README.md's "Experimental font picker" section
 - [ ] Add an optional preferred name in Settings and store it in the synced backend app data; let the user edit or clear it, use it only for the start-page greeting `Gasshō, {name}`, and retain plain `Gasshō` when no name is set
 - [ ] Audit the app's global text-zoom layout on narrow screens; the current whole-page zoom can push the right edge of controls and cards beyond the viewport, including the Dojo-mode control in the weekly plan
 - [ ] Add an option to show all techniques up to the user’s next grade, while keeping the focused weekly-plan view
