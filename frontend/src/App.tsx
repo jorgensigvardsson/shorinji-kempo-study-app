@@ -26,7 +26,8 @@ interface Props {
   languageData: Data<Language>;
   notesData: HokeiNotes;
   ranksData: HokeiRanks;
-  fontFamilyData: Data<string>;
+  bodyFontFamilyData: Data<string>;
+  headingFontFamilyData: Data<string>;
 }
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
@@ -97,13 +98,15 @@ function useAppUpdate(autoApply: boolean) {
 }
 
 function App(props: Props) {
-  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData, fontFamilyData } = props;
+  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData, bodyFontFamilyData, headingFontFamilyData } = props;
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
-  const [ fontFamily, setFontFamily ] = useState<string>(fontFamilyData.data);
+  const [ bodyFontFamily, setBodyFontFamily ] = useState<string>(bodyFontFamilyData.data);
+  const [ headingFontFamily, setHeadingFontFamily ] = useState<string>(headingFontFamilyData.data);
   // Session-only (not persisted): just needs to survive the toolbar's own
   // auto-collapse-on-navigate behavior, not a page reload.
-  const [ fontFilter, setFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "" });
+  const [ bodyFontFilter, setBodyFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "" });
+  const [ headingFontFilter, setHeadingFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "" });
   const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
   const [ displayGrade, setDisplayGrade ] = useState<GradeName>(gradeData.data);
   const translations = useContext(TranslationsContext);
@@ -150,10 +153,12 @@ function App(props: Props) {
     setDisplayGrade(g);
   }), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
-  useEffect(() => fontFamilyData.registerListener(f => setFontFamily(f)), [fontFamilyData]);
+  useEffect(() => bodyFontFamilyData.registerListener(f => setBodyFontFamily(f)), [bodyFontFamilyData]);
+  useEffect(() => headingFontFamilyData.registerListener(f => setHeadingFontFamily(f)), [headingFontFamilyData]);
   // Re-applies on every mount too, so a previously-chosen font survives a reload
   // (the <link> tag and :root overrides don't persist across page loads on their own).
-  useEffect(() => applyFontFamily(fontFamily || null), [fontFamily]);
+  useEffect(() => applyFontFamily("body", bodyFontFamily || null), [bodyFontFamily]);
+  useEffect(() => applyFontFamily("heading", headingFontFamily || null), [headingFontFamily]);
 
   // An account is required: everything below the login screen assumes a signed-in
   // user, so the provider doubles as the gate. Signing out (or a session that
@@ -246,8 +251,11 @@ function App(props: Props) {
           showTrainingMode={controlContext.showTrainingMode}
           trainingMode={trainingMode}
           onTrainingModeChange={setTrainingMode}
-          fontPicker={isFontPickerEnabled
-            ? { value: fontFamily, onChange: f => fontFamilyData.save(f), filter: fontFilter, onFilterChange: setFontFilter }
+          bodyFontPicker={isFontPickerEnabled
+            ? { value: bodyFontFamily, onChange: f => bodyFontFamilyData.save(f), filter: bodyFontFilter, onFilterChange: setBodyFontFilter }
+            : undefined}
+          headingFontPicker={isFontPickerEnabled
+            ? { value: headingFontFamily, onChange: f => headingFontFamilyData.save(f), filter: headingFontFilter, onFilterChange: setHeadingFontFilter }
             : undefined}
         />
         <SelectionWordLookup />

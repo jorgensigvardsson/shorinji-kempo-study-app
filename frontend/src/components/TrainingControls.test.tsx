@@ -19,7 +19,8 @@ const renderControls = (overrides: Partial<React.ComponentProps<typeof TrainingC
     showTrainingMode: true,
     trainingMode: false,
     onTrainingModeChange: vi.fn(),
-    fontPicker: undefined,
+    bodyFontPicker: undefined,
+    headingFontPicker: undefined,
     ...overrides,
   };
   render(<MemoryRouter><TrainingControls {...props} /></MemoryRouter>);
@@ -69,20 +70,39 @@ describe("TrainingControls", () => {
     expect(screen.queryByRole("button", { name: "Träningsverktyg" })).toBeNull();
   });
 
-  it("shows the font picker on its own when no other control applies", async () => {
+  it("shows the body font picker on its own when no other control applies", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     renderControls({
       showGrade: false,
       showTrainingMode: false,
-      fontPicker: { value: "", onChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
+      bodyFontPicker: { value: "", onChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
     });
 
     expect(screen.queryByRole("dialog")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
-    await user.selectOptions(screen.getByRole("combobox", { name: "Font" }), "Roboto");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Body font" }), "Roboto");
 
     expect(onChange).toHaveBeenCalledWith("Roboto");
+  });
+
+  it("shows both font pickers together, independently", async () => {
+    const user = userEvent.setup();
+    const onBodyChange = vi.fn();
+    const onHeadingChange = vi.fn();
+    renderControls({
+      showGrade: false,
+      showTrainingMode: false,
+      bodyFontPicker: { value: "", onChange: onBodyChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
+      headingFontPicker: { value: "", onChange: onHeadingChange, filter: { search: "", category: "", subset: "" }, onFilterChange: vi.fn() },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Body font" }), "Roboto");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Heading font" }), "Playfair Display");
+
+    expect(onBodyChange).toHaveBeenCalledWith("Roboto");
+    expect(onHeadingChange).toHaveBeenCalledWith("Playfair Display");
   });
 
   // The panel unmounts its contents whenever it collapses (including the
@@ -94,7 +114,7 @@ describe("TrainingControls", () => {
     renderControls({
       showGrade: false,
       showTrainingMode: false,
-      fontPicker: {
+      bodyFontPicker: {
         value: "",
         onChange: vi.fn(),
         filter: { search: "robo", category: "", subset: "" },
@@ -104,12 +124,12 @@ describe("TrainingControls", () => {
 
     const trigger = screen.getByRole("button", { name: "Träningsverktyg" });
     await user.click(trigger); // open
-    expect((screen.getByPlaceholderText("Search fonts…") as HTMLInputElement).value).toBe("robo");
+    expect((screen.getByPlaceholderText("Search Body fonts…") as HTMLInputElement).value).toBe("robo");
 
     await user.click(trigger); // collapse — unmounts the panel
-    expect(screen.queryByPlaceholderText("Search fonts…")).toBeNull();
+    expect(screen.queryByPlaceholderText("Search Body fonts…")).toBeNull();
 
     await user.click(trigger); // reopen — remounts it
-    expect((screen.getByPlaceholderText("Search fonts…") as HTMLInputElement).value).toBe("robo");
+    expect((screen.getByPlaceholderText("Search Body fonts…") as HTMLInputElement).value).toBe("robo");
   });
 });

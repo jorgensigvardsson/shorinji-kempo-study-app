@@ -19,12 +19,19 @@ interface Props {
     showTrainingMode: boolean;
     trainingMode: boolean;
     onTrainingModeChange: (active: boolean) => void;
-    // Experimental font picker (see src/google-fonts.ts's isFontPickerEnabled);
-    // undefined hides it. Kept as one prop so removing the feature later is a
-    // single deletion here plus whatever passes it in from App.tsx. filter/
-    // onFilterChange live here (not as FontPicker's own state) because this
-    // panel unmounts on every route change, which would otherwise reset them.
-    fontPicker?: { value: string; onChange: (family: string) => void; filter: FontFilter; onFilterChange: (filter: FontFilter) => void };
+    // Experimental font pickers (see src/google-fonts.ts's isFontPickerEnabled),
+    // one for body text and one for headings -- undefined hides that one.
+    // filter/onFilterChange live here (not as FontPicker's own state) because
+    // this panel unmounts on every route change, which would otherwise reset them.
+    bodyFontPicker?: FontPickerProps;
+    headingFontPicker?: FontPickerProps;
+}
+
+interface FontPickerProps {
+    value: string;
+    onChange: (family: string) => void;
+    filter: FontFilter;
+    onFilterChange: (filter: FontFilter) => void;
 }
 
 const TrainingControls = ({
@@ -35,7 +42,8 @@ const TrainingControls = ({
     showTrainingMode,
     trainingMode,
     onTrainingModeChange,
-    fontPicker,
+    bodyFontPicker,
+    headingFontPicker,
 }: Props) => {
     const translator = useContext(TranslatorContext);
     const location = useLocation();
@@ -65,7 +73,7 @@ const TrainingControls = ({
         };
     }, [expanded]);
 
-    if (!showGrade && !showTrainingMode && !fontPicker) return null;
+    if (!showGrade && !showTrainingMode && !bodyFontPicker && !headingFontPicker) return null;
 
     const dismissIntro = () => {
         localStorage.setItem(TRAINING_MODE_INTRO_KEY, "true");
@@ -115,14 +123,27 @@ const TrainingControls = ({
                                     onChange={event => onTrainingModeChange(event.target.checked)}
                                 />
                             )}
-                            {fontPicker && (
-                                <Form.Group className="training-controls-font" controlId="global-font-family">
-                                    <Form.Label>{noTranslate("Font")}</Form.Label>
+                            {bodyFontPicker && (
+                                <Form.Group className="training-controls-font" controlId="global-font-family-body">
+                                    <Form.Label>{noTranslate("Body font")}</Form.Label>
                                     <FontPicker
-                                        value={fontPicker.value}
-                                        onChange={fontPicker.onChange}
-                                        filter={fontPicker.filter}
-                                        onFilterChange={fontPicker.onFilterChange}
+                                        label="Body"
+                                        value={bodyFontPicker.value}
+                                        onChange={bodyFontPicker.onChange}
+                                        filter={bodyFontPicker.filter}
+                                        onFilterChange={bodyFontPicker.onFilterChange}
+                                    />
+                                </Form.Group>
+                            )}
+                            {headingFontPicker && (
+                                <Form.Group className="training-controls-font" controlId="global-font-family-heading">
+                                    <Form.Label>{noTranslate("Heading font")}</Form.Label>
+                                    <FontPicker
+                                        label="Heading"
+                                        value={headingFontPicker.value}
+                                        onChange={headingFontPicker.onChange}
+                                        filter={headingFontPicker.filter}
+                                        onFilterChange={headingFontPicker.onFilterChange}
                                     />
                                 </Form.Group>
                             )}

@@ -4,6 +4,11 @@ import { noTranslate } from "../i18n";
 import { allGoogleFonts, filterGoogleFonts, type FontCategory, type FontFilter } from "../google-fonts";
 
 interface Props {
+    // Distinguishes this picker's controls (e.g. "Body"/"Heading") when more
+    // than one is rendered at once -- otherwise every instance would share
+    // the same aria-labels, which is both an accessibility bug and makes
+    // them impossible to tell apart in tests.
+    label: string;
     value: string;
     onChange: (family: string) => void;
     // Filter state is a controlled prop, not local state: TrainingControls
@@ -30,7 +35,7 @@ const subsets = [...new Set(allGoogleFonts.flatMap(font => font.subsets))].sort(
 // own filters work (name search, category, language), and feeds a plain
 // <select> with the matches. Developer-only tooling, so labels are
 // deliberately unlocalized (noTranslate) rather than added to translations.json.
-const FontPicker = ({ value, onChange, filter, onFilterChange }: Props) => {
+const FontPicker = ({ label, value, onChange, filter, onFilterChange }: Props) => {
     const filtered = useMemo(
         () => filterGoogleFonts(allGoogleFonts, filter),
         [filter],
@@ -41,19 +46,19 @@ const FontPicker = ({ value, onChange, filter, onFilterChange }: Props) => {
             <Form.Control
                 size="sm"
                 type="text"
-                placeholder={noTranslate("Search fonts…")}
-                aria-label={noTranslate("Search fonts")}
+                placeholder={noTranslate(`Search ${label} fonts…`)}
+                aria-label={noTranslate(`Search ${label} fonts`)}
                 value={filter.search}
                 onChange={event => onFilterChange({ ...filter, search: event.target.value })}
             />
             <div className="font-picker-filters">
-                <Form.Select size="sm" aria-label={noTranslate("Category")} value={filter.category} onChange={event => onFilterChange({ ...filter, category: event.target.value })}>
+                <Form.Select size="sm" aria-label={noTranslate(`${label} category`)} value={filter.category} onChange={event => onFilterChange({ ...filter, category: event.target.value })}>
                     <option value="">{noTranslate("All categories")}</option>
                     {categories.map(c => (
                         <option key={c} value={c}>{categoryLabels[c]}</option>
                     ))}
                 </Form.Select>
-                <Form.Select size="sm" aria-label={noTranslate("Language")} value={filter.subset} onChange={event => onFilterChange({ ...filter, subset: event.target.value })}>
+                <Form.Select size="sm" aria-label={noTranslate(`${label} language`)} value={filter.subset} onChange={event => onFilterChange({ ...filter, subset: event.target.value })}>
                     <option value="">{noTranslate("All languages")}</option>
                     {subsets.map(s => (
                         <option key={s} value={s}>{s}</option>
@@ -62,7 +67,7 @@ const FontPicker = ({ value, onChange, filter, onFilterChange }: Props) => {
             </div>
             <Form.Select
                 size="sm"
-                aria-label={noTranslate("Font")}
+                aria-label={noTranslate(`${label} font`)}
                 value={value}
                 onChange={event => onChange(event.target.value)}
             >

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { filterGoogleFonts, type GoogleFont } from "./google-fonts";
+import { afterEach, describe, expect, it } from "vitest";
+import { applyFontFamily, filterGoogleFonts, type GoogleFont } from "./google-fonts";
 
 const fonts: GoogleFont[] = [
     { family: "Roboto", category: "sans-serif", subsets: ["latin", "latin-ext"] },
@@ -35,5 +35,39 @@ describe("filterGoogleFonts", () => {
 
     it("returns an empty array when nothing matches", () => {
         expect(filterGoogleFonts(fonts, { search: "nonexistent", category: "", subset: "" })).toEqual([]);
+    });
+});
+
+describe("applyFontFamily", () => {
+    afterEach(() => {
+        applyFontFamily("body", null);
+        applyFontFamily("heading", null);
+    });
+
+    it("sets only the target's own CSS variable and link, leaving the other target untouched", () => {
+        applyFontFamily("body", "Roboto");
+
+        expect(document.documentElement.style.getPropertyValue("--bs-body-font-family")).toContain("Roboto");
+        expect(document.documentElement.style.getPropertyValue("--app-display-font")).toBe("");
+        expect(document.getElementById("google-fonts-picker-body")).not.toBeNull();
+        expect(document.getElementById("google-fonts-picker-heading")).toBeNull();
+    });
+
+    it("lets body and heading carry different fonts at the same time", () => {
+        applyFontFamily("body", "Roboto");
+        applyFontFamily("heading", "Playfair Display");
+
+        expect(document.documentElement.style.getPropertyValue("--bs-body-font-family")).toContain("Roboto");
+        expect(document.documentElement.style.getPropertyValue("--app-display-font")).toContain("Playfair Display");
+    });
+
+    it("removing one target's font doesn't affect the other", () => {
+        applyFontFamily("body", "Roboto");
+        applyFontFamily("heading", "Playfair Display");
+
+        applyFontFamily("body", null);
+
+        expect(document.documentElement.style.getPropertyValue("--bs-body-font-family")).toBe("");
+        expect(document.documentElement.style.getPropertyValue("--app-display-font")).toContain("Playfair Display");
     });
 });

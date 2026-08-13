@@ -42,8 +42,6 @@ const genericFallback: Record<FontCategory, string> = {
     "display": "serif",
 };
 
-const FONT_LINK_ID = "google-fonts-picker";
-
 const googleFontsCssUrl = (family: string) =>
     `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family).replace(/%20/g, "+")}&display=swap`;
 
@@ -52,30 +50,41 @@ export const allGoogleFonts = googleFontsData as GoogleFont[];
 export const findGoogleFont = (family: string): GoogleFont | undefined =>
     allGoogleFonts.find(font => font.family === family);
 
+// Body text and headings are picked independently (they're different design
+// decisions -- e.g. a display face for headings paired with a plain one for
+// body copy), so each target gets its own <link> and its own CSS variable.
+export type FontTarget = "body" | "heading";
+
+const cssVarByTarget: Record<FontTarget, string> = {
+    body: "--bs-body-font-family",
+    heading: "--app-display-font",
+};
+
+const fontLinkId = (target: FontTarget) => `google-fonts-picker-${target}`;
+
 // Loads the chosen family from Google Fonts (or removes it) and overrides the
-// app's global font. Both --bs-body-font-family and --app-display-font are
-// declared at :root, so the override must be set on document.documentElement
+// app's font for that target. Both --bs-body-font-family and --app-display-font
+// are declared at :root, so the override must be set on document.documentElement
 // itself -- most descendants below <body> just inherit body's already-resolved
 // font-family rather than re-reading the custom property, so setting it any
 // lower in the tree (e.g. via a React inline style) would silently do nothing.
-export const applyFontFamily = (family: string | null): void => {
-    const existingLink = document.getElementById(FONT_LINK_ID) as HTMLLinkElement | null;
+export const applyFontFamily = (target: FontTarget, family: string | null): void => {
+    const linkId = fontLinkId(target);
+    const cssVar = cssVarByTarget[target];
+    const existingLink = document.getElementById(linkId) as HTMLLinkElement | null;
     const font = family ? findGoogleFont(family) : undefined;
 
     if (!family || !font) {
         existingLink?.remove();
-        document.documentElement.style.removeProperty("--bs-body-font-family");
-        document.documentElement.style.removeProperty("--app-display-font");
+        document.documentElement.style.removeProperty(cssVar);
         return;
     }
 
     const link = existingLink ?? document.createElement("link");
-    link.id = FONT_LINK_ID;
+    link.id = linkId;
     link.rel = "stylesheet";
     link.href = googleFontsCssUrl(font.family);
     if (!existingLink) document.head.appendChild(link);
 
-    const value = `"${font.family}", ${genericFallback[font.category]}`;
-    document.documentElement.style.setProperty("--bs-body-font-family", value);
-    document.documentElement.style.setProperty("--app-display-font", value);
+    document.documentElement.style.setProperty(cssVar, `"${font.family}", ${genericFallback[font.category]}`);
 };

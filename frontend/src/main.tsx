@@ -12,14 +12,15 @@ import { TranslationsContext, type Language } from './i18n.ts';
 import { load } from './persistence/data.ts';
 import { HokeiNotes, HokeiRanks } from './persistence/app-data.ts';
 import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
-import { DefaultFontFamily, FontFamilyStorageKey } from './persistence/font-family.ts';
+import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey } from './persistence/font-family.ts';
 import { type GradeName, type GradePlan } from './data.ts'
 import { getSyncManager } from './sync/manager.ts';
 
 const gradeData = load<GradeName>("grade", "shodan");
 const languageData = load<Language>("language", "sv");
 const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);
-const fontFamilyData = load<string>(FontFamilyStorageKey, DefaultFontFamily);
+const bodyFontFamilyData = load<string>(FontFamilyBodyStorageKey, DefaultFontFamily);
+const headingFontFamilyData = load<string>(FontFamilyHeadingStorageKey, DefaultFontFamily);
 const notesData = new HokeiNotes();
 const ranksData = new HokeiRanks();
 getSyncManager().start();
@@ -32,7 +33,7 @@ function mountRoot() {
           <TranslationsContext value={translations}>
             <App gradeData={gradeData} languageData={languageData}
                  gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}
-                 fontFamilyData={fontFamilyData}/>
+                 bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}/>
           </TranslationsContext>
         </BrowserRouter>
         <StagingBadge />

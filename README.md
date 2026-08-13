@@ -61,13 +61,13 @@ CORS allowed origin is an exact match against `FRONTEND_URL`, so `localhost:5173
 Active with `VITE_DEBUG=true` locally, or automatically on staging (`VITE_ENVIRONMENT=staging`)
 so it can be tried without a local build — see `isFontPickerEnabled` in
 `frontend/src/google-fonts.ts`, the single flag every integration point checks. It never
-activates in production. When active, a font picker appears in the floating toolbar
-(bottom-left, normally only shown on grading/training-mode pages) that swaps the app's
-global font live, per-device — useful for trying candidates without a rebuild. It filters a
-bundled snapshot of Google Fonts metadata (`frontend/src/assets/google-fonts.json`) by name,
-category, and language, the same way fonts.google.com's own filters work, and loads the
-chosen font from Google Fonts' key-free CSS endpoint. The choice is stored in plain
-`localStorage`, not synced to the backend.
+activates in production. When active, two font pickers appear in the floating toolbar
+(bottom-left, normally only shown on grading/training-mode pages) — one for body text, one
+for headings, changed independently — that swap the app's fonts live, per-device — useful for
+trying candidates without a rebuild. Each filters a bundled snapshot of Google Fonts metadata
+(`frontend/src/assets/google-fonts.json`) by name, category, and language, the same way
+fonts.google.com's own filters work, and loads the chosen font from Google Fonts' key-free CSS
+endpoint. The choices are stored in plain `localStorage`, not synced to the backend.
 
 The snapshot is static and only needs regenerating occasionally (font families rarely
 change). To refresh it:
@@ -86,17 +86,21 @@ Google's public, key-free stylesheet endpoint.
   (+ `.test.tsx`), `frontend/src/persistence/font-family.ts`,
   `frontend/src/assets/google-fonts.json`, and `frontend/scripts/fetch-google-fonts.ts`.
 - Remove the `fonts:fetch` line from `frontend/package.json` scripts.
-- In `frontend/src/components/TrainingControls.tsx`/`.css`: remove the `fontPicker` prop, the
-  `FontPicker` import, the `{fontPicker && (...)}` block, and the `.training-controls-font`/
-  `.font-picker*` CSS rules.
-- In `frontend/src/App.tsx`: remove the `fontFamilyData` prop/state/effects, the `fontFilter`
-  state, the `applyFontFamily`/`isFontPickerEnabled` import and usage, and drop
-  `isFontPickerEnabled` from the `--training-controls-reserve` calculation.
-- In `frontend/src/main.tsx`: remove the `fontFamilyData` load and prop.
+- In `frontend/src/components/TrainingControls.tsx`/`.css`: remove the `bodyFontPicker`/
+  `headingFontPicker` props, the `FontPicker` import, the `{bodyFontPicker && (...)}`/
+  `{headingFontPicker && (...)}` blocks, and the `.training-controls-font`/`.font-picker*`
+  CSS rules.
+- In `frontend/src/App.tsx`: remove the `bodyFontFamilyData`/`headingFontFamilyData` props,
+  state, and effects, the `bodyFontFilter`/`headingFontFilter` state, the
+  `applyFontFamily`/`isFontPickerEnabled` import and usage, and drop `isFontPickerEnabled`
+  from the `--training-controls-reserve` calculation.
+- In `frontend/src/main.tsx`: remove the `bodyFontFamilyData`/`headingFontFamilyData` loads
+  and props.
 - Delete this README section.
-- Hardcode the chosen font: set `$font-family-base`/`$font-family-sans-serif` in
-  `frontend/src/styles/bootstrap-theme.scss` (or add an `@font-face`/Google Fonts `<link>` if
-  it's a web font) rather than relying on any of the above.
+- Hardcode the chosen fonts: set `$font-family-base`/`$font-family-sans-serif` (body) and
+  `--app-display-font` (headings) in `frontend/src/styles/bootstrap-theme.scss`/`index.css`
+  (or add an `@font-face`/Google Fonts `<link>` if either is a web font) rather than relying
+  on any of the above.
 
 ## Translation workflow
 
