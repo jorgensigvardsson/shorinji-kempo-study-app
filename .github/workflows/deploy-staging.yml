@@ -107,7 +107,7 @@ jobs:
           SMTP_PASSWORD:            ${{ secrets.SMTP_PASSWORD }}
           SMTP_FROM:                ${{ vars.SMTP_FROM }}
           SMTP_TLS:                 ${{ vars.SMTP_TLS || 'starttls' }}
-          FEEDBACK_EMAIL:           ${{ secrets.FEEDBACK_EMAIL }}
+          FEEDBACK_EMAIL:           ${{ vars.FEEDBACK_EMAIL }}
         run: |
           jq -n \
             --arg authImage             "$AUTH_IMAGE" \

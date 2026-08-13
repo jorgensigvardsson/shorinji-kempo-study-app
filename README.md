@@ -120,7 +120,6 @@ Required repository secrets:
 - `VAPID_PRIVATE_KEY` — Web Push VAPID private key (paired with the `VAPID_PUBLIC_KEY` variable)
 - `PUSH_ADMIN_TOKEN` — bearer token authorizing `POST /push/broadcast` (leave unset to disable broadcasts)
 - `SMTP_PASSWORD` — password for the mail relay that sends sign-in codes (leave unset to log codes instead of mailing them)
-- `FEEDBACK_EMAIL` — comma-separated recipient(s) for in-app feedback submissions (`POST /auth/feedback`, sent via the same SMTP relay); leave unset to disable the feedback form
 
 Required repository variables (these are *variables*, not secrets — they are not sensitive, and leaving them unmasked keeps deploy logs readable):
 - `SSH_HOST` (`hostname:port`, e.g. `prime4.inleed.net:2020`), `SSH_USER` — deploy target. The port is mandatory; the workflow splits the value on the colon and there is no default.
@@ -131,6 +130,7 @@ Optional repository variables (with sensible defaults):
 - `VAPID_PUBLIC_KEY` — Web Push VAPID public key; `VAPID_SUBJECT` — `mailto:` or site URL for the VAPID claim. Push endpoints stay disabled until the public/private key pair is set.
 - `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_FROM` — mail relay for email (code) sign-in, paired with the `SMTP_PASSWORD` secret. `SMTP_FROM` may carry a display name: `Shorinji Kempo <noreply@example.com>`. With `SMTP_HOST` or `SMTP_FROM` unset the auth service logs codes to stdout instead of sending them.
 - `SMTP_PORT` (default `587`) and `SMTP_TLS` (default `starttls`) — use `465`/`implicit` for SMTPS. `starttls` refuses to deliver over an unencrypted connection rather than falling back to one.
+- `FEEDBACK_EMAIL` — comma-separated recipient(s) for in-app feedback submissions (`POST /auth/feedback`, sent via the same SMTP relay); leave unset to disable the feedback form
 - `VITE_DEBUG` (default `false`)
 
 `VITE_APP_VERSION` is not something you set — the workflow writes it automatically as the deployed commit SHA (the same one used to tag the backend images), so it's not listed above. It's included with feedback submissions purely as triage context.
