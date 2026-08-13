@@ -12,6 +12,15 @@ AddType application/manifest+json .webmanifest
 
 # ---------------------------------------------------------------------------
 # Security headers
+#
+# The Content-Security-Policy below names no third-party origin for styles or
+# fonts, which is what production wants. Staging is the exception: the
+# experimental font picker loads stylesheets from fonts.googleapis.com and font
+# files from fonts.gstatic.com, so the "Allow Google Fonts in the staging CSP"
+# step in .github/workflows/deploy-staging.yml rewrites the style-src and
+# font-src directives in the deployed copy of this file. That step matches them
+# literally and fails the deploy if it cannot — so if you reshape either
+# directive here, update the step to match.
 # ---------------------------------------------------------------------------
 <IfModule mod_headers.c>
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com;"

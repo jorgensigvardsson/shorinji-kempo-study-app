@@ -69,6 +69,17 @@ trying candidates without a rebuild. Each filters a bundled snapshot of Google F
 fonts.google.com's own filters work, and loads the chosen font from Google Fonts' key-free CSS
 endpoint. The choices are stored in plain `localStorage`, not synced to the backend.
 
+Loading a font reaches two Google origins — `fonts.googleapis.com` for the stylesheet and
+`fonts.gstatic.com` for the font files it references — and the `Content-Security-Policy` in
+[`frontend/public/.htaccess`](frontend/public/.htaccess) allows neither, so on a deployed
+site the browser blocks both. Rather than open production's CSP to origins it never needs,
+the "Allow Google Fonts in the staging CSP" step in
+[`.github/workflows/deploy-staging.yml`](.github/workflows/deploy-staging.yml) adds the two
+hosts to `style-src`/`font-src` in the deployed copy of the file. The step matches those
+directives literally and fails the deploy if it cannot, so reshaping them in `.htaccess`
+means updating the step too. (Local `npm run dev` sends no CSP at all, so the picker works
+there without any of this.)
+
 The snapshot is static and only needs regenerating occasionally (font families rarely
 change). To refresh it:
 
@@ -86,6 +97,9 @@ Google's public, key-free stylesheet endpoint.
   (+ `.test.tsx`), `frontend/src/persistence/font-family.ts`,
   `frontend/src/assets/google-fonts.json`, and `frontend/scripts/fetch-google-fonts.ts`.
 - Remove the `fonts:fetch` line from `frontend/package.json` scripts.
+- Remove the "Allow Google Fonts in the staging CSP" step from
+  `.github/workflows/deploy-staging.yml`, and the note about it above the
+  `Content-Security-Policy` in `frontend/public/.htaccess`.
 - In `frontend/src/components/TrainingControls.tsx`/`.css`: remove the `bodyFontPicker`/
   `headingFontPicker` props, the `FontPicker` import, the `{bodyFontPicker && (...)}`/
   `{headingFontPicker && (...)}` blocks, and the `.training-controls-font`/`.font-picker*`
@@ -100,7 +114,9 @@ Google's public, key-free stylesheet endpoint.
 - Hardcode the chosen fonts: set `$font-family-base`/`$font-family-sans-serif` (body) and
   `--app-display-font` (headings) in `frontend/src/styles/bootstrap-theme.scss`/`index.css`
   (or add an `@font-face`/Google Fonts `<link>` if either is a web font) rather than relying
-  on any of the above.
+  on any of the above. A self-hosted `@font-face` needs no CSP change; keeping the font on
+  Google's servers means production's `Content-Security-Policy` has to allow
+  `fonts.googleapis.com` (`style-src`) and `fonts.gstatic.com` (`font-src`) permanently.
 
 ## Translation workflow
 
