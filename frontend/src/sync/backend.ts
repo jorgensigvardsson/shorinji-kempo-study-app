@@ -349,6 +349,18 @@ export class BackendSyncClient {
     URL.revokeObjectURL(url);
   }
 
+  // Submits in-app feedback. The backend attributes it to the signed-in user
+  // and emails it to the configured recipients.
+  async submitFeedback(message: string): Promise<void> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    if (resp.status === 429) throw new RateLimitError();
+    if (!resp.ok) throw new Error(`POST /auth/feedback: ${resp.status}`);
+  }
+
   // Deletes app data then user record in order, then clears local state.
   async deleteAccount(): Promise<void> {
     const docResp = await fetch(`${apiUrl}/api/v1/account`, { method: "DELETE", credentials: "include" });

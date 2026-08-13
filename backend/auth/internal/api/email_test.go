@@ -16,16 +16,31 @@ import (
 )
 
 // fakeSender records the last code it was asked to send (the plaintext the
-// handler generated), which the tests use to drive the verify step.
+// handler generated), which the tests use to drive the verify step. It also
+// records the last feedback submission relayed through it.
 type fakeSender struct {
 	to, code, lang string
 	err            error
+
+	feedbackTo                                                     []string
+	feedbackSubmitterName, feedbackSubmitterEmail, feedbackMessage string
+	feedbackErr                                                    error
 }
 
 func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string) error {
 	f.to, f.code, f.lang = to, code, lang
 	return f.err
 }
+
+func (f *fakeSender) SendFeedback(_ context.Context, to []string, submitterName, submitterEmail, feedback string) error {
+	f.feedbackTo = to
+	f.feedbackSubmitterName, f.feedbackSubmitterEmail, f.feedbackMessage = submitterName, submitterEmail, feedback
+	return f.feedbackErr
+}
+
+// defaultFeedbackRecipients is the recipient list newTestHandler wires up so
+// tests exercising POST /auth/feedback don't need a dedicated constructor.
+var defaultFeedbackRecipients = []string{"maintainer@example.test"}
 
 func newTestHandler(t *testing.T, sender *fakeSender) *Handler {
 	t.Helper()
@@ -45,6 +60,7 @@ func newTestHandler(t *testing.T, sender *fakeSender) *Handler {
 		"http://frontend",
 		"",
 		ratelimit.New(1000, 1000),
+		defaultFeedbackRecipients,
 	)
 }
 

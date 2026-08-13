@@ -113,6 +113,13 @@ param smtpFrom string = ''
 ])
 param smtpTls string = 'starttls'
 
+// ── Feedback ────────────────────────────────────────────────────────────────
+// In-app feedback submissions (POST /auth/feedback) are relayed by the auth
+// service over the SMTP relay configured above. Empty disables the endpoint.
+
+@description('Comma-separated recipient(s) for feedback submissions.')
+param feedbackEmail string = ''
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -168,6 +175,7 @@ module authApp 'modules/auth-app.bicep' = {
     smtpPassword: smtpPassword
     smtpFrom: smtpFrom
     smtpTls: smtpTls
+    feedbackEmail: feedbackEmail
   }
 }
 

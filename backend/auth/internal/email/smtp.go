@@ -115,14 +115,47 @@ func (s *SMTPSender) SendVerificationCode(ctx context.Context, to, code, lang st
 	if err != nil {
 		return err
 	}
-	msg, err := s.message(rcpt.Address, rendered)
+	msg, err := s.message([]string{rcpt.Address}, rendered)
 	if err != nil {
 		return err
 	}
-	return s.send(ctx, rcpt.Address, msg)
+	return s.send(ctx, []string{rcpt.Address}, msg)
 }
 
-func (s *SMTPSender) send(ctx context.Context, to string, msg []byte) error {
+// SendFeedback relays an in-app feedback submission to every configured
+// recipient, with Reply-To set to the submitter's own address so a maintainer
+// can reply straight to them.
+func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, submitterName, submitterEmail, feedback string) error {
+	if len(to) == 0 {
+		return errors.New("smtp: no feedback recipients configured")
+	}
+	rcpts := make([]string, 0, len(to))
+	for _, addr := range to {
+		parsed, err := mail.ParseAddress(addr)
+		if err != nil {
+			return fmt.Errorf("smtp: invalid feedback recipient %q: %w", addr, err)
+		}
+		rcpts = append(rcpts, parsed.Address)
+	}
+	// submitterEmail comes from the authenticated user's account record, but it
+	// still lands in a header, so it gets the same validation as any recipient.
+	replyTo, err := mail.ParseAddress(submitterEmail)
+	if err != nil {
+		return fmt.Errorf("smtp: invalid submitter address: %w", err)
+	}
+
+	rendered, err := renderFeedback(submitterName, replyTo.Address, feedback)
+	if err != nil {
+		return err
+	}
+	msg, err := s.message(rcpts, rendered)
+	if err != nil {
+		return err
+	}
+	return s.send(ctx, rcpts, msg)
+}
+
+func (s *SMTPSender) send(ctx context.Context, to []string, msg []byte) error {
 	// net/smtp has no context support, so dial and conversation share a single
 	// deadline covering the whole exchange. Without it an unresponsive relay would
 	// hold the HTTP handler open for as long as the TCP connection survives.
@@ -182,8 +215,10 @@ func (s *SMTPSender) send(ctx context.Context, to string, msg []byte) error {
 	if err := c.Mail(s.from.Address); err != nil {
 		return fmt.Errorf("smtp: MAIL FROM: %w", err)
 	}
-	if err := c.Rcpt(to); err != nil {
-		return fmt.Errorf("smtp: RCPT TO: %w", err)
+	for _, addr := range to {
+		if err := c.Rcpt(addr); err != nil {
+			return fmt.Errorf("smtp: RCPT TO %s: %w", addr, err)
+		}
 	}
 	w, err := c.Data()
 	if err != nil {
@@ -249,7 +284,7 @@ func (s *SMTPSender) heloName() string {
 //
 // The From display name is the app's name in the recipient's language, so the
 // inbox listing reads the same way the app does.
-func (s *SMTPSender) message(to string, m message) ([]byte, error) {
+func (s *SMTPSender) message(to []string, m message) ([]byte, error) {
 	id, err := messageID(s.heloName())
 	if err != nil {
 		return nil, err
@@ -264,14 +299,25 @@ func (s *SMTPSender) message(to string, m message) ([]byte, error) {
 		from.Name = s.from.Name // fall back to any name configured in SMTP_FROM
 	}
 
+	toHeader := make([]string, 0, len(to))
+	for _, addr := range to {
+		toHeader = append(toHeader, (&mail.Address{Address: addr}).String())
+	}
+
+	// A human hitting "Reply" would otherwise land in SMTP_FROM's inbox, which
+	// nobody reads. Defaults to a noreply mailbox on the same domain — the
+	// From/envelope address is untouched, so bounces still reach SMTP_FROM as
+	// documented in BACKEND.md — but a message can override it (feedback mail
+	// sets it to the submitter's own address so a reply reaches them directly).
+	replyTo := m.replyTo
+	if replyTo == "" {
+		replyTo = "noreply@" + s.heloName()
+	}
+
 	var b strings.Builder
 	b.WriteString("From: " + from.String() + "\r\n")
-	b.WriteString("To: " + (&mail.Address{Address: to}).String() + "\r\n")
-	// A human hitting "Reply" would otherwise land in SMTP_FROM's inbox, which
-	// nobody reads. Points at a noreply mailbox on the same domain instead — the
-	// From/envelope address is untouched, so bounces still reach SMTP_FROM as
-	// documented in BACKEND.md.
-	b.WriteString("Reply-To: " + (&mail.Address{Address: "noreply@" + s.heloName()}).String() + "\r\n")
+	b.WriteString("To: " + strings.Join(toHeader, ", ") + "\r\n")
+	b.WriteString("Reply-To: " + (&mail.Address{Address: replyTo}).String() + "\r\n")
 	b.WriteString("Subject: " + mime.QEncoding.Encode("utf-8", m.subject) + "\r\n")
 	b.WriteString("Date: " + time.Now().Format(time.RFC1123Z) + "\r\n")
 	b.WriteString("Message-ID: " + id + "\r\n")

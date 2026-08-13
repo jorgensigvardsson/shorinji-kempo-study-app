@@ -6,7 +6,7 @@ import Settings from "./Settings.tsx";
 import Broadcast from "./Broadcast.tsx";
 import AdminUsers from "./AdminUsers.tsx";
 import { getSyncManager } from "./sync/manager.ts";
-import { noTranslate, type Language, type Translator } from "./i18n.ts";
+import type { Language, Translator } from "./i18n.ts";
 import Groups from "./Groups.tsx";
 import type { HokeiNotes, HokeiRanks } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
@@ -18,6 +18,7 @@ import TermsOfServices from "./TermsOfServices.tsx";
 import PrivacyPolicy from "./PrivacyPolicy.tsx";
 import Changelog from "./Changelog.tsx";
 import Theory, { TheoryToolPage } from "./Theory.tsx";
+import Feedback from "./Feedback.tsx";
 
 export interface Route {
     path?: string;
@@ -152,7 +153,8 @@ export const getRoutes = (gradePlan: GradePlan, allGradePlans: GradePlan[], tran
         icon: ShieldCheck,
         hideOnStartPage: true
     }, {
-        href: `mailto:${import.meta.env.VITE_FEEDBACK_EMAIL}?subject=${encodeURIComponent(noTranslate("App feedback"))}&body=${encodeURIComponent(noTranslate("Hi!\n\nMy feedback:"))}`,
+        path: "/feedback",
+        component: () => <Feedback />,
         menuText: translator.translate("Skicka feedback"),
         icon: Envelope,
         hideOnStartPage: true

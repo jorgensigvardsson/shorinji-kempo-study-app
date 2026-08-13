@@ -523,6 +523,70 @@ func TestParseTLSMode(t *testing.T) {
 	}
 }
 
+func TestSendFeedback_MultipleRecipientsAndReplyTo(t *testing.T) {
+	f, s := startFake(t, TLSImplicit, "PLAIN")
+
+	err := s.SendFeedback(context.Background(),
+		[]string{"maintainer1@example.test", "maintainer2@example.test"},
+		"Kenshi", "kenshi@example.test", "This app is great, but X could be better.")
+	if err != nil {
+		t.Fatalf("SendFeedback: %v", err)
+	}
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	// The envelope sender stays SMTP_FROM regardless of who submitted feedback.
+	if f.from != "noreply@example.test" {
+		t.Errorf("envelope sender = %q, want noreply@example.test", f.from)
+	}
+	wantRcpts := []string{"maintainer1@example.test", "maintainer2@example.test"}
+	if len(f.rcpts) != len(wantRcpts) {
+		t.Fatalf("recipients = %v, want %v", f.rcpts, wantRcpts)
+	}
+	for i, want := range wantRcpts {
+		if f.rcpts[i] != want {
+			t.Errorf("rcpts[%d] = %q, want %q", i, f.rcpts[i], want)
+		}
+	}
+
+	header, parts := parseMessage(t, f.data)
+	if got := header.Get("Reply-To"); !strings.Contains(got, "kenshi@example.test") {
+		t.Errorf("Reply-To = %q, want it to carry the submitter's address", got)
+	}
+	for _, p := range parts {
+		if !strings.Contains(p.body, "Kenshi") || !strings.Contains(p.body, "X could be better") {
+			t.Errorf("%s part is missing submitter/message content:\n%s", p.contentType, p.body)
+		}
+	}
+}
+
+// The submitter's own address ultimately lands in a header (Reply-To), so it
+// gets the same anti-injection validation as any other address.
+func TestSendFeedback_RejectsHeaderInjectionInSubmitterAddress(t *testing.T) {
+	f, s := startFake(t, TLSImplicit, "PLAIN")
+
+	err := s.SendFeedback(context.Background(), []string{"maintainer@example.test"},
+		"Kenshi", "kenshi\r\nBcc: attacker@evil.test@example.test", "feedback")
+	if err == nil {
+		t.Fatal("accepted a submitter address containing CRLF")
+	}
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.data != "" {
+		t.Error("a message was sent despite the invalid submitter address")
+	}
+}
+
+func TestSendFeedback_NoRecipients(t *testing.T) {
+	_, s := startFake(t, TLSImplicit, "PLAIN")
+
+	if err := s.SendFeedback(context.Background(), nil, "Kenshi", "kenshi@example.test", "feedback"); err == nil {
+		t.Fatal("SendFeedback with no recipients should fail")
+	}
+}
+
 // A long body must be wrapped: RFC 5321 caps a line at 1000 octets.
 func TestBase64Lines_Wraps(t *testing.T) {
 	out := base64Lines(strings.Repeat("räknar till tio. ", 40))

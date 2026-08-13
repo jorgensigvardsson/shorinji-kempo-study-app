@@ -57,6 +57,9 @@ func main() {
 	smtpFrom     := flag.String("smtp-from",     envutil.String("SMTP_FROM",     ""),          "sender address, optionally with a display name: \"Shorinji Kempo <noreply@example.com>\"")
 	smtpTLS      := flag.String("smtp-tls",      envutil.String("SMTP_TLS",      "starttls"),  "connection security: starttls (explicit, port 587), implicit (SMTPS, port 465), or none")
 
+	// ── Feedback ──────────────────────────────────────────────────────────────
+	feedbackEmail := flag.String("feedback-email", envutil.String("FEEDBACK_EMAIL", ""), "comma-separated recipient(s) for POST /auth/feedback (empty disables the endpoint)")
+
 	// ── Rate limiting ─────────────────────────────────────────────────────────
 	rateLimitRPS   := flag.Float64("rate-limit-rps",   envutil.Float64("RATE_LIMIT_RPS",   1.0), "max requests per second per IP (0 = disabled)")
 	rateLimitBurst := flag.Float64("rate-limit-burst", envutil.Float64("RATE_LIMIT_BURST", 5.0), "rate limit burst size")
@@ -170,8 +173,15 @@ func main() {
 	limiter := ratelimit.New(*rateLimitRPS, *rateLimitBurst)
 	log.Printf("rate limiting: %.1f req/s per IP, burst %d", *rateLimitRPS, int(*rateLimitBurst))
 
+	feedbackRecipients := splitList(*feedbackEmail)
+	if len(feedbackRecipients) == 0 {
+		log.Println("feedback endpoint disabled (set FEEDBACK_EMAIL to enable)")
+	} else {
+		log.Printf("feedback endpoint enabled (recipients: %s)", strings.Join(feedbackRecipients, ", "))
+	}
+
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,
@@ -210,6 +220,18 @@ func splitDomains(s string) []string {
 	for _, d := range strings.Split(s, ",") {
 		if d = strings.TrimSpace(strings.ToLower(d)); d != "" {
 			out = append(out, d)
+		}
+	}
+	return out
+}
+
+// splitList trims a comma-separated list without lowercasing — used for email
+// addresses, which are forwarded as-is rather than indexed by value.
+func splitList(s string) []string {
+	var out []string
+	for _, v := range strings.Split(s, ",") {
+		if v = strings.TrimSpace(v); v != "" {
+			out = append(out, v)
 		}
 	}
 	return out

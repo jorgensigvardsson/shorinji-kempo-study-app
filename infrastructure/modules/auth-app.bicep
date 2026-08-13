@@ -80,6 +80,9 @@ param smtpFrom string = ''
 @description('Connection security: starttls, implicit, or none')
 param smtpTls string = 'starttls'
 
+@description('Comma-separated recipient(s) for POST /auth/feedback. Empty disables the endpoint.')
+param feedbackEmail string = ''
+
 resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
@@ -161,6 +164,7 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'SMTP_PASSWORD',                 secretRef: 'smtp-password' }
             { name: 'SMTP_FROM',                     value: smtpFrom }
             { name: 'SMTP_TLS',                      value: smtpTls }
+            { name: 'FEEDBACK_EMAIL',                value: feedbackEmail }
           ]
         }
       ]

@@ -55,20 +55,22 @@ type pendingState struct {
 }
 
 type Handler struct {
-	providers     map[string]provider.Provider // provider name → provider
-	domains       map[string]string            // email domain → provider name
-	users         store.UserStore
-	refreshTokens store.RefreshTokenStore
-	roles         store.RoleStore
-	tokens        *token.Manager
-	mailer        email.Sender
-	frontendURL   string
-	cookieDomain  string
-	limiter       *ratelimit.IPRateLimiter
-	emailLimiter  *ratelimit.GlobalRateLimiter // global cap on code-sending (protects the email quota)
-	mu            sync.Mutex
-	pending       map[string]pendingState
-	emailCodes    map[string]emailCode // lowercased email → pending code
+	providers          map[string]provider.Provider // provider name → provider
+	domains            map[string]string            // email domain → provider name
+	users              store.UserStore
+	refreshTokens      store.RefreshTokenStore
+	roles              store.RoleStore
+	tokens             *token.Manager
+	mailer             email.Sender
+	frontendURL        string
+	cookieDomain       string
+	limiter            *ratelimit.IPRateLimiter
+	emailLimiter       *ratelimit.GlobalRateLimiter // global cap on code-sending (protects the email quota)
+	feedbackRecipients []string                     // where POST /auth/feedback is relayed; empty disables the endpoint
+	feedbackLimiter    *ratelimit.GlobalRateLimiter // global cap on feedback-sending (protects the email quota)
+	mu                 sync.Mutex
+	pending            map[string]pendingState
+	emailCodes         map[string]emailCode // lowercased email → pending code
 }
 
 func NewHandler(
@@ -82,6 +84,7 @@ func NewHandler(
 	frontendURL string,
 	cookieDomain string,
 	limiter *ratelimit.IPRateLimiter,
+	feedbackRecipients []string,
 ) *Handler {
 	h := &Handler{
 		providers:     providers,
@@ -96,9 +99,13 @@ func NewHandler(
 		limiter:       limiter,
 		// Hard product requirement: at most one verification email every 5 s,
 		// globally, to protect the provider quota and the developer's wallet.
-		emailLimiter: ratelimit.NewGlobal(0.2, 1),
-		pending:      make(map[string]pendingState),
-		emailCodes:   make(map[string]emailCode),
+		emailLimiter:       ratelimit.NewGlobal(0.2, 1),
+		feedbackRecipients: feedbackRecipients,
+		// Feedback is user-triggered but still a real SMTP send; cap it well
+		// below the verification-code limit since it's not latency-sensitive.
+		feedbackLimiter: ratelimit.NewGlobal(0.1, 2),
+		pending:         make(map[string]pendingState),
+		emailCodes:      make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -132,6 +139,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
 	inner.HandleFunc("POST /auth/link", h.linkAccount)
 	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
+	// Feedback submission carries its own global rate limit on top of the per-IP
+	// one, same as email/start, since it triggers a real SMTP send.
+	inner.Handle("POST /auth/feedback", h.feedbackLimiter.Middleware(http.HandlerFunc(h.submitFeedback)))
 	// Admin-only user management (see admin.go). Authorization is enforced per
 	// handler via requireAdmin; the routes ride the same middleware chain below.
 	inner.HandleFunc("GET /auth/admin/users", h.adminListUsers)
@@ -863,6 +873,64 @@ func (h *Handler) unlinkProvider(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("unlinked %s identity from user %s", providerName, user.ID)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// feedbackMaxLen bounds the feedback message so a submission can't blow up the
+// outgoing email (or someone's inbox).
+const feedbackMaxLen = 4000
+
+// submitFeedback relays an in-app feedback submission by email to the
+// configured recipients. Requires a valid session so the message can be
+// attributed (and replied to) — feedback is not accepted anonymously.
+func (h *Handler) submitFeedback(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.claimsFromRequest(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if len(h.feedbackRecipients) == 0 {
+		log.Printf("submitFeedback: no recipients configured; dropping submission from %s", claims.Subject)
+		http.Error(w, "feedback is not accepted right now", http.StatusServiceUnavailable)
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
+	var req struct {
+		Message string `json:"message"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	message := strings.TrimSpace(req.Message)
+	if message == "" {
+		http.Error(w, "message is required", http.StatusBadRequest)
+		return
+	}
+	if len(message) > feedbackMaxLen {
+		http.Error(w, fmt.Sprintf("message must be %d characters or fewer", feedbackMaxLen), http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.users.FindByID(claims.Subject)
+	if err != nil || user == nil {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+
+	submitterName := user.DisplayName
+	if submitterName == "" {
+		submitterName = user.Email
+	}
+
+	if err := h.mailer.SendFeedback(r.Context(), h.feedbackRecipients, submitterName, user.Email, message); err != nil {
+		log.Printf("submitFeedback: send from %s: %v", user.Email, err)
+		http.Error(w, "could not send feedback", http.StatusBadGateway)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
 

@@ -16,6 +16,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Focused technique cards** — calm full-card practice view, Dojo mode, notes, videos, and self-assessment
 - **Accounts** — sign in with an email code (or Google/Microsoft, when the address belongs to one); an account is required to use the app, and study data syncs automatically to the backend across devices
 - **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
+- **In-app feedback** — send feedback straight from the menu; the backend emails it to the maintainer, no mail client required
 - **Multilingual** — Swedish (default/fallback), English, Turkish, Japanese
 
 ## Tech stack
@@ -119,7 +120,7 @@ Required repository secrets:
 - `VAPID_PRIVATE_KEY` — Web Push VAPID private key (paired with the `VAPID_PUBLIC_KEY` variable)
 - `PUSH_ADMIN_TOKEN` — bearer token authorizing `POST /push/broadcast` (leave unset to disable broadcasts)
 - `SMTP_PASSWORD` — password for the mail relay that sends sign-in codes (leave unset to log codes instead of mailing them)
-- `VITE_FEEDBACK_EMAIL` — comma-separated feedback recipient(s)
+- `FEEDBACK_EMAIL` — comma-separated recipient(s) for in-app feedback submissions (`POST /auth/feedback`, sent via the same SMTP relay); leave unset to disable the feedback form
 
 Required repository variables (these are *variables*, not secrets — they are not sensitive, and leaving them unmasked keeps deploy logs readable):
 - `SSH_HOST` (`hostname:port`, e.g. `prime4.inleed.net:2020`), `SSH_USER` — deploy target. The port is mandatory; the workflow splits the value on the colon and there is no default.

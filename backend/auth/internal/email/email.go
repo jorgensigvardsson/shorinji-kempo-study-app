@@ -15,6 +15,11 @@ import (
 // lang is one of "sv", "en", "tr", "ja"; unknown values fall back to English.
 type Sender interface {
 	SendVerificationCode(ctx context.Context, to, code, lang string) error
+
+	// SendFeedback relays an in-app feedback submission to the given recipients.
+	// submitterName/submitterEmail identify the signed-in user who submitted it,
+	// so the recipient can reply directly to them.
+	SendFeedback(ctx context.Context, to []string, submitterName, submitterEmail, feedback string) error
 }
 
 // localized holds one language's worth of copy. The pieces are kept separate
@@ -74,12 +79,14 @@ func lookup(lang string) localized {
 	return templates["en"]
 }
 
-// message is one rendered verification email in every form the sender needs.
+// message is one rendered email in every form the sender needs.
 type message struct {
-	senderName string // localized display name for the From: header
+	senderName string // display name for the From: header
 	subject    string
 	plain      string
 	html       string
+	// replyTo overrides the default noreply@<domain> Reply-To address when set.
+	replyTo string
 }
 
 // htmlTemplate mirrors the app's own look: the gold accent (#dfbe5a light,
@@ -176,11 +183,75 @@ func langAttr(lang string) string {
 	return "en"
 }
 
+// feedbackHTMLTemplate mirrors the verification email's card look. This one goes
+// to the developer, not an end user, so it carries no language switching and no
+// dark-mode block — plenty of mail clients render it fine either way, and it's
+// not worth the upkeep for an internal-only message.
+var feedbackHTMLTemplate = template.Must(template.New("feedback").Parse(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Subject}}</title>
+</head>
+<body style="margin:0;padding:0;background:#f8f9fa;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f9fa;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="width:100%;max-width:560px;background:#ffffff;border-radius:12px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <tr><td style="background:#dfbe5a;height:6px;line-height:6px;font-size:0;border-radius:12px 12px 0 0;">&nbsp;</td></tr>
+  <tr><td style="padding:28px 28px 0 28px;">
+    <div style="font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#6c757d;">Shorinji Kempo Study App</div>
+    <div style="margin-top:6px;font-size:20px;font-weight:600;color:#212529;">App feedback</div>
+    <p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:#6c757d;">From {{.SubmitterName}} &lt;{{.SubmitterEmail}}&gt;</p>
+  </td></tr>
+  <tr><td style="padding:20px 28px 28px 28px;">
+    <div style="background:#faf3df;border:1px solid #efdca9;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.5;color:#212529;">{{.Feedback}}</div>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+`))
+
+// renderFeedback builds a feedback-notification email for the site's maintainer.
+// It is deliberately English-only and unlocalized: the recipient is a developer,
+// not the app's end user.
+func renderFeedback(submitterName, submitterEmail, feedback string) (message, error) {
+	subject := fmt.Sprintf("App feedback from %s <%s>", submitterName, submitterEmail)
+
+	var html bytes.Buffer
+	err := feedbackHTMLTemplate.Execute(&html, struct {
+		Subject, SubmitterName, SubmitterEmail, Feedback string
+	}{
+		Subject:        subject,
+		SubmitterName:  submitterName,
+		SubmitterEmail: submitterEmail,
+		Feedback:       feedback,
+	})
+	if err != nil {
+		return message{}, fmt.Errorf("render feedback email: %w", err)
+	}
+
+	return message{
+		senderName: "Shorinji Kempo Study App",
+		subject:    subject,
+		plain:      fmt.Sprintf("From %s <%s>\n\n%s\n", submitterName, submitterEmail, feedback),
+		html:       html.String(),
+		replyTo:    submitterEmail,
+	}, nil
+}
+
 // LogSender is the development fallback: it logs the code instead of sending an
 // email, so local dev needs no email provider configured.
 type LogSender struct{}
 
 func (LogSender) SendVerificationCode(_ context.Context, to, code, lang string) error {
 	log.Printf("[email:dev] verification code for %s (%s): %s", to, lang, code)
+	return nil
+}
+
+func (LogSender) SendFeedback(_ context.Context, to []string, submitterName, submitterEmail, feedback string) error {
+	log.Printf("[email:dev] feedback from %s <%s> for %v:\n%s", submitterName, submitterEmail, to, feedback)
 	return nil
 }

@@ -112,6 +112,10 @@ class SyncManager {
     this.store.set("syncProvider", "local");
   }
 
+  async submitFeedback(message: string): Promise<void> {
+    return this.backendClient.submitFeedback(message);
+  }
+
   // beginBackendAuthorization is called by the sign-in UI. It sets the email on
   // the backend client and redirects to the auth service.
   beginBackendAuthorization(email: string): void {

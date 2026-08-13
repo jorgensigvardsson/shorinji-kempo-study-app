@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-13T04:31:20.000Z",
+    changes: [
+      {
+        emoji: "💬",
+        sv: "\"Skicka feedback\" i menyn öppnar nu ett formulär i appen istället för din e-postapp. Meddelandet skickas direkt till utvecklaren.",
+        en: "\"Send feedback\" in the menu now opens an in-app form instead of your email app. The message goes straight to the developer.",
+        tr: "Menüdeki \"Geri bildirim gönder\" artık e-posta uygulamanız yerine uygulama içi bir form açıyor. Mesaj doğrudan geliştiriciye gidiyor.",
+        ja: "メニューの「フィードバックを送る」は、メールアプリの代わりにアプリ内フォームを開くようになりました。メッセージは開発者に直接届きます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-12T19:56:04.413Z",
     changes: [
       {
