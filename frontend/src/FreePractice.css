@@ -65,25 +65,11 @@
   padding: 0 0.25rem;
 }
 
-.free-practice-dojo-toggle {
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
-}
-
 .free-practice-content {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   padding-bottom: 2rem;
-}
-
-.free-practice-grade-control {
-  width: min(100%, 24rem);
-}
-
-.free-practice-grade-control .form-label {
-  color: var(--bs-secondary-color);
-  font-size: 0.9rem;
 }
 
 .free-practice-section > h3,

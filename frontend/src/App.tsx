@@ -11,11 +11,12 @@ import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } 
 import { useSyncProvider, useSyncState, useWakeLock } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
-import WakeLockToggle from './components/WakeLockToggle';
+import TrainingControls from './components/TrainingControls';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 import SelectionWordLookup from './components/SelectionWordLookup';
+import { getTrainingControlContext } from './training-controls-context';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -28,10 +29,6 @@ interface Props {
 
 const STANDALONE_IDLE_RESET_MS = 10 * 60 * 1000;
 const NOTIF_PROMPT_DISMISSED_KEY = "notifications-prompt-dismissed";
-// Hide the keep-screen-on control entirely where the Screen Wake Lock API is
-// unavailable — there's nothing it could do there.
-const WAKE_LOCK_SUPPORTED = typeof navigator !== "undefined" && "wakeLock" in navigator;
-
 function isStandalonePwa(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches
     || (navigator as Navigator & { standalone?: boolean }).standalone === true;
@@ -102,6 +99,7 @@ function App(props: Props) {
   const [ language, setLanguage ] = useState<Language>(languageData.data);
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
+  const [ displayGrade, setDisplayGrade ] = useState<GradeName>(gradeData.data);
   const translations = useContext(TranslationsContext);
   const translator = new TranslatorImplementation(translations, language);
   const navigate = useNavigate();
@@ -123,7 +121,11 @@ function App(props: Props) {
     document.addEventListener("visibilitychange", handler);
     return () => document.removeEventListener("visibilitychange", handler);
   }, [navigate]);
+  const location = useLocation();
+  const controlContext = getTrainingControlContext(location.pathname, location.search);
+  const [trainingMode, setTrainingMode] = useState(false);
   const routes = getRoutes(
+    gradePlans.find(l => l.grade === displayGrade)!,
     gradePlans.find(l => l.grade === nextGrade)!,
     gradePlans,
     translator,
@@ -132,47 +134,55 @@ function App(props: Props) {
     textZoom,
     lang => languageData.save(lang),
     g => gradeData.save(g.grade),
-    size => textSizeData.save(size)
+    size => textSizeData.save(size),
+    trainingMode,
   );
 
   useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
-  useEffect(() => gradeData.registerListener(g => setNextGrade(g)), [gradeData]);
+  useEffect(() => gradeData.registerListener(g => {
+    setNextGrade(g);
+    setDisplayGrade(g);
+  }), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
 
   // An account is required: everything below the login screen assumes a signed-in
   // user, so the provider doubles as the gate. Signing out (or a session that
   // can't be renewed) sets it back to "local" and the login screen returns.
   const { syncProvider } = useSyncProvider();
-  const showSignIn = syncProvider !== "backend";
+  // Local frontend development can run without the Go services. Vite hard-codes
+  // DEV to false in production builds, so this escape hatch cannot bypass the
+  // account requirement in a deployed build even if the variable is set there.
+  const devBypassAuth = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === "true";
+  const showSignIn = syncProvider !== "backend" && !devBypassAuth;
 
   // Auto-apply pending versions for unauthenticated visitors (login screen);
   // authenticated users get the "Update" toast via the returned needRefresh.
   const { needRefresh, applyUpdate } = useAppUpdate(showSignIn);
 
-  // Shared "keep screen on" state. GUI-only for now — no real wake lock yet.
-  // Lives here so the drawer toggle (small screens) and the floating toggle
-  // (large screens) reflect the same value.
-  const [keepAwake, setKeepAwake] = useState(false);
-  // Acquire/release the actual Screen Wake Lock to match the toggle.
-  useWakeLock(keepAwake);
-  // Reset to off whenever the route changes, so the toggle can't silently stay
-  // on after the user moves to a different page (the "I forgot it was on" guard).
-  const location = useLocation();
-  useEffect(() => { setKeepAwake(false); }, [location.pathname]);
+  // Training mode combines the existing Dojo presentation with the screen wake
+  // lock. It can follow the user between training views, but the wake lock is
+  // only requested while the control is relevant on the current page.
+  useWakeLock(trainingMode && controlContext.showTrainingMode);
+  useEffect(() => {
+    const remainsInTraining = location.pathname === "/kamoku" || location.pathname === "/training/grading";
+    if (remainsInTraining) return;
+    const resetTimer = window.setTimeout(() => setTrainingMode(false), 0);
+    return () => window.clearTimeout(resetTimer);
+  }, [location.pathname]);
 
-  // No persistent state across app switches: when the app is hidden, turn the
-  // toggle off so the user must re-activate it on return. This also mirrors the
+  // No persistent state across app switches: when the app is hidden, turn
+  // Training mode off so the user must re-activate it on return. This also mirrors the
   // browser auto-releasing the real wake lock when the tab is hidden.
   useEffect(() => {
     const onHidden = () => {
-      if (document.visibilityState === "hidden") setKeepAwake(false);
+      if (document.visibilityState === "hidden") setTrainingMode(false);
     };
     document.addEventListener("visibilitychange", onHidden);
     return () => document.removeEventListener("visibilitychange", onHidden);
   }, []);
 
-  // Reserve space at the bottom of the page equal to the floating stack's
-  // footprint (toasts + the wake-lock card), so the user can scroll the last
+  // Reserve space at the bottom of the page equal to the floating toast stack's
+  // footprint, so the user can scroll the last
   // line clear of all of it. The stack shrink-wraps its visible children, so the
   // reserve grows and shrinks as toasts appear/disappear, and collapses to 0
   // when the stack is empty (e.g. small screens with no toast showing).
@@ -204,22 +214,29 @@ function App(props: Props) {
   return (
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
-        <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none"
-          keepAwake={keepAwake} onKeepAwakeChange={setKeepAwake} />
-        <div className="app-route-content" style={{ '--floating-stack-reserve': `${floatingReserve}px` } as CSSProperties}>
+        <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none" />
+        <div className="app-route-content" style={{
+          '--floating-stack-reserve': `${floatingReserve}px`,
+          '--training-controls-reserve': controlContext.showGrade || controlContext.showTrainingMode ? '4.75rem' : '0px',
+        } as CSSProperties}>
           {renderRoutes(routes)}
           <Outlet />
         </div>
-        {/* Bottom-right floating stack: transient toasts above, the persistent
-            wake-lock card (lg+) pinned at the corner. The stack's full height is
+        {/* Bottom-right floating stack for transient toasts. Its full height is
             reserved at the bottom of the page (--floating-stack-reserve) so
             nothing here ever covers content when scrolled to the end. */}
         <div ref={floatingRef} className="app-floating-stack d-print-none">
           <AppToasts translator={translator} needRefresh={needRefresh} onUpdate={applyUpdate} />
-          {WAKE_LOCK_SUPPORTED && (
-            <WakeLockToggle variant="card" className="d-none d-lg-block" active={keepAwake} onChange={setKeepAwake} />
-          )}
         </div>
+        <TrainingControls
+          grade={displayGrade}
+          gradePlans={gradePlans}
+          onGradeChange={setDisplayGrade}
+          showGrade={controlContext.showGrade}
+          showTrainingMode={controlContext.showTrainingMode}
+          trainingMode={trainingMode}
+          onTrainingModeChange={setTrainingMode}
+        />
         <SelectionWordLookup />
       </div>
     </TranslatorContext.Provider>
@@ -242,12 +259,10 @@ interface NavbarProps {
   translator: Translator;
   textZoom: number;
   className?: string;
-  keepAwake: boolean;
-  onKeepAwakeChange: (active: boolean) => void;
 }
 
 const AppNavbar = (props: NavbarProps) => {
-  const { routes, className, translator, textZoom, keepAwake, onKeepAwakeChange } = props;
+  const { routes, className, translator, textZoom } = props;
   const [show, setShow] = useState(false);
   const location = useLocation();
   const visibleMenuRoutes = routes.filter(route => !route.hideFromMenu);
@@ -285,12 +300,6 @@ const AppNavbar = (props: NavbarProps) => {
                 </Nav.Link>
               ))}
             </Nav>
-            {/* Drawer toggle, small screens only (the floating one takes over at lg). */}
-            {WAKE_LOCK_SUPPORTED && (
-              <div className="d-lg-none mt-3 px-1">
-                <WakeLockToggle active={keepAwake} onChange={onKeepAwakeChange} className="w-100 justify-content-center" />
-              </div>
-            )}
             <Nav className="me-auto d-none d-lg-flex menu-main-nav" variant="pills">
               {mainMenuRoutes.map((route, index) => route.href ? (
                 <Nav.Link className="menu-item menu-no-wrap" key={index} href={route.href}>

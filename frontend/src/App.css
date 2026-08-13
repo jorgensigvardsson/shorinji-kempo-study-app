@@ -4,9 +4,9 @@
 
 .app-route-content {
   padding: 0.5rem;
-  /* Reserve room so the floating stack (toasts + wake-lock card) never covers
-     the last line of content when scrolled to the bottom. 0 when empty. */
-  padding-bottom: calc(0.5rem + var(--floating-stack-reserve, 0px));
+  /* Reserve room so floating toasts or training controls never cover the last
+     line of content when scrolled to the bottom. 0 when both are absent. */
+  padding-bottom: calc(0.5rem + max(var(--floating-stack-reserve, 0px), var(--training-controls-reserve, 0px)));
   max-width: 48rem;
   margin-left: auto;
   margin-right: auto;

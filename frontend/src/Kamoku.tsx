@@ -1,4 +1,3 @@
-import { Form } from "react-bootstrap";
 import { useContext, useEffect, useRef, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
@@ -14,7 +13,6 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
 );
 import { getAppDataStore } from "./persistence/store";
 import type { CurrentWeekAnchor, WeeklyPlanCompletionEntry } from "./persistence/schema";
-import { gradeLabel } from "./strings";
 import { resolveCurrentWeekNumber, toLocalDateKey } from "./utilities/current-week";
 import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
@@ -26,25 +24,17 @@ export interface Props {
     notesData: HokeiNotes;
     ranksData: HokeiRanks;
     dojoMode?: boolean;
-    onDojoModeChange: (enabled: boolean) => void;
 }
 
 const Kamoku = (props: Props) => {
-    const { myGrade, allGradePlans, notesData, ranksData, dojoMode = false, onDojoModeChange } = props;
+    const { myGrade, allGradePlans, notesData, ranksData, dojoMode = false } = props;
     const store = getAppDataStore();
-    const initialGrade = allGradePlans.find(l => l.grade == myGrade)!;
+    const grade = allGradePlans.find(l => l.grade === myGrade) ?? allGradePlans[0];
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
     const [weeklyPlanCompletions, setWeeklyPlanCompletions] = useState(() => store.get("weeklyPlanCompletions"));
     const [todayKey, setTodayKey] = useState(() => toLocalDateKey());
-    const [selectedWeek, setSelectedWeek] = useState(() => findSelectedWeekIndex(initialGrade, currentWeekAnchor, toLocalDateKey()));
+    const [selectedWeek, setSelectedWeek] = useState(() => findSelectedWeekIndex(grade, currentWeekAnchor, toLocalDateKey()));
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
-    const [grade, setGrade] = useState<GradePlan>(initialGrade);
-
-    const setNewGrade = (newGrade: GradePlan) => {
-        setGrade(newGrade);
-        setSelectedWeek(findSelectedWeekIndex(newGrade, currentWeekAnchor, todayKey));
-    }
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
     useEffect(() => store.subscribe("weeklyPlanCompletions", setWeeklyPlanCompletions), [store]);
@@ -66,7 +56,8 @@ const Kamoku = (props: Props) => {
         return () => window.clearTimeout(timerId);
     }, [todayKey]);
 
-    const selectedWeekData = grade.weeks[selectedWeek];
+    const visibleWeekIndex = Math.min(selectedWeek, grade.weeks.length - 1);
+    const selectedWeekData = grade.weeks[visibleWeekIndex];
     const selectedWeekNumber = selectedWeekData.week;
     const foundationalWeek = selectedWeekData.type === "kihon_only" || selectedWeekData.type === "regular_week"
         ? selectedWeekData
@@ -111,38 +102,13 @@ const Kamoku = (props: Props) => {
                 <p>{weekIntroduction(selectedWeekData, translator)}</p>
             </header>
             <div className="kamoku-controls training-view-controls mb-4">
-                <div className="kamoku-primary-controls">
-                    <div className="kamoku-grade-line">
-                        <Form.Label htmlFor="kamoku-grade-select" className="kamoku-grade-label">
-                            {translator.translate("Grad")}
-                        </Form.Label>
-                        <Form.Select
-                            id="kamoku-grade-select"
-                            className="kamoku-grade-select"
-                            value={grade.grade}
-                            onChange={event => setNewGrade(allGradePlans.find(plan => plan.grade === event.target.value)!)}
-                        >
-                            {allGradePlans.map(plan => (
-                                <option value={plan.grade} key={plan.grade}>{gradeLabel(plan.grade, translator, showKanji)}</option>
-                            ))}
-                        </Form.Select>
-                    </div>
-                    <Form.Check
-                        className="kamoku-dojo-toggle"
-                        type="switch"
-                        id="dojo-mode"
-                        label={translator.translate("Dojo-läge")}
-                        checked={dojoMode}
-                        onChange={event => onDojoModeChange(event.target.checked)}
-                    />
-                </div>
                 <div className="kamoku-week-navigation">
                     <button
                         type="button"
                         className="kamoku-week-button kamoku-week-button-previous"
                         aria-label={translator.translate("Föregående vecka")}
-                        disabled={selectedWeek === 0}
-                        onClick={() => setSelectedWeek(selectedWeek - 1)}
+                        disabled={visibleWeekIndex === 0}
+                        onClick={() => setSelectedWeek(visibleWeekIndex - 1)}
                     >
                         <ArrowLeft aria-hidden="true" />
                         <span>{translator.translate("Föregående")}</span>
@@ -166,8 +132,8 @@ const Kamoku = (props: Props) => {
                         type="button"
                         className="kamoku-week-button kamoku-week-button-next"
                         aria-label={translator.translate("Nästa vecka")}
-                        disabled={selectedWeek === grade.weeks.length - 1}
-                        onClick={() => setSelectedWeek(selectedWeek + 1)}
+                        disabled={visibleWeekIndex === grade.weeks.length - 1}
+                        onClick={() => setSelectedWeek(visibleWeekIndex + 1)}
                     >
                         <span>{translator.translate("Nästa")}</span>
                         <ArrowRight aria-hidden="true" />

@@ -36,7 +36,6 @@ interface Props {
     onAreaChange: (area: PracticeArea | null) => void;
     onBack: () => void;
     dojoMode: boolean;
-    onDojoModeChange: (enabled: boolean) => void;
 }
 
 interface AreaDefinition {
@@ -57,7 +56,7 @@ const areaDefinitions: AreaDefinition[] = [
 const tanenKihonHokei = tanenKihonHokeiData as TanenKihonHokei[];
 
 const FreePractice = (props: Props) => {
-    const { activeArea, onAreaChange, onBack, dojoMode, onDojoModeChange } = props;
+    const { activeArea, onAreaChange, onBack, dojoMode } = props;
     const translator = useContext(TranslatorContext);
     const [visitedAreas, setVisitedAreas] = useState<Set<PracticeArea>>(() =>
         new Set(activeArea ? [activeArea] : []));
@@ -126,14 +125,6 @@ const FreePractice = (props: Props) => {
                             <h1 ref={areaHeadingRef} tabIndex={-1}>{translator.translate(activeDefinition.title)}</h1>
                             <p>{translator.translate(activeDefinition.description)}</p>
                         </div>
-                        <Form.Check
-                            className="free-practice-dojo-toggle"
-                            type="switch"
-                            id="free-practice-dojo-mode"
-                            label={translator.translate("Dojo-läge")}
-                            checked={dojoMode}
-                            onChange={event => onDojoModeChange(event.target.checked)}
-                        />
                     </header>
                 )}
 
@@ -150,8 +141,6 @@ const FreePractice = (props: Props) => {
                         notesData={props.notesData}
                         ranksData={props.ranksData}
                         dojoMode={dojoMode}
-                        onDojoModeChange={onDojoModeChange}
-                        showDojoToggle={false}
                     />
                 </div>
             )}
@@ -181,29 +170,17 @@ const FreePractice = (props: Props) => {
     );
 };
 
-type KihonAreaProps = Pick<Props, "myGrade" | "allGradePlans" | "dojoMode">;
+type KihonAreaProps = Pick<Props, "myGrade" | "dojoMode">;
 
-const KihonArea = ({ myGrade, allGradePlans, dojoMode }: KihonAreaProps) => {
+const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
-    const [selectedGrade, setSelectedGrade] = useState<GradeName>(myGrade);
+    const selectedGrade = myGrade;
 
     return (
         <div className="free-practice-content kihon-practice-proposal">
             <p className="kihon-design-note">
                 {translator.translate("Den här sidan är fortfarande under utformning och kan ändras när som helst.")}
             </p>
-            <Form.Group className="free-practice-grade-control" controlId="free-practice-kihon-grade">
-                <Form.Label>{translator.translate("Visa tekniker upp till grad")}</Form.Label>
-                <Form.Select value={selectedGrade} onChange={event => setSelectedGrade(event.target.value as GradeName)}>
-                    {allGradePlans.map(candidate => (
-                        <option key={candidate.grade} value={candidate.grade}>
-                            {gradeLabel(candidate.grade, translator, showKanji && !dojoMode)}
-                        </option>
-                    ))}
-                </Form.Select>
-            </Form.Group>
-
             <section className="free-practice-section kihon-practice-group">
                 <h3>{translator.translate("Kaisoku dachi / Byakuren chūdan gamae")}</h3>
                 <div className="kihon-practice-columns">
@@ -506,7 +483,6 @@ const resolveKumiEmbuTermParts = (value: string, techniques: EmbuTechnique[]): K
 
 const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "notesData" | "ranksData" | "dojoMode">) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
     const draftData = useMemo(() => loadExperimentalEmbuDraft(), []);
     const [draft, setDraft] = useState<EmbuDraft>(() => draftData.data);
     const [query, setQuery] = useState("");
@@ -543,9 +519,7 @@ const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pi
             .find(item => item.term?.romaji === "kumi embu");
         return sequence ? [{ grade: plan.grade, sequence }] : [];
     }).sort((a, b) => compareGrades(a.grade, b.grade)), [allGradePlans]);
-    const defaultGrade = sequences.find(entry => entry.grade === myGrade)?.grade ?? sequences[0]?.grade;
-    const [selectedGrade, setSelectedGrade] = useState<GradeName | undefined>(defaultGrade);
-    const selected = sequences.find(entry => entry.grade === selectedGrade) ?? sequences[0];
+    const selected = sequences.find(entry => entry.grade === myGrade) ?? sequences[0];
 
     useEffect(() => draftData.registerListener(setDraft), [draftData]);
 
@@ -760,17 +734,6 @@ const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pi
                 <section className="free-practice-section">
                     <div className="free-practice-section-heading">
                         <h3>{translator.translate("Kumi-embu")}</h3>
-                        <Form.Select
-                            aria-label={translator.translate("Grad")}
-                            value={selected.grade}
-                            onChange={event => setSelectedGrade(event.target.value as GradeName)}
-                        >
-                            {sequences.map(entry => (
-                                <option key={entry.grade} value={entry.grade}>
-                                    {gradeLabel(entry.grade, translator, showKanji && !dojoMode)}
-                                </option>
-                            ))}
-                        </Form.Select>
                     </div>
                     <ol className="free-practice-sequence-list">
                         {(selected.sequence.items ?? []).map((step, index) => {

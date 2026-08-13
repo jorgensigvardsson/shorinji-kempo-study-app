@@ -20,44 +20,7 @@
 
 .kamoku-controls {
   margin-bottom: 2.5rem !important;
-  padding: 1.25rem 0 1rem;
-}
-
-.kamoku-primary-controls {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.kamoku-grade-line {
-  display: flex;
-  flex: 0 1 24rem;
-  flex-direction: column;
-  gap: 0.45rem;
-  min-width: 0;
-}
-
-.kamoku-grade-label {
-  margin: 0;
-  color: var(--bs-secondary-color);
-  font-size: 0.9rem;
-  font-weight: 550;
-}
-
-.kamoku-grade-select {
-  width: 100%;
-  border-color: var(--bs-border-color);
-  background-color: var(--bs-tertiary-bg);
-  color: var(--bs-emphasis-color);
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-
-.kamoku-dojo-toggle {
-  margin: 0 0 0.45rem;
-  color: var(--bs-emphasis-color);
-  white-space: nowrap;
+  padding: 0.5rem 0 1rem;
 }
 
 .kamoku-week-navigation {
@@ -65,7 +28,7 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 1rem;
-  margin-top: 1.65rem;
+  margin-top: 0;
 }
 
 .kamoku-week-button {
@@ -302,26 +265,8 @@
     padding-top: 1rem;
   }
 
-  .kamoku-primary-controls {
-    gap: 0.8rem;
-  }
-
-  .kamoku-grade-line {
-    flex: 1 1 0;
-  }
-
-  .kamoku-grade-select {
-    min-width: 0;
-  }
-
-  .kamoku-dojo-toggle {
-    flex: 0 0 auto;
-    font-size: 0.93rem;
-  }
-
   .kamoku-week-navigation {
     gap: 0.65rem;
-    margin-top: 1.4rem;
   }
 
   .kamoku-week-button {
