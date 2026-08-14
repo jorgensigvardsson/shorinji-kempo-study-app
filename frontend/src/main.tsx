@@ -8,16 +8,16 @@ import App from './App.tsx'
 import { BrowserRouter } from "react-router-dom";
 import gradePlans from './assets/kamokuhyo.json';
 import translations from './assets/translations.json';
-import { TranslationsContext, type Language } from './i18n.ts';
+import { TranslationsContext } from './i18n.ts';
 import { load } from './persistence/data.ts';
 import { HokeiNotes, HokeiRanks } from './persistence/app-data.ts';
 import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
 import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey, FontFamilyKanjiStorageKey } from './persistence/font-family.ts';
-import { type GradeName, type GradePlan } from './data.ts'
+import { type GradePlan } from './data.ts'
 import { getSyncManager } from './sync/manager.ts';
 
-const gradeData = load<GradeName>("grade", "shodan");
-const languageData = load<Language>("language", "sv");
+// Grade and language are read straight from the app-data store by useAppData,
+// so they need no wrapper here and no trip through App's props.
 const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);
 const bodyFontFamilyData = load<string>(FontFamilyBodyStorageKey, DefaultFontFamily);
 const headingFontFamilyData = load<string>(FontFamilyHeadingStorageKey, DefaultFontFamily);
@@ -32,8 +32,7 @@ function mountRoot() {
       <ErrorBoundary>
         <BrowserRouter>
           <TranslationsContext value={translations}>
-            <App gradeData={gradeData} languageData={languageData}
-                 gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}
+            <App gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}
                  bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}
                  kanjiFontFamilyData={kanjiFontFamilyData}/>
           </TranslationsContext>

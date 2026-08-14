@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { type GradePlan, type GradeName } from './data'
-import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Language, type Translator } from './i18n';
+import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -18,12 +18,11 @@ import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push
 import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
+import { setAppData, useAppData } from './persistence/use-app-data';
 
 interface Props {
   gradePlans: GradePlan[];
   textSizeData: Data<number>;
-  gradeData: Data<GradeName>;
-  languageData: Data<Language>;
   notesData: HokeiNotes;
   ranksData: HokeiRanks;
   bodyFontFamilyData: Data<string>;
@@ -99,8 +98,8 @@ function useAppUpdate(autoApply: boolean) {
 }
 
 function App(props: Props) {
-  const { gradePlans, languageData, gradeData, notesData, ranksData, textSizeData, bodyFontFamilyData, headingFontFamilyData, kanjiFontFamilyData } = props;
-  const [ language, setLanguage ] = useState<Language>(languageData.data);
+  const { gradePlans, notesData, ranksData, textSizeData, bodyFontFamilyData, headingFontFamilyData, kanjiFontFamilyData } = props;
+  const language = useAppData("language");
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ bodyFontFamily, setBodyFontFamily ] = useState<string>(bodyFontFamilyData.data);
   const [ headingFontFamily, setHeadingFontFamily ] = useState<string>(headingFontFamilyData.data);
@@ -114,8 +113,20 @@ function App(props: Props) {
   // falls through it to the next face in the stack), which reads as a bug.
   // Clearing the language filter is still allowed, it's only the starting point.
   const [ kanjiFontFilter, setKanjiFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "japanese" });
-  const [ nextGrade, setNextGrade ] = useState<GradeName>(gradePlans.find(g => g.grade === gradeData.data)!.grade);
-  const [ displayGrade, setDisplayGrade ] = useState<GradeName>(gradeData.data);
+  // The user's own grade, as stored and synced.
+  const profileGrade = useAppData("grade");
+  // The training controls can temporarily show another grade's material without
+  // touching the user's own grade. That override is session-only, and a real
+  // grade change — from Settings, or arriving over sync — clears it. Resetting
+  // during render rather than in an effect avoids a frame showing the stale
+  // override. See https://react.dev/learn/you-might-not-need-an-effect
+  const [ gradeOverride, setGradeOverride ] = useState<GradeName | null>(null);
+  const [ lastProfileGrade, setLastProfileGrade ] = useState<GradeName>(profileGrade);
+  if (lastProfileGrade !== profileGrade) {
+    setLastProfileGrade(profileGrade);
+    setGradeOverride(null);
+  }
+  const displayGrade = gradeOverride ?? profileGrade;
   const translations = useContext(TranslationsContext);
   const translator = new TranslatorImplementation(translations, language);
   const navigate = useNavigate();
@@ -142,23 +153,18 @@ function App(props: Props) {
   const [trainingMode, setTrainingMode] = useState(false);
   const routes = getRoutes(
     gradePlans.find(l => l.grade === displayGrade)!,
-    gradePlans.find(l => l.grade === nextGrade)!,
+    gradePlans.find(l => l.grade === profileGrade)!,
     gradePlans,
     translator,
     notesData,
     ranksData,
     textZoom,
-    lang => languageData.save(lang),
-    g => gradeData.save(g.grade),
+    lang => setAppData("language", lang),
+    g => setAppData("grade", g.grade),
     size => textSizeData.save(size),
     trainingMode,
   );
 
-  useEffect(() => languageData.registerListener(l => setLanguage(l)), [languageData]);
-  useEffect(() => gradeData.registerListener(g => {
-    setNextGrade(g);
-    setDisplayGrade(g);
-  }), [gradeData]);
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
   useEffect(() => bodyFontFamilyData.registerListener(f => setBodyFontFamily(f)), [bodyFontFamilyData]);
   useEffect(() => headingFontFamilyData.registerListener(f => setHeadingFontFamily(f)), [headingFontFamilyData]);
@@ -255,7 +261,7 @@ function App(props: Props) {
         <TrainingControls
           grade={displayGrade}
           gradePlans={gradePlans}
-          onGradeChange={setDisplayGrade}
+          onGradeChange={setGradeOverride}
           showGrade={controlContext.showGrade}
           showTrainingMode={controlContext.showTrainingMode}
           trainingMode={trainingMode}
