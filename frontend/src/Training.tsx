@@ -109,12 +109,15 @@ const Training = (props: Props) => {
 export const TrainingToolPage = ({ children }: { children: ReactNode }) => {
     const translator = useContext(TranslatorContext);
     const navigate = useNavigate();
+    const location = useLocation();
+    const isGradingCategory = location.pathname === "/training/grading"
+        && new URLSearchParams(location.search).has("gradingCategory");
 
     return (
         <div className="training-page">
             <button type="button" className="training-back" onClick={() => navigate(-1)}>
                 <ArrowLeft aria-hidden="true" />
-                <span>{translator.translate("Träning")}</span>
+                <span>{translator.translate(isGradingCategory ? "Gradering" : "Träning")}</span>
             </button>
             {children}
         </div>

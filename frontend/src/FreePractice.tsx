@@ -8,7 +8,6 @@ import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
 import List from "./List";
 import { TranslatorContext } from "./i18n";
-import { useShowKanji } from "./hooks";
 import { gradeLabel, matchesString, normalizeString } from "./strings";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { loadExperimentalEmbuDraft, type EmbuDraft, type EmbuDraftStep } from "./persistence/experimental-embu-draft";
@@ -766,13 +765,12 @@ const KumiEmbuStepTerm = ({ value, techniques, dojoMode, onSelect }: {
     onSelect: (technique: EmbuTechnique) => void;
 }) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
     const parts = resolveKumiEmbuTermParts(value, techniques);
     const hasLinkedTechnique = parts.some(part => part.techniques.length > 0);
 
     if (!hasLinkedTechnique) return <PracticeTerm value={value} dojoMode={dojoMode} />;
 
-    const japanese = !translator.isJapanese && showKanji && !dojoMode ? translator.japanese(value) : null;
+    const japanese = !translator.isJapanese && !dojoMode ? translator.japanese(value) : null;
     const primary = translator.translate(value);
     const showJapanese = japanese && japanese !== value && japanese !== primary;
 
@@ -807,9 +805,8 @@ const KumiEmbuStepTerm = ({ value, techniques, dojoMode, onSelect }: {
 
 const PracticeTerm = ({ value, dojoMode }: { value: string; dojoMode: boolean }) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
     const primary = translator.isJapanese ? translator.japanese(value) : translator.translate(value);
-    const japanese = !translator.isJapanese && showKanji && !dojoMode ? translator.japanese(value) : null;
+    const japanese = !translator.isJapanese && !dojoMode ? translator.japanese(value) : null;
     const showJapanese = japanese && japanese !== value && japanese !== primary;
 
     return (

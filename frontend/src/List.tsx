@@ -2,7 +2,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } from "./data";
 import { TranslatorContext } from "./i18n";
 import HokeiCard from "./components/HokeiCard";
-import { useShowKanji } from "./hooks";
 import { Form } from "react-bootstrap";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
@@ -24,7 +23,7 @@ const List = (props: Props) => {
     const [filterText, setFilterText] = useState<string>("");
     const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
+    const showKanji = !dojoMode;
 
     const allHokeis = useMemo(() =>
         allGradePlans.flatMap(gradePlan => gradePlan.weeks.map(week => ({

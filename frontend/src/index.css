@@ -17,17 +17,16 @@
      --app-kanji-font                       Japanese faces ("Kanji" font)
      --app-*-fallback                       generic keyword of the picked font
 
-   --app-kanji-font is deliberately left undeclared: each stack carries its own
-   Japanese default in the var() fallback instead -- gothic for body copy,
-   mincho for headings, matching what the browser resolved to before the
-   layer existed -- and picking a kanji font takes over both at once. */
+   The three default web fonts are loaded in index.html. A font-picker choice
+   overrides the matching custom property inline; choosing "Default" removes
+   that override and reveals these values again. */
 :root {
-  /* Bootstrap's own $font-family-sans-serif, minus its trailing generic and
-     emoji faces (they move to the end of --app-body-font-stack, below the
-     Japanese layer). Kept in sync by hand -- see styles/bootstrap-theme.scss,
-     which feeds this stack back into $font-family-sans-serif. */
-  --app-body-face: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial;
-  --app-display-face: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia;
+  /* The layered stacks are fed back into Bootstrap in
+     styles/bootstrap-theme.scss. Latin faces come first, followed by the
+     Japanese layer and finally generic/emoji fallbacks. */
+  --app-body-face: "Open Sans";
+  --app-display-face: "Lora";
+  --app-kanji-font: "Shippori Mincho";
 
   --app-body-font-stack: var(--app-body-face), var(--app-kanji-font, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo), var(--app-body-fallback, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --app-display-font: var(--app-display-face), var(--app-kanji-font, "Yu Mincho", "Hiragino Mincho ProN"), var(--app-display-fallback, serif);

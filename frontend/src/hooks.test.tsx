@@ -71,6 +71,11 @@ describe("useTheme", () => {
     expect(result.current.theme).toBe("light");
   });
 
+  it("applies the stored theme when the hook mounts", () => {
+    renderHook(() => useTheme());
+    expect(document.documentElement.getAttribute("data-bs-theme")).toBe("light");
+  });
+
   it("effectiveTheme equals the explicit theme when not system", () => {
     const { result } = renderHook(() => useTheme());
     expect(result.current.effectiveTheme).toBe("light");
@@ -93,6 +98,7 @@ describe("useTheme", () => {
     const { result } = renderHook(() => useTheme());
     act(() => store.set("theme", "dark"));
     expect(result.current.theme).toBe("dark");
+    expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
   });
 });
 

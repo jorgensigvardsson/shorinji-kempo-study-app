@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
-import { useShowKanji, useTheme } from "../hooks";
+import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
@@ -40,7 +40,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     const note = useHokeiNote(hokei.hokei_name);
     const rank = useHokeiRank(hokei.hokei_name);
     const hasNotes = showNotes && !!note;
-    const showKanji = useShowKanji();
+    const showKanji = !dojoMode;
 
     const videos = hokei.videos ?? [];
     const footer = (showNotes || videos.length > 0) ? (
@@ -77,14 +77,14 @@ const HokeiCard = (props: HokeiCardProps) => {
     if (kamokuLayout) {
         return (
             <CollapsibleCard
-                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} />}
+                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} showKanji={showKanji} />}
                 footer={kamokuFooter}
                 focusOnOpen
                 defaultOpen={defaultOpen}
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
             >
-                <KamokuCardBody hokei={hokei} />
+                <KamokuCardBody hokei={hokei} showKanji={showKanji} />
             </CollapsibleCard>
         );
     }
@@ -155,11 +155,11 @@ interface KamokuCardHeaderProps {
     gradeName?: GradeName;
     rank: HokeiRankValue | null;
     showRating?: boolean;
+    showKanji: boolean;
 }
 
-const KamokuCardHeader = ({ hokei, gradeName, rank, showRating }: KamokuCardHeaderProps) => {
+const KamokuCardHeader = ({ hokei, gradeName, rank, showRating, showKanji }: KamokuCardHeaderProps) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
     const name = translator.isJapanese ? translator.japanese(hokei.hokei_name) : translator.translate(hokei.hokei_name, { capitalize: true });
     const japaneseName = !translator.isJapanese && showKanji ? translator.japanese(hokei.hokei_name) : null;
 
@@ -207,9 +207,8 @@ const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
     );
 };
 
-const KamokuCardBody = ({ hokei }: { hokei: HokeiMoment }) => {
+const KamokuCardBody = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: boolean }) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji();
     const effectiveTheme = useTheme();
     const renderValue = (value?: string, suffix?: React.ReactNode) => value ? (
         <span className="kamoku-card-value">

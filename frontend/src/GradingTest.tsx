@@ -1,10 +1,10 @@
 import { useContext, useMemo, useState } from "react";
-import { Badge, Button } from "react-bootstrap";
-import { XLg } from "react-bootstrap-icons";
+import { Badge } from "react-bootstrap";
+import { Award, Book, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
+import { useSearchParams } from "react-router-dom";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext, type Translator } from "./i18n";
-import { useShowKanji } from "./hooks";
 import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
@@ -156,15 +156,60 @@ function itemDisplay(item: Item, translator: Translator, showKanji: boolean): It
 const sentenceCase = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 
 function hasExpandableContent(item: Item): boolean {
-    return !!(item.annotations?.length || item.techniqueGroups?.length || item.items?.length);
+    return !!(
+        item.description
+        || item.term?.gloss
+        || item.annotations?.length
+        || item.techniqueGroups?.length
+        || item.items?.length
+        || item.videos?.length
+    );
+}
+
+function itemSummary(item: Item, translator: Translator, showKanji: boolean) {
+    const display = itemDisplay(item, translator, showKanji);
+    const subtitleParts = [display.romajiSecondary, display.kanji].filter((value): value is string => !!value);
+    return {
+        display,
+        title: sentenceCase(display.primary),
+        subtitle: subtitleParts.length > 0 ? sentenceCase(subtitleParts.join(" · ")) : undefined,
+    };
+}
+
+function categoryIcon(romaji: string | undefined) {
+    switch (romaji) {
+        case "kiso kamoku":
+        case "gijutsu I":
+            return <Book />;
+        case "chūshutsu kamoku":
+        case "gijutsu II":
+            return <Collection />;
+        case "kumi embu":
+            return <People />;
+        case "hōkei kamoku":
+            return <ListUl />;
+        default:
+            return <Award />;
+    }
 }
 
 const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
-    const showKanji = useShowKanji() && !dojoMode;
+    const [searchParams, setSearchParams] = useSearchParams();
+    const showKanji = !dojoMode;
     const selectedGrade = grade && allGrades[grade] !== undefined ? grade : undefined;
-    const [selection, setSelection] = useState<{ grade: GradeName; sectionIndex: number; item: Item } | null>(null);
-    const activeSelection = selection?.grade === selectedGrade ? selection : null;
+    const [selection, setSelection] = useState<{ grade: GradeName; sectionIndex: number; itemIndex: number } | null>(null);
+    const categoryParam = searchParams.get("gradingCategory");
+    const [categoryGrade, categorySection, categoryItem] = categoryParam?.split("|") ?? [];
+    const categorySelection = selectedGrade
+        && categoryGrade === selectedGrade
+        && /^\d+$/.test(categorySection ?? "")
+        && /^\d+$/.test(categoryItem ?? "")
+        ? { grade: selectedGrade, sectionIndex: Number(categorySection), itemIndex: Number(categoryItem) }
+        : null;
+    const activeSelection = subject === "technical"
+        ? categorySelection
+        : selection?.grade === selectedGrade ? selection : null;
 
     const hokeiMap = useMemo(() => {
         const map = new Map<string, HokeiMoment>();
@@ -191,86 +236,151 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         .map((section, sectionIndex) => ({ section, sectionIndex }))
         .filter(({ section }) => section.term?.romaji === subjectTerm);
 
-    const closeItem = () => setSelection(null);
+    const selectedSection = activeSelection ? manual.sections[activeSelection.sectionIndex] : undefined;
+    const selectedItem = selectedSection && activeSelection
+        ? selectedSection.items[activeSelection.itemIndex]
+        : undefined;
+
+    const openTechnicalCategory = (sectionIndex: number, itemIndex: number) => {
+        if (!selectedGrade) return;
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.set("gradingCategory", `${selectedGrade}|${sectionIndex}|${itemIndex}`);
+        setSearchParams(nextParams);
+    };
+
+    if (subject === "technical" && activeSelection && selectedSection && selectedItem) {
+        const { display, title, subtitle } = itemSummary(selectedItem, translator, showKanji);
+        return (
+            <div className={`grading-test-page grading-category-page grading-detail-enter${dojoMode ? " is-dojo-mode" : ""}`}>
+                <header className="grading-category-header">
+                    <div className="grading-category-heading">
+                        <div className="text-muted small mb-1">{sentenceCase(translator.translate(selectedSection.title))}</div>
+                        <h2 className="mb-0">{title}</h2>
+                        {subtitle && <div className="text-muted small mt-1">{subtitle}</div>}
+                        {display.gloss && <div className="text-muted small mt-1">({display.gloss})</div>}
+                    </div>
+                    {selectedItem.points != null && <Badge bg="secondary">{selectedItem.points}{translator.translate("p")}</Badge>}
+                </header>
+
+                <ItemDetail
+                    item={selectedItem}
+                    translator={translator}
+                    showKanji={showKanji}
+                    hokeiMap={hokeiMap}
+                    dojoMode={dojoMode}
+                    showGloss={false}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
-                <h2>{translator.translate(manual.title)}</h2>
-                {manual.term && !translator.isJapanese && <div className="text-muted small mb-3">{sentenceCase(manual.term.romaji)}</div>}
+            <header className="grading-page-header">
+                <h2 className="mb-0">{translator.translate(manual.title)}</h2>
+                {manual.term && !translator.isJapanese && <div className="text-muted small mt-1">{sentenceCase(manual.term.romaji)}</div>}
+            </header>
 
-                {activeSelection !== null ? (
-                    <div className="grading-section-body grading-detail-enter">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <h3 className="mb-0">
-                                    {sentenceCase(translator.translate(manual.sections[activeSelection.sectionIndex].title))}
-                                </h3>
-                                {!translator.isJapanese && manual.sections[activeSelection.sectionIndex].term?.romaji && (
-                                    <div className="text-muted small">{sentenceCase(manual.sections[activeSelection.sectionIndex].term!.romaji)}</div>
+            <div className="grading-sections">
+                {sections.map(({ section, sectionIndex }) => {
+                    const categoryItems: GridItem[] = section.items.map((item, itemIndex) => {
+                        const summary = itemSummary(item, translator, showKanji);
+                        return {
+                            key: `category-${sectionIndex}-${itemIndex}`,
+                            title: item.term?.romaji === "kumi embu" ? translator.translate("Embu") : summary.title,
+                            subtitle: summary.subtitle,
+                            badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
+                            icon: categoryIcon(item.term?.romaji),
+                            onSelect: selectedGrade
+                                ? () => openTechnicalCategory(sectionIndex, itemIndex)
+                                : undefined,
+                        };
+                    });
+
+                    return (
+                        <section className="grading-section" key={`section-${sectionIndex}`}>
+                            <header className="grading-section-heading">
+                                <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
+                                {!translator.isJapanese && section.term?.romaji && (
+                                    <div className="text-muted small mt-1">{sentenceCase(section.term.romaji)}</div>
                                 )}
-                            </div>
-                            <Button variant="link" size="sm" onClick={closeItem} aria-label="Stäng" className="text-body p-0">
-                                <XLg size={14} />
-                            </Button>
-                        </div>
-                        <ItemDetail item={activeSelection.item} translator={translator} showKanji={showKanji} hokeiMap={hokeiMap} dojoMode={dojoMode} />
-                    </div>
-                ) : (
-                    sections.map(({ section, sectionIndex }) => {
-                        const gridItems: GridItem[] = section.items.map((item, i) => {
-                            const display = itemDisplay(item, translator, showKanji);
-                            const subtitleParts = [display.romajiSecondary, display.kanji].filter((v): v is string => !!v);
-                            const subtitle = subtitleParts.length > 0 ? sentenceCase(subtitleParts.join(" · ")) : undefined;
-                            return {
-                                key: `item-${sectionIndex}-${i}`,
-                                title: sentenceCase(display.primary),
-                                subtitle,
-                                badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
-                                onSelect: hasExpandableContent(item) && selectedGrade
-                                    ? () => setSelection({ grade: selectedGrade, sectionIndex, item })
-                                    : undefined,
-                            };
-                        });
-                        return (
-                            <div key={`section-${sectionIndex}`}>
-                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <div>
-                                        <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
-                                        {!translator.isJapanese && section.term?.romaji && (
-                                            <span className="text-muted small">{sentenceCase(section.term.romaji)}</span>
-                                        )}
-                                    </div>
+                            </header>
+
+                            {subject === "technical" ? (
+                                <Grid items={categoryItems} className="start-grid" />
+                            ) : (
+                                <div className="grading-outline">
+                                    {section.items.map((item, itemIndex) => {
+                                        const { title, subtitle } = itemSummary(item, translator, showKanji);
+                                        const expandable = hasExpandableContent(item);
+                                        const expanded = activeSelection?.sectionIndex === sectionIndex
+                                            && activeSelection.itemIndex === itemIndex;
+                                        const detailsId = `grading-item-${subject}-${sectionIndex}-${itemIndex}`;
+                                        const rowContent = (
+                                            <>
+                                                <span className="grading-outline-copy">
+                                                    <span className="grading-outline-title">{title}</span>
+                                                    {subtitle && <span className="grading-outline-subtitle">{subtitle}</span>}
+                                                </span>
+                                                <span className="grading-outline-meta">
+                                                    {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
+                                                    {expandable && (expanded ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />)}
+                                                </span>
+                                            </>
+                                        );
+
+                                        return (
+                                            <article className={`grading-outline-item${expanded ? " is-expanded" : ""}`} key={`item-${sectionIndex}-${itemIndex}`}>
+                                                {expandable && selectedGrade ? (
+                                                    <button
+                                                        type="button"
+                                                        className="grading-outline-trigger"
+                                                        aria-expanded={expanded}
+                                                        aria-controls={detailsId}
+                                                        onClick={() => setSelection(expanded ? null : { grade: selectedGrade, sectionIndex, itemIndex })}
+                                                    >
+                                                        {rowContent}
+                                                    </button>
+                                                ) : (
+                                                    <div className="grading-outline-summary">{rowContent}</div>
+                                                )}
+
+                                                {expanded && (
+                                                    <div id={detailsId} className="grading-outline-detail grading-detail-enter">
+                                                        <ItemDetail
+                                                            item={item}
+                                                            translator={translator}
+                                                            showKanji={showKanji}
+                                                            hokeiMap={hokeiMap}
+                                                            dojoMode={dojoMode}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </article>
+                                        );
+                                    })}
                                 </div>
-                                <div className="grading-section-body">
-                                    <Grid items={gridItems} />
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
+                            )}
+                        </section>
+                    );
+                })}
+            </div>
         </div>
     );
 };
 
 
-const ItemDetail = ({ item, translator, showKanji, hokeiMap, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; dojoMode: boolean }) => {
+const ItemDetail = ({ item, translator, showKanji, hokeiMap, dojoMode, showGloss = true }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; dojoMode: boolean; showGloss?: boolean }) => {
     const display = itemDisplay(item, translator, showKanji);
 
     return (
         <div>
-            <div className="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h5 className="mb-0">{sentenceCase(display.primary)}</h5>
-                    {display.gloss && <div className="text-muted small">({display.gloss})</div>}
-                    {display.romajiSecondary && <div className="text-muted small fst-italic">{display.romajiSecondary}</div>}
-                    {display.kanji && <div className="text-muted small">{display.kanji}</div>}
-                </div>
-                {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
-            </div>
+            {showGloss && display.gloss && <div className="text-muted small mb-2">({display.gloss})</div>}
             {item.description && <p className="mb-2">{translator.translate(item.description)}</p>}
             {item.annotations?.map((ann, i) => (
                 <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
             ))}
+            <TechniqueGroups groups={item.techniqueGroups} translator={translator} showKanji={showKanji} />
             <div className="d-flex flex-column gap-2">
                 {item.items?.map((subItem, i) => (
                     <SubItemCard key={i} item={subItem} translator={translator} showKanji={showKanji} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} dojoMode={dojoMode} />
@@ -338,6 +448,7 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
             showCollapse={hasContent}
             inlineChevron
         >
+            {item.description && <p className="mb-2">{translator.translate(item.description)}</p>}
             {item.annotations?.map((ann, i) => (
                 <p key={i} className="text-muted small fst-italic mb-2">* {translator.translate(ann.text)}</p>
             ))}
@@ -348,29 +459,18 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
                     ))}
                 </div>
             )}
-            {item.techniqueGroups?.map((group, gi) => (
-                <div key={gi} className="mb-2">
-                    {group.context?.text && (
-                        <div className="text-muted small mb-1">{translator.translate(group.context.text)}</div>
-                    )}
-                    <ul className="mb-0">
-                        {group.techniques.map((tech, ti) => {
-                            const techKanji = translator.japanese(tech.romaji);
-                            const hasKanji = techKanji !== tech.romaji;
-                            return (
-                                <li key={ti}>
-                                    {translator.isJapanese && hasKanji ? techKanji : tech.romaji}
-                                    {!translator.isJapanese && showKanji && hasKanji && <span className="text-muted ms-1 small">{techKanji}</span>}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            ))}
+            <TechniqueGroups groups={item.techniqueGroups} translator={translator} showKanji={showKanji} />
             {tanenVideos.length > 0 && (
                 <div className="mt-3 d-flex flex-column gap-2">
                     {tanenVideos.map(v => (
                         <VideoLink key={v.url} video={v} />
+                    ))}
+                </div>
+            )}
+            {item.videos && item.videos.length > 0 && (
+                <div className="mt-3 d-flex flex-column gap-2">
+                    {item.videos.map(video => (
+                        <VideoLink key={video.url} video={video} />
                     ))}
                 </div>
             )}
@@ -389,5 +489,29 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
         </CollapsibleCard>
     );
 };
+
+const TechniqueGroups = ({ groups, translator, showKanji }: { groups: TechniqueGroup[] | undefined; translator: Translator; showKanji: boolean }) => (
+    <>
+        {groups?.map((group, groupIndex) => (
+            <div key={groupIndex} className="mb-2">
+                {group.context?.text && (
+                    <div className="text-muted small mb-1">{translator.translate(group.context.text)}</div>
+                )}
+                <ul className="mb-0">
+                    {group.techniques.map((tech, techniqueIndex) => {
+                        const techKanji = translator.japanese(tech.romaji);
+                        const hasKanji = techKanji !== tech.romaji;
+                        return (
+                            <li key={techniqueIndex}>
+                                {translator.isJapanese && hasKanji ? techKanji : tech.romaji}
+                                {!translator.isJapanese && showKanji && hasKanji && <span className="text-muted ms-1 small">{techKanji}</span>}
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        ))}
+    </>
+);
 
 export default GradingTest;

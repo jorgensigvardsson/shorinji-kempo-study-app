@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import Training from "./Training";
+import Training, { TrainingToolPage } from "./Training";
 
 vi.mock("./Kamoku", () => ({
   default: ({ dojoMode }: { dojoMode?: boolean }) => (
@@ -138,5 +138,30 @@ describe("Training", () => {
     await user.click(screen.getByRole("button", { name: /Fri träning/i }));
     await user.click(screen.getByRole("button", { name: /^Hokei/i }));
     expect(screen.getByTestId("all-hokei").getAttribute("data-dojo-mode")).toBe("true");
+  });
+});
+
+describe("TrainingToolPage", () => {
+  it("uses one context-aware back button inside a grading category", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter
+        initialEntries={[
+          "/training/grading",
+          "/training/grading?gradingCategory=3+ky%C5%AB%7C0%7C0",
+        ]}
+        initialIndex={1}
+      >
+        <TrainingToolPage><div>Category content</div></TrainingToolPage>
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getAllByRole("button", { name: "Gradering" })).toHaveLength(1);
+
+    await user.click(screen.getByRole("button", { name: "Gradering" }));
+
+    expect(screen.getByTestId("location").textContent).toBe("/training/grading");
+    expect(screen.getAllByRole("button", { name: "Träning" })).toHaveLength(1);
   });
 });

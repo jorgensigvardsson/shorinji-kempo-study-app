@@ -345,30 +345,6 @@ jobs:
         run: |
           printf 'User-agent: *\nDisallow: /\n' > frontend/dist/robots.txt
 
-      # The experimental font picker is active on staging (VITE_ENVIRONMENT), and
-      # it loads stylesheets from fonts.googleapis.com and the font files those
-      # reference from fonts.gstatic.com. The shipped Content-Security-Policy
-      # allows neither, so the browser blocks both. Widen it here, in dist/,
-      # rather than in frontend/public/.htaccess — production never activates the
-      # picker and its CSP should keep naming no third-party origin. Retire this
-      # step along with the font picker (see README.md).
-      - name: Allow Google Fonts in the staging CSP
-        run: |
-          set -euo pipefail
-          htaccess=frontend/dist/.htaccess
-          sed -i \
-            -e "s|style-src 'self' 'unsafe-inline';|style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;|" \
-            -e "s|font-src 'self' data:;|font-src 'self' data: https://fonts.gstatic.com;|" \
-            "$htaccess"
-          # A silent no-match would deploy a staging site whose font picker loads
-          # nothing, so treat it as a failure rather than shipping it.
-          if ! grep -q "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;" "$htaccess" \
-            || ! grep -q "font-src 'self' data: https://fonts.gstatic.com;" "$htaccess"; then
-            echo "::error::Could not relax the CSP for Google Fonts — the style-src/font-src directives in frontend/public/.htaccess no longer match what this step rewrites."
-            exit 1
-          fi
-          grep -n 'Content-Security-Policy' "$htaccess"
-
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}

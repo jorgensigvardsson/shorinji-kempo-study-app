@@ -31,6 +31,23 @@ $border-color: #c8c0b1;
 
 @import "bootstrap/scss/bootstrap";
 
+// Native select popups otherwise fall back to the operating system's blue
+// highlight. Browsers that allow option styling now follow the active colours
+// from the current app theme instead.
+.form-select option {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+}
+
+.form-select option:checked {
+  color: var(--bs-component-active-color);
+  background-color: var(--bs-component-active-bg);
+  background-image: linear-gradient(
+    var(--bs-component-active-bg),
+    var(--bs-component-active-bg)
+  );
+}
+
 // Dark theme palette (runtime overrides when data-bs-theme="dark")
 $dark-theme-colors: (
   "primary": $primary-dark-gold,
