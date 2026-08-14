@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultAppDataDocument, formatKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./schema";
+import { canonicalKenshiNumber, createDefaultAppDataDocument, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./schema";
 
 describe("createDefaultAppDataDocument", () => {
   it("returns version 1", () => {
@@ -69,15 +69,40 @@ describe("kenshi numbers", () => {
     expect(isKenshiNumber(normalizeKenshiNumber("SWE-12345"))).toBe(false);
   });
 
-  it("groups a full-length number as nnn-nnnnnn", () => {
-    expect(formatKenshiNumber("123456789")).toBe("123-456789");
-    expect(formatKenshiNumber("123-456789")).toBe("123-456789");
-    expect(formatKenshiNumber("123 456789")).toBe("123-456789");
+  it("accepts both the nine- and ten-digit lengths hombu issues", () => {
+    expect(isCompleteKenshiNumber("123-456789")).toBe(true);
+    expect(isCompleteKenshiNumber("1234-567890")).toBe(true);
+    expect(isCompleteKenshiNumber("123456789")).toBe(true);
+    expect(isCompleteKenshiNumber("1234567890")).toBe(true);
   });
 
-  it("leaves a number that is not full length alone", () => {
+  it("rejects lengths no kenshi number has", () => {
+    expect(isCompleteKenshiNumber("12345")).toBe(false);
+    expect(isCompleteKenshiNumber("12345678901")).toBe(false);
+    expect(isCompleteKenshiNumber("")).toBe(false);
+  });
+
+  it("stores a nine-digit number as ten digits, with its leading zero", () => {
+    expect(canonicalKenshiNumber("123-456789")).toBe("0123456789");
+    expect(canonicalKenshiNumber("123456789")).toBe("0123456789");
+  });
+
+  it("leaves a ten-digit number as it is", () => {
+    expect(canonicalKenshiNumber("1234-567890")).toBe("1234567890");
+    expect(canonicalKenshiNumber("0123456789")).toBe("0123456789");
+  });
+
+  it("groups a number as [n]nnn-nnnnnn, without the padded leading zero", () => {
+    expect(formatKenshiNumber("0123456789")).toBe("123-456789");
+    expect(formatKenshiNumber("123456789")).toBe("123-456789");
+    expect(formatKenshiNumber("123-456789")).toBe("123-456789");
+    expect(formatKenshiNumber("1234567890")).toBe("1234-567890");
+    expect(formatKenshiNumber("1234-567890")).toBe("1234-567890");
+  });
+
+  it("leaves a number that is not whole alone", () => {
     expect(formatKenshiNumber("12345")).toBe("12345");
-    expect(formatKenshiNumber("1234567890")).toBe("1234567890");
+    expect(formatKenshiNumber("12345678901")).toBe("12345678901");
     expect(formatKenshiNumber("")).toBe("");
   });
 });

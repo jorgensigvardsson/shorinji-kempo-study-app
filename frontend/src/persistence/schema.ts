@@ -54,15 +54,20 @@ export interface AppDataDocument {
   data: AppDataState;
 }
 
-// A kenshi number is stored as a plain run of digits. Written down it is grouped as
-// nnn-nnnnnn, so the separators are treated as part of the writing rather than part
-// of the number: stripped on the way in, put back for display.
+// A kenshi number is written down grouped as [n]nnn-nnnnnn: a leading group of three
+// or four digits, then six. Hombu issued three-digit leading groups until it ran out
+// of them, so both are in circulation. The separators belong to the writing rather
+// than to the number — stripped on the way in, put back for display — and the stored
+// form is the ten digits, with a nine-digit number carrying the leading zero it is
+// written without. That way one canonical value covers both lengths, and the numbers
+// already saved at nine digits are read as the same number rather than as a different
+// one.
 //
 // The settings form and the document sanitizer both go through these helpers so the
 // two can never disagree: a number the form accepts but the sanitizer rejects looks
 // saved until the next load, and then disappears — from this device and, via sync,
-// from the server too. For the same reason the stored form stays "any run of digits"
-// rather than "exactly nine": tightening it would delete numbers already saved.
+// from the server too. That is also why the sanitizer keeps accepting any run of
+// digits: narrowing what it stores would delete numbers already saved.
 export function normalizeKenshiNumber(value: string): string {
   return value.replace(/[\s-]+/g, "");
 }
@@ -71,10 +76,23 @@ export function isKenshiNumber(value: string): boolean {
   return /^\d+$/.test(value);
 }
 
-// Groups a full-length number as nnn-nnnnnn. Anything else is handed back untouched.
+// Whether a number is one a kenshi could actually have been issued.
+export function isCompleteKenshiNumber(value: string): boolean {
+  return /^\d{9,10}$/.test(normalizeKenshiNumber(value));
+}
+
+// The stored form: ten digits, padding a nine-digit number with its leading zero.
+// Anything else is handed back stripped of separators but otherwise untouched.
+export function canonicalKenshiNumber(value: string): string {
+  const digits = normalizeKenshiNumber(value);
+  return /^\d{9}$/.test(digits) ? `0${digits}` : digits;
+}
+
+// Groups a number as [n]nnn-nnnnnn, leaving off the leading zero that a nine-digit
+// number is padded with. Anything that is not a whole number is handed back untouched.
 export function formatKenshiNumber(value: string): string {
-  const groups = /^(\d{3})(\d{6})$/.exec(normalizeKenshiNumber(value));
-  return groups ? `${groups[1]}-${groups[2]}` : value;
+  const groups = /^(\d{4})(\d{6})$/.exec(canonicalKenshiNumber(value));
+  return groups ? `${groups[1].replace(/^0/, "")}-${groups[2]}` : value;
 }
 
 function newDeviceId(): string {

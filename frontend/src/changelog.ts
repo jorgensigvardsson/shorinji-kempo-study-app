@@ -17,10 +17,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       {
         emoji: "🔢",
-        sv: "Ett fel har åtgärdats där kenshinumret såg ut att sparas men var borta nästa gång appen öppnades. Numret kan nu skrivas precis som det står på kortet, med bindestreck eller mellanrum, och visas grupperat som nnn-nnnnnn. Skrivs något annat än siffror in säger appen ifrån direkt.",
-        en: "Fixed a bug where the kenshi number looked saved but was gone the next time the app was opened. The number can now be written exactly as it appears on your card, with a hyphen or spaces, and is shown grouped as nnn-nnnnnn. If anything other than digits is entered, the app says so right away.",
-        tr: "Kenshi numarasının kaydedilmiş gibi görünüp uygulama bir sonraki açılışta kaybolmasına yol açan bir hata düzeltildi. Numara artık kartınızda yazdığı gibi, tire veya boşluklarla girilebiliyor ve nnn-nnnnnn biçiminde gruplanmış olarak gösteriliyor. Rakam dışında bir şey girilirse uygulama bunu hemen bildiriyor.",
-        ja: "拳士番号が保存されたように見えても、次にアプリを開くと消えていた不具合を修正しました。番号はカードに書かれているとおり、ハイフンや空白を入れて入力でき、nnn-nnnnnn の形に区切って表示されます。数字以外を入力した場合はその場で知らせます。",
+        sv: "Ett fel har åtgärdats där kenshinumret såg ut att sparas men var borta nästa gång appen öppnades. Numret kan nu skrivas precis som det står på kortet, med bindestreck eller mellanrum, och visas grupperat som 123-456789 eller 1234-567890. Både de äldre numren med tre inledande siffror och hombus nya med fyra fungerar, och skrivs något som inte är ett kenshinummer in säger appen ifrån.",
+        en: "Fixed a bug where the kenshi number looked saved but was gone the next time the app was opened. The number can now be written exactly as it appears on your card, with a hyphen or spaces, and is shown grouped as 123-456789 or 1234-567890. Both the older numbers with three leading digits and hombu's new ones with four are accepted, and the app says so if what is entered is not a kenshi number.",
+        tr: "Kenshi numarasının kaydedilmiş gibi görünüp uygulama bir sonraki açılışta kaybolmasına yol açan bir hata düzeltildi. Numara artık kartınızda yazdığı gibi, tire veya boşluklarla girilebiliyor ve 123-456789 ya da 1234-567890 biçiminde gruplanmış olarak gösteriliyor. Hem baştaki üç rakamlı eski numaralar hem de hombunun dört rakamlı yeni numaraları kabul ediliyor; girilen bir kenshi numarası değilse uygulama bunu bildiriyor.",
+        ja: "拳士番号が保存されたように見えても、次にアプリを開くと消えていた不具合を修正しました。番号はカードに書かれているとおり、ハイフンや空白を入れて入力でき、123-456789 または 1234-567890 の形に区切って表示されます。先頭が3桁の従来の番号も、本部が新たに発行する4桁の番号も使用でき、拳士番号でないものが入力された場合はその旨をお知らせします。",
       },
     ],
   },

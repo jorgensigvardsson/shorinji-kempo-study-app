@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
-import { formatKenshiNumber, isKenshiNumber, normalizeKenshiNumber, type CurrentWeekAnchor } from "./persistence/schema";
+import { canonicalKenshiNumber, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber, type CurrentWeekAnchor } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
@@ -34,7 +34,18 @@ const Settings = (props: Props) => {
     // grouping is applied on the way in and when leaving the field, never mid-keystroke,
     // so it cannot move the cursor around while the number is being written.
     const [kenshiNumberText, setKenshiNumberText] = useState(() => formatKenshiNumber(store.get("kenshiNumber") ?? ""));
-    const kenshiNumberIsInvalid = kenshiNumberText.trim().length > 0 && !isKenshiNumber(normalizeKenshiNumber(kenshiNumberText));
+    // A number is half-written for most of the time it is being typed, so its length is
+    // only worth complaining about once the field is left. A character that can never
+    // belong to a kenshi number is worth saying something about right away.
+    const [kenshiNumberLeft, setKenshiNumberLeft] = useState(false);
+    const kenshiNumberDigits = normalizeKenshiNumber(kenshiNumberText);
+    const kenshiNumberError = kenshiNumberText.trim().length === 0
+        ? null
+        : !isKenshiNumber(kenshiNumberDigits)
+            ? translator.translate("Ett kenshinummer består bara av siffror.")
+            : (kenshiNumberLeft && !isCompleteKenshiNumber(kenshiNumberDigits))
+                ? translator.translate("Ett kenshinummer består av 9 eller 10 siffror, till exempel 123-456789.")
+                : null;
     const availableWeeks = useMemo(
         () => [...new Set(nextGrade.weeks.map(week => week.week))].sort((a, b) => a - b),
         [nextGrade]
@@ -63,7 +74,7 @@ const Settings = (props: Props) => {
     // holds — a sync or another tab. Writes made from here must not rewrite the text
     // mid-typing.
     useEffect(() => store.subscribe("kenshiNumber", stored => {
-        setKenshiNumberText(current => normalizeKenshiNumber(current) === (stored ?? "") ? current : formatKenshiNumber(stored ?? ""));
+        setKenshiNumberText(current => canonicalKenshiNumber(current) === (stored ?? "") ? current : formatKenshiNumber(stored ?? ""));
     }), [store]);
 
     const exportData = () => {
@@ -153,29 +164,31 @@ const Settings = (props: Props) => {
                     inputMode="numeric"
                     autoComplete="off"
                     value={kenshiNumberText}
-                    isInvalid={kenshiNumberIsInvalid}
+                    isInvalid={kenshiNumberError !== null}
                     onChange={e => {
                         const text = e.target.value ?? "";
                         setKenshiNumberText(text);
+                        setKenshiNumberLeft(false);
 
-                        // Spaces and the nnn-nnnnnn hyphen are how a number gets written
-                        // down, so they are removed rather than rejected.
-                        const value = normalizeKenshiNumber(text);
-                        if (value.length === 0) {
+                        // Spaces and the [n]nnn-nnnnnn hyphen are how a number gets written
+                        // down, so they are removed rather than rejected. A half-written
+                        // number leaves what is stored alone until it is whole again.
+                        const typedDigits = normalizeKenshiNumber(text);
+                        if (typedDigits.length === 0) {
                             store.set("kenshiNumber", undefined);
-                        } else if (isKenshiNumber(value)) {
-                            store.set("kenshiNumber", value);
+                        } else if (isCompleteKenshiNumber(typedDigits)) {
+                            store.set("kenshiNumber", canonicalKenshiNumber(typedDigits));
                         }
                     }}
                     onBlur={() => {
-                        const value = normalizeKenshiNumber(kenshiNumberText);
-                        if (isKenshiNumber(value)) {
-                            setKenshiNumberText(formatKenshiNumber(value));
+                        setKenshiNumberLeft(true);
+                        if (isCompleteKenshiNumber(kenshiNumberDigits)) {
+                            setKenshiNumberText(formatKenshiNumber(kenshiNumberDigits));
                         }
                     }}
                 />
                 <Form.Control.Feedback type="invalid">
-                    {translator.translate("Ett kenshinummer består bara av siffror.")}
+                    {kenshiNumberError}
                 </Form.Control.Feedback>
             </Form.Group>
 
