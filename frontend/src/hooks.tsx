@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAppDataStore } from './persistence/store';
+import { setAppData, useAppData } from './persistence/use-app-data';
 import type { SyncProvider, ThemePreference } from './persistence/schema';
 import { getSyncManager } from './sync/manager';
 import type { SyncState } from './sync/types';
@@ -41,17 +41,14 @@ function applyTheme(theme: "light" | "dark") {
 }
 
 export function useTheme() {
-  const [preference, setPreference] = useState<ThemePreference>(() => getAppDataStore().get("theme"));
+  const preference = useAppData("theme");
 
+  // Applying the theme is a real side effect on the document, so this effect
+  // stays. What went away is the write-back that persisted the preference the
+  // component had just been handed by the store.
   useEffect(() => {
-    const resolved =
-      preference === "system" ? getSystemTheme() : preference;
-
-    applyTheme(resolved);
-    getAppDataStore().set("theme", preference);
+    applyTheme(preference === "system" ? getSystemTheme() : preference);
   }, [preference]);
-
-  useEffect(() => getAppDataStore().subscribe("theme", setPreference), []);
 
   // React to OS theme changes when in system mode
   useEffect(() => {
@@ -67,7 +64,7 @@ export function useTheme() {
   return {
     theme: preference,
     effectiveTheme: preference === "system" ? getSystemTheme() : preference,
-    setTheme: setPreference
+    setTheme: (theme: ThemePreference) => setAppData("theme", theme)
   };
 }
 
@@ -103,23 +100,16 @@ export function useWakeLock(active: boolean) {
 }
 
 export function useShowKanji() {
-  const [showKanji, setShowKanji] = useState(() => getAppDataStore().get("showKanjiOnHokeiCards"));
-
-  useEffect(() => getAppDataStore().subscribe("showKanjiOnHokeiCards", setShowKanji), []);
-
-  return showKanji;
+  return useAppData("showKanjiOnHokeiCards");
 }
 
 export function useSyncProvider() {
-  const [syncProvider, setSyncProvider] = useState<SyncProvider>(() => getAppDataStore().get("syncProvider"));
+  const syncProvider = useAppData("syncProvider");
 
-  useEffect(() => {
-    getAppDataStore().set("syncProvider", syncProvider);
-  }, [syncProvider]);
-
-  useEffect(() => getAppDataStore().subscribe("syncProvider", setSyncProvider), []);
-
-  return { syncProvider, setSyncProvider };
+  return {
+    syncProvider,
+    setSyncProvider: (provider: SyncProvider) => setAppData("syncProvider", provider)
+  };
 }
 
 export function useSyncState() {
