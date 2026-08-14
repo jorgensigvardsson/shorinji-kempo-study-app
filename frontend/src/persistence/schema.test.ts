@@ -40,6 +40,8 @@ describe("createDefaultAppDataDocument", () => {
     expect(data.knownFlashCards).toEqual({});
     expect(data.quizStreakHighScore).toBe(0);
     expect(data.hokeiListSelection).toBe("own");
+    expect(data.gradingFundamentalCompletions).toEqual({});
+    expect(data.gradingTheoryCompletions).toEqual({});
     expect("embuDraft" in data).toBe(false);
   });
 });

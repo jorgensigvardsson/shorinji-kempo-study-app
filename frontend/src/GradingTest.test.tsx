@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import GradingTest from "./GradingTest";
 import type { GradeName, GradePlan } from "./data";
+import { getAppDataStore } from "./persistence/store";
 
 vi.mock("./assets/grading-exam-information.json", () => ({
   default: {
@@ -13,7 +14,14 @@ vi.mock("./assets/grading-exam-information.json", () => ({
         {
           term: { romaji: "gakka kamoku" },
           title: "teoretiska ämnen",
-          items: [{ text: "Teoretiskt provämne" }],
+          items: [
+            {
+              text: "Teoretiskt provämne",
+              items: [{ text: "Teoretisk underdel" }],
+            },
+            { text: "Skriftligt prov" },
+            { text: "Muntligt prov" },
+          ],
         },
         {
           term: { romaji: "gijutsu kamoku" },
@@ -108,12 +116,41 @@ const renderGrading = (subject: "theory" | "technical", grade: GradeName = "6 ky
   </MemoryRouter>,
 );
 
+beforeEach(() => {
+  getAppDataStore().set("gradingFundamentalCompletions", {});
+  getAppDataStore().set("gradingTheoryCompletions", {});
+});
+
 describe("GradingTest subject split", () => {
   it("shows only theoretical subjects under Theory", () => {
     renderGrading("theory");
 
     expect(screen.getByText("Teoretiskt provämne")).toBeTruthy();
+    expect(screen.getByText("Skriftligt prov")).toBeTruthy();
+    expect(screen.getByText("Muntligt prov")).toBeTruthy();
     expect(screen.queryByText("Tekniskt provämne")).toBeNull();
+  });
+
+  it("saves completion for large theory areas and updates the heading progress", async () => {
+    const user = userEvent.setup();
+    renderGrading("theory");
+
+    expect(screen.getByLabelText("0 av 3 delar klarmarkerade")).toBeTruthy();
+    const completion = screen.getByRole("checkbox", {
+      name: "Klarmarkera Teoretiskt provämne",
+    });
+
+    await user.click(completion);
+
+    expect((completion as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByLabelText("1 av 3 delar klarmarkerade")).toBeTruthy();
+    expect(getAppDataStore().get("gradingTheoryCompletions")["6 kyū|item-0"]).toBeTruthy();
+
+    await user.click(completion);
+
+    expect((completion as HTMLInputElement).checked).toBe(false);
+    expect(screen.getByLabelText("0 av 3 delar klarmarkerade")).toBeTruthy();
+    expect(getAppDataStore().get("gradingTheoryCompletions")).toEqual({});
   });
 
   it("shows only technical subjects under Training", () => {
@@ -187,11 +224,11 @@ describe("GradingTest subject split", () => {
 
     await user.click(screen.getByRole("button", { name: /Grunder/ }));
 
-    expect(screen.getByText("4 delar")).toBeTruthy();
+    expect(screen.getByLabelText("0 av 4 delar klarmarkerade")).toBeTruthy();
     expect(screen.getByText("Rörelse och säkerhet")).toBeTruthy();
     expect(screen.getByText("Angrepp och försvar")).toBeTruthy();
     expect(screen.getByText("Hōkei")).toBeTruthy();
-    expect(container.querySelectorAll(".grading-completion-placeholder")).toHaveLength(4);
+    expect(container.querySelectorAll(".grading-completion-circle")).toHaveLength(4);
     expect(screen.queryByText("chūdan gamae")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: /Kroppsställning, kroppsföring och fotförflyttning/ }));
@@ -204,4 +241,27 @@ describe("GradingTest subject split", () => {
     expect(screen.getByText("chidori ashi")).toBeTruthy();
   });
 
+  it("saves each fundamentals completion and updates the heading progress", async () => {
+    const user = userEvent.setup();
+    renderGrading("technical", "3 kyū");
+
+    await user.click(screen.getByRole("button", { name: /Grunder/ }));
+
+    expect(screen.getByLabelText("0 av 4 delar klarmarkerade")).toBeTruthy();
+    const completion = screen.getByRole("checkbox", {
+      name: "Klarmarkera Kroppsställning, kroppsföring och fotförflyttning",
+    });
+
+    await user.click(completion);
+
+    expect((completion as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByLabelText("1 av 4 delar klarmarkerade")).toBeTruthy();
+    expect(getAppDataStore().get("gradingFundamentalCompletions")["3 kyū|tai gamae, tai sabaki, umpohō"]).toBeTruthy();
+
+    await user.click(completion);
+
+    expect((completion as HTMLInputElement).checked).toBe(false);
+    expect(screen.getByLabelText("0 av 4 delar klarmarkerade")).toBeTruthy();
+    expect(getAppDataStore().get("gradingFundamentalCompletions")).toEqual({});
+  });
 });

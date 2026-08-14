@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from "react";
 import { Badge } from "react-bootstrap";
-import { Award, Book, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
+import { Award, Book, Check2, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
 import { useSearchParams } from "react-router-dom";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
@@ -11,6 +11,8 @@ import VideoLink from "./components/VideoLink";
 import gradingExamInformation from "./assets/grading-exam-information.json";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
+import { setGradingFundamentalCompletion, setGradingTheoryCompletion } from "./persistence/app-data";
+import { useAppData } from "./persistence/use-app-data";
 
 const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
     (tanenKihonHokeiData as TanenKihonHokei[]).map(t => [t.hokei_name.trim(), t])
@@ -273,10 +275,32 @@ function structuredTechniqueGroupLabel(parentTerm: string | undefined, groupInde
     return structuredTechniqueGroupLabels[parentTerm]?.[groupIndex];
 }
 
+function gradingFundamentalCompletionKey(grade: GradeName, item: Item, itemIndex: number): string {
+    return `${grade}|${item.term?.romaji ?? `item-${itemIndex}`}`;
+}
+
+function gradingTheoryCompletionKey(grade: GradeName, item: Item, itemIndex: number): string {
+    return `${grade}|${item.term?.romaji ?? `item-${itemIndex}`}`;
+}
+
+const GradingCompletionProgress = ({ completed, total, translator }: { completed: number; total: number; translator: Translator }) => (
+    <span
+        className={`grading-completion-progress${completed === total && total > 0 ? " is-complete" : ""}`}
+        aria-label={translator.translate("{0} av {1} delar klarmarkerade", {
+            params: [String(completed), String(total)],
+        })}
+    >
+        <span aria-hidden="true">{completed}/{total}</span>
+        <Check2 aria-hidden="true" />
+    </span>
+);
+
 const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
     const [searchParams, setSearchParams] = useSearchParams();
     const showKanji = !dojoMode;
+    const gradingFundamentalCompletions = useAppData("gradingFundamentalCompletions");
+    const gradingTheoryCompletions = useAppData("gradingTheoryCompletions");
     const selectedGrade = grade && allGrades[grade] !== undefined ? grade : undefined;
     const [selection, setSelection] = useState<{ grade: GradeName; sectionIndex: number; itemIndex: number } | null>(null);
     const [expandedFundamental, setExpandedFundamental] = useState<string | null>(null);
@@ -332,19 +356,32 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
     if (subject === "technical" && activeSelection && selectedSection && selectedItem) {
         const { display, title, subtitle } = itemSummary(selectedItem, translator, showKanji);
         const isFundamentals = selectedItem.term?.romaji === "kiso kamoku";
+        const fundamentalItems = selectedItem.items ?? [];
+        const completedFundamentalCount = isFundamentals
+            ? fundamentalItems.filter((fundamentalItem, fundamentalIndex) =>
+                gradingFundamentalCompletions[gradingFundamentalCompletionKey(activeSelection.grade, fundamentalItem, fundamentalIndex)]
+              ).length
+            : 0;
         return (
             <div className={`grading-test-page grading-category-page grading-detail-enter${dojoMode ? " is-dojo-mode" : ""}`}>
                 <header className="grading-category-header">
                     <div className="grading-category-heading">
                         <div className="text-muted small mb-1">{sentenceCase(translator.translate(selectedSection.title))}</div>
-                        <h2 className="mb-0">{title}</h2>
+                        <div className="grading-category-title-line">
+                            <h2 className="mb-0">{title}</h2>
+                            {isFundamentals && (
+                                <GradingCompletionProgress
+                                    completed={completedFundamentalCount}
+                                    total={fundamentalItems.length}
+                                    translator={translator}
+                                />
+                            )}
+                        </div>
                         {subtitle && <div className="text-muted small mt-1">{subtitle}</div>}
                         {display.gloss && <div className="text-muted small mt-1">({display.gloss})</div>}
-                        {isFundamentals && (
+                        {isFundamentals && selectedItem.points != null && (
                             <div className="grading-category-summary mt-2">
-                                <span>{selectedItem.items?.length ?? 0} {translator.translate("delar")}</span>
-                                {selectedItem.points != null && <span aria-hidden="true">·</span>}
-                                {selectedItem.points != null && <span>{selectedItem.points}{translator.translate("p")}</span>}
+                                <span>{selectedItem.points}{translator.translate("p")}</span>
                             </div>
                         )}
                     </div>
@@ -354,8 +391,10 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                 {isFundamentals ? (
                     <FundamentalsDetail
                         item={selectedItem}
+                        grade={activeSelection.grade}
                         translator={translator}
                         showKanji={showKanji}
+                        completions={gradingFundamentalCompletions}
                         expandedKey={expandedFundamental}
                         onExpandedChange={setExpandedFundamental}
                     />
@@ -382,6 +421,11 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
 
             <div className="grading-sections">
                 {sections.map(({ section, sectionIndex }) => {
+                    const completedTheoryItemCount = subject === "theory" && selectedGrade
+                        ? section.items.filter((item, itemIndex) =>
+                            gradingTheoryCompletions[gradingTheoryCompletionKey(selectedGrade, item, itemIndex)]
+                          ).length
+                        : 0;
                     const categoryItems: GridItem[] = section.items.map((item, itemIndex) => {
                         const summary = itemSummary(item, translator, showKanji);
                         return {
@@ -399,7 +443,16 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                     return (
                         <section className="grading-section" key={`section-${sectionIndex}`}>
                             <header className="grading-section-heading">
-                                <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
+                                <div className="grading-section-title-line">
+                                    <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
+                                    {subject === "theory" && (
+                                        <GradingCompletionProgress
+                                            completed={completedTheoryItemCount}
+                                            total={section.items.length}
+                                            translator={translator}
+                                        />
+                                    )}
+                                </div>
                                 {!translator.isJapanese && section.term?.romaji && (
                                     <div className="text-muted small mt-1">{sentenceCase(section.term.romaji)}</div>
                                 )}
@@ -415,6 +468,10 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                         const expanded = activeSelection?.sectionIndex === sectionIndex
                                             && activeSelection.itemIndex === itemIndex;
                                         const detailsId = `grading-item-${subject}-${sectionIndex}-${itemIndex}`;
+                                        const completionKey = selectedGrade
+                                            ? gradingTheoryCompletionKey(selectedGrade, item, itemIndex)
+                                            : undefined;
+                                        const completed = completionKey ? !!gradingTheoryCompletions[completionKey] : false;
                                         const rowContent = (
                                             <>
                                                 <span className="grading-outline-copy">
@@ -429,20 +486,38 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                         );
 
                                         return (
-                                            <article className={`grading-outline-item${expanded ? " is-expanded" : ""}`} key={`item-${sectionIndex}-${itemIndex}`}>
-                                                {expandable && selectedGrade ? (
-                                                    <button
-                                                        type="button"
-                                                        className="grading-outline-trigger"
-                                                        aria-expanded={expanded}
-                                                        aria-controls={detailsId}
-                                                        onClick={() => setSelection(expanded ? null : { grade: selectedGrade, sectionIndex, itemIndex })}
-                                                    >
-                                                        {rowContent}
-                                                    </button>
-                                                ) : (
-                                                    <div className="grading-outline-summary">{rowContent}</div>
-                                                )}
+                                            <article className={`grading-outline-item${expanded ? " is-expanded" : ""}${completed ? " is-complete" : ""}`} key={`item-${sectionIndex}-${itemIndex}`}>
+                                                <div className="grading-outline-row">
+                                                    {completionKey && (
+                                                        <label className="grading-completion-control">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="grading-completion-input"
+                                                                checked={completed}
+                                                                aria-label={translator.translate(completed ? "Ta bort klarmarkering för {0}" : "Klarmarkera {0}", {
+                                                                    params: [title],
+                                                                })}
+                                                                onChange={event => setGradingTheoryCompletion(completionKey, event.currentTarget.checked)}
+                                                            />
+                                                            <span className="grading-completion-circle" aria-hidden="true">
+                                                                {completed && <Check2 />}
+                                                            </span>
+                                                        </label>
+                                                    )}
+                                                    {expandable && selectedGrade ? (
+                                                        <button
+                                                            type="button"
+                                                            className="grading-outline-trigger"
+                                                            aria-expanded={expanded}
+                                                            aria-controls={detailsId}
+                                                            onClick={() => setSelection(expanded ? null : { grade: selectedGrade, sectionIndex, itemIndex })}
+                                                        >
+                                                            {rowContent}
+                                                        </button>
+                                                    ) : (
+                                                        <div className="grading-outline-summary">{rowContent}</div>
+                                                    )}
+                                                </div>
 
                                                 {expanded && (
                                                     <div id={detailsId} className="grading-outline-detail grading-detail-enter">
@@ -498,13 +573,15 @@ const ItemDetail = ({ item, translator, showKanji, hokeiMap, dojoMode, showGloss
 
 interface FundamentalsDetailProps {
     item: Item;
+    grade: GradeName;
     translator: Translator;
     showKanji: boolean;
+    completions: Record<string, { completedAt: string }>;
     expandedKey: string | null;
     onExpandedChange: (key: string | null) => void;
 }
 
-const FundamentalsDetail = ({ item, translator, showKanji, expandedKey, onExpandedChange }: FundamentalsDetailProps) => {
+const FundamentalsDetail = ({ item, grade, translator, showKanji, completions, expandedKey, onExpandedChange }: FundamentalsDetailProps) => {
     const groups = groupFundamentalItems(item.items ?? []);
 
     return (
@@ -524,9 +601,10 @@ const FundamentalsDetail = ({ item, translator, showKanji, expandedKey, onExpand
                             const detailsId = `grading-fundamental-${groupIndex}-${itemIndex}`;
                             const expanded = expandedKey === rowKey;
                             const expandable = hasFundamentalDetails(fundamentalItem);
+                            const completionKey = gradingFundamentalCompletionKey(grade, fundamentalItem, itemIndex);
+                            const completed = !!completions[completionKey];
                             const rowContent = (
                                 <>
-                                    <span className="grading-completion-placeholder" aria-hidden="true" />
                                     <span className="grading-fundamental-copy">
                                         <span className="grading-fundamental-title">{title}</span>
                                         {subtitle && <span className="grading-fundamental-subtitle">{subtitle}</span>}
@@ -539,20 +617,36 @@ const FundamentalsDetail = ({ item, translator, showKanji, expandedKey, onExpand
                             );
 
                             return (
-                                <article className={`grading-fundamental-item${expanded ? " is-expanded" : ""}`} key={rowKey}>
-                                    {expandable ? (
-                                        <button
-                                            type="button"
-                                            className="grading-fundamental-trigger"
-                                            aria-expanded={expanded}
-                                            aria-controls={detailsId}
-                                            onClick={() => onExpandedChange(expanded ? null : rowKey)}
-                                        >
-                                            {rowContent}
-                                        </button>
-                                    ) : (
-                                        <div className="grading-fundamental-summary">{rowContent}</div>
-                                    )}
+                                <article className={`grading-fundamental-item${expanded ? " is-expanded" : ""}${completed ? " is-complete" : ""}`} key={rowKey}>
+                                    <div className="grading-fundamental-row">
+                                        <label className="grading-completion-control">
+                                            <input
+                                                type="checkbox"
+                                                className="grading-completion-input"
+                                                checked={completed}
+                                                aria-label={translator.translate(completed ? "Ta bort klarmarkering för {0}" : "Klarmarkera {0}", {
+                                                    params: [title],
+                                                })}
+                                                onChange={event => setGradingFundamentalCompletion(completionKey, event.currentTarget.checked)}
+                                            />
+                                            <span className="grading-completion-circle" aria-hidden="true">
+                                                {completed && <Check2 />}
+                                            </span>
+                                        </label>
+                                        {expandable ? (
+                                            <button
+                                                type="button"
+                                                className="grading-fundamental-trigger"
+                                                aria-expanded={expanded}
+                                                aria-controls={detailsId}
+                                                onClick={() => onExpandedChange(expanded ? null : rowKey)}
+                                            >
+                                                {rowContent}
+                                            </button>
+                                        ) : (
+                                            <div className="grading-fundamental-summary">{rowContent}</div>
+                                        )}
+                                    </div>
 
                                     {expanded && (
                                         <div id={detailsId} className="grading-fundamental-detail grading-detail-enter">

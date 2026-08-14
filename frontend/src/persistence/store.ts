@@ -30,6 +30,8 @@ export class AppDataStore {
       knownFlashCards: new Map<number, DataChangedCallback<"knownFlashCards">>(),
       showKanjiOnHokeiCards: new Map<number, DataChangedCallback<"showKanjiOnHokeiCards">>(),
       weeklyPlanCompletions: new Map<number, DataChangedCallback<"weeklyPlanCompletions">>(),
+      gradingFundamentalCompletions: new Map<number, DataChangedCallback<"gradingFundamentalCompletions">>(),
+      gradingTheoryCompletions: new Map<number, DataChangedCallback<"gradingTheoryCompletions">>(),
     };
   }
 
@@ -156,9 +158,15 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
       knownFlashCards: isFlashCardKnownRecord(input.data?.knownFlashCards) ? input.data.knownFlashCards : fallback.data.knownFlashCards,
       showKanjiOnHokeiCards: typeof input.data?.showKanjiOnHokeiCards === "boolean" ? input.data.showKanjiOnHokeiCards : fallback.data.showKanjiOnHokeiCards,
-      weeklyPlanCompletions: isWeeklyPlanCompletionRecord(input.data?.weeklyPlanCompletions)
+      weeklyPlanCompletions: isCompletionRecord(input.data?.weeklyPlanCompletions)
         ? input.data.weeklyPlanCompletions
         : fallback.data.weeklyPlanCompletions,
+      gradingFundamentalCompletions: isCompletionRecord(input.data?.gradingFundamentalCompletions)
+        ? input.data.gradingFundamentalCompletions
+        : fallback.data.gradingFundamentalCompletions,
+      gradingTheoryCompletions: isCompletionRecord(input.data?.gradingTheoryCompletions)
+        ? input.data.gradingTheoryCompletions
+        : fallback.data.gradingTheoryCompletions,
     },
   };
 }
@@ -216,7 +224,7 @@ function isRankRecord(value: unknown): value is Record<string, { value: 1 | 2 | 
   return true;
 }
 
-function isWeeklyPlanCompletionRecord(value: unknown): value is AppDataState["weeklyPlanCompletions"] {
+function isCompletionRecord(value: unknown): value is Record<string, { completedAt: string }> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   return Object.values(value).every(entry => {
     if (typeof entry !== "object" || entry === null || Array.isArray(entry)) return false;

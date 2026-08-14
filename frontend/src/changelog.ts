@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T13:06:42.171Z",
+    changes: [
+      {
+        emoji: "✅",
+        sv: "Du kan nu klarmarkera de stora områdena under Grunder och Teoretiska ämnen. Räknaren visar dina framsteg för den valda graden, och markeringarna följer med mellan dina enheter.",
+        en: "You can now mark the large areas under Fundamentals and Theory subjects as complete. The counter shows your progress for the selected grade, and completion marks follow you across devices.",
+        tr: "Artık Temeller ve Teorik konular altındaki büyük alanları tamamlandı olarak işaretleyebilirsiniz. Sayaç seçilen derece için ilerlemenizi gösterir ve tamamlanma işaretleri cihazlarınız arasında aktarılır.",
+        ja: "「基礎」と「学科科目」の大きな項目を完了として記録できるようになりました。選択した級・段ごとの進捗が表示され、完了状況は端末間で引き継がれます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T12:52:51.343Z",
     changes: [
       {
