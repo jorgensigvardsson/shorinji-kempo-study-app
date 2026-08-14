@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T19:29:01.000Z",
+    changes: [
+      {
+        emoji: "🔥",
+        sv: "Din pågående svit i quizet ligger kvar. Laddar du om appen, eller lämnar quizet för en annan sida och kommer tillbaka, fortsätter räkningen där du lämnade den. Sviten sparas bara på den här enheten, och börjar om från noll om du byter grad.",
+        en: "Your quiz streak now stays put. Reload the app, or leave the quiz for another page and come back, and the count carries on where you left it. The streak is kept on this device only, and starts over from zero if you change grade.",
+        tr: "Quizde devam eden seriniz artık korunuyor. Uygulamayı yeniden yüklediğinizde ya da quizden başka bir sayfaya gidip geri döndüğünüzde sayım kaldığı yerden devam ediyor. Seri yalnızca bu cihazda saklanıyor ve derecenizi değiştirirseniz sıfırdan başlıyor.",
+        ja: "クイズの連続正解数がそのまま残るようになりました。アプリを再読み込みしても、クイズを離れて別のページから戻っても、続きから数え続けます。連続正解数はこの端末にのみ保存され、段級を変更すると0からやり直しになります。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T16:52:00.000Z",
     changes: [
       {

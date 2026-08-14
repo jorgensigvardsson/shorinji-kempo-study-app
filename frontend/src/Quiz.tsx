@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import { TranslatorContext } from "./i18n";
 import "./Quiz.css";
@@ -9,6 +9,10 @@ import { buildQuizPool, drawQuestion, type QuizQuestion } from "./quiz-logic";
 import { load } from "./persistence/data";
 
 const highScoreData = load<number>("quizStreakHighScore", 0);
+// The streak in progress is kept on this device only — it belongs to the sitting
+// you are in, not to the kenshi the way the record does, so it is not part of the
+// synced document. It does survive a reload and leaving the quiz for another page.
+const currentStreakData = load<number>("quizStreakCurrent", 0);
 
 interface QuizProps {
   myGrade: GradeName;
@@ -21,10 +25,16 @@ const Quiz = (props: QuizProps) => {
   const [recentQuestionIds, setRecentQuestionIds] = useState<string[]>([]);
   const [answer, setAnswer] = useState<number | null>(null);
   const [showBack, setShowBack] = useState(false);
-  const [currentStreak, setCurrentStreak] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(currentStreakData.data ?? 0);
   const [highScore, setHighScore] = useState(highScoreData.data ?? 0);
+  const previousQuizPool = useRef(quizPool);
 
   const translator = useContext(TranslatorContext);
+
+  const saveCurrentStreak = (streak: number) => {
+    currentStreakData.save(streak);
+    setCurrentStreak(streak);
+  };
 
   useEffect(() => {
     const initialQuestion = drawQuestion(quizPool);
@@ -32,7 +42,14 @@ const Quiz = (props: QuizProps) => {
     setRecentQuestionIds(initialQuestion ? [initialQuestion.id] : []);
     setAnswer(null);
     setShowBack(false);
-    setCurrentStreak(0);
+
+    // A new pool means the questions changed under the streak — a grade was picked,
+    // say — so it starts over. Mounting the quiz is not such a change: coming back
+    // to the page, or reloading the app, picks the streak up where it was left.
+    if (previousQuizPool.current !== quizPool) {
+      previousQuizPool.current = quizPool;
+      saveCurrentStreak(0);
+    }
   }, [quizPool]);
 
   useEffect(() => {
@@ -44,20 +61,20 @@ const Quiz = (props: QuizProps) => {
   const answeredCorrectly = answer !== null && quizCard !== null && answer === quizCard.correctAnswer;
 
   const showAnswer = () => {
-    setCurrentStreak(0);
+    saveCurrentStreak(0);
     setShowBack(true);
   };
 
   const submitAnswer = () => {
     if (answeredCorrectly) {
       const newStreak = currentStreak + 1;
-      setCurrentStreak(newStreak);
+      saveCurrentStreak(newStreak);
       if (newStreak > highScore) {
         highScoreData.save(newStreak);
         setHighScore(newStreak);
       }
     } else {
-      setCurrentStreak(0);
+      saveCurrentStreak(0);
     }
     setShowBack(true);
   };
