@@ -1,5 +1,5 @@
 import { LocalStorageBackend, type PersistenceBackend } from "./backend";
-import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState } from "./schema";
+import { createDefaultAppDataDocument, isKenshiNumber, type AppDataDocument, type AppDataState } from "./schema";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
 type UnregisterDataChangedCallback = () => void;
@@ -151,7 +151,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
         ? input.data.currentWeekAnchor
         : fallback.data.currentWeekAnchor,
       syncProvider: isSyncProvider(input.data?.syncProvider) ? input.data.syncProvider : fallback.data.syncProvider,
-      kenshiNumber: isKenshiNumber(input.data?.kenshiNumber) ? input.data.kenshiNumber : fallback.data.kenshiNumber,
+      kenshiNumber: isStorableKenshiNumber(input.data?.kenshiNumber) ? input.data.kenshiNumber : fallback.data.kenshiNumber,
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
       hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
@@ -178,8 +178,8 @@ function isSyncProvider(value: unknown): value is AppDataState["syncProvider"] {
   return value === "local" || value === "backend";
 }
 
-function isKenshiNumber(value: unknown): value is string | undefined {
-  return value === undefined || (typeof value === "string" && /^\d+$/.test(value));
+function isStorableKenshiNumber(value: unknown): value is string | undefined {
+  return value === undefined || (typeof value === "string" && isKenshiNumber(value));
 }
 
 function isRecord(value: unknown): value is Record<string, string> {

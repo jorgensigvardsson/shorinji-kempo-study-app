@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
-import type { CurrentWeekAnchor } from "./persistence/schema";
+import { isKenshiNumber, normalizeKenshiNumber, type CurrentWeekAnchor } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
@@ -28,7 +28,11 @@ const Settings = (props: Props) => {
     const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
-    const [kenshiNumber, setKenshiNumber] = useState(() => store.get("kenshiNumber"));
+    // The field keeps the raw text so that what is typed stays put while it is being
+    // typed; only a valid number reaches the store. Anything else is flagged instead
+    // of being stored and quietly dropped the next time the document is loaded.
+    const [kenshiNumberText, setKenshiNumberText] = useState(() => store.get("kenshiNumber") ?? "");
+    const kenshiNumberIsInvalid = kenshiNumberText.trim().length > 0 && !isKenshiNumber(normalizeKenshiNumber(kenshiNumberText));
     const availableWeeks = useMemo(
         () => [...new Set(nextGrade.weeks.map(week => week.week))].sort((a, b) => a - b),
         [nextGrade]
@@ -53,7 +57,12 @@ const Settings = (props: Props) => {
     }
 
     useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
-    useEffect(() => store.subscribe("kenshiNumber", setKenshiNumber), [store]);
+    // Follow the store only when it lands somewhere other than what this field already
+    // holds — a sync or another tab. Writes made from here must not rewrite the text
+    // mid-typing.
+    useEffect(() => store.subscribe("kenshiNumber", stored => {
+        setKenshiNumberText(current => normalizeKenshiNumber(current) === (stored ?? "") ? current : (stored ?? ""));
+    }), [store]);
 
     const exportData = () => {
         const { version, data } = store.getDocument();
@@ -139,14 +148,27 @@ const Settings = (props: Props) => {
                 <Form.Label>{translator.translate("Kenshinummer")}</Form.Label>
                 <Form.Control
                     type="text"
-                    value={kenshiNumber ?? ""}
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={kenshiNumberText}
+                    isInvalid={kenshiNumberIsInvalid}
                     onChange={e => {
-                        const value = e.target.value ?? "";
-                        const stored = value.length > 0 ? value : undefined;
-                        setKenshiNumber(stored);
-                        store.set("kenshiNumber", stored);
+                        const text = e.target.value ?? "";
+                        setKenshiNumberText(text);
+
+                        // Spaces are how a number gets grouped when it is written down, so
+                        // they are removed rather than rejected.
+                        const value = normalizeKenshiNumber(text);
+                        if (value.length === 0) {
+                            store.set("kenshiNumber", undefined);
+                        } else if (isKenshiNumber(value)) {
+                            store.set("kenshiNumber", value);
+                        }
                     }}
                 />
+                <Form.Control.Feedback type="invalid">
+                    {translator.translate("Ett kenshinummer består bara av siffror.")}
+                </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="settingsLevel">

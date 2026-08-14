@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T16:52:00.000Z",
+    changes: [
+      {
+        emoji: "🔢",
+        sv: "Ett fel har åtgärdats där kenshinumret såg ut att sparas men var borta nästa gång appen öppnades. Numret kan nu skrivas med mellanrum mellan siffergrupperna, och om något annat än siffror skrivs in säger appen ifrån direkt.",
+        en: "Fixed a bug where the kenshi number looked saved but was gone the next time the app was opened. The number can now be written with spaces between the groups of digits, and if anything other than digits is entered, the app says so right away.",
+        tr: "Kenshi numarasının kaydedilmiş gibi görünüp uygulama bir sonraki açılışta kaybolmasına yol açan bir hata düzeltildi. Numara artık rakam grupları arasında boşluklarla yazılabiliyor ve rakam dışında bir şey girilirse uygulama bunu hemen bildiriyor.",
+        ja: "拳士番号が保存されたように見えても、次にアプリを開くと消えていた不具合を修正しました。番号は数字のまとまりの間に空白を入れて入力でき、数字以外を入力した場合はその場で知らせるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T13:19:49.825Z",
     changes: [
       {

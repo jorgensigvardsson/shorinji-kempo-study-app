@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultAppDataDocument } from "./schema";
+import { createDefaultAppDataDocument, isKenshiNumber, normalizeKenshiNumber } from "./schema";
 
 describe("createDefaultAppDataDocument", () => {
   it("returns version 1", () => {
@@ -43,5 +43,28 @@ describe("createDefaultAppDataDocument", () => {
     expect(data.gradingFundamentalCompletions).toEqual({});
     expect(data.gradingTheoryCompletions).toEqual({});
     expect("embuDraft" in data).toBe(false);
+  });
+});
+
+describe("kenshi numbers", () => {
+  it("accepts a run of digits", () => {
+    expect(isKenshiNumber("12345")).toBe(true);
+    expect(isKenshiNumber("0")).toBe(true);
+  });
+
+  it("rejects anything that is not digits", () => {
+    expect(isKenshiNumber("")).toBe(false);
+    expect(isKenshiNumber("SWE-12345")).toBe(false);
+    expect(isKenshiNumber("12345 ")).toBe(false);
+    expect(isKenshiNumber("12 345")).toBe(false);
+  });
+
+  it("normalizes away the spaces a number is grouped with when written down", () => {
+    expect(normalizeKenshiNumber(" 12 345 ")).toBe("12345");
+    expect(normalizeKenshiNumber("12345")).toBe("12345");
+  });
+
+  it("normalizing does not rescue a number that is not digits", () => {
+    expect(isKenshiNumber(normalizeKenshiNumber("SWE-12345"))).toBe(false);
   });
 });

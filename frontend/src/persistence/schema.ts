@@ -54,6 +54,18 @@ export interface AppDataDocument {
   data: AppDataState;
 }
 
+// A kenshi number is a plain run of digits. The settings form and the document
+// sanitizer both go through these helpers so the two can never disagree: a number
+// the form accepts but the sanitizer rejects looks saved until the next load, and
+// then disappears — from this device and, via sync, from the server too.
+export function normalizeKenshiNumber(value: string): string {
+  return value.replace(/\s+/g, "");
+}
+
+export function isKenshiNumber(value: string): boolean {
+  return /^\d+$/.test(value);
+}
+
 function newDeviceId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
