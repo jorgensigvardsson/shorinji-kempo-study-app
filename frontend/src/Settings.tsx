@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
-import { isKenshiNumber, normalizeKenshiNumber, type CurrentWeekAnchor } from "./persistence/schema";
+import { formatKenshiNumber, isKenshiNumber, normalizeKenshiNumber, type CurrentWeekAnchor } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
@@ -30,8 +30,10 @@ const Settings = (props: Props) => {
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
     // The field keeps the raw text so that what is typed stays put while it is being
     // typed; only a valid number reaches the store. Anything else is flagged instead
-    // of being stored and quietly dropped the next time the document is loaded.
-    const [kenshiNumberText, setKenshiNumberText] = useState(() => store.get("kenshiNumber") ?? "");
+    // of being stored and quietly dropped the next time the document is loaded. The
+    // grouping is applied on the way in and when leaving the field, never mid-keystroke,
+    // so it cannot move the cursor around while the number is being written.
+    const [kenshiNumberText, setKenshiNumberText] = useState(() => formatKenshiNumber(store.get("kenshiNumber") ?? ""));
     const kenshiNumberIsInvalid = kenshiNumberText.trim().length > 0 && !isKenshiNumber(normalizeKenshiNumber(kenshiNumberText));
     const availableWeeks = useMemo(
         () => [...new Set(nextGrade.weeks.map(week => week.week))].sort((a, b) => a - b),
@@ -61,7 +63,7 @@ const Settings = (props: Props) => {
     // holds — a sync or another tab. Writes made from here must not rewrite the text
     // mid-typing.
     useEffect(() => store.subscribe("kenshiNumber", stored => {
-        setKenshiNumberText(current => normalizeKenshiNumber(current) === (stored ?? "") ? current : (stored ?? ""));
+        setKenshiNumberText(current => normalizeKenshiNumber(current) === (stored ?? "") ? current : formatKenshiNumber(stored ?? ""));
     }), [store]);
 
     const exportData = () => {
@@ -156,13 +158,19 @@ const Settings = (props: Props) => {
                         const text = e.target.value ?? "";
                         setKenshiNumberText(text);
 
-                        // Spaces are how a number gets grouped when it is written down, so
-                        // they are removed rather than rejected.
+                        // Spaces and the nnn-nnnnnn hyphen are how a number gets written
+                        // down, so they are removed rather than rejected.
                         const value = normalizeKenshiNumber(text);
                         if (value.length === 0) {
                             store.set("kenshiNumber", undefined);
                         } else if (isKenshiNumber(value)) {
                             store.set("kenshiNumber", value);
+                        }
+                    }}
+                    onBlur={() => {
+                        const value = normalizeKenshiNumber(kenshiNumberText);
+                        if (isKenshiNumber(value)) {
+                            setKenshiNumberText(formatKenshiNumber(value));
                         }
                     }}
                 />

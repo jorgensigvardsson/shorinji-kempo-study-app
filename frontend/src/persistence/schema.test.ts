@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultAppDataDocument, isKenshiNumber, normalizeKenshiNumber } from "./schema";
+import { createDefaultAppDataDocument, formatKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./schema";
 
 describe("createDefaultAppDataDocument", () => {
   it("returns version 1", () => {
@@ -59,12 +59,25 @@ describe("kenshi numbers", () => {
     expect(isKenshiNumber("12 345")).toBe(false);
   });
 
-  it("normalizes away the spaces a number is grouped with when written down", () => {
+  it("normalizes away the separators a number is grouped with when written down", () => {
     expect(normalizeKenshiNumber(" 12 345 ")).toBe("12345");
+    expect(normalizeKenshiNumber("123-456789")).toBe("123456789");
     expect(normalizeKenshiNumber("12345")).toBe("12345");
   });
 
   it("normalizing does not rescue a number that is not digits", () => {
     expect(isKenshiNumber(normalizeKenshiNumber("SWE-12345"))).toBe(false);
+  });
+
+  it("groups a full-length number as nnn-nnnnnn", () => {
+    expect(formatKenshiNumber("123456789")).toBe("123-456789");
+    expect(formatKenshiNumber("123-456789")).toBe("123-456789");
+    expect(formatKenshiNumber("123 456789")).toBe("123-456789");
+  });
+
+  it("leaves a number that is not full length alone", () => {
+    expect(formatKenshiNumber("12345")).toBe("12345");
+    expect(formatKenshiNumber("1234567890")).toBe("1234567890");
+    expect(formatKenshiNumber("")).toBe("");
   });
 });

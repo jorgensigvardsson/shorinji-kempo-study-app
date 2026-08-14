@@ -54,16 +54,27 @@ export interface AppDataDocument {
   data: AppDataState;
 }
 
-// A kenshi number is a plain run of digits. The settings form and the document
-// sanitizer both go through these helpers so the two can never disagree: a number
-// the form accepts but the sanitizer rejects looks saved until the next load, and
-// then disappears — from this device and, via sync, from the server too.
+// A kenshi number is stored as a plain run of digits. Written down it is grouped as
+// nnn-nnnnnn, so the separators are treated as part of the writing rather than part
+// of the number: stripped on the way in, put back for display.
+//
+// The settings form and the document sanitizer both go through these helpers so the
+// two can never disagree: a number the form accepts but the sanitizer rejects looks
+// saved until the next load, and then disappears — from this device and, via sync,
+// from the server too. For the same reason the stored form stays "any run of digits"
+// rather than "exactly nine": tightening it would delete numbers already saved.
 export function normalizeKenshiNumber(value: string): string {
-  return value.replace(/\s+/g, "");
+  return value.replace(/[\s-]+/g, "");
 }
 
 export function isKenshiNumber(value: string): boolean {
   return /^\d+$/.test(value);
+}
+
+// Groups a full-length number as nnn-nnnnnn. Anything else is handed back untouched.
+export function formatKenshiNumber(value: string): string {
+  const groups = /^(\d{3})(\d{6})$/.exec(normalizeKenshiNumber(value));
+  return groups ? `${groups[1]}-${groups[2]}` : value;
 }
 
 function newDeviceId(): string {
