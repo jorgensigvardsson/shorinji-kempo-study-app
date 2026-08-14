@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GradePlan } from "./data";
 import FreePractice from "./FreePractice";
-import { experimentalEmbuDraftStorageKey } from "./persistence/experimental-embu-draft";
+import { experimentalEmbuDraftStorageKey, type EmbuDraft } from "./persistence/experimental-embu-draft";
 import type { PracticeArea } from "./practice-area";
 
 const plans: GradePlan[] = [
@@ -281,7 +281,7 @@ describe("FreePractice", () => {
     await user.type(screen.getByRole("textbox", { name: "Övergång efter shita uke geri" }), "Byt sida lugnt");
     await user.type(screen.getByRole("textbox", { name: "Anteckningar för hela embun" }), "Arbeta med rytmen");
 
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!);
+    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
     expect(saved.notes).toBe("Arbeta med rytmen");
     expect(saved.steps.map(step => step.hokeiName)).toEqual(["shita uke geri", "gyaku gote"]);
     expect(saved.steps[0].transition).toBe("Byt sida lugnt");

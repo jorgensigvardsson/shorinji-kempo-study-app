@@ -10,6 +10,7 @@ import { AppDataStore, getAppDataStore } from "./store";
 import type { PersistenceBackend } from "./backend";
 import type { AppDataDocument } from "./schema";
 import { load } from "./data";
+import type { GradeName } from "../data";
 
 function makeStore(): AppDataStore {
   const backend: PersistenceBackend<AppDataDocument> = { load: (d) => d, save: () => {} };
@@ -27,18 +28,18 @@ describe("load — store-backed keys", () => {
   });
 
   it("reads the initial value from the store for 'grade'", () => {
-    const data = load("grade", "shodan" as const);
+    const data = load<GradeName>("grade", "shodan");
     expect(data.data).toBe("shodan");
   });
 
   it("save() updates the store for a mapped key", () => {
-    const data = load("grade", "shodan" as const);
-    data.save("nidan" as const);
+    const data = load<GradeName>("grade", "shodan");
+    data.save("nidan");
     expect(store.get("grade")).toBe("nidan");
   });
 
   it("registerListener fires when the mapped store key changes", () => {
-    const data = load("grade", "shodan" as const);
+    const data = load<GradeName>("grade", "shodan");
     const cb = vi.fn();
     data.registerListener(cb);
     store.set("grade", "sandan" as const);
@@ -46,7 +47,7 @@ describe("load — store-backed keys", () => {
   });
 
   it("unregistering stops further callbacks for a mapped key", () => {
-    const data = load("grade", "shodan" as const);
+    const data = load<GradeName>("grade", "shodan");
     const cb = vi.fn();
     const unregister = data.registerListener(cb);
     unregister();

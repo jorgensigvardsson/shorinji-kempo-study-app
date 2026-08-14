@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AppDataDocument } from "../persistence/schema";
+import type { AppDataDocument, AppDataState } from "../persistence/schema";
 import { createDefaultAppDataDocument } from "../persistence/schema";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ function makeMockStore(provider = "backend", doc?: AppDataDocument): MockStore {
   const localDoc = doc ?? makeDoc();
   return {
     get: vi.fn((key: string) =>
-      key === "syncProvider" ? provider : (localDoc.data as Record<string, unknown>)[key]
+      key === "syncProvider" ? provider : localDoc.data[key as keyof AppDataState]
     ),
     getDocument: vi.fn(() => ({ ...localDoc })),
     set: vi.fn(),

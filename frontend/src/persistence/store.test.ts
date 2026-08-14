@@ -54,14 +54,12 @@ describe("AppDataStore — get / set", () => {
   });
 
   it("set persists the new value to the backend", () => {
-    let saved: AppDataDocument | null = null;
-    const backend: PersistenceBackend<AppDataDocument> = {
-      load: (d) => d,
-      save: (d) => { saved = d; },
-    };
+    const save = vi.fn<(document: AppDataDocument) => void>();
+    const backend: PersistenceBackend<AppDataDocument> = { load: (d) => d, save };
     const store = new AppDataStore(backend);
     store.set("grade", "yondan");
-    expect(saved?.data.grade).toBe("yondan");
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(save.mock.lastCall?.[0].data.grade).toBe("yondan");
   });
 });
 
