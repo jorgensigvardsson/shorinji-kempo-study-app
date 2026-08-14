@@ -7,15 +7,12 @@ import { AppDataStore, getAppDataStore } from "../persistence/store";
 import { TranslatorContext, TranslatorImplementation } from "../i18n";
 import HokeiCard from "./HokeiCard";
 
-const hookState = vi.hoisted(() => ({ showKanji: false }));
-
 vi.mock("../persistence/store", async importOriginal => ({
   ...(await importOriginal<typeof import("../persistence/store")>()),
   getAppDataStore: vi.fn(),
 }));
 
 vi.mock("../hooks", () => ({
-  useShowKanji: () => hookState.showKanji,
   useTheme: () => ({ effectiveTheme: "light" }),
 }));
 
@@ -41,6 +38,7 @@ const makeStore = (withNotes = true) => {
       ...initial.data,
       notes: withNotes ? { "gyaku gote": "Remember the angle" } : {},
       hokeiRanks: { "gyaku gote": { value: 2, updatedAt: initial.updatedAt } },
+      showKanjiOnHokeiCards: false,
     },
   };
   const backend: PersistenceBackend<AppDataDocument> = {
@@ -83,7 +81,6 @@ describe("HokeiCard training layouts", () => {
   it("keeps only practice-essential header information in dojo mode and opens saved notes", () => {
     const store = makeStore();
     vi.mocked(getAppDataStore).mockReturnValue(store);
-    hookState.showKanji = true;
     const translator = new TranslatorImplementation({ ja: { "gyaku gote": "逆小手" } }, "sv");
     const { container } = render(
       <TranslatorContext.Provider value={translator}>
@@ -96,7 +93,6 @@ describe("HokeiCard training layouts", () => {
         />
       </TranslatorContext.Provider>,
     );
-    hookState.showKanji = false;
 
     const content = container.textContent ?? "";
     expect(content).toContain("katate");
@@ -107,6 +103,19 @@ describe("HokeiCard training layouts", () => {
     expect(content).not.toContain("逆小手");
     expect(screen.queryByRole("group", { name: "Självskattning" })).toBeNull();
     expect(container.querySelector(".hokei-notes-box.is-open")).not.toBeNull();
+  });
+
+  it("shows kanji in the standard view even when the legacy preference was off", () => {
+    const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
+    const translator = new TranslatorImplementation({ ja: { "gyaku gote": "逆小手" } }, "sv");
+    const { container } = render(
+      <TranslatorContext.Provider value={translator}>
+        <HokeiCard hokei={hokei} kamokuLayout />
+      </TranslatorContext.Provider>,
+    );
+
+    expect(container.textContent).toContain("逆小手");
   });
 
   it("uses Japanese as the primary dojo text when Japanese is the interface language", () => {

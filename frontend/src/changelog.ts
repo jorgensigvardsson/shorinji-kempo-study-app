@@ -13,6 +13,39 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T11:22:27.004Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Graderingssidan är nu lugnare och tydligare, med områden som anpassas efter vald grad. Grunder, utvalda tekniker, embu och tillämpning är lättare att hitta, och bakåtknappen går ett steg i taget.",
+        en: "The grading page is now calmer and clearer, with areas adapted to the selected grade. Fundamentals, selected techniques, embu, and application are easier to find, and the Back button moves one step at a time.",
+        tr: "Derecelendirme sayfası artık seçilen seviyeye uyarlanan bölümlerle daha sade ve anlaşılır. Temelleri, seçili teknikleri, embu ve uygulamayı bulmak daha kolay; Geri düğmesi de her seferinde tek adım geri gider.",
+        ja: "昇格考試ページが、選択した級・段に合わせた、より見やすく落ち着いた構成になりました。基礎・指定技・演武・運用法を探しやすくし、戻るボタンは一段階ずつ戻るようになりました。",
+      },
+      {
+        emoji: "🈶",
+        sv: "Kanji visas nu automatiskt i vanliga träningsvyer. Den överflödiga inställningen ”Visa kanji” är borttagen; Dojoläge behåller sin tidigare betydelse och visar den avskalade träningsvyn.",
+        en: "Kanji is now shown automatically in regular training views. The redundant “Show kanji” setting has been removed; Dojo mode keeps its previous meaning and presents the streamlined practice view.",
+        tr: "Kanji artık normal antrenman görünümlerinde otomatik olarak gösteriliyor. Gereksiz “Kanji göster” ayarı kaldırıldı; Dojo modu önceki anlamını koruyarak sadeleştirilmiş antrenman görünümünü sunuyor.",
+        ja: "通常の練習画面では漢字が自動的に表示されるようになりました。不要になった「漢字を表示」設定を削除し、道場モードはこれまでどおり練習に集中した簡潔な表示になります。",
+      },
+      {
+        emoji: "🎨",
+        sv: "Valda menyalternativ och kombinationsrutor följer nu appens temafärger med tydligare kontrast. Ditt sparade ljusa eller mörka tema används dessutom direkt när appen öppnas.",
+        en: "Selected menu items and combo boxes now follow the app's theme colors with clearer contrast. Your saved light or dark theme is also applied as soon as the app opens.",
+        tr: "Seçili menü öğeleri ve açılır kutular artık daha belirgin kontrastla uygulamanın tema renklerini kullanıyor. Kaydedilmiş açık veya koyu temanız da uygulama açılır açılmaz uygulanıyor.",
+        ja: "選択中のメニュー項目とコンボボックスが、より見やすいコントラストでアプリのテーマカラーに沿うようになりました。保存したライト／ダークテーマも、アプリを開いた直後から反映されます。",
+      },
+      {
+        emoji: "✒️",
+        sv: "Appens nya standardtypsnitt är Open Sans för brödtext, Lora för rubriker och Shippori Mincho för japansk text.",
+        en: "The app's new default typefaces are Open Sans for body text, Lora for headings, and Shippori Mincho for Japanese text.",
+        tr: "Uygulamanın yeni varsayılan yazı tipleri gövde metni için Open Sans, başlıklar için Lora ve Japonca metin için Shippori Mincho'dur.",
+        ja: "アプリの標準フォントが、本文は Open Sans、見出しは Lora、日本語は Shippori Mincho になりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-13T07:55:16.602Z",
     changes: [
       {

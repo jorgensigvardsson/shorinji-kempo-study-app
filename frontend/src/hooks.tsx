@@ -99,10 +99,6 @@ export function useWakeLock(active: boolean) {
   }, [active]);
 }
 
-export function useShowKanji() {
-  return useAppData("showKanjiOnHokeiCards");
-}
-
 export function useSyncProvider() {
   const syncProvider = useAppData("syncProvider");
 

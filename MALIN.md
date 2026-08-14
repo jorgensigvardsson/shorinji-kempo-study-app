@@ -4,6 +4,7 @@ These instructions describe how to collaborate with Malin. They complement the s
 
 ## Working with Malin
 
+- Keep the dialogue with Malin lighthearted and a little playful while remaining clear and helpful.
 - Malin contributes frontend ideas and is not a developer. Explain technical decisions in simple, concrete language and do not assume prior development knowledge.
 - If Malin's intent is unclear or could reasonably be interpreted in different ways, ask clarifying questions instead of guessing.
 - Do not make code changes unless Malin has clearly approved them first.

@@ -3,7 +3,6 @@ import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
-import { useShowKanji } from "./hooks";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
 
@@ -280,7 +279,7 @@ interface FocusGroup {
 }
 
 const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: Translator; dojoMode: boolean }) => {
-    const showKanji = useShowKanji() && !dojoMode && !translator.isJapanese;
+    const showKanji = !dojoMode && !translator.isJapanese;
     const groups: FocusGroup[] = [];
     let sourceStrings: string[] = [];
 
@@ -302,7 +301,7 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
                 lines: references.map((entry, index) => ({
                     key: `reference-${index}`,
                     primary: hokeiReferenceLabel(entry, translator, false),
-                    japanese: showKanji ? hokeiReferenceLabel(entry, translator, true) : undefined,
+                    japanese: japaneseFocusLabel(hokeiReferenceLabel(entry, translator, true), showKanji),
                 })),
             });
         }
@@ -312,7 +311,7 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
                 lines: standardMoments.map((moment, index) => ({
                     key: `standard-${index}`,
                     primary: standardMomentLabel(moment, translator, false),
-                    japanese: showKanji ? standardMomentLabel(moment, translator, true) : undefined,
+                    japanese: japaneseFocusLabel(standardMomentLabel(moment, translator, true), showKanji),
                 })),
             });
         }
@@ -327,7 +326,7 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
             lines: week.study_teach.map((entry, index) => ({
                 key: `study-${index}`,
                 primary: hokeiReferenceLabel(entry, translator, false),
-                japanese: showKanji ? hokeiReferenceLabel(entry, translator, true) : undefined,
+                japanese: japaneseFocusLabel(hokeiReferenceLabel(entry, translator, true), showKanji),
             })),
         });
     }
@@ -405,8 +404,13 @@ const ReferencedTechniqueSection = ({ title, entries, allGradePlans, dojoMode }:
 const focusLine = (key: string, value: string, translator: Translator, showKanji: boolean): FocusLine => ({
     key,
     primary: localizeSourceTerm(value, translator, false),
-    japanese: showKanji ? localizeSourceTerm(value, translator, true) : undefined,
+    japanese: japaneseFocusLabel(localizeSourceTerm(value, translator, true), showKanji),
 });
+
+const japaneseFocusLabel = (value: string, showKanji: boolean): string | undefined =>
+    showKanji && /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u.test(value)
+        ? value
+        : undefined;
 
 export default Kamoku;
 

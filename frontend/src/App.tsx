@@ -7,7 +7,7 @@ import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
-import { useSyncProvider, useSyncState, useWakeLock } from './hooks';
+import { useSyncProvider, useSyncState, useTheme, useWakeLock } from './hooks';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
 import TrainingControls from './components/TrainingControls';
@@ -97,6 +97,9 @@ function useAppUpdate(autoApply: boolean) {
 
 function App(props: Props) {
   const { gradePlans, textSizeData, bodyFontFamilyData, headingFontFamilyData, kanjiFontFamilyData } = props;
+  // Theme application belongs to the app lifecycle, not to whichever page
+  // happens to need the theme value. This also reacts to synced changes.
+  useTheme();
   const language = useAppData("language");
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ bodyFontFamily, setBodyFontFamily ] = useState<string>(bodyFontFamilyData.data);
