@@ -1,5 +1,4 @@
-import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, ListUl, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
-import { Navigate } from "react-router-dom";
+import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import Training, { TrainingToolPage } from "./Training.tsx";
 import Settings from "./Settings.tsx";
@@ -68,14 +67,6 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         startDescription: translator.translate("Studera ord och begrepp i lugn takt."),
         icon: JournalText,
         showInMainMenu: true,
-    }, {
-        path: "/list",
-        component: () => <Navigate to="/kamoku?view=free&area=hokei" replace />,
-        menuText: translator.translate("Alla hokei"),
-        startDescription: translator.translate("Bläddra bland alla hokei och filtrera på nivå."),
-        icon: ListUl,
-        hideOnStartPage: true,
-        hideFromMenu: true
     }, {
         path: "/theory/groups",
         component: () => <TheoryToolPage><Groups allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/></TheoryToolPage>,

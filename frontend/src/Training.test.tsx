@@ -100,14 +100,6 @@ describe("Training", () => {
     expect(screen.getByTestId("location").textContent).toBe("/");
   });
 
-  it("redirects the legacy all-hokei view into free practice", async () => {
-    renderTraining("/kamoku?view=all");
-
-    expect(await screen.findByTestId("all-hokei")).toBeTruthy();
-    expect(screen.getByTestId("location").textContent).toBe("/kamoku?view=free&area=hokei");
-    expect(screen.queryByText("Alla tekniker")).toBeNull();
-  });
-
   it("keeps the global training mode while moving from weekly to free practice", async () => {
     const user = userEvent.setup();
     renderTraining("/kamoku", false, true);

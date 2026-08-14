@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type ReactNode } from "react";
+import { useContext, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { ArrowLeft, Award, Book, Collection } from "react-bootstrap-icons";
@@ -26,29 +26,16 @@ const Training = (props: Props) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const dojoMode = props.dojoMode ?? false;
     const requestedView = searchParams.get("view");
-    const isLegacyAllHokei = requestedView === "all";
     const view: TrainingView = requestedView === "plan"
         ? "plan"
-        : requestedView === "free" || isLegacyAllHokei
+        : requestedView === "free"
             ? "free"
             : "landing";
-    const activePracticeArea = isLegacyAllHokei
-        ? "hokei"
-        : isPracticeArea(searchParams.get("area"))
-            ? searchParams.get("area") as PracticeArea
-            : null;
+    const activePracticeArea = isPracticeArea(searchParams.get("area"))
+        ? searchParams.get("area") as PracticeArea
+        : null;
     const [visitedViews, setVisitedViews] = useState<Set<Exclude<TrainingView, "landing">>>(() =>
         new Set(view === "landing" ? [] : [view]));
-
-    useEffect(() => {
-        if (!isLegacyAllHokei) return;
-        setSearchParams(currentParams => {
-            const nextParams = new URLSearchParams(currentParams);
-            nextParams.set("view", "free");
-            nextParams.set("area", "hokei");
-            return nextParams;
-        }, { replace: true });
-    }, [isLegacyAllHokei, setSearchParams]);
 
     const selectView = (nextView: Exclude<TrainingView, "landing"> | null) => {
         if (nextView) {
