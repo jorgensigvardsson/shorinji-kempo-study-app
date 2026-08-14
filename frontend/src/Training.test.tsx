@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Training from "./Training";
 
@@ -35,6 +35,33 @@ const renderTraining = (initialEntry = "/kamoku", includeStartEntry = false, doj
   </MemoryRouter>,
 );
 
+// The section registers one splat pattern but the menu links to the bare root,
+// so both have to resolve to the same component.
+describe("Training route registration", () => {
+  const renderAt = (initialEntry: string) => render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <Routes>
+        <Route path="/kamoku/*" element={<Training myGrade="6 kyū" allGradePlans={[]} />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+
+  it("serves the landing view at the bare section root", () => {
+    renderAt("/kamoku");
+    expect(screen.getByRole("heading", { name: "Träning" })).toBeTruthy();
+  });
+
+  it("serves the weekly plan at its own path", () => {
+    renderAt("/kamoku/plan");
+    expect(screen.getByTestId("weekly-plan")).toBeTruthy();
+  });
+
+  it("serves a free-practice area directly by URL", () => {
+    renderAt("/kamoku/free/hokei");
+    expect(screen.getByTestId("all-hokei")).toBeTruthy();
+  });
+});
+
 describe("Training", () => {
   it("opens with weekly, free-practice, and grading choices", () => {
     renderTraining();
@@ -61,7 +88,7 @@ describe("Training", () => {
 
     await user.click(screen.getByRole("button", { name: /Veckans träning/i }));
     expect(screen.getByTestId("weekly-plan")).toBeTruthy();
-    expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start&view=plan");
+    expect(screen.getByTestId("location").textContent).toBe("/kamoku/plan?source=start");
 
     await user.click(screen.getByRole("button", { name: "Träningsval" }));
     expect(screen.getByRole("button", { name: /Veckans träning/i })).toBeTruthy();
@@ -77,7 +104,7 @@ describe("Training", () => {
     expect(screen.getByRole("heading", { name: "Fri träning" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /Randori/i }));
-    expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start&view=free&area=randori");
+    expect(screen.getByTestId("location").textContent).toBe("/kamoku/free/randori?source=start");
     expect(screen.getByRole("button", { name: "Alla träningsområden" })).toBeTruthy();
   });
 
@@ -88,10 +115,10 @@ describe("Training", () => {
 
     await user.click(screen.getByRole("button", { name: /Fri träning/i }));
     await user.click(screen.getByRole("button", { name: /Randori/i }));
-    expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start&view=free&area=randori");
+    expect(screen.getByTestId("location").textContent).toBe("/kamoku/free/randori?source=start");
 
     await user.click(screen.getByRole("button", { name: "Browser back" }));
-    expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start&view=free");
+    expect(screen.getByTestId("location").textContent).toBe("/kamoku/free?source=start");
 
     await user.click(screen.getByRole("button", { name: "Browser back" }));
     expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start");

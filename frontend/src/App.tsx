@@ -16,6 +16,7 @@ import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
+import { TRAINING_ROOT } from './training-routes';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
 import { setAppData, useAppData } from './persistence/use-app-data';
 
@@ -146,7 +147,7 @@ function App(props: Props) {
     return () => document.removeEventListener("visibilitychange", handler);
   }, [navigate]);
   const location = useLocation();
-  const controlContext = getTrainingControlContext(location.pathname, location.search);
+  const controlContext = getTrainingControlContext(location.pathname);
   const [trainingMode, setTrainingMode] = useState(false);
   const routes = getRoutes(
     gradePlans.find(l => l.grade === displayGrade)!,
@@ -189,7 +190,7 @@ function App(props: Props) {
   // only requested while the control is relevant on the current page.
   useWakeLock(trainingMode && controlContext.showTrainingMode);
   useEffect(() => {
-    const remainsInTraining = location.pathname === "/kamoku" || location.pathname === "/training/grading";
+    const remainsInTraining = location.pathname.startsWith(TRAINING_ROOT) || location.pathname === "/training/grading";
     if (remainsInTraining) return;
     const resetTimer = window.setTimeout(() => setTrainingMode(false), 0);
     return () => window.clearTimeout(resetTimer);
@@ -282,7 +283,7 @@ function renderRoutes(routes: Route[]) {
     <Routes>
       {routes.filter(r => r.path && r.component).map((route, index) => {
         const Component = route.component!;
-        return <DomRoute key={index} path={route.path!} element={<Component />} />;
+        return <DomRoute key={index} path={route.matchPath ?? route.path!} element={<Component />} />;
       })}
     </Routes>
   )

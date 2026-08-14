@@ -1,10 +1,11 @@
 import { useContext, useState, type ReactNode } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { ArrowLeft, Award, Book, Collection } from "react-bootstrap-icons";
 import Kamoku from "./Kamoku";
 import FreePractice from "./FreePractice";
-import { isPracticeArea, type PracticeArea } from "./practice-area";
+import type { PracticeArea } from "./practice-area";
+import { parseTrainingPath, trainingPath, type TrainingView } from "./training-routes";
 import type { GradePlan, GradeName } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import "./Training.css";
@@ -15,50 +16,28 @@ interface Props {
     dojoMode?: boolean;
 }
 
-type TrainingView = "landing" | "plan" | "free";
-
 const Training = (props: Props) => {
     const translator = useContext(TranslatorContext);
     const navigate = useNavigate();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
     const dojoMode = props.dojoMode ?? false;
-    const requestedView = searchParams.get("view");
-    const view: TrainingView = requestedView === "plan"
-        ? "plan"
-        : requestedView === "free"
-            ? "free"
-            : "landing";
-    const activePracticeArea = isPracticeArea(searchParams.get("area"))
-        ? searchParams.get("area") as PracticeArea
-        : null;
+    const { view, area: activePracticeArea } = parseTrainingPath(location.pathname);
+    // A view stays mounted once seen, so its scroll position, filters, and open
+    // cards survive switching away and back. Recording it from the URL rather
+    // than from the click that got here also covers arriving by deep link or by
+    // browser back and forward.
     const [visitedViews, setVisitedViews] = useState<Set<Exclude<TrainingView, "landing">>>(() =>
         new Set(view === "landing" ? [] : [view]));
+    if (view !== "landing" && !visitedViews.has(view)) {
+        setVisitedViews(new Set([...visitedViews, view]));
+    }
 
-    const selectView = (nextView: Exclude<TrainingView, "landing"> | null) => {
-        if (nextView) {
-            setVisitedViews(current => current.has(nextView) ? current : new Set([...current, nextView]));
-        }
-        setSearchParams(currentParams => {
-            const nextParams = new URLSearchParams(currentParams);
-            if (nextView) {
-                nextParams.set("view", nextView);
-            } else {
-                nextParams.delete("view");
-            }
-            if (nextView !== "free") nextParams.delete("area");
-            return nextParams;
-        });
-    };
+    // Any query string on the way in is unrelated to the training view, so it
+    // rides along rather than being dropped by the navigation.
+    const goTo = (nextView: TrainingView, area?: PracticeArea | null) =>
+        navigate(`${trainingPath(nextView, area)}${location.search}`);
 
-    const selectPracticeArea = (area: PracticeArea | null) => {
-        setSearchParams(currentParams => {
-            const nextParams = new URLSearchParams(currentParams);
-            nextParams.set("view", "free");
-            if (area) nextParams.set("area", area);
-            else nextParams.delete("area");
-            return nextParams;
-        });
-    };
+    const selectPracticeArea = (area: PracticeArea | null) => goTo("free", area);
 
     const choices: GridItem[] = [
         {
@@ -66,14 +45,14 @@ const Training = (props: Props) => {
             title: translator.translate("Veckans träning"),
             subtitle: translator.translate("Följ veckoplanen för din grad."),
             icon: <Book />,
-            onSelect: () => selectView("plan"),
+            onSelect: () => goTo("plan"),
         },
         {
             key: "free-practice",
             title: translator.translate("Fri träning"),
             subtitle: translator.translate("Välj själv vad du vill träna."),
             icon: <Collection />,
-            onSelect: () => selectView("free"),
+            onSelect: () => goTo("free"),
         },
         {
             key: "grading",

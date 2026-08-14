@@ -20,6 +20,9 @@ import Feedback from "./Feedback.tsx";
 
 export interface Route {
     path?: string;
+    // Router pattern to register, when a section owns more paths than the single
+    // one its menu entry links to (e.g. /kamoku also serves /kamoku/free/hokei).
+    matchPath?: string;
     component?: React.ComponentType;
     href?: string;
     menuText: string | (() => string);
@@ -54,6 +57,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         showInMainMenu: true
     }, {
         path: "/kamoku",
+        matchPath: "/kamoku/*",
         component: () => <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode}/>,
         menuText: translator.translate("Träning"),
         startDescription: translator.translate("Välj mellan veckans träning och fri träning."),
