@@ -3,7 +3,6 @@ import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
-import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import { useShowKanji } from "./hooks";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
@@ -21,13 +20,11 @@ import "./Kamoku.css";
 export interface Props {
     myGrade: GradeName;
     allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
     dojoMode?: boolean;
 }
 
 const Kamoku = (props: Props) => {
-    const { myGrade, allGradePlans, notesData, ranksData, dojoMode = false } = props;
+    const { myGrade, allGradePlans, dojoMode = false } = props;
     const store = getAppDataStore();
     const grade = allGradePlans.find(l => l.grade === myGrade) ?? allGradePlans[0];
     const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
@@ -146,8 +143,6 @@ const Kamoku = (props: Props) => {
                     title="Repetitionstekniker"
                     entries={basicReferences}
                     allGradePlans={allGradePlans}
-                    notesData={notesData}
-                    ranksData={ranksData}
                     dojoMode={dojoMode}
                 />
             )}
@@ -156,8 +151,6 @@ const Kamoku = (props: Props) => {
                     title="Studera och undervisa"
                     entries={yondanWeek.study_teach}
                     allGradePlans={allGradePlans}
-                    notesData={notesData}
-                    ranksData={ranksData}
                     dojoMode={dojoMode}
                 />
             )}
@@ -165,7 +158,7 @@ const Kamoku = (props: Props) => {
                 <section className="kamoku-technique-section" aria-labelledby="kamoku-techniques-heading">
                     <h2 id="kamoku-techniques-heading" className="kamoku-section-title">{translator.translate("Tekniker")}</h2>
                     {primaryTechniques.map(entry => (
-                        <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} kamokuLayout />
+                        <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" showNotes showRating dojoMode={dojoMode} kamokuLayout />
                     ))}
                 </section>
             )}
@@ -379,12 +372,10 @@ interface ReferencedTechniqueSectionProps {
     title: string;
     entries: HokeiRef[];
     allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
     dojoMode: boolean;
 }
 
-const ReferencedTechniqueSection = ({ title, entries, allGradePlans, notesData, ranksData, dojoMode }: ReferencedTechniqueSectionProps) => {
+const ReferencedTechniqueSection = ({ title, entries, allGradePlans, dojoMode }: ReferencedTechniqueSectionProps) => {
     const translator = useContext(TranslatorContext);
     const techniques = entries.flatMap((entry, index) => {
         const moment = allGradePlans
@@ -405,7 +396,7 @@ const ReferencedTechniqueSection = ({ title, entries, allGradePlans, notesData, 
         <section className="kamoku-technique-section">
             <h2 className="kamoku-section-title">{translator.translate(title)}</h2>
             {techniques.map(entry => (
-                <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} kamokuLayout />
+                <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" showNotes showRating dojoMode={dojoMode} kamokuLayout />
             ))}
         </section>
     );

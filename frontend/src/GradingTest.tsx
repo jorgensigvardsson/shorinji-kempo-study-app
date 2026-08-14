@@ -8,7 +8,6 @@ import { useShowKanji } from "./hooks";
 import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
-import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import gradingExamInformation from "./assets/grading-exam-information.json";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
@@ -21,8 +20,6 @@ import "./GradingTest.css";
 interface GradingTestProps {
     grade: GradeName | undefined;
     allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
     subject: "theory" | "technical";
     dojoMode?: boolean;
 }
@@ -162,7 +159,7 @@ function hasExpandableContent(item: Item): boolean {
     return !!(item.annotations?.length || item.techniqueGroups?.length || item.items?.length);
 }
 
-const GradingTest = ({ grade, allGradePlans, notesData, ranksData, subject, dojoMode = false }: GradingTestProps) => {
+const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
     const showKanji = useShowKanji() && !dojoMode;
     const selectedGrade = grade && allGrades[grade] !== undefined ? grade : undefined;
@@ -216,7 +213,7 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData, subject, dojo
                                 <XLg size={14} />
                             </Button>
                         </div>
-                        <ItemDetail item={activeSelection.item} translator={translator} showKanji={showKanji} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} />
+                        <ItemDetail item={activeSelection.item} translator={translator} showKanji={showKanji} hokeiMap={hokeiMap} dojoMode={dojoMode} />
                     </div>
                 ) : (
                     sections.map(({ section, sectionIndex }) => {
@@ -256,7 +253,7 @@ const GradingTest = ({ grade, allGradePlans, notesData, ranksData, subject, dojo
 };
 
 
-const ItemDetail = ({ item, translator, showKanji, hokeiMap, notesData, ranksData, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; notesData: HokeiNotes; ranksData: HokeiRanks; dojoMode: boolean }) => {
+const ItemDetail = ({ item, translator, showKanji, hokeiMap, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; hokeiMap: Map<string, HokeiMoment>; dojoMode: boolean }) => {
     const display = itemDisplay(item, translator, showKanji);
 
     return (
@@ -276,7 +273,7 @@ const ItemDetail = ({ item, translator, showKanji, hokeiMap, notesData, ranksDat
             ))}
             <div className="d-flex flex-column gap-2">
                 {item.items?.map((subItem, i) => (
-                    <SubItemCard key={i} item={subItem} translator={translator} showKanji={showKanji} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} />
+                    <SubItemCard key={i} item={subItem} translator={translator} showKanji={showKanji} showEmojiNumbers={item.term?.romaji === "kumi embu"} showHokeiCards={item.term?.romaji === "kumi embu" || item.term?.romaji === "hōkei kamoku"} hokeiMap={hokeiMap} dojoMode={dojoMode} />
                 ))}
             </div>
             {item.videos && item.videos.length > 0 && (
@@ -300,7 +297,7 @@ function extractHokeis(romaji: string, hokeiMap: Map<string, HokeiMoment>): Hoke
         .filter((h): h is HokeiMoment => !!h);
 }
 
-const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiCards, hokeiMap, notesData, ranksData, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; notesData?: HokeiNotes; ranksData?: HokeiRanks; dojoMode: boolean }) => {
+const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiCards, hokeiMap, dojoMode }: { item: Item; translator: Translator; showKanji: boolean; showEmojiNumbers?: boolean; showHokeiCards?: boolean; hokeiMap?: Map<string, HokeiMoment>; dojoMode: boolean }) => {
     const display = itemDisplay(item, translator, showKanji);
     const hokeis = showHokeiCards && hokeiMap && item.term?.romaji
         ? extractHokeis(item.term.romaji, hokeiMap)
@@ -347,7 +344,7 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
             {hokeis.length > 0 && (
                 <div className="d-flex flex-column gap-2 mt-2">
                     {hokeis.map(h => (
-                        <HokeiCard key={h.hokei_name} hokei={h} compact notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} />
+                        <HokeiCard key={h.hokei_name} hokei={h} compact showNotes showRating dojoMode={dojoMode} />
                     ))}
                 </div>
             )}

@@ -11,7 +11,6 @@ import { TranslatorContext } from "./i18n";
 import { useShowKanji } from "./hooks";
 import { gradeLabel, matchesString, normalizeString } from "./strings";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
-import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import { loadExperimentalEmbuDraft, type EmbuDraft, type EmbuDraftStep } from "./persistence/experimental-embu-draft";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import gradingExamInformation from "./assets/grading-exam-information.json";
@@ -30,8 +29,6 @@ import "./FreePractice.css";
 interface Props {
     myGrade: GradeName;
     allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
     activeArea: PracticeArea | null;
     onAreaChange: (area: PracticeArea | null) => void;
     onBack: () => void;
@@ -138,8 +135,6 @@ const FreePractice = (props: Props) => {
                     <List
                         grade={props.allGradePlans.find(plan => plan.grade === props.myGrade)!}
                         allGradePlans={props.allGradePlans}
-                        notesData={props.notesData}
-                        ranksData={props.ranksData}
                         dojoMode={dojoMode}
                     />
                 </div>
@@ -159,8 +154,6 @@ const FreePractice = (props: Props) => {
                     <EmbuArea
                         myGrade={props.myGrade}
                         allGradePlans={props.allGradePlans}
-                        notesData={props.notesData}
-                        ranksData={props.ranksData}
                         dojoMode={dojoMode}
                     />
                 </div>
@@ -481,7 +474,7 @@ const resolveKumiEmbuTermParts = (value: string, techniques: EmbuTechnique[]): K
     }));
 };
 
-const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "notesData" | "ranksData" | "dojoMode">) => {
+const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "dojoMode">) => {
     const translator = useContext(TranslatorContext);
     const draftData = useMemo(() => loadExperimentalEmbuDraft(), []);
     const [draft, setDraft] = useState<EmbuDraft>(() => draftData.data);
@@ -719,8 +712,8 @@ const EmbuArea = ({ myGrade, allGradePlans, notesData, ranksData, dojoMode }: Pi
                     key={`${embuTechniqueKey(preview.technique)}-${preview.requestId}`}
                     hokei={preview.technique.hokei}
                     gradeName={preview.technique.grade}
-                    notesData={notesData}
-                    ranksData={ranksData}
+                    showNotes
+                    showRating
                     dojoMode={dojoMode}
                     kamokuLayout
                     defaultOpen

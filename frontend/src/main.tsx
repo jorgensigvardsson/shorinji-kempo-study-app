@@ -10,7 +10,6 @@ import gradePlans from './assets/kamokuhyo.json';
 import translations from './assets/translations.json';
 import { TranslationsContext } from './i18n.ts';
 import { load } from './persistence/data.ts';
-import { HokeiNotes, HokeiRanks } from './persistence/app-data.ts';
 import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
 import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey, FontFamilyKanjiStorageKey } from './persistence/font-family.ts';
 import { type GradePlan } from './data.ts'
@@ -22,8 +21,6 @@ const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);
 const bodyFontFamilyData = load<string>(FontFamilyBodyStorageKey, DefaultFontFamily);
 const headingFontFamilyData = load<string>(FontFamilyHeadingStorageKey, DefaultFontFamily);
 const kanjiFontFamilyData = load<string>(FontFamilyKanjiStorageKey, DefaultFontFamily);
-const notesData = new HokeiNotes();
-const ranksData = new HokeiRanks();
 getSyncManager().start();
 
 function mountRoot() {
@@ -32,7 +29,7 @@ function mountRoot() {
       <ErrorBoundary>
         <BrowserRouter>
           <TranslationsContext value={translations}>
-            <App gradePlans={gradePlans as GradePlan[]} notesData={notesData} ranksData={ranksData} textSizeData={textSizeData}
+            <App gradePlans={gradePlans as GradePlan[]} textSizeData={textSizeData}
                  bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}
                  kanjiFontFamilyData={kanjiFontFamilyData}/>
           </TranslationsContext>

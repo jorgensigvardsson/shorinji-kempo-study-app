@@ -6,15 +6,12 @@ import Kamoku from "./Kamoku";
 import FreePractice from "./FreePractice";
 import { isPracticeArea, type PracticeArea } from "./practice-area";
 import type { GradePlan, GradeName } from "./data";
-import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import Grid, { type GridItem } from "./components/Grid";
 import "./Training.css";
 
 interface Props {
     myGrade: GradeName;
     allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
     dojoMode?: boolean;
 }
 

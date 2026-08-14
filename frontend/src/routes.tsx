@@ -7,7 +7,6 @@ import AdminUsers from "./AdminUsers.tsx";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
 import Groups from "./Groups.tsx";
-import type { HokeiNotes, HokeiRanks } from "./persistence/app-data.ts";
 import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
 import Quiz from "./Quiz.tsx";
@@ -42,7 +41,7 @@ export const routeDescription = (route: Route) => {
     return typeof(route.startDescription) === "function" ? route.startDescription() : route.startDescription;
 }
 
-export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator, notesData: HokeiNotes, ranksData: HokeiRanks,
+export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator,
                           textSize: number,
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
                           setTextSize: (size: number) => void, trainingMode: boolean): Route[] => {
@@ -55,7 +54,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         showInMainMenu: true
     }, {
         path: "/kamoku",
-        component: () => <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} dojoMode={trainingMode}/>,
+        component: () => <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode}/>,
         menuText: translator.translate("Träning"),
         startDescription: translator.translate("Välj mellan veckans träning och fri träning."),
         icon: Book,
@@ -69,7 +68,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         showInMainMenu: true,
     }, {
         path: "/theory/groups",
-        component: () => <TheoryToolPage><Groups allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData}/></TheoryToolPage>,
+        component: () => <TheoryToolPage><Groups allGradePlans={allGradePlans}/></TheoryToolPage>,
         menuText: translator.translate("Teknikgrupper"),
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection,
@@ -77,7 +76,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/theory/grading",
-        component: () => <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} /></TheoryToolPage>,
+        component: () => <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} /></TheoryToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -85,7 +84,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/training/grading",
-        component: () => <TrainingToolPage><GradingTest subject="technical" grade={gradePlan.grade} allGradePlans={allGradePlans} notesData={notesData} ranksData={ranksData} dojoMode={trainingMode} /></TrainingToolPage>,
+        component: () => <TrainingToolPage><GradingTest subject="technical" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TrainingToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,

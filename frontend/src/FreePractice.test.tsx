@@ -40,8 +40,6 @@ const FreePracticeHarness = () => {
       <FreePractice
         myGrade={myGrade}
         allGradePlans={plans}
-        notesData={null!}
-        ranksData={null!}
         activeArea={activeArea}
         onAreaChange={setActiveArea}
         onBack={() => setActiveArea(null)}
@@ -93,8 +91,6 @@ const RandoriHarness = () => (
   <FreePractice
     myGrade="5 kyū"
     allGradePlans={randoriPlans}
-    notesData={null!}
-    ranksData={null!}
     activeArea="randori"
     onAreaChange={() => undefined}
     onBack={() => undefined}
@@ -136,8 +132,6 @@ const EmbuHarness = () => (
   <FreePractice
     myGrade="5 kyū"
     allGradePlans={embuPlans}
-    notesData={null!}
-    ranksData={null!}
     activeArea="embu"
     onAreaChange={() => undefined}
     onBack={() => undefined}
@@ -179,8 +173,6 @@ const KumiEmbuLinkHarness = () => (
   <FreePractice
     myGrade="nidan"
     allGradePlans={kumiEmbuLinkPlans}
-    notesData={null!}
-    ranksData={null!}
     activeArea="embu"
     onAreaChange={() => undefined}
     onBack={() => undefined}

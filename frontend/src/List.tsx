@@ -1,7 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { type HokeiMoment, type GradePlan, getHokeiMoments, type GradeName } from "./data";
 import { TranslatorContext } from "./i18n";
-import type { HokeiNotes, HokeiRanks } from "./persistence/app-data";
 import HokeiCard from "./components/HokeiCard";
 import { useShowKanji } from "./hooks";
 import { Form } from "react-bootstrap";
@@ -12,8 +11,6 @@ import { load } from "./persistence/data";
 interface Props {
     grade: GradePlan;
     allGradePlans: GradePlan[];
-    notesData: HokeiNotes;
-    ranksData: HokeiRanks;
     dojoMode?: boolean;
 }
 
@@ -22,7 +19,7 @@ type Selection = "all" | "own" | "up-to-own" | GradeName;
 const selectionData = load<string>("hokeiListSelection", "own");
 
 const List = (props: Props) => {
-    const { grade, allGradePlans, notesData, ranksData, dojoMode = false } = props;
+    const { grade, allGradePlans, dojoMode = false } = props;
     const [selection, setSelection] = useState<Selection>((selectionData.data ?? "own") as Selection);
     const [filterText, setFilterText] = useState<string>("");
     const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
@@ -88,7 +85,7 @@ const List = (props: Props) => {
                                 value={filterText} onChange={e => setFilterText(e.target.value)} />
                 </div>
             </div>
-            {renderHokeis(filteredHokeis, notesData, ranksData, dojoMode)}
+            {renderHokeis(filteredHokeis, dojoMode)}
         </>
     )
 }
@@ -123,10 +120,10 @@ interface HokeiAndGrade {
     moment: HokeiMoment;
     momentIndex: number;
 }
-const renderHokeis = (hokeis: HokeiAndGrade[], notesData: HokeiNotes, ranksData: HokeiRanks, dojoMode: boolean) => {
+const renderHokeis = (hokeis: HokeiAndGrade[], dojoMode: boolean) => {
     return hokeis.map(h => (
         <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-2"
-                        notesData={notesData} ranksData={ranksData} dojoMode={dojoMode} kamokuLayout/>
+                        showNotes showRating dojoMode={dojoMode} kamokuLayout/>
     ))
 }
 

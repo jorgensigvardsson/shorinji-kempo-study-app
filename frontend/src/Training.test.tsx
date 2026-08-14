@@ -30,7 +30,7 @@ const renderTraining = (initialEntry = "/kamoku", includeStartEntry = false, doj
     initialEntries={includeStartEntry ? ["/", initialEntry] : [initialEntry]}
     initialIndex={includeStartEntry ? 1 : 0}
   >
-    <Training myGrade="6 kyū" allGradePlans={[]} notesData={null!} ranksData={null!} dojoMode={dojoMode} />
+    <Training myGrade="6 kyū" allGradePlans={[]} dojoMode={dojoMode} />
     <LocationProbe />
   </MemoryRouter>,
 );

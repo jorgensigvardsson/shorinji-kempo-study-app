@@ -7,7 +7,7 @@ import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
 import { Collapse, Form } from "react-bootstrap";
 import { ChatFill, ChevronDown, ChevronRight, JournalText, PersonFill, ShieldFill } from "react-bootstrap-icons";
-import type { HokeiNotes, HokeiRanks } from "../persistence/app-data";
+import { setHokeiNote, setHokeiRank, useHokeiNote, useHokeiRank } from "../persistence/app-data";
 import StarRating from "./StarRating";
 import VideoLink from "./VideoLink";
 import type { HokeiRankValue } from "../persistence/schema";
@@ -21,8 +21,10 @@ const assessmentLabels: Record<HokeiRankValue, string> = {
 
 interface HokeiCardProps {
     hokei: HokeiMoment;
-    notesData?: HokeiNotes;
-    ranksData?: HokeiRanks;
+    // Personal marks are opt-in per card: a card used purely to illustrate a
+    // technique elsewhere should not invite notes or self-assessment.
+    showNotes?: boolean;
+    showRating?: boolean;
     className?: string;
     gradeName?: GradeName;
     compact?: boolean;
@@ -33,34 +35,26 @@ interface HokeiCardProps {
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, notesData, ranksData, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange } = props;
+    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange } = props;
     const translator = useContext(TranslatorContext);
-    const [hasNotes, setHasNotes] = useState(notesData ? !!notesData.getNotes(hokei.hokei_name) : false);
-    const [rank, setRank] = useState<HokeiRankValue | null>(ranksData ? ranksData.getRank(hokei.hokei_name) : null);
+    const note = useHokeiNote(hokei.hokei_name);
+    const rank = useHokeiRank(hokei.hokei_name);
+    const hasNotes = showNotes && !!note;
     const showKanji = useShowKanji();
 
-    useEffect(() => {
-        if (!notesData) return;
-        return notesData.registerListener(hokei.hokei_name, note => setHasNotes(!!note));
-    }, [notesData, hokei.hokei_name]);
-    useEffect(() => {
-        if (!ranksData) return;
-        return ranksData.registerListener(hokei.hokei_name, setRank);
-    }, [ranksData, hokei.hokei_name]);
-
     const videos = hokei.videos ?? [];
-    const footer = (notesData || videos.length > 0) ? (
+    const footer = (showNotes || videos.length > 0) ? (
         <>
-            {notesData && <CardFooter notesData={notesData} hokei={hokei}/>}
+            {showNotes && <CardFooter hokei={hokei}/>}
             {videos.map((video, i) => (
-                <VideoLink key={video.url} video={video} className={(i > 0 || notesData) ? "mt-2" : undefined}/>
+                <VideoLink key={video.url} video={video} className={(i > 0 || showNotes) ? "mt-2" : undefined}/>
             ))}
         </>
     ) : undefined;
 
-    const kamokuFooter = (notesData || videos.length > 0) ? (
+    const kamokuFooter = (showNotes || videos.length > 0) ? (
         <div className="kamoku-card-footer-actions">
-            {notesData && <CardFooter notesData={notesData} hokei={hokei}/>}
+            {showNotes && <CardFooter hokei={hokei}/>}
             {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-video-link" />)}
         </div>
     ) : undefined;
@@ -83,7 +77,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     if (kamokuLayout) {
         return (
             <CollapsibleCard
-                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} ranksData={ranksData} />}
+                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} />}
                 footer={kamokuFooter}
                 focusOnOpen
                 defaultOpen={defaultOpen}
@@ -130,11 +124,11 @@ const HokeiCard = (props: HokeiCardProps) => {
         options.badges!.push({ text: hokei.technique_group, variant: "primary" });
     if (hasNotes)
         options.icons = [<ChatFill key="has-notes"/>];
-    if (ranksData)
+    if (showRating)
         options.rightNode = (
             <StarRating
                 value={rank}
-                onChange={(value) => ranksData.setRank(hokei.hokei_name, value)}
+                onChange={(value) => setHokeiRank(hokei.hokei_name, value)}
                 groupLabel={translator.translate("Självskattning")}
                 emptyLabel={translator.translate("Ej bedömd")}
                 getLabel={(value) => translator.translate(assessmentLabels[value])}
@@ -160,10 +154,10 @@ interface KamokuCardHeaderProps {
     hokei: HokeiMoment;
     gradeName?: GradeName;
     rank: HokeiRankValue | null;
-    ranksData?: HokeiRanks;
+    showRating?: boolean;
 }
 
-const KamokuCardHeader = ({ hokei, gradeName, rank, ranksData }: KamokuCardHeaderProps) => {
+const KamokuCardHeader = ({ hokei, gradeName, rank, showRating }: KamokuCardHeaderProps) => {
     const translator = useContext(TranslatorContext);
     const showKanji = useShowKanji();
     const name = translator.isJapanese ? translator.japanese(hokei.hokei_name) : translator.translate(hokei.hokei_name, { capitalize: true });
@@ -176,7 +170,7 @@ const KamokuCardHeader = ({ hokei, gradeName, rank, ranksData }: KamokuCardHeade
                     <div className="kamoku-card-name">{name}</div>
                     {japaneseName && <div className="kamoku-card-japanese">{japaneseName}</div>}
                 </div>
-                {ranksData && <StarRating value={rank} onChange={value => ranksData.setRank(hokei.hokei_name, value)}
+                {showRating && <StarRating value={rank} onChange={value => setHokeiRank(hokei.hokei_name, value)}
                                            groupLabel={translator.translate("Självskattning")} emptyLabel={translator.translate("Ej bedömd")}
                                            getLabel={value => translator.translate(assessmentLabels[value])} />}
             </div>
@@ -291,22 +285,28 @@ const DojoCardBody = ({ hokei }: { hokei: HokeiMoment }) => {
 
 interface CardFooterProps {
     hokei: HokeiMoment;
-    notesData: HokeiNotes;
 }
 
-const CardFooter = ({hokei, notesData}: CardFooterProps) => {
-    const [notes, setNotes] = useState(notesData.getNotes(hokei.hokei_name));
-    const [notesAreShown, setNotesAreShown] = useState<boolean>(!!notes);
+const CardFooter = ({hokei}: CardFooterProps) => {
+    const savedNotes = useHokeiNote(hokei.hokei_name);
+    // Typing edits a draft; only blur writes it to the store. The draft follows
+    // the saved note whenever that changes underneath — the trim applied on
+    // save, or an edit arriving from another device over sync.
+    const [notes, setNotes] = useState(savedNotes);
+    const [lastSavedNotes, setLastSavedNotes] = useState(savedNotes);
+    if (lastSavedNotes !== savedNotes) {
+        setLastSavedNotes(savedNotes);
+        setNotes(savedNotes);
+    }
+    const [notesAreShown, setNotesAreShown] = useState<boolean>(!!savedNotes);
     const notesRef = useRef<HTMLTextAreaElement>(null);
     const translator = useContext(TranslatorContext);
-    
-    useEffect(() => notesData.registerListener(hokei.hokei_name, note => setNotes(note)), [notesData, hokei.hokei_name]);
 
     const persistNotes = () => {
         let processedNotes = notes;
         if (processedNotes !== null)
             processedNotes = processedNotes.trim();
-        notesData.setNotes(hokei.hokei_name, processedNotes);
+        setHokeiNote(hokei.hokei_name, processedNotes);
     }
 
     // Focus when show changes to true

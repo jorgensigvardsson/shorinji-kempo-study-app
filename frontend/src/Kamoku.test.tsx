@@ -39,14 +39,14 @@ beforeEach(() => {
 
 describe("Kamoku weekly plan", () => {
   it("uses the selected global grade without repeating it on every technique card", () => {
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />);
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} />);
 
     expect(screen.queryByRole("combobox", { name: "Grad" })).toBeNull();
     expect(screen.getByTestId("weekly-hokei").getAttribute("data-grade")).toBe("");
   });
 
   it("presents the weekly focus openly above the technique cards", () => {
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />);
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} />);
 
     expect(screen.getByRole("heading", { name: "Veckoplan" })).toBeTruthy();
     expect(screen.getByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeTruthy();
@@ -78,7 +78,7 @@ describe("Kamoku weekly plan", () => {
       }],
     };
 
-    render(<Kamoku myGrade="5 kyū" allGradePlans={[mixedPlan]} notesData={null!} ranksData={null!} />);
+    render(<Kamoku myGrade="5 kyū" allGradePlans={[mixedPlan]} />);
 
     expect(screen.getByText(/Randori i jūhō med fokus på nuki waza från seitai gamae/)).toBeTruthy();
     expect(screen.getByText("Randori · jūhō — nuki waza från seitai gamae · Embu · Repetition")).toBeTruthy();
@@ -96,7 +96,7 @@ describe("Kamoku weekly plan", () => {
       }],
     };
 
-    render(<Kamoku myGrade="nidan" allGradePlans={[reviewPlan]} notesData={null!} ranksData={null!} />);
+    render(<Kamoku myGrade="nidan" allGradePlans={[reviewPlan]} />);
 
     expect(screen.getByText("En vecka för att samla ihop det du arbetat med: repetition, studier och förberedelse inför gradering.")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Veckans fokus" })).toBeTruthy();
@@ -123,7 +123,7 @@ describe("Kamoku weekly plan", () => {
 
   it("leaves grade and training mode to the global control", () => {
     const { container } = render(
-      <Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />,
+      <Kamoku myGrade="6 kyū" allGradePlans={[plan]} />,
     );
 
     const controls = container.querySelector(".kamoku-controls");
@@ -136,7 +136,7 @@ describe("Kamoku weekly plan", () => {
 
   it("marks a grade week as practised and opens a stable editable completion panel", async () => {
     const user = userEvent.setup();
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} notesData={null!} ranksData={null!} />);
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} />);
 
     await user.click(screen.getByRole("button", { name: "Markera som tränad" }));
 

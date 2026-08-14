@@ -1,14 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { HokeiMoment } from "../data";
-import { HokeiNotes, HokeiRanks } from "../persistence/app-data";
 import type { PersistenceBackend } from "../persistence/backend";
 import { createDefaultAppDataDocument, type AppDataDocument } from "../persistence/schema";
-import { AppDataStore } from "../persistence/store";
+import { AppDataStore, getAppDataStore } from "../persistence/store";
 import { TranslatorContext, TranslatorImplementation } from "../i18n";
 import HokeiCard from "./HokeiCard";
 
 const hookState = vi.hoisted(() => ({ showKanji: false }));
+
+vi.mock("../persistence/store", async importOriginal => ({
+  ...(await importOriginal<typeof import("../persistence/store")>()),
+  getAppDataStore: vi.fn(),
+}));
 
 vi.mock("../hooks", () => ({
   useShowKanji: () => hookState.showKanji,
@@ -49,12 +53,13 @@ const makeStore = (withNotes = true) => {
 describe("HokeiCard training layouts", () => {
   it("keeps variations, technique metadata, stance names, notes, and ratings in the calm layout", () => {
     const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
     const { container } = render(
       <HokeiCard
         hokei={hokei}
         gradeName="6 kyū"
-        notesData={new HokeiNotes(store)}
-        ranksData={new HokeiRanks(store)}
+        showNotes
+        showRating
         kamokuLayout
       />,
     );
@@ -77,6 +82,7 @@ describe("HokeiCard training layouts", () => {
 
   it("keeps only practice-essential header information in dojo mode and opens saved notes", () => {
     const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
     hookState.showKanji = true;
     const translator = new TranslatorImplementation({ ja: { "gyaku gote": "逆小手" } }, "sv");
     const { container } = render(
@@ -84,8 +90,8 @@ describe("HokeiCard training layouts", () => {
         <HokeiCard
           hokei={hokei}
           gradeName="6 kyū"
-          notesData={new HokeiNotes(store)}
-          ranksData={new HokeiRanks(store)}
+        showNotes
+        showRating
           dojoMode
         />
       </TranslatorContext.Provider>,
@@ -105,6 +111,7 @@ describe("HokeiCard training layouts", () => {
 
   it("uses Japanese as the primary dojo text when Japanese is the interface language", () => {
     const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
     const translator = new TranslatorImplementation({
       ja: { "gyaku gote": "逆小手", katate: "片手" },
     }, "ja");
@@ -112,8 +119,8 @@ describe("HokeiCard training layouts", () => {
       <TranslatorContext.Provider value={translator}>
         <HokeiCard
           hokei={hokei}
-          notesData={new HokeiNotes(store)}
-          ranksData={new HokeiRanks(store)}
+        showNotes
+        showRating
           dojoMode
         />
       </TranslatorContext.Provider>,
@@ -125,8 +132,9 @@ describe("HokeiCard training layouts", () => {
 
   it("uses a calm notes label when no note has been saved", () => {
     const store = makeStore(false);
+    vi.mocked(getAppDataStore).mockReturnValue(store);
     const { container } = render(
-      <HokeiCard hokei={hokei} notesData={new HokeiNotes(store)} kamokuLayout />,
+      <HokeiCard hokei={hokei} showNotes kamokuLayout />,
     );
 
     expect(container.textContent).toContain("Anteckningar");

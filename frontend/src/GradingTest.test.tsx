@@ -34,8 +34,6 @@ const renderGrading = (subject: "theory" | "technical") => render(
     subject={subject}
     grade="6 kyū"
     allGradePlans={plans}
-    notesData={null!}
-    ranksData={null!}
   />,
 );
 

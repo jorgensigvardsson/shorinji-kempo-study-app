@@ -6,7 +6,6 @@ import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastCon
 import { getRoutes, routeText, type Route } from './routes';
 import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
-import type { HokeiNotes, HokeiRanks } from './persistence/app-data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useSyncProvider, useSyncState, useWakeLock } from './hooks';
 import { getSyncManager } from './sync/manager';
@@ -23,8 +22,6 @@ import { setAppData, useAppData } from './persistence/use-app-data';
 interface Props {
   gradePlans: GradePlan[];
   textSizeData: Data<number>;
-  notesData: HokeiNotes;
-  ranksData: HokeiRanks;
   bodyFontFamilyData: Data<string>;
   headingFontFamilyData: Data<string>;
   kanjiFontFamilyData: Data<string>;
@@ -98,7 +95,7 @@ function useAppUpdate(autoApply: boolean) {
 }
 
 function App(props: Props) {
-  const { gradePlans, notesData, ranksData, textSizeData, bodyFontFamilyData, headingFontFamilyData, kanjiFontFamilyData } = props;
+  const { gradePlans, textSizeData, bodyFontFamilyData, headingFontFamilyData, kanjiFontFamilyData } = props;
   const language = useAppData("language");
   const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
   const [ bodyFontFamily, setBodyFontFamily ] = useState<string>(bodyFontFamilyData.data);
@@ -156,8 +153,6 @@ function App(props: Props) {
     gradePlans.find(l => l.grade === profileGrade)!,
     gradePlans,
     translator,
-    notesData,
-    ranksData,
     textZoom,
     lang => setAppData("language", lang),
     g => setAppData("grade", g.grade),
