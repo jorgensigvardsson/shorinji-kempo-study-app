@@ -45,7 +45,36 @@ vi.mock("./assets/grading-exam-information.json", () => ({
         term: { romaji: "gijutsu kamoku" },
         title: "tekniska ämnen",
         items: [
-          { term: { romaji: "kiso kamoku" }, items: [] },
+          {
+            term: { romaji: "kiso kamoku" },
+            points: 100,
+            items: [
+              {
+                term: { romaji: "tai gamae, tai sabaki, umpohō" },
+                points: 10,
+                techniqueGroups: [
+                  { techniques: [{ romaji: "chūdan gamae" }] },
+                  { techniques: [{ romaji: "zen tenkan" }] },
+                  { techniques: [{ romaji: "chidori ashi" }] },
+                ],
+              },
+              {
+                term: { romaji: "ukemi" },
+                points: 10,
+                techniqueGroups: [{ techniques: [{ romaji: "mae ukemi" }] }],
+              },
+              {
+                term: { romaji: "kihon kōgi" },
+                points: 10,
+                techniqueGroups: [{ techniques: [{ romaji: "furiko zuki" }] }],
+              },
+              {
+                term: { romaji: "tan'en kihon hōkei" },
+                points: 40,
+                techniqueGroups: [{ techniques: [{ romaji: "tenchi ken dai ikkei" }] }],
+              },
+            ],
+          },
           { term: { romaji: "chūshutsu kamoku" }, items: [] },
           { term: { romaji: "kumi embu" }, items: [] },
           { term: { romaji: "un'yōhō" }, items: [] },
@@ -151,4 +180,28 @@ describe("GradingTest subject split", () => {
     await user.click(screen.getByRole("button", { name: "App back" }));
     expect(screen.getByTestId("location").textContent).toBe("/training");
   });
+
+  it("groups fundamentals into a clean outline without dropping their techniques", async () => {
+    const user = userEvent.setup();
+    const { container } = renderGrading("technical", "3 kyū");
+
+    await user.click(screen.getByRole("button", { name: /Grunder/ }));
+
+    expect(screen.getByText("4 delar")).toBeTruthy();
+    expect(screen.getByText("Rörelse och säkerhet")).toBeTruthy();
+    expect(screen.getByText("Angrepp och försvar")).toBeTruthy();
+    expect(screen.getByText("Hōkei")).toBeTruthy();
+    expect(container.querySelectorAll(".grading-completion-placeholder")).toHaveLength(4);
+    expect(screen.queryByText("chūdan gamae")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: /Kroppsställning, kroppsföring och fotförflyttning/ }));
+
+    expect(screen.getByText("Kroppsställningar")).toBeTruthy();
+    expect(screen.getByText("Kroppsföring")).toBeTruthy();
+    expect(screen.getByText("Fotförflyttning")).toBeTruthy();
+    expect(screen.getByText("chūdan gamae")).toBeTruthy();
+    expect(screen.getByText("zen tenkan")).toBeTruthy();
+    expect(screen.getByText("chidori ashi")).toBeTruthy();
+  });
+
 });

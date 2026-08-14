@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T12:52:51.343Z",
+    changes: [
+      {
+        emoji: "🧹",
+        sv: "Grunder på graderingssidan är nu uppdelade i tydliga grupper och lugna, utfällbara rader. Kroppsställningar, kroppsföring och fotförflyttning har fått egna rubriker så innehållet blir lättare att överblicka.",
+        en: "Fundamentals on the grading page are now divided into clear groups and calm, expandable rows. Stances, body movement, and footwork have their own headings, making the content easier to scan.",
+        tr: "Derecelendirme sayfasındaki temeller artık açık gruplara ve sade, genişletilebilir satırlara ayrıldı. Duruşlar, vücut hareketi ve ayak çalışması kendi başlıklarına sahip, böylece içerik daha kolay gözden geçirilebilir.",
+        ja: "昇格考試ページの基礎科目を、分かりやすいグループと落ち着いた展開式の行に整理しました。体構え・体捌き・運歩法にそれぞれ見出しが付き、内容を確認しやすくなりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T11:22:27.004Z",
     changes: [
       {
