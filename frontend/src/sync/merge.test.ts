@@ -20,6 +20,8 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       knownFlashCards: {},
       showKanjiOnHokeiCards: true,
       weeklyPlanCompletions: {},
+      gradingFundamentalCompletions: {},
+      gradingTheoryCompletions: {},
     },
     ...overrides,
   };
@@ -394,6 +396,66 @@ describe("mergeDocuments — weekly-plan completions", () => {
 
     const result = mergeDocuments(base, local, remote);
     expect(result.document.data.weeklyPlanCompletions["6 kyū|1"].completedAt).toBe("2024-06-03T10:00:00.000Z");
+  });
+});
+
+describe("mergeDocuments — grading fundamentals completions", () => {
+  it("keeps fundamentals completed independently on two devices", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({
+      updatedAt: NEW,
+      data: {
+        ...base.data,
+        gradingFundamentalCompletions: {
+          "3 kyū|ukemi": { completedAt: "2024-06-01T10:00:00.000Z" },
+        },
+      },
+    });
+    const remote = makeDoc({
+      updatedAt: NEW,
+      data: {
+        ...base.data,
+        gradingFundamentalCompletions: {
+          "3 kyū|kihon kōgi": { completedAt: "2024-06-02T10:00:00.000Z" },
+        },
+      },
+    });
+
+    const result = mergeDocuments(base, local, remote);
+    expect(Object.keys(result.document.data.gradingFundamentalCompletions).sort()).toEqual([
+      "3 kyū|kihon kōgi",
+      "3 kyū|ukemi",
+    ]);
+  });
+});
+
+describe("mergeDocuments — grading theory completions", () => {
+  it("keeps theory areas completed independently on two devices", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({
+      updatedAt: NEW,
+      data: {
+        ...base.data,
+        gradingTheoryCompletions: {
+          "shodan|jukensha ga teishutsu suru shukudai": { completedAt: "2024-06-01T10:00:00.000Z" },
+        },
+      },
+    });
+    const remote = makeDoc({
+      updatedAt: NEW,
+      data: {
+        ...base.data,
+        gradingTheoryCompletions: {
+          "shodan|item-1": { completedAt: "2024-06-02T10:00:00.000Z" },
+        },
+      },
+    });
+
+    const result = mergeDocuments(base, local, remote);
+    expect(Object.keys(result.document.data.gradingTheoryCompletions).sort()).toEqual([
+      "shodan|item-1",
+      "shodan|jukensha ga teishutsu suru shukudai",
+    ]);
   });
 });
 

@@ -20,6 +20,10 @@ export interface WeeklyPlanCompletionEntry {
   completedAt: string;
 }
 
+export interface GradingCompletionEntry {
+  completedAt: string;
+}
+
 export interface CurrentWeekAnchor {
   week: number;
   anchorDate: string; // YYYY-MM-DD in local time
@@ -39,6 +43,8 @@ export interface AppDataState {
   knownFlashCards: Record<string, FlashCardKnownEntry>;
   showKanjiOnHokeiCards: boolean;
   weeklyPlanCompletions: Record<string, WeeklyPlanCompletionEntry>;
+  gradingFundamentalCompletions: Record<string, GradingCompletionEntry>;
+  gradingTheoryCompletions: Record<string, GradingCompletionEntry>;
 }
 
 export interface AppDataDocument {
@@ -75,6 +81,8 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       knownFlashCards: {},
       showKanjiOnHokeiCards: true,
       weeklyPlanCompletions: {},
+      gradingFundamentalCompletions: {},
+      gradingTheoryCompletions: {},
     },
   };
 }

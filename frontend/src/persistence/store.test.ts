@@ -36,6 +36,24 @@ describe("AppDataStore — initial state", () => {
 
     expect(store.get("weeklyPlanCompletions")).toEqual({});
   });
+
+  it("adds empty grading completions to older saved documents", () => {
+    const current = createDefaultAppDataDocument();
+    const oldData = { ...current.data } as Partial<AppDataDocument["data"]>;
+    delete oldData.gradingFundamentalCompletions;
+    const store = makeStore({ ...current, data: oldData as AppDataDocument["data"] });
+
+    expect(store.get("gradingFundamentalCompletions")).toEqual({});
+  });
+
+  it("adds empty theory grading completions to older saved documents", () => {
+    const current = createDefaultAppDataDocument();
+    const oldData = { ...current.data } as Partial<AppDataDocument["data"]>;
+    delete oldData.gradingTheoryCompletions;
+    const store = makeStore({ ...current, data: oldData as AppDataDocument["data"] });
+
+    expect(store.get("gradingTheoryCompletions")).toEqual({});
+  });
 });
 
 describe("AppDataStore — get / set", () => {

@@ -1,4 +1,4 @@
-import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry, type WeeklyPlanCompletionEntry } from "../persistence/schema";
+import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry } from "../persistence/schema";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -44,10 +44,24 @@ export function mergeDocuments(
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     knownFlashCards: mergeKnownFlashCards(baseDocument.data.knownFlashCards ?? {}, local.data.knownFlashCards ?? {}, remote.data.knownFlashCards ?? {}),
     showKanjiOnHokeiCards: mergeScalar("showKanjiOnHokeiCards"),
-    weeklyPlanCompletions: mergeWeeklyPlanCompletions(
+    weeklyPlanCompletions: mergeCompletionRecords(
       baseDocument.data.weeklyPlanCompletions ?? {},
       local.data.weeklyPlanCompletions ?? {},
       remote.data.weeklyPlanCompletions ?? {},
+      local,
+      remote,
+    ),
+    gradingFundamentalCompletions: mergeCompletionRecords(
+      baseDocument.data.gradingFundamentalCompletions ?? {},
+      local.data.gradingFundamentalCompletions ?? {},
+      remote.data.gradingFundamentalCompletions ?? {},
+      local,
+      remote,
+    ),
+    gradingTheoryCompletions: mergeCompletionRecords(
+      baseDocument.data.gradingTheoryCompletions ?? {},
+      local.data.gradingTheoryCompletions ?? {},
+      remote.data.gradingTheoryCompletions ?? {},
       local,
       remote,
     ),
@@ -223,14 +237,14 @@ function mergeKnownFlashCards(
   return result;
 }
 
-function mergeWeeklyPlanCompletions(
-  base: Record<string, WeeklyPlanCompletionEntry>,
-  local: Record<string, WeeklyPlanCompletionEntry>,
-  remote: Record<string, WeeklyPlanCompletionEntry>,
+function mergeCompletionRecords<TEntry extends { completedAt: string }>(
+  base: Record<string, TEntry>,
+  local: Record<string, TEntry>,
+  remote: Record<string, TEntry>,
   localDocument: AppDataDocument,
   remoteDocument: AppDataDocument,
-): Record<string, WeeklyPlanCompletionEntry> {
-  const result: Record<string, WeeklyPlanCompletionEntry> = {};
+): Record<string, TEntry> {
+  const result: Record<string, TEntry> = {};
   const allKeys = new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)]);
 
   for (const key of allKeys) {
@@ -239,7 +253,7 @@ function mergeWeeklyPlanCompletions(
     const remoteEntry = readOptional(remote, key);
     const localChanged = !areEqual(localEntry, baseEntry);
     const remoteChanged = !areEqual(remoteEntry, baseEntry);
-    let chosen: WeeklyPlanCompletionEntry | undefined;
+    let chosen: TEntry | undefined;
 
     if (localChanged && remoteChanged) {
       if (areEqual(localEntry, remoteEntry)) chosen = localEntry;

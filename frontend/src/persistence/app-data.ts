@@ -70,3 +70,34 @@ export function setHokeiRank(hokeiName: string, rank: HokeiRankValue | null): vo
         [hokeiName]: { value: rank, updatedAt: new Date().toISOString() },
     });
 }
+
+type GradingCompletionField = "gradingFundamentalCompletions" | "gradingTheoryCompletions";
+
+function setGradingCompletion(field: GradingCompletionField, key: string, completed: boolean): void {
+    const store = getAppDataStore();
+    const existing = store.get(field);
+
+    if (completed) {
+        if (existing[key]) return;
+        store.set(field, {
+            ...existing,
+            [key]: { completedAt: new Date().toISOString() },
+        });
+        return;
+    }
+
+    if (!(key in existing)) return;
+    const remaining = { ...existing };
+    delete remaining[key];
+    store.set(field, remaining);
+}
+
+/** Marks one fundamentals requirement as completed, or removes its mark. */
+export function setGradingFundamentalCompletion(key: string, completed: boolean): void {
+    setGradingCompletion("gradingFundamentalCompletions", key, completed);
+}
+
+/** Marks one large theory area as completed, or removes its mark. */
+export function setGradingTheoryCompletion(key: string, completed: boolean): void {
+    setGradingCompletion("gradingTheoryCompletions", key, completed);
+}

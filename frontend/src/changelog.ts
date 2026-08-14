@@ -13,6 +13,42 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T13:19:49.825Z",
+    changes: [
+      {
+        emoji: "🟢",
+        sv: "Självskattningen på teknikkorten visas nu med tre kompakta prickar, så att dina framsteg syns utan att ta onödig plats.",
+        en: "Self-assessment on technique cards now uses three compact dots, showing your progress without taking up unnecessary space.",
+        tr: "Teknik kartlarındaki öz değerlendirme artık üç kompakt noktayla gösteriliyor; böylece ilerlemeniz gereksiz yer kaplamadan görülebiliyor.",
+        ja: "技法カードの自己評価を3つのコンパクトな点で表示し、場所を取らずに進捗を確認できるようになりました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-14T13:06:42.171Z",
+    changes: [
+      {
+        emoji: "✅",
+        sv: "Du kan nu klarmarkera de stora områdena under Grunder och Teoretiska ämnen. Räknaren visar dina framsteg för den valda graden, och markeringarna följer med mellan dina enheter.",
+        en: "You can now mark the large areas under Fundamentals and Theory subjects as complete. The counter shows your progress for the selected grade, and completion marks follow you across devices.",
+        tr: "Artık Temeller ve Teorik konular altındaki büyük alanları tamamlandı olarak işaretleyebilirsiniz. Sayaç seçilen derece için ilerlemenizi gösterir ve tamamlanma işaretleri cihazlarınız arasında aktarılır.",
+        ja: "「基礎」と「学科科目」の大きな項目を完了として記録できるようになりました。選択した級・段ごとの進捗が表示され、完了状況は端末間で引き継がれます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-14T12:52:51.343Z",
+    changes: [
+      {
+        emoji: "🧹",
+        sv: "Grunder på graderingssidan är nu uppdelade i tydliga grupper och lugna, utfällbara rader. Kroppsställningar, kroppsföring och fotförflyttning har fått egna rubriker så innehållet blir lättare att överblicka.",
+        en: "Fundamentals on the grading page are now divided into clear groups and calm, expandable rows. Stances, body movement, and footwork have their own headings, making the content easier to scan.",
+        tr: "Derecelendirme sayfasındaki temeller artık açık gruplara ve sade, genişletilebilir satırlara ayrıldı. Duruşlar, vücut hareketi ve ayak çalışması kendi başlıklarına sahip, böylece içerik daha kolay gözden geçirilebilir.",
+        ja: "昇格考試ページの基礎科目を、分かりやすいグループと落ち着いた展開式の行に整理しました。体構え・体捌き・運歩法にそれぞれ見出しが付き、内容を確認しやすくなりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T11:22:27.004Z",
     changes: [
       {

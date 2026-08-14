@@ -20,17 +20,21 @@ const renderAssessment = (value: HokeiRankValue | null, onChange = () => undefin
 );
 
 describe("self-assessment control", () => {
-  it("shows only the current status while closed", () => {
-    renderAssessment(2);
+  it("shows the current status as three compact progress dots while closed", () => {
+    const { container } = renderAssessment(2);
 
     expect(screen.getByRole("button", { name: "Self-assessment: Practising" })).toBeTruthy();
+    expect(container.querySelectorAll(".self-assessment-progress .self-assessment-dot")).toHaveLength(3);
+    expect(container.querySelectorAll(".self-assessment-progress .is-filled")).toHaveLength(2);
+    expect(screen.queryByText("Practising")).toBeNull();
     expect(screen.queryByRole("radio")).toBeNull();
   });
 
   it("shows a calm unassessed state when no value is stored", () => {
-    renderAssessment(null);
+    const { container } = renderAssessment(null);
 
     expect(screen.getByRole("button", { name: "Self-assessment: Not assessed" })).toBeTruthy();
+    expect(container.querySelectorAll(".self-assessment-progress .is-filled")).toHaveLength(0);
   });
 
   it("opens the semantic choices without toggling the surrounding card", () => {
