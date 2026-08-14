@@ -2,6 +2,10 @@
 .env
 node_modules
 
+# Local backend development server output
+backend/*/.dev.*.log
+.codex/*.log
+
 # Personal Claude Code settings: machine-specific paths and permission grants.
 # The shared .claude/settings.json stays tracked.
 .claude/settings.local.json
