@@ -17,10 +17,8 @@
 }
 
 .self-assessment-trigger {
-  padding: 0.3rem 0.4rem;
+  padding: 0.45rem;
   border-radius: 0.35rem;
-  font-size: 0.85rem;
-  white-space: nowrap;
 }
 
 .self-assessment-trigger:hover {
@@ -40,6 +38,33 @@
   flex: 0 0 auto;
   border: 1px solid var(--bs-secondary-color);
   border-radius: 50%;
+}
+
+.self-assessment-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.self-assessment-progress .self-assessment-dot {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-color: color-mix(in srgb, var(--bs-secondary-color) 55%, transparent);
+}
+
+.self-assessment-progress .dot-1.is-filled {
+  border-color: var(--bs-secondary-color);
+  background: color-mix(in srgb, var(--bs-secondary-color) 45%, transparent);
+}
+
+.self-assessment-progress .dot-2.is-filled {
+  border-color: var(--bs-primary);
+  background: color-mix(in srgb, var(--bs-primary) 62%, transparent);
+}
+
+.self-assessment-progress .dot-3.is-filled {
+  border-color: var(--bs-primary);
+  background: var(--bs-primary);
 }
 
 .self-assessment-dot.value-1 {

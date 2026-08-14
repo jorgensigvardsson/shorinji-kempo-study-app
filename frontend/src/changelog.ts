@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-14T13:19:49.825Z",
+    changes: [
+      {
+        emoji: "🟢",
+        sv: "Självskattningen på teknikkorten visas nu med tre kompakta prickar, så att dina framsteg syns utan att ta onödig plats.",
+        en: "Self-assessment on technique cards now uses three compact dots, showing your progress without taking up unnecessary space.",
+        tr: "Teknik kartlarındaki öz değerlendirme artık üç kompakt noktayla gösteriliyor; böylece ilerlemeniz gereksiz yer kaplamadan görülebiliyor.",
+        ja: "技法カードの自己評価を3つのコンパクトな点で表示し、場所を取らずに進捗を確認できるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T13:06:42.171Z",
     changes: [
       {

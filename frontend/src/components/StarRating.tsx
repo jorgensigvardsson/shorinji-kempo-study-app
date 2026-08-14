@@ -52,8 +52,14 @@ const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel }: Props
           setOpen(current => !current);
         }}
       >
-        <span className={`self-assessment-dot value-${value ?? "none"}`} aria-hidden="true" />
-        <span>{currentLabel}</span>
+        <span className="self-assessment-progress" aria-hidden="true">
+          {([1, 2, 3] as HokeiRankValue[]).map(level => (
+            <span
+              key={level}
+              className={`self-assessment-dot dot-${level}${value !== null && level <= value ? " is-filled" : ""}`}
+            />
+          ))}
+        </span>
       </button>
       {open && (
         <div className="self-assessment-menu" role="radiogroup" aria-label={groupLabel}>
