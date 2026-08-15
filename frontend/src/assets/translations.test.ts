@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
-import translations from "./translations.json";
+import ja from "./translations.ja.json";
+import en from "./translations.en.json";
+import tr from "./translations.tr.json";
 // As text, because the parsed form is exactly where a duplicate key disappears.
-import translationsText from "./translations.json?raw";
+import jaText from "./translations.ja.json?raw";
+import enText from "./translations.en.json?raw";
+import trText from "./translations.tr.json?raw";
+
+const sections: Record<"ja" | "en" | "tr", Record<string, string>> = { ja, en, tr };
+const sourceText: Record<"ja" | "en" | "tr", string> = { ja: jaText, en: enText, tr: trText };
 
 // The i18n system normalises lookup keys to lowercase before storing them,
 // so "Vecka" and "vecka" are the same effective key at runtime.
@@ -23,33 +30,37 @@ const mustBeSubsetOf: Array<[string, string]> = [
 // A duplicated key is invisible once parsed: every JSON parser keeps one of them, so
 // the file reads as if two translations were in effect while only ever one was. Two
 // keys were duplicated this way for a long time without anything noticing.
-describe("translations.json duplicate keys", () => {
-  it("declares each key once per language section", () => {
-    let section: string | null = null;
-    const seen = new Set<string>();
-    const duplicates: string[] = [];
+describe("translation files, duplicate keys", () => {
+  for (const language of ["ja", "en", "tr"] as const) {
+    it(`declares each key once in ${language}`, () => {
+      const seen = new Set<string>();
+      const duplicates: string[] = [];
 
-    for (const line of translationsText.split(/\r?\n/)) {
-      const start = /^ {2}"(ja|en|tr)": \{/.exec(line);
-      if (start) {
-        section = start[1];
-        continue;
+      for (const line of sourceText[language].split(/\r?\n/)) {
+        const entry = /^ {2}("(?:[^"\\]|\\.)*")\s*:/.exec(line);
+        if (!entry) continue;
+        if (seen.has(entry[1])) duplicates.push(entry[1]);
+        seen.add(entry[1]);
       }
-      if (!section) continue;
-      const entry = /^ {4}("(?:[^"\\]|\\.)*")\s*:/.exec(line);
-      if (!entry) continue;
-      const id = `${section} ${entry[1]}`;
-      if (seen.has(id)) duplicates.push(id);
-      seen.add(id);
-    }
 
-    expect(duplicates, `duplicated: ${duplicates.join(", ")}`).toHaveLength(0);
-  });
+      expect(duplicates, `duplicated: ${duplicates.join(", ")}`).toHaveLength(0);
+    });
+
+    // The split into one file per language is only safe while each file really is
+    // just that language's section. A file that grew a nested object would silently
+    // stop being a translation table.
+    it(`holds only string values in ${language}`, () => {
+      const wrong = Object.entries(sections[language])
+        .filter(([, value]) => typeof value !== "string")
+        .map(([key]) => key);
+      expect(wrong, `non-string values: ${wrong.join(", ")}`).toHaveLength(0);
+    });
+  }
 });
 
-describe("translations.json completeness", () => {
+describe("translation files, completeness", () => {
   const keysBySection = Object.fromEntries(
-    ["ja", "en", "tr"].map(lang => [lang, normalizedKeySet(translations[lang as keyof typeof translations])])
+    ["ja", "en", "tr"].map(lang => [lang, normalizedKeySet(sections[lang as keyof typeof sections])])
   ) as Record<"ja" | "en" | "tr", Set<string>>;
 
   for (const [source, target] of mustBeSubsetOf) {

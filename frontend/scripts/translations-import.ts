@@ -9,7 +9,9 @@ if (!lang) {
 }
 
 const root = process.cwd();
-const translationsPath = resolve(root, "src/assets/translations.json");
+// One file per language, because each is fetched separately by the app - see
+// src/translations.ts. The command is unchanged; only the file it touches moved.
+const translationsPath = resolve(root, `src/assets/translations.${lang}.json`);
 const exportPath = resolve(root, "translation-exports", `${lang}.json`);
 const baselinePath = resolve(root, "translation-exports", `${lang}.baseline.json`);
 
@@ -23,12 +25,9 @@ for (const [label, path] of [[`Working copy`, exportPath], [`Baseline`, baseline
 
 type TranslationMap = Record<string, string>;
 
-const translations: Record<string, TranslationMap> = JSON.parse(
-  readFileSync(translationsPath, "utf-8")
-);
+const ours: TranslationMap = JSON.parse(readFileSync(translationsPath, "utf-8"));
 const base: TranslationMap = JSON.parse(readFileSync(baselinePath, "utf-8"));
 const theirs: TranslationMap = JSON.parse(readFileSync(exportPath, "utf-8"));
-const ours: TranslationMap = translations[lang] ?? {};
 
 // Merge order: ours first (preserves current key ordering and any new keys added
 // since export), then any keys present in base or theirs but not in ours.
@@ -71,15 +70,14 @@ for (const key of keyOrder) {
   }
 }
 
-translations[lang] = merged;
-writeFileSync(translationsPath, JSON.stringify(translations, null, 2) + "\n", "utf-8");
+writeFileSync(translationsPath, JSON.stringify(merged, null, 2) + "\n", "utf-8");
 
-console.log(`Merged "${lang}" translations into translations.json.`);
+console.log(`Merged "${lang}" translations into translations.${lang}.json.`);
 console.log(`  Their changes applied : ${theirChanges}`);
 console.log(`  Conflicts             : ${conflicts}`);
 
 if (conflicts > 0) {
   console.warn();
-  console.warn(`⚠  Resolve conflicts by searching for "<<<CONFLICT" in translations.json.`);
+  console.warn(`⚠  Resolve conflicts by searching for "<<<CONFLICT" in translations.${lang}.json.`);
   process.exit(1);
 }

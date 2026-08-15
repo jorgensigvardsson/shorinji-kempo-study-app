@@ -190,10 +190,10 @@ const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
     const translator = useContext(TranslatorContext);
     const name = translator.isJapanese
         ? translator.japanese(hokei.hokei_name)
-        : translator.explicitTranslate("en", hokei.hokei_name, { capitalize: true });
+        : translator.english(hokei.hokei_name, { capitalize: true });
     const variationLabel = (variation: string) => translator.isJapanese
         ? translator.translate(variation)
-        : translator.explicitTranslate("en", variation);
+        : translator.english(variation);
 
     return (
         <div className="kamoku-card-header-content dojo-card-header-content">

@@ -155,7 +155,12 @@ export interface Translator {
   get currentLanguage(): Language;
   get isJapanese(): boolean;
   translate(text: string | number, options?: Options): string;
-  explicitTranslate(language: Language, text: string | number, options?: Options): string;
+  // Japanese and English are the two languages the app can ask for regardless of
+  // which one the reader has chosen, and they are exactly the two whose sections load
+  // with the app. There is deliberately no way to ask for an arbitrary language: the
+  // rest arrive on demand, and a caller that named one before it landed would get the
+  // Swedish source text back with nothing to say it had.
+  english(text: string | number, options?: Options): string;
   japanese(text: string | number): string;
 }
 
@@ -168,8 +173,8 @@ export class TranslatorImplementation {
     return this.currentLanguage === "ja";
   }
 
-  explicitTranslate(language: Language, text: string | number, options?: Options): string {
-    return i18n(this.translations, language, text, options);
+  english(text: string | number, options?: Options): string {
+    return i18n(this.translations, "en", text, options);
   }
 
   translate(text: string | number, options?: Options): string {

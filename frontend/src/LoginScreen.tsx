@@ -1,6 +1,8 @@
-import { useContext, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
-import { type Language, noTranslate, TranslationsContext, TranslatorImplementation } from "./i18n";
+import { type Language, noTranslate, TranslatorImplementation } from "./i18n";
+import { useTranslations } from "./hooks";
+import { ensureAllTranslations } from "./translations";
 import PrivacyPolicy from "./PrivacyPolicy";
 import { getSyncManager } from "./sync/manager";
 import { RateLimitError } from "./sync/backend";
@@ -29,9 +31,13 @@ function detectBrowserLanguage(): Language {
 type Phase = "email" | "code";
 
 export function LoginScreen() {
-  const translations = useContext(TranslationsContext);
+  const translations = useTranslations();
   // Detection picks the initial language; the links below let the user override it.
   const [language, setLanguage] = useState<Language>(detectBrowserLanguage);
+  // Nobody is signed in yet, so there is no stored language for main.tsx to have
+  // waited on — a Turkish browser reaches this screen with its section still to come,
+  // and both of the languages offered here have to be ready the moment they are picked.
+  useEffect(() => { void ensureAllTranslations(); }, []);
   const translator = useMemo(
     () => new TranslatorImplementation(translations, language),
     [translations, language]

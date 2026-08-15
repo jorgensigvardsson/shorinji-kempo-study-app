@@ -3,6 +3,8 @@ import { setAppData, useAppData } from './persistence/use-app-data';
 import type { ThemePreference } from './persistence/schema';
 import { getSyncProvider, setSyncProvider, subscribeSyncProvider, type SyncProvider } from './sync/provider';
 import { getSyncManager } from './sync/manager';
+import { getTranslations, subscribeTranslations } from './translations';
+import type { Translations } from './i18n';
 import type { SyncState } from './sync/types';
 
 export const useDeviceSize = () => {
@@ -141,3 +143,9 @@ export function useIdleTask(task: () => void) {
 
 const IDLE_TASK_TIMEOUT_MS = 5000;
 const IDLE_TASK_FALLBACK_MS = 2000;
+
+// The translation sections currently held. Re-renders when one arrives that was not
+// loaded at startup — see translations.ts for which those are and why.
+export function useTranslations(): Translations {
+  return useSyncExternalStore(subscribeTranslations, getTranslations);
+}

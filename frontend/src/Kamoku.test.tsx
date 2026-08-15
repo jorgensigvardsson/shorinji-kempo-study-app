@@ -5,7 +5,9 @@ import type { GradePlan, HokeiMoment } from "./data";
 import Kamoku from "./Kamoku";
 import { getAppDataStore } from "./persistence/store";
 import gradePlans from "./assets/kamokuhyo.json";
-import translations from "./assets/translations.json";
+import ja from "./assets/translations.ja.json";
+import en from "./assets/translations.en.json";
+import tr from "./assets/translations.tr.json";
 import { TranslatorImplementation, type Language } from "./i18n";
 import { weekIntroduction } from "./weekly-copy";
 
@@ -110,7 +112,9 @@ describe("Kamoku weekly plan", () => {
     const languages: Language[] = ["sv", "en", "tr", "ja"];
 
     for (const language of languages) {
-      const translator = new TranslatorImplementation(translations, language);
+      // Every section, rather than what the app loads at startup: this asserts against
+      // real copy in each language, so each language's table has to be present.
+      const translator = new TranslatorImplementation({ ja, en, tr }, language);
       for (const grade of plans) {
         for (const week of grade.weeks) {
           const introduction = weekIntroduction(week, translator);

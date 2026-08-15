@@ -1,5 +1,10 @@
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "fs";
 import { resolve } from "path";
+
+const availableLanguages = (): string[] =>
+  readdirSync(resolve(process.cwd(), "src/assets"))
+    .map(name => /^translations\.([a-z]{2})\.json$/.exec(name)?.[1])
+    .filter((name): name is string => !!name);
 
 const lang = process.argv[2];
 if (!lang) {
@@ -9,22 +14,20 @@ if (!lang) {
 }
 
 const root = process.cwd();
-const translationsPath = resolve(root, "src/assets/translations.json");
+// One file per language, because each is fetched separately by the app — see
+// src/translations.ts. The command is unchanged; only the file it reads moved.
+const translationsPath = resolve(root, `src/assets/translations.${lang}.json`);
 const exportDir = resolve(root, "translation-exports");
 const exportPath = resolve(exportDir, `${lang}.json`);
 const baselinePath = resolve(exportDir, `${lang}.baseline.json`);
 
-const translations: Record<string, Record<string, string>> = JSON.parse(
-  readFileSync(translationsPath, "utf-8")
-);
-
-if (!translations[lang]) {
-  console.error(`Language "${lang}" not found in translations.json.`);
-  console.error(`Available languages: ${Object.keys(translations).join(", ")}`);
+if (!existsSync(translationsPath)) {
+  console.error(`Language "${lang}" has no file at ${translationsPath}.`);
+  console.error(`Available languages: ${availableLanguages().join(", ")}`);
   process.exit(1);
 }
 
-const section = translations[lang];
+const section: Record<string, string> = JSON.parse(readFileSync(translationsPath, "utf-8"));
 const content = JSON.stringify(section, null, 2) + "\n";
 
 mkdirSync(exportDir, { recursive: true });

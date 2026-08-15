@@ -7,8 +7,8 @@ import './styles/bootstrap-theme.scss';
 import App from './App.tsx'
 import { BrowserRouter } from "react-router-dom";
 import gradePlans from './assets/kamokuhyo.json';
-import translations from './assets/translations.json';
-import { TranslationsContext } from './i18n.ts';
+import { ensureTranslations } from './translations.ts';
+import { getAppDataStore } from './persistence/store.ts';
 import { load } from './persistence/data.ts';
 import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
 import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey, FontFamilyKanjiStorageKey } from './persistence/font-family.ts';
@@ -28,11 +28,9 @@ function mountRoot() {
     <StrictMode>
       <ErrorBoundary>
         <BrowserRouter>
-          <TranslationsContext value={translations}>
-            <App gradePlans={gradePlans as GradePlan[]} textSizeData={textSizeData}
-                 bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}
-                 kanjiFontFamilyData={kanjiFontFamilyData}/>
-          </TranslationsContext>
+          <App gradePlans={gradePlans as GradePlan[]} textSizeData={textSizeData}
+               bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}
+               kanjiFontFamilyData={kanjiFontFamilyData}/>
         </BrowserRouter>
         <StagingBadge />
       </ErrorBoundary>
@@ -45,5 +43,9 @@ function mountRoot() {
   }
 }
 
-mountRoot();
+// Wait for the stored language's translations before painting anything. Resolves in a
+// microtask for every language whose section ships with the app, and only actually
+// waits for a network fetch when this device belongs to a Turkish reader — who would
+// otherwise watch the interface arrive in Swedish and then change under them.
+void ensureTranslations(getAppDataStore().get("language")).then(mountRoot);
 

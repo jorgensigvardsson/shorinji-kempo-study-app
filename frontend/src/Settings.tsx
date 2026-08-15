@@ -9,6 +9,7 @@ import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { toLocalDateKey } from "./utilities/current-week";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
+import { ensureAllTranslations } from "./translations";
 import { Download, Upload } from "react-bootstrap-icons";
 
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
@@ -53,11 +54,21 @@ const Settings = (props: Props) => {
     const selectedWeek = availableWeeks.includes(currentWeekAnchor?.week ?? -1)
         ? currentWeekAnchor!.week
         : (availableWeeks[0] ?? 1);
-    const languages: { code: Language; key: string }[] = [
-        { code: "sv", key: "Svenska" },
-        { code: "en", key: "Engelska" },
-        { code: "tr", key: "Turkiska" },
-        { code: "ja", key: "Japanska" },
+    // `name` is what the language calls itself, and is deliberately a constant rather
+    // than a lookup in that language's own section: a language's own name is not a
+    // translation of the interface, and treating it as one meant every section had to
+    // be loaded just to draw this list. `key` is still translated, because "Turkiska"
+    // does change with the language the reader is using.
+    // This is the one place a language gets chosen, so fetch the sections that do not
+    // ship with the app now rather than when the choice is made — otherwise picking
+    // Turkish shows the Swedish source text until its section lands.
+    useEffect(() => { void ensureAllTranslations(); }, []);
+
+    const languages: { code: Language; key: string; name: string }[] = [
+        { code: "sv", key: "Svenska", name: "Svenska" },
+        { code: "en", key: "Engelska", name: "English" },
+        { code: "tr", key: "Turkiska", name: "Türkçe" },
+        { code: "ja", key: "Japanska", name: "日本語" },
     ];
 
     const gradeLabel = (name: GradeName) => {
@@ -140,7 +151,7 @@ const Settings = (props: Props) => {
                 <Form.Select onChange={e => onSetLanguage(e.target.value as Language)} value={translator.currentLanguage}>
                     {languages.map(language => (
                         <option value={language.code} key={language.code}>
-                            {translator.explicitTranslate(language.code, language.key)} ({translator.translate(language.key)})
+                            {language.name} ({translator.translate(language.key)})
                         </option>
                     ))}
                 </Form.Select>

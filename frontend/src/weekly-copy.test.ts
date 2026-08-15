@@ -17,7 +17,7 @@ function makeTranslator(language: Language = "sv", table: Record<string, string>
       if (options?.capitalize && language !== "ja") result = result.charAt(0).toUpperCase() + result.slice(1);
       return result;
     },
-    explicitTranslate(_language, text) { return lookup(text); },
+    english(text) { return lookup(text); },
     japanese(text) { return `ja:${String(text)}`; },
   };
 }

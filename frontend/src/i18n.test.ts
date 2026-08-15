@@ -126,9 +126,12 @@ describe("TranslatorImplementation", () => {
     expect(t.translate("hello")).toBe("Hello");
   });
 
-  it("explicitTranslate uses the specified language", () => {
-    const t = new TranslatorImplementation(translations, "en");
-    expect(t.explicitTranslate("tr", "hello")).toBe("Merhaba");
+  // English is reachable whatever the reader's language is, because technique names
+  // are shown in English on the dojo cards. It is one of the two sections that load
+  // with the app for exactly that reason.
+  it("english uses the English section regardless of the current language", () => {
+    expect(new TranslatorImplementation(translations, "tr").english("hello")).toBe("Hello");
+    expect(new TranslatorImplementation(translations, "ja").english("hello")).toBe("Hello");
   });
 
   it("isJapanese is true when currentLanguage is ja", () => {

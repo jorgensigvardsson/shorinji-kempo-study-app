@@ -1,13 +1,14 @@
-import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { findGradePlan, type GradePlan, type GradeName } from './data'
-import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
+import { TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, preloadPages, routeText, type Route } from './routes';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
-import { useIdleTask, useSyncProvider, useSyncState, useTheme, useWakeLock } from './hooks';
+import { useIdleTask, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
+import { ensureTranslations } from './translations';
 import RouteContent from './components/RouteContent';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
@@ -136,8 +137,12 @@ function App(props: Props) {
     setGradeOverride(null);
   }
   const displayGrade = gradeOverride ?? profileGrade;
-  const translations = useContext(TranslationsContext);
+  const translations = useTranslations();
   const translator = new TranslatorImplementation(translations, language);
+  // A language whose section is not loaded with the app — Turkish — arrives here.
+  // Until it does the app renders the Swedish source text, which is why main.tsx
+  // waits for it before the first paint rather than leaving it to this.
+  useEffect(() => { void ensureTranslations(language); }, [language]);
   const navigate = useNavigate();
 
   useEffect(() => {
