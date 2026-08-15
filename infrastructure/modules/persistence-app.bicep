@@ -35,6 +35,9 @@ param customDomain string = ''
 @description('Frontend origin allowed by CORS')
 param frontendUrl string
 
+@description('Serve document reads from the split-item container rather than the original. The original keeps receiving every accepted write either way, so setting this back to false and redeploying is the way back. Only turn on once the backfill has run.')
+param userDataReads bool = false
+
 @description('VAPID public key (base64url) for Web Push. Empty disables push endpoints.')
 param vapidPublicKey string = ''
 
@@ -110,6 +113,9 @@ resource persistenceApp 'Microsoft.App/containerApps@2023-05-01' = {
               { name: 'COSMOS_DB_KEY',           secretRef: 'cosmos-key' }
               { name: 'COSMOS_DB_DATABASE',      value: cosmosDatabase }
               { name: 'COSMOS_DB_CONTAINER',     value: 'documents' }
+              // Spelled out rather than string(userDataReads): that renders 'True',
+              // which Go's strconv.ParseBool rejects — leaving the flag silently off.
+              { name: 'USERDATA_READS',          value: userDataReads ? 'true' : 'false' }
             ],
             pushEnabled ? [
               { name: 'VAPID_PUBLIC_KEY',  value: vapidPublicKey }

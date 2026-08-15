@@ -202,6 +202,9 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     cosmosDatabase: cosmosDatabase
     customDomain: persistenceCustomDomain
     frontendUrl: frontendUrl
+    // Reads come from the split-item container; the original keeps receiving every
+    // write, so setting this false and redeploying is the way back.
+    userDataReads: true
     vapidPublicKey: vapidPublicKey
     vapidPrivateKey: vapidPrivateKey
     vapidSubject: vapidSubject
