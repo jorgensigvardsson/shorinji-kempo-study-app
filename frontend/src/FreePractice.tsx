@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
 import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, People, Search, Trash } from "react-bootstrap-icons";
-import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei, Video } from "./data";
+import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import HokeiCard from "./components/HokeiCard";
@@ -12,7 +12,7 @@ import { gradeLabel, matchesString, normalizeString } from "./strings";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { loadExperimentalEmbuDraft, type EmbuDraft, type EmbuDraftStep } from "./persistence/experimental-embu-draft";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
-import gradingExamInformation from "./assets/grading-exam-information.json";
+import { gradingManuals } from "./grading-exam-information";
 import type { PracticeArea } from "./practice-area";
 import {
     hidariMigiMaeTechniques,
@@ -372,21 +372,6 @@ const RandoriThemeGroup = ({ title, themes, dojoMode }: { title: string; themes:
     );
 };
 
-interface GradingAnnotation { text: string; }
-interface GradingTerm { romaji: string; }
-interface GradingSequenceStep {
-    term?: GradingTerm;
-    annotations?: GradingAnnotation[];
-}
-interface GradingKumiEmbu {
-    term?: GradingTerm;
-    items?: GradingSequenceStep[];
-    videos?: Video[];
-}
-interface GradingSection { items?: GradingKumiEmbu[]; }
-interface GradingManual { sections?: GradingSection[]; }
-
-const gradingManuals = gradingExamInformation as unknown as Partial<Record<GradeName, GradingManual>>;
 
 interface EmbuTechnique {
     grade: GradeName;

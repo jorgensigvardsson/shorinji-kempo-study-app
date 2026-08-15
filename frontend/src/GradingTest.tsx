@@ -8,7 +8,6 @@ import { noTranslate, TranslatorContext, type Translator } from "./i18n";
 import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
-import gradingExamInformation from "./assets/grading-exam-information.json";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
 import { setGradingFundamentalCompletion, setGradingTheoryCompletion } from "./persistence/app-data";
@@ -17,6 +16,7 @@ import { useAppData } from "./persistence/use-app-data";
 const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
     (tanenKihonHokeiData as TanenKihonHokei[]).map(t => [t.hokei_name.trim(), t])
 );
+import { gradingManuals, type Item, type Numbering, type TechniqueGroup } from "./grading-exam-information";
 import "./GradingTest.css";
 
 interface GradingTestProps {
@@ -26,52 +26,7 @@ interface GradingTestProps {
     dojoMode?: boolean;
 }
 
-interface Term {
-    romaji: string;
-    gloss?: string;
-}
-
-interface Numbering {
-    style: "bullet" | "numeric" | "paren" | "circled";
-    value?: number;
-}
-
-interface Annotation {
-    marker: "kome" | "asterisk";
-    text: string;
-}
-
-interface TechniqueGroup {
-    context?: { kanji?: string; text?: string };
-    techniques: Term[];
-}
-
-interface Item {
-    numbering?: Numbering;
-    term?: Term;
-    text?: string;
-    description?: string;
-    points?: number;
-    annotations?: Annotation[];
-    techniqueGroups?: TechniqueGroup[];
-    items?: Item[];
-    videos?: Video[];
-}
-
-interface Section {
-    marker?: string;
-    term?: Term;
-    title: string;
-    items: Item[];
-}
-
-interface GradeManual {
-    term?: Term;
-    title: string;
-    sections: Section[];
-}
-
-const allGrades = gradingExamInformation as unknown as Partial<Record<GradeName, GradeManual>>;
+const allGrades = gradingManuals;
 
 function formatNumbering(n: Numbering | undefined): string {
     if (!n) return "";
