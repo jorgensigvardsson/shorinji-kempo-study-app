@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { findGradePlan, type GradePlan, type GradeName } from './data'
 import { TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
@@ -13,12 +13,12 @@ import RouteContent from './components/RouteContent';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
 import TrainingControls from './components/TrainingControls';
-import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useAppUpdate } from './app-update';
+import { useTrainingMode } from './training-mode';
 import { markChangelogSeen, unseenChangelog, type ChangelogUpdate } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
-import { TRAINING_ROOT } from './training-routes';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
 import { setAppData, useAppData } from './persistence/use-app-data';
 
@@ -35,73 +35,6 @@ const NOTIF_PROMPT_DISMISSED_KEY = "notifications-prompt-dismissed";
 function isStandalonePwa(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches
     || (navigator as Navigator & { standalone?: boolean }).standalone === true;
-}
-
-// Service-worker update handling. Registration and waiting-SW detection run here,
-// at the top of App, so they're active regardless of auth state. When `autoApply`
-// is set (an unauthenticated visitor, e.g. on the login screen) a pending version
-// is applied immediately and silently — there's no in-progress work to protect.
-// In-app users get `needRefresh` instead, surfaced as the "Update" toast, so a
-// new version never interrupts them mid-task.
-function useAppUpdate(autoApply: boolean) {
-  const [needRefresh, setNeedRefresh] = useState(false);
-  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
-  useRegisterSW({
-    onNeedRefresh() {
-      setNeedRefresh(true);
-    },
-    onRegisteredSW(_swUrl, registration) {
-      registrationRef.current = registration;
-      if (registration) {
-        if (registration.waiting) {
-          setNeedRefresh(true);
-        }
-        setInterval(() => registration.update(), 60 * 60 * 1000);
-      }
-    },
-  });
-
-  useEffect(() => {
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && registrationRef.current?.waiting) {
-        setNeedRefresh(true);
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, []);
-
-  // Hand control to the waiting SW and reload once it takes over. Returns false
-  // if there's nothing waiting (so callers know it was a no-op).
-  const activateWaiting = useCallback(() => {
-    const waiting = registrationRef.current?.waiting;
-    if (!waiting) return false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once: true });
-    waiting.postMessage({ type: 'SKIP_WAITING' });
-    return true;
-  }, []);
-
-  // The "Update" toast button: apply and drop the prompt.
-  const applyUpdate = useCallback(() => {
-    if (activateWaiting()) setNeedRefresh(false);
-  }, [activateWaiting]);
-
-  // Unauthenticated visitors (e.g. the login screen) have no in-progress work to
-  // protect, so a pending version is applied immediately and silently — no toast.
-  // This covers both a fresh load with a version already waiting and logging out
-  // while one is pending.
-  useEffect(() => {
-    if (autoApply && needRefresh) activateWaiting();
-  }, [autoApply, needRefresh, activateWaiting]);
-
-  // Gets the user onto the newest build on demand, whether or not the service worker
-  // has already noticed one. Used when syncing has stopped because this build is too
-  // old to write safely, where waiting for the usual update prompt is not good enough.
-  const reloadIntoLatest = useCallback(() => {
-    if (!activateWaiting()) window.location.reload();
-  }, [activateWaiting]);
-
-  return { needRefresh, applyUpdate, reloadIntoLatest };
 }
 
 function App(props: Props) {
@@ -164,7 +97,7 @@ function App(props: Props) {
   }, [navigate]);
   const location = useLocation();
   const controlContext = getTrainingControlContext(location.pathname);
-  const [trainingMode, setTrainingMode] = useState(false);
+  const [trainingMode, setTrainingMode] = useTrainingMode();
   const routes = getRoutes(
     findGradePlan(gradePlans, displayGrade),
     findGradePlan(gradePlans, profileGrade),
@@ -210,23 +143,6 @@ function App(props: Props) {
   // lock. It can follow the user between training views, but the wake lock is
   // only requested while the control is relevant on the current page.
   useWakeLock(trainingMode && controlContext.showTrainingMode);
-  useEffect(() => {
-    const remainsInTraining = location.pathname.startsWith(TRAINING_ROOT) || location.pathname === "/training/grading";
-    if (remainsInTraining) return;
-    const resetTimer = window.setTimeout(() => setTrainingMode(false), 0);
-    return () => window.clearTimeout(resetTimer);
-  }, [location.pathname]);
-
-  // No persistent state across app switches: when the app is hidden, turn
-  // Training mode off so the user must re-activate it on return. This also mirrors the
-  // browser auto-releasing the real wake lock when the tab is hidden.
-  useEffect(() => {
-    const onHidden = () => {
-      if (document.visibilityState === "hidden") setTrainingMode(false);
-    };
-    document.addEventListener("visibilitychange", onHidden);
-    return () => document.removeEventListener("visibilitychange", onHidden);
-  }, []);
 
   // Reserve space at the bottom of the page equal to the floating toast stack's
   // footprint, so the user can scroll the last

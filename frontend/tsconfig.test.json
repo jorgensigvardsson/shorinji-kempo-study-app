@@ -5,7 +5,11 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    /* vite-plugin-pwa declares `virtual:pwa-register/react`, which App and the update
+       hook import. src/vite-env.d.ts carries this for the app project, but that file
+       is not in this project's include list — only test entry points are — so the
+       reference has to be repeated here for anything reaching those modules. */
+    "types": ["vite/client", "vite-plugin-pwa/client"],
     "skipLibCheck": true,
 
     /* Bundler mode */
