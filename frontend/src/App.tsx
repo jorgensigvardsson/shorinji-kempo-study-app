@@ -7,7 +7,7 @@ import { getRoutes, preloadPages, routeText, type Route } from './routes';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
-import { useIdleTask, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
+import { useIdleTask, useNavigationPending, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
 import { ensureTranslations } from './translations';
 import RouteContent from './components/RouteContent';
 import { getSyncManager } from './sync/manager';
@@ -19,6 +19,7 @@ import { markChangelogSeen, unseenChangelog, type ChangelogUpdate } from './chan
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
+import { beginNavigation } from './navigation-pending';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
 import { setAppData, useAppData } from './persistence/use-app-data';
 
@@ -98,6 +99,7 @@ function App(props: Props) {
   const location = useLocation();
   const controlContext = getTrainingControlContext(location.pathname);
   const [trainingMode, setTrainingMode] = useTrainingMode();
+  const navigationPending = useNavigationPending();
   const routes = getRoutes(
     findGradePlan(gradePlans, displayGrade),
     findGradePlan(gradePlans, profileGrade),
@@ -177,6 +179,10 @@ function App(props: Props) {
   return (
     <TranslatorContext.Provider value={translator}>
       <div style={{ zoom: textZoom }}>
+        {/* Only appears once a navigation has been waiting long enough that the tap
+            would otherwise look ignored — see useNavigationPending. */}
+        {navigationPending && <div className="app-navigation-pending d-print-none" role="status"
+                                   aria-label={translator.translate("Laddar…")} />}
         <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none" />
         <div className="app-route-content" style={{
           '--floating-stack-reserve': `${floatingReserve}px`,
@@ -234,7 +240,7 @@ const AppNavbar = (props: NavbarProps) => {
   return (
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
-        <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand">
+        <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand" onClick={() => beginNavigation("/")}>
           <img src="/shorinjikempo.png" className="logo" />
           <span className="app-navbar-title">{translator.translate("Shorinji Kempo")}</span>
         </Navbar.Brand>
@@ -255,7 +261,7 @@ const AppNavbar = (props: NavbarProps) => {
                   {routeText(route)}
                 </Nav.Link>
               ) : (
-                <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path!} onClick={() => setShow(false)}>
+                <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path!} onClick={() => { beginNavigation(route.path!); setShow(false); }}>
                   {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
                   {routeText(route)}
                 </Nav.Link>
@@ -268,7 +274,7 @@ const AppNavbar = (props: NavbarProps) => {
                   {routeText(route)}
                 </Nav.Link>
               ) : (
-                <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path!}>
+                <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path!} onClick={() => beginNavigation(route.path!)}>
                   {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
                   {routeText(route)}
                 </Nav.Link>
@@ -286,7 +292,7 @@ const AppNavbar = (props: NavbarProps) => {
                       {routeText(route)}
                     </NavDropdown.Item>
                   ) : (
-                    <NavDropdown.Item as={NavLink} key={index} to={route.path!} className="menu-dropdown-item">
+                    <NavDropdown.Item as={NavLink} key={index} to={route.path!} className="menu-dropdown-item" onClick={() => beginNavigation(route.path!)}>
                       {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
                       {routeText(route)}
                     </NavDropdown.Item>

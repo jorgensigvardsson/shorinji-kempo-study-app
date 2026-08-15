@@ -19,6 +19,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             subtitle: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
             icon: <Collection />,
             onSelect: () => navigate("/theory/groups"),
+            navigatesTo: "/theory/groups",
         },
         {
             key: "grading",
@@ -26,6 +27,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             subtitle: translator.translate("Se krav inför nästa gradering."),
             icon: <Award />,
             onSelect: () => navigate("/theory/grading"),
+            navigatesTo: "/theory/grading",
         },
         ...(showLanguageTools ? [{
             key: "word-list",
@@ -33,6 +35,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             subtitle: translator.translate("Slå upp ord på kanji, romaji och betydelse."),
             icon: <JournalText />,
             onSelect: () => navigate("/word-list"),
+            navigatesTo: "/word-list",
         }] : []),
         {
             key: "quiz",
@@ -40,6 +43,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             subtitle: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
             icon: <QuestionSquare />,
             onSelect: () => navigate("/quiz"),
+            navigatesTo: "/quiz",
         },
         ...(showLanguageTools ? [{
             key: "flashcard",
@@ -47,6 +51,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             subtitle: translator.translate("Öva med kort och bygg minnet steg för steg."),
             icon: <CardHeading />,
             onSelect: () => navigate("/flashcard"),
+            navigatesTo: "/flashcard",
         }] : []),
     ];
 

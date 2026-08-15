@@ -25,6 +25,7 @@ const Start = (props: Props) => {
         subtitle: route.description,
         icon: <route.icon size={20} />,
         onSelect: () => navigate(route.path),
+        navigatesTo: route.path,
     }));
 
     return (

@@ -60,6 +60,7 @@ const Training = (props: Props) => {
             subtitle: translator.translate("Se krav inför nästa gradering."),
             icon: <Award />,
             onSelect: () => navigate("/training/grading"),
+            navigatesTo: "/training/grading",
         },
     ];
 

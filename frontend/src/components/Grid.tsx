@@ -1,5 +1,6 @@
 import { type KeyboardEvent, type ReactNode } from "react";
 import { Card } from "react-bootstrap";
+import { beginNavigation } from "../navigation-pending";
 import "../Grid.css";
 
 export interface GridItem {
@@ -10,6 +11,10 @@ export interface GridItem {
     icon?: ReactNode;
     preview?: ReactNode;
     onSelect?: () => void;
+    // Where selecting this card navigates to, when it navigates at all. Only used to
+    // notice that a page is on its way: React commits nothing at all while it is, so
+    // without this a card tapped on a slow connection looks like it was missed.
+    navigatesTo?: string;
 }
 
 interface Props {
@@ -21,11 +26,17 @@ const Grid = (props: Props) => {
     const { items, className } = props;
     const gridClass = ["app-grid", className].filter(Boolean).join(" ");
 
-    const onCardKeyDown = (event: KeyboardEvent, onSelect?: () => void) => {
-        if (!onSelect) return;
+    const select = (item: GridItem) => {
+        if (!item.onSelect) return;
+        if (item.navigatesTo) beginNavigation(item.navigatesTo);
+        item.onSelect();
+    };
+
+    const onCardKeyDown = (event: KeyboardEvent, item: GridItem) => {
+        if (!item.onSelect) return;
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            onSelect();
+            select(item);
         }
     };
 
@@ -38,8 +49,8 @@ const Grid = (props: Props) => {
                     <Card
                         key={item.key}
                         className={cardClass}
-                        onClick={item.onSelect}
-                        onKeyDown={(e) => onCardKeyDown(e, item.onSelect)}
+                        onClick={() => select(item)}
+                        onKeyDown={(e) => onCardKeyDown(e, item)}
                         role={item.onSelect ? "button" : undefined}
                         tabIndex={item.onSelect ? 0 : undefined}
                     >

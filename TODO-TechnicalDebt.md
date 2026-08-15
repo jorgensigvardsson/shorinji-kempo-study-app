@@ -47,7 +47,22 @@ The list is ordered by risk, not by effort.
   whose field names cannot make legal ids
 - [ ] Add the granular per-item API, and only then split `notes` per note and bucket the entry-timestamped maps. That split needs the key formats, which live in the client, so it belongs there rather than in the server. This is also the step that bumps the schema version, and so the one gated on the client-build drain
 - [x] Drop `syncProvider` from the synced set. It now lives in its own `sync/provider.ts` with a tiny external store, retired from `AppDataState` and added to `RETIRED_DATA_FIELDS` so it does not come back the first time an old device syncs. On first read it adopts whatever the stored document said, so the move signs nobody out. Two things it fixes beyond tidiness: it was circular (the document only exists on the server once signed in), and it was a merged scalar, so signing out on one device was a change the merge could raise a conflict prompt about on another
-- [ ] Decide what happens when the app-data document reaches its size cap. `notes`, `hokeiRanks`, `knownFlashCards`, `weeklyPlanCompletions`, `gradingFundamentalCompletions` and `gradingTheoryCompletions` all grow without bound inside one blob, and the PUT is capped at 1 MB (`MaxBytesReader` in `backend/persistence/internal/api/handlers.go`, because Cosmos hard-limits items to 2 MB). Nothing prunes and nothing warns; a 413 would surface as a generic sync error that retries three times and then parks in a state the user cannot act on. Belongs with the permanent Embu data-model work in `TODO.md`
+- [x] Decide what happens when the app-data document reaches its size cap. The 413 used
+  to fall through to the generic error path — three retries of the same oversized body,
+  each refused for the identical reason, then a parked "sync error" the user could do
+  nothing with. It is its own terminal state now, next to the outdated-client one it
+  resembles: neither is worth retrying, and the difference is that an outdated client
+  is fixed by reloading while this one is fixed by nothing the app does on its own. The
+  error carries the measured size and the limit. The toast says what has stopped and
+  what has not — changes are still saved on this device, they are just not reaching the
+  others — and deliberately offers no button, since nothing in the app makes the
+  document smaller today
+- [ ] Give the user a way to get back under the size cap. The reporting is done; the
+  remedy is not. `notes`, `hokeiRanks`, `knownFlashCards`, `weeklyPlanCompletions`,
+  `gradingFundamentalCompletions` and `gradingTheoryCompletions` still grow without
+  bound inside one blob against a 1 MB `MaxBytesReader` cap. The real fix is the
+  granular per-item API above, which is the item waiting on the client-build drain;
+  until then a user who reaches the cap has to delete notes by hand
 - [x] Stop hand-writing two divergent type views of `grading-exam-information.json`. One `grading-exam-information.ts` now owns the types and the import, and both components use it — the last two `as unknown as` casts in the frontend are gone. A complete draft-07 schema for the file already existed at `frontend/data/grading-exam-information.schema`, pointed at by the data's own `$schema` and enforced by nothing; a test now validates the data against it with ajv, so a transcription slip fails the suite with a path to the offending node instead of surfacing at runtime in whichever component happened to read it. Unifying the types exposed two ways the old ones were wrong: `Annotation.marker` was required though the schema makes it optional, and the file has a top-level `$schema` key, so `Partial<Record<GradeName, GradeManual>>` never described its shape
 
 ## Correctness
@@ -61,7 +76,18 @@ The list is ordered by risk, not by effort.
 - [x] Replace the `__conflictMarker` sentinel in `sync/merge.ts`, which signalled a conflict by writing a magic key into the notes/ranks maps themselves and deleting it after reading. Return the flag alongside the map instead. While there: document why only notes and hokeiRanks raise the user-facing conflict prompt, while flashcards and completions resolve silently — presumably deliberate, currently unwritten
 - [ ] Break up `EmbuArea` in `FreePractice.tsx` (~285 lines, the largest component in the app). Best done as part of replacing the experimental embu builder rather than before it
 - [x] Remove the duplicate keys in `frontend/src/assets/translations.json`. `kōbōgi` and `ukemi` each appeared twice in all three language sections. Removed the repeat occurrences rather than the first ones: a duplicate key keeps its original position and only its value is overwritten, so dropping the first would have moved the key to the end and changed the parsed key order. The values were identical, so the parsed object is unchanged — verified by comparing before and after, and confirmed independently by the build producing an identical bundle hash. A test now reads the file as text and fails on any duplicate, since the parsed form is exactly where one disappears
-- [x] Add tests for `weekly-copy.ts` — 23 covering every week type, the randori label, list joining per language and the basic-focus rules. Writing them found a real copy bug: the strikes-and-blocks rule matched `uke` unbounded, so `ukemi` matched it too and three of the 104 weeks with basic entries told the reader their grundarbete involved strikes when it was only falling. `uke` is bounded as a word now. Tests for the training-mode and update-toast state machines in `App.tsx` are still open
+- [x] Add tests for `weekly-copy.ts` — 23 covering every week type, the randori label, list joining per language and the basic-focus rules. Writing them found a real copy bug: the strikes-and-blocks rule matched `uke` unbounded, so `ukemi` matched it too and three of the 104 weeks with basic entries told the reader their grundarbete involved strikes when it was only falling. `uke` is bounded as a word now
+- [x] Test the two state machines in `App.tsx`. They were untestable rather than
+  untested: App imports `virtual:pwa-register/react`, which vite-plugin-pwa generates
+  at build time and the vitest config knew nothing about, so importing App from a test
+  failed to resolve before any assertion ran. That is aliased to an inert stub now, and
+  `tsconfig.test.json` picks up the plugin's types the way the app project already did.
+  The update hook moved to `app-update.ts` and training mode to `training-mode.ts`,
+  18 tests between them. Writing the training-mode ones corrected an assumption rather
+  than finding a bug: the hook resets on leaving the training area and does not stop
+  the mode being switched on elsewhere — nothing needs it to, because App only renders
+  the control where `getTrainingControlContext` says it belongs — so that boundary is
+  written down as a test rather than left to read as a gap
 
 ## Delivery
 
@@ -93,16 +119,23 @@ The list is ordered by risk, not by effort.
   two merged selectors. The service worker still precaches every chunk, so offline use
   and repeat visits are unchanged — and a returning user after a release now refetches
   only the app chunk, 165 KB rather than 382 KB
-- [ ] Split `translations.json` by language. It is what remains of the entry chunk:
-  120 KB gzipped of the app's 165 KB. Japanese is needed everywhere (kanji sit next to
-  every technique name) and English nearly so (the dojo card headers ask for it by
-  name), but Turkish — 42 KB gzipped, a quarter of the entry chunk — is dead weight for
-  every user who is not Turkish. Held back because it is a change to the authored file
-  layout, which the `translations:export`/`import` workflow is built around: it needs
-  either one file per language, or a build step that slices the one file. Note also
-  that `explicitTranslate` would have to narrow — its two callers want "the English
-  name" and "this language's own name", and the second of those is not really a
-  translation at all
+- [x] Split `translations.json` by language. It was 120 KB gzipped of a 165 KB entry
+  chunk. One file per language now: Japanese and English still load with the app, since
+  both are reachable whatever the interface language is, and Turkish is fetched when
+  Turkish turns out to be who is reading — 44 KB gzipped off the startup path for
+  everyone else. First paint is 239 KB gzipped, against 382 before any of the splitting.
+  The waiting happens in exactly one place: `main.tsx` reads the stored language and
+  holds the first paint until that section is in hand, so a Turkish reader never
+  watches the interface arrive in Swedish and change under them.
+  `explicitTranslate` is gone as predicted. Its two callers wanted "the English name of
+  this technique" and "what this language calls itself"; only the first is a
+  translation, so `Translator` offers `english()` beside `japanese()` — exactly the two
+  sections guaranteed to be loaded — and the second is a constant in Settings. The
+  invariant is the type checker's now rather than a comment's.
+  The split was textual, so every value kept its bytes and every key its position,
+  verified per language against the parsed original before writing. The
+  `translations:export`/`import` commands are unchanged; only the file they touch
+  moved, and both scripts got simpler for no longer indexing into a language
 - [x] Decide what a failed chunk load should do. Lazy routes made it possible for the
   first time: a build deployed while someone has the app open, before the service
   worker has precached the new chunks, and the import 404s. It used to land in the root
@@ -112,17 +145,24 @@ The list is ordered by risk, not by effort.
   than holding the error for the rest of the session
 - [x] Work out what the UI does while a chunk is in flight. React Router runs a
   navigation as a transition, so React keeps the current page on screen instead of
-  showing the Suspense fallback — a page that has not arrived looks like a tap that did
-  nothing, while the navbar and training controls have already moved to the page that
-  was asked for. Nothing is lost in that state, because everything outside the boundary
-  acts on App-level state the page reads when it mounts, but the silence was the
-  problem. Pages are fetched once the app goes idle now, which closes the window for
-  every way of navigating at once and costs no extra traffic — the service worker
-  precaches them moments later regardless. The Suspense fallback is still what a cold
-  deep link sees
-- [ ] Give a slow navigation something to say for itself. The idle preload closes the
-  common case, but a genuinely slow first visit can still tap Träning and watch Start
-  sit there. A pending indicator needs the app to own the transition — declarative
-  `BrowserRouter` starts its own, and `useTransition` only reports transitions started
-  by its own hook — so it means taking over navigation, which is more than the window
-  is worth today
+  showing the Suspense fallback. An earlier note here said the navbar and training
+  controls moved on to the page that had been asked for while the body lagged; a probe
+  test disproved that. React holds back the **whole** commit — mid-navigation
+  `useLocation()` still reports the old path and the clicked link is still unstyled —
+  so there is no half-drawn state at all. What there is instead is a tap that changes
+  nothing whatsoever, which is a cleaner problem and a worse-looking one. Pages are
+  fetched once the app goes idle now, which closes the window for every way of
+  navigating at once and costs no extra traffic, since the service worker precaches
+  them moments later regardless. The Suspense fallback is still what a cold deep link
+  sees, having no previous page to hold
+- [x] Give a slow navigation something to say for itself. A thin bar at the top of the
+  page, after a 200 ms delay so a chunk already in hand never flashes one. The delay is
+  the part worth testing, and the first version of that test was worthless — it used a
+  route that resolved synchronously, so it passed with the delay removed. It drives a
+  deliberately brisk arrival now and fails without it.
+  Detecting the wait at all needs the click, not the router: everything on screen is
+  still rendering the previous location, so nothing already rendered can notice. The
+  handler records the intent in `navigation-pending.ts`, outside React's transition, so
+  that update commits immediately while the navigation it belongs to does not. Wired at
+  the two places navigation starts — the navbar links, and `Grid`, which every card
+  landing page goes through

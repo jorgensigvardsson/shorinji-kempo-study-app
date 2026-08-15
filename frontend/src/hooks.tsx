@@ -4,6 +4,8 @@ import type { ThemePreference } from './persistence/schema';
 import { getSyncProvider, setSyncProvider, subscribeSyncProvider, type SyncProvider } from './sync/provider';
 import { getSyncManager } from './sync/manager';
 import { getTranslations, subscribeTranslations } from './translations';
+import { endNavigation, getPendingNavigation, subscribePendingNavigation } from './navigation-pending';
+import { useLocation } from 'react-router-dom';
 import type { Translations } from './i18n';
 import type { SyncState } from './sync/types';
 
@@ -149,3 +151,30 @@ const IDLE_TASK_FALLBACK_MS = 2000;
 export function useTranslations(): Translations {
   return useSyncExternalStore(subscribeTranslations, getTranslations);
 }
+
+// True once a navigation has been waiting long enough to be worth mentioning. The
+// delay is the point: a page whose chunk is already in hand commits in a frame or
+// two, and a bar that appears and vanishes that fast reads as a glitch rather than as
+// progress. Only a wait the user would otherwise think was a dropped tap shows it.
+export function useNavigationPending(): boolean {
+  const pending = useSyncExternalStore(subscribePendingNavigation, getPendingNavigation);
+  const location = useLocation();
+  const [visible, setVisible] = useState(false);
+
+  // The commit landed — which is exactly what could not be observed while it was
+  // pending, since everything on screen was still rendering the previous location.
+  useEffect(() => { endNavigation(); }, [location.pathname]);
+
+  useEffect(() => {
+    if (!pending) {
+      setVisible(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setVisible(true), NAVIGATION_PENDING_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [pending]);
+
+  return visible;
+}
+
+const NAVIGATION_PENDING_DELAY_MS = 200;
