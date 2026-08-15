@@ -23,8 +23,12 @@ func NewFileUserDataStore(baseDir string) *FileUserDataStore {
 	return &FileUserDataStore{baseDir: baseDir}
 }
 
+// userDataFileSuffix is shared with FileStore.ListUserIDs, which lives in the same
+// directory and has to skip these rather than read them back as users.
+const userDataFileSuffix = ".items.json"
+
 func (s *FileUserDataStore) path(userID string) string {
-	return filepath.Join(s.baseDir, userID+".items.json")
+	return filepath.Join(s.baseDir, userID+userDataFileSuffix)
 }
 
 func (s *FileUserDataStore) Save(userID string, doc *Document) error {

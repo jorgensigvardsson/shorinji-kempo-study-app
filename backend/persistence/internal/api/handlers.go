@@ -75,6 +75,12 @@ func (h *Handler) Register(mux *http.ServeMux) {
 		inner.HandleFunc("POST /push/broadcast", h.broadcast)
 	}
 
+	// Only registered while the split store is being filled. Admin-guarded and run on
+	// purpose: it scans every document, which the container it reads is not built for.
+	if h.userData != nil {
+		inner.HandleFunc("POST /api/v1/admin/userdata-backfill", h.backfillUserData)
+	}
+
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
@@ -177,6 +183,33 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(doc)
+}
+
+// backfillUserData copies every stored document into the split-item store, covering
+// the users shadow writes never reach because they have not synced since it started.
+//
+// Admin-guarded and synchronous: it is a rare, deliberate operation, and the caller
+// wanting the summary is the point. If it ever grows past what one request can hold,
+// it should become a job rather than lose its report.
+func (h *Handler) backfillUserData(w http.ResponseWriter, r *http.Request) {
+	if !h.authorizeAdmin(r) {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if h.userData == nil {
+		http.Error(w, "user data shadow writes are not enabled", http.StatusServiceUnavailable)
+		return
+	}
+
+	result, err := store.BackfillUserData(h.store, h.userData, log.Printf)
+	if err != nil {
+		log.Printf("userdata backfill: %v", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 // shadowWrite copies an already-accepted document into the split-item store.

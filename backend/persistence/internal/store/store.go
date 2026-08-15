@@ -68,6 +68,15 @@ type Store interface {
 	Delete(userID string) error
 }
 
+// UserLister enumerates every user the store holds a document for.
+//
+// Kept out of Store because only the backfill needs it, and it is a full scan of a
+// container deliberately built for point reads — the cost belongs to an operation run
+// on purpose, not to an interface every caller sees.
+type UserLister interface {
+	ListUserIDs() ([]string, error)
+}
+
 // etagOf derives an ETag from the stored bytes, for stores that have no version
 // identifier of their own. Content-derived rather than a counter, so it stays
 // correct without the store having to remember anything between calls.

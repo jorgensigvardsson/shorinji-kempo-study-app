@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 )
 
 func newDocumentHandler(t *testing.T) *Handler {
@@ -457,6 +458,96 @@ func TestDeleteAccount_ShadowDeleteFailureIsReported(t *testing.T) {
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("got %d, want 500", rec.Code)
+	}
+}
+
+// ─── backfill ───────────────────────────────────────────────────────────────────
+
+func postBackfill(h *Handler, admin bool) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/userdata-backfill", nil)
+	if admin {
+		req = asUser(req, "admin-user")
+		req.Header.Set("Authorization", "Bearer "+testBackfillAdminToken)
+	}
+	rec := httptest.NewRecorder()
+	h.backfillUserData(rec, req)
+	return rec
+}
+
+const testBackfillAdminToken = "backfill-admin-token"
+
+func newBackfillHandler(t *testing.T) (*Handler, store.Store, store.UserDataStore) {
+	t.Helper()
+	dir := t.TempDir()
+	source := store.NewFileStore(dir)
+	shadow := store.NewFileUserDataStore(dir)
+	h := NewHandler(source, nil, "http://frontend", testIssuer, nil).
+		WithUserDataShadow(shadow)
+	h.pushAdminToken = testBackfillAdminToken
+	return h, source, shadow
+}
+
+func TestBackfillEndpoint_CopiesUsersThatNeverSynced(t *testing.T) {
+	h, source, shadow := newBackfillHandler(t)
+
+	// Written straight to the authoritative store, as a user who has not synced since
+	// shadow writes began would appear.
+	for _, id := range []string{"quiet-1", "quiet-2"} {
+		if _, err := source.Save(id, &store.Document{Version: 1, UpdatedAt: "2026-08-01T00:00:00Z", Data: json.RawMessage(`{"grade":"shodan"}`)}, ""); err != nil {
+			t.Fatalf("seed %s: %v", id, err)
+		}
+	}
+
+	rec := postBackfill(h, true)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200", rec.Code)
+	}
+	var result store.BackfillResult
+	if err := json.Unmarshal(rec.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode result: %v", err)
+	}
+	if result.Total != 2 || result.Copied != 2 {
+		t.Errorf("got %+v, want 2 total / 2 copied", result)
+	}
+
+	for _, id := range []string{"quiet-1", "quiet-2"} {
+		got, err := shadow.Load(id)
+		if err != nil || got == nil {
+			t.Errorf("%s was not backfilled (err %v)", id, err)
+		}
+	}
+}
+
+func TestBackfillEndpoint_RequiresAdmin(t *testing.T) {
+	h, _, _ := newBackfillHandler(t)
+	if rec := postBackfill(h, false); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("got %d, want 401", rec.Code)
+	}
+}
+
+func TestBackfillEndpoint_NotRegisteredWithoutShadowStore(t *testing.T) {
+	// No WithUserDataShadow: there is nothing to back fill into, so the route should
+	// not exist rather than answer.
+	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, ratelimit.New(100, 100))
+	mux := http.NewServeMux()
+	h.Register(mux)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/userdata-backfill", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code == http.StatusOK {
+		t.Errorf("got %d, want the route to be absent", rec.Code)
+	}
+}
+
+// And if it is somehow reached without a shadow store, it says so rather than panicking.
+func TestBackfillEndpoint_WithoutShadowStore_ReportsUnavailable(t *testing.T) {
+	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil)
+	h.pushAdminToken = testBackfillAdminToken
+
+	if rec := postBackfill(h, true); rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("got %d, want 503", rec.Code)
 	}
 }
 

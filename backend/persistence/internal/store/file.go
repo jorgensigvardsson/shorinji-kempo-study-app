@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -86,6 +87,34 @@ func (s *FileStore) write(userID string, doc *Document) (string, error) {
 		return "", err
 	}
 	return etagOf(data), nil
+}
+
+// ListUserIDs returns every user with a stored document, from the file names.
+//
+// FileUserDataStore writes its own files into the same directory, so those are skipped
+// explicitly — otherwise the split store's items would be read back as users, and the
+// backfill would chase names that are not accounts.
+func (s *FileStore) ListUserIDs() ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	entries, err := os.ReadDir(s.baseDir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(name, ".json") || strings.HasSuffix(name, userDataFileSuffix) {
+			continue
+		}
+		ids = append(ids, strings.TrimSuffix(name, ".json"))
+	}
+	return ids, nil
 }
 
 func (s *FileStore) Delete(userID string) error {

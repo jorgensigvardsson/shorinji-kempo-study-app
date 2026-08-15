@@ -120,6 +120,39 @@ func (s *CosmosDBStore) Delete(userID string) error {
 	return nil
 }
 
+// ListUserIDs returns every user with a stored document.
+//
+// This container has indexing switched off, since everything else about it is a point
+// read, so the query has to be run as an explicit scan — hence EnableScanInQuery,
+// without which Cosmos refuses it rather than silently doing something expensive. It
+// is a scan either way: only call this from an operation someone asked for.
+func (s *CosmosDBStore) ListUserIDs() ([]string, error) {
+	ctx := context.Background()
+	opts := &azcosmos.QueryOptions{EnableScanInQuery: true}
+	// An empty partition key fans the query out across all partitions — here, all users.
+	pager := s.container.NewQueryItemsPager("SELECT c.id FROM c", azcosmos.NewPartitionKey(), opts)
+
+	var ids []string
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos list user ids: %w", err)
+		}
+		for _, item := range page.Items {
+			var row struct {
+				ID string `json:"id"`
+			}
+			if err := json.Unmarshal(item, &row); err != nil {
+				return nil, fmt.Errorf("cosmos unmarshal user id row: %w", err)
+			}
+			if row.ID != "" {
+				ids = append(ids, row.ID)
+			}
+		}
+	}
+	return ids, nil
+}
+
 func (s *CosmosDBStore) marshal(userID string, doc *Document) ([]byte, error) {
 	data, err := json.Marshal(cosmosDocument{ID: userID, Document: *doc})
 	if err != nil {
