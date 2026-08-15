@@ -4,8 +4,25 @@ import { Search, X } from "react-bootstrap-icons";
 import type { WordListEntry } from "../data";
 import { TranslatorContext } from "../i18n";
 import { logMissingWordLookup } from "../missing-word-lookups";
-import { cleanLookupTerm, findLookupTextAtOffset, isUsefulLookupSelection, lookupWordEntries } from "../word-lookup";
+import { cleanLookupTerm, isUsefulLookupSelection } from "../lookup-text";
 import "./SelectionWordLookup.css";
+
+// The word list is a large file that nothing needs until someone actually looks a
+// word up, so it is fetched on demand instead of at startup. It is warmed once this
+// component mounts and again on every touch that might become a long press, so by
+// the time a lookup is wanted it is normally already in hand.
+//
+// `loadedWordLookup` is the resolved module, kept separately so the long-press path
+// can stay synchronous: a gesture handler that awaits would set its "this press
+// opened a lookup" flag after the finger had already lifted, and the tap it is
+// meant to swallow would go through to whatever was underneath.
+type WordLookup = typeof import("../word-lookup");
+let wordLookupModule: Promise<WordLookup> | null = null;
+let loadedWordLookup: WordLookup | null = null;
+const loadWordLookup = () => (wordLookupModule ??= import("../word-lookup").then(module => {
+    loadedWordLookup = module;
+    return module;
+}));
 
 interface LookupPosition {
     left: number;
@@ -91,6 +108,19 @@ const SelectionWordLookup = () => {
     const pendingLongPressRef = useRef<PendingLongPress | null>(null);
     const suppressedClickRef = useRef<SuppressedClick | null>(null);
 
+    // Fetch the word list once the page has settled, so a lookup does not have to wait
+    // for it but the first paint does not either. requestIdleCallback is missing in
+    // Safari, hence the timer.
+    useEffect(() => {
+        const idle = window.requestIdleCallback;
+        if (idle) {
+            const handle = idle(() => void loadWordLookup(), { timeout: 5000 });
+            return () => window.cancelIdleCallback(handle);
+        }
+        const timer = window.setTimeout(() => void loadWordLookup(), 2000);
+        return () => window.clearTimeout(timer);
+    }, []);
+
     useEffect(() => {
         const readSelection = () => {
             const selection = window.getSelection();
@@ -135,6 +165,16 @@ const SelectionWordLookup = () => {
         };
 
         const openLongPressLookup = (pending: PendingLongPress) => {
+            // Only reachable if someone long-presses in the first moments of a cold
+            // load, before the warm-up has landed. The press then behaves as it did
+            // before this feature existed, and the list is on its way for the next one.
+            const wordLookup = loadedWordLookup;
+            if (!wordLookup) {
+                void loadWordLookup();
+                return;
+            }
+            const { findLookupTextAtOffset, lookupWordEntries } = wordLookup;
+
             const position = textPositionAtPoint(pending.startX, pending.startY);
             if (!position || !pending.target.contains(position.node)) return;
             const lookupText = findLookupTextAtOffset(position.node.data, position.offset, translator);
@@ -151,6 +191,7 @@ const SelectionWordLookup = () => {
 
         const startLongPress = (event: PointerEvent) => {
             if (event.pointerType !== "touch" || !(event.target instanceof Element) || longPressIsDisabled(event.target)) return;
+            void loadWordLookup();
             finishPendingPress();
             setCandidate(null);
             const selectionBlocker = event.target.closest(".card-header") ?? event.target;
@@ -232,8 +273,9 @@ const SelectionWordLookup = () => {
         };
     }, [result]);
 
-    const searchSelection = () => {
+    const searchSelection = async () => {
         if (!candidate) return;
+        const { lookupWordEntries } = await loadWordLookup();
         const entries = lookupWordEntries(candidate.text, translator);
         if (entries.length === 0) logMissingWordLookup(candidate.text);
         setResult({ ...candidate, position: { ...candidate.position, left: positionForCard(candidate.position.left) }, entries });
@@ -255,7 +297,7 @@ const SelectionWordLookup = () => {
                     className="selection-lookup-trigger"
                     style={positionStyle(candidate.position)}
                     onPointerDown={event => event.preventDefault()}
-                    onClick={searchSelection}
+                    onClick={() => void searchSelection()}
                 >
                     <Search aria-hidden="true" />
                     {translator.translate("Sök")}

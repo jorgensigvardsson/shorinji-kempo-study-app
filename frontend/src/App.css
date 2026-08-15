@@ -12,6 +12,13 @@
   margin-right: auto;
 }
 
+/* Placeholder while a page's chunk is on its way. It holds a viewport's worth of
+   height so the scroll position does not collapse and then jump back, and shows
+   nothing: the wait is normally too short for anything drawn here to be read. */
+.app-route-loading {
+  min-height: 60vh;
+}
+
 .app-navbar-brand {
   display: inline-flex;
   align-items: center;

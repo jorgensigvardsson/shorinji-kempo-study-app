@@ -1,14 +1,12 @@
 import type { WordListEntry } from "./data";
 import wordListData from "./assets/word-list.json";
 import { normalizeString } from "./strings";
+import { cleanLookupTerm } from "./lookup-text";
 import type { Translator } from "./i18n";
 
+// Importing this module pulls in the word list, so it is loaded on demand rather
+// than at startup. See components/SelectionWordLookup.tsx.
 const wordList = wordListData as WordListEntry[];
-
-export const cleanLookupTerm = (value: string): string => value
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/^[\s.,:;!?()[\]{}"“”'‘’]+|[\s.,:;!?()[\]{}"“”'‘’]+$/g, "");
 
 const normalizeLookupTerm = (value: string): string => normalizeString(cleanLookupTerm(value));
 
@@ -99,10 +97,4 @@ export const lookupWordEntries = (value: string, translator: Translator): WordLi
         if (!unique.has(entry.index)) unique.set(entry.index, entry);
         return unique;
     }, new Map<number, WordListEntry>()).values()].slice(0, 5);
-};
-
-export const isUsefulLookupSelection = (value: string): boolean => {
-    const cleaned = cleanLookupTerm(value);
-    if (!cleaned || cleaned.length > 80) return false;
-    return cleaned.split(/\s+/).length <= 8;
 };

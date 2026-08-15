@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import Theory, { TheoryToolPage } from "./Theory";
+import Theory from "./Theory";
+import { TheoryToolPage } from "./components/ToolPage";
 
 const LocationProbe = () => {
   const location = useLocation();

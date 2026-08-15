@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { TranslatorImplementation } from "./i18n";
 import { getMissingWordLookups, logMissingWordLookup } from "./missing-word-lookups";
-import { findLookupTextAtOffset, isUsefulLookupSelection, lookupWordEntries } from "./word-lookup";
+import { findLookupTextAtOffset, lookupWordEntries } from "./word-lookup";
+import { isUsefulLookupSelection } from "./lookup-text";
 
 const translator = new TranslatorImplementation({}, "sv");
 

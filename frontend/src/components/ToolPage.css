@@ -1,0 +1,26 @@
+/* Moved here from Theory.css and Training.css, where the two rules were identical
+   apart from the class name. The wrapper class names still differ per area, so both
+   selectors are kept rather than merged into one. */
+.theory-back,
+.training-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.65rem 0 0.5rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+.theory-back:hover,
+.theory-back:focus-visible,
+.training-back:hover,
+.training-back:focus-visible {
+  color: var(--bs-emphasis-color);
+}
+
+.theory-tool-page > .theory-back {
+  margin-bottom: 1rem;
+}

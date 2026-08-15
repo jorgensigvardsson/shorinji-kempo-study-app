@@ -1,4 +1,4 @@
-import { useContext, type ReactNode } from "react";
+import { useContext } from "react";
 import { ArrowLeft, Award, CardHeading, Collection, JournalText, QuestionSquare } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
@@ -61,21 +61,6 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
                 <p>{translator.translate("Vad vill du studera idag?")}</p>
             </header>
             <Grid items={items} className="theory-choice-grid" />
-        </div>
-    );
-};
-
-export const TheoryToolPage = ({ children }: { children: ReactNode }) => {
-    const translator = useContext(TranslatorContext);
-    const navigate = useNavigate();
-
-    return (
-        <div className="theory-tool-page">
-            <button type="button" className="theory-back" onClick={() => navigate(-1)}>
-                <ArrowLeft aria-hidden="true" />
-                <span>{translator.translate("Teori")}</span>
-            </button>
-            {children}
         </div>
     );
 };

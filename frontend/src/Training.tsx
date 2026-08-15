@@ -1,4 +1,4 @@
-import { useContext, useState, type ReactNode } from "react";
+import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { ArrowLeft, Award, Book, Collection } from "react-bootstrap-icons";
@@ -102,24 +102,6 @@ const Training = (props: Props) => {
                     </div>
                 )}
             </main>
-        </div>
-    );
-};
-
-export const TrainingToolPage = ({ children }: { children: ReactNode }) => {
-    const translator = useContext(TranslatorContext);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const isGradingCategory = location.pathname === "/training/grading"
-        && new URLSearchParams(location.search).has("gradingCategory");
-
-    return (
-        <div className="training-page">
-            <button type="button" className="training-back" onClick={() => navigate(-1)}>
-                <ArrowLeft aria-hidden="true" />
-                <span>{translator.translate(isGradingCategory ? "Gradering" : "Träning")}</span>
-            </button>
-            {children}
         </div>
     );
 };

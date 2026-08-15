@@ -48,22 +48,8 @@
   box-shadow: none;
 }
 
-.training-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.65rem 0 0.5rem;
-  padding: 0.35rem 0;
-  border: 0;
-  background: transparent;
-  color: var(--bs-secondary-color);
-  font: inherit;
-}
-
-.training-back:hover,
-.training-back:focus-visible {
-  color: var(--bs-emphasis-color);
-}
+/* .training-back lives in components/ToolPage.css, alongside the identical Teori
+   rule it used to be duplicated with. */
 
 @media (max-width: 35rem) {
   .training-page-header {

@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import { TranslatorContext, type Language } from "./i18n";
-import { CHANGELOG, type ChangelogChange, markChangelogSeen } from "./changelog";
+import { type ChangelogChange, markChangelogSeen } from "./changelog";
+import { CHANGELOG, CURRENT_VERSION } from "./changelog-entries";
 import "./Changelog.css";
 
 interface DateGroup {
@@ -23,7 +24,7 @@ const Changelog = () => {
   const lang = translator.currentLanguage as Language;
 
   useEffect(() => {
-    markChangelogSeen();
+    markChangelogSeen(CURRENT_VERSION);
     window.dispatchEvent(new Event("changelog-seen"));
   }, []);
 

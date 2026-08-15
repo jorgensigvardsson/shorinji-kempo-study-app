@@ -1,4 +1,4 @@
-import { cleanLookupTerm } from "./word-lookup";
+import { cleanLookupTerm } from "./lookup-text";
 import { normalizeString } from "./strings";
 
 export interface MissingWordLookup {

@@ -17,22 +17,8 @@
   line-height: 1.5;
 }
 
-.theory-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.65rem 0 0.5rem;
-  padding: 0.35rem 0;
-  border: 0;
-  background: transparent;
-  color: var(--bs-secondary-color);
-  font: inherit;
-}
-
-.theory-back:hover,
-.theory-back:focus-visible {
-  color: var(--bs-emphasis-color);
-}
+/* .theory-back and .theory-tool-page live in components/ToolPage.css, alongside the
+   identical Träning rules they used to be duplicated with. */
 
 .theory-choice-grid {
   gap: 0.75rem 1.5rem;
@@ -50,10 +36,6 @@
   transform: none;
   background: var(--bs-tertiary-bg);
   box-shadow: none;
-}
-
-.theory-tool-page > .theory-back {
-  margin-bottom: 1rem;
 }
 
 @media (max-width: 35rem) {

@@ -41,4 +41,46 @@ The list is ordered by risk, not by effort.
 
 ## Delivery
 
-- [ ] Split the frontend bundle. The production build is a single 1.37 MB chunk (381 KB gzipped) with no code splitting, of which roughly 950 KB is statically imported JSON — `translations.json` alone is 446 KB. The service worker precaches 2 MB, so repeat visits are fine, but first load on a phone in a dojo is not
+- [x] Split the frontend bundle. It was a single 1.37 MB chunk (382 KB gzipped) with no
+  code splitting. What the first paint now needs is 276 KB gzipped, down 28%, in two
+  parallel chunks: the app (165 KB) and a `vendor` chunk holding React and the UI
+  libraries (112 KB). Four separate things got it there, and the last three mattered
+  more than the route split did:
+  - Every page but the start screen is a `lazy()` chunk behind one `Suspense`. This is
+    also what moved `grading-exam-information.json` out, since only the grading page
+    reads it
+  - `TheoryToolPage` and `TrainingToolPage` moved to `components/ToolPage.tsx`. They are
+    the frame the tools render inside, so importing them eagerly pulled `Training.tsx`
+    in with them — and behind it `Kamoku` and `FreePractice`, the largest components in
+    the app. The two were near-identical, so the move deduplicated them and their CSS
+  - The changelog entries (28 KB gzipped, the whole release history in four languages)
+    moved to `changelog-entries.ts`, fetched after mount. `changelog.ts` keeps only the
+    types and the seen marker. The toast now appears a beat after the page instead of
+    with it, which is the right order for a notice nobody came here for
+  - The word list (17 KB gzipped) is fetched when this device first touches something,
+    and warmed at idle after mount. The long-press handler stays synchronous against
+    the loaded module rather than awaiting inside the gesture: a handler that awaits
+    sets its "this press opened a lookup" flag after the finger has already lifted, and
+    the tap it exists to swallow reaches the card underneath. An existing test caught
+    exactly that
+  CSS is deliberately left in one file (`cssCodeSplit: false`) so a lazily-loaded page
+  can never paint before its own stylesheet lands; the built stylesheet was compared
+  rule by rule against the old one to prove the ToolPage move changed nothing but the
+  two merged selectors. The service worker still precaches every chunk, so offline use
+  and repeat visits are unchanged — and a returning user after a release now refetches
+  only the app chunk, 165 KB rather than 382 KB
+- [ ] Split `translations.json` by language. It is what remains of the entry chunk:
+  120 KB gzipped of the app's 165 KB. Japanese is needed everywhere (kanji sit next to
+  every technique name) and English nearly so (the dojo card headers ask for it by
+  name), but Turkish — 42 KB gzipped, a quarter of the entry chunk — is dead weight for
+  every user who is not Turkish. Held back because it is a change to the authored file
+  layout, which the `translations:export`/`import` workflow is built around: it needs
+  either one file per language, or a build step that slices the one file. Note also
+  that `explicitTranslate` would have to narrow — its two callers want "the English
+  name" and "this language's own name", and the second of those is not really a
+  translation at all
+- [ ] Decide what a failed chunk load should do. Lazy routes make it possible for the
+  first time: a build deployed while someone has the app open, before the service
+  worker has precached the new chunks, and the import 404s. It lands in the root
+  `ErrorBoundary`, which offers a reload in four languages and does fix it — but it
+  replaces the whole app for what is really one page failing to arrive

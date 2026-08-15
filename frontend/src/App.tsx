@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Suspense, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { findGradePlan, type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
@@ -12,7 +12,7 @@ import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
 import TrainingControls from './components/TrainingControls';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { CHANGELOG, isChangelogUnseen, markChangelogSeen } from './changelog';
+import { markChangelogSeen, unseenChangelog, type ChangelogUpdate } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
 import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
@@ -290,12 +290,18 @@ function App(props: Props) {
 
 function renderRoutes(routes: Route[]) {
   return (
-    <Routes>
-      {routes.filter(r => r.path && r.component).map((route, index) => {
-        const Component = route.component!;
-        return <DomRoute key={index} path={route.matchPath ?? route.path!} element={<Component />} />;
-      })}
-    </Routes>
+    // Every page but the start screen is a lazy chunk, so navigation can land on one
+    // that has not arrived yet. The fallback is deliberately near-empty: on a warm
+    // cache the wait is a frame or two, and a spinner that flashes for one frame reads
+    // as a glitch. It reserves height so the page below does not jump when it lands.
+    <Suspense fallback={<div className="app-route-loading" aria-busy="true" />}>
+      <Routes>
+        {routes.filter(r => r.path && r.component).map((route, index) => {
+          const Component = route.component!;
+          return <DomRoute key={index} path={route.matchPath ?? route.path!} element={<Component />} />;
+        })}
+      </Routes>
+    </Suspense>
   )
 }
 
@@ -391,15 +397,25 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
   const lang = translator.currentLanguage;
 
   // --- changelog toast ---
-  const [showChangelogToast, setShowChangelogToast] = useState(() => isChangelogUnseen());
+  // The entries arrive on their own chunk, so the toast appears a beat after the page
+  // rather than with it. That is no loss: it is a notice about the release, not
+  // something the user came here for.
+  const [changelogUpdate, setChangelogUpdate] = useState<ChangelogUpdate | null>(null);
   useEffect(() => {
-    const handler = () => setShowChangelogToast(false);
+    let cancelled = false;
+    void unseenChangelog().then(update => {
+      if (!cancelled) setChangelogUpdate(update);
+    });
+    const handler = () => setChangelogUpdate(null);
     window.addEventListener("changelog-seen", handler);
-    return () => window.removeEventListener("changelog-seen", handler);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("changelog-seen", handler);
+    };
   }, []);
   const dismissChangelog = () => {
-    markChangelogSeen();
-    setShowChangelogToast(false);
+    if (changelogUpdate) markChangelogSeen(changelogUpdate.version);
+    setChangelogUpdate(null);
   };
 
   // --- notifications opt-in prompt ---
@@ -452,7 +468,7 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
 
   return (
     <ToastContainer className="app-update-toast-container">
-      <Toast show={showChangelogToast} className="app-update-toast">
+      <Toast show={changelogUpdate !== null} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon" aria-hidden="true">
             <Megaphone size={20} />
@@ -460,7 +476,7 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
           <div className="app-update-toast-copy">
             <div className="app-update-toast-title">{translator.translate("Nyheter")}</div>
             <div className="app-update-toast-changelog-list">
-              {CHANGELOG[0].changes.map((change, i) => (
+              {(changelogUpdate?.changes ?? []).map((change, i) => (
                 <div key={i} className="app-update-toast-changelog-item">
                   <span>{change.emoji}</span>
                   <span>{change[lang]}</span>

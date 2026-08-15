@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SelectionWordLookup from "./SelectionWordLookup";
@@ -58,8 +58,11 @@ describe("SelectionWordLookup", () => {
     expect(screen.queryByRole("button", { name: "Sök" })).toBeNull();
   });
 
-  it("opens the dictionary on touch long press without expanding a collapsed card", () => {
-    vi.useFakeTimers();
+  // Real timers rather than advanced fake ones, because the order this exercises is
+  // the point: the press has to have opened the dictionary before the finger lifts,
+  // or the tap that follows reaches the card underneath and expands it. The word list
+  // arrives on its own chunk, and the wait below is what covers its arrival too.
+  it("opens the dictionary on touch long press without expanding a collapsed card", async () => {
     const { container } = render(
       <>
         <CollapsibleCard header={<span data-testid="pressed-term">gyaku gote</span>}>Hidden body</CollapsibleCard>
@@ -73,14 +76,11 @@ describe("SelectionWordLookup", () => {
     });
 
     fireEvent.pointerDown(term, { pointerId: 4, pointerType: "touch", clientX: 80, clientY: 40 });
-    act(() => {
-      vi.advanceTimersByTime(525);
-    });
+    const dialog = await screen.findByRole("dialog", { name: "Ordlista: gyaku" }, { timeout: 3000 });
     fireEvent.pointerUp(term, { pointerId: 4, pointerType: "touch", clientX: 80, clientY: 40 });
     fireEvent.click(term);
 
-    expect(screen.getByRole("dialog", { name: "Ordlista: gyaku" })).toBeDefined();
+    expect(dialog).toBeDefined();
     expect(container.querySelector(".card")?.classList.contains("is-collapsed")).toBe(true);
-    vi.useRealTimers();
   });
 });

@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import Training, { TrainingToolPage } from "./Training";
+import Training from "./Training";
+import { TrainingToolPage } from "./components/ToolPage";
 
 vi.mock("./Kamoku", () => ({
   default: ({ dojoMode }: { dojoMode?: boolean }) => (

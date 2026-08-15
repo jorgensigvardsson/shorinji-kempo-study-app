@@ -1,22 +1,30 @@
+import { lazy } from "react";
 import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
-import Training, { TrainingToolPage } from "./Training.tsx";
-import Settings from "./Settings.tsx";
-import Broadcast from "./Broadcast.tsx";
-import AdminUsers from "./AdminUsers.tsx";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
-import Groups from "./Groups.tsx";
-import WordList from "./WordList.tsx";
 import Start from "./Start.tsx";
-import Quiz from "./Quiz.tsx";
-import GradingTest from "./GradingTest.tsx";
-import Flashcard from "./Flashcard.tsx";
-import TermsOfServices from "./TermsOfServices.tsx";
-import PrivacyPolicy from "./PrivacyPolicy.tsx";
-import Changelog from "./Changelog.tsx";
-import Theory, { TheoryToolPage } from "./Theory.tsx";
-import Feedback from "./Feedback.tsx";
+import { TheoryToolPage, TrainingToolPage } from "./components/ToolPage.tsx";
+
+// Every page but the start screen is loaded on first navigation to it. The start
+// screen stays in the entry chunk because it is what the app opens on, and the two
+// tool-page frames stay because they are the shell the lazy tools arrive inside.
+// This is where most of the bundle went: the training area, the grading requirements
+// and the word list each carry a large JSON file that only their own page reads.
+const Training = lazy(() => import("./Training.tsx"));
+const Settings = lazy(() => import("./Settings.tsx"));
+const Broadcast = lazy(() => import("./Broadcast.tsx"));
+const AdminUsers = lazy(() => import("./AdminUsers.tsx"));
+const Groups = lazy(() => import("./Groups.tsx"));
+const WordList = lazy(() => import("./WordList.tsx"));
+const Quiz = lazy(() => import("./Quiz.tsx"));
+const GradingTest = lazy(() => import("./GradingTest.tsx"));
+const Flashcard = lazy(() => import("./Flashcard.tsx"));
+const TermsOfServices = lazy(() => import("./TermsOfServices.tsx"));
+const PrivacyPolicy = lazy(() => import("./PrivacyPolicy.tsx"));
+const Changelog = lazy(() => import("./Changelog.tsx"));
+const Theory = lazy(() => import("./Theory.tsx"));
+const Feedback = lazy(() => import("./Feedback.tsx"));
 
 export interface Route {
     path?: string;
