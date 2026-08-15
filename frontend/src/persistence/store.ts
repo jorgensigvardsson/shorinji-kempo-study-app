@@ -22,7 +22,6 @@ export class AppDataStore {
       language: new Map<number, DataChangedCallback<"language">>(),
       theme: new Map<number, DataChangedCallback<"theme">>(),
       currentWeekAnchor: new Map<number, DataChangedCallback<"currentWeekAnchor">>(),
-      syncProvider: new Map<number, DataChangedCallback<"syncProvider">>(),
       kenshiNumber: new Map<number, DataChangedCallback<"kenshiNumber">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
       hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
@@ -156,7 +155,6 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       currentWeekAnchor: isWeekAnchor(input.data?.currentWeekAnchor)
         ? input.data.currentWeekAnchor
         : fallback.data.currentWeekAnchor,
-      syncProvider: isSyncProvider(input.data?.syncProvider) ? input.data.syncProvider : fallback.data.syncProvider,
       kenshiNumber: readKenshiNumber(input.data?.kenshiNumber),
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
@@ -175,13 +173,6 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
         : fallback.data.gradingTheoryCompletions,
     },
   };
-}
-
-// Documents written before cloud-storage sync was removed can still name a
-// provider we no longer have ("onedrive", "google-drive", "dropbox"); those fall
-// back to "local", i.e. signed out.
-function isSyncProvider(value: unknown): value is AppDataState["syncProvider"] {
-  return value === "local" || value === "backend";
 }
 
 // Documents written before hombu started issuing four-digit leading groups hold nine

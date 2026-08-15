@@ -7,6 +7,7 @@ vi.mock("./sync/manager", () => ({ getSyncManager: vi.fn() }));
 import { getAppDataStore } from "./persistence/store";
 import { getSyncManager } from "./sync/manager";
 import { useTheme, useSyncProvider, useSyncState } from "./hooks";
+import { resetSyncProviderCache, setSyncProvider } from "./sync/provider";
 
 type Listener = (v: unknown) => void;
 
@@ -105,27 +106,45 @@ describe("useTheme", () => {
 // ─── useSyncProvider ─────────────────────────────────────────────────────────
 
 describe("useSyncProvider", () => {
-  let store: ReturnType<typeof makeStore>;
-
+  // Device-local now, not part of the synced document, so these drive the real
+  // provider module through localStorage rather than the app-data store.
   beforeEach(() => {
-    store = makeStore({ syncProvider: "backend" });
-    vi.mocked(getAppDataStore).mockReturnValue(store as never);
+    localStorage.setItem("sync-provider", "backend");
+    resetSyncProviderCache();
   });
 
-  it("reads the current syncProvider from the store", () => {
+  it("reads the current provider", () => {
     const { result } = renderHook(() => useSyncProvider());
     expect(result.current.syncProvider).toBe("backend");
   });
 
   it("setSyncProvider updates the returned provider", () => {
     const { result } = renderHook(() => useSyncProvider());
-    act(() => result.current.setSyncProvider("local" as never));
+    act(() => result.current.setSyncProvider("local"));
+    expect(result.current.syncProvider).toBe("local");
+    expect(localStorage.getItem("sync-provider")).toBe("local");
+  });
+
+  it("reflects a change made outside the hook", () => {
+    const { result } = renderHook(() => useSyncProvider());
+    act(() => setSyncProvider("local"));
     expect(result.current.syncProvider).toBe("local");
   });
 
-  it("reflects a store-driven external change", () => {
+  it("adopts the value from a document written before it moved out", () => {
+    localStorage.clear();
+    localStorage.setItem("app-data-document", JSON.stringify({ data: { syncProvider: "backend" } }));
+    resetSyncProviderCache();
+
+    // Nobody should be bounced back to the login screen by the move.
     const { result } = renderHook(() => useSyncProvider());
-    act(() => store.set("syncProvider", "local"));
+    expect(result.current.syncProvider).toBe("backend");
+  });
+
+  it("reads a device with no history at all as signed out", () => {
+    localStorage.clear();
+    resetSyncProviderCache();
+    const { result } = renderHook(() => useSyncProvider());
     expect(result.current.syncProvider).toBe("local");
   });
 });

@@ -84,7 +84,6 @@ export function mergeDocuments(
     language: mergeScalar("language"),
     theme: mergeScalar("theme"),
     currentWeekAnchor: mergeScalar("currentWeekAnchor"),
-    syncProvider: mergeScalar("syncProvider"),
     kenshiNumber: mergeScalar("kenshiNumber"),
     notes: notes.merged,
     hokeiRanks: hokeiRanks.merged,

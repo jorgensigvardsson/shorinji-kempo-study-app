@@ -4,6 +4,7 @@ import { mergeDocuments } from "./merge";
 import { deepEqual } from "../utilities/deep-equal";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
 import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, type SyncResult, type SyncState } from "./types";
+import { getSyncProvider, setSyncProvider, subscribeSyncProvider } from "./provider";
 
 const debug = import.meta.env.VITE_DEBUG === "true";
 const debugLog = (...args: unknown[]) => { if (debug) console.log(...args); };
@@ -79,7 +80,7 @@ class SyncManager {
 
     purgeLegacySyncStorage();
 
-    this.store.subscribe("syncProvider", () => {
+    subscribeSyncProvider(() => {
       this.handleProviderChanged().catch(error => this.handleSyncError(error));
     });
 
@@ -122,7 +123,7 @@ class SyncManager {
 
   async deleteAccount(): Promise<void> {
     await this.backendClient.deleteAccount();
-    this.store.set("syncProvider", "local");
+    setSyncProvider("local");
   }
 
   async submitFeedback(message: string, language: string): Promise<void> {
@@ -150,7 +151,7 @@ class SyncManager {
   // are already set by the server, so switching the provider to "backend" triggers
   // the same path as the OIDC ?auth_success redirect (fetch /auth/me, then sync).
   completeEmailLogin(): void {
-    this.store.set("syncProvider", "backend");
+    setSyncProvider("backend");
   }
 
   // beginLinkAuthorization initiates an OIDC flow to link another provider to the
@@ -196,7 +197,7 @@ class SyncManager {
   // handleProviderChanged fires via the subscription and sets status to local_only.
   disconnect(): void {
     this.backendClient.disconnect();
-    this.store.set("syncProvider", "local");
+    setSyncProvider("local");
   }
 
   retrySync(): void {
@@ -274,7 +275,7 @@ class SyncManager {
 
   private async runSync(staleRetries = 0): Promise<SyncResult> {
     this.clearRetryTimer();
-    const provider = this.store.get("syncProvider");
+    const provider = getSyncProvider();
     if (provider !== "backend") {
       this.setState({ status: "local_only", message: null });
       return { conflictDetected: false, pushedLocalChanges: false };
@@ -387,7 +388,7 @@ class SyncManager {
   private async handleProviderChanged(): Promise<void> {
     this.clearRetryTimer();
     this.retryCount = 0;
-    const provider = this.store.get("syncProvider");
+    const provider = getSyncProvider();
     debugLog(`[sync] handleProviderChanged: provider=${provider}`);
 
     // Detect post-login redirect from the auth service (?auth_success=1).
@@ -402,7 +403,7 @@ class SyncManager {
           "",
           window.location.pathname + (q ? "?" + q : "") + window.location.hash
         );
-        this.store.set("syncProvider", "backend");
+        setSyncProvider("backend");
         return; // handleProviderChanged fires again via subscription with provider="backend"
       }
     }
@@ -462,7 +463,7 @@ class SyncManager {
   }
 
   private scheduleBackgroundSync(): void {
-    const provider = this.store.get("syncProvider");
+    const provider = getSyncProvider();
     if (provider !== "backend"
       || this.state.status === "error"
       || this.state.status === "conflict_resolution"

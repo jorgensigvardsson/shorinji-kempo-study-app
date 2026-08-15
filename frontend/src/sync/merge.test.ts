@@ -11,7 +11,6 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       language: "sv",
       theme: "system",
       currentWeekAnchor: null,
-      syncProvider: "local",
       kenshiNumber: undefined,
       notes: {},
       hokeiRanks: {},

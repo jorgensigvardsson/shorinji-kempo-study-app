@@ -60,12 +60,10 @@ type MockStore = {
   subscribeDocument: ReturnType<typeof vi.fn>;
 };
 
-function makeMockStore(provider = "backend", doc?: AppDataDocument): MockStore {
+function makeMockStore(doc?: AppDataDocument): MockStore {
   const localDoc = doc ?? makeDoc();
   return {
-    get: vi.fn((key: string) =>
-      key === "syncProvider" ? provider : localDoc.data[key as keyof AppDataState]
-    ),
+    get: vi.fn((key: string) => localDoc.data[key as keyof AppDataState]),
     getDocument: vi.fn(() => ({ ...localDoc })),
     set: vi.fn(),
     setDocument: vi.fn(),
@@ -87,6 +85,9 @@ describe("SyncManager", () => {
 
   beforeEach(async () => {
     localStorage.clear();
+    // Signed in unless a test says otherwise. Device-local now, so it is set here
+    // rather than through the store mock.
+    localStorage.setItem("sync-provider", "backend");
     mockBackendClient = makeMockClient();
     mockStore = makeMockStore();
 
@@ -119,7 +120,7 @@ describe("SyncManager", () => {
     });
 
     it("subscribe listener receives state updates", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
+      localStorage.setItem("sync-provider", "local");
       const manager = getSyncManager();
       const received: string[] = [];
       manager.subscribe(s => received.push(s.status));
@@ -128,7 +129,7 @@ describe("SyncManager", () => {
     });
 
     it("unsubscribe stops receiving state updates", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
+      localStorage.setItem("sync-provider", "local");
       const manager = getSyncManager();
       const cb = vi.fn();
       const unsub = manager.subscribe(cb);
@@ -138,7 +139,7 @@ describe("SyncManager", () => {
     });
 
     it("multiple subscribers all receive the same update", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
+      localStorage.setItem("sync-provider", "local");
       const manager = getSyncManager();
       const cb1 = vi.fn();
       const cb2 = vi.fn();
@@ -154,7 +155,7 @@ describe("SyncManager", () => {
 
   describe("syncNow", () => {
     it("returns local_only result and sets status when signed out", async () => {
-      mockStore.get.mockReturnValue("local");
+      localStorage.setItem("sync-provider", "local");
       const manager = getSyncManager();
       const result = await manager.syncNow();
       expect(result).toEqual({ conflictDetected: false, pushedLocalChanges: false });
@@ -285,7 +286,7 @@ describe("SyncManager", () => {
     it("drops the backend session and reverts the provider to local", () => {
       getSyncManager().disconnect();
       expect(mockBackendClient.disconnect).toHaveBeenCalled();
-      expect(mockStore.set).toHaveBeenCalledWith("syncProvider", "local");
+      expect(localStorage.getItem("sync-provider")).toBe("local");
     });
   });
 
@@ -589,7 +590,7 @@ describe("SyncManager", () => {
 
   describe("start", () => {
     it("calling start() twice is a no-op for the second call", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
+      localStorage.setItem("sync-provider", "local");
       const manager = getSyncManager();
       manager.start();
       manager.start();
@@ -599,7 +600,7 @@ describe("SyncManager", () => {
     });
 
     it("sets local_only state when signed out on start", async () => {
-      mockStore.get.mockImplementation((k: string) => k === "syncProvider" ? "local" : undefined);
+      localStorage.setItem("sync-provider", "local");
       const manager = getSyncManager();
       manager.start();
       await flushPromises();

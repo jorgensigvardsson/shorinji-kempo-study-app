@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import { setAppData, useAppData } from './persistence/use-app-data';
-import type { SyncProvider, ThemePreference } from './persistence/schema';
+import type { ThemePreference } from './persistence/schema';
+import { getSyncProvider, setSyncProvider, subscribeSyncProvider, type SyncProvider } from './sync/provider';
 import { getSyncManager } from './sync/manager';
 import type { SyncState } from './sync/types';
 
@@ -100,11 +101,13 @@ export function useWakeLock(active: boolean) {
 }
 
 export function useSyncProvider() {
-  const syncProvider = useAppData("syncProvider");
+  // Device-local rather than part of the synced document, so it has its own small
+  // external store rather than going through useAppData.
+  const syncProvider = useSyncExternalStore(subscribeSyncProvider, getSyncProvider);
 
   return {
     syncProvider,
-    setSyncProvider: (provider: SyncProvider) => setAppData("syncProvider", provider)
+    setSyncProvider: (provider: SyncProvider) => setSyncProvider(provider),
   };
 }
 

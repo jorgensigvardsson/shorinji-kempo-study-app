@@ -2,8 +2,6 @@ import type { GradeName } from "../data";
 import type { Language } from "../i18n";
 
 export type ThemePreference = "light" | "dark" | "system";
-// "local" means signed out — the document lives only in this browser.
-export type SyncProvider = "local" | "backend";
 export type HokeiRankValue = 1 | 2 | 3;
 
 export interface HokeiRankEntry {
@@ -34,7 +32,6 @@ export interface AppDataState {
   language: Language;
   theme: ThemePreference;
   currentWeekAnchor: CurrentWeekAnchor | null;
-  syncProvider: SyncProvider;
   kenshiNumber: string | undefined;
   notes: Record<string, string>;
   hokeiRanks: Record<string, HokeiRankEntry>;
@@ -59,7 +56,7 @@ export interface AppDataDocument {
 //
 // Bump it when a release starts writing fields an earlier release did not.
 //
-// 1 — grade, language, theme, currentWeekAnchor, syncProvider, kenshiNumber, notes,
+// 1 — grade, language, theme, currentWeekAnchor, kenshiNumber, notes,
 //     hokeiRanks, hokeiListSelection, quizStreakHighScore, knownFlashCards,
 //     showKanjiOnHokeiCards, and the three completion maps.
 export const APP_SCHEMA_VERSION = 1;
@@ -101,7 +98,10 @@ export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(
 //
 // embuDraft — the experimental Embu builder's draft, moved to its own localStorage key
 // so it stays out of the document that syncs to Cosmos. See TODO.md.
-export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft"]);
+// syncProvider — whether this device is signed in. Per-device state, and circular
+// where it was: the document only exists on the server once signed in. See
+// sync/provider.ts, which also adopts the old value so nobody is signed out by the move.
+export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft", "syncProvider"]);
 
 // The fields of `data` this build has no schema for. They are never interpreted, only
 // preserved, so that a device running an older build cannot erase newer data simply by
@@ -174,7 +174,6 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       language: "sv",
       theme: "system",
       currentWeekAnchor: null,
-      syncProvider: "local",
       kenshiNumber: undefined,
       notes: {},
       hokeiRanks: {},
