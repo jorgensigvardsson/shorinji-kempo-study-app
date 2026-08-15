@@ -79,8 +79,26 @@ The list is ordered by risk, not by effort.
   that `explicitTranslate` would have to narrow — its two callers want "the English
   name" and "this language's own name", and the second of those is not really a
   translation at all
-- [ ] Decide what a failed chunk load should do. Lazy routes make it possible for the
+- [x] Decide what a failed chunk load should do. Lazy routes made it possible for the
   first time: a build deployed while someone has the app open, before the service
-  worker has precached the new chunks, and the import 404s. It lands in the root
-  `ErrorBoundary`, which offers a reload in four languages and does fix it — but it
-  replaces the whole app for what is really one page failing to arrive
+  worker has precached the new chunks, and the import 404s. It used to land in the root
+  `ErrorBoundary` and replace the whole app. Caught per route now, in
+  `components/RouteContent.tsx`, so the navbar survives and the user can go somewhere
+  that did load; the boundary is keyed on the path so navigating away clears it rather
+  than holding the error for the rest of the session
+- [x] Work out what the UI does while a chunk is in flight. React Router runs a
+  navigation as a transition, so React keeps the current page on screen instead of
+  showing the Suspense fallback — a page that has not arrived looks like a tap that did
+  nothing, while the navbar and training controls have already moved to the page that
+  was asked for. Nothing is lost in that state, because everything outside the boundary
+  acts on App-level state the page reads when it mounts, but the silence was the
+  problem. Pages are fetched once the app goes idle now, which closes the window for
+  every way of navigating at once and costs no extra traffic — the service worker
+  precaches them moments later regardless. The Suspense fallback is still what a cold
+  deep link sees
+- [ ] Give a slow navigation something to say for itself. The idle preload closes the
+  common case, but a genuinely slow first visit can still tap Träning and watch Start
+  sit there. A pending indicator needs the app to own the transition — declarative
+  `BrowserRouter` starts its own, and `useTransition` only reports transitions started
+  by its own hook — so it means taking over navigation, which is more than the window
+  is worth today
