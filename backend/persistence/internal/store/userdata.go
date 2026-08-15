@@ -21,9 +21,72 @@ import (
 // data into the new container safely, and it already lifts the ceiling from one item
 // per user to one per field.
 const (
-	metaItemID      = "meta"
-	fieldItemPrefix = "field/"
+	metaItemID = "meta"
+
+	// The prefix a field item's id is built from, per scheme. See ItemScheme.
+	fieldItemPrefix       = "field_"
+	legacyFieldItemPrefix = "field/"
 )
+
+// How a document's field items name themselves. Recorded on the meta item so a
+// reader never has to guess which scheme the items beside it are in.
+//
+// SchemeLegacy built ids as "field/" + name. Cosmos documents "/" as illegal in an
+// id and enforces that asymmetrically: it accepts the write, then refuses every
+// delete of what it just accepted. So a field could be added but never removed, and
+// nothing noticed until the first field was retired from the document — at which
+// point every write for that user began failing, because the whole transactional
+// batch is rejected when one operation in it is. Items already stored this way
+// cannot be deleted at all; they are expired with a TTL instead.
+//
+// SchemeEscaped uses "field_" and percent-escapes the characters Cosmos rejects, so
+// a field name arriving from a client can no longer produce an id the store cannot
+// manage.
+const (
+	SchemeLegacy  = 0
+	SchemeEscaped = 1
+
+	currentScheme = SchemeEscaped
+)
+
+// Cosmos rejects these four characters in an item id. Field names are the top-level
+// keys of the client's `data`, so nothing guarantees they avoid them — "%" is escaped
+// too, which is what keeps the encoding reversible.
+var fieldNameEscaper = strings.NewReplacer(
+	"%", "%25",
+	"/", "%2F",
+	"\\", "%5C",
+	"?", "%3F",
+	"#", "%23",
+)
+
+var fieldNameUnescaper = strings.NewReplacer(
+	"%2F", "/",
+	"%5C", "\\",
+	"%3F", "?",
+	"%23", "#",
+	"%25", "%",
+)
+
+func fieldItemID(field string, scheme int) string {
+	if scheme == SchemeLegacy {
+		return legacyFieldItemPrefix + field
+	}
+	return fieldItemPrefix + fieldNameEscaper.Replace(field)
+}
+
+// fieldNameFromID is the inverse of fieldItemID: the field name, and whether the id
+// belonged to a field item of that scheme at all.
+func fieldNameFromID(id string, scheme int) (string, bool) {
+	if scheme == SchemeLegacy {
+		return strings.CutPrefix(id, legacyFieldItemPrefix)
+	}
+	escaped, ok := strings.CutPrefix(id, fieldItemPrefix)
+	if !ok {
+		return "", false
+	}
+	return fieldNameUnescaper.Replace(escaped), true
+}
 
 // DocumentMeta is the envelope, minus the data itself.
 type DocumentMeta struct {
@@ -42,6 +105,11 @@ type DocumentMeta struct {
 	// by field — null, or anything else a client might send. Splitting has to round
 	// trip exactly, including inputs nothing is supposed to produce.
 	RawData json.RawMessage `json:"rawData,omitempty"`
+
+	// Which scheme the field items beside this one name themselves with. Absent on
+	// everything written before the scheme changed, which is exactly what SchemeLegacy
+	// being the zero value means.
+	ItemScheme int `json:"itemScheme,omitempty"`
 }
 
 // UserDataItem is one stored item: the meta envelope or a single field of `data`.
@@ -53,10 +121,9 @@ type UserDataItem struct {
 	Value  json.RawMessage `json:"value"`
 }
 
-func fieldItemID(field string) string { return fieldItemPrefix + field }
-
 // SplitDocument turns a document into the items it is stored as. The returned items
-// always start with the meta item.
+// always start with the meta item, and always use the current scheme — a document is
+// migrated off the legacy one by being written.
 func SplitDocument(userID string, doc *Document) ([]UserDataItem, error) {
 	meta := DocumentMeta{
 		Version:       doc.Version,
@@ -64,6 +131,7 @@ func SplitDocument(userID string, doc *Document) ([]UserDataItem, error) {
 		DeviceID:      doc.DeviceID,
 		SchemaVersion: doc.SchemaVersion,
 		ClientCompat:  doc.ClientCompat,
+		ItemScheme:    currentScheme,
 	}
 
 	var fields map[string]json.RawMessage
@@ -96,7 +164,7 @@ func SplitDocument(userID string, doc *Document) ([]UserDataItem, error) {
 	items = append(items, UserDataItem{ID: metaItemID, UserID: userID, Value: encodedMeta})
 
 	for _, name := range meta.Fields {
-		items = append(items, UserDataItem{ID: fieldItemID(name), UserID: userID, Value: fields[name]})
+		items = append(items, UserDataItem{ID: fieldItemID(name, currentScheme), UserID: userID, Value: fields[name]})
 	}
 	return items, nil
 }
@@ -106,24 +174,32 @@ func SplitDocument(userID string, doc *Document) ([]UserDataItem, error) {
 // whole safety argument for writing to both containers before trusting either.
 func AssembleDocument(items []UserDataItem) (*Document, error) {
 	var meta DocumentMeta
-	fields := make(map[string]json.RawMessage, len(items))
 	foundMeta := false
-
 	for _, item := range items {
-		if item.ID == metaItemID {
-			if err := json.Unmarshal(item.Value, &meta); err != nil {
-				return nil, fmt.Errorf("unmarshal document meta: %w", err)
-			}
-			foundMeta = true
+		if item.ID != metaItemID {
 			continue
 		}
-		if name, ok := strings.CutPrefix(item.ID, fieldItemPrefix); ok {
-			fields[name] = item.Value
+		if err := json.Unmarshal(item.Value, &meta); err != nil {
+			return nil, fmt.Errorf("unmarshal document meta: %w", err)
 		}
+		foundMeta = true
+		break
 	}
 
 	if !foundMeta {
 		return nil, fmt.Errorf("no %q item among %d items", metaItemID, len(items))
+	}
+
+	// Read in a second pass, because which ids count as field items depends on the
+	// scheme the meta item just named.
+	fields := make(map[string]json.RawMessage, len(items))
+	for _, item := range items {
+		if item.ID == metaItemID {
+			continue
+		}
+		if name, ok := fieldNameFromID(item.ID, meta.ItemScheme); ok {
+			fields[name] = item.Value
+		}
 	}
 
 	doc := &Document{

@@ -58,6 +58,12 @@ func ProvisionCosmos(endpoint, key, database, container, pushContainer, userData
 	//
 	// Reassembly is point reads driven by the field list in the meta item, so no
 	// indexing is needed here either.
+	//
+	// Indexing stays off, which rules TTL out — Cosmos rejects a container that has
+	// both. That matters because an item whose id was built by the legacy scheme
+	// cannot be deleted, and expiry would have been the other way to remove one. The
+	// store overwrites them with an empty husk instead, which takes the user's data
+	// with it and leaves only a shell. See retireLegacyItem.
 	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
 		ID:                     userDataContainer,
 		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/userId"}, Kind: azcosmos.PartitionKeyKindHash},

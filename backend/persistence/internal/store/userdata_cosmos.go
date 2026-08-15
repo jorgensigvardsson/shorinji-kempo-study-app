@@ -94,9 +94,23 @@ func (s *CosmosUserDataStore) save(userID string, doc *Document, ifMatch string,
 			current[item.ID] = true
 		}
 		for _, name := range previous.Fields {
-			if id := fieldItemID(name); !current[id] {
-				batch.DeleteItem(id, nil)
+			id := fieldItemID(name, previous.ItemScheme)
+			if current[id] {
+				continue // still part of the document, and rewritten above
 			}
+			if previous.ItemScheme == SchemeLegacy {
+				// Cosmos refuses to delete an id containing "/", so the item is emptied
+				// instead. This is the path every field of a legacy document takes on
+				// its first write under the new scheme: the value now lives under a new
+				// id, and the old item is superseded and stripped of its contents.
+				husk, err := legacyItemHusk(userID, id)
+				if err != nil {
+					return "", err
+				}
+				batch.UpsertItem(husk, nil)
+				continue
+			}
+			batch.DeleteItem(id, nil)
 		}
 	}
 
@@ -133,9 +147,11 @@ func (s *CosmosUserDataStore) Load(userID string) (*Document, string, error) {
 	items := []UserDataItem{{ID: metaItemID, UserID: userID, Value: encodedMeta}}
 
 	// Point reads, driven by the field list in meta, so this container needs no
-	// indexing — the same reason the one it replaces has none.
+	// indexing — the same reason the one it replaces has none. The ids are built with
+	// the scheme meta records, so a document written before the scheme changed is read
+	// exactly as it was written rather than guessed at.
 	for _, name := range meta.Fields {
-		item, _, err := s.readItem(userID, fieldItemID(name))
+		item, _, err := s.readItem(userID, fieldItemID(name, meta.ItemScheme))
 		if err != nil {
 			return nil, "", err
 		}
@@ -149,6 +165,29 @@ func (s *CosmosUserDataStore) Load(userID string) (*Document, string, error) {
 		return nil, "", err
 	}
 	return doc, etag, nil
+}
+
+// retireLegacyItem empties an item whose id Cosmos will not let us delete.
+//
+// Upsert is accepted for these ids even though delete is not, so the item is
+// overwritten with a husk holding nothing but the id and partition key. The user's
+// data is what goes; the shell stays behind, unreachable, because meta no longer
+// names the field or names it under a different scheme.
+//
+// Expiring them instead would be tidier, but TTL cannot be enabled on a container
+// with indexing turned off, and this one has all access by point read precisely so
+// that it can stay off. An empty shell is the price of the original mistake.
+// Returns the husk rather than taking the batch, deliberately: TransactionalBatch is
+// a value type whose methods append to a slice it holds, so handing one to a function
+// hands over a copy, and every operation added inside is discarded on return. The
+// first version of this did exactly that — the writes all succeeded, and the legacy
+// items quietly kept their contents.
+func legacyItemHusk(userID, id string) ([]byte, error) {
+	husk, err := json.Marshal(UserDataItem{ID: id, UserID: userID})
+	if err != nil {
+		return nil, fmt.Errorf("marshal husk for %s/%s: %w", userID, id, err)
+	}
+	return husk, nil
 }
 
 func (s *CosmosUserDataStore) Delete(userID string) error {
@@ -165,7 +204,19 @@ func (s *CosmosUserDataStore) Delete(userID string) error {
 
 	batch := s.container.NewTransactionalBatch(pk)
 	for _, name := range meta.Fields {
-		batch.DeleteItem(fieldItemID(name), nil)
+		id := fieldItemID(name, meta.ItemScheme)
+		// Deleting an account has to actually remove the data. For a legacy id Cosmos
+		// refuses the delete, so the item is overwritten with a husk that expires —
+		// which clears the user's data in the same batch either way.
+		if meta.ItemScheme == SchemeLegacy {
+			husk, err := legacyItemHusk(userID, id)
+			if err != nil {
+				return err
+			}
+			batch.UpsertItem(husk, nil)
+			continue
+		}
+		batch.DeleteItem(id, nil)
 	}
 	batch.DeleteItem(metaItemID, nil)
 

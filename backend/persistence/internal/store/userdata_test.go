@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -144,7 +145,7 @@ func TestSplitDocument_IsDeterministic(t *testing.T) {
 }
 
 func TestAssembleDocument_RejectsItemsWithoutMeta(t *testing.T) {
-	items := []UserDataItem{{ID: fieldItemID("grade"), UserID: "user-1", Value: json.RawMessage(`"nidan"`)}}
+	items := []UserDataItem{{ID: fieldItemID("grade", currentScheme), UserID: "user-1", Value: json.RawMessage(`"nidan"`)}}
 	if _, err := AssembleDocument(items); err == nil {
 		t.Error("expected an error when the meta item is missing")
 	}
@@ -320,5 +321,114 @@ func TestFileUserDataStore_ETagChangesWithTheDocument(t *testing.T) {
 	third, _ := s.SaveUnconditional("user-1", &Document{Version: 1, UpdatedAt: "t2", Data: json.RawMessage(`{"a":1,"b":2}`)})
 	if third == second {
 		t.Error("the ETag did not change when a field was added")
+	}
+}
+
+// ─── item id schemes ──────────────────────────────────────────────────────────
+
+func TestFieldItemIDEscapesWhatCosmosRejects(t *testing.T) {
+	// The four characters Cosmos refuses in an item id, plus the escape character
+	// itself. Field names are the client's top-level data keys, so nothing upstream
+	// guarantees they avoid these.
+	for _, name := range []string{
+		"grade", "notes", "hokeiRanks",
+		"a/b", "a\b", "a?b", "a#b", "a%b",
+		"%2F", "///", "", "åäö 漢字",
+	} {
+		id := fieldItemID(name, SchemeEscaped)
+		for _, bad := range []string{"/", "\\", "?", "#"} {
+			if strings.Contains(strings.TrimPrefix(id, fieldItemPrefix), bad) {
+				t.Errorf("fieldItemID(%q) = %q, still contains %q", name, id, bad)
+			}
+		}
+		got, ok := fieldNameFromID(id, SchemeEscaped)
+		if !ok || got != name {
+			t.Errorf("round trip of %q: fieldNameFromID(%q) = %q, %v", name, id, got, ok)
+		}
+	}
+}
+
+func TestFieldItemIDLegacySchemeIsUnchanged(t *testing.T) {
+	// Documents written before the scheme changed have to keep reading exactly as
+	// they were written, escaping and all — which is to say, without any.
+	if got := fieldItemID("grade", SchemeLegacy); got != "field/grade" {
+		t.Errorf("legacy fieldItemID(grade) = %q, want field/grade", got)
+	}
+	name, ok := fieldNameFromID("field/grade", SchemeLegacy)
+	if !ok || name != "grade" {
+		t.Errorf("fieldNameFromID(field/grade, legacy) = %q, %v", name, ok)
+	}
+	// A legacy id must not be mistaken for a current one, or a stale value could be
+	// read back as if it were live.
+	if _, ok := fieldNameFromID("field/grade", SchemeEscaped); ok {
+		t.Error("legacy id was accepted as a current-scheme field item")
+	}
+	if _, ok := fieldNameFromID("field_grade", SchemeLegacy); ok {
+		t.Error("current id was accepted as a legacy field item")
+	}
+}
+
+func TestSplitDocumentAlwaysWritesTheCurrentScheme(t *testing.T) {
+	doc := &Document{Version: 1, UpdatedAt: "2026-08-15T00:00:00.000Z", Data: json.RawMessage(`{"grade":"nidan"}`)}
+	items, err := SplitDocument("u1", doc)
+	if err != nil {
+		t.Fatalf("SplitDocument: %v", err)
+	}
+
+	var meta DocumentMeta
+	if err := json.Unmarshal(items[0].Value, &meta); err != nil {
+		t.Fatalf("unmarshal meta: %v", err)
+	}
+	if meta.ItemScheme != SchemeEscaped {
+		t.Errorf("meta.ItemScheme = %d, want %d", meta.ItemScheme, SchemeEscaped)
+	}
+	if items[1].ID != "field_grade" {
+		t.Errorf("field item id = %q, want field_grade", items[1].ID)
+	}
+}
+
+// A document stored before the scheme changed still reassembles, which is what makes
+// the change deployable without touching what is already there.
+func TestAssembleDocumentReadsLegacyItems(t *testing.T) {
+	meta, err := json.Marshal(DocumentMeta{
+		Version: 3, UpdatedAt: "2026-08-15T00:00:00.000Z",
+		Fields: []string{"grade", "notes"}, ItemScheme: SchemeLegacy,
+	})
+	if err != nil {
+		t.Fatalf("marshal meta: %v", err)
+	}
+	doc, err := AssembleDocument([]UserDataItem{
+		{ID: metaItemID, UserID: "u1", Value: meta},
+		{ID: "field/grade", UserID: "u1", Value: json.RawMessage(`"nidan"`)},
+		{ID: "field/notes", UserID: "u1", Value: json.RawMessage(`{"oshi gote":"x"}`)},
+	})
+	if err != nil {
+		t.Fatalf("AssembleDocument: %v", err)
+	}
+	if string(doc.Data) != `{"grade":"nidan","notes":{"oshi gote":"x"}}` {
+		t.Errorf("data = %s", doc.Data)
+	}
+}
+
+// Reading a legacy document must not pick up items left behind under the new scheme,
+// nor the other way round: a superseded value coming back would be silent corruption.
+func TestAssembleDocumentIgnoresItemsFromTheOtherScheme(t *testing.T) {
+	meta, err := json.Marshal(DocumentMeta{
+		Version: 4, UpdatedAt: "2026-08-15T00:00:00.000Z",
+		Fields: []string{"grade"}, ItemScheme: SchemeEscaped,
+	})
+	if err != nil {
+		t.Fatalf("marshal meta: %v", err)
+	}
+	doc, err := AssembleDocument([]UserDataItem{
+		{ID: metaItemID, UserID: "u1", Value: meta},
+		{ID: "field_grade", UserID: "u1", Value: json.RawMessage(`"sandan"`)},
+		{ID: "field/grade", UserID: "u1", Value: json.RawMessage(`"nidan"`)}, // stale
+	})
+	if err != nil {
+		t.Fatalf("AssembleDocument: %v", err)
+	}
+	if string(doc.Data) != `{"grade":"sandan"}` {
+		t.Errorf("data = %s, want the current-scheme value", doc.Data)
 	}
 }
