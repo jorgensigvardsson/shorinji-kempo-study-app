@@ -2,6 +2,9 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
+  // Replaces the full-page card below. Used for failures that only cost the user one
+  // part of the app, where taking the whole thing down would be the larger loss.
+  fallback?: (error: Error) => ReactNode;
 }
 
 interface State {
@@ -22,6 +25,10 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.error) {
       return this.props.children;
+    }
+
+    if (this.props.fallback) {
+      return this.props.fallback(this.state.error);
     }
 
     return (

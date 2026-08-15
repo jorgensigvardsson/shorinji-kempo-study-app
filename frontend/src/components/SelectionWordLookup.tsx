@@ -4,6 +4,7 @@ import { Search, X } from "react-bootstrap-icons";
 import type { WordListEntry } from "../data";
 import { TranslatorContext } from "../i18n";
 import { logMissingWordLookup } from "../missing-word-lookups";
+import { useIdleTask } from "../hooks";
 import { cleanLookupTerm, isUsefulLookupSelection } from "../lookup-text";
 import "./SelectionWordLookup.css";
 
@@ -109,17 +110,8 @@ const SelectionWordLookup = () => {
     const suppressedClickRef = useRef<SuppressedClick | null>(null);
 
     // Fetch the word list once the page has settled, so a lookup does not have to wait
-    // for it but the first paint does not either. requestIdleCallback is missing in
-    // Safari, hence the timer.
-    useEffect(() => {
-        const idle = window.requestIdleCallback;
-        if (idle) {
-            const handle = idle(() => void loadWordLookup(), { timeout: 5000 });
-            return () => window.cancelIdleCallback(handle);
-        }
-        const timer = window.setTimeout(() => void loadWordLookup(), 2000);
-        return () => window.clearTimeout(timer);
-    }, []);
+    // for it but the first paint does not either.
+    useIdleTask(() => void loadWordLookup());
 
     useEffect(() => {
         const readSelection = () => {
@@ -275,11 +267,16 @@ const SelectionWordLookup = () => {
 
     const searchSelection = async () => {
         if (!candidate) return;
+        // Cleared before the wait, not after: if the word list is still on its way the
+        // button would otherwise stay tappable, and a second tap would run the lookup
+        // twice — counting the term twice in the missing-word log that Ordlista shows.
+        // Dropping the button is also the only acknowledgement the tap gets until the
+        // card appears.
+        setCandidate(null);
         const { lookupWordEntries } = await loadWordLookup();
         const entries = lookupWordEntries(candidate.text, translator);
         if (entries.length === 0) logMissingWordLookup(candidate.text);
         setResult({ ...candidate, position: { ...candidate.position, left: positionForCard(candidate.position.left) }, entries });
-        setCandidate(null);
         window.getSelection()?.removeAllRanges();
     };
 

@@ -19,6 +19,14 @@
   min-height: 60vh;
 }
 
+/* One page failed to arrive. Deliberately modest: the navbar is still there and
+   still works, so this is a notice, not a wall. */
+.app-route-error {
+  padding: 2rem 0.5rem;
+  text-align: center;
+  color: var(--bs-secondary-color);
+}
+
 .app-navbar-brand {
   display: inline-flex;
   align-items: center;

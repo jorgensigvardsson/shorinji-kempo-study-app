@@ -119,3 +119,25 @@ export function useSyncState() {
 
   return state;
 }
+
+// Runs `task` once the browser has nothing better to do, for work that should not
+// compete with the first paint but should not wait for the user either — fetching a
+// chunk that will be wanted shortly, most of the time. Safari has no
+// requestIdleCallback, hence the timer.
+export function useIdleTask(task: () => void) {
+  useEffect(() => {
+    const idle = window.requestIdleCallback;
+    if (idle) {
+      const handle = idle(() => task(), { timeout: IDLE_TASK_TIMEOUT_MS });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const timer = window.setTimeout(task, IDLE_TASK_FALLBACK_MS);
+    return () => window.clearTimeout(timer);
+    // Deliberately runs once per mount: the caller passes a fresh closure on every
+    // render, and re-running the task on each of them is never what is wanted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
+
+const IDLE_TASK_TIMEOUT_MS = 5000;
+const IDLE_TASK_FALLBACK_MS = 2000;

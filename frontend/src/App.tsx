@@ -1,13 +1,14 @@
-import { Suspense, useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { findGradePlan, type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
-import { getRoutes, routeText, type Route } from './routes';
-import { Outlet, Route as DomRoute, Routes, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { getRoutes, preloadPages, routeText, type Route } from './routes';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
-import { useSyncProvider, useSyncState, useTheme, useWakeLock } from './hooks';
+import { useIdleTask, useSyncProvider, useSyncState, useTheme, useWakeLock } from './hooks';
+import RouteContent from './components/RouteContent';
 import { getSyncManager } from './sync/manager';
 import { LoginScreen } from './LoginScreen';
 import TrainingControls from './components/TrainingControls';
@@ -171,6 +172,11 @@ function App(props: Props) {
     trainingMode,
   );
 
+  // Fetch the other pages once the first one has settled. Without this a navigation
+  // made before the service worker has precached them keeps the current page on
+  // screen with nothing to show that anything is happening.
+  useIdleTask(() => void preloadPages());
+
   useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
   useEffect(() => bodyFontFamilyData.registerListener(f => setBodyFontFamily(f)), [bodyFontFamilyData]);
   useEffect(() => headingFontFamilyData.registerListener(f => setHeadingFontFamily(f)), [headingFontFamilyData]);
@@ -255,7 +261,7 @@ function App(props: Props) {
           '--floating-stack-reserve': `${floatingReserve}px`,
           '--training-controls-reserve': controlContext.showGrade || controlContext.showTrainingMode || isFontPickerEnabled ? '4.75rem' : '0px',
         } as CSSProperties}>
-          {renderRoutes(routes)}
+          <RouteContent routes={routes} translator={translator} />
           <Outlet />
         </div>
         {/* Bottom-right floating stack for transient toasts. Its full height is
@@ -285,23 +291,6 @@ function App(props: Props) {
         <SelectionWordLookup />
       </div>
     </TranslatorContext.Provider>
-  )
-}
-
-function renderRoutes(routes: Route[]) {
-  return (
-    // Every page but the start screen is a lazy chunk, so navigation can land on one
-    // that has not arrived yet. The fallback is deliberately near-empty: on a warm
-    // cache the wait is a frame or two, and a spinner that flashes for one frame reads
-    // as a glitch. It reserves height so the page below does not jump when it lands.
-    <Suspense fallback={<div className="app-route-loading" aria-busy="true" />}>
-      <Routes>
-        {routes.filter(r => r.path && r.component).map((route, index) => {
-          const Component = route.component!;
-          return <DomRoute key={index} path={route.matchPath ?? route.path!} element={<Component />} />;
-        })}
-      </Routes>
-    </Suspense>
   )
 }
 

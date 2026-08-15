@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
@@ -11,20 +11,42 @@ import { TheoryToolPage, TrainingToolPage } from "./components/ToolPage.tsx";
 // tool-page frames stay because they are the shell the lazy tools arrive inside.
 // This is where most of the bundle went: the training area, the grading requirements
 // and the word list each carry a large JSON file that only their own page reads.
-const Training = lazy(() => import("./Training.tsx"));
-const Settings = lazy(() => import("./Settings.tsx"));
-const Broadcast = lazy(() => import("./Broadcast.tsx"));
-const AdminUsers = lazy(() => import("./AdminUsers.tsx"));
-const Groups = lazy(() => import("./Groups.tsx"));
-const WordList = lazy(() => import("./WordList.tsx"));
-const Quiz = lazy(() => import("./Quiz.tsx"));
-const GradingTest = lazy(() => import("./GradingTest.tsx"));
-const Flashcard = lazy(() => import("./Flashcard.tsx"));
-const TermsOfServices = lazy(() => import("./TermsOfServices.tsx"));
-const PrivacyPolicy = lazy(() => import("./PrivacyPolicy.tsx"));
-const Changelog = lazy(() => import("./Changelog.tsx"));
-const Theory = lazy(() => import("./Theory.tsx"));
-const Feedback = lazy(() => import("./Feedback.tsx"));
+const pageLoaders: Array<() => Promise<unknown>> = [];
+
+const page = <T,>(load: () => Promise<{ default: ComponentType<T> }>): LazyExoticComponent<ComponentType<T>> => {
+    pageLoaders.push(load);
+    return lazy(load);
+};
+
+// Fetches every page's chunk without rendering any of them. React Router runs a
+// navigation as a transition, which means it keeps the current page on screen
+// instead of showing the Suspense fallback — so a page that has not arrived yet
+// looks like a tap that did nothing rather than like something loading. Calling
+// this once the app is idle closes that window for every way of navigating at
+// once, rather than each link having to remember to prefetch its own target.
+//
+// It costs no extra traffic: the service worker precaches all of these anyway,
+// moments later. This only makes the timing predictable, and covers the first
+// visit, when there is no service worker in control yet.
+// Resolves once every page is in hand. Nothing in the app waits on it — the return
+// value is there so a test can assert that each registered loader points at a module
+// that really loads.
+export const preloadPages = (): Promise<unknown[]> => Promise.all(pageLoaders.map(load => load()));
+
+const Training = page(() => import("./Training.tsx"));
+const Settings = page(() => import("./Settings.tsx"));
+const Broadcast = page(() => import("./Broadcast.tsx"));
+const AdminUsers = page(() => import("./AdminUsers.tsx"));
+const Groups = page(() => import("./Groups.tsx"));
+const WordList = page(() => import("./WordList.tsx"));
+const Quiz = page(() => import("./Quiz.tsx"));
+const GradingTest = page(() => import("./GradingTest.tsx"));
+const Flashcard = page(() => import("./Flashcard.tsx"));
+const TermsOfServices = page(() => import("./TermsOfServices.tsx"));
+const PrivacyPolicy = page(() => import("./PrivacyPolicy.tsx"));
+const Changelog = page(() => import("./Changelog.tsx"));
+const Theory = page(() => import("./Theory.tsx"));
+const Feedback = page(() => import("./Feedback.tsx"));
 
 export interface Route {
     path?: string;

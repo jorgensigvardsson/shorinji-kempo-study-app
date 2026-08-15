@@ -1,5 +1,7 @@
 {
   "ja": {
+    "Ladda om": "再読み込み",
+    "Sidan kunde inte laddas. Ladda om appen och försök igen.": "このページを読み込めませんでした。アプリを再読み込みして、もう一度お試しください。",
     "1 kyū": "１級",
     "morote tsuki nuki": "諸手突抜",
     "katate oshi nuki": "片手押抜",
@@ -1814,6 +1816,8 @@
     "Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.": "変更はこの端末に保存されますが、アプリを更新するまで同期されません。"
   },
   "en": {
+    "Ladda om": "Reload",
+    "Sidan kunde inte laddas. Ladda om appen och försök igen.": "This page could not be loaded. Reload the app and try again.",
     "1": "1",
     "2": "2",
     "3": "3",
@@ -3972,6 +3976,8 @@
     "Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.": "Your changes are saved on this device, but will not sync until the app has been updated."
   },
   "tr": {
+    "Ladda om": "Yeniden yükle",
+    "Sidan kunde inte laddas. Ladda om appen och försök igen.": "Bu sayfa yüklenemedi. Uygulamayı yeniden yükleyip tekrar deneyin.",
     "1": "1",
     "2": "2",
     "3": "3",
