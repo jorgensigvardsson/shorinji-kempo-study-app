@@ -36,6 +36,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
   - Map every existing study and training feature into the new entrances so no content or workflow becomes duplicated, hidden, or stranded
   - Decide whether the question appears on every visit, whether the app remembers the user’s choice, and how someone resumes their most recent activity
   - Decide the wording, grouping, and whether this should be a new app section before implementing it
+- [ ] Rework the weekly plan's focus headings: remove the "Veckans innehåll" section label entirely, and restyle the group headings ("Veckans grundarbete", "Återkommande delar", "Repetitionstekniker", …) with the calm small-caps eyebrow look that label uses today, instead of the large serif display style. Keep the section's accessible name when the visible `h2` disappears
 - [ ] Merge `test.yml` and `deploy-staging.yml`/`deploy.yml` into a single workflow triggered directly by `push` (test job gating a `needs:`-dependent deploy job), instead of linking them via `workflow_run`. `workflow_run`-triggered workflows always execute using the workflow YAML from the default branch (`main`), never the branch that pushed — so any deploy-workflow change only takes effect once it's merged to `main`, which silently broke a staging deploy on 2026-08-13 (a new `FEEDBACK_EMAIL` parameter got dropped because `main`'s copy of `deploy-staging.yml` didn't know about it yet). A `push`-triggered workflow always uses the pushed branch's own file.
 
 ## Questions for the next design session
