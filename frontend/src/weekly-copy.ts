@@ -93,7 +93,10 @@ const BASIC_FOCUS_RULES: Array<{ label: string; pattern: RegExp }> = [
     { label: "kyūsho", pattern: /kyūsho/i },
     { label: "tan’en och sōtai", pattern: /tan'en|sōtai/i },
     { label: "principer och studier", pattern: /principer|studera|träna/i },
-    { label: "slag, sparkar och uke", pattern: /zuki|geri|uchi|giri|uke|ate/i },
+    // `uke` is bounded because it is a whole word here — the block in "uchi uke" —
+    // and unbounded it also matches inside "ukemi", which is a fall, not a block. That
+    // put "slag, sparkar och uke" on three weeks whose basic work is only ukemi.
+    { label: "slag, sparkar och uke", pattern: /zuki|geri|uchi|giri|\buke\b|ate/i },
 ];
 
 const describeBasicFocus = (entries: string[], translator: Translator): string => {
