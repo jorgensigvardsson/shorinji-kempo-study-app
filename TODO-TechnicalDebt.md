@@ -21,6 +21,30 @@ The list is ordered by risk, not by effort.
 - [x] Give the split store its own optimistic concurrency before any read is served from it. Done without a composite hash in the end: every write rewrites the meta item, so its ETag identifies the document as a whole, and because Cosmos rejects a whole batch when any operation in it fails, an `If-Match` on that one item guards everything written with it. `Save` is the checked write; `SaveUnconditional` is for shadow writes and the backfill, which copy a write the old store already ordered
 - [x] Flip reads to the split store behind a config flag (`USERDATA_READS`, default off), keeping dual-write so rollback is a restart rather than a deploy. Built as a swap rather than a second code path: both stores satisfy one `documentStore` interface, so the flag only decides which is `primary` (read from, preconditions checked against) and which is `shadow` (written a copy). A document found only in the shadow is copied across and served rather than 404'd — healing, not just falling back, because the ETag handed out has to come from the store that will check the next write. The backfill refuses to run once the flag is on, since its one direction would then overwrite current data with the rollback copy
 - [x] Turn `USERDATA_READS` on in both environments. Wired through `persistence-app.bicep` as a module parameter so each environment sets it independently, and rendered as an explicit `true`/`false` string rather than `string(bool)`, which produces `True` and would be rejected by Go's `strconv.ParseBool` — leaving the flag silently off. The split-item container is now the source of truth; the original keeps receiving every write, so the way back is setting this false and redeploying
+- [ ] Stop putting a `/` in a Cosmos item id. Field items are stored as `field/<name>`,
+  and `/` is one of the four characters Cosmos documents as illegal in `id` (with `\`,
+  `?` and `#`). Nothing is broken today and no data is at risk: the Go SDK runs
+  `url.PathEscape` on the id in `createLink`, applying the same escaped form to the URL
+  and the shared-key signature, and batch operations carry the id in the request body
+  rather than a URL — so every path this code uses works. The old `appdata` container
+  also still holds a complete copy, so `USERDATA_READS=false` remains a full rollback.
+  What it costs is everything outside our own client: Data Explorer cannot open these
+  items, so the container cannot be inspected or repaired by hand, and the same applies
+  to `az`, migration and export tooling, and any other SDK. It is also unsupported
+  behaviour rather than a contract — Microsoft's position is that the SDK ought to
+  reject these on insert, and a version that starts doing so would break writes.
+  Nothing caught it because the file store used in tests keeps a user's items in one
+  JSON file, where ids are map keys and never touch a path.
+  The fix needs a migration, not a new prefix: `Load` computes ids from `meta.Fields`
+  and point-reads them, so changing the prefix alone would make every existing item
+  404 and fail the read. It wants a legal prefix, read-through fallback to the legacy
+  id so a user's next sync migrates them and deletes the old items, and probably a
+  one-shot admin sweep for users who do not sync soon.
+  While there: field names come from the client's top-level `data` keys and are trusted
+  as ids. The SDK builds batch payloads with `fmt.Sprintf(",\"id\":\"%s\"", id)` and no
+  JSON escaping, so a key containing a quote or backslash would corrupt the batch. The
+  existing `meta.RawData` whole-document path is the obvious place to divert a document
+  whose field names cannot make legal ids
 - [ ] Add the granular per-item API, and only then split `notes` per note and bucket the entry-timestamped maps. That split needs the key formats, which live in the client, so it belongs there rather than in the server. This is also the step that bumps the schema version, and so the one gated on the client-build drain
 - [x] Drop `syncProvider` from the synced set. It now lives in its own `sync/provider.ts` with a tiny external store, retired from `AppDataState` and added to `RETIRED_DATA_FIELDS` so it does not come back the first time an old device syncs. On first read it adopts whatever the stored document said, so the move signs nobody out. Two things it fixes beyond tidiness: it was circular (the document only exists on the server once signed in), and it was a merged scalar, so signing out on one device was a change the merge could raise a conflict prompt about on another
 - [ ] Decide what happens when the app-data document reaches its size cap. `notes`, `hokeiRanks`, `knownFlashCards`, `weeklyPlanCompletions`, `gradingFundamentalCompletions` and `gradingTheoryCompletions` all grow without bound inside one blob, and the PUT is capped at 1 MB (`MaxBytesReader` in `backend/persistence/internal/api/handlers.go`, because Cosmos hard-limits items to 2 MB). Nothing prunes and nothing warns; a 413 would surface as a generic sync error that retries three times and then parks in a state the user cannot act on. Belongs with the permanent Embu data-model work in `TODO.md`
