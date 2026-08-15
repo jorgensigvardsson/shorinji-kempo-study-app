@@ -28,14 +28,28 @@ type Handler struct {
 	pushSender     *push.Sender
 	pushAdminToken string
 
-	// The split-item store the document is migrating to. While it is being filled it
-	// is written but never read, and `store` above stays the source of truth. Nil
-	// means the migration is not enabled and nothing shadow-writes.
+	// The split-item store the document is migrating to. Nil means the migration is
+	// not enabled and nothing is written to it.
 	userData store.UserDataStore
+
+	// Which of the two the API reads from and checks preconditions against. Flipping
+	// it is the migration step: the other store keeps receiving copies either way, so
+	// whichever is not being read stays current as the way back.
+	readFromUserData bool
+}
+
+// documentStore is a store the API can be pointed at. Both the original store and the
+// split-item one satisfy it, which is what lets the migration be a matter of swapping
+// which is read from rather than a second path through every handler.
+type documentStore interface {
+	Load(userID string) (*store.Document, string, error)
+	Save(userID string, doc *store.Document, ifMatch string) (string, error)
+	SaveUnconditional(userID string, doc *store.Document) (string, error)
+	Delete(userID string) error
 }
 
 // WithUserDataShadow starts writing every accepted document to the split-item store as
-// well, without reading from it. Call before Register.
+// well, without reading from it.
 //
 // Writing both for a while is what makes the move safe: the split runs against real
 // documents, at real volume, with the old container still authoritative, so a mistake
@@ -43,6 +57,36 @@ type Handler struct {
 func (h *Handler) WithUserDataShadow(s store.UserDataStore) *Handler {
 	h.userData = s
 	return h
+}
+
+// WithUserDataReads serves reads from the split-item store, and checks write
+// preconditions against it. The original container keeps receiving every accepted
+// document, so turning this back off is a restart rather than a deploy.
+//
+// Only meaningful once the split store holds every user: see the backfill.
+func (h *Handler) WithUserDataReads() *Handler {
+	h.readFromUserData = true
+	return h
+}
+
+// primary is the store being read from, and the one a write's precondition is checked
+// against. shadow is the other one, which receives a copy of every accepted write and
+// is nil when the migration is not enabled.
+func (h *Handler) primary() documentStore {
+	if h.readFromUserData && h.userData != nil {
+		return h.userData
+	}
+	return h.store
+}
+
+func (h *Handler) shadow() documentStore {
+	if h.userData == nil {
+		return nil
+	}
+	if h.readFromUserData {
+		return h.store
+	}
+	return h.userData
 }
 
 func NewHandler(s store.Store, ks KeySource, frontendURL, issuerURL string, limiter *ratelimit.IPRateLimiter) *Handler {
@@ -95,9 +139,9 @@ func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	doc, etag, err := h.store.Load(userID)
+	doc, etag, err := h.loadDocument(userID)
 	if err != nil {
-		log.Printf("store.Load(%s): %v", userID, err)
+		log.Printf("load document(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -200,6 +244,14 @@ func (h *Handler) backfillUserData(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user data shadow writes are not enabled", http.StatusServiceUnavailable)
 		return
 	}
+	// The backfill only ever copies the original container into the split one. Once
+	// reads have moved, that direction is backwards: it would overwrite every user's
+	// current document with the rollback copy. Refuse rather than offer a footgun —
+	// after the switch, dual-write is what keeps the other store current.
+	if h.readFromUserData {
+		http.Error(w, "reads already come from the split store; backfilling now would overwrite current data with the rollback copy", http.StatusConflict)
+		return
+	}
 
 	result, err := store.BackfillUserData(h.store, h.userData, log.Printf)
 	if err != nil {
@@ -212,20 +264,62 @@ func (h *Handler) backfillUserData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-// shadowWrite copies an already-accepted document into the split-item store.
+// loadDocument reads from whichever store is being read from, and heals a gap if it
+// finds one.
 //
-// Failures are logged and swallowed on purpose. Nothing reads that store yet, so a
-// failure here costs a backfill, whereas failing the request would let a bug in a
-// store no user depends on take syncing down for everyone. The trade flips once reads
-// move across, and this becomes part of the write that has to succeed.
+// A document present in the store not being read from, but missing from the one that
+// is, means a write slipped through: shadow-write failures are logged and swallowed on
+// purpose, and the backfill only covers users up to the moment it ran. Serving a 404
+// there would look exactly like a user losing everything.
+//
+// So it is copied across and served. Healing rather than merely falling back matters
+// for the precondition: the ETag handed out has to be one the next write can be
+// checked against, and that has to come from the store doing the checking.
+func (h *Handler) loadDocument(userID string) (*store.Document, string, error) {
+	doc, etag, err := h.primary().Load(userID)
+	if err != nil || doc != nil {
+		return doc, etag, err
+	}
+
+	shadow := h.shadow()
+	if shadow == nil {
+		return nil, "", nil
+	}
+	fallback, _, err := shadow.Load(userID)
+	if err != nil || fallback == nil {
+		// Nothing anywhere, which is a genuine 404. An error reading the store we do
+		// not read from is not worth failing the request over.
+		return nil, "", nil
+	}
+
+	log.Printf("healing %s: found in the store not being read from, copying across", userID)
+	healedEtag, err := h.primary().SaveUnconditional(userID, fallback)
+	if err != nil {
+		// Serve it anyway — the user's data is more important than the copy. Without
+		// an ETag the client's next write carries no precondition and is treated as a
+		// legacy unconditional write, which is the old behaviour rather than a loss.
+		log.Printf("healing %s failed, serving from the other store without an ETag: %v", userID, err)
+		return fallback, "", nil
+	}
+	return fallback, healedEtag, nil
+}
+
+// shadowWrite copies an already-accepted document into whichever store is not being
+// read from — the one being filled before the switch, or the one kept current as the
+// way back after it.
+//
+// Failures are logged and swallowed on purpose. Nothing reads that store, so a failure
+// costs a backfill, whereas failing the request would let a store no user depends on
+// take syncing down for everyone. What it does cost is that a gap can open up, which
+// is why loadDocument heals one when it finds it.
 func (h *Handler) shadowWrite(userID string, doc *store.Document) {
-	if h.userData == nil {
+	shadow := h.shadow()
+	if shadow == nil {
 		return
 	}
-	// Unconditional: the old store has already accepted and ordered this write, so a
-	// second concurrency check here would only reject writes that never conflicted.
-	// That changes when reads move across and this becomes the checked write.
-	if _, err := h.userData.SaveUnconditional(userID, doc); err != nil {
+	// Unconditional: the primary store has already accepted and ordered this write, so
+	// a second concurrency check here would only reject writes that never conflicted.
+	if _, err := shadow.SaveUnconditional(userID, doc); err != nil {
 		log.Printf("shadow write failed for %s: %v", userID, err)
 	}
 }
@@ -284,7 +378,7 @@ func declaredCompatVersion(r *http.Request) int { return headerVersion(r, schema
 // Costs a point read on each write; a sync writes rarely enough for that to be a fair
 // price for not letting a stale client delete data it cannot see.
 func (h *Handler) storedSchemaVersion(userID string) (int, error) {
-	current, _, err := h.store.Load(userID)
+	current, _, err := h.primary().Load(userID)
 	if err != nil {
 		return 0, err
 	}
@@ -309,12 +403,12 @@ func (h *Handler) storedSchemaVersion(userID string) (int, error) {
 // behaviour and stop racing as soon as they update.
 func (h *Handler) saveDocument(userID string, doc *store.Document, r *http.Request) (string, error) {
 	if ifMatch := r.Header.Get("If-Match"); ifMatch != "" {
-		return h.store.Save(userID, doc, ifMatch)
+		return h.primary().Save(userID, doc, ifMatch)
 	}
 	if r.Header.Get("If-None-Match") == "*" {
-		return h.store.Save(userID, doc, "")
+		return h.primary().Save(userID, doc, "")
 	}
-	return h.store.SaveUnconditional(userID, doc)
+	return h.primary().SaveUnconditional(userID, doc)
 }
 
 func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -323,17 +417,18 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	if err := h.store.Delete(userID); err != nil {
-		log.Printf("store.Delete(%s): %v", userID, err)
+	if err := h.primary().Delete(userID); err != nil {
+		log.Printf("primary Delete(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	// Deleting an account has to clear both stores, or the copy would outlive the
-	// account it belongs to. Unlike a shadow write, a failure here leaves data behind
+	// account it belongs to — and once loadDocument heals from the other store, a copy
+	// left behind would come back. Unlike a shadow write, a failure here leaves data
 	// after someone asked for it to be gone, so it is reported rather than logged.
-	if h.userData != nil {
-		if err := h.userData.Delete(userID); err != nil {
-			log.Printf("userData.Delete(%s): %v", userID, err)
+	if shadow := h.shadow(); shadow != nil {
+		if err := shadow.Delete(userID); err != nil {
+			log.Printf("shadow Delete(%s): %v", userID, err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}

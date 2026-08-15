@@ -31,7 +31,8 @@ func main() {
 	cosmosContainer := flag.String("cosmosdb-container", envutil.String("COSMOS_DB_CONTAINER",    ""),                                             "Cosmos DB container name")
 	pushContainer   := flag.String("cosmosdb-push-container", envutil.String("COSMOS_DB_PUSH_CONTAINER", "pushsubscriptions"),                    "Cosmos DB container name for push subscriptions")
 	userDataContainer := flag.String("cosmosdb-userdata-container", envutil.String("COSMOS_DB_USERDATA_CONTAINER", "userdata"),                   "Cosmos DB container name for the split-item document store")
-	userDataShadow  := flag.Bool("userdata-shadow-writes", envutil.Bool("USERDATA_SHADOW_WRITES", true),                                          "also write every accepted document to the split-item store (never read from it)")
+	userDataShadow  := flag.Bool("userdata-shadow-writes", envutil.Bool("USERDATA_SHADOW_WRITES", true),                                          "also write every accepted document to the split-item store")
+	userDataReads   := flag.Bool("userdata-reads",       envutil.Bool("USERDATA_READS",          false),                                         "serve reads from the split-item store, keeping the original written as the way back (requires the backfill to have run)")
 	rateLimitRPS    := flag.Float64("rate-limit-rps",    envutil.Float64("RATE_LIMIT_RPS",        2.0),                                            "max requests per second per IP (0 = disabled)")
 	rateLimitBurst  := flag.Float64("rate-limit-burst",  envutil.Float64("RATE_LIMIT_BURST",      10.0),                                           "rate limit burst size")
 	vapidPublicKey  := flag.String("vapid-public-key",   envutil.String("VAPID_PUBLIC_KEY",       ""),                                             "VAPID public key (base64url); enables push when set with the private key")
@@ -104,9 +105,14 @@ func main() {
 
 	if userDataStore != nil {
 		handler.WithUserDataShadow(userDataStore)
-		log.Print("user data shadow writes enabled — documents are also written split by field, and never read back")
+		if *userDataReads {
+			handler.WithUserDataReads()
+			log.Print("user data: reading from the split-item store; the original container is kept written as the way back")
+		} else {
+			log.Print("user data: writing the split-item store, still reading from the original")
+		}
 	} else {
-		log.Print("user data shadow writes disabled")
+		log.Print("user data: split-item store disabled")
 	}
 
 	mux := http.NewServeMux()
