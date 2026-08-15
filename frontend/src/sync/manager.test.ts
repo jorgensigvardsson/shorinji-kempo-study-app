@@ -36,8 +36,19 @@ function makeMockClient(): MockClient {
     wasAuthExpired: vi.fn().mockReturnValue(false),
     disconnect: vi.fn(),
     downloadDocument: vi.fn().mockResolvedValue(null),
-    uploadDocument: vi.fn().mockResolvedValue(undefined),
+    uploadDocument: vi.fn().mockResolvedValue(nextEtag()),
   };
+}
+
+// downloadDocument hands back the document together with the ETag naming that exact
+// stored version, which the upload then quotes as its precondition.
+function stored(document: AppDataDocument, etag = "etag-remote") {
+  return { document, etag };
+}
+
+let etagCounter = 0;
+function nextEtag() {
+  return `etag-${++etagCounter}`;
 }
 
 type MockStore = {
@@ -71,6 +82,7 @@ describe("SyncManager", () => {
   let getSyncManager: typeof import("./manager").getSyncManager;
   // Dynamically imported after vi.resetModules() so instanceof checks match the fresh module.
   let AuthExpiredError: typeof import("./types").AuthExpiredError;
+  let DocumentChangedError: typeof import("./types").DocumentChangedError;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -84,7 +96,7 @@ describe("SyncManager", () => {
     vi.doMock("../persistence/store", () => ({ getAppDataStore: function() { return mockStore; } }));
 
     ({ getSyncManager } = await import("./manager"));
-    ({ AuthExpiredError } = await import("./types"));
+    ({ AuthExpiredError, DocumentChangedError } = await import("./types"));
   });
 
   afterEach(() => {
@@ -164,7 +176,8 @@ describe("SyncManager", () => {
       const manager = getSyncManager();
       const result = await manager.syncNow();
 
-      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc);
+      // No ETag: this upload claims to be creating the first document.
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc, null);
       expect(result.pushedLocalChanges).toBe(true);
       expect(result.conflictDetected).toBe(false);
       expect(manager.getState().status).toBe("connected");
@@ -186,7 +199,7 @@ describe("SyncManager", () => {
         data: { ...localDoc.data, grade: "nidan" as const },
       });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
 
       const manager = getSyncManager();
       await manager.syncNow();
@@ -202,7 +215,7 @@ describe("SyncManager", () => {
         data: { ...remoteDoc.data, grade: "sandan" as const },
       });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
 
       const result = await getSyncManager().syncNow();
 
@@ -221,7 +234,7 @@ describe("SyncManager", () => {
       // Second sync: remote is the doc we just uploaded; local is the normalised form.
       const uploaded = mockBackendClient.uploadDocument.mock.calls[0][0] as AppDataDocument;
       mockStore.getDocument.mockReturnValue(uploaded);
-      mockBackendClient.downloadDocument.mockResolvedValue(uploaded);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(uploaded));
       mockBackendClient.uploadDocument.mockClear();
       mockStore.setDocument.mockClear();
 
@@ -239,7 +252,7 @@ describe("SyncManager", () => {
       const localDoc = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "nidan" as const } });
       const remoteDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "sandan" as const } });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
 
       const manager = getSyncManager();
       const result = await manager.syncNow();
@@ -256,7 +269,7 @@ describe("SyncManager", () => {
       const localDoc = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "nidan" as const } });
       const remoteDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "sandan" as const } });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
 
       await getSyncManager().syncNow();
 
@@ -291,7 +304,7 @@ describe("SyncManager", () => {
       const localDoc = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "nidan" as const } });
       const remoteDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z", data: { ...baseDoc.data, grade: "sandan" as const } });
       mockStore.getDocument.mockReturnValue(localDoc);
-      mockBackendClient.downloadDocument.mockResolvedValue(remoteDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
 
       const manager = getSyncManager();
       await manager.syncNow();
@@ -305,7 +318,9 @@ describe("SyncManager", () => {
       await manager.resolveConflict("local");
 
       expect(mockStore.setDocument).toHaveBeenCalledWith(localDoc);
-      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc);
+      // Resolving quotes the version the conflict was read from, so a device that
+      // wrote while the prompt was open is not overwritten by the answer.
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc, "etag-remote");
       expect(manager.getState().status).toBe("connected");
     });
 
@@ -316,7 +331,7 @@ describe("SyncManager", () => {
       await manager.resolveConflict("remote");
 
       expect(mockStore.setDocument).toHaveBeenCalledWith(remoteDoc);
-      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(remoteDoc);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(remoteDoc, "etag-remote");
       expect(manager.getState().status).toBe("connected");
     });
 
@@ -324,6 +339,127 @@ describe("SyncManager", () => {
       const { manager } = await enterConflict();
       await manager.resolveConflict("local");
       expect(manager.getState().lastConflictResolutionAt).not.toBeNull();
+    });
+  });
+
+  // ─── optimistic concurrency ───────────────────────────────────────────────
+
+  describe("stale uploads", () => {
+    // Local is ahead of remote, so the merge is uploaded — the case a competing
+    // device can invalidate between our read and our write.
+    function aheadOfRemote() {
+      const remoteDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
+      const localDoc = makeDoc({
+        updatedAt: "2024-06-01T00:00:00.000Z",
+        data: { ...remoteDoc.data, grade: "sandan" as const },
+      });
+      mockStore.getDocument.mockReturnValue(localDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
+      return { localDoc, remoteDoc };
+    }
+
+    it("re-reads and merges again when the server rejects the upload as stale", async () => {
+      aheadOfRemote();
+      mockBackendClient.uploadDocument
+        .mockRejectedValueOnce(new DocumentChangedError())
+        .mockResolvedValue("etag-new");
+
+      const manager = getSyncManager();
+      const result = await manager.syncNow();
+
+      // Rejected once, so the whole read/merge/write ran a second time.
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(2);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledTimes(2);
+      expect(manager.getState().status).toBe("connected");
+      expect(result.pushedLocalChanges).toBe(true);
+    });
+
+    it("sends the ETag of the version it merged from", async () => {
+      aheadOfRemote();
+      mockBackendClient.downloadDocument.mockResolvedValue(
+        stored(makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" }), "etag-v7"),
+      );
+
+      await getSyncManager().syncNow();
+
+      expect(mockBackendClient.uploadDocument.mock.calls[0][1]).toBe("etag-v7");
+    });
+
+    it("stops retrying stale uploads and surfaces the failure", async () => {
+      aheadOfRemote();
+      mockBackendClient.uploadDocument.mockRejectedValue(new DocumentChangedError());
+
+      // retrySync is how the app calls in — it routes a rejection to the error state.
+      const manager = getSyncManager();
+      manager.retrySync();
+      await flushPromises();
+
+      // Four attempts: the first plus MAX_STALE_RETRIES.
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledTimes(4);
+      expect(manager.getState().status).toBe("error");
+    });
+
+    it("does not apply a merge the server refused", async () => {
+      aheadOfRemote();
+      mockBackendClient.uploadDocument.mockRejectedValue(new DocumentChangedError());
+
+      await getSyncManager().syncNow().catch(() => {});
+      await flushPromises();
+
+      // Leaving the refused merge in the local store would make this device believe
+      // it holds a version the server never accepted.
+      expect(mockStore.setDocument).not.toHaveBeenCalled();
+      expect(localStorage.getItem("sync-base-document:backend")).toBeNull();
+    });
+  });
+
+  // ─── concurrent syncs ─────────────────────────────────────────────────────
+
+  describe("overlapping syncNow calls", () => {
+    it("joins an in-flight sync instead of starting a second one", async () => {
+      let releaseDownload: (value: unknown) => void = () => {};
+      mockBackendClient.downloadDocument.mockReturnValue(
+        new Promise(resolve => { releaseDownload = resolve; }),
+      );
+      mockStore.getDocument.mockReturnValue(makeDoc());
+
+      const manager = getSyncManager();
+      const first = manager.syncNow();
+      const second = manager.syncNow();
+      const third = manager.syncNow();
+
+      releaseDownload(null);
+      const results = await Promise.all([first, second, third]);
+
+      // One download, one upload — not three racing read/merge/write cycles.
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(1);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledTimes(1);
+      expect(results[0]).toBe(results[1]);
+      expect(results[1]).toBe(results[2]);
+    });
+
+    it("runs another pass afterwards, so changes made mid-sync are not stranded", async () => {
+      vi.useFakeTimers();
+      let releaseDownload: (value: unknown) => void = () => {};
+      mockBackendClient.downloadDocument.mockReturnValueOnce(
+        new Promise(resolve => { releaseDownload = resolve; }),
+      ).mockResolvedValue(null);
+      mockStore.getDocument.mockReturnValue(makeDoc());
+
+      const manager = getSyncManager();
+      const first = manager.syncNow();
+      void manager.syncNow(); // arrives while the first is still downloading
+
+      releaseDownload(null);
+      await first;
+      await flushPromises();
+
+      // The joined request is honoured through the normal debounce.
+      await vi.advanceTimersByTimeAsync(2500);
+      await flushPromises();
+
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
     });
   });
 

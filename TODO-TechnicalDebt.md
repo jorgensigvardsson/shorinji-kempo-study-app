@@ -8,8 +8,8 @@ The list is ordered by risk, not by effort.
 
 ## Data loss
 
-- [ ] Give the synced document optimistic concurrency. `syncNow()` in `frontend/src/sync/manager.ts` downloads, merges and uploads with nothing guarding the gap: there is no ETag or `If-Match` in `frontend/src/sync/backend.ts`, none in `backend/persistence/internal/api/handlers.go`, and `backend/persistence/internal/store/cosmosdb.go` does a bare `UpsertItem`. A device that writes between another device's GET and PUT has its write overwritten silently — no error, no trace. The `version` field already exists in the schema and is carried through the merge, but nothing enforces it. Return the Cosmos ETag from GET, require `If-Match` on PUT, and re-run the merge when the PUT comes back 412
-- [ ] Make `syncNow()` re-entrant-safe. Four callers can start it concurrently — the 2.5 s scheduled sync, the `visibilitychange` handler, the retry timer, and the user's "Försök nu" button — and there is no in-flight guard, so two runs can each download, merge and upload over one another. Same failure class as the missing ETag, but on the client side of the wire
+- [x] Give the synced document optimistic concurrency. `syncNow()` downloaded, merged and uploaded with nothing guarding the gap, so a device writing between another device's GET and PUT had its write overwritten silently. GET now returns the store's ETag, PUT carries it as `If-Match` (or `If-None-Match: *` when creating the first document) and answers 412 when the belief no longer holds, and the client re-reads and re-merges up to three times before giving up. Requests with no precondition keep the old last-write-wins behaviour, so app versions cached by a service worker do not lose the ability to sync
+- [x] Make `syncNow()` re-entrant-safe. The four things that can ask for a sync — the 2.5 s scheduled pass, the `visibilitychange` handler, the retry timer and the user's "Försök nu" button — now join an in-flight run instead of starting a competing one, and a request that arrives mid-run schedules another pass afterwards so changes made during a sync are not stranded
 
 ## Data model
 

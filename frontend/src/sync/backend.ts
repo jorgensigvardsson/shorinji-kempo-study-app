@@ -1,5 +1,12 @@
 import type { AppDataDocument } from "../persistence/schema";
-import { AuthExpiredError } from "./types";
+import { AuthExpiredError, DocumentChangedError } from "./types";
+
+// A document as read from the server, paired with the ETag identifying that exact
+// stored version. A null etag means the server sent none — an older API build.
+export interface RemoteDocument {
+  document: AppDataDocument;
+  etag: string | null;
+}
 
 // Base URLs are configurable for different environments.
 // In development both services run on localhost via Docker Compose.
@@ -229,7 +236,7 @@ export class BackendSyncClient {
     localStorage.removeItem(userInfoKey);
   }
 
-  async downloadDocument(): Promise<AppDataDocument | null> {
+  async downloadDocument(): Promise<RemoteDocument | null> {
     let resp = await fetch(`${apiUrl}/api/v1/document`, { credentials: "include" });
     if (resp.status === 404) return null;
     if (resp.status === 401) {
@@ -243,17 +250,28 @@ export class BackendSyncClient {
     }
     if (resp.status === 404) return null;
     if (!resp.ok) throw new Error(`GET /api/v1/document: ${resp.status}`);
-    return resp.json() as Promise<AppDataDocument>;
+    // The ETag names the exact version being read. Sending it back as If-Match on
+    // the upload is what stops this device overwriting a write it never saw. It is
+    // only readable cross-origin because the API exposes it (see shared/cors).
+    return { document: await (resp.json() as Promise<AppDataDocument>), etag: resp.headers.get("ETag") };
   }
 
-  async uploadDocument(document: AppDataDocument): Promise<void> {
+  // etag is the version this upload is based on: the one downloadDocument returned,
+  // or null when the caller believes no document exists on the server yet. Either
+  // way the server verifies the belief and answers 412 if it no longer holds.
+  async uploadDocument(document: AppDataDocument, etag: string | null): Promise<string | null> {
     const init: RequestInit = {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(etag ? { "If-Match": etag } : { "If-None-Match": "*" }),
+      },
       body: JSON.stringify(document),
     };
     const resp = await this.fetchWithRefresh(`${apiUrl}/api/v1/document`, init);
+    if (resp.status === 412) throw new DocumentChangedError();
     if (!resp.ok) throw new Error(`PUT /api/v1/document: ${resp.status}`);
+    return resp.headers.get("ETag");
   }
 
   // Initiates an OIDC flow to link another provider identity to the current account.

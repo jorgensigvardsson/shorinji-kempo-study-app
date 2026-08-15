@@ -72,7 +72,7 @@ func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	doc, err := h.store.Load(userID)
+	doc, etag, err := h.store.Load(userID)
 	if err != nil {
 		log.Printf("store.Load(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -81,6 +81,11 @@ func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
 	if doc == nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
+	}
+	// The client sends this back as If-Match on the PUT that follows, so its merge
+	// is rejected if anything else wrote in between.
+	if etag != "" {
+		w.Header().Set("ETag", etag)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(doc)
@@ -103,14 +108,45 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err := h.store.Save(userID, &doc); err != nil {
+	etag, err := h.saveDocument(userID, &doc, r)
+	if errors.Is(err, store.ErrPreconditionFailed) {
+		// Another device wrote since this one read. Its merge was computed against a
+		// document that is no longer current, so the client has to read, merge and
+		// retry rather than have this write silently replace the other device's.
+		http.Error(w, "document changed since it was read", http.StatusPreconditionFailed)
+		return
+	}
+	if err != nil {
 		log.Printf("store.Save(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	if etag != "" {
+		w.Header().Set("ETag", etag)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(doc)
+}
+
+// saveDocument picks the concurrency check from the request's preconditions.
+//
+//	If-Match: <etag>   the client merged into that exact version
+//	If-None-Match: *   the client believes it is creating the first document
+//	neither            an app version predating optimistic concurrency
+//
+// The unconditional case is what installed clients did before this existed, and a
+// service worker can keep one of those around for a while after a release. Rejecting
+// them would break sync on those devices, so they keep the old last-write-wins
+// behaviour and stop racing as soon as they update.
+func (h *Handler) saveDocument(userID string, doc *store.Document, r *http.Request) (string, error) {
+	if ifMatch := r.Header.Get("If-Match"); ifMatch != "" {
+		return h.store.Save(userID, doc, ifMatch)
+	}
+	if r.Header.Get("If-None-Match") == "*" {
+		return h.store.Save(userID, doc, "")
+	}
+	return h.store.SaveUnconditional(userID, doc)
 }
 
 func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {

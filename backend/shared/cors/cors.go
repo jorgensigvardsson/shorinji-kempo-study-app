@@ -14,7 +14,13 @@ func Middleware(allowedOrigin string, next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			// If-Match / If-None-Match carry the optimistic-concurrency preconditions
+			// on document writes, and neither is CORS-safelisted, so both have to be
+			// named here or the browser blocks the request at preflight.
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, If-Match, If-None-Match")
+			// ETag is likewise not exposed to cross-origin scripts by default, and the
+			// client cannot send back a precondition it was never allowed to read.
+			w.Header().Set("Access-Control-Expose-Headers", "ETag")
 		}
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)

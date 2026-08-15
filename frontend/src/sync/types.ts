@@ -7,6 +7,16 @@ export class AuthExpiredError extends Error {
   }
 }
 
+// The server refused a document write because another device wrote first, so the
+// merge behind it was computed against a version that is no longer current. Not an
+// error the user needs to see: the fix is to read again, merge again, and retry.
+export class DocumentChangedError extends Error {
+  constructor() {
+    super("The document changed on the server since it was read.");
+    this.name = "DocumentChangedError";
+  }
+}
+
 export interface SyncState {
   status: SyncStatus;
   message: string | null;

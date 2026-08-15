@@ -2,7 +2,7 @@ import { getAppDataStore } from "../persistence/store";
 import type { AppDataDocument } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
-import { AuthExpiredError, type SyncResult, type SyncState } from "./types";
+import { AuthExpiredError, DocumentChangedError, type SyncResult, type SyncState } from "./types";
 
 const debug = import.meta.env.VITE_DEBUG === "true";
 const debugLog = (...args: unknown[]) => { if (debug) console.log(...args); };
@@ -57,6 +57,18 @@ class SyncManager {
   private isApplyingRemoteDocument = false;
   private pendingLocalDocument: AppDataDocument | null = null;
   private pendingRemoteDocument: AppDataDocument | null = null;
+  // The version the pending conflict was read from. A user can leave the prompt up
+  // for a long time, so by the time they answer the server may have moved on again.
+  private pendingRemoteEtag: string | null = null;
+  // A sync in progress, so the four things that can ask for one — the debounced
+  // scheduler, the visibility handler, the retry timer and the user's "try now"
+  // button — join it instead of running a second download/merge/upload over it.
+  private inFlightSync: Promise<SyncResult> | null = null;
+  private resyncWhenIdle = false;
+  // How many times one syncNow() re-reads and re-merges after the server rejects
+  // its upload as stale. Each retry only loses to a device that wrote in the
+  // meantime, so a small bound is enough; the scheduler covers the rest.
+  private readonly MAX_STALE_RETRIES = 3;
 
   start(): void {
     if (this.started) {
@@ -198,6 +210,8 @@ class SyncManager {
 
     this.pendingLocalDocument = null;
     this.pendingRemoteDocument = null;
+    const etag = this.pendingRemoteEtag;
+    this.pendingRemoteEtag = null;
 
     const chosen = choice === "local" ? localDoc : remoteDoc;
 
@@ -209,10 +223,18 @@ class SyncManager {
 
     try {
       if (this.backendClient.isConnected()) {
-        await this.backendClient.uploadDocument(chosen);
+        await this.backendClient.uploadDocument(chosen, etag);
         this.saveBaseDocument(chosen);
       }
     } catch (error) {
+      // The prompt can sit unanswered for a long time, so by now a third device may
+      // have written. The user's choice is already the local document, so a fresh
+      // sync merges from there — and asks again if that is still a conflict.
+      if (error instanceof DocumentChangedError) {
+        debugWarn("[sync] Document changed while the conflict prompt was open — syncing again.");
+        this.syncNow().catch(e => this.handleSyncError(e));
+        return;
+      }
       this.handleSyncError(error);
       return;
     }
@@ -226,7 +248,30 @@ class SyncManager {
     });
   }
 
+  // Serializes syncing. A caller arriving while a sync is running joins that run
+  // rather than starting a competing one, and its request is remembered so changes
+  // made during the run are not left unsynced: once the run finishes, another pass
+  // is scheduled through the normal debounce.
   async syncNow(): Promise<SyncResult> {
+    if (this.inFlightSync) {
+      this.resyncWhenIdle = true;
+      return this.inFlightSync;
+    }
+
+    const run = this.runSync();
+    this.inFlightSync = run;
+    try {
+      return await run;
+    } finally {
+      this.inFlightSync = null;
+      if (this.resyncWhenIdle) {
+        this.resyncWhenIdle = false;
+        this.scheduleBackgroundSync();
+      }
+    }
+  }
+
+  private async runSync(staleRetries = 0): Promise<SyncResult> {
     this.clearRetryTimer();
     const provider = this.store.get("syncProvider");
     if (provider !== "backend") {
@@ -242,7 +287,11 @@ class SyncManager {
 
     this.setState({ status: "syncing", message: "Synkar..." });
 
-    const remoteDocument = await this.backendClient.downloadDocument();
+    const remote = await this.backendClient.downloadDocument();
+    const remoteDocument = remote?.document ?? null;
+    // Everything uploaded below is based on this exact version, and says so via
+    // If-Match. A null etag means we read no document and are creating the first.
+    const baseEtag = remote?.etag ?? null;
 
     // Read local AFTER the async download so any changes made during the download are included.
     const localDocument = this.store.getDocument();
@@ -250,7 +299,8 @@ class SyncManager {
 
     if (!remoteDocument) {
       debugLog("[sync] No remote document found — uploading local as initial.");
-      await this.backendClient.uploadDocument(localDocument);
+      const uploaded = await this.uploadOrRestart(localDocument, null, staleRetries);
+      if (uploaded !== "ok") return uploaded;
       this.saveBaseDocument(localDocument);
       this.retryCount = 0;
       this.setState({
@@ -278,8 +328,18 @@ class SyncManager {
       this.backupDocument(localDocument);
       this.pendingLocalDocument = localDocument;
       this.pendingRemoteDocument = remoteDocument;
+      this.pendingRemoteEtag = baseEtag;
       this.setState({ status: "conflict_resolution", message: null });
       return { conflictDetected: true, pushedLocalChanges: false };
+    }
+
+    // Upload before touching the local store. A rejected upload means the merge was
+    // computed against a version that is no longer current, and applying it locally
+    // first would leave this device holding a merge the server refused.
+    if (mergedDiffersFromRemote) {
+      const uploaded = await this.uploadOrRestart(mergedDocument, baseEtag, staleRetries);
+      if (uploaded !== "ok") return uploaded;
+      debugLog("[sync] Uploaded merged document to remote.");
     }
 
     if (mergedDiffersFromLocal) {
@@ -287,11 +347,6 @@ class SyncManager {
       this.store.setDocument(mergedDocument);
       this.isApplyingRemoteDocument = false;
       debugLog("[sync] Applied remote changes to local store.");
-    }
-
-    if (mergedDiffersFromRemote) {
-      await this.backendClient.uploadDocument(mergedDocument);
-      debugLog("[sync] Uploaded merged document to remote.");
     }
 
     this.retryCount = 0;
@@ -305,6 +360,27 @@ class SyncManager {
     debugLog("[sync] Sync complete. No conflicts.");
 
     return { conflictDetected: false, pushedLocalChanges: mergedDiffersFromRemote };
+  }
+
+  // Uploads a document that was merged from the version named by etag. "ok" means it
+  // landed; anything else is the result of the fresh sync started because the server
+  // rejected it as stale, and the caller should return that instead of carrying on
+  // with a merge the server has already refused.
+  private async uploadOrRestart(
+    document: AppDataDocument,
+    etag: string | null,
+    staleRetries: number,
+  ): Promise<"ok" | SyncResult> {
+    try {
+      await this.backendClient.uploadDocument(document, etag);
+      return "ok";
+    } catch (error) {
+      if (!(error instanceof DocumentChangedError) || staleRetries >= this.MAX_STALE_RETRIES) {
+        throw error;
+      }
+      debugWarn(`[sync] Upload rejected as stale — another device wrote first. Re-reading and merging again (attempt ${staleRetries + 1} of ${this.MAX_STALE_RETRIES}).`);
+      return this.runSync(staleRetries + 1);
+    }
   }
 
   private async handleProviderChanged(): Promise<void> {
