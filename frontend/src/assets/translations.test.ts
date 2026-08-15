@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import translations from "./translations.json";
+// As text, because the parsed form is exactly where a duplicate key disappears.
+import translationsText from "./translations.json?raw";
 
 // The i18n system normalises lookup keys to lowercase before storing them,
 // so "Vecka" and "vecka" are the same effective key at runtime.
@@ -17,6 +19,33 @@ const mustBeSubsetOf: Array<[string, string]> = [
   ["en", "tr"],
   ["tr", "en"],
 ];
+
+// A duplicated key is invisible once parsed: every JSON parser keeps one of them, so
+// the file reads as if two translations were in effect while only ever one was. Two
+// keys were duplicated this way for a long time without anything noticing.
+describe("translations.json duplicate keys", () => {
+  it("declares each key once per language section", () => {
+    let section: string | null = null;
+    const seen = new Set<string>();
+    const duplicates: string[] = [];
+
+    for (const line of translationsText.split(/\r?\n/)) {
+      const start = /^ {2}"(ja|en|tr)": \{/.exec(line);
+      if (start) {
+        section = start[1];
+        continue;
+      }
+      if (!section) continue;
+      const entry = /^ {4}("(?:[^"\\]|\\.)*")\s*:/.exec(line);
+      if (!entry) continue;
+      const id = `${section} ${entry[1]}`;
+      if (seen.has(id)) duplicates.push(id);
+      seen.add(id);
+    }
+
+    expect(duplicates, `duplicated: ${duplicates.join(", ")}`).toHaveLength(0);
+  });
+});
 
 describe("translations.json completeness", () => {
   const keysBySection = Object.fromEntries(
