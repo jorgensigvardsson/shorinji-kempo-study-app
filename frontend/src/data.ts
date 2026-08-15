@@ -27,6 +27,21 @@ export interface GradePlan {
   weeks: Week[];
 }
 
+// Looks up the plan for a grade, falling back to the first one when there is none.
+//
+// The grade in a user's document is not guaranteed to name a plan this build ships: a
+// grade can be renamed or dropped from the kamokuhyō, and a device that has been
+// offline can sync an old one back long afterwards. Asserting the lookup succeeded —
+// which is what the call sites used to do — turned that into a crash at render, taking
+// the whole app down rather than one page.
+//
+// The stored grade is deliberately left alone rather than corrected: rendering
+// something usable is this function's job, and silently rewriting a user's profile is
+// not. An empty plans array is a broken build, and there is nothing to fall back to.
+export function findGradePlan(plans: GradePlan[], grade: GradeName): GradePlan {
+  return plans.find(plan => plan.grade === grade) ?? plans[0];
+}
+
 export type Week = RegularWeek | KihonOnlyWeek | ReviewPreparationWeek | YondanWeek | GodanWeek | KyushoZemeWeek;
 
 /**

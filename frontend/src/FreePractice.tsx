@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from
 import { Form } from "react-bootstrap";
 import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, People, Search, Trash } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei, Video } from "./data";
-import { getHokeiMoments, getStandardMoments } from "./data";
+import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
@@ -132,7 +132,7 @@ const FreePractice = (props: Props) => {
             {visitedAreas.has("hokei") && (
                 <div hidden={activeArea !== "hokei"}>
                     <List
-                        grade={props.allGradePlans.find(plan => plan.grade === props.myGrade)!}
+                        grade={findGradePlan(props.allGradePlans, props.myGrade)}
                         allGradePlans={props.allGradePlans}
                         dojoMode={dojoMode}
                     />

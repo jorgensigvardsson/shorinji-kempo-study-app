@@ -1,6 +1,7 @@
 import { getAppDataStore } from "../persistence/store";
 import type { AppDataDocument } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
+import { deepEqual } from "../utilities/deep-equal";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
 import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, type SyncResult, type SyncState } from "./types";
 
@@ -318,8 +319,8 @@ class SyncManager {
     const mergeResult = mergeDocuments(baseDocument, localDocument, remoteDocument);
     const mergedDocument = mergeResult.document;
 
-    const mergedDiffersFromLocal = !areEqual(localDocument, mergedDocument);
-    const mergedDiffersFromRemote = !areEqual(remoteDocument, mergedDocument);
+    const mergedDiffersFromLocal = !deepEqual(localDocument, mergedDocument);
+    const mergedDiffersFromRemote = !deepEqual(remoteDocument, mergedDocument);
 
     debugLog(`[sync] Merge result — conflictDetected: ${mergeResult.conflictDetected}, applyingRemoteChanges: ${mergedDiffersFromLocal}, uploadingToRemote: ${mergedDiffersFromRemote}`);
 
@@ -568,10 +569,6 @@ export function getSyncManager(): SyncManager {
   }
 
   return syncManager;
-}
-
-function areEqual<T>(a: T, b: T): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 function purgeLegacySyncStorage(): void {

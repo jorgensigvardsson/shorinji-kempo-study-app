@@ -1,4 +1,5 @@
 import { LocalStorageBackend, type PersistenceBackend } from "./backend";
+import { deepEqual } from "../utilities/deep-equal";
 import { canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, unknownDataFields, type AppDataDocument, type AppDataState } from "./schema";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
@@ -69,7 +70,7 @@ export class AppDataStore {
 
     const keys = Object.keys(this.document.data) as Array<keyof AppDataState>;
     for (const key of keys) {
-      if (!areEqual(previous.data[key], this.document.data[key])) {
+      if (!deepEqual(previous.data[key], this.document.data[key])) {
         this.notify(key, this.document.data[key]);
       }
     }
@@ -135,10 +136,6 @@ function clone<T>(value: T): T {
   }
 
   return JSON.parse(JSON.stringify(value)) as T;
-}
-
-function areEqual<T>(a: T, b: T): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 function sanitizeDocument(input: AppDataDocument): AppDataDocument {

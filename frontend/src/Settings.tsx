@@ -194,7 +194,13 @@ const Settings = (props: Props) => {
 
             <Form.Group className="mb-3" controlId="settingsLevel">
                 <Form.Label>{translator.translate("Min nästa grad")}</Form.Label>
-                <Form.Select onChange={e => onSetGrade(allGradePlans.find(x => x.grade === e.target.value)!)} value={nextGrade.grade}>
+                {/* Every option comes from allGradePlans, so a miss should not happen —
+                    but doing nothing is the right answer if it ever does, rather than
+                    handing on an undefined grade. */}
+                <Form.Select onChange={e => {
+                    const plan = allGradePlans.find(x => x.grade === e.target.value);
+                    if (plan) onSetGrade(plan);
+                }} value={nextGrade.grade}>
                     {
                         allGradePlans.map(
                             (l, i) => <option value={l.grade} key={i}>{gradeLabel(l.grade)}</option>

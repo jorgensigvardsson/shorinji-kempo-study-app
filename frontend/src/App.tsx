@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
-import { type GradePlan, type GradeName } from './data'
+import { findGradePlan, type GradePlan, type GradeName } from './data'
 import { TranslationsContext, TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, routeText, type Route } from './routes';
@@ -160,8 +160,8 @@ function App(props: Props) {
   const controlContext = getTrainingControlContext(location.pathname);
   const [trainingMode, setTrainingMode] = useState(false);
   const routes = getRoutes(
-    gradePlans.find(l => l.grade === displayGrade)!,
-    gradePlans.find(l => l.grade === profileGrade)!,
+    findGradePlan(gradePlans, displayGrade),
+    findGradePlan(gradePlans, profileGrade),
     gradePlans,
     translator,
     textZoom,

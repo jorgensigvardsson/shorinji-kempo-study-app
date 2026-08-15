@@ -9,6 +9,7 @@ import {
   getStandardMoments,
   getAllHokeiMoments,
   getWeeksWithKihonShoho,
+  findGradePlan,
   type HokeiMoment,
   type StandardMoment,
   type RegularWeek,
@@ -168,5 +169,28 @@ describe("getWeeksWithKihonShoho", () => {
   it("returns both types when both are present", () => {
     const result = getWeeksWithKihonShoho({ grade: "shodan", weeks: [regularWithKihon, kihonWeek, reviewWeek] });
     expect(result).toHaveLength(2);
+  });
+});
+
+describe("findGradePlan", () => {
+  const shodan: GradePlan = { grade: "shodan", weeks: [] };
+  const nidan: GradePlan = { grade: "nidan", weeks: [] };
+  const plans = [shodan, nidan];
+
+  it("returns the plan for the grade asked for", () => {
+    expect(findGradePlan(plans, "nidan")).toBe(nidan);
+  });
+
+  // A grade can be renamed or dropped from the kamokuhyō, and a device that has been
+  // offline can sync an old one back long afterwards. Asserting the lookup succeeded
+  // crashed the whole app at render rather than degrading one page.
+  it("falls back instead of returning nothing for a grade this build does not ship", () => {
+    expect(findGradePlan(plans, "kudan")).toBe(shodan);
+  });
+
+  it("leaves the stored grade alone — rendering something usable is not the same as rewriting a profile", () => {
+    const asked = "kudan" as const;
+    findGradePlan(plans, asked);
+    expect(plans.map(p => p.grade)).toEqual(["shodan", "nidan"]);
   });
 });
