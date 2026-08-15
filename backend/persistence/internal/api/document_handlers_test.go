@@ -341,12 +341,18 @@ func TestPutDocument_LegacyClientRecordedAsLegacyCompat(t *testing.T) {
 // failingUserDataStore stands in for the split store being broken or unreachable.
 type failingUserDataStore struct{ calls int }
 
-func (s *failingUserDataStore) Save(string, *store.Document) error {
+func (s *failingUserDataStore) SaveUnconditional(string, *store.Document) (string, error) {
 	s.calls++
+	return "", errors.New("shadow store unavailable")
+}
+func (s *failingUserDataStore) Save(string, *store.Document, string) (string, error) {
+	s.calls++
+	return "", errors.New("shadow store unavailable")
+}
+func (s *failingUserDataStore) Load(string) (*store.Document, string, error) { return nil, "", nil }
+func (s *failingUserDataStore) Delete(string) error {
 	return errors.New("shadow store unavailable")
 }
-func (s *failingUserDataStore) Load(string) (*store.Document, error) { return nil, nil }
-func (s *failingUserDataStore) Delete(string) error                  { return errors.New("shadow store unavailable") }
 
 func newShadowingHandler(t *testing.T) (*Handler, store.UserDataStore) {
 	t.Helper()
@@ -363,7 +369,7 @@ func TestPutDocument_AcceptedWriteIsAlsoWrittenSplit(t *testing.T) {
 		t.Fatalf("got %d, want 200", rec.Code)
 	}
 
-	got, err := shadow.Load("user-1")
+	got, _, err := shadow.Load("user-1")
 	if err != nil {
 		t.Fatalf("shadow Load: %v", err)
 	}
@@ -393,7 +399,7 @@ func TestPutDocument_RejectedWriteIsNotShadowed(t *testing.T) {
 		t.Fatalf("got %d, want 409", rec.Code)
 	}
 
-	got, _ := shadow.Load("user-1")
+	got, _, _ := shadow.Load("user-1")
 	if got == nil {
 		t.Fatal("expected the first document to still be there")
 	}
@@ -438,7 +444,7 @@ func TestDeleteAccount_ClearsBothStores(t *testing.T) {
 		t.Fatalf("got %d, want 204", rec.Code)
 	}
 
-	if got, _ := shadow.Load("user-1"); got != nil {
+	if got, _, _ := shadow.Load("user-1"); got != nil {
 		t.Error("the split store still holds data for a deleted account")
 	}
 	if rec := getDocument(h, "user-1"); rec.Code != http.StatusNotFound {
@@ -511,7 +517,7 @@ func TestBackfillEndpoint_CopiesUsersThatNeverSynced(t *testing.T) {
 	}
 
 	for _, id := range []string{"quiet-1", "quiet-2"} {
-		got, err := shadow.Load(id)
+		got, _, err := shadow.Load(id)
 		if err != nil || got == nil {
 			t.Errorf("%s was not backfilled (err %v)", id, err)
 		}

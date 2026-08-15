@@ -222,7 +222,10 @@ func (h *Handler) shadowWrite(userID string, doc *store.Document) {
 	if h.userData == nil {
 		return
 	}
-	if err := h.userData.Save(userID, doc); err != nil {
+	// Unconditional: the old store has already accepted and ordered this write, so a
+	// second concurrency check here would only reject writes that never conflicted.
+	// That changes when reads move across and this becomes the checked write.
+	if _, err := h.userData.SaveUnconditional(userID, doc); err != nil {
 		log.Printf("shadow write failed for %s: %v", userID, err)
 	}
 }

@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
 
@@ -164,10 +165,10 @@ func TestFileUserDataStore_RoundTripsThroughStorage(t *testing.T) {
 	s := NewFileUserDataStore(t.TempDir())
 	doc := fullDocument()
 
-	if err := s.Save("user-1", doc); err != nil {
+	if _, err := s.SaveUnconditional("user-1", doc); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
-	got, err := s.Load("user-1")
+	got, _, err := s.Load("user-1")
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -182,7 +183,7 @@ func TestFileUserDataStore_RoundTripsThroughStorage(t *testing.T) {
 
 func TestFileUserDataStore_Load_Missing_ReturnsNil(t *testing.T) {
 	s := NewFileUserDataStore(t.TempDir())
-	got, err := s.Load("nobody")
+	got, _, err := s.Load("nobody")
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -196,14 +197,14 @@ func TestFileUserDataStore_Load_Missing_ReturnsNil(t *testing.T) {
 func TestFileUserDataStore_DroppedFieldDoesNotLingerAcrossSaves(t *testing.T) {
 	s := NewFileUserDataStore(t.TempDir())
 
-	if err := s.Save("user-1", &Document{Version: 1, Data: json.RawMessage(`{"a":1,"b":2}`)}); err != nil {
+	if _, err := s.SaveUnconditional("user-1", &Document{Version: 1, Data: json.RawMessage(`{"a":1,"b":2}`)}); err != nil {
 		t.Fatalf("first Save: %v", err)
 	}
-	if err := s.Save("user-1", &Document{Version: 2, Data: json.RawMessage(`{"a":1}`)}); err != nil {
+	if _, err := s.SaveUnconditional("user-1", &Document{Version: 2, Data: json.RawMessage(`{"a":1}`)}); err != nil {
 		t.Fatalf("second Save: %v", err)
 	}
 
-	got, err := s.Load("user-1")
+	got, _, err := s.Load("user-1")
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -212,13 +213,13 @@ func TestFileUserDataStore_DroppedFieldDoesNotLingerAcrossSaves(t *testing.T) {
 
 func TestFileUserDataStore_Delete_RemovesEverything(t *testing.T) {
 	s := NewFileUserDataStore(t.TempDir())
-	if err := s.Save("user-1", fullDocument()); err != nil {
+	if _, err := s.SaveUnconditional("user-1", fullDocument()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 	if err := s.Delete("user-1"); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
-	got, _ := s.Load("user-1")
+	got, _, _ := s.Load("user-1")
 	if got != nil {
 		t.Errorf("got %+v after delete, want nil", got)
 	}
@@ -227,5 +228,97 @@ func TestFileUserDataStore_Delete_RemovesEverything(t *testing.T) {
 func TestFileUserDataStore_Delete_Missing_IsNotAnError(t *testing.T) {
 	if err := NewFileUserDataStore(t.TempDir()).Delete("nobody"); err != nil {
 		t.Errorf("Delete: %v", err)
+	}
+}
+
+// ─── concurrency ────────────────────────────────────────────────────────────────
+//
+// The split store needs its own optimistic concurrency before any read is served from
+// it, or two devices can overwrite each other again exactly as they could before the
+// ETag work. The meta item carries it: every write rewrites that item, so its version
+// identifies the document as a whole.
+
+func TestFileUserDataStore_Load_ReturnsAnETag(t *testing.T) {
+	s := NewFileUserDataStore(t.TempDir())
+	written, err := s.SaveUnconditional("user-1", fullDocument())
+	if err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	if written == "" {
+		t.Fatal("Save returned an empty ETag")
+	}
+
+	_, read, err := s.Load("user-1")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if read != written {
+		t.Errorf("Load ETag %q, want the one Save returned, %q", read, written)
+	}
+}
+
+func TestFileUserDataStore_Save_StaleETag_Rejected(t *testing.T) {
+	s := NewFileUserDataStore(t.TempDir())
+
+	first, err := s.Save("user-1", &Document{Version: 1, UpdatedAt: "t1", Data: json.RawMessage(`{"a":1}`)}, "")
+	if err != nil {
+		t.Fatalf("first Save: %v", err)
+	}
+	if _, err := s.Save("user-1", &Document{Version: 2, UpdatedAt: "t2", Data: json.RawMessage(`{"a":2}`)}, first); err != nil {
+		t.Fatalf("second Save: %v", err)
+	}
+
+	// A third write holding the version the second one replaced.
+	if _, err := s.Save("user-1", &Document{Version: 3, UpdatedAt: "t3", Data: json.RawMessage(`{"a":3}`)}, first); !errors.Is(err, ErrPreconditionFailed) {
+		t.Fatalf("stale write: got %v, want ErrPreconditionFailed", err)
+	}
+
+	got, _, _ := s.Load("user-1")
+	if got.Version != 2 {
+		t.Errorf("stored version %d, want 2 — the stale write must not have landed", got.Version)
+	}
+}
+
+func TestFileUserDataStore_Save_CreateWhenAlreadyExists_Rejected(t *testing.T) {
+	s := NewFileUserDataStore(t.TempDir())
+	if _, err := s.Save("user-1", &Document{Version: 1, UpdatedAt: "t1"}, ""); err != nil {
+		t.Fatalf("first Save: %v", err)
+	}
+	if _, err := s.Save("user-1", &Document{Version: 99, UpdatedAt: "t2"}, ""); !errors.Is(err, ErrPreconditionFailed) {
+		t.Fatalf("create over existing: got %v, want ErrPreconditionFailed", err)
+	}
+}
+
+// Shadow writes and the backfill copy documents the authoritative store has already
+// ordered, so they must not be subject to a second check that could reject a write
+// which was never in conflict.
+func TestFileUserDataStore_SaveUnconditional_IgnoresTheStoredVersion(t *testing.T) {
+	s := NewFileUserDataStore(t.TempDir())
+	if _, err := s.SaveUnconditional("user-1", &Document{Version: 1, UpdatedAt: "t1"}); err != nil {
+		t.Fatalf("first: %v", err)
+	}
+	if _, err := s.SaveUnconditional("user-1", &Document{Version: 2, UpdatedAt: "t2"}); err != nil {
+		t.Fatalf("second: %v", err)
+	}
+	got, _, _ := s.Load("user-1")
+	if got.Version != 2 {
+		t.Errorf("stored version %d, want 2", got.Version)
+	}
+}
+
+// The ETag has to follow the document's content, not just the fact that a write
+// happened, or a caller could hold one that no longer describes what is stored.
+func TestFileUserDataStore_ETagChangesWithTheDocument(t *testing.T) {
+	s := NewFileUserDataStore(t.TempDir())
+	first, _ := s.SaveUnconditional("user-1", &Document{Version: 1, UpdatedAt: "t1", Data: json.RawMessage(`{"a":1}`)})
+	second, _ := s.SaveUnconditional("user-1", &Document{Version: 1, UpdatedAt: "t2", Data: json.RawMessage(`{"a":1}`)})
+	if first == second {
+		t.Error("the ETag did not change when the document did")
+	}
+
+	// A new field changes the field list in meta, so the ETag must move too.
+	third, _ := s.SaveUnconditional("user-1", &Document{Version: 1, UpdatedAt: "t2", Data: json.RawMessage(`{"a":1,"b":2}`)})
+	if third == second {
+		t.Error("the ETag did not change when a field was added")
 	}
 }

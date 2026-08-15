@@ -169,12 +169,28 @@ func AssembleDocument(items []UserDataItem) (*Document, error) {
 
 // UserDataStore is the split-item store that will eventually replace Store.
 //
-// It has no ETag argument because nothing reads it yet: writes to it are shadows of a
-// write the old store has already accepted, and that store is what enforces
-// concurrency. Before reads move here, this needs a composite ETag over the items, or
-// two devices will be able to overwrite each other again.
+// Concurrency rides on the meta item. Every write rewrites it — it carries updatedAt
+// and the field list — so its ETag identifies the document as a whole, and guarding it
+// inside the batch means a write based on a stale read is refused in full rather than
+// landing over someone else's. There is no need to hash the parts together: the item
+// they all move with already answers the question.
+//
+// Save is the checked write, for once reads are served from here. SaveUnconditional is
+// for shadow writes and the backfill, which are copies of a write the old store has
+// already accepted and ordered — adding a second concurrency check there would reject
+// writes that were never in conflict.
 type UserDataStore interface {
-	Save(userID string, doc *Document) error
-	Load(userID string) (*Document, error)
+	// Load returns the document and the ETag naming that exact version, or
+	// (nil, "", nil) when the user has nothing stored.
+	Load(userID string) (*Document, string, error)
+
+	// Save writes doc if the stored version still matches ifMatch. An empty ifMatch
+	// asserts nothing is stored yet. Either way a wrong assertion is
+	// ErrPreconditionFailed, as with Store.
+	Save(userID string, doc *Document, ifMatch string) (string, error)
+
+	// SaveUnconditional writes doc with no concurrency check.
+	SaveUnconditional(userID string, doc *Document) (string, error)
+
 	Delete(userID string) error
 }

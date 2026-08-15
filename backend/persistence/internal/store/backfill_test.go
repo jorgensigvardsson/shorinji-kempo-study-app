@@ -41,7 +41,7 @@ func TestBackfill_CopiesEveryDocument(t *testing.T) {
 
 	for i := range 5 {
 		userID := fmt.Sprintf("user-%d", i)
-		got, err := target.Load(userID)
+		got, _, err := target.Load(userID)
 		if err != nil {
 			t.Fatalf("Load %s: %v", userID, err)
 		}
@@ -120,7 +120,7 @@ func TestBackfill_RecopiesAChangedDocument(t *testing.T) {
 	if result.Copied != 1 {
 		t.Errorf("copied %d, want 1", result.Copied)
 	}
-	got, _ := target.Load("user-0")
+	got, _, _ := target.Load("user-0")
 	assertSameJSON(t, got.Data, json.RawMessage(`{"grade":"nidan"}`))
 }
 
@@ -130,11 +130,11 @@ type oneUserFailingStore struct {
 	failFor string
 }
 
-func (s *oneUserFailingStore) Save(userID string, doc *Document) error {
+func (s *oneUserFailingStore) SaveUnconditional(userID string, doc *Document) (string, error) {
 	if userID == s.failFor {
-		return errors.New("nope")
+		return "", errors.New("nope")
 	}
-	return s.UserDataStore.Save(userID, doc)
+	return s.UserDataStore.SaveUnconditional(userID, doc)
 }
 
 func TestBackfill_ContinuesPastAFailingUser(t *testing.T) {

@@ -63,7 +63,7 @@ func BackfillUserData(source Store, target UserDataStore, logf func(string, ...a
 			continue
 		}
 
-		existing, err := target.Load(userID)
+		existing, _, err := target.Load(userID)
 		if err != nil {
 			// Unreadable on the target is not a reason to skip: overwriting it is
 			// exactly what a backfill is for.
@@ -73,7 +73,9 @@ func BackfillUserData(source Store, target UserDataStore, logf func(string, ...a
 			continue
 		}
 
-		if err := target.Save(userID, doc); err != nil {
+		// Unconditional: this is a copy of a document the authoritative store has
+		// already accepted and ordered, so there is no separate conflict to lose.
+		if _, err := target.SaveUnconditional(userID, doc); err != nil {
 			result.note(&result.Failed, fmt.Sprintf("%s: save: %v", userID, err))
 			continue
 		}
