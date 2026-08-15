@@ -9,7 +9,10 @@
        hook import. src/vite-env.d.ts carries this for the app project, but that file
        is not in this project's include list — only test entry points are — so the
        reference has to be repeated here for anything reaching those modules. */
-    "types": ["vite/client", "vite-plugin-pwa/client"],
+    /* "node" because a couple of tests read a source file off disk rather than
+       importing it — a stylesheet cannot be pulled in with ?raw, since Vite's CSS
+       pipeline claims the request first. */
+    "types": ["vite/client", "vite-plugin-pwa/client", "node"],
     "skipLibCheck": true,
 
     /* Bundler mode */

@@ -17,14 +17,34 @@ body.card-focus-active::before {
   display: none;
 }
 
+/* The focused card lives inside the app's `zoom` wrapper, so every length here is in
+   layout pixels and paints multiplied by the text size — 1.1 by default, so this is
+   not an edge case. Two kinds of value do not survive that and both are avoided:
+
+   - Viewport lengths (100dvh, 100vw) resolve against the real viewport, so using one
+     as a height inside the wrapper produces a box taller than the screen. It still
+     scrolls, but the end of its scroll range sits below the fold and the page itself
+     cannot move, because .card-focus-active pins it. That is a card that cannot be
+     read to the end. --app-zoom-inverse converts such a length back to layout pixels.
+   - --card-focus-top is measured with getBoundingClientRect, which is already scaled,
+     so it needs the same conversion before being used in here. The body backdrop
+     below uses it raw, because that element sits outside the wrapper.
+
+   The horizontal centring needs no conversion at all now it is expressed as anchored
+   edges and a max-width rather than a slice of 100vw — the same reasoning as the
+   floating toast stack in App.css. */
 .focus-card.is-expanded {
+  --focus-top: calc(var(--card-focus-top, 0px) * var(--app-zoom-inverse, 1));
+
   position: fixed;
   z-index: 1030;
-  top: calc(var(--card-focus-top, 0px) + 0.75rem);
-  right: max(1rem, calc((100vw - 60rem) / 2));
-  left: max(1rem, calc((100vw - 60rem) / 2));
-  max-height: calc(100dvh - var(--card-focus-top, 0px) - 1.5rem);
-  margin: 0 !important;
+  top: calc(var(--focus-top) + 0.75rem);
+  right: 1rem;
+  left: 1rem;
+  max-width: 60rem;
+  max-height: calc((100dvh - var(--card-focus-top, 0px)) * var(--app-zoom-inverse, 1) - 1.5rem);
+  margin-block: 0 !important;
+  margin-inline: auto !important;
   overflow-y: auto;
 }
 
@@ -54,10 +74,10 @@ body.card-focus-active::before {
 
 @media (max-width: 35rem) {
   .focus-card.is-expanded {
-    top: calc(var(--card-focus-top, 0px) + 0.35rem);
+    top: calc(var(--focus-top) + 0.35rem);
     right: 0.35rem;
     left: 0.35rem;
-    max-height: calc(100dvh - var(--card-focus-top, 0px) - 0.7rem);
+    max-height: calc((100dvh - var(--card-focus-top, 0px)) * var(--app-zoom-inverse, 1) - 0.7rem);
   }
 }
 

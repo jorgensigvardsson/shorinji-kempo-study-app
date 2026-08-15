@@ -178,7 +178,11 @@ function App(props: Props) {
 
   return (
     <TranslatorContext.Provider value={translator}>
-      <div style={{ zoom: textZoom }}>
+      {/* --app-zoom-inverse is published for the few places that have to undo the zoom
+          rather than live inside it: anything sizing itself from a viewport length, or
+          from a measurement taken in screen pixels, would otherwise come out this much
+          too large. See components/HokeiCard.css. */}
+      <div style={{ zoom: textZoom, '--app-zoom-inverse': 1 / textZoom } as CSSProperties}>
         {/* Only appears once a navigation has been waiting long enough that the tap
             would otherwise look ignored — see useNavigationPending. */}
         {navigationPending && <div className="app-navigation-pending d-print-none" role="status"
