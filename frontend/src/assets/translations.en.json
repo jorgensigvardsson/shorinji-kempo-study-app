@@ -1,4 +1,6 @@
 {
+  "För mycket data för att synka": "Too much data to sync",
+  "Dina ändringar sparas på den här enheten, men når inte dina andra enheter. Ta bort några anteckningar för att komma under gränsen.": "Your changes are saved on this device, but are not reaching your other devices. Remove some notes to get back under the limit.",
   "Ladda om": "Reload",
   "Sidan kunde inte laddas. Ladda om appen och försök igen.": "This page could not be loaded. Reload the app and try again.",
   "1": "1",

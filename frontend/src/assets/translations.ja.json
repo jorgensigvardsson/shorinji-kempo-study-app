@@ -1,4 +1,6 @@
 {
+  "För mycket data för att synka": "同期できるデータ量を超えています",
+  "Dina ändringar sparas på den här enheten, men når inte dina andra enheter. Ta bort några anteckningar för att komma under gränsen.": "変更はこの端末に保存されますが、他の端末には反映されません。メモをいくつか削除して上限を下回るようにしてください。",
   "Ladda om": "再読み込み",
   "Sidan kunde inte laddas. Ladda om appen och försök igen.": "このページを読み込めませんでした。アプリを再読み込みして、もう一度お試しください。",
   "1 kyū": "１級",

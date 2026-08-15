@@ -464,6 +464,23 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
           </Button>
         </Toast.Body>
       </Toast>
+      {/* The document has outgrown what the server accepts. Like the outdated-client
+          toast there is nothing to retry, so no dismiss — but there is also no button,
+          because nothing the app offers today makes the document smaller. It says what
+          has stopped and what has not, which is the honest extent of it. */}
+      <Toast show={syncState.status === "document_too_large"} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
+            <ExclamationTriangle size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("För mycket data för att synka")}</div>
+            <div className="app-update-toast-text">
+              {translator.translate("Dina ändringar sparas på den här enheten, men når inte dina andra enheter. Ta bort några anteckningar för att komma under gränsen.")}
+            </div>
+          </div>
+        </Toast.Body>
+      </Toast>
       <Toast show={syncState.status === "error"} className="app-update-toast">
         <Toast.Body className="app-update-toast-body">
           <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">

@@ -82,6 +82,7 @@ describe("SyncManager", () => {
   let AuthExpiredError: typeof import("./types").AuthExpiredError;
   let DocumentChangedError: typeof import("./types").DocumentChangedError;
   let ClientOutdatedError: typeof import("./types").ClientOutdatedError;
+  let DocumentTooLargeError: typeof import("./types").DocumentTooLargeError;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -98,7 +99,7 @@ describe("SyncManager", () => {
     vi.doMock("../persistence/store", () => ({ getAppDataStore: function() { return mockStore; } }));
 
     ({ getSyncManager } = await import("./manager"));
-    ({ AuthExpiredError, DocumentChangedError, ClientOutdatedError } = await import("./types"));
+    ({ AuthExpiredError, DocumentChangedError, ClientOutdatedError, DocumentTooLargeError } = await import("./types"));
   });
 
   afterEach(() => {
@@ -464,6 +465,72 @@ describe("SyncManager", () => {
       await flushPromises();
 
       expect(mockStore.setDocument).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── document over the size limit ──────────────────────────────────────────
+
+  describe("document too large for the server", () => {
+    function rejectingServer() {
+      const remoteDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
+      const localDoc = makeDoc({
+        updatedAt: "2024-06-01T00:00:00.000Z",
+        data: { ...remoteDoc.data, grade: "sandan" as const },
+      });
+      mockStore.getDocument.mockReturnValue(localDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
+      mockBackendClient.uploadDocument.mockRejectedValue(new DocumentTooLargeError(1_400_000, 1 << 20));
+    }
+
+    it("stops rather than retrying an upload the server will always refuse", async () => {
+      rejectingServer();
+
+      const manager = getSyncManager();
+      manager.retrySync();
+      await flushPromises();
+
+      expect(manager.getState().status).toBe("document_too_large");
+      // One attempt. Three more megabyte uploads would help nobody.
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledTimes(1);
+    });
+
+    it("schedules no retry, because nothing that happens on its own makes it smaller", async () => {
+      vi.useFakeTimers();
+      rejectingServer();
+
+      const manager = getSyncManager();
+      manager.retrySync();
+      await flushPromises();
+
+      await vi.advanceTimersByTimeAsync(120_000);
+      await flushPromises();
+
+      expect(manager.getState().status).toBe("document_too_large");
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(1);
+      vi.useRealTimers();
+    });
+
+    // The local document is the one that is too big, and it is also the only copy of
+    // the user's most recent work. Refusing to sync it must not discard it.
+    it("leaves the local document alone", async () => {
+      rejectingServer();
+
+      getSyncManager().retrySync();
+      await flushPromises();
+
+      expect(mockStore.setDocument).not.toHaveBeenCalled();
+    });
+
+    it("reports how far over the limit it is", async () => {
+      rejectingServer();
+
+      getSyncManager().retrySync();
+      await flushPromises();
+
+      const error = getSyncManager().getState().error;
+      expect(error).toBeInstanceOf(DocumentTooLargeError);
+      expect((error as InstanceType<typeof DocumentTooLargeError>).bytes).toBe(1_400_000);
+      expect((error as InstanceType<typeof DocumentTooLargeError>).limitBytes).toBe(1 << 20);
     });
   });
 

@@ -1,4 +1,4 @@
-export type SyncStatus = "local_only" | "disconnected" | "connected" | "syncing" | "error" | "auth_expired" | "conflict_resolution" | "client_outdated";
+export type SyncStatus = "local_only" | "disconnected" | "connected" | "syncing" | "error" | "auth_expired" | "conflict_resolution" | "client_outdated" | "document_too_large";
 
 export class AuthExpiredError extends Error {
   constructor() {
@@ -24,6 +24,18 @@ export class ClientOutdatedError extends Error {
   constructor(readonly requiredSchemaVersion: number) {
     super(`The stored document uses schema version ${requiredSchemaVersion}, which this build does not understand.`);
     this.name = "ClientOutdatedError";
+  }
+}
+
+// The document has outgrown what the server will accept. Like ClientOutdatedError
+// there is nothing to retry — the same bytes will be refused every time — but unlike
+// it, no reload fixes this: the document has to get smaller. Nothing is lost when it
+// happens, because every change is already saved on this device; what stops is the
+// copy reaching the user's other devices.
+export class DocumentTooLargeError extends Error {
+  constructor(readonly bytes: number, readonly limitBytes: number) {
+    super(`The document is ${bytes} bytes, over the ${limitBytes} byte limit the server accepts.`);
+    this.name = "DocumentTooLargeError";
   }
 }
 

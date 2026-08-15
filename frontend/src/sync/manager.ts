@@ -3,7 +3,7 @@ import type { AppDataDocument } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
 import { deepEqual } from "../utilities/deep-equal";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
-import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, type SyncResult, type SyncState } from "./types";
+import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, DocumentTooLargeError, type SyncResult, type SyncState } from "./types";
 import { getSyncProvider, setSyncProvider, subscribeSyncProvider } from "./provider";
 
 const debug = import.meta.env.VITE_DEBUG === "true";
@@ -467,7 +467,8 @@ class SyncManager {
     if (provider !== "backend"
       || this.state.status === "error"
       || this.state.status === "conflict_resolution"
-      || this.state.status === "client_outdated") {
+      || this.state.status === "client_outdated"
+      || this.state.status === "document_too_large") {
       return;
     }
 
@@ -534,6 +535,16 @@ class SyncManager {
       this.clearRetryTimer();
       this.retryCount = 0;
       this.setState({ status: "client_outdated", message: null, error: err });
+    } else if (error instanceof DocumentTooLargeError) {
+      // Also nothing to retry: the same bytes would be refused every time, and three
+      // rejected megabyte uploads help nobody. Unlike an outdated client there is no
+      // reload that fixes it either, so this parks until the document gets smaller.
+      // Local changes keep being saved on this device throughout — what has stopped
+      // is them reaching the user's other devices.
+      this.clearScheduledSync();
+      this.clearRetryTimer();
+      this.retryCount = 0;
+      this.setState({ status: "document_too_large", message: null, error: err });
     } else if (this.retryCount < this.MAX_RETRIES) {
       const delay = this.RETRY_DELAYS_MS[this.retryCount];
       this.retryCount++;

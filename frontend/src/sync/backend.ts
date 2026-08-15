@@ -1,5 +1,10 @@
 import { APP_SCHEMA_COMPAT_VERSION, APP_SCHEMA_VERSION, type AppDataDocument } from "../persistence/schema";
-import { AuthExpiredError, ClientOutdatedError, DocumentChangedError } from "./types";
+import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, DocumentTooLargeError } from "./types";
+
+// Mirrors the MaxBytesReader cap in backend/persistence/internal/api/handlers.go,
+// which is itself set below the 2 MB Cosmos hard-limits an item to. Only used to
+// describe the failure — the server is the one that enforces it.
+const DOCUMENT_LIMIT_BYTES = 1 << 20;
 
 // A 409 on a document write means the stored schema is newer than this build. Any
 // other 409, or a body we cannot read, is left to the generic error path.
@@ -272,6 +277,7 @@ export class BackendSyncClient {
   // or null when the caller believes no document exists on the server yet. Either
   // way the server verifies the belief and answers 412 if it no longer holds.
   async uploadDocument(document: AppDataDocument, etag: string | null): Promise<string | null> {
+    const body = JSON.stringify(document);
     const init: RequestInit = {
       method: "PUT",
       headers: {
@@ -285,7 +291,7 @@ export class BackendSyncClient {
         "X-App-Schema-Compat": String(APP_SCHEMA_COMPAT_VERSION),
         ...(etag ? { "If-Match": etag } : { "If-None-Match": "*" }),
       },
-      body: JSON.stringify(document),
+      body,
     };
     const resp = await this.fetchWithRefresh(`${apiUrl}/api/v1/document`, init);
     if (resp.status === 412) throw new DocumentChangedError();
@@ -293,6 +299,10 @@ export class BackendSyncClient {
       const required = await readRequiredSchemaVersion(resp);
       if (required !== null) throw new ClientOutdatedError(required);
     }
+    // The document has outgrown the server's limit. Measured here rather than taken
+    // from the response so the error can say how far over it is — the server only
+    // says no.
+    if (resp.status === 413) throw new DocumentTooLargeError(new Blob([body]).size, DOCUMENT_LIMIT_BYTES);
     if (!resp.ok) throw new Error(`PUT /api/v1/document: ${resp.status}`);
     return resp.headers.get("ETag");
   }
