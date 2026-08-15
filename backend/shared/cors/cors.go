@@ -17,8 +17,9 @@ func Middleware(allowedOrigin string, next http.Handler) http.Handler {
 			// If-Match / If-None-Match carry the optimistic-concurrency preconditions
 			// on document writes, and neither is CORS-safelisted, so both have to be
 			// named here or the browser blocks the request at preflight.
-			// X-App-Schema-Version carries the writing client's declared document shape.
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, If-Match, If-None-Match, X-App-Schema-Version")
+			// The X-App-Schema-* pair carries the writing client's document shape and
+			// the highest shape it can hold without dropping anything.
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, If-Match, If-None-Match, X-App-Schema-Version, X-App-Schema-Compat")
 			// ETag is likewise not exposed to cross-origin scripts by default, and the
 			// client cannot send back a precondition it was never allowed to read.
 			w.Header().Set("Access-Control-Expose-Headers", "ETag")

@@ -54,22 +54,36 @@ export interface AppDataDocument {
   data: AppDataState;
 }
 
-// The shape of AppDataState this build understands, declared to the server on every
-// write so it can refuse writes from builds too old to preserve what is stored.
+// The shape of AppDataState this build writes. Recorded on the stored document, so
+// the server knows which shape the data is in.
 //
-// Bump it whenever a release starts writing fields an earlier release would not carry
-// through — and only then. The server treats a write that declares an older version
-// than the stored document as unsafe and rejects it, which is what stops a build that
-// has been sitting in a service worker from quietly deleting newer data.
+// Bump it when a release starts writing fields an earlier release did not.
 //
 // 1 — grade, language, theme, currentWeekAnchor, syncProvider, kenshiNumber, notes,
 //     hokeiRanks, hokeiListSelection, quizStreakHighScore, knownFlashCards,
 //     showKanjiOnHokeiCards, and the three completion maps.
 export const APP_SCHEMA_VERSION = 1;
 
-// Writes from before the version header existed are read as version 1: that is the
-// shape those builds write, and they must keep syncing until a later schema actually
-// arrives. See the server's putDocument.
+// The highest schema this build can hold without losing anything — a different
+// question from which shape it writes, and the one that decides whether a write is
+// safe. This build carries fields it does not recognise through untouched
+// (unknownDataFields), so it can round-trip a document written by the next schema as
+// well as its own; hence a compatibility version one ahead of what it writes.
+//
+// The server refuses a write whose compatibility version is below the stored
+// document's schema, because such a build would drop the parts it cannot see. Keeping
+// the two numbers apart is what lets a build keep syncing through a schema rollout it
+// predates, instead of being locked out for not being the newest.
+//
+// Bump alongside APP_SCHEMA_VERSION, and only after checking the new schema really is
+// something older builds round-trip — additive fields are, renamed or restructured
+// ones are not.
+export const APP_SCHEMA_COMPAT_VERSION = 2;
+
+// What a request carrying neither header is taken to declare: the shape those builds
+// write, and the only shape they can hold. Builds before the compatibility header
+// existed dropped anything they did not recognise, so they can claim no more than
+// their own schema. See the server's putDocument.
 export const LEGACY_SCHEMA_VERSION = 1;
 
 // The fields this build knows the meaning of. Anything else in a stored document was

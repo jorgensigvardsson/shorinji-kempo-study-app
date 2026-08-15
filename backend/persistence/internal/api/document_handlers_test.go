@@ -137,12 +137,24 @@ func TestPutDocument_NoPrecondition_OverwritesUnconditionally(t *testing.T) {
 
 // ─── schema gate ────────────────────────────────────────────────────────────────
 //
-// A build that does not recognise a field drops it, and syncing that back deletes it
-// for every one of the user's devices. Service workers keep old builds alive well past
-// a release, so the server is the only place this can be enforced.
+// A build that drops fields it does not recognise deletes them for every one of the
+// user's devices as soon as it syncs. Service workers keep old builds alive well past
+// a release, so the server is the only place this can be caught.
+//
+// A client declares two separate things, and the distinction is the point: the shape
+// it writes, and the highest shape it can hold without dropping anything. Only the
+// second decides whether a write is safe.
 
-func schemaHeaders(version string, extra map[string]string) map[string]string {
-	headers := map[string]string{schemaVersionHeader: version}
+// clientBuild describes a client by what it writes and what it can hold. An empty
+// string means the header is absent — a build from before these existed.
+func clientBuild(writes, compat string, extra map[string]string) map[string]string {
+	headers := map[string]string{}
+	if writes != "" {
+		headers[schemaVersionHeader] = writes
+	}
+	if compat != "" {
+		headers[schemaCompatHeader] = compat
+	}
 	for k, v := range extra {
 		headers[k] = v
 	}
@@ -158,16 +170,35 @@ func storedSchema(t *testing.T, h *Handler, userID string) int {
 	return version
 }
 
-func TestPutDocument_OlderSchemaThanStored_Rejected(t *testing.T) {
-	h := newDocumentHandler(t)
-	first := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
-	if first.Code != http.StatusOK {
-		t.Fatalf("schema-2 write: got %d, want 200", first.Code)
+func storedDocument(t *testing.T, h *Handler, userID string) *store.Document {
+	t.Helper()
+	doc, _, err := h.store.Load(userID)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
 	}
+	if doc == nil {
+		t.Fatal("no stored document")
+	}
+	return doc
+}
 
-	rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("1", map[string]string{"If-Match": first.Header().Get("ETag")}))
+// Seeds a schema-2 document, written by a build that both writes and holds 2.
+func seedSchema2(t *testing.T, h *Handler) string {
+	t.Helper()
+	rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("2", "2", map[string]string{"If-None-Match": "*"}))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("seed schema-2 write: got %d, want 200", rec.Code)
+	}
+	return rec.Header().Get("ETag")
+}
+
+func TestPutDocument_CompatBelowStoredSchema_Rejected(t *testing.T) {
+	h := newDocumentHandler(t)
+	etag := seedSchema2(t, h)
+
+	rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("1", "1", map[string]string{"If-Match": etag}))
 	if rec.Code != http.StatusConflict {
-		t.Fatalf("schema-1 write over schema-2 document: got %d, want 409", rec.Code)
+		t.Fatalf("got %d, want 409", rec.Code)
 	}
 
 	var body struct {
@@ -188,27 +219,43 @@ func TestPutDocument_OlderSchemaThanStored_Rejected(t *testing.T) {
 	}
 }
 
-func TestPutDocument_SameOrNewerSchema_Accepted(t *testing.T) {
+// The reason the two declarations are separate. This build writes the old shape but
+// carries unrecognised fields through, so it cannot lose the schema-2 data and must
+// keep syncing right through the rollout rather than being locked out for being old.
+func TestPutDocument_OlderShapeButAdequateCompat_Accepted(t *testing.T) {
 	h := newDocumentHandler(t)
-	first := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+	etag := seedSchema2(t, h)
 
-	same := putDocument(h, "user-1", `{"version":2,"data":{}}`, schemaHeaders("2", map[string]string{"If-Match": first.Header().Get("ETag")}))
+	rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("1", "2", map[string]string{"If-Match": etag}))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 — a build that preserves what it cannot read is safe", rec.Code)
+	}
+	if got := storedSchema(t, h, "user-1"); got != 1 {
+		t.Errorf("stored schema %d, want 1 — the document was rewritten in the older shape", got)
+	}
+}
+
+func TestPutDocument_SameOrNewerCompat_Accepted(t *testing.T) {
+	h := newDocumentHandler(t)
+	etag := seedSchema2(t, h)
+
+	same := putDocument(h, "user-1", `{"version":2,"data":{}}`, clientBuild("2", "2", map[string]string{"If-Match": etag}))
 	if same.Code != http.StatusOK {
-		t.Fatalf("same schema: got %d, want 200", same.Code)
+		t.Fatalf("same compat: got %d, want 200", same.Code)
 	}
 
-	newer := putDocument(h, "user-1", `{"version":3,"data":{}}`, schemaHeaders("3", map[string]string{"If-Match": same.Header().Get("ETag")}))
+	newer := putDocument(h, "user-1", `{"version":3,"data":{}}`, clientBuild("3", "4", map[string]string{"If-Match": same.Header().Get("ETag")}))
 	if newer.Code != http.StatusOK {
-		t.Fatalf("newer schema: got %d, want 200", newer.Code)
+		t.Fatalf("newer compat: got %d, want 200", newer.Code)
 	}
 	if got := storedSchema(t, h, "user-1"); got != 3 {
 		t.Errorf("stored schema %d, want 3", got)
 	}
 }
 
-// Until a release actually starts writing a newer shape, every client is at the
-// legacy version and the gate must be invisible.
-func TestPutDocument_NoSchemaHeader_TreatedAsLegacyAndAccepted(t *testing.T) {
+// Until a release actually writes a newer shape, every client is at the legacy version
+// and the gate must be invisible.
+func TestPutDocument_NoHeaders_TreatedAsLegacyAndAccepted(t *testing.T) {
 	h := newDocumentHandler(t)
 	if rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, map[string]string{"If-None-Match": "*"}); rec.Code != http.StatusOK {
 		t.Fatalf("first headerless write: got %d, want 200", rec.Code)
@@ -223,50 +270,65 @@ func TestPutDocument_NoSchemaHeader_TreatedAsLegacyAndAccepted(t *testing.T) {
 
 func TestPutDocument_HeaderlessWriteOverNewerSchema_Rejected(t *testing.T) {
 	h := newDocumentHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+	seedSchema2(t, h)
 
 	if rec := putDocument(h, "user-1", `{"version":9,"data":{}}`, nil); rec.Code != http.StatusConflict {
 		t.Fatalf("got %d, want 409", rec.Code)
 	}
 }
 
-func TestPutDocument_UnreadableSchemaHeader_TreatedAsLegacy(t *testing.T) {
+func TestPutDocument_UnreadableHeaders_TreatedAsLegacy(t *testing.T) {
 	h := newDocumentHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+	seedSchema2(t, h)
 
-	for _, header := range []string{"", "banana", "-3", "2.5"} {
-		rec := putDocument(h, "user-1", `{"version":9,"data":{}}`, schemaHeaders(header, nil))
+	for _, compat := range []string{"", "banana", "-3", "2.5"} {
+		rec := putDocument(h, "user-1", `{"version":9,"data":{}}`, clientBuild("9", compat, nil))
 		if rec.Code != http.StatusConflict {
-			t.Errorf("header %q: got %d, want 409 — an unreadable header is not a claim to understand anything", header, rec.Code)
+			t.Errorf("compat header %q: got %d, want 409 — an unreadable header is not a claim to handle anything", compat, rec.Code)
 		}
 	}
 }
 
-// The body is a document the client may have just read from the server, so a schema
-// version inside it proves nothing about what the client understands.
-func TestPutDocument_SchemaVersionInBody_Ignored(t *testing.T) {
+// The body is a document the client may have just read from the server, so versions
+// inside it prove nothing about what the client can actually handle.
+func TestPutDocument_VersionsInBody_Ignored(t *testing.T) {
 	h := newDocumentHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+	seedSchema2(t, h)
 
-	rec := putDocument(h, "user-1", `{"version":9,"schemaVersion":99,"data":{}}`, schemaHeaders("1", nil))
+	rec := putDocument(h, "user-1", `{"version":9,"schemaVersion":99,"clientCompat":99,"data":{}}`, clientBuild("1", "1", nil))
 	if rec.Code != http.StatusConflict {
-		t.Fatalf("got %d, want 409 — the body must not be able to claim a schema version", rec.Code)
+		t.Fatalf("got %d, want 409 — the body must not be able to claim a version", rec.Code)
 	}
 	if got := storedSchema(t, h, "user-1"); got != 2 {
 		t.Errorf("stored schema %d, want 2", got)
 	}
 }
 
-func TestPutDocument_FirstWriteRecordsDeclaredSchema(t *testing.T) {
+func TestPutDocument_RecordsBothDeclarationsForCounting(t *testing.T) {
 	h := newDocumentHandler(t)
-	if rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("4", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
+	if rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("3", "4", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200", rec.Code)
 	}
-	if got := storedSchema(t, h, "user-1"); got != 4 {
-		t.Errorf("stored schema %d, want 4", got)
+
+	// Recorded so the spread of client builds can be counted from the data, which is
+	// what says whether a schema change is safe to make yet.
+	doc := storedDocument(t, h, "user-1")
+	if doc.SchemaVersion != 3 {
+		t.Errorf("SchemaVersion = %d, want 3", doc.SchemaVersion)
+	}
+	if doc.ClientCompat != 4 {
+		t.Errorf("ClientCompat = %d, want 4", doc.ClientCompat)
 	}
 }
 
+func TestPutDocument_LegacyClientRecordedAsLegacyCompat(t *testing.T) {
+	h := newDocumentHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{}}`, map[string]string{"If-None-Match": "*"})
+
+	if got := storedDocument(t, h, "user-1").ClientCompat; got != legacySchemaVersion {
+		t.Errorf("ClientCompat = %d, want %d — a build with no header claims only its own shape", got, legacySchemaVersion)
+	}
+}
 func TestPutDocument_Unauthenticated_Returns401(t *testing.T) {
 	h := newDocumentHandler(t)
 	req := httptest.NewRequest(http.MethodPut, "/api/v1/document", strings.NewReader(`{"version":1}`))

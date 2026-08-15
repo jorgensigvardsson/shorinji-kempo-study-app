@@ -109,17 +109,17 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	// Refuse the write outright if this client is too old to preserve what is stored,
+	// Refuse the write outright if this client cannot hold what is already stored,
 	// before any of it can be overwritten by a document missing fields.
-	declared := declaredSchemaVersion(r)
+	compat := declaredCompatVersion(r)
 	stored, err := h.storedSchemaVersion(userID)
 	if err != nil {
 		log.Printf("store.Load(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	if declared < stored {
-		log.Printf("rejected write for %s: client schema %d, stored schema %d", userID, declared, stored)
+	if compat < stored {
+		log.Printf("rejected write for %s: client compat %d, stored schema %d", userID, compat, stored)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
 		json.NewEncoder(w).Encode(map[string]any{
@@ -128,7 +128,17 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	doc.SchemaVersion = declared
+
+	// Not a rejection — this write is safe — but worth knowing about. Builds that
+	// predate the compatibility header cannot be told apart from ones that predate
+	// preserving unknown fields, so this over-reports rather than under-reports,
+	// which is the right direction to be wrong in.
+	if compat < currentCompatVersion {
+		log.Printf("outdated client wrote for %s: compat %d, current %d", userID, compat, currentCompatVersion)
+	}
+
+	doc.SchemaVersion = declaredSchemaVersion(r)
+	doc.ClientCompat = compat
 
 	etag, err := h.saveDocument(userID, &doc, r)
 	if errors.Is(err, store.ErrPreconditionFailed) {
@@ -151,34 +161,55 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(doc)
 }
 
-// schemaVersionHeader is how a client states which shape of the document it
-// understands. It is deliberately not part of the request body: the body is a
-// document the client may have just read from the server, so anything in it could be
-// echoed back by a client that does not actually understand it.
-const schemaVersionHeader = "X-App-Schema-Version"
+// A client states two separate things about itself, and conflating them is what makes
+// a schema rollout either unsafe or needlessly disruptive:
+//
+//	X-App-Schema-Version  which shape it writes, recorded against the document
+//	X-App-Schema-Compat   the highest shape it can hold without dropping anything
+//
+// Only the second decides whether a write is safe. A build that writes an older shape
+// but carries unrecognised fields through is harmless and keeps syncing; a build that
+// drops them is refused. Declaring only the first cannot tell those apart.
+//
+// Both are headers rather than body fields on purpose: the body is a document the
+// client may have just read from the server, so anything in it could be echoed back
+// by a client that understands none of it.
+const (
+	schemaVersionHeader = "X-App-Schema-Version"
+	schemaCompatHeader  = "X-App-Schema-Compat"
+)
 
-// legacySchemaVersion is what a request without the header is taken to declare — the
-// shape those builds write. They must keep syncing until a later schema actually
-// arrives, so until one does, this check changes nothing for anybody.
+// legacySchemaVersion is what a request missing either header is taken to declare.
+// Builds from before these headers existed dropped whatever they did not recognise,
+// so they can claim no more than the shape they themselves write.
 const legacySchemaVersion = 1
+
+// currentCompatVersion is the compatibility version of the client shipped alongside
+// this server. A write declaring less came from an older build; logging those is how
+// we know whether any build predating the safety work is still out there, without
+// having to refuse anything to find out. The line stops appearing once they are gone.
+const currentCompatVersion = 2
 
 // schemaTooOldError is the machine-readable reason in a 409 body, so the client can
 // tell "your app is too old" apart from any other conflict and say so plainly rather
 // than retrying a write that can never succeed.
 const schemaTooOldError = "schema_too_old"
 
-func declaredSchemaVersion(r *http.Request) int {
-	raw := r.Header.Get(schemaVersionHeader)
+func headerVersion(r *http.Request, name string) int {
+	raw := r.Header.Get(name)
 	if raw == "" {
 		return legacySchemaVersion
 	}
 	version, err := strconv.Atoi(raw)
 	if err != nil || version < 0 {
-		// An unreadable header is not a claim to understand anything newer.
+		// An unreadable header is not a claim to handle anything newer.
 		return legacySchemaVersion
 	}
 	return version
 }
+
+func declaredSchemaVersion(r *http.Request) int { return headerVersion(r, schemaVersionHeader) }
+func declaredCompatVersion(r *http.Request) int { return headerVersion(r, schemaCompatHeader) }
 
 // storedSchemaVersion reports the shape the stored document was last written in.
 // Costs a point read on each write; a sync writes rarely enough for that to be a fair

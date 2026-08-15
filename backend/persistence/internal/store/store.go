@@ -25,6 +25,15 @@ type Document struct {
 	//
 	// Zero means the document predates this field. See api.putDocument.
 	SchemaVersion int `json:"schemaVersion,omitempty"`
+
+	// ClientCompat records the highest schema the client that last wrote this document
+	// said it could hold without dropping anything — a different claim from the shape
+	// it writes, and the one writes are actually checked against.
+	//
+	// Kept so the spread of client versions can be counted from the data rather than
+	// only from logs, which is what tells you whether a schema change is safe to make
+	// yet. Server-owned, like SchemaVersion.
+	ClientCompat int `json:"clientCompat,omitempty"`
 }
 
 // ErrPreconditionFailed means the caller's expected version of the document is no

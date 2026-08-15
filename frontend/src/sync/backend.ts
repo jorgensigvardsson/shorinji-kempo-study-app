@@ -1,4 +1,4 @@
-import { APP_SCHEMA_VERSION, type AppDataDocument } from "../persistence/schema";
+import { APP_SCHEMA_COMPAT_VERSION, APP_SCHEMA_VERSION, type AppDataDocument } from "../persistence/schema";
 import { AuthExpiredError, ClientOutdatedError, DocumentChangedError } from "./types";
 
 // A 409 on a document write means the stored schema is newer than this build. Any
@@ -276,9 +276,13 @@ export class BackendSyncClient {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        // Declares which shape of the document this build can preserve. The server
-        // refuses the write if the stored document is newer than that.
+        // Which shape this document is written in, recorded against it.
         "X-App-Schema-Version": String(APP_SCHEMA_VERSION),
+        // The highest shape this build can hold without dropping anything. This is
+        // what the server checks the stored document against — a build that writes an
+        // older shape but preserves what it does not recognise is still safe to let
+        // through, and this is what tells the two apart.
+        "X-App-Schema-Compat": String(APP_SCHEMA_COMPAT_VERSION),
         ...(etag ? { "If-Match": etag } : { "If-None-Match": "*" }),
       },
       body: JSON.stringify(document),

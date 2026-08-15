@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_SCHEMA_VERSION, canonicalKenshiNumber, createDefaultAppDataDocument, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, KNOWN_DATA_FIELDS, normalizeKenshiNumber, unknownDataFields } from "./schema";
+import { APP_SCHEMA_COMPAT_VERSION, APP_SCHEMA_VERSION, canonicalKenshiNumber, createDefaultAppDataDocument, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, KNOWN_DATA_FIELDS, normalizeKenshiNumber, unknownDataFields } from "./schema";
 
 describe("createDefaultAppDataDocument", () => {
   it("returns version 1", () => {
@@ -76,10 +76,21 @@ describe("unknownDataFields", () => {
   });
 });
 
-describe("APP_SCHEMA_VERSION", () => {
-  it("is a positive integer", () => {
+describe("schema versions", () => {
+  it("are positive integers", () => {
     expect(Number.isInteger(APP_SCHEMA_VERSION)).toBe(true);
     expect(APP_SCHEMA_VERSION).toBeGreaterThan(0);
+    expect(Number.isInteger(APP_SCHEMA_COMPAT_VERSION)).toBe(true);
+    expect(APP_SCHEMA_COMPAT_VERSION).toBeGreaterThan(0);
+  });
+
+  // The whole point of keeping the two apart: this build carries fields it does not
+  // recognise through untouched, so it can hold a document written by a newer schema
+  // than the one it writes. If these were ever equal, the server could not tell this
+  // build from one that drops what it cannot read, and would lock it out of syncing
+  // during a rollout it is perfectly safe for.
+  it("declare a compatibility ahead of the shape written, because unknown fields are preserved", () => {
+    expect(APP_SCHEMA_COMPAT_VERSION).toBeGreaterThan(APP_SCHEMA_VERSION);
   });
 });
 
