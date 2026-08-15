@@ -27,6 +27,22 @@ type Handler struct {
 	pushStore      store.PushStore
 	pushSender     *push.Sender
 	pushAdminToken string
+
+	// The split-item store the document is migrating to. While it is being filled it
+	// is written but never read, and `store` above stays the source of truth. Nil
+	// means the migration is not enabled and nothing shadow-writes.
+	userData store.UserDataStore
+}
+
+// WithUserDataShadow starts writing every accepted document to the split-item store as
+// well, without reading from it. Call before Register.
+//
+// Writing both for a while is what makes the move safe: the split runs against real
+// documents, at real volume, with the old container still authoritative, so a mistake
+// in it costs nothing and can be fixed and backfilled rather than recovered from.
+func (h *Handler) WithUserDataShadow(s store.UserDataStore) *Handler {
+	h.userData = s
+	return h
 }
 
 func NewHandler(s store.Store, ks KeySource, frontendURL, issuerURL string, limiter *ratelimit.IPRateLimiter) *Handler {
@@ -153,12 +169,29 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	h.shadowWrite(userID, &doc)
+
 	if etag != "" {
 		w.Header().Set("ETag", etag)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(doc)
+}
+
+// shadowWrite copies an already-accepted document into the split-item store.
+//
+// Failures are logged and swallowed on purpose. Nothing reads that store yet, so a
+// failure here costs a backfill, whereas failing the request would let a bug in a
+// store no user depends on take syncing down for everyone. The trade flips once reads
+// move across, and this becomes part of the write that has to succeed.
+func (h *Handler) shadowWrite(userID string, doc *store.Document) {
+	if h.userData == nil {
+		return
+	}
+	if err := h.userData.Save(userID, doc); err != nil {
+		log.Printf("shadow write failed for %s: %v", userID, err)
+	}
 }
 
 // A client states two separate things about itself, and conflating them is what makes
@@ -258,6 +291,16 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		log.Printf("store.Delete(%s): %v", userID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
+	}
+	// Deleting an account has to clear both stores, or the copy would outlive the
+	// account it belongs to. Unlike a shadow write, a failure here leaves data behind
+	// after someone asked for it to be gone, so it is reported rather than logged.
+	if h.userData != nil {
+		if err := h.userData.Delete(userID); err != nil {
+			log.Printf("userData.Delete(%s): %v", userID, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
 	}
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -329,6 +330,136 @@ func TestPutDocument_LegacyClientRecordedAsLegacyCompat(t *testing.T) {
 		t.Errorf("ClientCompat = %d, want %d — a build with no header claims only its own shape", got, legacySchemaVersion)
 	}
 }
+// ─── shadow writes to the split-item store ──────────────────────────────────────
+//
+// Every accepted document is also written split by field, to fill the container that
+// will replace the current one. Nothing reads it yet, which is the point: the split
+// runs against real documents while the old store is still authoritative, so a mistake
+// in it costs a backfill rather than data.
+
+// failingUserDataStore stands in for the split store being broken or unreachable.
+type failingUserDataStore struct{ calls int }
+
+func (s *failingUserDataStore) Save(string, *store.Document) error {
+	s.calls++
+	return errors.New("shadow store unavailable")
+}
+func (s *failingUserDataStore) Load(string) (*store.Document, error) { return nil, nil }
+func (s *failingUserDataStore) Delete(string) error                  { return errors.New("shadow store unavailable") }
+
+func newShadowingHandler(t *testing.T) (*Handler, store.UserDataStore) {
+	t.Helper()
+	shadow := store.NewFileUserDataStore(t.TempDir())
+	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil).WithUserDataShadow(shadow)
+	return h, shadow
+}
+
+func TestPutDocument_AcceptedWriteIsAlsoWrittenSplit(t *testing.T) {
+	h, shadow := newShadowingHandler(t)
+	body := `{"version":1,"data":{"grade":"nidan","notes":{"kote nage":"hold the elbow"}}}`
+
+	if rec := putDocument(h, "user-1", body, clientBuild("1", "2", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200", rec.Code)
+	}
+
+	got, err := shadow.Load("user-1")
+	if err != nil {
+		t.Fatalf("shadow Load: %v", err)
+	}
+	if got == nil {
+		t.Fatal("the accepted document was not written to the split store")
+	}
+	var data struct {
+		Grade string            `json:"grade"`
+		Notes map[string]string `json:"notes"`
+	}
+	if err := json.Unmarshal(got.Data, &data); err != nil {
+		t.Fatalf("unmarshal shadow data: %v", err)
+	}
+	if data.Grade != "nidan" || data.Notes["kote nage"] != "hold the elbow" {
+		t.Errorf("shadow document lost content: %+v", data)
+	}
+}
+
+// A rejected write must not reach the split store, or it would hold a version the
+// authoritative store refused.
+func TestPutDocument_RejectedWriteIsNotShadowed(t *testing.T) {
+	h, shadow := newShadowingHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("2", "2", map[string]string{"If-None-Match": "*"}))
+
+	// Refused: this client cannot hold the stored schema.
+	if rec := putDocument(h, "user-1", `{"version":99,"data":{"a":99}}`, clientBuild("1", "1", nil)); rec.Code != http.StatusConflict {
+		t.Fatalf("got %d, want 409", rec.Code)
+	}
+
+	got, _ := shadow.Load("user-1")
+	if got == nil {
+		t.Fatal("expected the first document to still be there")
+	}
+	if got.Version != 1 {
+		t.Errorf("shadow version %d, want 1 — the refused write must not have been shadowed", got.Version)
+	}
+}
+
+// The whole reason shadow failures are swallowed: a store nothing reads must not be
+// able to take syncing down.
+func TestPutDocument_ShadowFailureDoesNotFailTheRequest(t *testing.T) {
+	shadow := &failingUserDataStore{}
+	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil).WithUserDataShadow(shadow)
+
+	rec := putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 — a failing shadow store must not break syncing", rec.Code)
+	}
+	if shadow.calls != 1 {
+		t.Errorf("shadow Save called %d times, want 1", shadow.calls)
+	}
+	if storedVersion(t, h, "user-1") != 1 {
+		t.Error("the authoritative write should have landed regardless")
+	}
+}
+
+func TestPutDocument_NoShadowStore_StillWorks(t *testing.T) {
+	h := newDocumentHandler(t) // no WithUserDataShadow
+	if rec := putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200", rec.Code)
+	}
+}
+
+func TestDeleteAccount_ClearsBothStores(t *testing.T) {
+	h, shadow := newShadowingHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
+
+	req := asUser(httptest.NewRequest(http.MethodDelete, "/api/v1/account", nil), "user-1")
+	rec := httptest.NewRecorder()
+	h.deleteAccount(rec, req)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("got %d, want 204", rec.Code)
+	}
+
+	if got, _ := shadow.Load("user-1"); got != nil {
+		t.Error("the split store still holds data for a deleted account")
+	}
+	if rec := getDocument(h, "user-1"); rec.Code != http.StatusNotFound {
+		t.Errorf("GET after delete: got %d, want 404", rec.Code)
+	}
+}
+
+// Unlike a shadow write, failing to delete leaves data behind after someone asked for
+// it to be gone. That has to be reported, not swallowed.
+func TestDeleteAccount_ShadowDeleteFailureIsReported(t *testing.T) {
+	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil).
+		WithUserDataShadow(&failingUserDataStore{})
+
+	req := asUser(httptest.NewRequest(http.MethodDelete, "/api/v1/account", nil), "user-1")
+	rec := httptest.NewRecorder()
+	h.deleteAccount(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("got %d, want 500", rec.Code)
+	}
+}
+
 func TestPutDocument_Unauthenticated_Returns401(t *testing.T) {
 	h := newDocumentHandler(t)
 	req := httptest.NewRequest(http.MethodPut, "/api/v1/document", strings.NewReader(`{"version":1}`))
