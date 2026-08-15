@@ -54,6 +54,53 @@ export interface AppDataDocument {
   data: AppDataState;
 }
 
+// The shape of AppDataState this build understands, declared to the server on every
+// write so it can refuse writes from builds too old to preserve what is stored.
+//
+// Bump it whenever a release starts writing fields an earlier release would not carry
+// through — and only then. The server treats a write that declares an older version
+// than the stored document as unsafe and rejects it, which is what stops a build that
+// has been sitting in a service worker from quietly deleting newer data.
+//
+// 1 — grade, language, theme, currentWeekAnchor, syncProvider, kenshiNumber, notes,
+//     hokeiRanks, hokeiListSelection, quizStreakHighScore, knownFlashCards,
+//     showKanjiOnHokeiCards, and the three completion maps.
+export const APP_SCHEMA_VERSION = 1;
+
+// Writes from before the version header existed are read as version 1: that is the
+// shape those builds write, and they must keep syncing until a later schema actually
+// arrives. See the server's putDocument.
+export const LEGACY_SCHEMA_VERSION = 1;
+
+// The fields this build knows the meaning of. Anything else in a stored document was
+// written by a newer build and is carried through untouched rather than dropped.
+export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(
+  Object.keys(createDefaultAppDataDocument().data),
+);
+
+// Fields that were once part of the document and have been deliberately retired.
+//
+// They are unrecognised in the same way a newer build's fields are, but they must be
+// treated as the opposite: carrying them through would put them back into the synced
+// document they were moved out of. Anything retired from AppDataState belongs here, or
+// it comes back the first time an old device syncs.
+//
+// embuDraft — the experimental Embu builder's draft, moved to its own localStorage key
+// so it stays out of the document that syncs to Cosmos. See TODO.md.
+export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft"]);
+
+// The fields of `data` this build has no schema for. They are never interpreted, only
+// preserved, so that a device running an older build cannot erase newer data simply by
+// syncing. Fields this build does understand are validated as usual, and retired ones
+// are dropped rather than carried.
+export function unknownDataFields(data: unknown): Record<string, unknown> {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) return {};
+  return Object.fromEntries(
+    Object.entries(data as Record<string, unknown>)
+      .filter(([key]) => !KNOWN_DATA_FIELDS.has(key) && !RETIRED_DATA_FIELDS.has(key)),
+  );
+}
+
 // A kenshi number is written down grouped as [n]nnn-nnnnnn: a leading group of three
 // or four digits, then six. Hombu issued three-digit leading groups until it ran out
 // of them, so both are in circulation. The separators belong to the writing rather

@@ -56,6 +56,56 @@ describe("AppDataStore — initial state", () => {
   });
 });
 
+// A build that drops what it does not recognise deletes it for every one of the user's
+// devices the moment it syncs. These cover the store's half of not doing that.
+describe("AppDataStore — fields from a newer build", () => {
+  function docWithNewerField(): AppDataDocument {
+    const doc = createDefaultAppDataDocument();
+    return { ...doc, data: { ...doc.data, fieldFromTheFuture: { keep: "me" } } as AppDataDocument["data"] };
+  }
+
+  it("preserves them when loading a stored document", () => {
+    const store = makeStore(docWithNewerField());
+    const data = store.getDocument().data as AppDataDocument["data"] & { fieldFromTheFuture?: unknown };
+    expect(data.fieldFromTheFuture).toEqual({ keep: "me" });
+  });
+
+  it("preserves them across a write of a known field", () => {
+    const store = makeStore(docWithNewerField());
+    store.set("grade", "nidan");
+    const data = store.getDocument().data as AppDataDocument["data"] & { fieldFromTheFuture?: unknown };
+    expect(data.grade).toBe("nidan");
+    expect(data.fieldFromTheFuture).toEqual({ keep: "me" });
+  });
+
+  it("preserves them when a synced document is applied", () => {
+    const store = makeStore();
+    store.setDocument(docWithNewerField());
+    const data = store.getDocument().data as AppDataDocument["data"] & { fieldFromTheFuture?: unknown };
+    expect(data.fieldFromTheFuture).toEqual({ keep: "me" });
+  });
+
+  it("does not fail applying a document carrying a field it has no subscribers for", () => {
+    const store = makeStore();
+    expect(() => store.setDocument(docWithNewerField())).not.toThrow();
+  });
+
+  it("still drops retired fields", () => {
+    const doc = createDefaultAppDataDocument();
+    const store = makeStore({ ...doc, data: { ...doc.data, embuDraft: { notes: "", steps: [] } } as AppDataDocument["data"] });
+    expect("embuDraft" in store.getDocument().data).toBe(false);
+  });
+
+  it("still validates the fields it does know", () => {
+    const doc = createDefaultAppDataDocument();
+    const store = makeStore({
+      ...doc,
+      data: { ...doc.data, quizStreakHighScore: "not a number", fieldFromTheFuture: 1 } as unknown as AppDataDocument["data"],
+    });
+    expect(store.get("quizStreakHighScore")).toBe(0);
+  });
+});
+
 describe("AppDataStore — get / set", () => {
   it("set updates the value returned by get", () => {
     const store = makeStore();

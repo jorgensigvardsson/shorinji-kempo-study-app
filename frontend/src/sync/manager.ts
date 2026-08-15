@@ -2,7 +2,7 @@ import { getAppDataStore } from "../persistence/store";
 import type { AppDataDocument } from "../persistence/schema";
 import { mergeDocuments } from "./merge";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
-import { AuthExpiredError, DocumentChangedError, type SyncResult, type SyncState } from "./types";
+import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, type SyncResult, type SyncState } from "./types";
 
 const debug = import.meta.env.VITE_DEBUG === "true";
 const debugLog = (...args: unknown[]) => { if (debug) console.log(...args); };
@@ -462,7 +462,10 @@ class SyncManager {
 
   private scheduleBackgroundSync(): void {
     const provider = this.store.get("syncProvider");
-    if (provider !== "backend" || this.state.status === "error" || this.state.status === "conflict_resolution") {
+    if (provider !== "backend"
+      || this.state.status === "error"
+      || this.state.status === "conflict_resolution"
+      || this.state.status === "client_outdated") {
       return;
     }
 
@@ -520,6 +523,15 @@ class SyncManager {
       this.clearRetryTimer();
       this.retryCount = 0;
       this.setState({ status: "auth_expired", message: null, error: err });
+    } else if (error instanceof ClientOutdatedError) {
+      // Retrying cannot help — the app has to be updated first — and every attempt
+      // is a write the server will refuse. Stop until the user reloads into a
+      // build that can read what is stored. Local changes keep being saved on this
+      // device meanwhile, and sync resumes once it can do so without deleting data.
+      this.clearScheduledSync();
+      this.clearRetryTimer();
+      this.retryCount = 0;
+      this.setState({ status: "client_outdated", message: null, error: err });
     } else if (this.retryCount < this.MAX_RETRIES) {
       const delay = this.RETRY_DELAYS_MS[this.retryCount];
       this.retryCount++;

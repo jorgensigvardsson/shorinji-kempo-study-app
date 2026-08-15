@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonicalKenshiNumber, createDefaultAppDataDocument, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./schema";
+import { APP_SCHEMA_VERSION, canonicalKenshiNumber, createDefaultAppDataDocument, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, KNOWN_DATA_FIELDS, normalizeKenshiNumber, unknownDataFields } from "./schema";
 
 describe("createDefaultAppDataDocument", () => {
   it("returns version 1", () => {
@@ -43,6 +43,43 @@ describe("createDefaultAppDataDocument", () => {
     expect(data.gradingFundamentalCompletions).toEqual({});
     expect(data.gradingTheoryCompletions).toEqual({});
     expect("embuDraft" in data).toBe(false);
+  });
+});
+
+describe("unknownDataFields", () => {
+  it("keeps fields written by a newer build", () => {
+    const { data } = createDefaultAppDataDocument();
+    const withNewer = { ...data, somethingNewerKnows: { a: 1 } };
+    expect(unknownDataFields(withNewer)).toEqual({ somethingNewerKnows: { a: 1 } });
+  });
+
+  it("keeps nothing from a document this build fully understands", () => {
+    expect(unknownDataFields(createDefaultAppDataDocument().data)).toEqual({});
+  });
+
+  it("drops retired fields, which are unrecognised but deliberately unwanted", () => {
+    const { data } = createDefaultAppDataDocument();
+    const withRetired = { ...data, embuDraft: { notes: "x", steps: [] }, futureField: 1 };
+    expect(unknownDataFields(withRetired)).toEqual({ futureField: 1 });
+  });
+
+  it("tolerates a data field that is not an object", () => {
+    expect(unknownDataFields(null)).toEqual({});
+    expect(unknownDataFields("nonsense")).toEqual({});
+    expect(unknownDataFields([1, 2])).toEqual({});
+  });
+
+  it("covers every field of the default document", () => {
+    for (const key of Object.keys(createDefaultAppDataDocument().data)) {
+      expect(KNOWN_DATA_FIELDS.has(key)).toBe(true);
+    }
+  });
+});
+
+describe("APP_SCHEMA_VERSION", () => {
+  it("is a positive integer", () => {
+    expect(Number.isInteger(APP_SCHEMA_VERSION)).toBe(true);
+    expect(APP_SCHEMA_VERSION).toBeGreaterThan(0);
   });
 });
 

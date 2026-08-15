@@ -1,4 +1,4 @@
-export type SyncStatus = "local_only" | "disconnected" | "connected" | "syncing" | "error" | "auth_expired" | "conflict_resolution";
+export type SyncStatus = "local_only" | "disconnected" | "connected" | "syncing" | "error" | "auth_expired" | "conflict_resolution" | "client_outdated";
 
 export class AuthExpiredError extends Error {
   constructor() {
@@ -14,6 +14,16 @@ export class DocumentChangedError extends Error {
   constructor() {
     super("The document changed on the server since it was read.");
     this.name = "DocumentChangedError";
+  }
+}
+
+// The server refused the write because this build predates the shape the document is
+// stored in, and writing it back would drop the fields this build cannot see. Unlike
+// a stale write there is nothing to retry: the app itself has to be updated first.
+export class ClientOutdatedError extends Error {
+  constructor(readonly requiredSchemaVersion: number) {
+    super(`The stored document uses schema version ${requiredSchemaVersion}, which this build does not understand.`);
+    this.name = "ClientOutdatedError";
   }
 }
 

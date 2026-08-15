@@ -14,6 +14,17 @@ type Document struct {
 	UpdatedAt string          `json:"updatedAt"`
 	DeviceID  string          `json:"deviceId"`
 	Data      json.RawMessage `json:"data"`
+
+	// SchemaVersion records which shape of Data the document was last written in.
+	//
+	// Server-owned: it is taken from the writing client's declared version header and
+	// never from the request body, so a client cannot claim to understand a shape it
+	// does not by echoing back what it read. Being agnostic about the contents of Data
+	// is fine; being agnostic about which clients may overwrite it is not, because a
+	// client that drops the fields it does not recognise deletes them for every device.
+	//
+	// Zero means the document predates this field. See api.putDocument.
+	SchemaVersion int `json:"schemaVersion,omitempty"`
 }
 
 // ErrPreconditionFailed means the caller's expected version of the document is no

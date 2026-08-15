@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/push"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
@@ -108,6 +109,27 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	// Refuse the write outright if this client is too old to preserve what is stored,
+	// before any of it can be overwritten by a document missing fields.
+	declared := declaredSchemaVersion(r)
+	stored, err := h.storedSchemaVersion(userID)
+	if err != nil {
+		log.Printf("store.Load(%s): %v", userID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if declared < stored {
+		log.Printf("rejected write for %s: client schema %d, stored schema %d", userID, declared, stored)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]any{
+			"error":                 schemaTooOldError,
+			"requiredSchemaVersion": stored,
+		})
+		return
+	}
+	doc.SchemaVersion = declared
+
 	etag, err := h.saveDocument(userID, &doc, r)
 	if errors.Is(err, store.ErrPreconditionFailed) {
 		// Another device wrote since this one read. Its merge was computed against a
@@ -127,6 +149,52 @@ func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(doc)
+}
+
+// schemaVersionHeader is how a client states which shape of the document it
+// understands. It is deliberately not part of the request body: the body is a
+// document the client may have just read from the server, so anything in it could be
+// echoed back by a client that does not actually understand it.
+const schemaVersionHeader = "X-App-Schema-Version"
+
+// legacySchemaVersion is what a request without the header is taken to declare — the
+// shape those builds write. They must keep syncing until a later schema actually
+// arrives, so until one does, this check changes nothing for anybody.
+const legacySchemaVersion = 1
+
+// schemaTooOldError is the machine-readable reason in a 409 body, so the client can
+// tell "your app is too old" apart from any other conflict and say so plainly rather
+// than retrying a write that can never succeed.
+const schemaTooOldError = "schema_too_old"
+
+func declaredSchemaVersion(r *http.Request) int {
+	raw := r.Header.Get(schemaVersionHeader)
+	if raw == "" {
+		return legacySchemaVersion
+	}
+	version, err := strconv.Atoi(raw)
+	if err != nil || version < 0 {
+		// An unreadable header is not a claim to understand anything newer.
+		return legacySchemaVersion
+	}
+	return version
+}
+
+// storedSchemaVersion reports the shape the stored document was last written in.
+// Costs a point read on each write; a sync writes rarely enough for that to be a fair
+// price for not letting a stale client delete data it cannot see.
+func (h *Handler) storedSchemaVersion(userID string) (int, error) {
+	current, _, err := h.store.Load(userID)
+	if err != nil {
+		return 0, err
+	}
+	if current == nil {
+		return 0, nil // nothing stored yet, so nothing to protect
+	}
+	if current.SchemaVersion == 0 {
+		return legacySchemaVersion, nil // written before this field existed
+	}
+	return current.SchemaVersion, nil
 }
 
 // saveDocument picks the concurrency check from the request's preconditions.

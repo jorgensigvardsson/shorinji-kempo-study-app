@@ -1,5 +1,17 @@
-import type { AppDataDocument } from "../persistence/schema";
-import { AuthExpiredError, DocumentChangedError } from "./types";
+import { APP_SCHEMA_VERSION, type AppDataDocument } from "../persistence/schema";
+import { AuthExpiredError, ClientOutdatedError, DocumentChangedError } from "./types";
+
+// A 409 on a document write means the stored schema is newer than this build. Any
+// other 409, or a body we cannot read, is left to the generic error path.
+async function readRequiredSchemaVersion(resp: Response): Promise<number | null> {
+  try {
+    const body = await resp.json() as { error?: string; requiredSchemaVersion?: number };
+    if (body.error !== "schema_too_old") return null;
+    return typeof body.requiredSchemaVersion === "number" ? body.requiredSchemaVersion : APP_SCHEMA_VERSION + 1;
+  } catch {
+    return null;
+  }
+}
 
 // A document as read from the server, paired with the ETag identifying that exact
 // stored version. A null etag means the server sent none — an older API build.
@@ -264,12 +276,19 @@ export class BackendSyncClient {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        // Declares which shape of the document this build can preserve. The server
+        // refuses the write if the stored document is newer than that.
+        "X-App-Schema-Version": String(APP_SCHEMA_VERSION),
         ...(etag ? { "If-Match": etag } : { "If-None-Match": "*" }),
       },
       body: JSON.stringify(document),
     };
     const resp = await this.fetchWithRefresh(`${apiUrl}/api/v1/document`, init);
     if (resp.status === 412) throw new DocumentChangedError();
+    if (resp.status === 409) {
+      const required = await readRequiredSchemaVersion(resp);
+      if (required !== null) throw new ClientOutdatedError(required);
+    }
     if (!resp.ok) throw new Error(`PUT /api/v1/document: ${resp.status}`);
     return resp.headers.get("ETag");
   }

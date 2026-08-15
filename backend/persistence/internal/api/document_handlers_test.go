@@ -135,6 +135,138 @@ func TestPutDocument_NoPrecondition_OverwritesUnconditionally(t *testing.T) {
 	}
 }
 
+// ─── schema gate ────────────────────────────────────────────────────────────────
+//
+// A build that does not recognise a field drops it, and syncing that back deletes it
+// for every one of the user's devices. Service workers keep old builds alive well past
+// a release, so the server is the only place this can be enforced.
+
+func schemaHeaders(version string, extra map[string]string) map[string]string {
+	headers := map[string]string{schemaVersionHeader: version}
+	for k, v := range extra {
+		headers[k] = v
+	}
+	return headers
+}
+
+func storedSchema(t *testing.T, h *Handler, userID string) int {
+	t.Helper()
+	version, err := h.storedSchemaVersion(userID)
+	if err != nil {
+		t.Fatalf("storedSchemaVersion: %v", err)
+	}
+	return version
+}
+
+func TestPutDocument_OlderSchemaThanStored_Rejected(t *testing.T) {
+	h := newDocumentHandler(t)
+	first := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+	if first.Code != http.StatusOK {
+		t.Fatalf("schema-2 write: got %d, want 200", first.Code)
+	}
+
+	rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("1", map[string]string{"If-Match": first.Header().Get("ETag")}))
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("schema-1 write over schema-2 document: got %d, want 409", rec.Code)
+	}
+
+	var body struct {
+		Error                 string `json:"error"`
+		RequiredSchemaVersion int    `json:"requiredSchemaVersion"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode error body: %v", err)
+	}
+	if body.Error != schemaTooOldError {
+		t.Errorf("error = %q, want %q", body.Error, schemaTooOldError)
+	}
+	if body.RequiredSchemaVersion != 2 {
+		t.Errorf("requiredSchemaVersion = %d, want 2", body.RequiredSchemaVersion)
+	}
+	if got := storedSchema(t, h, "user-1"); got != 2 {
+		t.Errorf("stored schema %d, want 2 — the rejected write must not have downgraded it", got)
+	}
+}
+
+func TestPutDocument_SameOrNewerSchema_Accepted(t *testing.T) {
+	h := newDocumentHandler(t)
+	first := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+
+	same := putDocument(h, "user-1", `{"version":2,"data":{}}`, schemaHeaders("2", map[string]string{"If-Match": first.Header().Get("ETag")}))
+	if same.Code != http.StatusOK {
+		t.Fatalf("same schema: got %d, want 200", same.Code)
+	}
+
+	newer := putDocument(h, "user-1", `{"version":3,"data":{}}`, schemaHeaders("3", map[string]string{"If-Match": same.Header().Get("ETag")}))
+	if newer.Code != http.StatusOK {
+		t.Fatalf("newer schema: got %d, want 200", newer.Code)
+	}
+	if got := storedSchema(t, h, "user-1"); got != 3 {
+		t.Errorf("stored schema %d, want 3", got)
+	}
+}
+
+// Until a release actually starts writing a newer shape, every client is at the
+// legacy version and the gate must be invisible.
+func TestPutDocument_NoSchemaHeader_TreatedAsLegacyAndAccepted(t *testing.T) {
+	h := newDocumentHandler(t)
+	if rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, map[string]string{"If-None-Match": "*"}); rec.Code != http.StatusOK {
+		t.Fatalf("first headerless write: got %d, want 200", rec.Code)
+	}
+	if rec := putDocument(h, "user-1", `{"version":2,"data":{}}`, nil); rec.Code != http.StatusOK {
+		t.Fatalf("second headerless write: got %d, want 200", rec.Code)
+	}
+	if got := storedSchema(t, h, "user-1"); got != legacySchemaVersion {
+		t.Errorf("stored schema %d, want %d", got, legacySchemaVersion)
+	}
+}
+
+func TestPutDocument_HeaderlessWriteOverNewerSchema_Rejected(t *testing.T) {
+	h := newDocumentHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+
+	if rec := putDocument(h, "user-1", `{"version":9,"data":{}}`, nil); rec.Code != http.StatusConflict {
+		t.Fatalf("got %d, want 409", rec.Code)
+	}
+}
+
+func TestPutDocument_UnreadableSchemaHeader_TreatedAsLegacy(t *testing.T) {
+	h := newDocumentHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+
+	for _, header := range []string{"", "banana", "-3", "2.5"} {
+		rec := putDocument(h, "user-1", `{"version":9,"data":{}}`, schemaHeaders(header, nil))
+		if rec.Code != http.StatusConflict {
+			t.Errorf("header %q: got %d, want 409 — an unreadable header is not a claim to understand anything", header, rec.Code)
+		}
+	}
+}
+
+// The body is a document the client may have just read from the server, so a schema
+// version inside it proves nothing about what the client understands.
+func TestPutDocument_SchemaVersionInBody_Ignored(t *testing.T) {
+	h := newDocumentHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("2", map[string]string{"If-None-Match": "*"}))
+
+	rec := putDocument(h, "user-1", `{"version":9,"schemaVersion":99,"data":{}}`, schemaHeaders("1", nil))
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("got %d, want 409 — the body must not be able to claim a schema version", rec.Code)
+	}
+	if got := storedSchema(t, h, "user-1"); got != 2 {
+		t.Errorf("stored schema %d, want 2", got)
+	}
+}
+
+func TestPutDocument_FirstWriteRecordsDeclaredSchema(t *testing.T) {
+	h := newDocumentHandler(t)
+	if rec := putDocument(h, "user-1", `{"version":1,"data":{}}`, schemaHeaders("4", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200", rec.Code)
+	}
+	if got := storedSchema(t, h, "user-1"); got != 4 {
+		t.Errorf("stored schema %d, want 4", got)
+	}
+}
+
 func TestPutDocument_Unauthenticated_Returns401(t *testing.T) {
 	h := newDocumentHandler(t)
 	req := httptest.NewRequest(http.MethodPut, "/api/v1/document", strings.NewReader(`{"version":1}`))

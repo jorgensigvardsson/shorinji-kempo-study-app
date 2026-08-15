@@ -60,6 +60,45 @@ describe("mergeDocuments — null base", () => {
     expect("embuDraft" in result.document.data).toBe(false);
   });
 
+  it("carries fields written by a newer build through the merge", () => {
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW });
+    (local.data as AppDataDocument["data"] & { onlyLocalKnows: unknown }).onlyLocalKnows = { a: 1 };
+    (remote.data as AppDataDocument["data"] & { onlyRemoteKnows: unknown }).onlyRemoteKnows = { b: 2 };
+
+    const merged = mergeDocuments(null, local, remote).document.data as AppDataDocument["data"] & {
+      onlyLocalKnows?: unknown;
+      onlyRemoteKnows?: unknown;
+    };
+
+    // A field on one side only is far more likely to be one the other device has not
+    // learned about yet than one that was deliberately removed, so both survive.
+    expect(merged.onlyLocalKnows).toEqual({ a: 1 });
+    expect(merged.onlyRemoteKnows).toEqual({ b: 2 });
+  });
+
+  it("lets the newer document win a field neither side has a schema for", () => {
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW });
+    (local.data as AppDataDocument["data"] & { future: unknown }).future = "from local";
+    (remote.data as AppDataDocument["data"] & { future: unknown }).future = "from remote";
+
+    const merged = mergeDocuments(null, local, remote).document.data as AppDataDocument["data"] & { future?: unknown };
+
+    expect(merged.future).toBe("from remote");
+  });
+
+  it("does not raise a user-facing conflict over a field it cannot interpret", () => {
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW });
+    (local.data as AppDataDocument["data"] & { future: unknown }).future = "from local";
+    (remote.data as AppDataDocument["data"] & { future: unknown }).future = "from remote";
+
+    // Asking the user about a field this build cannot even name would be worse than
+    // picking the newer one.
+    expect(mergeDocuments(null, local, remote).conflictDetected).toBe(false);
+  });
+
   it("remote non-default data is applied when local is at defaults", () => {
     const defaults = makeDoc({ updatedAt: OLD }).data;
     const local = makeDoc({ updatedAt: OLD });

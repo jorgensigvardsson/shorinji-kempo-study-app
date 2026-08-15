@@ -92,7 +92,14 @@ function useAppUpdate(autoApply: boolean) {
     if (autoApply && needRefresh) activateWaiting();
   }, [autoApply, needRefresh, activateWaiting]);
 
-  return { needRefresh, applyUpdate };
+  // Gets the user onto the newest build on demand, whether or not the service worker
+  // has already noticed one. Used when syncing has stopped because this build is too
+  // old to write safely, where waiting for the usual update prompt is not good enough.
+  const reloadIntoLatest = useCallback(() => {
+    if (!activateWaiting()) window.location.reload();
+  }, [activateWaiting]);
+
+  return { needRefresh, applyUpdate, reloadIntoLatest };
 }
 
 function App(props: Props) {
@@ -186,7 +193,7 @@ function App(props: Props) {
 
   // Auto-apply pending versions for unauthenticated visitors (login screen);
   // authenticated users get the "Update" toast via the returned needRefresh.
-  const { needRefresh, applyUpdate } = useAppUpdate(showSignIn);
+  const { needRefresh, applyUpdate, reloadIntoLatest } = useAppUpdate(showSignIn);
 
   // Training mode combines the existing Dojo presentation with the screen wake
   // lock. It can follow the user between training views, but the wake lock is
@@ -255,7 +262,7 @@ function App(props: Props) {
             reserved at the bottom of the page (--floating-stack-reserve) so
             nothing here ever covers content when scrolled to the end. */}
         <div ref={floatingRef} className="app-floating-stack d-print-none">
-          <AppToasts translator={translator} needRefresh={needRefresh} onUpdate={applyUpdate} />
+          <AppToasts translator={translator} needRefresh={needRefresh} onUpdate={applyUpdate} onReloadIntoLatest={reloadIntoLatest} />
         </div>
         <TrainingControls
           grade={displayGrade}
@@ -378,8 +385,8 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpdate: () => void }) => {
-  const { translator, needRefresh, onUpdate } = props;
+const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpdate: () => void; onReloadIntoLatest: () => void }) => {
+  const { translator, needRefresh, onUpdate, onReloadIntoLatest } = props;
   const navigate = useNavigate();
   const lang = translator.currentLanguage;
 
@@ -507,6 +514,26 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
             </div>
           </div>
           <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onUpdate}>
+            {translator.translate("Uppdatera")}
+          </Button>
+        </Toast.Body>
+      </Toast>
+      {/* Syncing has stopped because this build predates the shape the account's data
+          is stored in, and writing it back would delete the parts it cannot read.
+          Unlike a sync error there is nothing to retry, so the toast has no dismiss:
+          it stays until the app is updated. */}
+      <Toast show={syncState.status === "client_outdated"} className="app-update-toast">
+        <Toast.Body className="app-update-toast-body">
+          <div className="app-update-toast-icon app-update-toast-icon--warning" aria-hidden="true">
+            <ExclamationTriangle size={20} />
+          </div>
+          <div className="app-update-toast-copy">
+            <div className="app-update-toast-title">{translator.translate("Appen behöver uppdateras")}</div>
+            <div className="app-update-toast-text">
+              {translator.translate("Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.")}
+            </div>
+          </div>
+          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onReloadIntoLatest}>
             {translator.translate("Uppdatera")}
           </Button>
         </Toast.Body>

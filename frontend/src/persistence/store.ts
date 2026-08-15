@@ -1,5 +1,5 @@
 import { LocalStorageBackend, type PersistenceBackend } from "./backend";
-import { canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, type AppDataDocument, type AppDataState } from "./schema";
+import { canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, unknownDataFields, type AppDataDocument, type AppDataState } from "./schema";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
 type UnregisterDataChangedCallback = () => void;
@@ -100,7 +100,11 @@ export class AppDataStore {
   }
 
   private notify<TKey extends keyof AppDataState>(key: TKey, value: AppDataState[TKey]): void {
-    const callbacks = this.callbacks[key] as Map<number, DataChangedCallback<TKey>>;
+    // A document can carry fields written by a newer build, which are preserved but
+    // have no subscriber map here. Nothing in this build reads them, so there is
+    // nobody to notify.
+    const callbacks = this.callbacks[key] as Map<number, DataChangedCallback<TKey>> | undefined;
+    if (!callbacks) return;
 
     for (const callback of callbacks.values()) {
       callback(value);
@@ -144,6 +148,11 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
     updatedAt: typeof input.updatedAt === "string" ? input.updatedAt : fallback.updatedAt,
     deviceId: typeof input.deviceId === "string" ? input.deviceId : fallback.deviceId,
     data: {
+      // Fields written by a newer build come first and are kept as they are. Without
+      // this, sanitizing would rebuild `data` from the known keys alone and drop them,
+      // and syncing that back would delete newer data for every one of the user's
+      // devices. Known fields are still validated below and override anything here.
+      ...unknownDataFields(input.data),
       grade: input.data?.grade ?? fallback.data.grade,
       language: input.data?.language ?? fallback.data.language,
       theme: input.data?.theme ?? fallback.data.theme,

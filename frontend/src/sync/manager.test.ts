@@ -83,6 +83,7 @@ describe("SyncManager", () => {
   // Dynamically imported after vi.resetModules() so instanceof checks match the fresh module.
   let AuthExpiredError: typeof import("./types").AuthExpiredError;
   let DocumentChangedError: typeof import("./types").DocumentChangedError;
+  let ClientOutdatedError: typeof import("./types").ClientOutdatedError;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -96,7 +97,7 @@ describe("SyncManager", () => {
     vi.doMock("../persistence/store", () => ({ getAppDataStore: function() { return mockStore; } }));
 
     ({ getSyncManager } = await import("./manager"));
-    ({ AuthExpiredError, DocumentChangedError } = await import("./types"));
+    ({ AuthExpiredError, DocumentChangedError, ClientOutdatedError } = await import("./types"));
   });
 
   afterEach(() => {
@@ -410,6 +411,58 @@ describe("SyncManager", () => {
       // it holds a version the server never accepted.
       expect(mockStore.setDocument).not.toHaveBeenCalled();
       expect(localStorage.getItem("sync-base-document:backend")).toBeNull();
+    });
+  });
+
+  // ─── outdated client ──────────────────────────────────────────────────────
+
+  describe("client too old for the stored schema", () => {
+    function rejectingServer() {
+      const remoteDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
+      const localDoc = makeDoc({
+        updatedAt: "2024-06-01T00:00:00.000Z",
+        data: { ...remoteDoc.data, grade: "sandan" as const },
+      });
+      mockStore.getDocument.mockReturnValue(localDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
+      mockBackendClient.uploadDocument.mockRejectedValue(new ClientOutdatedError(2));
+    }
+
+    it("stops syncing rather than retrying a write that cannot succeed", async () => {
+      rejectingServer();
+
+      const manager = getSyncManager();
+      manager.retrySync();
+      await flushPromises();
+
+      expect(manager.getState().status).toBe("client_outdated");
+      // One attempt, not the four a stale write would make.
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledTimes(1);
+    });
+
+    it("schedules no retry, because only updating the app can help", async () => {
+      vi.useFakeTimers();
+      rejectingServer();
+
+      const manager = getSyncManager();
+      manager.retrySync();
+      await flushPromises();
+
+      await vi.advanceTimersByTimeAsync(120_000);
+      await flushPromises();
+
+      expect(manager.getState().status).toBe("client_outdated");
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(1);
+      vi.useRealTimers();
+    });
+
+    it("does not apply the refused document locally", async () => {
+      rejectingServer();
+
+      getSyncManager().retrySync();
+      await flushPromises();
+
+      expect(mockStore.setDocument).not.toHaveBeenCalled();
     });
   });
 

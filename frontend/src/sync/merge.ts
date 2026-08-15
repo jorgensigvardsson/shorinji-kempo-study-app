@@ -1,4 +1,4 @@
-import { createDefaultAppDataDocument, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry } from "../persistence/schema";
+import { createDefaultAppDataDocument, unknownDataFields, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry } from "../persistence/schema";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -32,6 +32,11 @@ export function mergeDocuments(
   const baseDocument = base;
   let conflictDetected = false;
   const mergedData: AppDataState = {
+    // Fields written by a newer build, carried through so that merging on an older
+    // device does not delete them. There is no schema here to merge them by, so the
+    // newer document's copy wins wholesale — the honest option when the alternative
+    // is dropping them. Known fields below override anything of the same name.
+    ...mergeUnknownFields(local, remote),
     grade: mergeScalar("grade"),
     language: mergeScalar("language"),
     theme: mergeScalar("theme"),
@@ -320,6 +325,16 @@ function newerRank(
   return parseTimestamp(localDocument.updatedAt) >= parseTimestamp(remoteDocument.updatedAt)
     ? localValue
     : remoteValue;
+}
+
+// Unions the fields neither side has a schema for, letting the newer document win
+// where both carry the same one. A field present on only one side is kept either way:
+// it is more likely a field the other device has not learned about yet than one that
+// was deliberately removed.
+function mergeUnknownFields(local: AppDataDocument, remote: AppDataDocument): Record<string, unknown> {
+  const newer = newerOf(local, remote);
+  const older = newer === local ? remote : local;
+  return { ...unknownDataFields(older.data), ...unknownDataFields(newer.data) };
 }
 
 function newerOf(local: AppDataDocument, remote: AppDataDocument): AppDataDocument {

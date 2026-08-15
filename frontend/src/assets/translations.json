@@ -1811,7 +1811,9 @@
     "vänta, invänta (t.ex. machi geri = väntande spark — spark mot en annalkande motståndare)": "待ち（例：machi geri = 待ち蹴り — 近づいてくる相手への蹴り）",
     "ring, cirkel (t.ex. morote wa nuki = tvåhändig ringfrigörelse)": "輪（例：morote wa nuki = 諸手輪抜き）",
     "fyra grupper (teknikkategori i jūhō; t.ex. shikumi koshi nage, shikumi nai tembin)": "四組み（柔法の技カテゴリ；例：shikumi koshi nage、shikumi nai tembin）",
-    "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)": "守法（特定の組み手・絞め技に対する返し技；例：hagai jime to shuhō）"
+    "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)": "守法（特定の組み手・絞め技に対する返し技；例：hagai jime to shuhō）",
+    "Appen behöver uppdateras": "アプリの更新が必要です",
+    "Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.": "変更はこの端末に保存されますが、アプリを更新するまで同期されません。"
   },
   "en": {
     "1": "1",
@@ -3969,7 +3971,9 @@
     "vänta, invänta (t.ex. machi geri = väntande spark — spark mot en annalkande motståndare)": "wait, await (e.g. machi geri = waiting kick — kick against an approaching opponent)",
     "ring, cirkel (t.ex. morote wa nuki = tvåhändig ringfrigörelse)": "ring, circle (e.g. morote wa nuki = two-handed ring release)",
     "fyra grupper (teknikkategori i jūhō; t.ex. shikumi koshi nage, shikumi nai tembin)": "four groups (technique category in jūhō; e.g. shikumi koshi nage, shikumi nai tembin)",
-    "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)": "defensive responses (counter techniques against specific grips/chokes; e.g. hagai jime to shuhō)"
+    "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)": "defensive responses (counter techniques against specific grips/chokes; e.g. hagai jime to shuhō)",
+    "Appen behöver uppdateras": "The app needs updating",
+    "Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.": "Your changes are saved on this device, but will not sync until the app has been updated."
   },
   "tr": {
     "1": "1",
@@ -6127,6 +6131,8 @@
     "vänta, invänta (t.ex. machi geri = väntande spark — spark mot en annalkande motståndare)": "beklemek (ör. machi geri = bekleyerek tekme — yaklaşan bir rakibe tekme)",
     "ring, cirkel (t.ex. morote wa nuki = tvåhändig ringfrigörelse)": "halka, daire (ör. morote wa nuki = iki elle halka serbest bırakma)",
     "fyra grupper (teknikkategori i jūhō; t.ex. shikumi koshi nage, shikumi nai tembin)": "dört grup (jūhō'da teknik kategorisi; ör. shikumi koshi nage, shikumi nai tembin)",
-    "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)": "savunma yanıtları (belirli tutma/boğma tekniklerine karşı karşı teknikler; ör. hagai jime to shuhō)"
+    "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)": "savunma yanıtları (belirli tutma/boğma tekniklerine karşı karşı teknikler; ör. hagai jime to shuhō)",
+    "Appen behöver uppdateras": "Uygulamanın güncellenmesi gerekiyor",
+    "Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.": "Değişiklikleriniz bu cihazda kaydediliyor, ancak uygulama güncellenene kadar eşitlenmeyecek."
   }
 }
