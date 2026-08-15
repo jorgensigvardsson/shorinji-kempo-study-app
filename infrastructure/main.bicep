@@ -198,6 +198,15 @@ module persistenceApp 'modules/persistence-app.bicep' = {
     vapidSubject: vapidSubject
     pushAdminToken: pushAdminToken
   }
+  // Serialized behind authApp purely to keep the two custom-domain bindings apart.
+  // Both apps bind a domain to the same Container Apps environment, and Azure allows
+  // only one such modification at a time per environment — so deploying them in
+  // parallel is a coin flip, and the loser fails the whole deployment with
+  // CustomDomainLockConflict. Costs a little deploy time; removes a random failure
+  // that has needed a manual re-run more than once.
+  dependsOn: [
+    authApp
+  ]
 }
 
 // ── Outputs ───────────────────────────────────────────────────────────────────
