@@ -1,6 +1,7 @@
 # Todo
 
 Ideas and follow-up tasks to park without interrupting the current task.
+Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`.
 
 - [ ] Add comments for repetition-and other cards
 - [ ] Review the merged Training page on mobile and desktop
