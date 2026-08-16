@@ -148,7 +148,7 @@ Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as
 
 **Sending a broadcast** (e.g. announcing a new version). Three ways, all hit `POST /push/broadcast`:
 
-- **Automatically on deploy** — the final step of the `deploy` workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) sends a "New version available" notification once the stack restart succeeds. It uses `PUSH_ADMIN_TOKEN`; if that secret is unset the step is skipped, and a failed broadcast only warns (it never fails an otherwise-successful deploy).
+- **Automatically on deploy** — the final step of the `deploy` workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) sends a "New version available" notification once the stack restart succeeds. It uses `PUSH_ADMIN_TOKEN`; if that secret is unset the step is skipped, and a failed broadcast only warns (it never fails an otherwise-successful deploy). Production only — staging deploys deliberately stay quiet.
 - **From the app** — a signed-in user with the `admin` role gets a *Skicka notis till alla* form under Settings. The browser session cookie authorizes the call.
 - **From a script/CI** — present the `PUSH_ADMIN_TOKEN` as a bearer token:
   ```bash
@@ -204,5 +204,7 @@ Optional repository variables (with sensible defaults):
 Deployments may be done to the staging environment. Same rules apply for the staging environment as for the production environment. The differences: push to the branch `deploy-staging`, and the site syncs to `~/domains/app-staging.shorinjikempo.net/public_html` on the same host.
 
 Staging also deploys its own auth and persistence services, into a separate Azure resource group, so backend sign-in and sync can be tested there too. It shares prod's Cosmos DB account rather than provisioning a second one — see [BACKEND.md](BACKEND.md#staging) for the full setup, including the one-time Azure configuration it doesn't automate.
+
+A staging deploy sends no "New version available" push. Staging is redeployed often, sometimes repeatedly while chasing one problem, and those notifications land on the phones of the very people testing it. Delivery can still be exercised on staging by calling `POST /push/broadcast` by hand with `PUSH_ADMIN_TOKEN`, or from Settings as an admin.
 
 The staging build sets `VITE_ENVIRONMENT=staging`, which shows a small "Staging environment" label fixed to the bottom-left corner of every screen — a quick visual cue that staging and prod would otherwise not have, since they're built from the same code.
