@@ -465,7 +465,7 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 	}
 	h.mu.Unlock()
 
-	if err := h.mailer.SendVerificationCode(r.Context(), addr, code, normalizeLang(req.Language)); err != nil {
+	if err := h.mailer.SendVerificationCode(r.Context(), addr, code, normalizeLang(req.Language), emailCodeTTL); err != nil {
 		log.Printf("emailStart: send code to %s: %v", addr, err)
 		http.Error(w, "could not send verification email", http.StatusBadGateway)
 		return

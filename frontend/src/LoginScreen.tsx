@@ -134,11 +134,12 @@ export function LoginScreen() {
     setError(null);
   };
 
-  // The validity is worded in whole minutes, so a TTL the server didn't state —
-  // or one shorter than a minute — leaves the sentence out entirely rather than
-  // rounding it down to "0 minutes".
+  // The validity is worded in whole minutes, and part-minutes are dropped rather
+  // than rounded so the sentence never offers more time than the code has (the
+  // verification email does the same). A TTL the server didn't state — or one
+  // shorter than a minute — leaves the sentence out rather than saying "0 minutes".
   const ttlMinutes = codeTtlSeconds !== null && codeTtlSeconds >= 60
-    ? Math.round(codeTtlSeconds / 60)
+    ? Math.floor(codeTtlSeconds / 60)
     : null;
   const validityText = ttlMinutes === null
     ? null

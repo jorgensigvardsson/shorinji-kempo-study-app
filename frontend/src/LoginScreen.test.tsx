@@ -48,6 +48,15 @@ describe("LoginScreen — how long the code lasts", () => {
     expect(await screen.findByText(/Koden är giltig i 15 minuter\./)).toBeTruthy();
   });
 
+  // Down, never up: a code with 2½ minutes left is not a three-minute code.
+  it("drops a part-minute rather than rounding it up", async () => {
+    startEmailAuth.mockResolvedValue({ action: "existing", expiresInSeconds: 150 });
+
+    await reachCodePhase();
+
+    expect(await screen.findByText(/Koden är giltig i 2 minuter\./)).toBeTruthy();
+  });
+
   it("words a one-minute code in the singular", async () => {
     startEmailAuth.mockResolvedValue({ action: "existing", expiresInSeconds: 60 });
 

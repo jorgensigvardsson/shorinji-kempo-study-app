@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
@@ -21,6 +22,7 @@ import (
 // records the last feedback submission relayed through it.
 type fakeSender struct {
 	to, code, lang string
+	validFor       time.Duration
 	err            error
 
 	feedbackTo         []string
@@ -28,8 +30,8 @@ type fakeSender struct {
 	feedbackErr        error
 }
 
-func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string) error {
-	f.to, f.code, f.lang = to, code, lang
+func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string, validFor time.Duration) error {
+	f.to, f.code, f.lang, f.validFor = to, code, lang, validFor
 	return f.err
 }
 
@@ -128,8 +130,9 @@ func TestEmailStart_NewThenExisting(t *testing.T) {
 	}
 }
 
-// The sign-in screen states the code's validity from this field, so a response
-// without it (or with a stale number) puts the wrong duration in front of users.
+// Both places that tell a user how long the code lasts — the sign-in screen, via
+// this field, and the email itself, via the mailer — take the duration from the
+// TTL that enforces it, so neither can state a number the server won't honour.
 func TestEmailStart_ReportsCodeTTL(t *testing.T) {
 	sender := &fakeSender{}
 	h := newTestHandler(t, sender)
@@ -144,6 +147,9 @@ func TestEmailStart_ReportsCodeTTL(t *testing.T) {
 	json.Unmarshal(rec.Body.Bytes(), &resp)
 	if want := int(emailCodeTTL.Seconds()); resp.ExpiresInSeconds != want {
 		t.Fatalf("expires_in_seconds = %d, want %d", resp.ExpiresInSeconds, want)
+	}
+	if sender.validFor != emailCodeTTL {
+		t.Fatalf("mailer got validFor = %s, want %s", sender.validFor, emailCodeTTL)
 	}
 }
 

@@ -9,12 +9,17 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"strings"
+	"time"
 )
 
 // Sender delivers a verification code to a recipient in the given language.
 // lang is one of "sv", "en", "tr", "ja"; unknown values fall back to English.
+// validFor is how long the code the caller generated will be accepted; the copy
+// states it, so it comes from whoever enforces it rather than from a number kept
+// here that would drift from the real TTL.
 type Sender interface {
-	SendVerificationCode(ctx context.Context, to, code, lang string) error
+	SendVerificationCode(ctx context.Context, to, code, lang string, validFor time.Duration) error
 
 	// SendFeedback relays an in-app feedback submission to the given recipients.
 	SendFeedback(ctx context.Context, to []string, submission FeedbackSubmission) error
@@ -43,47 +48,55 @@ type FeedbackSubmission struct {
 type localized struct {
 	// appName is the sender's display name — the "…" in `From: "…" <a@b>`. It
 	// matches the localized app names in frontend/public/site.webmanifest.
-	appName  string
-	subject  string
-	heading  string
-	intro    string
-	validity string
-	ignore   string
+	appName string
+	subject string
+	heading string
+	intro   string
+	// validity carries the code's lifetime and takes the number of minutes as its
+	// single %d verb; validityOne is the same sentence worded for exactly one
+	// minute, which no amount of formatting gets right by itself.
+	validity    string
+	validityOne string
+	ignore      string
 }
 
 // templates is keyed by language. English is the fallback (see lookup).
 var templates = map[string]localized{
 	"en": {
-		appName:  "Shorinji Kempo Study App",
-		subject:  "Your Shorinji Kempo sign-in code",
-		heading:  "Your sign-in code",
-		intro:    "Use the code below to sign in.",
-		validity: "The code is valid for 10 minutes.",
-		ignore:   "If you didn't request it, you can ignore this email.",
+		appName:     "Shorinji Kempo Study App",
+		subject:     "Your Shorinji Kempo sign-in code",
+		heading:     "Your sign-in code",
+		intro:       "Use the code below to sign in.",
+		validity:    "The code is valid for %d minutes.",
+		validityOne: "The code is valid for one minute.",
+		ignore:      "If you didn't request it, you can ignore this email.",
 	},
 	"sv": {
-		appName:  "Shorinji Kempo Studieapp",
-		subject:  "Din inloggningskod för Shorinji Kempo",
-		heading:  "Din inloggningskod",
-		intro:    "Använd koden här nedan för att logga in.",
-		validity: "Koden gäller i 10 minuter.",
-		ignore:   "Om du inte begärde koden kan du bortse från det här meddelandet.",
+		appName:     "Shorinji Kempo Studieapp",
+		subject:     "Din inloggningskod för Shorinji Kempo",
+		heading:     "Din inloggningskod",
+		intro:       "Använd koden här nedan för att logga in.",
+		validity:    "Koden gäller i %d minuter.",
+		validityOne: "Koden gäller i en minut.",
+		ignore:      "Om du inte begärde koden kan du bortse från det här meddelandet.",
 	},
 	"tr": {
-		appName:  "Shorinji Kempo Çalışma Uygulaması",
-		subject:  "Shorinji Kempo giriş kodunuz",
-		heading:  "Giriş kodunuz",
-		intro:    "Giriş yapmak için aşağıdaki kodu kullanın.",
-		validity: "Kod 10 dakika geçerlidir.",
-		ignore:   "Bunu siz istemediyseniz bu e-postayı yoksayabilirsiniz.",
+		appName:     "Shorinji Kempo Çalışma Uygulaması",
+		subject:     "Shorinji Kempo giriş kodunuz",
+		heading:     "Giriş kodunuz",
+		intro:       "Giriş yapmak için aşağıdaki kodu kullanın.",
+		validity:    "Kod %d dakika geçerlidir.",
+		validityOne: "Kod bir dakika geçerlidir.",
+		ignore:      "Bunu siz istemediyseniz bu e-postayı yoksayabilirsiniz.",
 	},
 	"ja": {
-		appName:  "少林寺拳法学習アプリ",
-		subject:  "Shorinji Kempo のログインコード",
-		heading:  "ログインコード",
-		intro:    "以下のコードを入力してログインしてください。",
-		validity: "コードは10分間有効です。",
-		ignore:   "心当たりがない場合は、このメールを無視してください。",
+		appName:     "少林寺拳法学習アプリ",
+		subject:     "Shorinji Kempo のログインコード",
+		heading:     "ログインコード",
+		intro:       "以下のコードを入力してログインしてください。",
+		validity:    "コードは%d分間有効です。",
+		validityOne: "コードは1分間有効です。",
+		ignore:      "心当たりがない場合は、このメールを無視してください。",
 	},
 }
 
@@ -92,6 +105,23 @@ func lookup(lang string) localized {
 		return t
 	}
 	return templates["en"]
+}
+
+// validityLine states how long the code lasts, in whole minutes. Part-minutes
+// are dropped rather than rounded, so the sentence never promises the reader more
+// time than the code actually has. A lifetime shorter than a minute has no
+// wording left that would be true, so it says nothing at all; callers leave the
+// line out when this is empty.
+func (s localized) validityLine(validFor time.Duration) string {
+	minutes := int(validFor / time.Minute)
+	switch {
+	case minutes < 1:
+		return ""
+	case minutes == 1:
+		return s.validityOne
+	default:
+		return fmt.Sprintf(s.validity, minutes)
+	}
 }
 
 // message is one rendered email in every form the sender needs.
@@ -149,7 +179,7 @@ var htmlTemplate = template.Must(template.New("verification").Parse(`<!DOCTYPE h
     </div>
   </td></tr>
   <tr><td style="padding:0 28px 26px 28px;">
-    <p class="muted" style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#6c757d;">{{.Validity}}</p>
+    {{if .Validity}}<p class="muted" style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#6c757d;">{{.Validity}}</p>{{end}}
     <p class="muted" style="margin:0;font-size:13px;line-height:1.5;color:#6c757d;">{{.Ignore}}</p>
   </td></tr>
 </table>
@@ -159,9 +189,11 @@ var htmlTemplate = template.Must(template.New("verification").Parse(`<!DOCTYPE h
 </html>
 `))
 
-// render builds the verification email for a language.
-func render(code, lang string) (message, error) {
+// render builds the verification email for a language. validFor is the lifetime
+// of the code, which the copy states.
+func render(code, lang string, validFor time.Duration) (message, error) {
 	s := lookup(lang)
+	validity := s.validityLine(validFor)
 
 	var html bytes.Buffer
 	err := htmlTemplate.Execute(&html, struct {
@@ -173,19 +205,26 @@ func render(code, lang string) (message, error) {
 		Heading:  s.heading,
 		Intro:    s.intro,
 		Code:     code,
-		Validity: s.validity,
+		Validity: validity,
 		Ignore:   s.ignore,
 	})
 	if err != nil {
 		return message{}, fmt.Errorf("render verification email: %w", err)
 	}
 
+	// Assembled from the parts that have something to say, so an absent validity
+	// leaves no blank gap behind in the plain-text rendering.
+	paragraphs := []string{s.intro, "    " + code}
+	if validity != "" {
+		paragraphs = append(paragraphs, validity)
+	}
+	paragraphs = append(paragraphs, s.ignore)
+
 	return message{
 		senderName: s.appName,
 		subject:    s.subject,
-		plain: fmt.Sprintf("%s\n\n    %s\n\n%s\n\n%s\n",
-			s.intro, code, s.validity, s.ignore),
-		html: html.String(),
+		plain:      strings.Join(paragraphs, "\n\n") + "\n",
+		html:       html.String(),
 	}, nil
 }
 
@@ -270,8 +309,8 @@ func renderFeedback(fb FeedbackSubmission) (message, error) {
 // email, so local dev needs no email provider configured.
 type LogSender struct{}
 
-func (LogSender) SendVerificationCode(_ context.Context, to, code, lang string) error {
-	log.Printf("[email:dev] verification code for %s (%s): %s", to, lang, code)
+func (LogSender) SendVerificationCode(_ context.Context, to, code, lang string, validFor time.Duration) error {
+	log.Printf("[email:dev] verification code for %s (%s, valid %s): %s", to, lang, validFor, code)
 	return nil
 }
 

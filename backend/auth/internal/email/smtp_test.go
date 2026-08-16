@@ -22,6 +22,10 @@ import (
 	"time"
 )
 
+// testCodeTTL stands in for the auth service's code lifetime. These tests are
+// about delivery rather than copy, so any plausible value will do.
+const testCodeTTL = 10 * time.Minute
+
 // ── A scripted SMTP server ────────────────────────────────────────────────────
 //
 // Just enough of RFC 5321 to exercise the client: implicit TLS or STARTTLS,
@@ -322,7 +326,7 @@ type mimePart struct {
 func TestSendVerificationCode_ImplicitTLS_PlainAuth(t *testing.T) {
 	f, s := startFake(t, TLSImplicit, "PLAIN")
 
-	if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", "sv"); err != nil {
+	if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", "sv", testCodeTTL); err != nil {
 		t.Fatalf("SendVerificationCode: %v", err)
 	}
 
@@ -392,7 +396,7 @@ func TestSendVerificationCode_LocalizedSenderName(t *testing.T) {
 	} {
 		t.Run(tc.lang, func(t *testing.T) {
 			f, s := startFake(t, TLSImplicit, "PLAIN")
-			if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", tc.lang); err != nil {
+			if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", tc.lang, testCodeTTL); err != nil {
 				t.Fatalf("SendVerificationCode: %v", err)
 			}
 
@@ -421,7 +425,7 @@ func TestSendVerificationCode_LocalizedSenderName(t *testing.T) {
 func TestSendVerificationCode_StartTLS(t *testing.T) {
 	f, s := startFake(t, TLSStartTLS, "PLAIN")
 
-	if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "654321", "en"); err != nil {
+	if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "654321", "en", testCodeTTL); err != nil {
 		t.Fatalf("SendVerificationCode: %v", err)
 	}
 
@@ -441,7 +445,7 @@ func TestSendVerificationCode_StartTLS(t *testing.T) {
 func TestSendVerificationCode_LoginAuthFallback(t *testing.T) {
 	f, s := startFake(t, TLSImplicit, "LOGIN")
 
-	if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "111222", "ja"); err != nil {
+	if err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "111222", "ja", testCodeTTL); err != nil {
 		t.Fatalf("SendVerificationCode: %v", err)
 	}
 
@@ -456,7 +460,7 @@ func TestSendVerificationCode_LoginAuthFallback(t *testing.T) {
 func TestSendVerificationCode_StartTLSNotOffered(t *testing.T) {
 	f, s := startFake(t, TLSStartTLS, "PLAIN", func(f *fakeServer) { f.noStartTLS = true })
 
-	err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", "en")
+	err := s.SendVerificationCode(context.Background(), "kenshi@example.test", "123456", "en", testCodeTTL)
 	if err == nil {
 		t.Fatal("send succeeded without STARTTLS")
 	}
@@ -476,7 +480,7 @@ func TestSendVerificationCode_StartTLSNotOffered(t *testing.T) {
 func TestSendVerificationCode_RejectsHeaderInjection(t *testing.T) {
 	f, s := startFake(t, TLSImplicit, "PLAIN")
 
-	err := s.SendVerificationCode(context.Background(), "kenshi\r\nBcc: attacker@evil.test@example.test", "123456", "en")
+	err := s.SendVerificationCode(context.Background(), "kenshi\r\nBcc: attacker@evil.test@example.test", "123456", "en", testCodeTTL)
 	if err == nil {
 		t.Fatal("accepted an address containing CRLF")
 	}
