@@ -234,9 +234,7 @@
 
 .kamoku-focus-video {
   max-width: 20rem;
-  padding: 0.25rem 0 !important;
-  border: 0 !important;
-  background: transparent;
+  padding: 0.25rem 0;
 }
 
 .kamoku-technique-section {

@@ -149,4 +149,20 @@ describe("HokeiCard training layouts", () => {
     expect(container.textContent).toContain("Anteckningar");
     expect(container.textContent).not.toContain("Lägg till anteckningar");
   });
+
+  it("draws the kamoku footer video link without a box of its own", () => {
+    const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
+    const { container } = render(
+      <HokeiCard
+        hokei={{ ...hokei, videos: [{ url: "https://www.youtube.com/watch?v=example" }] }}
+        showNotes
+        kamokuLayout
+      />,
+    );
+
+    const link = container.querySelector(".kamoku-video-link")!;
+    expect(link.className).toBe("kamoku-video-link");
+    expect(screen.getByRole("link", { name: /YouTube/ })).toBeTruthy();
+  });
 });
