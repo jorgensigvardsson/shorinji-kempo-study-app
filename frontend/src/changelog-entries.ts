@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T11:10:15.322Z",
+    changes: [
+      {
+        emoji: "↕️",
+        sv: "Teknikkort öppnas nu direkt på sin plats i listan i stället för att ta över skärmen. Innehållet anpassas efter kortets egen bredd, så små förändringar av fönstret ger ett stabilare upplägg.",
+        en: "Technique cards now open directly in place in the list instead of taking over the screen. Their content adapts to the card's own width, making the layout more stable when the window changes slightly.",
+        tr: "Teknik kartları artık ekranı kaplamak yerine listedeki yerinde açılıyor. İçerik kartın kendi genişliğine göre uyarlanıyor; böylece pencere boyutundaki küçük değişikliklerde düzen daha kararlı kalıyor.",
+        ja: "技法カードが画面全体を覆わず、一覧のその場で開くようになりました。内容はカード自体の幅に合わせて調整されるため、画面幅が少し変わってもレイアウトが安定します。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T10:48:45.998Z",
     changes: [
       {

@@ -50,6 +50,24 @@ const makeStore = (withNotes = true, note = "Remember the angle") => {
 };
 
 describe("HokeiCard training layouts", () => {
+  it("expands in the page flow without turning into a focused full-screen card", async () => {
+    const user = userEvent.setup();
+    const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
+    const { container } = render(<HokeiCard hokei={hokei} kamokuLayout />);
+
+    const card = container.querySelector(".hokei-card")!;
+    const header = container.querySelector<HTMLElement>(".card-header")!;
+    expect(card.classList.contains("is-collapsed")).toBe(true);
+
+    await user.click(header);
+
+    expect(card.classList.contains("is-expanded")).toBe(true);
+    expect(card.classList.contains("focus-card")).toBe(false);
+    expect(document.body.classList.contains("card-focus-active")).toBe(false);
+    expect(header.getAttribute("aria-expanded")).toBe("true");
+  });
+
   it("keeps variations, technique metadata, stance names, notes, and ratings in the calm layout", () => {
     const store = makeStore();
     vi.mocked(getAppDataStore).mockReturnValue(store);

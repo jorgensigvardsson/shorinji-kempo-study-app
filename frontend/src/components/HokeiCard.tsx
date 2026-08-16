@@ -64,7 +64,6 @@ const HokeiCard = (props: HokeiCardProps) => {
             <CollapsibleCard
                 header={<DojoCardHeader hokei={hokei} />}
                 footer={footer}
-                focusOnOpen
                 defaultOpen={defaultOpen}
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
@@ -79,7 +78,6 @@ const HokeiCard = (props: HokeiCardProps) => {
             <CollapsibleCard
                 header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} showKanji={showKanji} />}
                 footer={kamokuFooter}
-                focusOnOpen
                 defaultOpen={defaultOpen}
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
@@ -104,7 +102,6 @@ const HokeiCard = (props: HokeiCardProps) => {
         return (
             <CollapsibleCard header={compactHeader} inlineChevron
                              footer={footer}
-                             focusOnOpen
                              defaultOpen={defaultOpen}
                              onOpenChange={onOpenChange}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
@@ -138,7 +135,6 @@ const HokeiCard = (props: HokeiCardProps) => {
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
                          footer={footer}
-                         focusOnOpen
                          defaultOpen={defaultOpen}
                          onOpenChange={onOpenChange}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>

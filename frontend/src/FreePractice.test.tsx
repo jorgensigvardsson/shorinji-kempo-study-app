@@ -13,17 +13,9 @@ const plans: GradePlan[] = [
   { grade: "2 kyū", weeks: [] },
 ];
 
-const HistoryControls = () => {
-  return <>
-    <button type="button" onClick={() => window.dispatchEvent(new PopStateEvent("popstate"))}>Browser back</button>
-    <button type="button" onClick={() => window.dispatchEvent(new PopStateEvent("popstate"))}>Browser forward</button>
-  </>;
-};
-
 const renderPractice = (ui: ReactNode) => render(
   <MemoryRouter>
     {ui}
-    <HistoryControls />
   </MemoryRouter>,
 );
 
@@ -359,7 +351,7 @@ describe("FreePractice", () => {
     expect(saved.sequences).toHaveLength(6);
   });
 
-  it("opens a selected embu technique as a focused technique card", async () => {
+  it("opens a selected embu technique as an inline expandable card", async () => {
     const user = userEvent.setup();
     renderPractice(<EmbuHarness />);
     await user.click(screen.getByRole("button", { name: "Skapa embu" }));
@@ -369,12 +361,15 @@ describe("FreePractice", () => {
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
     await user.click(screen.getByRole("button", { name: "Visa teknik gyaku gote" }));
 
-    await waitFor(() => expect(document.body.classList.contains("card-focus-active")).toBe(true));
-    await user.click(screen.getByRole("button", { name: "Browser back" }));
-    await waitFor(() => expect(document.body.classList.contains("card-focus-active")).toBe(false));
-
-    await user.click(screen.getByRole("button", { name: "Browser forward" }));
+    const card = document.querySelector<HTMLElement>(".hokei-card.is-expanded");
+    expect(card).not.toBeNull();
+    expect(card?.classList.contains("focus-card")).toBe(false);
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
+
+    const cardHeader = card?.querySelector<HTMLElement>(".card-header");
+    expect(cardHeader?.getAttribute("aria-expanded")).toBe("true");
+    await user.click(cardHeader!);
+    await waitFor(() => expect(document.querySelector(".hokei-card")).toBeNull());
   });
 
   it("links both existing technique cards in a composite kumi-embu step", async () => {
@@ -388,8 +383,12 @@ describe("FreePractice", () => {
     expect(keriTenSan).toBeTruthy();
 
     await user.click(keriTenSan);
-    await waitFor(() => expect(document.body.classList.contains("card-focus-active")).toBe(true));
-    await user.keyboard("{Escape}");
+    const card = document.querySelector<HTMLElement>(".hokei-card.is-expanded");
+    expect(card).not.toBeNull();
+    expect(document.body.classList.contains("card-focus-active")).toBe(false);
+
+    await user.click(card!.querySelector<HTMLElement>(".card-header")!);
+    await waitFor(() => expect(document.querySelector(".hokei-card")).toBeNull());
   });
 
   it("returns to all areas and keeps global grade and training mode for the session", async () => {

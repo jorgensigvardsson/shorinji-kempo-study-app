@@ -149,7 +149,7 @@
   padding: 0.65rem 0 !important;
 }
 
-@media (max-width: 35rem) {
+@container hokei-card (max-width: 30rem) {
   .dojo-role {
     grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.35fr);
     gap: 0.5rem;

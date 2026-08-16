@@ -40,15 +40,6 @@ describe("the focused card's geometry", () => {
     );
   });
 
-  it("keeps the compact video action beside a note until space runs out", () => {
-    expect(css).toMatch(
-      /\.kamoku-card-footer-actions \.kamoku-video-link\s*{[^}]*flex:\s*0 0 auto;/s
-    );
-    expect(css).not.toMatch(
-      /\.kamoku-card-footer-actions \.hokei-inline-note\.has-note\s*{[^}]*flex-basis:\s*100%/s
-    );
-  });
-
   // Every declaration that reaches for the viewport has to convert back out of the
   // zoomed coordinate space, or the card is sized against the wrong ruler.
   it("compensates for the app's zoom wherever it uses a viewport length", () => {
@@ -79,5 +70,25 @@ describe("the focused card's geometry", () => {
         ).toContain("--app-zoom-inverse");
       }
     }
+  });
+});
+
+describe("the inline hokei card's responsive layout", () => {
+  it("uses the card itself as the responsive container", () => {
+    expect(css).toMatch(
+      /\.hokei-card\s*{[^}]*container-name:\s*hokei-card;[^}]*container-type:\s*inline-size;/s
+    );
+    expect(css).toMatch(
+      /@container hokei-card \(max-width:\s*30rem\)\s*{[\s\S]*?\.kamoku-card-stage\s*{/
+    );
+  });
+
+  it("keeps the compact video action beside a note until space runs out", () => {
+    expect(css).toMatch(
+      /\.kamoku-card-footer-actions \.kamoku-video-link\s*{[^}]*flex:\s*0 0 auto;/s
+    );
+    expect(css).not.toMatch(
+      /\.kamoku-card-footer-actions \.hokei-inline-note\.has-note\s*{[^}]*flex-basis:\s*100%/s
+    );
   });
 });
