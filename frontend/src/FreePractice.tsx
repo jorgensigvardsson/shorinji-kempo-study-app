@@ -1,16 +1,22 @@
 import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, People, Search, Trash } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, Pencil, People, Search, Trash } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import HokeiCard from "./components/HokeiCard";
+import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
 import List from "./List";
 import { TranslatorContext } from "./i18n";
-import { gradeLabel, matchesString, normalizeString } from "./strings";
+import { gradeLabel, matchesString } from "./strings";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
-import { loadExperimentalEmbuDraft, type EmbuDraft, type EmbuDraftStep } from "./persistence/experimental-embu-draft";
+import {
+    loadExperimentalEmbuDraft,
+    type EmbuDraft,
+    type EmbuDraftHokei,
+    type EmbuDraftSequence,
+} from "./persistence/experimental-embu-draft";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { gradingManuals } from "./grading-exam-information";
 import type { PracticeArea } from "./practice-area";
@@ -56,6 +62,7 @@ const FreePractice = (props: Props) => {
     const translator = useContext(TranslatorContext);
     const [visitedAreas, setVisitedAreas] = useState<Set<PracticeArea>>(() =>
         new Set(activeArea ? [activeArea] : []));
+    const [activeEmbuView, setActiveEmbuView] = useState<EmbuAreaView | null>(null);
     const scrollPositions = useRef<Record<string, number>>({ overview: 0 });
     const pendingScrollTarget = useRef<string | null>(null);
     const overviewHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -81,12 +88,18 @@ const FreePractice = (props: Props) => {
         if (nextArea) {
             setVisitedAreas(current => current.has(nextArea) ? current : new Set([...current, nextArea]));
         }
+        setActiveEmbuView(null);
         onAreaChange(nextArea);
     };
 
     const returnToOverview = () => {
+        if (activeArea === "embu" && activeEmbuView !== null) {
+            setActiveEmbuView(null);
+            return;
+        }
         if (activeArea) scrollPositions.current[activeArea] = window.scrollY;
         pendingScrollTarget.current = "overview";
+        setActiveEmbuView(null);
         onBack();
     };
 
@@ -113,7 +126,9 @@ const FreePractice = (props: Props) => {
             <section className="free-practice-area" hidden={activeArea === null}>
                 <button type="button" className="free-practice-back" onClick={returnToOverview}>
                     <ArrowLeft aria-hidden="true" />
-                    <span>{translator.translate("Alla träningsområden")}</span>
+                    <span>{translator.translate(activeArea === "embu" && activeEmbuView !== null
+                        ? "Embu och kumi-embu"
+                        : "Alla träningsområden")}</span>
                 </button>
                 {activeDefinition && (
                     <header className="free-practice-area-header">
@@ -154,6 +169,8 @@ const FreePractice = (props: Props) => {
                         myGrade={props.myGrade}
                         allGradePlans={props.allGradePlans}
                         dojoMode={dojoMode}
+                        activeView={activeEmbuView}
+                        onViewChange={setActiveEmbuView}
                     />
                 </div>
             )}
@@ -385,86 +402,36 @@ interface EmbuPreview {
     requestId: number;
 }
 
-let embuStepId = 0;
-const createEmbuStepId = () => {
+const MAX_EMBU_SEQUENCES = 6;
+
+let embuItemId = 0;
+const createEmbuItemId = (prefix: "sequence" | "hokei") => {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-    embuStepId += 1;
-    return `embu-step-${Date.now().toString(36)}-${embuStepId}`;
+    embuItemId += 1;
+    return `embu-${prefix}-${Date.now().toString(36)}-${embuItemId}`;
 };
 
 const embuTechniqueKey = (technique: Pick<EmbuTechnique, "grade" | "week" | "momentIndex">) =>
     `${technique.grade}|${technique.week}|${technique.momentIndex}`;
 
-const normalizedTechniqueName = (value: string) => normalizeString(value).replace(/\s+/g, " ").trim();
+type EmbuAreaView = "builder" | "kumi";
 
-interface KumiEmbuTermPart {
-    value: string;
-    separator: boolean;
-    techniques: EmbuTechnique[];
+interface EmbuAreaProps extends Pick<Props, "myGrade" | "allGradePlans" | "dojoMode"> {
+    activeView: EmbuAreaView | null;
+    onViewChange: (view: EmbuAreaView | null) => void;
 }
 
-const resolveKumiEmbuTermParts = (value: string, techniques: EmbuTechnique[]): KumiEmbuTermPart[] => {
-    const techniquesByName = new Map<string, EmbuTechnique[]>();
-    for (const technique of techniques) {
-        const name = normalizedTechniqueName(technique.hokei.hokei_name);
-        techniquesByName.set(name, [...(techniquesByName.get(name) ?? []), technique]);
-    }
-
-    const resolvePart = (rawPart: string): EmbuTechnique[] => {
-        const qualifiers = [...rawPart.matchAll(/\(([^)]+)\)/g)]
-            .flatMap(match => match[1].split(/[,/]\s*/))
-            .map(normalizedTechniqueName);
-        const part = rawPart.replace(/\s*\([^)]*\)/g, "").trim();
-        const withoutRenHanko = part.replace(/\s+ren hankō$/i, "").trim();
-        const candidates = [part, withoutRenHanko, withoutRenHanko.replace(/\btsuki$/i, "zuki")]
-            .map(normalizedTechniqueName)
-            .filter((candidate, index, all) => candidate && all.indexOf(candidate) === index);
-
-        let matchedName = candidates.find(candidate => techniquesByName.has(candidate));
-        if (!matchedName) {
-            matchedName = [...techniquesByName.keys()]
-                .filter(name => candidates.some(candidate => candidate.startsWith(`${name} `)))
-                .sort((left, right) => right.length - left.length)[0];
-        }
-        if (!matchedName) {
-            matchedName = [...techniquesByName.keys()]
-                .filter(name => candidates.some(candidate => {
-                    if (!candidate.endsWith(` ${name}`)) return false;
-                    const prefix = candidate.slice(0, -(name.length + 1));
-                    return (techniquesByName.get(name) ?? []).some(technique =>
-                        technique.hokei.variations.some(variation => normalizedTechniqueName(variation) === prefix));
-                }))
-                .sort((left, right) => right.length - left.length)[0];
-        }
-        if (!matchedName) return [];
-
-        const matchingTechniques = techniquesByName.get(matchedName) ?? [];
-        const qualifiedTechniques = qualifiers.length === 0 ? matchingTechniques : matchingTechniques.filter(technique =>
-            qualifiers.every(qualifier => technique.hokei.variations.some(variation =>
-                normalizedTechniqueName(variation) === qualifier)));
-        const resolved = qualifiedTechniques.length > 0 ? qualifiedTechniques : matchingTechniques;
-
-        return [...resolved.reduce((unique, technique) => {
-            const signature = `${normalizedTechniqueName(technique.hokei.hokei_name)}|${technique.hokei.variations.map(normalizedTechniqueName).sort().join("|")}`;
-            if (!unique.has(signature)) unique.set(signature, technique);
-            return unique;
-        }, new Map<string, EmbuTechnique>()).values()];
-    };
-
-    return value.split(/(\s+(?:&|-)\s+)/).filter(Boolean).map((part, index) => ({
-        value: part,
-        separator: index % 2 === 1,
-        techniques: index % 2 === 1 ? [] : resolvePart(part),
-    }));
-};
-
-const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "dojoMode">) => {
+const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }: EmbuAreaProps) => {
     const translator = useContext(TranslatorContext);
     const draftData = useMemo(() => loadExperimentalEmbuDraft(), []);
     const [draft, setDraft] = useState<EmbuDraft>(() => draftData.data);
+    const [pickerTarget, setPickerTarget] = useState<string | "new" | null>(() =>
+        draftData.data.sequences.length === 0 ? "new" : null);
     const [query, setQuery] = useState("");
     const [activeSuggestion, setActiveSuggestion] = useState(0);
     const [preview, setPreview] = useState<EmbuPreview | null>(null);
+    const [editingHokeiId, setEditingHokeiId] = useState<string | null>(null);
+    const [commentDraft, setCommentDraft] = useState("");
     const previewRequestId = useRef(0);
     const techniqueSearchRef = useRef<HTMLInputElement>(null);
     const techniques = useMemo(() => allGradePlans.flatMap(plan => plan.weeks.flatMap(week =>
@@ -505,40 +472,99 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
         draftData.save(nextDraft);
     };
 
-    const addTechnique = (technique: EmbuTechnique) => {
-        const step: EmbuDraftStep = {
-            id: createEmbuStepId(),
-            hokeiName: technique.hokei.hokei_name,
-            grade: technique.grade,
-            week: technique.week,
-            momentIndex: technique.momentIndex,
-            transition: "",
-        };
-        saveDraft({ ...draft, steps: [...draft.steps, step] });
+    const openPicker = (target: string | "new") => {
+        setPickerTarget(target);
         setQuery("");
         setActiveSuggestion(0);
         window.requestAnimationFrame(() => techniqueSearchRef.current?.focus());
     };
 
-    const updateStep = (id: string, changes: Partial<EmbuDraftStep>) => {
+    const closePicker = () => {
+        if (draft.sequences.length === 0) return;
+        setPickerTarget(null);
+        setQuery("");
+        setActiveSuggestion(0);
+    };
+
+    const addHokei = (technique: EmbuTechnique) => {
+        if (pickerTarget === null) return;
+
+        const hokei: EmbuDraftHokei = {
+            id: createEmbuItemId("hokei"),
+            hokeiName: technique.hokei.hokei_name,
+            grade: technique.grade,
+            week: technique.week,
+            momentIndex: technique.momentIndex,
+            comment: draft.pendingComment ?? "",
+        };
+
+        if (pickerTarget === "new") {
+            if (draft.sequences.length >= MAX_EMBU_SEQUENCES) return;
+            const sequence: EmbuDraftSequence = {
+                id: createEmbuItemId("sequence"),
+                hokeis: [hokei],
+            };
+            saveDraft({ sequences: [...draft.sequences, sequence] });
+        } else {
+            saveDraft({
+                ...draft,
+                sequences: draft.sequences.map(sequence => sequence.id === pickerTarget
+                    ? { ...sequence, hokeis: [...sequence.hokeis, hokei] }
+                    : sequence),
+            });
+        }
+
+        setPickerTarget(null);
+        setQuery("");
+        setActiveSuggestion(0);
+    };
+
+    const updateSequence = (id: string, changes: Partial<EmbuDraftSequence>) => {
         saveDraft({
             ...draft,
-            steps: draft.steps.map(step => step.id === id ? { ...step, ...changes } : step),
+            sequences: draft.sequences.map(sequence => sequence.id === id ? { ...sequence, ...changes } : sequence),
         });
     };
 
-    const moveStep = (index: number, direction: -1 | 1) => {
+    const moveSequence = (index: number, direction: -1 | 1) => {
         const destination = index + direction;
-        if (destination < 0 || destination >= draft.steps.length) return;
-        const steps = [...draft.steps];
-        [steps[index], steps[destination]] = [steps[destination], steps[index]];
-        saveDraft({ ...draft, steps });
+        if (destination < 0 || destination >= draft.sequences.length) return;
+        const sequences = [...draft.sequences];
+        [sequences[index], sequences[destination]] = [sequences[destination], sequences[index]];
+        saveDraft({ ...draft, sequences });
     };
 
-    const removeStep = (id: string) => {
-        saveDraft({ ...draft, steps: draft.steps.filter(step => step.id !== id) });
-        setPreview(current => current && draft.steps.some(step => step.id === id
-            && embuTechniqueKey(step) === embuTechniqueKey(current.technique)) ? null : current);
+    const moveHokei = (sequenceId: string, hokeiIndex: number, direction: -1 | 1) => {
+        const sequence = draft.sequences.find(candidate => candidate.id === sequenceId);
+        if (!sequence) return;
+        const destination = hokeiIndex + direction;
+        if (destination < 0 || destination >= sequence.hokeis.length) return;
+        const hokeis = [...sequence.hokeis];
+        [hokeis[hokeiIndex], hokeis[destination]] = [hokeis[destination], hokeis[hokeiIndex]];
+        updateSequence(sequenceId, { hokeis });
+    };
+
+    const removeHokei = (sequenceId: string, hokeiId: string) => {
+        const sequence = draft.sequences.find(candidate => candidate.id === sequenceId);
+        if (!sequence) return;
+        const removedHokei = sequence.hokeis.find(hokei => hokei.id === hokeiId);
+        const remainingHokeis = sequence.hokeis.filter(hokei => hokei.id !== hokeiId);
+        const sequences = remainingHokeis.length > 0
+            ? draft.sequences.map(candidate => candidate.id === sequenceId
+                ? { ...candidate, hokeis: remainingHokeis }
+                : candidate)
+            : draft.sequences.filter(candidate => candidate.id !== sequenceId);
+
+        saveDraft({ ...draft, sequences });
+        if (pickerTarget === sequenceId) setPickerTarget(sequences.length === 0 ? "new" : null);
+        if (removedHokei) {
+            if (removedHokei.id === editingHokeiId) {
+                setEditingHokeiId(null);
+                setCommentDraft("");
+            }
+            setPreview(current => current
+                && embuTechniqueKey(removedHokei) === embuTechniqueKey(current.technique) ? null : current);
+        }
     };
 
     const showTechnique = (technique: EmbuTechnique) => {
@@ -546,13 +572,151 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
         setPreview({ technique, requestId: previewRequestId.current });
     };
 
+    const selectView = (view: EmbuAreaView | null) => {
+        setPreview(null);
+        setEditingHokeiId(null);
+        setCommentDraft("");
+        onViewChange(view);
+    };
+
+    const startEditingComment = (hokei: EmbuDraftHokei) => {
+        setEditingHokeiId(hokei.id);
+        setCommentDraft(hokei.comment);
+    };
+
+    const cancelEditingComment = () => {
+        setEditingHokeiId(null);
+        setCommentDraft("");
+    };
+
+    const saveHokeiComment = (sequenceId: string, hokeiId: string) => {
+        const sequence = draft.sequences.find(candidate => candidate.id === sequenceId);
+        if (!sequence) return;
+
+        updateSequence(sequenceId, {
+            hokeis: sequence.hokeis.map(hokei => hokei.id === hokeiId
+                ? { ...hokei, comment: commentDraft.trim() ? commentDraft : "" }
+                : hokei),
+        });
+        cancelEditingComment();
+    };
+
     const chooseActiveSuggestion = () => {
         const suggestion = suggestions[activeSuggestion];
-        if (suggestion) addTechnique(suggestion);
+        if (suggestion) addHokei(suggestion);
     };
+
+    const pickerSequenceIndex = pickerTarget === "new"
+        ? draft.sequences.length
+        : draft.sequences.findIndex(sequence => sequence.id === pickerTarget);
+    const currentSequenceNumber = pickerSequenceIndex >= 0
+        ? pickerSequenceIndex + 1
+        : Math.max(1, draft.sequences.length);
+    const progressLength = Math.max(MAX_EMBU_SEQUENCES, draft.sequences.length);
+    const kumiEmbuTechniques: KumiEmbuTechniqueLink[] = techniques.map(technique => ({
+        key: embuTechniqueKey(technique),
+        hokei: technique.hokei,
+        onSelect: () => showTechnique(technique),
+    }));
+
+    const techniquePicker = pickerTarget !== null && pickerSequenceIndex >= 0 ? (
+        <div className="embu-technique-picker">
+            <div className="embu-picker-heading">
+                <Form.Label htmlFor="embu-technique-search">
+                    {translator.translate("Välj hokei till sekvens {0}", { params: [String(pickerSequenceIndex + 1)] })}
+                </Form.Label>
+                {draft.sequences.length > 0 && (
+                    <button type="button" className="embu-text-button" onClick={closePicker}>
+                        {translator.translate("Avbryt")}
+                    </button>
+                )}
+            </div>
+            <div className="embu-search-field">
+                <Search aria-hidden="true" />
+                <Form.Control
+                    id="embu-technique-search"
+                    ref={techniqueSearchRef}
+                    type="search"
+                    role="combobox"
+                    autoComplete="off"
+                    aria-autocomplete="list"
+                    aria-expanded={suggestions.length > 0}
+                    aria-controls="embu-technique-suggestions"
+                    aria-activedescendant={suggestions.length > 0 ? `embu-suggestion-${activeSuggestion}` : undefined}
+                    value={query}
+                    placeholder={translator.translate("Sök, till exempel gyaku gote")}
+                    onChange={event => {
+                        setQuery(event.target.value);
+                        setActiveSuggestion(0);
+                    }}
+                    onKeyDown={event => {
+                        if (event.key === "ArrowDown" && suggestions.length > 0) {
+                            event.preventDefault();
+                            setActiveSuggestion(index => (index + 1) % suggestions.length);
+                        } else if (event.key === "ArrowUp" && suggestions.length > 0) {
+                            event.preventDefault();
+                            setActiveSuggestion(index => (index - 1 + suggestions.length) % suggestions.length);
+                        } else if (event.key === "Enter" && suggestions.length > 0) {
+                            event.preventDefault();
+                            chooseActiveSuggestion();
+                        } else if (event.key === "Escape") {
+                            if (query) setQuery("");
+                            else closePicker();
+                        }
+                    }}
+                />
+            </div>
+            {suggestions.length > 0 && (
+                <div className="embu-suggestions" id="embu-technique-suggestions" role="listbox">
+                    {suggestions.map((technique, index) => (
+                        <button
+                            key={embuTechniqueKey(technique)}
+                            id={`embu-suggestion-${index}`}
+                            type="button"
+                            role="option"
+                            aria-selected={index === activeSuggestion}
+                            className={index === activeSuggestion ? "is-active" : undefined}
+                            onMouseDown={event => event.preventDefault()}
+                            onClick={() => addHokei(technique)}
+                        >
+                            <PracticeTerm value={technique.hokei.hokei_name} dojoMode={dojoMode} />
+                            <span>{gradeLabel(technique.grade, translator, false)} · {translator.translate("vecka {0}", { params: [String(technique.week)] })}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+            {query.trim() && suggestions.length === 0 && (
+                <p className="embu-no-results">{translator.translate("Ingen teknik hittades.")}</p>
+            )}
+        </div>
+    ) : null;
+
+    if (activeView === null) {
+        const choices: GridItem[] = [
+            {
+                key: "build-embu",
+                title: translator.translate("Skapa embu"),
+                icon: <CardHeading />,
+                onSelect: () => selectView("builder"),
+            },
+            {
+                key: "practice-kumi-embu",
+                title: translator.translate("Träna kumi-embu"),
+                icon: <People />,
+                onSelect: () => selectView("kumi"),
+            },
+        ];
+
+        return (
+            <div className="free-practice-content embu-choice-page">
+                <Grid items={choices} className="free-practice-grid embu-choice-grid" />
+            </div>
+        );
+    }
 
     return (
         <div className="free-practice-content">
+            {activeView === "builder" && (
             <section className="free-practice-section embu-builder">
                 <div className="embu-builder-heading">
                     <h3 className="app-section-heading">{translator.translate("Bygg embu")}</h3>
@@ -564,132 +728,162 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
                 <p className="embu-experimental-note">
                     {translator.translate("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")}
                 </p>
-                <p className="free-practice-source-note">
-                    {translator.translate("Sätt ihop din embu med tekniker och egna övergångar. Utkastet sparas automatiskt.")}
-                </p>
 
-                <Form.Group className="embu-overall-notes" controlId="embu-overall-notes">
-                    <Form.Label>{translator.translate("Anteckningar för hela embun")}</Form.Label>
-                    <Form.Control
-                        as="textarea"
-                        rows={3}
-                        value={draft.notes}
-                        placeholder={translator.translate("Idé, tema eller sådant ni vill komma ihåg…")}
-                        onChange={event => saveDraft({ ...draft, notes: event.target.value })}
-                    />
-                </Form.Group>
-
-                <div className="embu-technique-picker">
-                    <Form.Label htmlFor="embu-technique-search">{translator.translate("Lägg till teknik")}</Form.Label>
-                    <div className="embu-search-field">
-                        <Search aria-hidden="true" />
-                        <Form.Control
-                            id="embu-technique-search"
-                            ref={techniqueSearchRef}
-                            type="search"
-                            role="combobox"
-                            autoComplete="off"
-                            aria-autocomplete="list"
-                            aria-expanded={suggestions.length > 0}
-                            aria-controls="embu-technique-suggestions"
-                            aria-activedescendant={suggestions.length > 0 ? `embu-suggestion-${activeSuggestion}` : undefined}
-                            value={query}
-                            placeholder={translator.translate("Sök, till exempel gyaku gote")}
-                            onChange={event => {
-                                setQuery(event.target.value);
-                                setActiveSuggestion(0);
-                            }}
-                            onKeyDown={event => {
-                                if (event.key === "ArrowDown" && suggestions.length > 0) {
-                                    event.preventDefault();
-                                    setActiveSuggestion(index => (index + 1) % suggestions.length);
-                                } else if (event.key === "ArrowUp" && suggestions.length > 0) {
-                                    event.preventDefault();
-                                    setActiveSuggestion(index => (index - 1 + suggestions.length) % suggestions.length);
-                                } else if (event.key === "Enter" && suggestions.length > 0) {
-                                    event.preventDefault();
-                                    chooseActiveSuggestion();
-                                } else if (event.key === "Escape") {
-                                    setQuery("");
-                                }
-                            }}
-                        />
-                    </div>
-                    {suggestions.length > 0 && (
-                        <div className="embu-suggestions" id="embu-technique-suggestions" role="listbox">
-                            {suggestions.map((technique, index) => (
-                                <button
-                                    key={embuTechniqueKey(technique)}
-                                    id={`embu-suggestion-${index}`}
-                                    type="button"
-                                    role="option"
-                                    aria-selected={index === activeSuggestion}
-                                    className={index === activeSuggestion ? "is-active" : undefined}
-                                    onMouseDown={event => event.preventDefault()}
-                                    onClick={() => addTechnique(technique)}
-                                >
-                                    <PracticeTerm value={technique.hokei.hokei_name} dojoMode={dojoMode} />
-                                    <span>{gradeLabel(technique.grade, translator, false)} · {translator.translate("vecka {0}", { params: [String(technique.week)] })}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                    {query.trim() && suggestions.length === 0 && (
-                        <p className="embu-no-results">{translator.translate("Ingen teknik hittades.")}</p>
-                    )}
+                <div className="embu-progress">
+                    <span>{translator.translate("Sekvens {0} av {1}", { params: [String(currentSequenceNumber), String(progressLength)] })}</span>
+                    <ol aria-hidden="true">
+                        {Array.from({ length: progressLength }, (_, index) => (
+                            <li
+                                key={index}
+                                className={`${index < draft.sequences.length ? "is-complete" : ""}${index + 1 === currentSequenceNumber ? " is-current" : ""}`}
+                            >
+                                {index + 1}
+                            </li>
+                        ))}
+                    </ol>
                 </div>
 
-                {draft.steps.length === 0 ? (
-                    <p className="embu-empty-state">{translator.translate("Din embu är tom. Sök efter den första tekniken ovan.")}</p>
-                ) : (
-                    <ol className="embu-draft-steps">
-                        {draft.steps.map((step, index) => {
-                            const technique = techniqueLookup.get(embuTechniqueKey(step))
-                                ?? techniques.find(candidate => candidate.hokei.hokei_name === step.hokeiName);
-                            return (
-                                <li key={step.id}>
-                                    <div className="embu-step-row">
-                                        <span className="embu-step-number" aria-hidden="true">{index + 1}</span>
+                {draft.sequences.length === 0 && techniquePicker}
+
+                {draft.sequences.length > 0 && (
+                    <>
+                        <ol className="embu-draft-sequences">
+                            {draft.sequences.map((sequence, sequenceIndex) => (
+                                <li key={sequence.id} className="embu-sequence">
+                                    <div className="embu-sequence-heading">
+                                        <span className="embu-sequence-number" aria-hidden="true">{sequenceIndex + 1}</span>
+                                        <h4>{translator.translate("Sekvens {0}", { params: [String(sequenceIndex + 1)] })}</h4>
+                                        {draft.sequences.length > 1 && (
+                                            <div className="embu-step-actions">
+                                                <button
+                                                    type="button"
+                                                    disabled={sequenceIndex === 0}
+                                                    aria-label={translator.translate("Flytta sekvens {0} upp", { params: [String(sequenceIndex + 1)] })}
+                                                    onClick={() => moveSequence(sequenceIndex, -1)}
+                                                >
+                                                    <ArrowUp aria-hidden="true" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={sequenceIndex === draft.sequences.length - 1}
+                                                    aria-label={translator.translate("Flytta sekvens {0} ner", { params: [String(sequenceIndex + 1)] })}
+                                                    onClick={() => moveSequence(sequenceIndex, 1)}
+                                                >
+                                                    <ArrowDown aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <ul className="embu-sequence-hokeis">
+                                        {sequence.hokeis.map((hokei, hokeiIndex) => {
+                                            const technique = techniqueLookup.get(embuTechniqueKey(hokei))
+                                                ?? techniques.find(candidate => candidate.hokei.hokei_name === hokei.hokeiName);
+                                            const attack = technique?.hokei.roles.attacker.action;
+                                            const commentLabel = hokei.comment
+                                                ? "Redigera kommentar till {0}"
+                                                : "Lägg till kommentar till {0}";
+                                            return (
+                                                <li key={hokei.id}>
+                                                    <div className="embu-hokei-content">
+                                                        <button
+                                                            type="button"
+                                                            className="embu-step-technique"
+                                                            disabled={!technique}
+                                                            aria-label={translator.translate("Visa teknik {0}", { params: [hokei.hokeiName] })}
+                                                            onClick={() => technique && showTechnique(technique)}
+                                                        >
+                                                            <PracticeTerm value={hokei.hokeiName} dojoMode={dojoMode} />
+                                                        </button>
+                                                        <div className="embu-hokei-note-line">
+                                                            {attack && (
+                                                                <span className="embu-hokei-description">
+                                                                    {translator.translate("kōgeki: {0}", { params: [translator.translate(attack)] })}
+                                                                </span>
+                                                            )}
+                                                            {editingHokeiId !== hokei.id && (
+                                                                <span className={`embu-comment-display${hokei.comment ? " has-comment" : ""}`}>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="embu-comment-pencil"
+                                                                        aria-label={translator.translate(commentLabel, { params: [hokei.hokeiName] })}
+                                                                        title={translator.translate(commentLabel, { params: [hokei.hokeiName] })}
+                                                                        onClick={() => startEditingComment(hokei)}
+                                                                    >
+                                                                        <Pencil aria-hidden="true" />
+                                                                    </button>
+                                                                    {hokei.comment && <span className="embu-hokei-comment">{hokei.comment}</span>}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {editingHokeiId === hokei.id ? (
+                                                            <Form.Group className="embu-comment-editor">
+                                                                <Form.Control
+                                                                    as="textarea"
+                                                                    rows={3}
+                                                                    autoFocus
+                                                                    aria-label={translator.translate("Kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                                    value={commentDraft}
+                                                                    placeholder={translator.translate("Skriv din kommentar…")}
+                                                                    onChange={event => setCommentDraft(event.target.value)}
+                                                                />
+                                                                <div className="embu-comment-actions">
+                                                                    <button type="button" className="btn btn-sm btn-primary" onClick={() => saveHokeiComment(sequence.id, hokei.id)}>
+                                                                        {translator.translate("Spara")}
+                                                                    </button>
+                                                                    <button type="button" className="embu-text-button" onClick={cancelEditingComment}>
+                                                                        {translator.translate("Avbryt")}
+                                                                    </button>
+                                                                </div>
+                                                            </Form.Group>
+                                                        ) : null}
+                                                    </div>
+                                                    <div className="embu-step-actions">
+                                                        {sequence.hokeis.length > 1 && (
+                                                            <>
+                                                                <button type="button" disabled={hokeiIndex === 0} aria-label={translator.translate("Flytta {0} upp", { params: [hokei.hokeiName] })} onClick={() => moveHokei(sequence.id, hokeiIndex, -1)}>
+                                                                    <ArrowUp aria-hidden="true" />
+                                                                </button>
+                                                                <button type="button" disabled={hokeiIndex === sequence.hokeis.length - 1} aria-label={translator.translate("Flytta {0} ner", { params: [hokei.hokeiName] })} onClick={() => moveHokei(sequence.id, hokeiIndex, 1)}>
+                                                                    <ArrowDown aria-hidden="true" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        <button type="button" aria-label={translator.translate("Ta bort {0}", { params: [hokei.hokeiName] })} onClick={() => removeHokei(sequence.id, hokei.id)}>
+                                                            <Trash aria-hidden="true" />
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+
+                                    {pickerTarget === sequence.id ? techniquePicker : pickerTarget === null && (
                                         <button
                                             type="button"
-                                            className="embu-step-technique"
-                                            disabled={!technique}
-                                            aria-label={translator.translate("Visa teknik {0}", { params: [step.hokeiName] })}
-                                            onClick={() => technique && showTechnique(technique)}
+                                            className="embu-add-hokei"
+                                            aria-label={translator.translate("Lägg till hokei i sekvens {0}", { params: [String(sequenceIndex + 1)] })}
+                                            onClick={() => openPicker(sequence.id)}
                                         >
-                                            <PracticeTerm value={step.hokeiName} dojoMode={dojoMode} />
+                                            + {translator.translate("Lägg till hokei i sekvens {0}", { params: [String(sequenceIndex + 1)] })}
                                         </button>
-                                        <div className="embu-step-actions">
-                                            <button type="button" disabled={index === 0} aria-label={translator.translate("Flytta {0} upp", { params: [step.hokeiName] })} onClick={() => moveStep(index, -1)}>
-                                                <ArrowUp aria-hidden="true" />
-                                            </button>
-                                            <button type="button" disabled={index === draft.steps.length - 1} aria-label={translator.translate("Flytta {0} ner", { params: [step.hokeiName] })} onClick={() => moveStep(index, 1)}>
-                                                <ArrowDown aria-hidden="true" />
-                                            </button>
-                                            <button type="button" aria-label={translator.translate("Ta bort {0}", { params: [step.hokeiName] })} onClick={() => removeStep(step.id)}>
-                                                <Trash aria-hidden="true" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {index < draft.steps.length - 1 && (
-                                        <div className="embu-transition">
-                                            <span aria-hidden="true">↓</span>
-                                            <Form.Control
-                                                as="textarea"
-                                                rows={2}
-                                                aria-label={translator.translate("Övergång efter {0}", { params: [step.hokeiName] })}
-                                                value={step.transition}
-                                                placeholder={translator.translate("Kommentar eller övergång till nästa teknik…")}
-                                                onChange={event => updateStep(step.id, { transition: event.target.value })}
-                                            />
-                                        </div>
                                     )}
+
                                 </li>
-                            );
-                        })}
-                    </ol>
+                            ))}
+                        </ol>
+
+                        {pickerTarget === "new" && techniquePicker}
+
+                        {pickerTarget === null && draft.sequences.length < MAX_EMBU_SEQUENCES && (
+                            <button type="button" className="btn btn-primary embu-next-sequence" onClick={() => openPicker("new")}>
+                                {translator.translate("Nästa sekvens")}
+                            </button>
+                        )}
+                    </>
                 )}
             </section>
+            )}
 
             {preview && (
                 <HokeiCard
@@ -707,84 +901,22 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
                 />
             )}
 
-            {selected && (
-                <section className="free-practice-section">
+            {activeView === "kumi" && selected && (
+                <section className="free-practice-section embu-kumi-example">
                     <div className="free-practice-section-heading">
                         <h3 className="app-section-heading">{translator.translate("Kumi-embu")}</h3>
                     </div>
-                    <ol className="free-practice-sequence-list">
-                        {(selected.sequence.items ?? []).map((step, index) => {
-                            const term = step.term?.romaji;
-                            return (
-                                <li key={`${selected.grade}.${index}`}>
-                                    {term && (
-                                        <KumiEmbuStepTerm
-                                            value={term}
-                                            techniques={techniques}
-                                            dojoMode={dojoMode}
-                                            onSelect={showTechnique}
-                                        />
-                                    )}
-                                    {step.annotations?.map((annotation, annotationIndex) => (
-                                        <div className="free-practice-step-note" key={annotationIndex}>
-                                            {translator.translate(annotation.text)}
-                                        </div>
-                                    ))}
-                                </li>
-                            );
-                        })}
-                    </ol>
+                    <KumiEmbuSequenceList
+                        items={selected.sequence.items ?? []}
+                        techniques={kumiEmbuTechniques}
+                        dojoMode={dojoMode}
+                    />
                     {(selected.sequence.videos ?? []).map(video => (
                         <VideoLink key={video.url} video={video} className="mt-3" />
                     ))}
                 </section>
             )}
         </div>
-    );
-};
-
-const KumiEmbuStepTerm = ({ value, techniques, dojoMode, onSelect }: {
-    value: string;
-    techniques: EmbuTechnique[];
-    dojoMode: boolean;
-    onSelect: (technique: EmbuTechnique) => void;
-}) => {
-    const translator = useContext(TranslatorContext);
-    const parts = resolveKumiEmbuTermParts(value, techniques);
-    const hasLinkedTechnique = parts.some(part => part.techniques.length > 0);
-
-    if (!hasLinkedTechnique) return <PracticeTerm value={value} dojoMode={dojoMode} />;
-
-    const japanese = !translator.isJapanese && !dojoMode ? translator.japanese(value) : null;
-    const primary = translator.translate(value);
-    const showJapanese = japanese && japanese !== value && japanese !== primary;
-
-    return (
-        <span className="free-practice-term">
-            <span className="kumi-embu-inline-term">
-                {parts.map((part, index) => {
-                    if (part.separator) {
-                        const separator = part.value.trim() === "&" ? "\u00a0&\u00a0" : part.value;
-                        return <span key={`${index}.${part.value}`}>{separator}</span>;
-                    }
-                    const label = translator.isJapanese ? translator.japanese(part.value) : translator.translate(part.value);
-                    return part.techniques.length > 0 ? (
-                        <button
-                            key={`${index}.${part.value}`}
-                            type="button"
-                            className="kumi-embu-step-button"
-                            aria-label={translator.translate("Visa teknik {0}", { params: [part.value.trim()] })}
-                            onClick={() => onSelect(part.techniques[0])}
-                        >
-                            {label}
-                        </button>
-                    ) : (
-                        <span key={`${index}.${part.value}`}>{label}</span>
-                    );
-                })}
-            </span>
-            {showJapanese && <span className="free-practice-term-japanese">{japanese}</span>}
-        </span>
     );
 };
 

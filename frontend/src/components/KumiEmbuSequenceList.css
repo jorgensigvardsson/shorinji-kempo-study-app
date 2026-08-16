@@ -1,0 +1,62 @@
+.kumi-embu-sequence-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: kumi-embu-sequence;
+}
+
+.kumi-embu-sequence-list > li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: 0.5rem;
+  padding: 0.9rem 0.25rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  counter-increment: kumi-embu-sequence;
+}
+
+.kumi-embu-sequence-list > li:first-child {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.kumi-embu-sequence-list > li::before {
+  content: counter(kumi-embu-sequence) ".";
+  grid-row: 1 / span 2;
+  color: var(--bs-secondary-color);
+}
+
+.kumi-embu-term {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.kumi-embu-term-japanese,
+.kumi-embu-step-note {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.kumi-embu-step-note {
+  margin-top: 0.35rem;
+}
+
+.kumi-embu-inline-term {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.kumi-embu-step-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-body-color);
+  font: inherit;
+  text-align: left;
+}
+
+.kumi-embu-step-button:hover,
+.kumi-embu-step-button:focus-visible {
+  color: var(--bs-primary);
+}

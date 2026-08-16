@@ -157,6 +157,22 @@
   font-size: 0.875rem;
 }
 
+.grading-kumi-embu {
+  padding-bottom: 0.5rem;
+}
+
+.grading-kumi-note {
+  max-width: 42rem;
+  margin: 0 0 1rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.grading-kumi-preview {
+  margin-top: 1.5rem;
+}
+
 .grading-fundamentals {
   padding-bottom: 0.5rem;
 }

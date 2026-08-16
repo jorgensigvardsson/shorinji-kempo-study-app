@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import GradingTest from "./GradingTest";
-import type { GradeName, GradePlan } from "./data";
+import type { GradeName, GradePlan, HokeiMoment } from "./data";
 import { getAppDataStore } from "./persistence/store";
 
 vi.mock("./assets/grading-exam-information.json", () => ({
@@ -84,7 +84,21 @@ vi.mock("./assets/grading-exam-information.json", () => ({
             ],
           },
           { term: { romaji: "chūshutsu kamoku" }, items: [] },
-          { term: { romaji: "kumi embu" }, items: [] },
+          {
+            term: { romaji: "kumi embu" },
+            annotations: [{ marker: "kome", text: "Växla shusha mellan sekvenserna" }],
+            items: [
+              {
+                numbering: { style: "paren", value: 1 },
+                term: { romaji: "tai ten ichi & keri ten san" },
+                annotations: [{ marker: "kome", text: "Lugn övergång" }],
+              },
+              {
+                numbering: { style: "paren", value: 2 },
+                term: { romaji: "gyaku gote" },
+              },
+            ],
+          },
           { term: { romaji: "un'yōhō" }, items: [] },
         ],
       }],
@@ -92,7 +106,28 @@ vi.mock("./assets/grading-exam-information.json", () => ({
   },
 }));
 
-const plans = [{ grade: "6 kyū", weeks: [] }, { grade: "3 kyū", weeks: [] }] as GradePlan[];
+const hokei = (hokeiName: string): HokeiMoment => ({
+  type: "hokei_moment",
+  hokei_name: hokeiName,
+  ren_hanko: false,
+  variations: [],
+  technique_group: "test ken",
+  foot_stance: [],
+  roles: { attacker: { action: "attack" }, defender: { action: hokeiName } },
+  kyohan_pages: [],
+});
+
+const plans = [
+  { grade: "6 kyū", weeks: [] },
+  {
+    grade: "3 kyū",
+    weeks: [{
+      week: 1,
+      type: "regular_week",
+      moments: [hokei("tai ten ichi"), hokei("keri ten san"), hokei("gyaku gote")],
+    }],
+  },
+] as GradePlan[];
 
 const HistoryProbe = () => {
   const location = useLocation();
@@ -193,11 +228,27 @@ describe("GradingTest subject split", () => {
 
     expect(screen.getByRole("button", { name: /Grunder/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Utvalda tekniker/ })).toBeTruthy();
-    const embuButton = screen.getByRole("button", { name: /Embu/ });
+    const embuButton = screen.getByRole("button", { name: /Kumi-embu/ });
     expect(embuButton.classList.contains("app-grid-card")).toBe(true);
     expect(embuButton.closest(".start-grid")).not.toBeNull();
     expect(screen.getByRole("button", { name: /Tillämpning/ })).toBeTruthy();
     expect(screen.queryByText("Tekniskt provämne")).toBeNull();
+  });
+
+  it("shows grading kumi-embu with the same calm sequence list as free practice", async () => {
+    const user = userEvent.setup();
+    const { container } = renderGrading("technical", "3 kyū");
+
+    await user.click(screen.getByRole("button", { name: /Kumi-embu/ }));
+
+    expect(screen.getByRole("heading", { name: "Kumi-embu" })).toBeTruthy();
+    expect(screen.getByText("Växla shusha mellan sekvenserna")).toBeTruthy();
+    expect(screen.getByText("Lugn övergång")).toBeTruthy();
+    expect(container.querySelector(".kumi-embu-sequence-list")).toBeTruthy();
+    expect(container.querySelectorAll(".kumi-embu-sequence-list > li")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: /Visa teknik Tai ten ichi/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Visa teknik Keri ten san/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Visa teknik Gyaku gote/i })).toBeTruthy();
   });
 
   it("treats an opened technical category as exactly one back step", async () => {

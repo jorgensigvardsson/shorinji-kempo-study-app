@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { Badge } from "react-bootstrap";
 import { Award, Book, Check2, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
 import { useSearchParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import Grid, { type GridItem } from "./components/Grid";
 import { noTranslate, TranslatorContext, type Translator } from "./i18n";
 import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
+import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
@@ -55,7 +56,7 @@ interface ItemDisplay {
 const categoryTitles: Record<string, string> = {
     "kiso kamoku": "Grunder",
     "chūshutsu kamoku": "Utvalda tekniker",
-    "kumi embu": "Parembu",
+    "kumi embu": "Kumi-embu",
     "un'yōhō": "Tillämpning",
     "gōhō un'yōhō": "Tillämpning hårda tekniker",
     "jūhō un'yōhō": "Tillämpning mjuka tekniker",
@@ -311,6 +312,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
     if (subject === "technical" && activeSelection && selectedSection && selectedItem) {
         const { display, title, subtitle } = itemSummary(selectedItem, translator, showKanji);
         const isFundamentals = selectedItem.term?.romaji === "kiso kamoku";
+        const isKumiEmbu = selectedItem.term?.romaji === "kumi embu";
         const fundamentalItems = selectedItem.items ?? [];
         const completedFundamentalCount = isFundamentals
             ? fundamentalItems.filter((fundamentalItem, fundamentalIndex) =>
@@ -332,7 +334,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                 />
                             )}
                         </div>
-                        {subtitle && <div className="text-muted small mt-1">{subtitle}</div>}
+                        {!isKumiEmbu && subtitle && <div className="text-muted small mt-1">{subtitle}</div>}
                         {display.gloss && <div className="text-muted small mt-1">({display.gloss})</div>}
                         {isFundamentals && selectedItem.points != null && (
                             <div className="grading-category-summary mt-2">
@@ -352,6 +354,13 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                         completions={gradingFundamentalCompletions}
                         expandedKey={expandedFundamental}
                         onExpandedChange={setExpandedFundamental}
+                    />
+                ) : isKumiEmbu ? (
+                    <KumiEmbuDetail
+                        item={selectedItem}
+                        grade={activeSelection.grade}
+                        hokeiMap={hokeiMap}
+                        dojoMode={dojoMode}
                     />
                 ) : (
                     <ItemDetail
@@ -385,7 +394,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                         const summary = itemSummary(item, translator, showKanji);
                         return {
                             key: `category-${sectionIndex}-${itemIndex}`,
-                            title: item.term?.romaji === "kumi embu" ? translator.translate("Embu") : summary.title,
+                            title: summary.title,
                             subtitle: summary.subtitle,
                             badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
                             icon: categoryIcon(item.term?.romaji),
@@ -494,6 +503,63 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                     );
                 })}
             </div>
+        </div>
+    );
+};
+
+const KumiEmbuDetail = ({ item, grade, hokeiMap, dojoMode }: {
+    item: Item;
+    grade: GradeName;
+    hokeiMap: Map<string, HokeiMoment>;
+    dojoMode: boolean;
+}) => {
+    const translator = useContext(TranslatorContext);
+    const [preview, setPreview] = useState<{ hokei: HokeiMoment; requestId: number } | null>(null);
+    const previewRequestId = useRef(0);
+    const techniques: KumiEmbuTechniqueLink[] = [...hokeiMap.entries()].map(([key, hokei]) => ({
+        key,
+        hokei,
+        onSelect: () => {
+            previewRequestId.current += 1;
+            setPreview({ hokei, requestId: previewRequestId.current });
+        },
+    }));
+
+    return (
+        <div className="grading-kumi-embu">
+            {item.description && <p>{translator.translate(item.description)}</p>}
+            {item.annotations?.map((annotation, annotationIndex) => (
+                <p key={annotationIndex} className="grading-kumi-note">
+                    {translator.translate(annotation.text)}
+                </p>
+            ))}
+            <KumiEmbuSequenceList
+                items={item.items ?? []}
+                techniques={techniques}
+                dojoMode={dojoMode}
+            />
+            {item.videos && item.videos.length > 0 && (
+                <div className="d-flex flex-column gap-2 mt-3">
+                    {item.videos.map(video => <VideoLink key={video.url} video={video} />)}
+                </div>
+            )}
+            {preview && (
+                <div className="grading-kumi-preview">
+                    <HokeiCard
+                        key={`${preview.hokei.hokei_name}-${preview.requestId}`}
+                        hokei={preview.hokei}
+                        gradeName={grade}
+                        showNotes
+                        showRating
+                        dojoMode={dojoMode}
+                        kamokuLayout
+                        defaultOpen
+                        onOpenChange={open => {
+                            if (!open) setPreview(null);
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 };

@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T08:57:35.671Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Embu och kumi-embu har fått varsitt tydligt val under Fri träning. Embu-byggaren leder dig genom sex sekvenser, låter varje sekvens innehålla flera hokei och ger varje teknik en egen kompakt kommentar. Kumi-embu visas nu med samma lugna upplägg under både träning och gradering.",
+        en: "Embu and kumi-embu now have separate, clear entrances under Free practice. The embu builder guides you through six sequences, allows several hokei in each sequence, and gives every technique its own compact comment. Kumi-embu now uses the same calm layout in both practice and grading.",
+        tr: "Embu ve kumi-embu artık Serbest çalışma altında ayrı ve anlaşılır seçeneklere sahip. Embu oluşturucu sizi altı dizi boyunca yönlendiriyor, her dizide birden fazla hokei kullanılmasına izin veriyor ve her tekniğe kendi kompakt yorumunu ekleme olanağı sunuyor. Kumi-embu artık hem çalışma hem de sınav bölümünde aynı sade düzenle gösteriliyor.",
+        ja: "自由練習で、演武と組演武をそれぞれ分かりやすく選べるようになりました。演武作成では6つの構成を順に組み立て、各構成に複数の法形を入れ、技ごとにコンパクトなコメントを残せます。組演武は練習と昇格考試の両方で、同じ落ち着いた表示になりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T07:39:46.494Z",
     changes: [
       {

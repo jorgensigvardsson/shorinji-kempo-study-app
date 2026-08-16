@@ -279,33 +279,92 @@ describe("FreePractice", () => {
     expect(screen.getByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeTruthy();
   });
 
-  it("builds and autosaves one embu with searchable, movable steps", async () => {
+  it("starts quietly and builds autosaved sequences with one or more hokei", async () => {
     const user = userEvent.setup();
     renderPractice(<EmbuHarness />);
 
+    expect(screen.getByRole("button", { name: "Skapa embu" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Träna kumi-embu" })).toBeTruthy();
+    expect(screen.queryByRole("combobox")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Skapa embu" }));
+
+    expect(screen.queryByRole("button", { name: "Alla träningsområden" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Embu och kumi-embu" })).toBeTruthy();
     expect(screen.getByText("Experimentell").querySelector("svg")).toBeTruthy();
     expect(screen.getByText("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")).toBeTruthy();
-    const search = screen.getByRole("combobox", { name: "Lägg till teknik" });
+    expect(screen.getByText("Sekvens 1 av 6")).toBeTruthy();
+    expect(screen.queryByRole("textbox", { name: "Anteckningar för hela embun" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Kumi-embu" })).toBeNull();
+
+    let search = screen.getByRole("combobox", { name: "Välj hokei till sekvens 1" });
     await user.type(search, "gyak");
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
+
+    await user.click(screen.getByRole("button", { name: "Lägg till hokei i sekvens 1" }));
+    search = screen.getByRole("combobox", { name: "Välj hokei till sekvens 1" });
     await user.type(search, "shita");
     await user.click(screen.getByRole("option", { name: /shita uke geri/i }));
-
     await user.click(screen.getByRole("button", { name: "Flytta shita uke geri upp" }));
-    await user.type(screen.getByRole("textbox", { name: "Övergång efter shita uke geri" }), "Byt sida lugnt");
-    await user.type(screen.getByRole("textbox", { name: "Anteckningar för hela embun" }), "Arbeta med rytmen");
+
+    expect(screen.getByText("kōgeki: zuki")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Lägg till kommentar till shita uke geri" }));
+    await user.type(
+      screen.getByRole("textbox", { name: "Kommentar till shita uke geri" }),
+      "Byt sida lugnt{enter}Arbeta med rytmen",
+    );
+    await user.click(screen.getByRole("button", { name: "Spara" }));
+
+    await user.click(screen.getByRole("button", { name: "Nästa sekvens" }));
+    search = screen.getByRole("combobox", { name: "Välj hokei till sekvens 2" });
+    await user.type(search, "gyak");
+    await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
 
     const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
-    expect(saved.notes).toBe("Arbeta med rytmen");
-    expect(saved.steps.map(step => step.hokeiName)).toEqual(["shita uke geri", "gyaku gote"]);
-    expect(saved.steps[0].transition).toBe("Byt sida lugnt");
+    expect(saved.sequences).toHaveLength(2);
+    expect(saved.sequences[0].hokeis.map(hokei => hokei.hokeiName)).toEqual(["shita uke geri", "gyaku gote"]);
+    expect(saved.sequences[0].hokeis[0].comment).toBe("Byt sida lugnt\nArbeta med rytmen");
+    expect(saved.sequences[1].hokeis.map(hokei => hokei.hokeiName)).toEqual(["gyaku gote"]);
+    expect(screen.queryByRole("textbox", { name: /Kommentar efter sekvens/ })).toBeNull();
+    expect(screen.queryByRole("textbox", { name: "Anteckningar för hela embun" })).toBeNull();
+
+    const displayedComment = screen.getByText((_, element) =>
+      element?.classList.contains("embu-hokei-comment") === true);
+    expect(displayedComment.textContent).toBe("Byt sida lugnt\nArbeta med rytmen");
+    const compactNoteLine = displayedComment.closest(".embu-hokei-note-line") as HTMLElement;
+    expect(within(compactNoteLine).getByText("kōgeki: zuki")).toBeTruthy();
+    expect(compactNoteLine.querySelector(".embu-comment-display.has-comment")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Redigera kommentar till shita uke geri" })).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Embu och kumi-embu" }));
+    expect(screen.getByRole("button", { name: "Skapa embu" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Träna kumi-embu" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Alla träningsområden" })).toBeTruthy();
+  });
+
+  it("finishes the builder after six sequences", async () => {
+    const user = userEvent.setup();
+    renderPractice(<EmbuHarness />);
+    await user.click(screen.getByRole("button", { name: "Skapa embu" }));
+
+    for (let sequence = 1; sequence <= 6; sequence += 1) {
+      const search = screen.getByRole("combobox", { name: `Välj hokei till sekvens ${sequence}` });
+      await user.type(search, "gyak");
+      await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
+      if (sequence < 6) await user.click(screen.getByRole("button", { name: "Nästa sekvens" }));
+    }
+
+    expect(screen.getByText("Sekvens 6 av 6")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Nästa sekvens" })).toBeNull();
+    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    expect(saved.sequences).toHaveLength(6);
   });
 
   it("opens a selected embu technique as a focused technique card", async () => {
     const user = userEvent.setup();
     renderPractice(<EmbuHarness />);
+    await user.click(screen.getByRole("button", { name: "Skapa embu" }));
 
-    const search = screen.getByRole("combobox", { name: "Lägg till teknik" });
+    const search = screen.getByRole("combobox", { name: "Välj hokei till sekvens 1" });
     await user.type(search, "gyak");
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
     await user.click(screen.getByRole("button", { name: "Visa teknik gyaku gote" }));
@@ -322,6 +381,8 @@ describe("FreePractice", () => {
     const user = userEvent.setup();
     renderPractice(<KumiEmbuLinkHarness />);
 
+    await user.click(screen.getByRole("button", { name: "Träna kumi-embu" }));
+    expect(screen.queryByRole("heading", { name: "Bygg embu" })).toBeNull();
     expect(screen.getByRole("button", { name: /Visa teknik Tai ten ichi/i })).toBeTruthy();
     const keriTenSan = screen.getByRole("button", { name: /Visa teknik Keri ten san/i });
     expect(keriTenSan).toBeTruthy();

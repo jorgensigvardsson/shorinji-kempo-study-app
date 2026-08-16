@@ -80,21 +80,18 @@
   min-width: 10rem;
 }
 
-.free-practice-item-list,
-.free-practice-sequence-list {
+.free-practice-item-list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.free-practice-item-list > li,
-.free-practice-sequence-list > li {
+.free-practice-item-list > li {
   padding: 0.9rem 0.25rem;
   border-bottom: 1px solid var(--bs-border-color);
 }
 
-.free-practice-item-list > li:first-child,
-.free-practice-sequence-list > li:first-child {
+.free-practice-item-list > li:first-child {
   border-top: 1px solid var(--bs-border-color);
 }
 
@@ -111,14 +108,9 @@
 }
 
 .free-practice-term-japanese,
-.free-practice-step-note,
 .free-practice-source-note {
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
-}
-
-.free-practice-step-note {
-  margin-top: 0.35rem;
 }
 
 .free-practice-source-note {
@@ -130,7 +122,7 @@
 .embu-builder {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .embu-builder-heading {
@@ -163,18 +155,58 @@
 .embu-experimental-note {
   width: min(100%, 42rem);
   margin: 0;
-  padding: 0.75rem 0.9rem;
-  border-left: 2px solid var(--bs-warning-border-subtle);
-  background: rgba(var(--bs-warning-rgb), 0.08);
   color: var(--bs-secondary-color);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
-.embu-overall-notes,
 .embu-technique-picker,
-.embu-draft-steps {
+.embu-draft-sequences,
+.embu-progress {
   width: min(100%, 42rem);
+}
+
+.embu-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.86rem;
+}
+
+.embu-progress > span {
+  flex: 0 0 auto;
+}
+
+.embu-progress ol {
+  display: flex;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.embu-progress li {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 50%;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.embu-progress li.is-complete {
+  border-color: rgba(var(--bs-primary-rgb), 0.3);
+  background: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+.embu-progress li.is-current {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.12);
 }
 
 .embu-builder .form-label {
@@ -185,6 +217,27 @@
 
 .embu-technique-picker {
   position: relative;
+  padding-block: 0.25rem;
+}
+
+.embu-picker-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.embu-text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 0.82rem;
+}
+
+.embu-text-button:hover,
+.embu-text-button:focus-visible {
+  color: var(--bs-primary);
 }
 
 .embu-search-field {
@@ -247,50 +300,74 @@
   font-size: 0.8rem;
 }
 
-.embu-no-results,
-.embu-empty-state {
+.embu-no-results {
   margin: 0.65rem 0 0;
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
 }
 
-.embu-empty-state {
-  width: min(100%, 42rem);
-  margin: 0;
-  padding: 1.25rem 0;
-  border-block: 1px solid var(--bs-border-color);
-}
-
-.embu-draft-steps {
+.embu-draft-sequences {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.embu-draft-steps > li {
+.embu-sequence {
+  padding-block: 0.65rem 0;
   border-top: 1px solid var(--bs-border-color);
 }
 
-.embu-draft-steps > li:last-child {
+.embu-sequence:last-child {
   border-bottom: 1px solid var(--bs-border-color);
 }
 
-.embu-step-row {
+.embu-sequence-heading {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.45rem;
-  min-height: 4.2rem;
+  min-height: 2.8rem;
 }
 
-.embu-step-number {
+.embu-sequence-number {
   color: var(--bs-secondary-color);
   text-align: center;
 }
 
+.embu-sequence-heading h4 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.embu-sequence-hokeis {
+  margin: 0;
+  padding: 0 0 0 2.45rem;
+  list-style: none;
+}
+
+.embu-sequence-hokeis > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.45rem;
+  min-height: 3.2rem;
+  padding-block: 0.55rem;
+}
+
+.embu-sequence-hokeis > li + li {
+  border-top: 1px dashed var(--bs-border-color);
+}
+
+.embu-hokei-content {
+  min-width: 0;
+}
+
 .embu-step-technique {
   min-width: 0;
-  padding: 0.7rem 0.35rem;
+  padding: 0.1rem 0.35rem 0.2rem 0;
   border: 0;
   background: transparent;
   color: var(--bs-emphasis-color);
@@ -307,6 +384,10 @@
 .embu-step-actions {
   display: flex;
   gap: 0.15rem;
+}
+
+.embu-sequence-hokeis > li > .embu-step-actions {
+  margin-top: 0.15rem;
 }
 
 .embu-step-actions button {
@@ -331,23 +412,107 @@
   opacity: 0.25;
 }
 
-.embu-transition {
-  display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  gap: 0.45rem;
-  padding: 0 0 1rem;
+.embu-add-hokei {
+  margin: 0 0 0.7rem 2.45rem;
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-primary);
+  font-size: 0.84rem;
+  text-align: left;
 }
 
-.embu-transition > span {
-  padding-top: 0.55rem;
-  color: var(--bs-secondary-color);
-  text-align: center;
+.embu-add-hokei:hover,
+.embu-add-hokei:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
-.embu-transition .form-control {
-  min-height: 3.25rem;
+.embu-sequence .embu-technique-picker {
+  width: auto;
+  margin: 0 0 0.9rem 2.45rem;
+}
+
+.embu-next-sequence {
+  align-self: flex-start;
+  min-width: 10rem;
+}
+
+.embu-hokei-note-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.15rem 0.45rem;
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.embu-comment-display {
+  display: inline-flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.embu-comment-display.has-comment {
+  flex: 1 1 12rem;
+  padding-left: 0.45rem;
+  border-left: 1px solid color-mix(in srgb, var(--bs-primary) 45%, transparent);
+  color: color-mix(in srgb, var(--bs-primary) 72%, var(--bs-body-color));
+}
+
+.embu-hokei-comment {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.embu-comment-pencil {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin: -0.15rem -0.25rem -0.15rem 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bs-secondary-color);
+}
+
+.embu-comment-display.has-comment .embu-comment-pencil {
+  color: var(--bs-primary);
+}
+
+.embu-comment-pencil:hover,
+.embu-comment-pencil:focus-visible {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+}
+
+.embu-comment-pencil svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.embu-comment-editor {
+  max-width: 32rem;
+  margin-top: 0.35rem;
+}
+
+.embu-comment-editor .form-control {
+  min-height: 4.5rem;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.embu-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.45rem;
 }
 
 .kihon-practice-proposal {
@@ -440,43 +605,6 @@
   min-width: 0;
 }
 
-.free-practice-sequence-list {
-  counter-reset: practice-step;
-}
-
-.free-practice-sequence-list > li {
-  display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  column-gap: 0.5rem;
-  counter-increment: practice-step;
-}
-
-.free-practice-sequence-list > li::before {
-  content: counter(practice-step) ".";
-  grid-row: 1 / span 2;
-  color: var(--bs-secondary-color);
-}
-
-.kumi-embu-step-button {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--bs-body-color);
-  font: inherit;
-  text-align: left;
-}
-
-.kumi-embu-step-button:hover,
-.kumi-embu-step-button:focus-visible {
-  color: var(--bs-primary);
-}
-
-.kumi-embu-inline-term {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-}
-
 @media (max-width: 35rem) {
   .free-practice-area-header {
     align-items: flex-start;
@@ -497,8 +625,23 @@
     grid-template-columns: 1fr;
   }
 
-  .embu-step-row {
+  .embu-progress {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .embu-sequence-heading {
     grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  }
+
+  .embu-sequence-hokeis {
+    padding-left: 2.05rem;
+  }
+
+  .embu-add-hokei,
+  .embu-sequence .embu-technique-picker {
+    margin-left: 2.05rem;
   }
 
   .embu-step-actions button {

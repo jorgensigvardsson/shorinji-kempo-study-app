@@ -7,8 +7,8 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Training** — choose between a grade-based weekly plan and free practice, with app-style back navigation that preserves your place
 - **Contextual training tools** — a discreet global grade selector and a Training mode that combines the focused Dojo presentation with keeping the screen awake
 - **Weekly progress** — mark a training week as completed and retain its completion date across synced devices
-- **Free practice** — focused areas for Kihon, Hokei, Tan'en/Sōtai, Randori, and Embu/Kumi-embu
-- **Experimental Embu builder** — assemble an Embu from existing techniques with transitions and notes; drafts are intentionally local-only while the permanent data model is designed
+- **Free practice** — focused areas for Kihon, Hokei, Tan'en/Sōtai, and Randori, with separate flows for building Embu and training Kumi-embu
+- **Experimental Embu builder** — compose six sequences from one or more existing Hokei, with transitions and notes; drafts are intentionally local-only while the permanent data model is designed
 - **Technique Groups** — explore techniques organized by category under Theory
 - **Grading** — theoretical requirements under Theory and practical requirements under Training, with grouped fundamentals and per-grade completion progress for large theory areas and fundamentals synced across devices
 - **Theory** — a shared entrance for technique groups, grading information, the word list, quiz, and flashcards
