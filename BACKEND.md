@@ -424,6 +424,31 @@ Two things this shape fixes, both worth not reintroducing:
   itself, running alongside the test workflow rather than after it, so the
   environment that mattered most had the weaker gate — none at all.
 
+### OIDC federated credentials
+Azure login is workload identity federation, so the `AZURE_CLIENT_ID` app
+registration must hold a federated credential matching the *subject* GitHub
+mints for the run. The subject is the branch that triggered it — the `uses:`
+call from `ci.yml` does not change that. Two credentials, one per deploy
+branch:
+
+    repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy-staging
+    repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy
+
+Staging's used to be `ref:refs/heads/main`, because `workflow_run` always ran
+in the default branch's context whatever branch pushed. That is gone, and the
+first staging deploy after the change failed on it:
+
+    AADSTS700213: No matching federated identity record found for presented
+    assertion subject 'repo:…:ref:refs/heads/deploy-staging'
+
+Adding the branch's credential fixes it; the `main` one is now unused and can
+be deleted. Note the consequence of keeping these branch-scoped: a
+`workflow_dispatch` deploy from some *other* branch presents that branch's
+subject and fails the same way until a credential exists for it. A flexible
+credential matching `ref:refs/heads/*`, or subjects keyed on GitHub
+Environments (`…:environment:staging`) instead of branches, would cover every
+branch at once — deliberately not done, to keep Azure trust narrow.
+
 ### Production
 Deploying production runs `.github/workflows/deploy.yml`:
 
@@ -479,17 +504,10 @@ One-time Azure-side setup this doesn't automate:
   `sk-study-app-staging`, plus write access to the `sk-study-app-db` Cosmos
   account (or the whole `sk-study-app` resource group) so it can create the
   `shorinji-staging` database and containers there.
-- If OIDC login is scoped by branch, the federated credential's subject must be
+- A federated credential on `AZURE_CLIENT_ID` with subject
   `repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy-staging`.
-  The OIDC token's subject follows the branch that actually triggered the run,
-  including through the `uses:` call from `ci.yml`. This changed when the
-  staging deploy stopped hanging off `workflow_run:` (which always ran in the
-  default branch's context, making the subject `ref:refs/heads/main` no matter
-  which branch pushed) — a branch-scoped credential still naming `main` will
-  now fail Azure login. Deploying an arbitrary branch via `ci.yml`'s
-  `workflow_dispatch` needs a credential matching that branch too, so a
-  branch-scoped setup is worth trading for a subject that covers the whole
-  repository if that flow is used often.
+  See "OIDC federated credentials" below — staging's used to name `main`, and
+  the first deploy after the `ci.yml` change failed because of it.
 - Register `https://auth.app-staging.shorinjikempo.net/auth/callback` as an
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
