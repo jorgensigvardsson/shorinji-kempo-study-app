@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T15:18:52.722Z",
+    changes: [
+      {
+        emoji: "🙏",
+        sv: "Hälsningen på startsidan avslutas nu med 🙏, så som kenshi hälsar varandra.",
+        en: "The greeting on the start page now ends with 🙏, the way kenshi greet each other.",
+        tr: "Başlangıç sayfasındaki selamlama artık 🙏 ile bitiyor; kenshiler birbirini böyle selamlar.",
+        ja: "スタートページの挨拶の最後に🙏を添えました。拳士同士が挨拶を交わすときの合掌です。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T14:25:49.000Z",
     changes: [
       {

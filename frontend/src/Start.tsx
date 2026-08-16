@@ -35,8 +35,11 @@ const Start = (props: Props) => {
 
     return (
         <div className="start-screen">
+            {/* The gasshō hands are decoration on top of the word itself, so they
+                stay out of the accessible name — a screen reader should read the
+                greeting, not "folded hands". */}
             <div className="start-context" aria-label={greeting}>
-                {greeting}
+                {greeting} <span aria-hidden="true">🙏</span>
             </div>
             <header className="start-intro">
                 <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
