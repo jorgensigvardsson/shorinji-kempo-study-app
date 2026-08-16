@@ -134,6 +134,7 @@
       "description": "Generic recursive node. Represents a numbered or bulleted entry with optional Japanese term, translatable description, point value, annotations, technique groups, and nested sub-items.",
       "type": "object",
       "properties": {
+        "id": { "type": "string", "description": "Stable identity for an item whose completion is stored against it. Never changed or reused: the user's saved ticks are keyed by it. The romaji beside it is display text and may be corrected freely." },
         "numbering": { "$ref": "#/definitions/Numbering" },
         "term": { "$ref": "#/definitions/Term" },
         "text": {

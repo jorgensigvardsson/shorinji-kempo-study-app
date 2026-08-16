@@ -14,13 +14,17 @@ vi.mock("./assets/grading-exam-information.json", () => ({
         {
           term: { romaji: "gakka kamoku" },
           title: "teoretiska ämnen",
+          // Tickable items carry an id, as they do in the real manual: it is what
+          // the completion is stored against. These have no term, so their ids are
+          // the frozen positional ones the keys used to be derived from.
           items: [
             {
+              id: "item-0",
               text: "Teoretiskt provämne",
               items: [{ text: "Teoretisk underdel" }],
             },
-            { text: "Skriftligt prov" },
-            { text: "Muntligt prov" },
+            { id: "item-1", text: "Skriftligt prov" },
+            { id: "item-2", text: "Muntligt prov" },
           ],
         },
         {
@@ -58,6 +62,7 @@ vi.mock("./assets/grading-exam-information.json", () => ({
             points: 100,
             items: [
               {
+                id: "tai gamae, tai sabaki, umpohō",
                 term: { romaji: "tai gamae, tai sabaki, umpohō" },
                 points: 10,
                 techniqueGroups: [
@@ -67,16 +72,19 @@ vi.mock("./assets/grading-exam-information.json", () => ({
                 ],
               },
               {
+                id: "ukemi",
                 term: { romaji: "ukemi" },
                 points: 10,
                 techniqueGroups: [{ techniques: [{ romaji: "mae ukemi" }] }],
               },
               {
+                id: "kihon kōgi",
                 term: { romaji: "kihon kōgi" },
                 points: 10,
                 techniqueGroups: [{ techniques: [{ romaji: "furiko zuki" }] }],
               },
               {
+                id: "tan'en kihon hōkei",
                 term: { romaji: "tan'en kihon hōkei" },
                 points: 40,
                 techniqueGroups: [{ techniques: [{ romaji: "tenchi ken dai ikkei" }] }],

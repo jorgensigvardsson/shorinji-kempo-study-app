@@ -15,20 +15,34 @@ Any user-visible string passed to `translator.translate()` must have a correspon
 
 Strings wrapped with `noTranslate()` (imported from `frontend/src/i18n.ts`) are intentionally fixed in an unspecified language and must never be passed to `translator.translate()` or added to `translations.json`. The function is an identity marker — its purpose is to signal that translation is explicitly unwanted.
 
-## Word list ids
+## Ids in the source data
 
-Each entry in `frontend/src/assets/word-list.json` carries an `id`, and that id is
-identity rather than position. A flashcard's "known" flag is saved against it in the
-user's synced document, so the number already exists on other people's devices.
+Some entries in the source JSON carry an `id`, and where they do, that id is what the
+user's synced document stores their progress against. It already exists on other
+people's devices, so it is identity — not a label, not a position, and not a
+description of the entry.
 
-- A new word takes `max(id) + 1`, wherever in the file it is inserted.
-- An id is never renumbered and never reused, including after a word is removed.
-- Correcting a word's spelling in place is fine — the id stays, and
-  `frontend/src/assets/word-list-id-baseline.json` is updated to match.
+The rule is the same wherever an `id` appears:
 
-Renumbering loses nothing visibly: it moves every later flag onto a different word,
-so the app reports that people know words they have never seen.
-`frontend/src/assets/word-list.test.ts` fails when an id changes meaning.
+- Never renumber, rename or reuse one, including after an entry is removed.
+- A new entry takes an id that has never been used before.
+- Correcting the display text beside an id — a romaji spelling, a translation — is
+  always fine and deliberately leaves the id alone.
+
+Changing one loses nothing visibly, which is what makes it dangerous: the progress
+saved against the old id is orphaned, the entry comes back blank, and nothing reports
+it. Each has a baseline file recording what has been handed out, and a test that fails
+when one changes:
+
+| Source | Stores | Baseline | Test |
+| --- | --- | --- | --- |
+| `word-list.json` | flashcard "known" flags | `word-list-id-baseline.json` | `word-list.test.ts` |
+| `grading-exam-information.json` | ticked grading items | `grading-completion-id-baseline.json` | `grading-completions.test.ts` |
+
+All paths are under `frontend/src/assets/`. Word list ids are numbers, so a new word
+takes `max(id) + 1` wherever in the file it is inserted. Grading ids are strings that
+were frozen from the romaji they used to be derived from, so a few read as `item-1`
+where the item has no term; those are historical, not a pattern to follow.
 
 ## Fonts: kanji, hiragana and katakana
 
