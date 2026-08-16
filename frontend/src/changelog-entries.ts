@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T07:22:55.237Z",
+    changes: [
+      {
+        emoji: "👋",
+        sv: "Startsidan hälsar dig nu välkommen med ditt namn efter Gasshō, när det finns ett namn på kontot.",
+        en: "The start page now welcomes you by name after Gasshō when your account has a name.",
+        tr: "Hesabınızda bir ad varsa başlangıç sayfası artık Gasshō'nun ardından adınızla sizi karşılıyor.",
+        ja: "アカウントに名前が登録されている場合、スタートページで「合掌」に続けて名前を表示するようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T06:40:41.382Z",
     changes: [
       {

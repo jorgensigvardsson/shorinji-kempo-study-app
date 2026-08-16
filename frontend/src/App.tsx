@@ -100,6 +100,12 @@ function App(props: Props) {
   const controlContext = getTrainingControlContext(location.pathname);
   const [trainingMode, setTrainingMode] = useTrainingMode();
   const navigationPending = useNavigationPending();
+  // Account details arrive asynchronously after login. Subscribing to sync state
+  // gives the route tree a fresh render once /auth/me has populated the cached user.
+  const syncState = useSyncState();
+  const displayName = syncState.status === "local_only"
+    ? undefined
+    : getSyncManager().getBackendUserInfo()?.displayName;
   const routes = getRoutes(
     findGradePlan(gradePlans, displayGrade),
     findGradePlan(gradePlans, profileGrade),
@@ -110,6 +116,7 @@ function App(props: Props) {
     g => setAppData("grade", g.grade),
     size => textSizeData.save(size),
     trainingMode,
+    displayName,
   );
 
   // Fetch the other pages once the first one has settled. Without this a navigation

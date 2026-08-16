@@ -77,11 +77,12 @@ export const routeDescription = (route: Route) => {
 export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator,
                           textSize: number,
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
-                          setTextSize: (size: number) => void, trainingMode: boolean): Route[] => {
+                          setTextSize: (size: number) => void, trainingMode: boolean, displayName?: string): Route[] => {
     const routes: Route[] = [{
         path: "/",
         component: () => <Start routes={routes.filter(r => r.path && r.path !== "/" && !r.hideOnStartPage)
-                                              .map(r => ({ path: r.path!, title: routeText(r), description: routeDescription(r), icon: r.icon }))} />,
+                                              .map(r => ({ path: r.path!, title: routeText(r), description: routeDescription(r), icon: r.icon }))}
+                                displayName={displayName} />,
         menuText: translator.translate("Start"),
         icon: House,
         showInMainMenu: true
