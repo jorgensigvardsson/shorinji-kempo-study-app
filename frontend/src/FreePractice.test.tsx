@@ -97,6 +97,7 @@ const embuPlans: GradePlan[] = [{
     type: "regular_week",
     moments: [
       {
+        id: "gyaku gote",
         type: "hokei_moment",
         hokei_name: "gyaku gote",
         ren_hanko: false,
@@ -107,6 +108,7 @@ const embuPlans: GradePlan[] = [{
         kyohan_pages: [164],
       },
       {
+        id: "shita uke geri",
         type: "hokei_moment",
         hokei_name: "shita uke geri",
         ren_hanko: false,
@@ -138,6 +140,7 @@ const kumiEmbuLinkPlans: GradePlan[] = [{
     type: "regular_week",
     moments: [
       {
+        id: "tai ten ichi",
         type: "hokei_moment",
         hokei_name: "tai ten ichi",
         ren_hanko: false,
@@ -148,6 +151,7 @@ const kumiEmbuLinkPlans: GradePlan[] = [{
         kyohan_pages: [100],
       },
       {
+        id: "keri ten san",
         type: "hokei_moment",
         hokei_name: "keri ten san",
         ren_hanko: false,

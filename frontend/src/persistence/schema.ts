@@ -83,6 +83,21 @@ export const APP_SCHEMA_COMPAT_VERSION = 2;
 // their own schema. See the server's putDocument.
 export const LEGACY_SCHEMA_VERSION = 1;
 
+// How long one technique's note may be.
+//
+// The whole document goes to the server as a single body, capped there at 1 MB, and
+// notes are the only part of it a reader can grow without limit. There are 288
+// techniques a note can be written against, so an unbounded note is the one field
+// that can carry the document over on its own — and the failure it causes is a dead
+// end: sync stops, and nothing in the app makes the document smaller again.
+//
+// 2000 characters is far more than anyone writes about a single technique, so it
+// reads as a guard rail rather than a restriction. It is counted in characters rather
+// than bytes because that is what the reader can see; in the worst case (Japanese, at
+// 3 bytes a character) a full note is 6 KB, so it is the count of long notes that
+// matters rather than any single one.
+export const HOKEI_NOTE_MAX_LENGTH = 2000;
+
 // The fields this build knows the meaning of. Anything else in a stored document was
 // written by a newer build and is carried through untouched rather than dropped.
 export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(

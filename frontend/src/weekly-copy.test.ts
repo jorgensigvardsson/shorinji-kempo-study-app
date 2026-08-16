@@ -23,6 +23,7 @@ function makeTranslator(language: Language = "sv", table: Record<string, string>
 }
 
 const hokeiMoment = (name: string): HokeiMoment => ({
+  id: name,
   type: "hokei_moment",
   hokei_name: name,
   ren_hanko: false,

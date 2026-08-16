@@ -82,6 +82,15 @@
   resize: vertical;
 }
 
+/* Sits between the textarea and the buttons, and only appears near the limit. */
+.inline-note-counter {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-secondary-color);
+    text-align: right;
+}
+
 .inline-note-actions {
   display: flex;
   align-items: center;

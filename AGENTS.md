@@ -38,11 +38,23 @@ when one changes:
 | --- | --- | --- | --- |
 | `word-list.json` | flashcard "known" flags | `word-list-id-baseline.json` | `word-list.test.ts` |
 | `grading-exam-information.json` | ticked grading items | `grading-completion-id-baseline.json` | `grading-completions.test.ts` |
+| `kamokuhyo.json` | notes and self-assessments | `kamokuhyo-id-baseline.json` | `kamokuhyo.test.ts` |
 
 All paths are under `frontend/src/assets/`. Word list ids are numbers, so a new word
 takes `max(id) + 1` wherever in the file it is inserted. Grading ids are strings that
 were frozen from the romaji they used to be derived from, so a few read as `item-1`
 where the item has no term; those are historical, not a pattern to follow.
+
+A hokei moment's id is its `hokei_name`, except where a name covers more than one
+moment — eleven of them do — and there it carries the variation that tells them apart,
+in square brackets: `tsuki nuki [soto]`. The brackets are not a style choice. An
+earlier version of the app wrote note keys in exactly that form, and there are notes
+in production stored under them, so matching it is what keeps those notes attached to
+their techniques.
+
+**A new moment whose name is already taken needs the same treatment.**
+`kamokuhyo.test.ts` fails on a duplicate id, which is what catches it — a name shared
+by two moments would otherwise be a note shared by two techniques, silently.
 
 ## Fonts: kanji, hiragana and katakana
 

@@ -137,6 +137,12 @@ export interface Video {
 }
 
 export interface HokeiMoment {
+  // Identity. The reader's note and self-assessment for this moment are saved
+  // against it, so it is never renamed or reused — see AGENTS.md. It is usually the
+  // hokei_name, and `name (variations)` for the eleven names that cover more than
+  // one moment; those used to share a note between them. Correcting a hokei_name is
+  // expected and deliberately leaves the id alone.
+  id: string;
   type: "hokei_moment";
   hokei_name: string;
   ren_hanko: boolean;
@@ -208,6 +214,9 @@ export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
 
 export function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
   return {
+    // These come from their own assets rather than kamokuhyo and have never had
+    // an id; the name is what their notes are already saved against.
+    id: m.hokei_name,
     type: "hokei_moment",
     hokei_name: m.hokei_name,
     ren_hanko: false,
@@ -224,6 +233,7 @@ export function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
 
 export function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
   return {
+    id: m.hokei_name,
     type: "hokei_moment",
     hokei_name: m.hokei_name,
     ren_hanko: false,
@@ -237,6 +247,7 @@ export function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
 
 export function adaptKyushoZeme(z: KyushoZeme): HokeiMoment {
   return {
+    id: z.name,
     type: "hokei_moment",
     hokei_name: z.name,
     ren_hanko: false,

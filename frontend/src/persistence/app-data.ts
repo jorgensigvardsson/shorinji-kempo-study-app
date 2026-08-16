@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { getAppDataStore } from "./store";
-import type { HokeiRankValue } from "./schema";
+import { HOKEI_NOTE_MAX_LENGTH, type HokeiRankValue } from "./schema";
 
 /**
  * The personal note saved against one technique, or null when there is none.
@@ -11,40 +11,47 @@ import type { HokeiRankValue } from "./schema";
  * other card on screen alone — the per-technique fan-out that used to be
  * hand-rolled with a Map of listeners keyed by technique name.
  */
-export function useHokeiNote(hokeiName: string): string | null {
+export function useHokeiNote(hokeiId: string): string | null {
     const subscribe = useCallback(
         (onStoreChange: () => void) => getAppDataStore().subscribe("notes", onStoreChange),
         []
     );
 
-    return useSyncExternalStore(subscribe, () => getAppDataStore().get("notes")[hokeiName] ?? null);
+    return useSyncExternalStore(subscribe, () => getAppDataStore().get("notes")[hokeiId] ?? null);
 }
 
-/** Saves a technique's note, or removes it when the note is empty. */
-export function setHokeiNote(hokeiName: string, note: string | null): void {
+/**
+ * Saves a technique's note, or removes it when the note is empty.
+ *
+ * The note is cut to HOKEI_NOTE_MAX_LENGTH here as well as in the editor, because the
+ * editor's limit only covers typing: a paste, an autofill, or a note arriving from a
+ * build that had no limit all reach the document without passing through it.
+ */
+export function setHokeiNote(hokeiId: string, note: string | null): void {
     const store = getAppDataStore();
     const existing = store.get("notes");
 
     if (note) {
-        if (existing[hokeiName] === note) return;
-        store.set("notes", { ...existing, [hokeiName]: note });
+        const capped = note.length > HOKEI_NOTE_MAX_LENGTH ? note.slice(0, HOKEI_NOTE_MAX_LENGTH) : note;
+        if (existing[hokeiId] === capped) return;
+        store.set("notes", { ...existing, [hokeiId]: capped });
         return;
     }
 
-    if (!(hokeiName in existing)) return;
+    if (!(hokeiId in existing)) return;
     const remaining = { ...existing };
-    delete remaining[hokeiName];
+    delete remaining[hokeiId];
     store.set("notes", remaining);
 }
 
 /** The self-assessment saved against one technique, or null when unrated. */
-export function useHokeiRank(hokeiName: string): HokeiRankValue | null {
+export function useHokeiRank(hokeiId: string): HokeiRankValue | null {
     const subscribe = useCallback(
         (onStoreChange: () => void) => getAppDataStore().subscribe("hokeiRanks", onStoreChange),
         []
     );
 
-    return useSyncExternalStore(subscribe, () => getAppDataStore().get("hokeiRanks")[hokeiName]?.value ?? null);
+    return useSyncExternalStore(subscribe, () => getAppDataStore().get("hokeiRanks")[hokeiId]?.value ?? null);
 }
 
 /**
@@ -52,22 +59,22 @@ export function useHokeiRank(hokeiName: string): HokeiRankValue | null {
  * Rewriting the same value is ignored so the entry keeps its original
  * `updatedAt`, which sync conflict resolution reads.
  */
-export function setHokeiRank(hokeiName: string, rank: HokeiRankValue | null): void {
+export function setHokeiRank(hokeiId: string, rank: HokeiRankValue | null): void {
     const store = getAppDataStore();
     const existing = store.get("hokeiRanks");
 
     if (rank === null) {
-        if (!(hokeiName in existing)) return;
+        if (!(hokeiId in existing)) return;
         const remaining = { ...existing };
-        delete remaining[hokeiName];
+        delete remaining[hokeiId];
         store.set("hokeiRanks", remaining);
         return;
     }
 
-    if (existing[hokeiName]?.value === rank) return;
+    if (existing[hokeiId]?.value === rank) return;
     store.set("hokeiRanks", {
         ...existing,
-        [hokeiName]: { value: rank, updatedAt: new Date().toISOString() },
+        [hokeiId]: { value: rank, updatedAt: new Date().toISOString() },
     });
 }
 

@@ -7,6 +7,7 @@ import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
 import { ChatFill, PersonFill, ShieldFill } from "react-bootstrap-icons";
 import { setHokeiNote, setHokeiRank, useHokeiNote, useHokeiRank } from "../persistence/app-data";
+import { HOKEI_NOTE_MAX_LENGTH } from "../persistence/schema";
 import StarRating from "./StarRating";
 import InlineNoteEditor from "./InlineNoteEditor";
 import VideoLink from "./VideoLink";
@@ -37,8 +38,8 @@ interface HokeiCardProps {
 const HokeiCard = (props: HokeiCardProps) => {
     const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange } = props;
     const translator = useContext(TranslatorContext);
-    const note = useHokeiNote(hokei.hokei_name);
-    const rank = useHokeiRank(hokei.hokei_name);
+    const note = useHokeiNote(hokei.id);
+    const rank = useHokeiRank(hokei.id);
     const hasNotes = showNotes && !!note;
     const showKanji = !dojoMode;
 
@@ -125,7 +126,7 @@ const HokeiCard = (props: HokeiCardProps) => {
         options.rightNode = (
             <StarRating
                 value={rank}
-                onChange={(value) => setHokeiRank(hokei.hokei_name, value)}
+                onChange={(value) => setHokeiRank(hokei.id, value)}
                 groupLabel={translator.translate("Självskattning")}
                 emptyLabel={translator.translate("Ej bedömd")}
                 getLabel={(value) => translator.translate(assessmentLabels[value])}
@@ -166,7 +167,7 @@ const KamokuCardHeader = ({ hokei, gradeName, rank, showRating, showKanji }: Kam
                     <div className="kamoku-card-name">{name}</div>
                     {japaneseName && <div className="kamoku-card-japanese">{japaneseName}</div>}
                 </div>
-                {showRating && <StarRating value={rank} onChange={value => setHokeiRank(hokei.hokei_name, value)}
+                {showRating && <StarRating value={rank} onChange={value => setHokeiRank(hokei.id, value)}
                                            groupLabel={translator.translate("Självskattning")} emptyLabel={translator.translate("Ej bedömd")}
                                            getLabel={value => translator.translate(assessmentLabels[value])} />}
             </div>
@@ -283,7 +284,7 @@ interface CardFooterProps {
 }
 
 const CardFooter = ({hokei}: CardFooterProps) => {
-    const savedNotes = useHokeiNote(hokei.hokei_name);
+    const savedNotes = useHokeiNote(hokei.id);
     const translator = useContext(TranslatorContext);
     const hokeiName = translator.translate(hokei.hokei_name);
 
@@ -291,12 +292,13 @@ const CardFooter = ({hokei}: CardFooterProps) => {
         <InlineNoteEditor
             className="hokei-inline-note"
             value={savedNotes ?? ""}
-            onSave={notes => setHokeiNote(hokei.hokei_name, notes || null)}
+            onSave={notes => setHokeiNote(hokei.id, notes || null)}
             addLabel={translator.translate("Lägg till anteckningar för {0}", { params: [hokeiName] })}
             editLabel={translator.translate("Redigera anteckningar för {0}", { params: [hokeiName] })}
             inputLabel={translator.translate("Anteckningar för {0}", { params: [hokeiName] })}
             placeholder={translator.translate("Skriv dina anteckningar…")}
             emptyLabel={translator.translate("Anteckningar")}
+            maxLength={HOKEI_NOTE_MAX_LENGTH}
         />
     )
 }

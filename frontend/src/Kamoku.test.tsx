@@ -18,6 +18,7 @@ vi.mock("./components/HokeiCard", () => ({
 }));
 
 const hokei: HokeiMoment = {
+  id: "gyaku gote",
   type: "hokei_moment",
   hokei_name: "gyaku gote",
   ren_hanko: false,

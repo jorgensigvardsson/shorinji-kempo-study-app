@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Form } from "react-bootstrap";
 import { Pencil } from "react-bootstrap-icons";
-import { TranslatorContext } from "../i18n";
+import { noTranslate, TranslatorContext } from "../i18n";
 import "./InlineNoteEditor.css";
 
 interface Props {
@@ -13,6 +13,9 @@ interface Props {
     placeholder: string;
     emptyLabel?: string;
     className?: string;
+    // Longest note this editor accepts. The counter appears only near the limit, so a
+    // note of ordinary length is written without a number watching.
+    maxLength?: number;
 }
 
 const InlineNoteEditor = ({
@@ -24,6 +27,7 @@ const InlineNoteEditor = ({
     placeholder,
     emptyLabel,
     className,
+    maxLength,
 }: Props) => {
     const translator = useContext(TranslatorContext);
     const [editing, setEditing] = useState(false);
@@ -54,7 +58,8 @@ const InlineNoteEditor = ({
     };
 
     const save = () => {
-        const nextValue = draft.trim() ? draft : "";
+        const trimmed = draft.trim() ? draft : "";
+        const nextValue = maxLength !== undefined && trimmed.length > maxLength ? trimmed.slice(0, maxLength) : trimmed;
         onSave(nextValue);
         setLastValue(nextValue);
         setDraft(nextValue);
@@ -78,8 +83,22 @@ const InlineNoteEditor = ({
                     aria-label={inputLabel}
                     value={draft}
                     placeholder={placeholder}
+                    maxLength={maxLength}
                     onChange={event => setDraft(event.target.value)}
                 />
+                {maxLength !== undefined && draft.length >= maxLength * 0.9 && (
+                    <div
+                        className="inline-note-counter"
+                        // Announced only when it changes meaningfully, so a screen
+                        // reader is not read a new number on every keystroke.
+                        aria-live="polite"
+                        aria-label={translator.translate("{0} av {1} tecken", {
+                            params: [String(draft.length), String(maxLength)],
+                        })}
+                    >
+                        {noTranslate(`${draft.length} / ${maxLength}`)}
+                    </div>
+                )}
                 <div className="inline-note-actions">
                     <button type="button" className="btn btn-sm btn-primary" onClick={save}>
                         {translator.translate("Spara")}

@@ -115,6 +115,7 @@ vi.mock("./assets/grading-exam-information.json", () => ({
 }));
 
 const hokei = (hokeiName: string): HokeiMoment => ({
+  id: hokeiName,
   type: "hokei_moment",
   hokei_name: hokeiName,
   ren_hanko: false,

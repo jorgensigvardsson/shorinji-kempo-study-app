@@ -22,6 +22,7 @@
         ],
         "moments": [
           {
+            "id": "ryūsui geri [ushiro]",
             "type": "hokei_moment",
             "hokei_name": "ryūsui geri",
             "variations": [
@@ -64,6 +65,7 @@
         ],
         "moments": [
           {
+            "id": "uchi uke zuki [ura]",
             "type": "hokei_moment",
             "hokei_name": "uchi uke zuki",
             "variations": [
@@ -105,6 +107,7 @@
         ],
         "moments": [
           {
+            "id": "ude jūji gatame",
             "type": "hokei_moment",
             "hokei_name": "ude jūji gatame",
             "variations": [],
@@ -139,6 +142,7 @@
         ],
         "moments": [
           {
+            "id": "kote nuki",
             "type": "hokei_moment",
             "hokei_name": "kote nuki",
             "variations": [],
@@ -179,6 +183,7 @@
         ],
         "moments": [
           {
+            "id": "tenshin geri",
             "type": "hokei_moment",
             "hokei_name": "tenshin geri",
             "variations": [],
@@ -224,6 +229,7 @@
         ],
         "moments": [
           {
+            "id": "uwa uke zuki [omote]",
             "type": "hokei_moment",
             "hokei_name": "uwa uke zuki",
             "variations": [
@@ -254,6 +260,7 @@
             ]
           },
           {
+            "id": "uwa uke zuki [ura]",
             "type": "hokei_moment",
             "hokei_name": "uwa uke zuki",
             "variations": [
@@ -306,6 +313,7 @@
         ],
         "moments": [
           {
+            "id": "ryūsui geri [mae]",
             "type": "hokei_moment",
             "hokei_name": "ryūsui geri",
             "variations": [
@@ -355,6 +363,7 @@
         ],
         "moments": [
           {
+            "id": "uwa uke geri [omote]",
             "type": "hokei_moment",
             "hokei_name": "uwa uke geri",
             "variations": [
@@ -385,6 +394,7 @@
             ]
           },
           {
+            "id": "uwa uke geri [ura]",
             "type": "hokei_moment",
             "hokei_name": "uwa uke geri",
             "variations": [
@@ -435,6 +445,7 @@
         ],
         "moments": [
           {
+            "id": "katate yori nuki",
             "type": "hokei_moment",
             "hokei_name": "katate yori nuki",
             "variations": [],
@@ -482,6 +493,7 @@
         ],
         "moments": [
           {
+            "id": "maki nuki [katate]",
             "type": "hokei_moment",
             "hokei_name": "maki nuki",
             "variations": [
@@ -532,6 +544,7 @@
         ],
         "moments": [
           {
+            "id": "shita uke geri",
             "type": "hokei_moment",
             "hokei_name": "shita uke geri",
             "variations": [],
@@ -579,6 +592,7 @@
         ],
         "moments": [
           {
+            "id": "shita uke jun geri",
             "type": "hokei_moment",
             "hokei_name": "shita uke jun geri",
             "variations": [],
@@ -625,6 +639,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku gote",
             "type": "hokei_moment",
             "hokei_name": "gyaku gote",
             "variations": [],
@@ -697,6 +712,7 @@
         ],
         "moments": [
           {
+            "id": "soto uke zuki [ura]",
             "type": "hokei_moment",
             "hokei_name": "soto uke zuki",
             "variations": [
@@ -728,6 +744,7 @@
             ]
           },
           {
+            "id": "soto uke zuki [omote]",
             "type": "hokei_moment",
             "hokei_name": "soto uke zuki",
             "variations": [
@@ -779,6 +796,7 @@
         ],
         "moments": [
           {
+            "id": "soto uke geri [ura]",
             "type": "hokei_moment",
             "hokei_name": "soto uke geri",
             "variations": [
@@ -814,6 +832,7 @@
             ]
           },
           {
+            "id": "soto uke geri [omote]",
             "type": "hokei_moment",
             "hokei_name": "soto uke geri",
             "variations": [
@@ -870,6 +889,7 @@
         ],
         "moments": [
           {
+            "id": "katate okuri gote",
             "type": "hokei_moment",
             "hokei_name": "katate okuri gote",
             "variations": [],
@@ -918,6 +938,7 @@
         ],
         "moments": [
           {
+            "id": "okuri maki tembin",
             "type": "hokei_moment",
             "hokei_name": "okuri maki tembin",
             "variations": [],
@@ -966,6 +987,7 @@
         ],
         "moments": [
           {
+            "id": "uchi age zuki",
             "type": "hokei_moment",
             "hokei_name": "uchi age zuki",
             "variations": [
@@ -998,6 +1020,7 @@
             ]
           },
           {
+            "id": "uchi age geri",
             "type": "hokei_moment",
             "hokei_name": "uchi age geri",
             "variations": [
@@ -1050,6 +1073,7 @@
         ],
         "moments": [
           {
+            "id": "kiri nuki [soto]",
             "type": "hokei_moment",
             "hokei_name": "kiri nuki",
             "variations": [
@@ -1080,6 +1104,7 @@
             ]
           },
           {
+            "id": "kiri nuki [uchi]",
             "type": "hokei_moment",
             "hokei_name": "kiri nuki",
             "variations": [
@@ -1129,6 +1154,7 @@
         ],
         "moments": [
           {
+            "id": "tsuki nuki [soto]",
             "type": "hokei_moment",
             "hokei_name": "tsuki nuki",
             "variations": [
@@ -1159,6 +1185,7 @@
             ]
           },
           {
+            "id": "tsuki nuki [uchi]",
             "type": "hokei_moment",
             "hokei_name": "tsuki nuki",
             "variations": [
@@ -1232,6 +1259,7 @@
         ],
         "moments": [
           {
+            "id": "ude jūji gatame yori tate gasshō gatame",
             "type": "hokei_moment",
             "hokei_name": "ude jūji gatame yori tate gasshō gatame",
             "variations": [],
@@ -1280,6 +1308,7 @@
         ],
         "moments": [
           {
+            "id": "ryōte yori nuki",
             "type": "hokei_moment",
             "hokei_name": "ryōte yori nuki",
             "variations": [],
@@ -1308,6 +1337,7 @@
             ]
           },
           {
+            "id": "maki nuki [ryōte]",
             "type": "hokei_moment",
             "hokei_name": "maki nuki",
             "variations": [
@@ -1358,6 +1388,7 @@
         ],
         "moments": [
           {
+            "id": "uchi uke geri [ura]",
             "type": "hokei_moment",
             "hokei_name": "uchi uke geri",
             "variations": [
@@ -1388,6 +1419,7 @@
             ]
           },
           {
+            "id": "uchi uke geri [omote]",
             "type": "hokei_moment",
             "hokei_name": "uchi uke geri",
             "variations": [
@@ -1441,6 +1473,7 @@
         ],
         "moments": [
           {
+            "id": "jūji nuki [katate]",
             "type": "hokei_moment",
             "hokei_name": "jūji nuki",
             "variations": [
@@ -1471,6 +1504,7 @@
             ]
           },
           {
+            "id": "jūji gote",
             "type": "hokei_moment",
             "hokei_name": "jūji gote",
             "variations": [
@@ -1522,6 +1556,7 @@
         ],
         "moments": [
           {
+            "id": "nidan nuki",
             "type": "hokei_moment",
             "hokei_name": "nidan nuki",
             "variations": [],
@@ -1574,6 +1609,7 @@
         ],
         "moments": [
           {
+            "id": "soto oshi uke zuki",
             "type": "hokei_moment",
             "hokei_name": "soto oshi uke zuki",
             "variations": [],
@@ -1602,6 +1638,7 @@
             ]
           },
           {
+            "id": "uchi oshi uke zuki",
             "type": "hokei_moment",
             "hokei_name": "uchi oshi uke zuki",
             "variations": [],
@@ -1646,6 +1683,7 @@
         ],
         "moments": [
           {
+            "id": "tsuki nuki [ryōte]",
             "type": "hokei_moment",
             "hokei_name": "tsuki nuki",
             "variations": [
@@ -1696,6 +1734,7 @@
         ],
         "moments": [
           {
+            "id": "tsuki ten ichi",
             "type": "hokei_moment",
             "hokei_name": "tsuki ten ichi",
             "variations": [],
@@ -1743,6 +1782,7 @@
         ],
         "moments": [
           {
+            "id": "hiji nuki yori mae tembin",
             "type": "hokei_moment",
             "hokei_name": "hiji nuki yori mae tembin",
             "variations": [],
@@ -1790,6 +1830,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku gote yori ura gaeshi nage, ura gatame",
             "type": "hokei_moment",
             "hokei_name": "gyaku gote yori ura gaeshi nage, ura gatame",
             "variations": [],
@@ -1840,6 +1881,7 @@
         ],
         "moments": [
           {
+            "id": "jūji uke geri",
             "type": "hokei_moment",
             "hokei_name": "jūji uke geri",
             "variations": [],
@@ -1900,6 +1942,7 @@
         ],
         "moments": [
           {
+            "id": "gasshō nuki",
             "type": "hokei_moment",
             "hokei_name": "gasshō nuki",
             "variations": [],
@@ -1928,6 +1971,7 @@
             ]
           },
           {
+            "id": "sankaku nuki",
             "type": "hokei_moment",
             "hokei_name": "sankaku nuki",
             "variations": [],
@@ -1976,6 +2020,7 @@
         ],
         "moments": [
           {
+            "id": "jūji nuki [ryōte]",
             "type": "hokei_moment",
             "hokei_name": "jūji nuki",
             "variations": [
@@ -2005,6 +2050,7 @@
             ]
           },
           {
+            "id": "ryōte jūji gote",
             "type": "hokei_moment",
             "hokei_name": "ryōte jūji gote",
             "variations": [],
@@ -2054,6 +2100,7 @@
         ],
         "moments": [
           {
+            "id": "kusshin zuki",
             "type": "hokei_moment",
             "hokei_name": "kusshin zuki",
             "variations": [],
@@ -2082,6 +2129,7 @@
             ]
           },
           {
+            "id": "kusshin geri",
             "type": "hokei_moment",
             "hokei_name": "kusshin geri",
             "variations": [],
@@ -2110,6 +2158,7 @@
             ]
           },
           {
+            "id": "kōbōgi (furi zuki & kusshin uke)",
             "type": "hokei_moment",
             "hokei_name": "kōbōgi (furi zuki & kusshin uke)",
             "variations": [],
@@ -2152,6 +2201,7 @@
         ],
         "moments": [
           {
+            "id": "kiri kaeshi nuki",
             "type": "hokei_moment",
             "hokei_name": "kiri kaeshi nuki",
             "variations": [
@@ -2188,6 +2238,7 @@
             ]
           },
           {
+            "id": "kiri gote",
             "type": "hokei_moment",
             "hokei_name": "kiri gote",
             "variations": [
@@ -2243,6 +2294,7 @@
         ],
         "moments": [
           {
+            "id": "yoko tenshin geri",
             "type": "hokei_moment",
             "hokei_name": "yoko tenshin geri",
             "variations": [],
@@ -2271,6 +2323,7 @@
             ]
           },
           {
+            "id": "han tenshin geri",
             "type": "hokei_moment",
             "hokei_name": "han tenshin geri",
             "variations": [],
@@ -2321,6 +2374,7 @@
         ],
         "moments": [
           {
+            "id": "jōhaku nuki",
             "type": "hokei_moment",
             "hokei_name": "jōhaku nuki",
             "variations": [
@@ -2361,6 +2415,7 @@
             ]
           },
           {
+            "id": "jōhaku dori",
             "type": "hokei_moment",
             "hokei_name": "jōhaku dori",
             "variations": [
@@ -2422,6 +2477,7 @@
         ],
         "moments": [
           {
+            "id": "soto oshi uke geri",
             "type": "hokei_moment",
             "hokei_name": "soto oshi uke geri",
             "variations": [],
@@ -2448,6 +2504,7 @@
             ]
           },
           {
+            "id": "uchi oshi uke geri",
             "type": "hokei_moment",
             "hokei_name": "uchi oshi uke geri",
             "variations": [],
@@ -2496,6 +2553,7 @@
         ],
         "moments": [
           {
+            "id": "uchi uke zuki [omote]",
             "type": "hokei_moment",
             "hokei_name": "uchi uke zuki",
             "variations": [
@@ -2522,6 +2580,7 @@
             "videos": []
           },
           {
+            "id": "kon ten ichi",
             "type": "hokei_moment",
             "hokei_name": "kon ten ichi",
             "variations": [],
@@ -2571,6 +2630,7 @@
         ],
         "moments": [
           {
+            "id": "oshi kiri nuki",
             "type": "hokei_moment",
             "hokei_name": "oshi kiri nuki",
             "variations": [],
@@ -2597,6 +2657,7 @@
             ]
           },
           {
+            "id": "okuri dori",
             "type": "hokei_moment",
             "hokei_name": "okuri dori",
             "variations": [],
@@ -2641,6 +2702,7 @@
         ],
         "moments": [
           {
+            "id": "ryōte okuri gote",
             "type": "hokei_moment",
             "hokei_name": "ryōte okuri gote",
             "variations": [],
@@ -2670,6 +2732,7 @@
             ]
           },
           {
+            "id": "ryōte okuri gote yori okuri yoko tembin",
             "type": "hokei_moment",
             "hokei_name": "ryōte okuri gote yori okuri yoko tembin",
             "variations": [],
@@ -2713,6 +2776,7 @@
         ],
         "moments": [
           {
+            "id": "ryaku jūji gote",
             "type": "hokei_moment",
             "hokei_name": "ryaku jūji gote",
             "variations": [],
@@ -2737,6 +2801,7 @@
             ]
           },
           {
+            "id": "maki jūji gote",
             "type": "hokei_moment",
             "hokei_name": "maki jūji gote",
             "variations": [],
@@ -2794,6 +2859,7 @@
         ],
         "moments": [
           {
+            "id": "morote tsuki nuki",
             "type": "hokei_moment",
             "hokei_name": "morote tsuki nuki",
             "variations": [],
@@ -2822,6 +2888,7 @@
             ]
           },
           {
+            "id": "katate oshi nuki",
             "type": "hokei_moment",
             "hokei_name": "katate oshi nuki",
             "variations": [],
@@ -2871,6 +2938,7 @@
         ],
         "moments": [
           {
+            "id": "kata muna otoshi",
             "type": "hokei_moment",
             "hokei_name": "kata muna otoshi",
             "variations": [],
@@ -2894,6 +2962,7 @@
             ]
           },
           {
+            "id": "eri jūji",
             "type": "hokei_moment",
             "hokei_name": "eri jūji",
             "variations": [],
@@ -2940,6 +3009,7 @@
         ],
         "moments": [
           {
+            "id": "tsubame gaeshi",
             "type": "hokei_moment",
             "hokei_name": "tsubame gaeshi",
             "variations": [],
@@ -2968,6 +3038,7 @@
             ]
           },
           {
+            "id": "chidori gaeshi kari ashi",
             "type": "hokei_moment",
             "hokei_name": "chidori gaeshi kari ashi",
             "variations": [],
@@ -3018,6 +3089,7 @@
         ],
         "moments": [
           {
+            "id": "sode nuki",
             "type": "hokei_moment",
             "hokei_name": "sode nuki",
             "variations": [],
@@ -3044,6 +3116,7 @@
             ]
           },
           {
+            "id": "sode dori",
             "type": "hokei_moment",
             "hokei_name": "sode dori",
             "variations": [],
@@ -3089,6 +3162,7 @@
         ],
         "moments": [
           {
+            "id": "hiki otoshi",
             "type": "hokei_moment",
             "hokei_name": "hiki otoshi",
             "variations": [],
@@ -3115,6 +3189,7 @@
             ]
           },
           {
+            "id": "harai uke geri",
             "type": "hokei_moment",
             "hokei_name": "harai uke geri",
             "variations": [],
@@ -3164,6 +3239,7 @@
         ],
         "moments": [
           {
+            "id": "sode maki",
             "type": "hokei_moment",
             "hokei_name": "sode maki",
             "variations": [],
@@ -3189,6 +3265,7 @@
             ]
           },
           {
+            "id": "sode maki tembin",
             "type": "hokei_moment",
             "hokei_name": "sode maki tembin",
             "variations": [],
@@ -3236,6 +3313,7 @@
         ],
         "moments": [
           {
+            "id": "tsuki ten ni",
             "type": "hokei_moment",
             "hokei_name": "tsuki ten ni",
             "variations": [],
@@ -3264,6 +3342,7 @@
             ]
           },
           {
+            "id": "furi ten ni",
             "type": "hokei_moment",
             "hokei_name": "furi ten ni",
             "variations": [],
@@ -3313,6 +3392,7 @@
         ],
         "moments": [
           {
+            "id": "eri nuki",
             "type": "hokei_moment",
             "hokei_name": "eri nuki",
             "variations": [],
@@ -3339,6 +3419,7 @@
             ]
           },
           {
+            "id": "ude maki",
             "type": "hokei_moment",
             "hokei_name": "ude maki",
             "variations": [],
@@ -3384,6 +3465,7 @@
         ],
         "moments": [
           {
+            "id": "morote jūji nuki",
             "type": "hokei_moment",
             "hokei_name": "morote jūji nuki",
             "variations": [],
@@ -3410,6 +3492,7 @@
             ]
           },
           {
+            "id": "morote jūji gote",
             "type": "hokei_moment",
             "hokei_name": "morote jūji gote",
             "variations": [],
@@ -3458,6 +3541,7 @@
         ],
         "moments": [
           {
+            "id": "tsuki ten san",
             "type": "hokei_moment",
             "hokei_name": "tsuki ten san",
             "variations": [],
@@ -3486,6 +3570,7 @@
             ]
           },
           {
+            "id": "keri ten san",
             "type": "hokei_moment",
             "hokei_name": "keri ten san",
             "variations": [],
@@ -3534,6 +3619,7 @@
         ],
         "moments": [
           {
+            "id": "morote hiki nuki",
             "type": "hokei_moment",
             "hokei_name": "morote hiki nuki",
             "variations": [],
@@ -3562,6 +3648,7 @@
             ]
           },
           {
+            "id": "maki gote",
             "type": "hokei_moment",
             "hokei_name": "maki gote",
             "variations": [
@@ -3631,6 +3718,7 @@
         ],
         "moments": [
           {
+            "id": "gedan gaeshi",
             "type": "hokei_moment",
             "hokei_name": "gedan gaeshi",
             "variations": [],
@@ -3658,6 +3746,7 @@
             ]
           },
           {
+            "id": "gyaku tenshin geri",
             "type": "hokei_moment",
             "hokei_name": "gyaku tenshin geri",
             "variations": [],
@@ -3705,6 +3794,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku tembin",
             "type": "hokei_moment",
             "hokei_name": "gyaku tembin",
             "variations": [],
@@ -3731,6 +3821,7 @@
             ]
           },
           {
+            "id": "morote oshi nuki",
             "type": "hokei_moment",
             "hokei_name": "morote oshi nuki",
             "variations": [],
@@ -3780,6 +3871,7 @@
         ],
         "moments": [
           {
+            "id": "kinteki geri hiza uke nami gaeshi",
             "type": "hokei_moment",
             "hokei_name": "kinteki geri hiza uke nami gaeshi",
             "variations": [],
@@ -3808,6 +3900,7 @@
             ]
           },
           {
+            "id": "gyaku geri hiza uke nami gaeshi",
             "type": "hokei_moment",
             "hokei_name": "gyaku geri hiza uke nami gaeshi",
             "variations": [],
@@ -3853,6 +3946,7 @@
         ],
         "moments": [
           {
+            "id": "oshi gote",
             "type": "hokei_moment",
             "hokei_name": "oshi gote",
             "variations": [
@@ -3897,6 +3991,7 @@
             ]
           },
           {
+            "id": "kote maki gaeshi",
             "type": "hokei_moment",
             "hokei_name": "kote maki gaeshi",
             "variations": [],
@@ -3948,6 +4043,7 @@
         ],
         "moments": [
           {
+            "id": "morote wa nuki",
             "type": "hokei_moment",
             "hokei_name": "morote wa nuki",
             "variations": [],
@@ -3975,6 +4071,7 @@
             ]
           },
           {
+            "id": "morote maki nuki",
             "type": "hokei_moment",
             "hokei_name": "morote maki nuki",
             "variations": [],
@@ -4034,6 +4131,7 @@
         ],
         "moments": [
           {
+            "id": "kaishin zuki",
             "hokei_name": "kaishin zuki",
             "variations": [
               "ura",
@@ -4086,6 +4184,7 @@
         ],
         "moments": [
           {
+            "id": "hangetsu geri",
             "hokei_name": "hangetsu geri",
             "variations": [],
             "technique_group": "niō ken",
@@ -4134,6 +4233,7 @@
         ],
         "moments": [
           {
+            "id": "gyakute nage",
             "hokei_name": "gyakute nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4185,6 +4285,7 @@
         ],
         "moments": [
           {
+            "id": "ryū nage",
             "hokei_name": "ryū nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4234,6 +4335,7 @@
         ],
         "moments": [
           {
+            "id": "soto maki tembin",
             "hokei_name": "soto maki tembin",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4283,6 +4385,7 @@
         ],
         "moments": [
           {
+            "id": "uchi nuki",
             "hokei_name": "uchi nuki",
             "variations": [
               "katate",
@@ -4338,6 +4441,7 @@
         ],
         "moments": [
           {
+            "id": "shita uke geri kote nage",
             "hokei_name": "shita uke geri kote nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4390,6 +4494,7 @@
         ],
         "moments": [
           {
+            "id": "tai ten ichi",
             "hokei_name": "tai ten ichi",
             "variations": [],
             "technique_group": "ten'ō ken",
@@ -4437,6 +4542,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku ten ichi",
             "hokei_name": "gyaku ten ichi",
             "variations": [],
             "technique_group": "ten'ō ken",
@@ -4483,6 +4589,7 @@
         ],
         "moments": [
           {
+            "id": "hiki tembin",
             "hokei_name": "hiki tembin",
             "variations": [],
             "technique_group": "goka ken",
@@ -4529,6 +4636,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku hiki tembin",
             "hokei_name": "gyaku hiki tembin",
             "variations": [],
             "technique_group": "goka ken",
@@ -4574,6 +4682,7 @@
         ],
         "moments": [
           {
+            "id": "kiri kaeshi tembin",
             "hokei_name": "kiri kaeshi tembin",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4622,6 +4731,7 @@
         ],
         "moments": [
           {
+            "id": "kiri kaeshi maki tembin",
             "hokei_name": "kiri kaeshi maki tembin",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4669,6 +4779,7 @@
         ],
         "moments": [
           {
+            "id": "uwa uke nage",
             "hokei_name": "uwa uke nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -4723,6 +4834,7 @@
         ],
         "moments": [
           {
+            "id": "uwa uke gyakute nage",
             "hokei_name": "uwa uke gyakute nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -4773,6 +4885,7 @@
         ],
         "moments": [
           {
+            "id": "morote gyaku gote",
             "hokei_name": "morote gyaku gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -4819,6 +4932,7 @@
         ],
         "moments": [
           {
+            "id": "morote okuri gote yori bakuhō",
             "hokei_name": "morote okuri gote yori bakuhō",
             "variations": [
               "ichi"
@@ -4869,6 +4983,7 @@
         ],
         "moments": [
           {
+            "id": "ude jūji gatame yori ura gasshō gatame",
             "hokei_name": "ude jūji gatame yori ura gasshō gatame",
             "variations": [],
             "technique_group": "kongō ken",
@@ -4909,6 +5024,7 @@
         ],
         "moments": [
           {
+            "id": "okuri tembin dori",
             "hokei_name": "okuri tembin dori",
             "variations": [
               "ni shu"
@@ -4958,6 +5074,7 @@
         ],
         "moments": [
           {
+            "id": "okuri hiji zeme",
             "hokei_name": "okuri hiji zeme",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -5007,6 +5124,7 @@
         ],
         "moments": [
           {
+            "id": "tsuri otoshi",
             "hokei_name": "tsuri otoshi",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -5056,6 +5174,7 @@
         ],
         "moments": [
           {
+            "id": "tsuri age dori",
             "hokei_name": "tsuri age dori",
             "variations": [],
             "technique_group": "kongō ken",
@@ -5097,6 +5216,7 @@
         ],
         "moments": [
           {
+            "id": "hiki muna otoshi",
             "hokei_name": "hiki muna otoshi",
             "variations": [],
             "technique_group": "rakan ken",
@@ -5138,6 +5258,7 @@
         ],
         "moments": [
           {
+            "id": "ryō muna otoshi",
             "hokei_name": "ryō muna otoshi",
             "variations": [],
             "technique_group": "rakan ken",
@@ -5179,6 +5300,7 @@
         ],
         "moments": [
           {
+            "id": "jun geri chi ichi",
             "hokei_name": "jun geri chi ichi",
             "variations": [],
             "technique_group": "chiō ken",
@@ -5229,6 +5351,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku geri chi ichi",
             "hokei_name": "gyaku geri chi ichi",
             "variations": [],
             "technique_group": "chiō ken",
@@ -5275,6 +5398,7 @@
         ],
         "moments": [
           {
+            "id": "maki otoshi",
             "hokei_name": "maki otoshi",
             "variations": [],
             "technique_group": "rakan ken",
@@ -5319,6 +5443,7 @@
         ],
         "moments": [
           {
+            "id": "soto maki otoshi",
             "hokei_name": "soto maki otoshi",
             "variations": [],
             "technique_group": "rakan ken",
@@ -5364,6 +5489,7 @@
         ],
         "moments": [
           {
+            "id": "mawashi geri sambō uke nami gaeshi",
             "hokei_name": "mawashi geri sambō uke nami gaeshi",
             "variations": [],
             "technique_group": "kakuritsu ken",
@@ -5410,6 +5536,7 @@
         ],
         "moments": [
           {
+            "id": "dan geri sambō uke dan geri gaeshi",
             "hokei_name": "dan geri sambō uke dan geri gaeshi",
             "variations": [],
             "technique_group": "kakuritsu ken",
@@ -5456,6 +5583,7 @@
         ],
         "moments": [
           {
+            "id": "sokutō geri hiki ashi nami gaeshi",
             "hokei_name": "sokutō geri hiki ashi nami gaeshi",
             "variations": [],
             "technique_group": "kakuritsu ken",
@@ -5501,6 +5629,7 @@
         ],
         "moments": [
           {
+            "id": "nuki uchi oshi gote",
             "hokei_name": "nuki uchi oshi gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -5549,6 +5678,7 @@
         ],
         "moments": [
           {
+            "id": "harai uke dan zuki",
             "hokei_name": "harai uke dan zuki",
             "variations": [],
             "technique_group": "byakuren ken",
@@ -5595,6 +5725,7 @@
         ],
         "moments": [
           {
+            "id": "harai uke chi ni",
             "hokei_name": "harai uke chi ni",
             "variations": [],
             "technique_group": "chiō ken",
@@ -5638,6 +5769,7 @@
         ],
         "moments": [
           {
+            "id": "jun geri chi san",
             "hokei_name": "jun geri chi san",
             "variations": [],
             "technique_group": "chiō ken",
@@ -5684,6 +5816,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku geri chi san",
             "hokei_name": "gyaku geri chi san",
             "variations": [],
             "technique_group": "chiō ken",
@@ -5743,6 +5876,7 @@
         ],
         "moments": [
           {
+            "id": "machi geri",
             "hokei_name": "machi geri",
             "variations": [],
             "technique_group": "niō ken",
@@ -5782,6 +5916,7 @@
         ],
         "moments": [
           {
+            "id": "tantō furi age ryūsui geri",
             "hokei_name": "tantō furi age ryūsui geri",
             "variations": [],
             "technique_group": "niō ken",
@@ -5826,6 +5961,7 @@
         ],
         "moments": [
           {
+            "id": "tantō tsuki komi shita uke uchi otoshi geri",
             "hokei_name": "tantō tsuki komi shita uke uchi otoshi geri",
             "variations": [],
             "technique_group": "niō ken",
@@ -5871,6 +6007,7 @@
         ],
         "moments": [
           {
+            "id": "age nuki",
             "hokei_name": "age nuki",
             "variations": [],
             "technique_group": "ryūō ken",
@@ -5912,6 +6049,7 @@
         ],
         "moments": [
           {
+            "id": "idori okuri gote",
             "hokei_name": "idori okuri gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -5962,6 +6100,7 @@
         ],
         "moments": [
           {
+            "id": "idori gyaku gote",
             "hokei_name": "idori gyaku gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -6023,6 +6162,7 @@
         ],
         "moments": [
           {
+            "id": "idori oshi gote",
             "hokei_name": "idori oshi gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -6073,6 +6213,7 @@
         ],
         "moments": [
           {
+            "id": "katate nage",
             "hokei_name": "katate nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -6126,6 +6267,7 @@
         ],
         "moments": [
           {
+            "id": "gyaku katate nage",
             "hokei_name": "gyaku katate nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -6176,6 +6318,7 @@
         ],
         "moments": [
           {
+            "id": "okuri katate nage",
             "hokei_name": "okuri katate nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -6233,6 +6376,7 @@
         ],
         "moments": [
           {
+            "id": "mikazuki gaeshi kari ashi",
             "hokei_name": "mikazuki gaeshi kari ashi",
             "variations": [],
             "technique_group": "byakuren ken",
@@ -6285,6 +6429,7 @@
         ],
         "moments": [
           {
+            "id": "suigetsu gaeshi oshi taoshi",
             "hokei_name": "suigetsu gaeshi oshi taoshi",
             "variations": [],
             "technique_group": "byakuren ken",
@@ -6330,6 +6475,7 @@
         ],
         "moments": [
           {
+            "id": "keri ten ichi sukui nage",
             "hokei_name": "keri ten ichi sukui nage",
             "variations": [],
             "technique_group": "ten'ō ken",
@@ -6380,6 +6526,7 @@
         ],
         "moments": [
           {
+            "id": "hangetsu gaeshi sukui kubi nage",
             "hokei_name": "hangetsu gaeshi sukui kubi nage",
             "variations": [],
             "technique_group": "byakuren ken",
@@ -6435,6 +6582,7 @@
         ],
         "moments": [
           {
+            "id": "sode maki gaeshi",
             "hokei_name": "sode maki gaeshi",
             "variations": [],
             "technique_group": "rakan ken",
@@ -6489,6 +6637,7 @@
         ],
         "moments": [
           {
+            "id": "sode guchi dori",
             "hokei_name": "sode guchi dori",
             "variations": [],
             "technique_group": "rakan ken",
@@ -6538,6 +6687,7 @@
         ],
         "moments": [
           {
+            "id": "sode guchi maki",
             "hokei_name": "sode guchi maki",
             "variations": [],
             "technique_group": "rakan ken",
@@ -6590,6 +6740,7 @@
         ],
         "moments": [
           {
+            "id": "chūdan gaeshi",
             "hokei_name": "chūdan gaeshi",
             "variations": [],
             "technique_group": "sangō ken",
@@ -6643,6 +6794,7 @@
         ],
         "moments": [
           {
+            "id": "fukko chi ni",
             "hokei_name": "fukko chi ni",
             "variations": [],
             "technique_group": "chiō ken",
@@ -6696,6 +6848,7 @@
         ],
         "moments": [
           {
+            "id": "kiri kaeshi gote",
             "hokei_name": "kiri kaeshi gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -6751,6 +6904,7 @@
         ],
         "moments": [
           {
+            "id": "kiri kaeshi nage",
             "hokei_name": "kiri kaeshi nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -6805,6 +6959,7 @@
         ],
         "moments": [
           {
+            "id": "morote kiri kaeshi nage",
             "hokei_name": "morote kiri kaeshi nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -6860,6 +7015,7 @@
         ],
         "moments": [
           {
+            "id": "maki komi gote",
             "hokei_name": "maki komi gote",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -6911,6 +7067,7 @@
         ],
         "moments": [
           {
+            "id": "ryōte katate nage",
             "hokei_name": "ryōte katate nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -6961,6 +7118,7 @@
         ],
         "moments": [
           {
+            "id": "morote katate nage",
             "hokei_name": "morote katate nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -7013,6 +7171,7 @@
         ],
         "moments": [
           {
+            "id": "uwa uke se nage",
             "hokei_name": "uwa uke se nage",
             "variations": [],
             "technique_group": "goka ken",
@@ -7057,6 +7216,7 @@
         ],
         "moments": [
           {
+            "id": "kata uchi nage",
             "hokei_name": "kata uchi nage",
             "variations": [],
             "technique_group": "rakan ken",
@@ -7103,6 +7263,7 @@
         ],
         "moments": [
           {
+            "id": "furisute omote nage",
             "hokei_name": "furisute omote nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7157,6 +7318,7 @@
         ],
         "moments": [
           {
+            "id": "morote okuri kote nage",
             "hokei_name": "morote okuri kote nage",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7211,6 +7373,7 @@
         ],
         "moments": [
           {
+            "id": "okuri tsuki taoshi",
             "hokei_name": "okuri tsuki taoshi",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7266,6 +7429,7 @@
         ],
         "moments": [
           {
+            "id": "koshi kujiki",
             "hokei_name": "koshi kujiki",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7320,6 +7484,7 @@
         ],
         "moments": [
           {
+            "id": "soto uke dan zuki",
             "hokei_name": "soto uke dan zuki",
             "variations": [],
             "technique_group": "niō ken",
@@ -7369,6 +7534,7 @@
         ],
         "moments": [
           {
+            "id": "uchi age dan zuki",
             "hokei_name": "uchi age dan zuki",
             "variations": [],
             "technique_group": "niō ken",
@@ -7419,6 +7585,7 @@
         ],
         "moments": [
           {
+            "id": "shita uke zuki",
             "hokei_name": "shita uke zuki",
             "variations": [],
             "technique_group": "niō ken",
@@ -7446,6 +7613,7 @@
             ]
           },
           {
+            "id": "shita uke dan zuki",
             "hokei_name": "shita uke dan zuki",
             "variations": [],
             "technique_group": "niō ken",
@@ -7507,6 +7675,7 @@
         ],
         "moments": [
           {
+            "id": "konoha okuri",
             "hokei_name": "konoha okuri",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7533,6 +7702,7 @@
             ]
           },
           {
+            "id": "okuri yubi gaeshi",
             "hokei_name": "okuri yubi gaeshi",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7578,6 +7748,7 @@
         ],
         "moments": [
           {
+            "id": "konoha gaeshi",
             "hokei_name": "konoha gaeshi",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7627,6 +7798,7 @@
         ],
         "moments": [
           {
+            "id": "gasshō hiki tembin",
             "hokei_name": "gasshō hiki tembin",
             "variations": [],
             "technique_group": "goka ken",
@@ -7647,6 +7819,7 @@
             ]
           },
           {
+            "id": "nigiri gaeshi",
             "hokei_name": "nigiri gaeshi",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7687,6 +7860,7 @@
         ],
         "moments": [
           {
+            "id": "okuri shi shi dori",
             "hokei_name": "okuri shi shi dori",
             "variations": [],
             "technique_group": "ryūka ken",
@@ -7733,6 +7907,7 @@
         ],
         "moments": [
           {
+            "id": "gasshō okuri dori",
             "hokei_name": "gasshō okuri dori",
             "variations": [],
             "technique_group": "kongō ken",
@@ -7797,6 +7972,7 @@
           }
         ],
         "moment": {
+          "id": "kubi jime shuhō jūji nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "kubi jime shuhō jūji nage",
           "technique_group": "rakan ken",
@@ -7850,6 +8026,7 @@
           }
         ],
         "moment": {
+          "id": "kubi jime nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "kubi jime nage",
           "technique_group": "rakan ken",
@@ -7910,6 +8087,7 @@
           }
         ],
         "moment": {
+          "id": "ken jime dori",
           "type": "yondan_hokei_moment",
           "hokei_name": "ken jime dori",
           "technique_group": "rakan ken",
@@ -7959,6 +8137,7 @@
           }
         ],
         "moment": {
+          "id": "tembin nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "tembin nage",
           "technique_group": "goka ken",
@@ -8006,6 +8185,7 @@
           }
         ],
         "moment": {
+          "id": "kumade gaeshi",
           "type": "yondan_hokei_moment",
           "hokei_name": "kumade gaeshi",
           "technique_group": "ryūka ken",
@@ -8050,6 +8230,7 @@
           }
         ],
         "moment": {
+          "id": "okuri gasshō",
           "type": "yondan_hokei_moment",
           "hokei_name": "okuri gasshō",
           "technique_group": "ryūka ken",
@@ -8093,6 +8274,7 @@
           }
         ],
         "moment": {
+          "id": "kannuki okuri dori",
           "type": "yondan_hokei_moment",
           "hokei_name": "kannuki okuri dori",
           "technique_group": "kongō ken",
@@ -8141,6 +8323,7 @@
           }
         ],
         "moment": {
+          "id": "kannuki soto tembin",
           "type": "yondan_hokei_moment",
           "hokei_name": "kannuki soto tembin",
           "technique_group": "goka ken",
@@ -8182,6 +8365,7 @@
           }
         ],
         "moment": {
+          "id": "gasshō gyaku gote",
           "type": "yondan_hokei_moment",
           "hokei_name": "gasshō gyaku gote",
           "technique_group": "ryūka ken",
@@ -8217,6 +8401,7 @@
           }
         ],
         "moment": {
+          "id": "gyaku gasshō nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "gyaku gasshō nage",
           "technique_group": "ryūka ken",
@@ -8262,6 +8447,7 @@
           }
         ],
         "moment": {
+          "id": "gyaku sode dori",
           "type": "yondan_hokei_moment",
           "hokei_name": "gyaku sode dori",
           "technique_group": "rakan ken",
@@ -8301,6 +8487,7 @@
           }
         ],
         "moment": {
+          "id": "gyaku sode maki",
           "type": "yondan_hokei_moment",
           "hokei_name": "gyaku sode maki",
           "technique_group": "rakan ken",
@@ -8337,6 +8524,7 @@
           }
         ],
         "moment": {
+          "id": "hangetsu kubi nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "hangetsu kubi nage",
           "technique_group": "rakan ken",
@@ -8378,6 +8566,7 @@
           }
         ],
         "moment": {
+          "id": "maki uchi kubi nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "maki uchi kubi nage",
           "technique_group": "rakan ken",
@@ -8415,6 +8604,7 @@
           }
         ],
         "moment": {
+          "id": "omote nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "omote nage",
           "technique_group": "rakan ken",
@@ -8453,6 +8643,7 @@
           }
         ],
         "moment": {
+          "id": "ura nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "ura nage",
           "technique_group": "rakan ken",
@@ -8490,6 +8681,7 @@
           }
         ],
         "moment": {
+          "id": "katate nage kiri kaeshi",
           "type": "yondan_hokei_moment",
           "hokei_name": "katate nage kiri kaeshi",
           "technique_group": "ryūka ken",
@@ -8528,6 +8720,7 @@
           }
         ],
         "moment": {
+          "id": "okuri eri dori",
           "type": "yondan_hokei_moment",
           "hokei_name": "okuri eri dori",
           "technique_group": "rakan ken",
@@ -8557,6 +8750,7 @@
           }
         ],
         "moment": {
+          "id": "ushiro kari taoshi",
           "type": "yondan_hokei_moment",
           "hokei_name": "ushiro kari taoshi",
           "technique_group": "rakan ken",
@@ -8586,6 +8780,7 @@
           }
         ],
         "moment": {
+          "id": "ushiro eri dori",
           "type": "yondan_hokei_moment",
           "hokei_name": "ushiro eri dori",
           "technique_group": "rakan ken",
@@ -8627,6 +8822,7 @@
           }
         ],
         "moment": {
+          "id": "ushiro kubi nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "ushiro kubi nage",
           "technique_group": "rakan ken",
@@ -8669,6 +8865,7 @@
           }
         ],
         "moment": {
+          "id": "ushiro sode maki dori",
           "type": "yondan_hokei_moment",
           "hokei_name": "ushiro sode maki dori",
           "technique_group": "rakan ken",
@@ -8704,6 +8901,7 @@
           }
         ],
         "moment": {
+          "id": "yahazu nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "yahazu nage",
           "technique_group": "rakan ken",
@@ -8739,6 +8937,7 @@
           }
         ],
         "moment": {
+          "id": "oshi uke nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "oshi uke nage",
           "technique_group": "goka ken",
@@ -8770,6 +8969,7 @@
           }
         ],
         "moment": {
+          "id": "oshi uke maki nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "oshi uke maki nage",
           "technique_group": "goka ken",
@@ -8799,6 +8999,7 @@
           }
         ],
         "moment": {
+          "id": "gasshō chōji",
           "type": "yondan_hokei_moment",
           "hokei_name": "gasshō chōji",
           "technique_group": "ryūka ken",
@@ -8836,6 +9037,7 @@
           }
         ],
         "moment": {
+          "id": "gasshō katate nage",
           "type": "yondan_hokei_moment",
           "hokei_name": "gasshō katate nage",
           "technique_group": "goka ken",
@@ -8873,6 +9075,7 @@
           }
         ],
         "moment": {
+          "id": "gasshō tsuki otoshi",
           "type": "yondan_hokei_moment",
           "hokei_name": "gasshō tsuki otoshi",
           "technique_group": "ryūka ken",
@@ -8902,6 +9105,7 @@
           }
         ],
         "moment": {
+          "id": "ashi nuki",
           "type": "yondan_hokei_moment",
           "hokei_name": "ashi nuki",
           "technique_group": "ryūō ken",
@@ -8950,6 +9154,7 @@
         "week": 1,
         "type": "godan_week",
         "moment": {
+          "id": "katate kannuki nage",
           "type": "godan_hokei_moment",
           "hokei_name": "katate kannuki nage",
           "variations": [],
@@ -8963,6 +9168,7 @@
         "week": 2,
         "type": "godan_week",
         "moment": {
+          "id": "ryōte kannuki nage",
           "type": "godan_hokei_moment",
           "hokei_name": "ryōte kannuki nage",
           "variations": [],
@@ -8976,6 +9182,7 @@
         "week": 3,
         "type": "godan_week",
         "moment": {
+          "id": "kannuki nai tembin",
           "type": "godan_hokei_moment",
           "hokei_name": "kannuki nai tembin",
           "variations": [],
@@ -8989,6 +9196,7 @@
         "week": 4,
         "type": "godan_week",
         "moment": {
+          "id": "osae kannuki nage soto",
           "type": "godan_hokei_moment",
           "hokei_name": "osae kannuki nage soto",
           "variations": [],
@@ -9002,6 +9210,7 @@
         "week": 5,
         "type": "godan_week",
         "moment": {
+          "id": "osae kannuki nage uchi",
           "type": "godan_hokei_moment",
           "hokei_name": "osae kannuki nage uchi",
           "variations": [],
@@ -9015,6 +9224,7 @@
         "week": 6,
         "type": "godan_week",
         "moment": {
+          "id": "kannuki katate nage",
           "type": "godan_hokei_moment",
           "hokei_name": "kannuki katate nage",
           "variations": [],
@@ -9028,6 +9238,7 @@
         "week": 7,
         "type": "godan_week",
         "moment": {
+          "id": "tekubi dori",
           "type": "godan_hokei_moment",
           "hokei_name": "tekubi dori",
           "variations": [],
@@ -9041,6 +9252,7 @@
         "week": 8,
         "type": "godan_week",
         "moment": {
+          "id": "chōji dori",
           "type": "godan_hokei_moment",
           "hokei_name": "chōji dori",
           "variations": [],
@@ -9054,6 +9266,7 @@
         "week": 9,
         "type": "godan_week",
         "moment": {
+          "id": "sode jūji",
           "type": "godan_hokei_moment",
           "hokei_name": "sode jūji",
           "variations": [],
@@ -9067,6 +9280,7 @@
         "week": 10,
         "type": "godan_week",
         "moment": {
+          "id": "sode dori nai tembin",
           "type": "godan_hokei_moment",
           "hokei_name": "sode dori nai tembin",
           "variations": [],
@@ -9080,6 +9294,7 @@
         "week": 11,
         "type": "godan_week",
         "moment": {
+          "id": "sode maki gaeshi ura",
           "type": "godan_hokei_moment",
           "hokei_name": "sode maki gaeshi ura",
           "variations": [],
@@ -9093,6 +9308,7 @@
         "week": 12,
         "type": "godan_week",
         "moment": {
+          "id": "okuri eri dori omote",
           "type": "godan_hokei_moment",
           "hokei_name": "okuri eri dori omote",
           "variations": [],
@@ -9106,6 +9322,7 @@
         "week": 13,
         "type": "godan_week",
         "moment": {
+          "id": "kubi jime nage omote",
           "type": "godan_hokei_moment",
           "hokei_name": "kubi jime nage omote",
           "variations": [],
@@ -9119,6 +9336,7 @@
         "week": 14,
         "type": "godan_week",
         "moment": {
+          "id": "bukkotsu nage",
           "type": "godan_hokei_moment",
           "hokei_name": "bukkotsu nage",
           "variations": [],
@@ -9132,6 +9350,7 @@
         "week": 15,
         "type": "godan_week",
         "moment": {
+          "id": "harai bukkotsu nage",
           "type": "godan_hokei_moment",
           "hokei_name": "harai bukkotsu nage",
           "variations": [],
@@ -9145,6 +9364,7 @@
         "week": 16,
         "type": "godan_week",
         "moment": {
+          "id": "ushiro bukkotsu nage",
           "type": "godan_hokei_moment",
           "hokei_name": "ushiro bukkotsu nage",
           "variations": [],
@@ -9158,6 +9378,7 @@
         "week": 17,
         "type": "godan_week",
         "moment": {
+          "id": "mae gami dori",
           "type": "godan_hokei_moment",
           "hokei_name": "mae gami dori",
           "variations": [],
@@ -9171,6 +9392,7 @@
         "week": 18,
         "type": "godan_week",
         "moment": {
+          "id": "obi dori",
           "type": "godan_hokei_moment",
           "hokei_name": "obi dori",
           "variations": [],
@@ -9184,6 +9406,7 @@
         "week": 19,
         "type": "godan_week",
         "moment": {
+          "id": "shikumi koshi nage",
           "type": "godan_hokei_moment",
           "hokei_name": "shikumi koshi nage",
           "variations": [],
@@ -9197,6 +9420,7 @@
         "week": 20,
         "type": "godan_week",
         "moment": {
+          "id": "shikumi nai tembin",
           "type": "godan_hokei_moment",
           "hokei_name": "shikumi nai tembin",
           "variations": [],
@@ -9210,6 +9434,7 @@
         "week": 21,
         "type": "godan_week",
         "moment": {
+          "id": "tora daoshi",
           "type": "godan_hokei_moment",
           "hokei_name": "tora daoshi",
           "variations": [
@@ -9225,6 +9450,7 @@
         "week": 22,
         "type": "godan_week",
         "moment": {
+          "id": "fukko daoshi",
           "type": "godan_hokei_moment",
           "hokei_name": "fukko daoshi",
           "variations": [
@@ -9240,6 +9466,7 @@
         "week": 23,
         "type": "godan_week",
         "moment": {
+          "id": "hasami daoshi",
           "type": "godan_hokei_moment",
           "hokei_name": "hasami daoshi",
           "variations": [
@@ -9255,6 +9482,7 @@
         "week": 24,
         "type": "godan_week",
         "moment": {
+          "id": "chōji nage",
           "type": "godan_hokei_moment",
           "hokei_name": "chōji nage",
           "variations": [],
@@ -9268,6 +9496,7 @@
         "week": 25,
         "type": "godan_week",
         "moment": {
+          "id": "konoha chōji",
           "type": "godan_hokei_moment",
           "hokei_name": "konoha chōji",
           "variations": [],
@@ -9281,6 +9510,7 @@
         "week": 26,
         "type": "godan_week",
         "moment": {
+          "id": "gyaku konoha gaeshi",
           "type": "godan_hokei_moment",
           "hokei_name": "gyaku konoha gaeshi",
           "variations": [],
@@ -9294,6 +9524,7 @@
         "week": 27,
         "type": "godan_week",
         "moment": {
+          "id": "okuri gasshō konoha nage",
           "type": "godan_hokei_moment",
           "hokei_name": "okuri gasshō konoha nage",
           "variations": [],
@@ -9307,6 +9538,7 @@
         "week": 28,
         "type": "godan_week",
         "moment": {
+          "id": "omote kumade gaeshi",
           "type": "godan_hokei_moment",
           "hokei_name": "omote kumade gaeshi",
           "variations": [],
@@ -9320,6 +9552,7 @@
         "week": 29,
         "type": "godan_week",
         "moment": {
+          "id": "okuri hiji zeme omote",
           "type": "godan_hokei_moment",
           "hokei_name": "okuri hiji zeme omote",
           "variations": [],
@@ -9333,6 +9566,7 @@
         "week": 30,
         "type": "godan_week",
         "moment": {
+          "id": "okuri kannuki gote",
           "type": "godan_hokei_moment",
           "hokei_name": "okuri kannuki gote",
           "variations": [],
@@ -9346,6 +9580,7 @@
         "week": 31,
         "type": "godan_week",
         "moment": {
+          "id": "uchi gyakute dori",
           "type": "godan_hokei_moment",
           "hokei_name": "uchi gyakute dori",
           "variations": [],
@@ -9359,6 +9594,7 @@
         "week": 32,
         "type": "godan_week",
         "moment": {
+          "id": "soto gyakute dori",
           "type": "godan_hokei_moment",
           "hokei_name": "soto gyakute dori",
           "variations": [],
@@ -9372,6 +9608,7 @@
         "week": 33,
         "type": "godan_week",
         "moment": {
+          "id": "hagai jime to shuhō",
           "type": "godan_hokei_moment",
           "hokei_name": "hagai jime to shuhō",
           "variations": [],

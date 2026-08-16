@@ -75,33 +75,59 @@ The list is ordered by risk, not by effort.
   what has not — changes are still saved on this device, they are just not reaching the
   others — and deliberately offers no button, since nothing in the app makes the
   document smaller today
-- [ ] Give the user a way to get back under the size cap. The reporting is done; the
-  remedy is not. `notes`, `hokeiRanks`, `knownFlashCards`, `weeklyPlanCompletions`,
-  `gradingFundamentalCompletions` and `gradingTheoryCompletions` still grow without
-  bound inside one blob against a 1 MB `MaxBytesReader` cap. The real fix is the
-  granular per-item API above, which is the item waiting on the client-build drain;
-  until then a user who reaches the cap has to delete notes by hand
+- [ ] Give the user a way to get back under the size cap. The reporting is done and
+  the growth is now bounded; the remedy is still not. A note is capped at 2000
+  characters (`HOKEI_NOTE_MAX_LENGTH`), applied in the textarea, in the editor's save
+  and in `setHokeiNote` — the last of those being what catches a paste or a note
+  synced from a build that had no cap. That was the one field a reader could grow
+  without limit, so reaching the cap by ordinary use is no longer really possible: 288
+  techniques at 2000 characters is about 660 KB of Latin text against a 1 MB
+  `MaxBytesReader`.
+  What remains is everything else — `hokeiRanks`, `knownFlashCards`,
+  `weeklyPlanCompletions` and the two grading completion maps still accumulate inside
+  the same blob — and, more to the point, a user who is *already* over has nothing to
+  do about it but delete notes by hand. The real fix is still the granular per-item
+  API above, waiting on the client-build drain
 - [x] Stop hand-writing two divergent type views of `grading-exam-information.json`. One `grading-exam-information.ts` now owns the types and the import, and both components use it — the last two `as unknown as` casts in the frontend are gone. A complete draft-07 schema for the file already existed at `frontend/data/grading-exam-information.schema`, pointed at by the data's own `$schema` and enforced by nothing; a test now validates the data against it with ajv, so a transcription slip fails the suite with a path to the offending node instead of surfacing at runtime in whichever component happened to read it. Unifying the types exposed two ways the old ones were wrong: `Annotation.marker` was required though the schema makes it optional, and the file has a top-level `$schema` key, so `Partial<Record<GradeName, GradeManual>>` never described its shape
-- [ ] Give a flashcard's "known" flag a stable id. `knownFlashCards` is keyed by
-  `entry.index + 1` (`Flashcard.tsx`), and `index` is a field stored in
-  `word-list.json` that today equals the array position exactly, 0 through 537. So
-  the key is positional in everything but name: insert a word anywhere but the end
-  and renumber, and every later card's flag moves to a different word. That is worse
-  than the orphaning the other derived keys suffer, because nothing goes missing —
-  the flags stay, attached to the wrong words, and no screen shows anything unusual.
-  The filter for cards with content runs before the id is read, so filtering is not
-  the risk; editing the list is. An id that does not encode position, plus a migration
-  from the numbers already stored, is the fix
-- [ ] Key grading completions by something other than the displayed romaji.
-  `gradingFundamentalCompletionKey`/`gradingTheoryCompletionKey` in `GradingTest.tsx`
-  build `${grade}|${item.term.romaji}`, falling back to `item-${itemIndex}` where an
-  item has no term. Both halves are fragile in the same way as the hokei note keys:
-  correcting a spelling in the source clears every tick saved against the old one, and
-  reordering the items without a term moves ticks between them. The `sashikae sokuō
-  geri` → `sokutō` correction on 2026-08-16 landed on `techniques[].romaji` rather
-  than `term.romaji`, so nothing broke — the same correction one level up would have
-  silently cleared grading progress for every user, with no error and no way to find
-  out afterwards
+- [x] Give a flashcard's "known" flag a stable id. `knownFlashCards` was keyed by
+  `entry.index + 1`, and `index` was a field stored in `word-list.json` that equalled
+  the array position exactly, 0 through 537 — positional in everything but name, so
+  inserting a word anywhere but the end and renumbering would move every later card's
+  flag onto a different word. Worse than the orphaning the other derived keys suffer,
+  because nothing goes missing: the flags stay, attached to the wrong words, and no
+  screen shows anything unusual.
+  It needed no migration in the end, which is the part worth remembering. Rather than
+  replacing the key, the value it already had was frozen as identity: `index` became
+  `id` holding `index + 1`, exactly what the flashcard key already used, so every key
+  already stored on every device still named the word it always did. Nothing moved,
+  so there was nothing to move.
+  The rename is not what makes it stick — `word-list.test.ts` is, pinning each id to
+  the word it has meant and failing when one changes meaning, disappears, or is reused
+  from below the baseline. Proved by inserting a word mid-file and renumbering, and
+  watching it name the first shifted id and count the 438 that followed.
+  It also flushed out a bug in waiting: `word-lookup.ts` deduplicated compound-lookup
+  matches by `entry.index`, so with the field gone every entry collapsed to one map
+  key and `lookupWordEntries("gyaku gote")` returned only `gyaku`. Its own test caught
+  it. Worth knowing how the type checker found the other three call sites: `tsc
+  --noEmit` reports clean on the root tsconfig, which lists no files and only project
+  references. `tsc -b` is the typecheck that sees this project
+- [x] Key grading completions by something other than the displayed romaji. They were
+  `${grade}|${item.term.romaji}`, falling back to `${grade}|item-${itemIndex}` where an
+  item has no term, so correcting a spelling cleared every tick saved against the old
+  one and reordering the term-less items moved ticks between them. How close that was:
+  the `sashikae sokuō geri` → `sokutō` correction on 2026-08-16 landed on
+  `techniques[].romaji`; one nesting level up, on `term.romaji`, and it would have
+  cleared grading progress for every user with no error and no trace.
+  Frozen in place like the word list: the 70 tickable items carry an `id` holding
+  exactly what the key derived before — the romaji, or the historical `item-N` — so
+  every stored key still names the item it always did, verified against HEAD rather
+  than assumed. Unlike the hokei names there was no collision to resolve; all 70 keys
+  were already unique.
+  The two identical key functions became one that reads the id and returns `undefined`
+  rather than a key when an item has none, so an item nothing can be stored against
+  gets no checkbox instead of a `grade|undefined` key several items would share.
+  `grading-completions.test.ts` pins the ids, checked by renaming one the old way and
+  watching it name the six orphaned keys
 - [ ] Give a note its own timestamp. `notes` is `Record<string, string>` — the only
   merged map whose entries carry no `updatedAt`, where `hokeiRanks`, `knownFlashCards`
   and the three completion maps all do. That absence is the whole reason a note

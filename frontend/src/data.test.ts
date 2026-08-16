@@ -19,6 +19,7 @@ import {
 } from "./data";
 
 const hokei: HokeiMoment = {
+  id: "ippo",
   type: "hokei_moment",
   hokei_name: "ippo",
   ren_hanko: false,

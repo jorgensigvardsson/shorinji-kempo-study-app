@@ -164,6 +164,7 @@ describe("buildWordListCandidates", () => {
 // ─── buildKamokuCandidates ───────────────────────────────────────────────────
 
 const baseHokei: HokeiMoment = {
+  id: "morote tsuki",
   type: "hokei_moment",
   hokei_name: "morote tsuki",
   ren_hanko: false,
