@@ -109,4 +109,26 @@ describe("experimental Embu draft persistence", () => {
 
     expect(loadExperimentalEmbuDraft().data).toEqual(draft);
   });
+
+  it("keeps empty sequence slots so an unfinished plan does not shift after reload", () => {
+    const draft = {
+      sequences: [
+        { id: "sequence-one", hokeis: [] },
+        {
+          id: "sequence-two",
+          hokeis: [{
+            id: "hokei-one",
+            hokeiName: "gyaku gote",
+            grade: "5 kyū",
+            week: 3,
+            momentIndex: 0,
+            comment: "",
+          }],
+        },
+      ],
+    };
+    localStorage.setItem(experimentalEmbuDraftStorageKey, JSON.stringify(draft));
+
+    expect(loadExperimentalEmbuDraft().data).toEqual(draft);
+  });
 });

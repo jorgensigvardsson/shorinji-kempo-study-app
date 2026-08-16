@@ -149,10 +149,38 @@
   padding: 0.65rem 0 !important;
 }
 
+/* Selected hokei views opt in to distance-friendly Dojo mode text. This keeps
+   the shared card layout compact everywhere else until those screens have
+   been reviewed separately. */
+.dojo-readable-hokei .dojo-card .kamoku-card-name {
+  font-size: clamp(1.65rem, 4vw, 2rem);
+}
+
+.dojo-readable-hokei .dojo-card-variations {
+  font-size: 1.05rem;
+}
+
+.dojo-readable-hokei .dojo-role {
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  line-height: 1.4;
+}
+
+.dojo-readable-hokei .dojo-role strong {
+  font-size: 0.9rem;
+}
+
+.dojo-readable-hokei .dojo-card .hokei-inline-note {
+  font-size: 1.15rem;
+}
+
 @container hokei-card (max-width: 30rem) {
   .dojo-role {
     grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.35fr);
     gap: 0.5rem;
     font-size: 1rem;
+  }
+
+  .dojo-readable-hokei .dojo-role {
+    font-size: 1.2rem;
   }
 }

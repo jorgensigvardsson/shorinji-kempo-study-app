@@ -92,10 +92,10 @@ const Kamoku = (props: Props) => {
 
 
     return (
-        <>
+        <div className={`kamoku-page${dojoMode ? " is-dojo-mode dojo-readable-hokei" : ""}`}>
             <header className="kamoku-page-header">
                 <h1 className="app-page-heading">{translator.translate("Veckoplan")}</h1>
-                <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>
+                {!dojoMode && <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>}
             </header>
             <div className="kamoku-controls training-view-controls mb-4">
                 <div className="kamoku-week-navigation">
@@ -161,7 +161,7 @@ const Kamoku = (props: Props) => {
                     ))}
                 </section>
             )}
-        </>
+        </div>
     )
 }
 

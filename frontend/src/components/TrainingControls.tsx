@@ -121,7 +121,7 @@ const TrainingControls = ({
                                     type="switch"
                                     id="global-training-mode"
                                     className="training-controls-mode"
-                                    label={translator.translate("Träningsläge")}
+                                    label={translator.translate("Dojo-läge")}
                                     checked={trainingMode}
                                     onChange={event => onTrainingModeChange(event.target.checked)}
                                 />
@@ -169,7 +169,7 @@ const TrainingControls = ({
 
             <Modal show={showIntro} onHide={() => undefined} centered backdrop="static" keyboard={false}>
                 <Modal.Header>
-                    <Modal.Title>{translator.translate("Träningsläge")}</Modal.Title>
+                    <Modal.Title>{translator.translate("Dojo-läge")}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {translator.translate("Förenklar träningsvyn och håller, när enheten stöder det, skärmen vaken medan du tränar.")}

@@ -62,6 +62,15 @@ describe("Kamoku weekly plan", () => {
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
   });
 
+  it("removes the explanatory introduction and marks the page for larger dojo text", () => {
+    const { container } = render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} dojoMode />);
+
+    expect(container.querySelector(".kamoku-page.is-dojo-mode")).not.toBeNull();
+    expect(screen.queryByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeNull();
+    expect(screen.getByText("uwazeme")).toBeTruthy();
+    expect(screen.getByText("gyaku gote")).toBeTruthy();
+  });
+
   it("keeps exact randori restrictions, embu and repetition in the open overview", () => {
     const mixedPlan: GradePlan = {
       grade: "5 kyū",

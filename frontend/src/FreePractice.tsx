@@ -1,6 +1,6 @@
-import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, People, Search, Trash } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, ExclamationTriangle, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
@@ -134,8 +134,12 @@ const FreePractice = (props: Props) => {
                 {activeDefinition && (
                     <header className="free-practice-area-header">
                         <div>
-                            <h1 className="app-view-heading" ref={areaHeadingRef} tabIndex={-1}>{translator.translate(activeDefinition.title)}</h1>
-                            <p className="app-intro-copy">{translator.translate(activeDefinition.description)}</p>
+                            <h1 className="app-view-heading" ref={areaHeadingRef} tabIndex={-1}>
+                                {translator.translate(activeArea === "embu" ? "Embu" : activeDefinition.title)}
+                            </h1>
+                            {!(dojoMode && activeArea !== null) && (
+                                <p className="app-intro-copy">{translator.translate(activeDefinition.description)}</p>
+                            )}
                         </div>
                     </header>
                 )}
@@ -146,7 +150,10 @@ const FreePractice = (props: Props) => {
                 </div>
             )}
             {visitedAreas.has("hokei") && (
-                <div hidden={activeArea !== "hokei"}>
+                <div
+                    className={`free-practice-hokei${dojoMode ? " dojo-readable-hokei" : ""}`}
+                    hidden={activeArea !== "hokei"}
+                >
                     <List
                         grade={findGradePlan(props.allGradePlans, props.myGrade)}
                         allGradePlans={props.allGradePlans}
@@ -187,10 +194,12 @@ const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
     const selectedGrade = myGrade;
 
     return (
-        <div className="free-practice-content kihon-practice-proposal">
-            <p className="kihon-design-note">
-                {translator.translate("Den här sidan är fortfarande under utformning och kan ändras när som helst.")}
-            </p>
+        <div className={`free-practice-content kihon-practice-proposal${dojoMode ? " is-dojo-mode" : ""}`}>
+            {!dojoMode && (
+                <p className="kihon-design-note">
+                    {translator.translate("Den här sidan är fortfarande under utformning och kan ändras när som helst.")}
+                </p>
+            )}
             <section className="free-practice-section kihon-practice-group">
                 <h3 className="app-section-heading">{translator.translate("Kaisoku dachi / Byakuren chūdan gamae")}</h3>
                 <div className="kihon-practice-columns">
@@ -256,7 +265,7 @@ const TanenSotaiArea = ({ dojoMode }: { dojoMode: boolean }) => {
     const sotai = tanenKihonHokei.filter(entry => entry.hokei_name.includes("(sōtai)"));
 
     return (
-        <div className="free-practice-content free-practice-form-groups">
+        <div className={`free-practice-content free-practice-form-groups${dojoMode ? " is-dojo-mode" : ""}`}>
             <PracticeFormMode title={translator.translate("Tan'en")} entries={tanen} dojoMode={dojoMode} />
             <PracticeFormMode title={translator.translate("Sōtai")} entries={sotai} dojoMode={dojoMode} />
         </div>
@@ -352,13 +361,13 @@ const RandoriArea = ({ allGradePlans, dojoMode }: Pick<Props, "allGradePlans" | 
     }, [allGradePlans]);
 
     return (
-        <div className="free-practice-content randori-practice-groups">
+        <div className={`free-practice-content randori-practice-groups${dojoMode ? " is-dojo-mode" : ""}`}>
             <RandoriThemeGroup title="gōhō" themes={gohoThemes} dojoMode={dojoMode} />
             <RandoriThemeGroup title="jūhō" themes={juhoThemes} dojoMode={dojoMode} />
             {otherThemes.length > 0 && (
                 <RandoriThemeGroup title={translator.translate("Övrigt")} themes={otherThemes} dojoMode={dojoMode} />
             )}
-            {unrestrictedFrom && (
+            {unrestrictedFrom && !dojoMode && (
                 <p className="free-practice-source-note">
                     {translator.translate("Från {0} anger Kamokuhyo randori utan ett mer detaljerat delsteg.", {
                         params: [gradeLabel(unrestrictedFrom, translator, false)],
@@ -380,9 +389,11 @@ const RandoriThemeGroup = ({ title, themes, dojoMode }: { title: string; themes:
                 {themes.map(theme => (
                     <li key={`${theme.type}|${theme.restriction}`}>
                         <PracticeTerm value={theme.restriction} dojoMode={dojoMode} />
-                        <span className="free-practice-item-grade">
-                            {gradeLabel(theme.introducedAt, translator, false)}
-                        </span>
+                        {!dojoMode && (
+                            <span className="free-practice-item-grade">
+                                {gradeLabel(theme.introducedAt, translator, false)}
+                            </span>
+                        )}
                     </li>
                 ))}
             </ul>
@@ -403,6 +414,29 @@ interface EmbuPreview {
     requestId: number;
 }
 
+interface EmbuMoveMenu {
+    sequenceId: string;
+    hokeiId: string;
+}
+
+interface EmbuDragCandidate extends EmbuMoveMenu {
+    pointerId: number;
+    startX: number;
+    startY: number;
+    hokeiName: string;
+}
+
+interface EmbuHokeiDrag extends EmbuMoveMenu {
+    hokeiName: string;
+    clientX: number;
+    clientY: number;
+}
+
+interface EmbuDropTarget {
+    sequenceId: string;
+    index: number;
+}
+
 const MAX_EMBU_SEQUENCES = 6;
 
 let embuItemId = 0;
@@ -415,7 +449,17 @@ const createEmbuItemId = (prefix: "sequence" | "hokei") => {
 const embuTechniqueKey = (technique: Pick<EmbuTechnique, "grade" | "week" | "momentIndex">) =>
     `${technique.grade}|${technique.week}|${technique.momentIndex}`;
 
-type EmbuAreaView = "builder" | "kumi";
+const fillEmbuSequenceSlots = (draft: EmbuDraft): EmbuDraft => {
+    if (draft.sequences.length >= MAX_EMBU_SEQUENCES) return draft;
+
+    const sequences = [...draft.sequences];
+    while (sequences.length < MAX_EMBU_SEQUENCES) {
+        sequences.push({ id: createEmbuItemId("sequence"), hokeis: [] });
+    }
+    return { ...draft, sequences };
+};
+
+type EmbuAreaView = "builder" | "practice" | "kumi";
 
 interface EmbuAreaProps extends Pick<Props, "myGrade" | "allGradePlans" | "dojoMode"> {
     activeView: EmbuAreaView | null;
@@ -425,13 +469,20 @@ interface EmbuAreaProps extends Pick<Props, "myGrade" | "allGradePlans" | "dojoM
 const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }: EmbuAreaProps) => {
     const translator = useContext(TranslatorContext);
     const draftData = useMemo(() => loadExperimentalEmbuDraft(), []);
-    const [draft, setDraft] = useState<EmbuDraft>(() => draftData.data);
-    const [pickerTarget, setPickerTarget] = useState<string | "new" | null>(() =>
-        draftData.data.sequences.length === 0 ? "new" : null);
+    const [draft, setDraft] = useState<EmbuDraft>(() => fillEmbuSequenceSlots(draftData.data));
+    const [pickerTarget, setPickerTarget] = useState<string | null>(null);
     const [query, setQuery] = useState("");
     const [activeSuggestion, setActiveSuggestion] = useState(0);
     const [preview, setPreview] = useState<EmbuPreview | null>(null);
+    const [practiceSequenceIndex, setPracticeSequenceIndex] = useState(0);
+    const [expandedSequenceId, setExpandedSequenceId] = useState<string | null>(null);
+    const [moveMenu, setMoveMenu] = useState<EmbuMoveMenu | null>(null);
+    const [draggedHokei, setDraggedHokei] = useState<EmbuHokeiDrag | null>(null);
+    const [dropTarget, setDropTarget] = useState<EmbuDropTarget | null>(null);
     const previewRequestId = useRef(0);
+    const dragCandidateRef = useRef<EmbuDragCandidate | null>(null);
+    const draggedHokeiRef = useRef<EmbuHokeiDrag | null>(null);
+    const dropTargetRef = useRef<EmbuDropTarget | null>(null);
     const techniqueSearchRef = useRef<HTMLInputElement>(null);
     const techniques = useMemo(() => allGradePlans.flatMap(plan => plan.weeks.flatMap(week =>
         getHokeiMoments(week).map((hokei, momentIndex) => ({
@@ -464,22 +515,23 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
     }).sort((a, b) => compareGrades(a.grade, b.grade)), [allGradePlans]);
     const selected = sequences.find(entry => entry.grade === myGrade) ?? sequences[0];
 
-    useEffect(() => draftData.registerListener(setDraft), [draftData]);
+    useEffect(() => draftData.registerListener(nextDraft => setDraft(fillEmbuSequenceSlots(nextDraft))), [draftData]);
 
     const saveDraft = (nextDraft: EmbuDraft) => {
         setDraft(nextDraft);
         draftData.save(nextDraft);
     };
 
-    const openPicker = (target: string | "new") => {
+    const openPicker = (target: string) => {
         setPickerTarget(target);
+        setExpandedSequenceId(null);
+        setMoveMenu(null);
         setQuery("");
         setActiveSuggestion(0);
         window.requestAnimationFrame(() => techniqueSearchRef.current?.focus());
     };
 
     const closePicker = () => {
-        if (draft.sequences.length === 0) return;
         setPickerTarget(null);
         setQuery("");
         setActiveSuggestion(0);
@@ -497,21 +549,11 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
             comment: draft.pendingComment ?? "",
         };
 
-        if (pickerTarget === "new") {
-            if (draft.sequences.length >= MAX_EMBU_SEQUENCES) return;
-            const sequence: EmbuDraftSequence = {
-                id: createEmbuItemId("sequence"),
-                hokeis: [hokei],
-            };
-            saveDraft({ sequences: [...draft.sequences, sequence] });
-        } else {
-            saveDraft({
-                ...draft,
-                sequences: draft.sequences.map(sequence => sequence.id === pickerTarget
-                    ? { ...sequence, hokeis: [...sequence.hokeis, hokei] }
-                    : sequence),
-            });
-        }
+        saveDraft({
+            sequences: draft.sequences.map(sequence => sequence.id === pickerTarget
+                ? { ...sequence, hokeis: [...sequence.hokeis, hokei] }
+                : sequence),
+        });
 
         setPickerTarget(null);
         setQuery("");
@@ -525,22 +567,116 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         });
     };
 
-    const moveSequence = (index: number, direction: -1 | 1) => {
-        const destination = index + direction;
-        if (destination < 0 || destination >= draft.sequences.length) return;
-        const sequences = [...draft.sequences];
-        [sequences[index], sequences[destination]] = [sequences[destination], sequences[index]];
+    const moveHokeiTo = (sourceSequenceId: string, hokeiId: string, targetSequenceId: string, targetIndex: number) => {
+        const sourceSequence = draft.sequences.find(sequence => sequence.id === sourceSequenceId);
+        const hokei = sourceSequence?.hokeis.find(candidate => candidate.id === hokeiId);
+        if (!hokei || !draft.sequences.some(sequence => sequence.id === targetSequenceId)) return;
+
+        const sequencesWithoutHokei = draft.sequences.map(sequence => sequence.id === sourceSequenceId
+            ? { ...sequence, hokeis: sequence.hokeis.filter(candidate => candidate.id !== hokeiId) }
+            : sequence);
+        const sequences = sequencesWithoutHokei.map(sequence => {
+            if (sequence.id !== targetSequenceId) return sequence;
+            const index = Math.max(0, Math.min(targetIndex, sequence.hokeis.length));
+            return {
+                ...sequence,
+                hokeis: [...sequence.hokeis.slice(0, index), hokei, ...sequence.hokeis.slice(index)],
+            };
+        });
         saveDraft({ ...draft, sequences });
     };
 
     const moveHokei = (sequenceId: string, hokeiIndex: number, direction: -1 | 1) => {
         const sequence = draft.sequences.find(candidate => candidate.id === sequenceId);
         if (!sequence) return;
+        const hokei = sequence.hokeis[hokeiIndex];
         const destination = hokeiIndex + direction;
-        if (destination < 0 || destination >= sequence.hokeis.length) return;
-        const hokeis = [...sequence.hokeis];
-        [hokeis[hokeiIndex], hokeis[destination]] = [hokeis[destination], hokeis[hokeiIndex]];
-        updateSequence(sequenceId, { hokeis });
+        if (!hokei || destination < 0 || destination >= sequence.hokeis.length) return;
+        moveHokeiTo(sequenceId, hokei.id, sequenceId, destination);
+    };
+
+    const moveHokeiToSequence = (sourceSequenceId: string, hokeiId: string, targetSequenceId: string) => {
+        const targetSequence = draft.sequences.find(sequence => sequence.id === targetSequenceId);
+        if (!targetSequence) return;
+        moveHokeiTo(sourceSequenceId, hokeiId, targetSequenceId, targetSequence.hokeis.length);
+    };
+
+    const locateHokeiDropTarget = (clientX: number, clientY: number, draggedHokeiId: string) => {
+        const sequenceElement = document.elementFromPoint(clientX, clientY)
+            ?.closest<HTMLElement>("[data-embu-sequence-id]");
+        const sequenceId = sequenceElement?.dataset.embuSequenceId;
+        if (!sequenceElement || !sequenceId) return null;
+
+        const hokeiRows = [...sequenceElement.querySelectorAll<HTMLElement>("[data-embu-hokei-id]")]
+            .filter(row => row.dataset.embuHokeiId !== draggedHokeiId);
+        const index = hokeiRows.findIndex(row => clientY < row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2);
+        return { sequenceId, index: index < 0 ? hokeiRows.length : index };
+    };
+
+    const startHokeiPointer = (
+        event: React.PointerEvent<HTMLButtonElement>,
+        sequenceId: string,
+        hokei: EmbuDraftHokei,
+    ) => {
+        if (event.button !== 0) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragCandidateRef.current = {
+            pointerId: event.pointerId,
+            sequenceId,
+            hokeiId: hokei.id,
+            hokeiName: hokei.hokeiName,
+            startX: event.clientX,
+            startY: event.clientY,
+        };
+    };
+
+    const dragHokeiPointer = (event: React.PointerEvent<HTMLButtonElement>) => {
+        const candidate = dragCandidateRef.current;
+        if (!candidate || candidate.pointerId !== event.pointerId) return;
+
+        const distance = Math.hypot(event.clientX - candidate.startX, event.clientY - candidate.startY);
+        if (!draggedHokeiRef.current && distance < 7) return;
+
+        event.preventDefault();
+        const drag = {
+            sequenceId: candidate.sequenceId,
+            hokeiId: candidate.hokeiId,
+            hokeiName: candidate.hokeiName,
+            clientX: event.clientX,
+            clientY: event.clientY,
+        };
+        const target = locateHokeiDropTarget(event.clientX, event.clientY, candidate.hokeiId);
+        draggedHokeiRef.current = drag;
+        dropTargetRef.current = target;
+        setDraggedHokei(drag);
+        setDropTarget(target);
+        setMoveMenu(null);
+    };
+
+    const finishHokeiPointer = (event: React.PointerEvent<HTMLButtonElement>, cancelled = false) => {
+        const candidate = dragCandidateRef.current;
+        const drag = draggedHokeiRef.current;
+        const target = dropTargetRef.current;
+        if (!candidate || candidate.pointerId !== event.pointerId) return;
+
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+        if (!cancelled && drag && target) {
+            moveHokeiTo(drag.sequenceId, drag.hokeiId, target.sequenceId, target.index);
+        } else if (!cancelled && !drag) {
+            setMoveMenu({ sequenceId: candidate.sequenceId, hokeiId: candidate.hokeiId });
+        }
+
+        dragCandidateRef.current = null;
+        draggedHokeiRef.current = null;
+        dropTargetRef.current = null;
+        setDraggedHokei(null);
+        setDropTarget(null);
+    };
+
+    const cancelHokeiPointer = (event: React.PointerEvent<HTMLButtonElement>) => {
+        finishHokeiPointer(event, true);
     };
 
     const removeHokei = (sequenceId: string, hokeiId: string) => {
@@ -548,14 +684,13 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         if (!sequence) return;
         const removedHokei = sequence.hokeis.find(hokei => hokei.id === hokeiId);
         const remainingHokeis = sequence.hokeis.filter(hokei => hokei.id !== hokeiId);
-        const sequences = remainingHokeis.length > 0
-            ? draft.sequences.map(candidate => candidate.id === sequenceId
-                ? { ...candidate, hokeis: remainingHokeis }
-                : candidate)
-            : draft.sequences.filter(candidate => candidate.id !== sequenceId);
+        const sequences = draft.sequences.map(candidate => candidate.id === sequenceId
+            ? { ...candidate, hokeis: remainingHokeis }
+            : candidate);
 
         saveDraft({ ...draft, sequences });
-        if (pickerTarget === sequenceId) setPickerTarget(sequences.length === 0 ? "new" : null);
+        if (pickerTarget === sequenceId) setPickerTarget(null);
+        if (moveMenu?.hokeiId === hokeiId) setMoveMenu(null);
         if (removedHokei) {
             setPreview(current => current
                 && embuTechniqueKey(removedHokei) === embuTechniqueKey(current.technique) ? null : current);
@@ -569,6 +704,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
 
     const selectView = (view: EmbuAreaView | null) => {
         setPreview(null);
+        if (view === "practice") setPracticeSequenceIndex(0);
         onViewChange(view);
     };
 
@@ -588,13 +724,13 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         if (suggestion) addHokei(suggestion);
     };
 
-    const pickerSequenceIndex = pickerTarget === "new"
-        ? draft.sequences.length
-        : draft.sequences.findIndex(sequence => sequence.id === pickerTarget);
-    const currentSequenceNumber = pickerSequenceIndex >= 0
-        ? pickerSequenceIndex + 1
-        : Math.max(1, draft.sequences.length);
-    const progressLength = Math.max(MAX_EMBU_SEQUENCES, draft.sequences.length);
+    const pickerSequenceIndex = draft.sequences.findIndex(sequence => sequence.id === pickerTarget);
+    const practiceSequences = draft.sequences.flatMap((sequence, sequenceIndex) =>
+        sequence.hokeis.length > 0 ? [{ sequence, sequenceIndex }] : []);
+    const visiblePracticeSequenceIndex = Math.min(practiceSequenceIndex, Math.max(0, practiceSequences.length - 1));
+    const practiceSequenceEntry = practiceSequences[visiblePracticeSequenceIndex];
+    const practiceSequence = practiceSequenceEntry?.sequence;
+    const hasDraftHokeis = practiceSequences.length > 0;
     const kumiEmbuTechniques: KumiEmbuTechniqueLink[] = techniques.map(technique => ({
         key: embuTechniqueKey(technique),
         hokei: technique.hokei,
@@ -688,16 +824,24 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                 onSelect: () => selectView("kumi"),
             },
         ];
+        if (hasDraftHokeis) {
+            choices.splice(1, 0, {
+                key: "practice-embu",
+                title: translator.translate("Träna embun"),
+                icon: <PlayCircle />,
+                onSelect: () => selectView("practice"),
+            });
+        }
 
         return (
-            <div className="free-practice-content embu-choice-page">
+            <div className={`free-practice-content embu-choice-page${dojoMode ? " is-dojo-mode" : ""}`}>
                 <Grid items={choices} className="free-practice-grid embu-choice-grid" />
             </div>
         );
     }
 
     return (
-        <div className="free-practice-content">
+        <div className={`free-practice-content embu-detail-view${dojoMode || activeView === "practice" ? " dojo-readable-hokei" : ""}`}>
             {activeView === "builder" && (
             <section className="free-practice-section embu-builder">
                 <div className="embu-builder-heading">
@@ -711,60 +855,76 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                     {translator.translate("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")}
                 </p>
 
-                <div className="embu-progress">
-                    <span>{translator.translate("Sekvens {0} av {1}", { params: [String(currentSequenceNumber), String(progressLength)] })}</span>
-                    <ol aria-hidden="true">
-                        {Array.from({ length: progressLength }, (_, index) => (
+                <ol className="embu-draft-sequences">
+                    {draft.sequences.map((sequence, sequenceIndex) => {
+                        const isExpanded = expandedSequenceId === sequence.id;
+                        const isDropSequence = dropTarget?.sequenceId === sequence.id;
+                        const remainingHokeiCount = sequence.hokeis.filter(hokei => hokei.id !== draggedHokei?.hokeiId).length;
+                        return (
                             <li
-                                key={index}
-                                className={`${index < draft.sequences.length ? "is-complete" : ""}${index + 1 === currentSequenceNumber ? " is-current" : ""}`}
+                                key={sequence.id}
+                                className={`embu-sequence${isExpanded ? " is-expanded" : ""}${isDropSequence ? " is-drop-target" : ""}`}
+                                data-embu-sequence-id={sequence.id}
                             >
-                                {index + 1}
-                            </li>
-                        ))}
-                    </ol>
-                </div>
-
-                {draft.sequences.length === 0 && techniquePicker}
-
-                {draft.sequences.length > 0 && (
-                    <>
-                        <ol className="embu-draft-sequences">
-                            {draft.sequences.map((sequence, sequenceIndex) => (
-                                <li key={sequence.id} className="embu-sequence">
-                                    <div className="embu-sequence-heading">
-                                        <span className="embu-sequence-number" aria-hidden="true">{sequenceIndex + 1}</span>
-                                        <h4>{translator.translate("Sekvens {0}", { params: [String(sequenceIndex + 1)] })}</h4>
-                                        {draft.sequences.length > 1 && (
-                                            <div className="embu-step-actions">
-                                                <button
-                                                    type="button"
-                                                    disabled={sequenceIndex === 0}
-                                                    aria-label={translator.translate("Flytta sekvens {0} upp", { params: [String(sequenceIndex + 1)] })}
-                                                    onClick={() => moveSequence(sequenceIndex, -1)}
-                                                >
-                                                    <ArrowUp aria-hidden="true" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    disabled={sequenceIndex === draft.sequences.length - 1}
-                                                    aria-label={translator.translate("Flytta sekvens {0} ner", { params: [String(sequenceIndex + 1)] })}
-                                                    onClick={() => moveSequence(sequenceIndex, 1)}
-                                                >
-                                                    <ArrowDown aria-hidden="true" />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
+                                <div className="embu-sequence-summary">
+                                    {sequence.hokeis.length > 0 ? (
+                                        <button
+                                            type="button"
+                                            className="embu-sequence-toggle"
+                                            aria-expanded={isExpanded}
+                                            aria-label={translator.translate(isExpanded ? "Dölj detaljer för sekvens {0}" : "Visa detaljer för sekvens {0}", { params: [String(sequenceIndex + 1)] })}
+                                            onClick={() => {
+                                                setExpandedSequenceId(isExpanded ? null : sequence.id);
+                                                setPickerTarget(null);
+                                                setMoveMenu(null);
+                                            }}
+                                        >
+                                            <span>{sequenceIndex + 1}.</span>
+                                            {isExpanded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
+                                        </button>
+                                    ) : (
+                                        <span className="embu-sequence-number">
+                                            <span aria-hidden="true">{sequenceIndex + 1}.</span>
+                                            <span className="visually-hidden">
+                                                {translator.translate("Sekvens {0}", { params: [String(sequenceIndex + 1)] })}
+                                            </span>
+                                        </span>
+                                    )}
 
                                     <ul className="embu-sequence-hokeis">
                                         {sequence.hokeis.map((hokei, hokeiIndex) => {
                                             const technique = techniqueLookup.get(embuTechniqueKey(hokei))
                                                 ?? techniques.find(candidate => candidate.hokei.hokei_name === hokei.hokeiName);
-                                            const attack = technique?.hokei.roles.attacker.action;
+                                            const isDragged = draggedHokei?.hokeiId === hokei.id;
+                                            const filteredIndex = sequence.hokeis
+                                                .slice(0, hokeiIndex)
+                                                .filter(candidate => candidate.id !== draggedHokei?.hokeiId).length;
+                                            const showIndicator = !isDragged && isDropSequence && dropTarget?.index === filteredIndex;
+                                            const menuIsOpen = moveMenu?.sequenceId === sequence.id && moveMenu.hokeiId === hokei.id;
                                             return (
-                                                <li key={hokei.id}>
-                                                    <div className="embu-hokei-content">
+                                                <Fragment key={hokei.id}>
+                                                    {showIndicator && <li className="embu-drop-indicator" aria-hidden="true" />}
+                                                    <li
+                                                        className={`embu-compact-hokei${isDragged ? " is-dragging-placeholder" : ""}`}
+                                                        data-embu-hokei-id={hokei.id}
+                                                    >
+                                                        <button
+                                                            type="button"
+                                                            className="embu-hokei-drag-handle"
+                                                            aria-label={translator.translate("Flytta {0}", { params: [hokei.hokeiName] })}
+                                                            aria-expanded={menuIsOpen}
+                                                            onKeyDown={event => {
+                                                                if (event.key !== "Enter" && event.key !== " ") return;
+                                                                event.preventDefault();
+                                                                setMoveMenu(menuIsOpen ? null : { sequenceId: sequence.id, hokeiId: hokei.id });
+                                                            }}
+                                                            onPointerDown={event => startHokeiPointer(event, sequence.id, hokei)}
+                                                            onPointerMove={dragHokeiPointer}
+                                                            onPointerUp={event => finishHokeiPointer(event)}
+                                                            onPointerCancel={cancelHokeiPointer}
+                                                        >
+                                                            <GripVertical aria-hidden="true" />
+                                                        </button>
                                                         <button
                                                             type="button"
                                                             className="embu-step-technique"
@@ -774,67 +934,201 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                                         >
                                                             <PracticeTerm value={hokei.hokeiName} dojoMode={dojoMode} />
                                                         </button>
-                                                        <div className="embu-hokei-note-line">
-                                                            {attack && (
-                                                                <span className="embu-hokei-description">
-                                                                    {translator.translate("kōgeki: {0}", { params: [translator.translate(attack)] })}
-                                                                </span>
-                                                            )}
-                                                            <InlineNoteEditor
-                                                                value={hokei.comment}
-                                                                onSave={comment => saveHokeiComment(sequence.id, hokei.id, comment)}
-                                                                addLabel={translator.translate("Lägg till kommentar till {0}", { params: [hokei.hokeiName] })}
-                                                                editLabel={translator.translate("Redigera kommentar till {0}", { params: [hokei.hokeiName] })}
-                                                                inputLabel={translator.translate("Kommentar till {0}", { params: [hokei.hokeiName] })}
-                                                                placeholder={translator.translate("Skriv din kommentar…")}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="embu-step-actions">
-                                                        {sequence.hokeis.length > 1 && (
-                                                            <>
-                                                                <button type="button" disabled={hokeiIndex === 0} aria-label={translator.translate("Flytta {0} upp", { params: [hokei.hokeiName] })} onClick={() => moveHokei(sequence.id, hokeiIndex, -1)}>
-                                                                    <ArrowUp aria-hidden="true" />
-                                                                </button>
-                                                                <button type="button" disabled={hokeiIndex === sequence.hokeis.length - 1} aria-label={translator.translate("Flytta {0} ner", { params: [hokei.hokeiName] })} onClick={() => moveHokei(sequence.id, hokeiIndex, 1)}>
-                                                                    <ArrowDown aria-hidden="true" />
-                                                                </button>
-                                                            </>
+                                                        {hokei.comment && (
+                                                            <span className="embu-compact-note" title={translator.translate("Har kommentar")}>
+                                                                <Pencil aria-hidden="true" />
+                                                                <span className="visually-hidden">{translator.translate("Har kommentar")}</span>
+                                                            </span>
                                                         )}
+                                                        {menuIsOpen && (
+                                                            <div className="embu-move-menu" role="group" aria-label={translator.translate("Flytta {0}", { params: [hokei.hokeiName] })}>
+                                                                <div className="embu-move-menu-heading">
+                                                                    <span>{translator.translate(hokei.hokeiName)}</span>
+                                                                    <button type="button" aria-label={translator.translate("Stäng")} onClick={() => setMoveMenu(null)}>
+                                                                        <X aria-hidden="true" />
+                                                                    </button>
+                                                                </div>
+                                                                <div className="embu-move-step-buttons">
+                                                                    <button type="button" disabled={hokeiIndex === 0} onClick={() => { moveHokei(sequence.id, hokeiIndex, -1); setMoveMenu(null); }}>
+                                                                        <ArrowUp aria-hidden="true" />
+                                                                        {translator.translate("Upp")}
+                                                                    </button>
+                                                                    <button type="button" disabled={hokeiIndex === sequence.hokeis.length - 1} onClick={() => { moveHokei(sequence.id, hokeiIndex, 1); setMoveMenu(null); }}>
+                                                                        <ArrowDown aria-hidden="true" />
+                                                                        {translator.translate("Ner")}
+                                                                    </button>
+                                                                </div>
+                                                                <div className="embu-move-destinations">
+                                                                    <span>{translator.translate("Till sekvens")}</span>
+                                                                    <div>
+                                                                        {draft.sequences.map((targetSequence, targetIndex) => (
+                                                                            <button
+                                                                                key={targetSequence.id}
+                                                                                type="button"
+                                                                                disabled={targetSequence.id === sequence.id}
+                                                                                aria-label={translator.translate("Flytta {0} till sekvens {1}", { params: [hokei.hokeiName, String(targetIndex + 1)] })}
+                                                                                onClick={() => { moveHokeiToSequence(sequence.id, hokei.id, targetSequence.id); setMoveMenu(null); }}
+                                                                            >
+                                                                                {targetIndex + 1}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                </Fragment>
+                                            );
+                                        })}
+                                        {isDropSequence && dropTarget?.index === remainingHokeiCount && (
+                                            <li className="embu-drop-indicator" aria-hidden="true" />
+                                        )}
+                                    </ul>
+
+                                    {pickerTarget !== sequence.id && (
+                                        <button
+                                            type="button"
+                                            className={sequence.hokeis.length === 0 ? "embu-empty-sequence" : "embu-add-hokei"}
+                                            aria-label={translator.translate("Lägg till hokei i sekvens {0}", { params: [String(sequenceIndex + 1)] })}
+                                            onClick={() => openPicker(sequence.id)}
+                                        >
+                                            <Plus aria-hidden="true" />
+                                            {sequence.hokeis.length === 0 ? (
+                                                <span>{translator.translate(!hasDraftHokeis && sequenceIndex === 0 ? "Välj din första teknik" : "Välj teknik")}</span>
+                                            ) : (
+                                                <span className="visually-hidden">{translator.translate("Lägg till teknik")}</span>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {pickerTarget === sequence.id && techniquePicker}
+
+                                {isExpanded && (
+                                    <div className="embu-sequence-details">
+                                        {sequence.hokeis.map(hokei => {
+                                            const technique = techniqueLookup.get(embuTechniqueKey(hokei))
+                                                ?? techniques.find(candidate => candidate.hokei.hokei_name === hokei.hokeiName);
+                                            const attack = technique?.hokei.roles.attacker.action;
+                                            return (
+                                                <section key={hokei.id} className="embu-hokei-details">
+                                                    <div className="embu-hokei-details-heading">
+                                                        <button
+                                                            type="button"
+                                                            disabled={!technique}
+                                                            aria-label={translator.translate("Visa teknik {0}", { params: [hokei.hokeiName] })}
+                                                            onClick={() => technique && showTechnique(technique)}
+                                                        >
+                                                            <PracticeTerm value={hokei.hokeiName} dojoMode={dojoMode} />
+                                                        </button>
                                                         <button type="button" aria-label={translator.translate("Ta bort {0}", { params: [hokei.hokeiName] })} onClick={() => removeHokei(sequence.id, hokei.id)}>
                                                             <Trash aria-hidden="true" />
                                                         </button>
                                                     </div>
-                                                </li>
+                                                    <div className="embu-hokei-note-line">
+                                                        {attack && (
+                                                            <span className="embu-hokei-description">
+                                                                {translator.translate("kōgeki: {0}", { params: [translator.translate(attack)] })}
+                                                            </span>
+                                                        )}
+                                                        <InlineNoteEditor
+                                                            value={hokei.comment}
+                                                            onSave={comment => saveHokeiComment(sequence.id, hokei.id, comment)}
+                                                            addLabel={translator.translate("Lägg till kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                            editLabel={translator.translate("Redigera kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                            inputLabel={translator.translate("Kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                            placeholder={translator.translate("Skriv din kommentar…")}
+                                                            emptyLabel={translator.translate("Lägg till kommentar")}
+                                                        />
+                                                    </div>
+                                                </section>
                                             );
                                         })}
-                                    </ul>
+                                    </div>
+                                )}
+                            </li>
+                        );
+                    })}
+                </ol>
 
-                                    {pickerTarget === sequence.id ? techniquePicker : pickerTarget === null && (
-                                        <button
-                                            type="button"
-                                            className="embu-add-hokei"
-                                            aria-label={translator.translate("Lägg till hokei i sekvens {0}", { params: [String(sequenceIndex + 1)] })}
-                                            onClick={() => openPicker(sequence.id)}
-                                        >
-                                            + {translator.translate("Lägg till hokei i sekvens {0}", { params: [String(sequenceIndex + 1)] })}
-                                        </button>
-                                    )}
+                {draggedHokei && (
+                    <div
+                        className="embu-drag-preview"
+                        style={{ left: draggedHokei.clientX + 12, top: draggedHokei.clientY + 12 }}
+                        aria-hidden="true"
+                    >
+                        <GripVertical />
+                        <span>{translator.translate(draggedHokei.hokeiName)}</span>
+                    </div>
+                )}
 
-                                </li>
-                            ))}
-                        </ol>
-
-                        {pickerTarget === "new" && techniquePicker}
-
-                        {pickerTarget === null && draft.sequences.length < MAX_EMBU_SEQUENCES && (
-                            <button type="button" className="btn btn-primary embu-next-sequence" onClick={() => openPicker("new")}>
-                                {translator.translate("Nästa sekvens")}
-                            </button>
-                        )}
-                    </>
+                {pickerTarget === null && hasDraftHokeis && (
+                    <div className="embu-builder-actions">
+                        <button type="button" className="btn btn-outline-primary embu-practice-button" onClick={() => selectView("practice")}>
+                            <PlayCircle aria-hidden="true" />
+                            {translator.translate("Träna embun")}
+                        </button>
+                    </div>
                 )}
             </section>
+            )}
+
+            {activeView === "practice" && practiceSequence && (
+                <section className="free-practice-section embu-practice">
+                    <h3 className="visually-hidden">
+                        {translator.translate("Sekvens {0}", { params: [String((practiceSequenceEntry?.sequenceIndex ?? 0) + 1)] })}
+                    </h3>
+                    <div className="embu-practice-sequence">
+                        <span className="embu-practice-number" aria-hidden="true">{(practiceSequenceEntry?.sequenceIndex ?? 0) + 1}.</span>
+                        <ul className="embu-practice-hokeis">
+                            {practiceSequence.hokeis.map(hokei => {
+                                const technique = techniqueLookup.get(embuTechniqueKey(hokei))
+                                    ?? techniques.find(candidate => candidate.hokei.hokei_name === hokei.hokeiName);
+                                const attack = technique?.hokei.roles.attacker.action;
+                                return (
+                                    <li key={hokei.id}>
+                                        <button
+                                            type="button"
+                                            className="embu-practice-technique"
+                                            disabled={!technique}
+                                            aria-label={translator.translate("Visa teknik {0}", { params: [hokei.hokeiName] })}
+                                            onClick={() => technique && showTechnique(technique)}
+                                        >
+                                            <PracticeTerm value={hokei.hokeiName} dojoMode />
+                                        </button>
+                                        {attack && (
+                                            <div className="embu-practice-attack">
+                                                {translator.translate("kōgeki: {0}", { params: [translator.translate(attack)] })}
+                                            </div>
+                                        )}
+                                        {hokei.comment && <div className="embu-practice-comment">{hokei.comment}</div>}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                    <div className="embu-practice-navigation">
+                        <button
+                            type="button"
+                            disabled={visiblePracticeSequenceIndex === 0}
+                            onClick={() => setPracticeSequenceIndex(index => Math.max(0, index - 1))}
+                        >
+                            <ArrowLeft aria-hidden="true" />
+                            {translator.translate("Föregående")}
+                        </button>
+                        <button type="button" className="embu-practice-edit" onClick={() => selectView("builder")}>
+                            {translator.translate("Redigera embun")}
+                        </button>
+                        <button
+                            type="button"
+                            disabled={visiblePracticeSequenceIndex === practiceSequences.length - 1}
+                            onClick={() => setPracticeSequenceIndex(index => Math.min(practiceSequences.length - 1, index + 1))}
+                        >
+                            {translator.translate("Nästa")}
+                            <ArrowRight aria-hidden="true" />
+                        </button>
+                    </div>
+                </section>
             )}
 
             {preview && (
@@ -844,7 +1138,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                     gradeName={preview.technique.grade}
                     showNotes
                     showRating
-                    dojoMode={dojoMode}
+                    dojoMode={dojoMode || activeView === "practice"}
                     kamokuLayout
                     defaultOpen
                     onOpenChange={open => {
@@ -854,7 +1148,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
             )}
 
             {activeView === "kumi" && selected && (
-                <section className="free-practice-section embu-kumi-example">
+                <section className={`free-practice-section embu-kumi-example${dojoMode ? " is-dojo-mode" : ""}`}>
                     <div className="free-practice-section-heading">
                         <h3 className="app-section-heading">{translator.translate("Kumi-embu")}</h3>
                     </div>

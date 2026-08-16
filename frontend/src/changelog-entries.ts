@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T12:36:39.356Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Träningsläget heter nu Dojo-läge. När det är påslaget skalas grader och annan kringinformation bort samtidigt som det du faktiskt tränar blir större, så innehållet går lättare att läsa med mobilen på golvet.",
+        en: "Training mode is now called Dojo mode. When enabled, grades and other supporting information are removed while the content you are practising becomes larger, making it easier to read with the phone on the floor.",
+        tr: "Antrenman modunun adı artık Dojo modu. Açıldığında dereceler ve diğer ikincil bilgiler gizlenirken çalıştığınız içerik büyütülüyor; böylece telefon yerdeyken okumak kolaylaşıyor.",
+        ja: "トレーニングモードの名称を「道場モード」に変更しました。有効にすると、級位などの補足情報を省き、実際に練習する内容を大きく表示するため、床に置いたスマートフォンからも読みやすくなります。",
+      },
+      {
+        emoji: "🧩",
+        sv: "Embu-byggaren är nu en kompakt planeringstavla med sex fasta sekvenser. Fäll ut en sekvens när du vill se detaljer eller skriva kommentarer, och dra tekniker med sexpunktsreglaget för att flytta dem inom eller mellan sekvenser.",
+        en: "The Embu builder is now a compact planning board with six fixed sequences. Expand a sequence when you want to see details or write comments, and drag techniques by the six-dot handle to move them within or between sequences.",
+        tr: "Embu oluşturucu artık altı sabit diziden oluşan kompakt bir planlama panosu. Ayrıntıları görmek veya yorum yazmak istediğinizde bir diziyi açabilir, teknikleri altı noktalı tutamaktan sürükleyerek aynı dizi içinde ya da diziler arasında taşıyabilirsiniz.",
+        ja: "演武作成が、6つの固定された構成を並べたコンパクトな計画画面になりました。詳細の確認やコメントの記入が必要なときだけ構成を開き、6点のハンドルで技をドラッグして構成内や構成間を移動できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T11:18:51.771Z",
     changes: [
       {

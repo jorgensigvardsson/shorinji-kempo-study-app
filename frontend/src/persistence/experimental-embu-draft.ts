@@ -134,7 +134,6 @@ function isEmbuDraft(value: unknown): value is EmbuDraft {
     return typeof entry.id === "string"
       && entry.transition === undefined
       && Array.isArray(entry.hokeis)
-      && entry.hokeis.length > 0
       && entry.hokeis.every(isEmbuDraftHokei);
   });
 }

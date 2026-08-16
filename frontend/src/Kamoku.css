@@ -218,6 +218,24 @@
   color: var(--bs-secondary-color);
 }
 
+/* Dojo mode is meant to be readable with the phone lying beside the training
+   area. Keep controls compact, but make the current week and practice content
+   substantially larger without changing the normal weekly plan. */
+.kamoku-page.is-dojo-mode .kamoku-week-position {
+  font-size: clamp(1.45rem, 4vw, 1.8rem);
+}
+
+.kamoku-page.is-dojo-mode .kamoku-focus-group h3,
+.kamoku-page.is-dojo-mode .kamoku-section-title {
+  font-size: 0.9rem;
+}
+
+.kamoku-page.is-dojo-mode .kamoku-focus-group li {
+  padding-left: 1.2rem;
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  line-height: 1.45;
+}
+
 @media (max-width: 35rem) {
   .kamoku-page-header {
     padding-top: 0.25rem;
@@ -242,6 +260,10 @@
 
   .kamoku-week-position {
     font-size: 1.15rem;
+  }
+
+  .kamoku-page.is-dojo-mode .kamoku-week-position {
+    font-size: 1.45rem;
   }
 
   .kamoku-week-focus {
