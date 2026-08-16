@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T06:21:49.000Z",
+    changes: [
+      {
+        emoji: "🎬",
+        sv: "Videolänkarna är lugnare. Ramen runt länken är borta överallt i appen, och under Tan'en och sōtai upprepas inte längre formens namn inuti länken – det står redan på raden ovanför.",
+        en: "Video links are calmer. The frame around the link is gone everywhere in the app, and under Tan'en and sōtai the form's name is no longer repeated inside the link – it is already on the line above.",
+        tr: "Video bağlantıları daha sade. Bağlantının çevresindeki çerçeve uygulamanın her yerinde kaldırıldı ve Tan'en ve sōtai bölümünde formun adı artık bağlantının içinde tekrarlanmıyor – zaten hemen üstteki satırda yazıyor.",
+        ja: "動画リンクの見た目を整えました。リンクを囲む枠をアプリ全体でなくし、単演・相対では法形の名前をリンク内で繰り返さないようにしました。名前はすぐ上の行に表示されています。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-14T19:29:01.000Z",
     changes: [
       {
