@@ -1482,6 +1482,7 @@
   "Inloggning är inte tillgänglig för den här e-postdomänen.": "このメールドメインではログインできません。",
   "Inloggning misslyckades. Försök igen.": "ログインに失敗しました。もう一度お試しください。",
   "Vi har skickat en verifieringskod till din e-post.": "確認コードをメールで送信しました。",
+  "Koden är giltig i 10 minuter.": "コードの有効期限は10分です。",
   "Verifieringskod": "確認コード",
   "Ditt namn": "お名前",
   "Bekräfta": "確認",

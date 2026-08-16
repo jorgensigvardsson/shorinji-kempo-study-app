@@ -168,7 +168,8 @@ export function LoginScreen() {
         ) : (
           <Form onSubmit={(e) => { void handleCodeSubmit(e); }}>
             <p className="text-body-secondary">
-              {translator.translate("Vi har skickat en verifieringskod till din e-post.")}
+              {translator.translate("Vi har skickat en verifieringskod till din e-post.")}{" "}
+              {translator.translate("Koden är giltig i 10 minuter.")}
             </p>
 
             {needsName && (

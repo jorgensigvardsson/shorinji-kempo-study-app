@@ -1829,6 +1829,7 @@
   "Inloggning är inte tillgänglig för den här e-postdomänen.": "Sign-in is not available for this email domain.",
   "Inloggning misslyckades. Försök igen.": "Sign-in failed. Please try again.",
   "Vi har skickat en verifieringskod till din e-post.": "We've sent a verification code to your email.",
+  "Koden är giltig i 10 minuter.": "The code is valid for 10 minutes.",
   "Verifieringskod": "Verification code",
   "Ditt namn": "Your name",
   "Bekräfta": "Confirm",
