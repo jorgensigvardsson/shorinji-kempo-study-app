@@ -82,6 +82,46 @@ The list is ordered by risk, not by effort.
   granular per-item API above, which is the item waiting on the client-build drain;
   until then a user who reaches the cap has to delete notes by hand
 - [x] Stop hand-writing two divergent type views of `grading-exam-information.json`. One `grading-exam-information.ts` now owns the types and the import, and both components use it — the last two `as unknown as` casts in the frontend are gone. A complete draft-07 schema for the file already existed at `frontend/data/grading-exam-information.schema`, pointed at by the data's own `$schema` and enforced by nothing; a test now validates the data against it with ajv, so a transcription slip fails the suite with a path to the offending node instead of surfacing at runtime in whichever component happened to read it. Unifying the types exposed two ways the old ones were wrong: `Annotation.marker` was required though the schema makes it optional, and the file has a top-level `$schema` key, so `Partial<Record<GradeName, GradeManual>>` never described its shape
+- [ ] Give a flashcard's "known" flag a stable id. `knownFlashCards` is keyed by
+  `entry.index + 1` (`Flashcard.tsx`), and `index` is a field stored in
+  `word-list.json` that today equals the array position exactly, 0 through 537. So
+  the key is positional in everything but name: insert a word anywhere but the end
+  and renumber, and every later card's flag moves to a different word. That is worse
+  than the orphaning the other derived keys suffer, because nothing goes missing —
+  the flags stay, attached to the wrong words, and no screen shows anything unusual.
+  The filter for cards with content runs before the id is read, so filtering is not
+  the risk; editing the list is. An id that does not encode position, plus a migration
+  from the numbers already stored, is the fix
+- [ ] Key grading completions by something other than the displayed romaji.
+  `gradingFundamentalCompletionKey`/`gradingTheoryCompletionKey` in `GradingTest.tsx`
+  build `${grade}|${item.term.romaji}`, falling back to `item-${itemIndex}` where an
+  item has no term. Both halves are fragile in the same way as the hokei note keys:
+  correcting a spelling in the source clears every tick saved against the old one, and
+  reordering the items without a term moves ticks between them. The `sashikae sokuō
+  geri` → `sokutō` correction on 2026-08-16 landed on `techniques[].romaji` rather
+  than `term.romaji`, so nothing broke — the same correction one level up would have
+  silently cleared grading progress for every user, with no error and no way to find
+  out afterwards
+- [ ] Give a note its own timestamp. `notes` is `Record<string, string>` — the only
+  merged map whose entries carry no `updatedAt`, where `hokeiRanks`, `knownFlashCards`
+  and the three completion maps all do. That absence is the whole reason a note
+  disagreement has to be put to the user: `mergeMap` has no principled winner to pick,
+  so `escalates: true` is the honest setting rather than a considered one. Stored as
+  `{ text, updatedAt }` a note would settle itself like everything else, and the
+  conflict prompt could be reserved for cases that genuinely need a person. The value
+  shape changes, so this is a schema bump and belongs with the other one; reading
+  either shape during the rollout keeps it from being a hard cutover
+- [ ] Decide which of the synced fields are account data and which are device
+  preferences. `theme`, `language`, `hokeiListSelection` and `showKanjiOnHokeiCards`
+  describe how one device is set up, not what the user knows or has done, yet they
+  ride in the same document and go through `mergeScalar` like `grade` and
+  `kenshiNumber`. A genuine disagreement there sets `conflictDetected`, so two devices
+  that were each given a different theme can raise the same conflict dialog as two
+  devices disagreeing about the text of a note — and there is no right answer to offer,
+  since both devices are correct about themselves. Worth noting alongside the
+  `__conflictMarker` item above, which records that only notes and hokeiRanks raise the
+  user-facing prompt: scalars raise it too, asserted by `merge.test.ts` for `grade` and
+  `kenshiNumber`
 
 ## Correctness
 
