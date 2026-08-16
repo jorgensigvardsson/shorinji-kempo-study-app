@@ -606,31 +606,27 @@
   margin-bottom: 0.25rem;
 }
 
-.embu-hokei-details-heading button {
+.embu-hokei-details-name {
   padding: 0.15rem 0;
-  border: 0;
-  background: transparent;
   color: var(--bs-emphasis-color);
-  text-align: left;
+  font-weight: 600;
 }
 
-.embu-hokei-details-heading button:first-child:hover:not(:disabled),
-.embu-hokei-details-heading button:first-child:focus-visible {
-  color: var(--bs-primary);
-}
-
-.embu-hokei-details-heading button:last-child {
+.embu-hokei-details-heading > button {
   display: inline-grid;
   flex: 0 0 auto;
   place-items: center;
   width: 2rem;
   height: 2rem;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  background: transparent;
   color: var(--bs-secondary-color);
 }
 
-.embu-hokei-details-heading button:last-child:hover,
-.embu-hokei-details-heading button:last-child:focus-visible {
+.embu-hokei-details-heading > button:hover,
+.embu-hokei-details-heading > button:focus-visible {
   background: var(--bs-body-bg);
   color: var(--bs-emphasis-color);
 }

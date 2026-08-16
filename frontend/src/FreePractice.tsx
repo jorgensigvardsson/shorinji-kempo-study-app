@@ -537,6 +537,13 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         setActiveSuggestion(0);
     };
 
+    const toggleSequenceDetails = (sequenceId: string) => {
+        setExpandedSequenceId(current => current === sequenceId ? null : sequenceId);
+        setPickerTarget(null);
+        setMoveMenu(null);
+        setPreview(null);
+    };
+
     const addHokei = (technique: EmbuTechnique) => {
         if (pickerTarget === null) return;
 
@@ -873,11 +880,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                             className="embu-sequence-toggle"
                                             aria-expanded={isExpanded}
                                             aria-label={translator.translate(isExpanded ? "Dölj detaljer för sekvens {0}" : "Visa detaljer för sekvens {0}", { params: [String(sequenceIndex + 1)] })}
-                                            onClick={() => {
-                                                setExpandedSequenceId(isExpanded ? null : sequence.id);
-                                                setPickerTarget(null);
-                                                setMoveMenu(null);
-                                            }}
+                                            onClick={() => toggleSequenceDetails(sequence.id)}
                                         >
                                             <span>{sequenceIndex + 1}.</span>
                                             {isExpanded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
@@ -893,8 +896,6 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
 
                                     <ul className="embu-sequence-hokeis">
                                         {sequence.hokeis.map((hokei, hokeiIndex) => {
-                                            const technique = techniqueLookup.get(embuTechniqueKey(hokei))
-                                                ?? techniques.find(candidate => candidate.hokei.hokei_name === hokei.hokeiName);
                                             const isDragged = draggedHokei?.hokeiId === hokei.id;
                                             const filteredIndex = sequence.hokeis
                                                 .slice(0, hokeiIndex)
@@ -928,9 +929,8 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                                         <button
                                                             type="button"
                                                             className="embu-step-technique"
-                                                            disabled={!technique}
-                                                            aria-label={translator.translate("Visa teknik {0}", { params: [hokei.hokeiName] })}
-                                                            onClick={() => technique && showTechnique(technique)}
+                                                            aria-expanded={isExpanded}
+                                                            onClick={() => toggleSequenceDetails(sequence.id)}
                                                         >
                                                             <PracticeTerm value={hokei.hokeiName} dojoMode={dojoMode} />
                                                         </button>
@@ -1013,14 +1013,9 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                             return (
                                                 <section key={hokei.id} className="embu-hokei-details">
                                                     <div className="embu-hokei-details-heading">
-                                                        <button
-                                                            type="button"
-                                                            disabled={!technique}
-                                                            aria-label={translator.translate("Visa teknik {0}", { params: [hokei.hokeiName] })}
-                                                            onClick={() => technique && showTechnique(technique)}
-                                                        >
+                                                        <div className="embu-hokei-details-name">
                                                             <PracticeTerm value={hokei.hokeiName} dojoMode={dojoMode} />
-                                                        </button>
+                                                        </div>
                                                         <button type="button" aria-label={translator.translate("Ta bort {0}", { params: [hokei.hokeiName] })} onClick={() => removeHokei(sequence.id, hokei.id)}>
                                                             <Trash aria-hidden="true" />
                                                         </button>

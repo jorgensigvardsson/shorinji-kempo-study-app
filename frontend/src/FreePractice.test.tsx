@@ -513,7 +513,7 @@ describe("FreePractice", () => {
     expect(saved.sequences[3].hokeis.map(hokei => hokei.hokeiName)).toEqual(["shita uke geri"]);
   });
 
-  it("opens a selected embu technique as an inline expandable card", async () => {
+  it("uses a technique name to expand planning details without opening a hokei card", async () => {
     const user = userEvent.setup();
     renderPractice(<EmbuHarness />);
     await user.click(screen.getByRole("button", { name: "Skapa embu" }));
@@ -522,17 +522,17 @@ describe("FreePractice", () => {
     const search = screen.getByRole("combobox", { name: "Välj hokei till sekvens 1" });
     await user.type(search, "gyak");
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
-    await user.click(screen.getByRole("button", { name: "Visa teknik gyaku gote" }));
+    const techniqueName = screen.getByRole("button", { name: /^gyaku gote$/i });
+    expect(techniqueName.getAttribute("aria-expanded")).toBe("false");
+    await user.click(techniqueName);
 
-    const card = document.querySelector<HTMLElement>(".hokei-card.is-expanded");
-    expect(card).not.toBeNull();
-    expect(card?.classList.contains("focus-card")).toBe(false);
-    expect(document.body.classList.contains("card-focus-active")).toBe(false);
+    expect(techniqueName.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText("kōgeki: migi ryote yubi")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Lägg till kommentar till gyaku gote" })).toBeTruthy();
+    expect(document.querySelector(".hokei-card")).toBeNull();
 
-    const cardHeader = card?.querySelector<HTMLElement>(".card-header");
-    expect(cardHeader?.getAttribute("aria-expanded")).toBe("true");
-    await user.click(cardHeader!);
-    await waitFor(() => expect(document.querySelector(".hokei-card")).toBeNull());
+    await user.click(techniqueName);
+    expect(screen.queryByText("kōgeki: migi ryote yubi")).toBeNull();
   });
 
   it("links both existing technique cards in a composite kumi-embu step", async () => {
