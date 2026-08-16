@@ -252,7 +252,7 @@ const AppNavbar = (props: NavbarProps) => {
     <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand" onClick={() => beginNavigation("/")}>
-          <img src="/shorinjikempo.png" className="logo" />
+          <img src="/shorinjikempo.svg" className="logo" />
           <span className="app-navbar-title">{translator.translate("Shorinji Kempo")}</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow(true)} />
@@ -260,7 +260,7 @@ const AppNavbar = (props: NavbarProps) => {
           show={show} onHide={() => setShow(false)}>
           <Offcanvas.Header closeButton>
             <Offcanvas.Title className="app-offcanvas-title">
-              <img src="/shorinjikempo.png" className="logo" />
+              <img src="/shorinjikempo.svg" className="logo" />
               <span>{translator.translate("Shorinji Kempo")}</span>
             </Offcanvas.Title>
           </Offcanvas.Header>

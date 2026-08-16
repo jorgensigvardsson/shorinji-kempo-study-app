@@ -151,7 +151,7 @@ export function LoginScreen() {
     <div className="login-screen">
       <div className="login-screen-card">
         <div className="login-screen-brand">
-          <img src="/shorinjikempo.png" alt="" className="login-screen-logo" />
+          <img src="/shorinjikempo.svg" alt="" className="login-screen-logo" />
           <span className="login-screen-title">Shorinji Kempo</span>
         </div>
 
