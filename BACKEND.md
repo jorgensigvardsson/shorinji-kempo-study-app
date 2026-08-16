@@ -614,6 +614,13 @@ It now runs **daily** (`17 3 * * *`) and is idempotent by construction:
 - Whether alerting is configured at all is checked on *every* run, failing or
   not, and warns if not: an alert path only exercised when something breaks is
   an alert path nobody knows is broken.
+- To prove the mail actually *arrives*, dispatch the workflow with the
+  `test_alert` input ticked. It sends one alert per environment and stops,
+  inspecting and touching no certificates. The `force` input does **not** test
+  this: the real alert step is `if: failure()`, so a forced run that succeeds
+  sends nothing, and a forced run that fails cannot be ordered on demand.
+  `force` tests issuance, `test_alert` tests alerting; they are different
+  questions.
 
 Two failure modes this does *not* cover:
 - GitHub disables `schedule:` triggers in repositories with no activity for 60

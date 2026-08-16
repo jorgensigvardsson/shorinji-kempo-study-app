@@ -29,6 +29,11 @@ name: Renew-Certs
 # Actions tab. GitHub's own notification for a failed scheduled run only
 # reaches whoever last touched the cron line, and is easy to miss.
 #
+# To check that the mail actually arrives, dispatch this with `test_alert`
+# ticked: it sends one alert per environment and stops, touching no
+# certificates. `force` will not do it — the real alert step is `if: failure()`,
+# so a forced run that succeeds sends nothing.
+#
 # One-time bootstrap per environment: run this manually (workflow_dispatch)
 # once before relying on deploy-staging.yml/deploy.yml's hostname bind steps,
 # which bind against the certificate this workflow uploads and will fail if
@@ -47,6 +52,10 @@ on:
     inputs:
       force:
         description: 'Renew even if the current certificates are not near expiry'
+        type: boolean
+        default: false
+      test_alert:
+        description: 'Only send a test alert email, then stop. Touches no certificates.'
         type: boolean
         default: false
 
@@ -114,7 +123,44 @@ jobs:
             echo "Failure alerts will go to ${ALERT_TO}."
           fi
 
+      - name: Send a test alert email, then stop
+        if: ${{ inputs.test_alert }}
+        env:
+          SMTP_HOST:     ${{ vars.SMTP_HOST }}
+          SMTP_PORT:     ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USERNAME: ${{ vars.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM:     ${{ vars.SMTP_FROM }}
+          SMTP_TLS:      ${{ vars.SMTP_TLS || 'starttls' }}
+          ALERT_TO:      ${{ vars.CERT_ALERT_EMAIL || vars.ACME_CONTACT_EMAIL }}
+        run: |
+          set -uo pipefail
+
+          # `force` does not exercise this path: the real alert step is
+          # `if: failure()`, so a forced run that succeeds sends nothing and a
+          # forced run that fails cannot be ordered on demand. Without this
+          # input the only way to find out whether the mail actually arrives is
+          # to wait for a genuine renewal failure — which is the one moment it
+          # must not be discovered to be broken.
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          export ALERT_SUBJECT="[test] Certificate renewal alerting for ${{ matrix.environment }} - no action needed"
+          ALERT_BODY="$(cat <<EOF
+          This is a test of the certificate renewal alerting for the ${{ matrix.environment }}
+          backend, triggered by hand with the workflow's test_alert input. No
+          certificate was inspected, issued or bound, and nothing is wrong.
+
+          Receiving this means a real renewal failure would reach you too.
+
+          Triggered from: ${run_url}
+          EOF
+          )"
+          export ALERT_BODY
+
+          python3 .github/scripts/send-alert-email.py
+
       - name: Check how long the served certificates are still valid
+        if: ${{ !inputs.test_alert }}
         run: |
           set -uo pipefail
           min=""
@@ -371,7 +417,7 @@ jobs:
 
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          export ALERT_SUBJECT="${urgency} Certificate renewal failed for ${{ matrix.environment }} — ${state}"
+          export ALERT_SUBJECT="${urgency} Certificate renewal failed for ${{ matrix.environment }} - ${state}"
 
           # A heredoc rather than a multi-line string: YAML strips exactly this
           # block's indentation, so lines written at this column arrive in the
