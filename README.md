@@ -170,7 +170,11 @@ The change takes effect on their next login or hourly token refresh. Locally (fi
 
 ## Deployment
 
-Pushes to the `deploy` branch trigger the GitHub Actions workflow. See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for details.
+Everything runs from one workflow, [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Every push runs the Go and frontend test jobs; a push to `deploy` then deploys production and a push to `deploy-staging` deploys staging, each as a `needs:`-gated job that calls [`deploy.yml`](.github/workflows/deploy.yml) or [`deploy-staging.yml`](.github/workflows/deploy-staging.yml). Those two files hold the deploy steps themselves and are never triggered on their own.
+
+**A deploy always uses the deploy workflow from the branch being deployed.** Change a deploy step on a branch, push it, and that branch's version is what runs — no merge to `main` needed first. (This is why the deploys are `uses:` calls rather than the `workflow_run` trigger they started as: GitHub always runs a `workflow_run` workflow from the *default* branch's copy of the file, which once shipped a staging deploy silently missing a newly added parameter.)
+
+To try a deploy from a branch that isn't a deploy branch, use **Actions → CI → Run workflow**, pick the branch, and set *Deploy this branch once the tests pass* to `staging` or `production`. Tests still gate it. The button itself only appears once `ci.yml` exists on `main` — GitHub reads the trigger list from the default branch — but the run uses the selected branch's own workflow files. Note that deploying a branch to `production` this way ships it to real users; there is nothing but the choice in that menu stopping it.
 
 The backend is built into container images and deployed to Azure Container Apps. The frontend is built with Vite on the runner and `rsync`ed over SSH to the production web host, which runs LiteSpeed and serves the files statically from `~/domains/app.shorinjikempo.net/public_html`. The sync is a full synchronisation (`--delete-after`), so files removed from the build are removed from the web root; `.well-known/` and `cgi-bin/` are excluded so host-managed content survives.
 

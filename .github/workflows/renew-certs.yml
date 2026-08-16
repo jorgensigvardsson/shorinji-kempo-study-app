@@ -14,6 +14,26 @@ name: Renew-Certs
 # branch, regardless of which branch is "current" for either environment
 # otherwise.
 #
+# ── Failure handling ──────────────────────────────────────────────────────────
+# The job runs *daily* and does nothing on most days: it first asks each
+# hostname what certificate it is actually serving, and only issues a new one
+# when fewer than RENEW_BEFORE_DAYS (default 30) days remain — or when the
+# handshake fails outright, which is the "TLS is already broken, fix it"
+# signal. This is what makes the job self-healing: a failed attempt is simply
+# retried tomorrow, and every day after, until it succeeds or the certificate
+# expires. It replaces a bimonthly cron under which a single failed run meant
+# no second attempt before expiry.
+#
+# Every failed attempt also emails CERT_ALERT_EMAIL (falling back to
+# ACME_CONTACT_EMAIL) with the days remaining, so nobody has to be watching the
+# Actions tab. GitHub's own notification for a failed scheduled run only
+# reaches whoever last touched the cron line, and is easy to miss.
+#
+# To check that the mail actually arrives, dispatch this with `test_alert`
+# ticked: it sends one alert per environment and stops, touching no
+# certificates. `force` will not do it — the real alert step is `if: failure()`,
+# so a forced run that succeeds sends nothing.
+#
 # One-time bootstrap per environment: run this manually (workflow_dispatch)
 # once before relying on deploy-staging.yml/deploy.yml's hostname bind steps,
 # which bind against the certificate this workflow uploads and will fail if
@@ -21,17 +41,31 @@ name: Renew-Certs
 
 on:
   schedule:
-    # Cron has no native "every N days" that crosses month boundaries, so day
-    # 1 of every 2nd month is the closest calendar approximation to ~60 days
-    # — comfortably inside Let's Encrypt's current 90-day certificate
-    # lifetime. Revisit the cadence if/when LE's phased move to 45-day certs
-    # reaches this account.
-    - cron: '0 3 1 */2 *'
-  workflow_dispatch: {}
+    # Daily. The work is skipped unless a certificate is close to expiry, so
+    # this costs one TLS handshake per hostname on an ordinary day; what it
+    # buys is ~30 consecutive chances to renew before anything breaks. The
+    # cadence needs no revisiting if Let's Encrypt's phased move to 45-day
+    # certificates reaches this account — a 30-day threshold still leaves a
+    # fortnight of retries.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Renew even if the current certificates are not near expiry'
+        type: boolean
+        default: false
+      test_alert:
+        description: 'Only send a test alert email, then stop. Touches no certificates.'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
   id-token: write
+
+env:
+  # Renew once the served certificate has fewer than this many days left.
+  RENEW_BEFORE_DAYS: 30
 
 jobs:
   renew:
@@ -41,6 +75,8 @@ jobs:
         environment: [staging, prod]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+
       - name: Set environment-specific values
         run: |
           set -euo pipefail
@@ -67,7 +103,105 @@ jobs:
               ;;
           esac
 
+      - name: Check that failure alerting is configured
+        env:
+          SMTP_HOST:  ${{ vars.SMTP_HOST }}
+          SMTP_FROM:  ${{ vars.SMTP_FROM }}
+          ALERT_TO:   ${{ vars.CERT_ALERT_EMAIL || vars.ACME_CONTACT_EMAIL }}
+        run: |
+          set -uo pipefail
+          # Checked on every run, not just failing ones: an alert path that is
+          # only exercised when something breaks is an alert path nobody knows
+          # is broken.
+          missing=""
+          for name in SMTP_HOST SMTP_FROM ALERT_TO; do
+            [ -n "${!name}" ] || missing="${missing}${missing:+, }${name}"
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning::Certificate renewal failures cannot be emailed — unset: ${missing}. See BACKEND.md."
+          else
+            echo "Failure alerts will go to ${ALERT_TO}."
+          fi
+
+      - name: Send a test alert email, then stop
+        if: ${{ inputs.test_alert }}
+        env:
+          SMTP_HOST:     ${{ vars.SMTP_HOST }}
+          SMTP_PORT:     ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USERNAME: ${{ vars.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM:     ${{ vars.SMTP_FROM }}
+          SMTP_TLS:      ${{ vars.SMTP_TLS || 'starttls' }}
+          ALERT_TO:      ${{ vars.CERT_ALERT_EMAIL || vars.ACME_CONTACT_EMAIL }}
+          # Unsendable mail must fail this run: a green tick on the one job
+          # whose purpose is to prove delivery would be worse than no test.
+          ALERT_STRICT:  'true'
+        run: |
+          set -uo pipefail
+
+          # `force` does not exercise this path: the real alert step is
+          # `if: failure()`, so a forced run that succeeds sends nothing and a
+          # forced run that fails cannot be ordered on demand. Without this
+          # input the only way to find out whether the mail actually arrives is
+          # to wait for a genuine renewal failure — which is the one moment it
+          # must not be discovered to be broken.
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          export ALERT_SUBJECT="[test] Certificate renewal alerting for ${{ matrix.environment }} - no action needed"
+          ALERT_BODY="$(cat <<EOF
+          This is a test of the certificate renewal alerting for the ${{ matrix.environment }}
+          backend, triggered by hand with the workflow's test_alert input. No
+          certificate was inspected, issued or bound, and nothing is wrong.
+
+          Receiving this means a real renewal failure would reach you too.
+
+          Triggered from: ${run_url}
+          EOF
+          )"
+          export ALERT_BODY
+
+          python3 .github/scripts/send-alert-email.py
+
+      - name: Check how long the served certificates are still valid
+        if: ${{ !inputs.test_alert }}
+        run: |
+          set -uo pipefail
+          min=""
+          summary=""
+          for host in "$AUTH_HOSTNAME" "$PERSISTENCE_HOSTNAME"; do
+            days="$(.github/scripts/cert-days-left.sh "$host")"
+            echo "$host: $days day(s) of validity left"
+            summary="${summary}${summary:+; }${host}: ${days}"
+            # An unreachable host or unparseable date sorts below every real
+            # answer, so it always triggers a renewal attempt.
+            if [ "$days" = unknown ]; then days=-1; fi
+            if [ -z "$min" ] || [ "$days" -lt "$min" ]; then min="$days"; fi
+          done
+
+          echo "CERT_DAYS_LEFT=$min"        >> "$GITHUB_ENV"
+          echo "CERT_DAYS_SUMMARY=$summary" >> "$GITHUB_ENV"
+
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "Forced by workflow_dispatch input."
+            needed=true
+          elif [ "$min" -lt "$RENEW_BEFORE_DAYS" ]; then
+            echo "Fewer than $RENEW_BEFORE_DAYS days left — renewing."
+            needed=true
+          else
+            echo "More than $RENEW_BEFORE_DAYS days left — nothing to do today."
+            needed=false
+          fi
+          echo "RENEW_NEEDED=$needed" >> "$GITHUB_ENV"
+
+          {
+            echo "### ${{ matrix.environment }}"
+            echo ""
+            echo "- Validity remaining: ${summary}"
+            echo "- Renewing: ${needed}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install certbot + DirectAdmin DNS plugin
+        if: env.RENEW_NEEDED == 'true'
         run: |
           set -euo pipefail
           python3 -m venv "$RUNNER_TEMP/certbot-venv"
@@ -77,6 +211,7 @@ jobs:
           echo "$RUNNER_TEMP/certbot-venv/bin" >> "$GITHUB_PATH"
 
       - name: Write DirectAdmin API credentials
+        if: env.RENEW_NEEDED == 'true'
         env:
           DIRECTADMIN_SERVER:    ${{ vars.DIRECTADMIN_SERVER }}
           DIRECTADMIN_USERNAME:  ${{ vars.DIRECTADMIN_USERNAME }}
@@ -94,6 +229,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/directadmin.ini"
 
       - name: Request certificate (DNS-01 via DirectAdmin)
+        if: env.RENEW_NEEDED == 'true'
         env:
           ACME_CONTACT_EMAIL: ${{ vars.ACME_CONTACT_EMAIL }}
         run: |
@@ -112,6 +248,7 @@ jobs:
             -d "$PERSISTENCE_HOSTNAME"
 
       - name: Package as PFX
+        if: env.RENEW_NEEDED == 'true'
         run: |
           set -euo pipefail
           live="$RUNNER_TEMP/le-config/live/$CERT_DIR_NAME"
@@ -126,6 +263,7 @@ jobs:
           echo "PFX_PASSWORD=$PFX_PASSWORD" >> "$GITHUB_ENV"
 
       - name: Azure login (OIDC)
+        if: env.RENEW_NEEDED == 'true'
         uses: azure/login@v3
         with:
           client-id:       ${{ vars.AZURE_CLIENT_ID }}
@@ -133,6 +271,7 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Upload certificate to the Container Apps environment
+        if: env.RENEW_NEEDED == 'true'
         run: |
           set -euo pipefail
           az containerapp env certificate upload \
@@ -143,6 +282,7 @@ jobs:
             --certificate-name "$CERT_NAME"
 
       - name: Bind hostnames to the uploaded certificate
+        if: env.RENEW_NEEDED == 'true'
         run: |
           set -uo pipefail
 
@@ -194,7 +334,40 @@ jobs:
             --environment "$ENV_NAME" \
             --certificate "$CERT_NAME" || exit 1
 
-      - name: Verify TLS is serving on both hostnames
+      - name: Verify the new certificate is the one being served
+        if: env.RENEW_NEEDED == 'true'
+        run: |
+          set -uo pipefail
+
+          # Two things have to be true afterwards, and only the second one was
+          # ever checked: the hostname answers, *and* it answers with the
+          # certificate that was just issued. A bind that silently kept serving
+          # the old certificate would otherwise leave a green run behind and
+          # expire anyway. The binding can take a little while to propagate, so
+          # give it a few rounds before calling it a failure.
+          for attempt in $(seq 1 10); do
+            fail=0
+            for host in "$AUTH_HOSTNAME" "$PERSISTENCE_HOSTNAME"; do
+              days="$(.github/scripts/cert-days-left.sh "$host")"
+              echo "attempt $attempt — $host: $days day(s) left"
+              if [ "$days" = unknown ] || [ "$days" -lt "$RENEW_BEFORE_DAYS" ]; then
+                fail=1
+              fi
+            done
+            if [ "$fail" -eq 0 ]; then
+              echo "Both hostnames are serving the renewed certificate."
+              exit 0
+            fi
+            # `test && sleep` would abort the whole step under errexit on the
+            # last round, when the test is false — hence the explicit `if`.
+            if [ "$attempt" -lt 10 ]; then sleep 30; fi
+          done
+
+          echo "::error::After binding, at least one hostname is unreachable or still serving a certificate that expires within $RENEW_BEFORE_DAYS days."
+          exit 1
+
+      - name: Check that the services answer over the new certificate
+        if: env.RENEW_NEEDED == 'true'
         run: |
           set -uo pipefail
           fail=0
@@ -217,3 +390,59 @@ jobs:
             echo "::error::TLS handshake or connection failed on at least one hostname after binding."
             exit 1
           fi
+
+      - name: Email the failure
+        if: failure()
+        env:
+          SMTP_HOST:     ${{ vars.SMTP_HOST }}
+          SMTP_PORT:     ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USERNAME: ${{ vars.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM:     ${{ vars.SMTP_FROM }}
+          SMTP_TLS:      ${{ vars.SMTP_TLS || 'starttls' }}
+          ALERT_TO:      ${{ vars.CERT_ALERT_EMAIL || vars.ACME_CONTACT_EMAIL }}
+        run: |
+          set -uo pipefail
+          days="${CERT_DAYS_LEFT:-unknown}"
+          summary="${CERT_DAYS_SUMMARY:-not measured — the run failed before probing}"
+
+          # Below a fortnight there is no longer room for this to sort itself
+          # out by tomorrow, so the subject line stops being polite about it.
+          if [ "$days" = unknown ]; then
+            urgency="[ACTION NEEDED]"; state="remaining validity not yet measured"
+          elif [ "$days" -lt 0 ]; then
+            urgency="[URGENT]";        state="HTTPS is already not answering"
+          elif [ "$days" -lt 14 ]; then
+            urgency="[URGENT]";        state="${days} days left"
+          else
+            urgency="[warning]";       state="${days} days left"
+          fi
+
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          export ALERT_SUBJECT="${urgency} Certificate renewal failed for ${{ matrix.environment }} - ${state}"
+
+          # A heredoc rather than a multi-line string: YAML strips exactly this
+          # block's indentation, so lines written at this column arrive in the
+          # mail body unindented.
+          ALERT_BODY="$(cat <<EOF
+          The scheduled TLS certificate renewal for the ${{ matrix.environment }} backend failed.
+
+          Validity remaining per hostname: ${summary}
+          Failed run: ${run_url}
+
+          The job retries automatically every day at 03:17 UTC and keeps emailing
+          until it succeeds, so no manual re-run is required — but the certificate
+          expires on its own schedule, and once it does both backend hostnames stop
+          answering over HTTPS.
+
+          If the cause is DirectAdmin, Let's Encrypt or Azure being briefly
+          unavailable, tomorrow's run will likely fix it by itself. Anything else —
+          an expired DirectAdmin login key, a deleted Azure federated credential,
+          changed DNS — needs a human. See BACKEND.md for the renewal pipeline and
+          its prerequisites.
+          EOF
+          )"
+          export ALERT_BODY
+
+          python3 .github/scripts/send-alert-email.py

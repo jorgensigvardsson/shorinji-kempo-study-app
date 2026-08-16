@@ -139,7 +139,7 @@ const createWordListRow = (entry: WordListEntry, translator: Translator) => {
     }
 
     return (
-        <tr key={entry.index}>
+        <tr key={entry.id}>
             <td className="top-align-cell">{entry.kanji}</td>
             <td className="top-align-cell">{entry.romaji}</td>
             <td className="top-align-cell">{meanings}</td>

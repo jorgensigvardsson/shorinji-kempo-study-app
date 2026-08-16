@@ -82,6 +82,46 @@ The list is ordered by risk, not by effort.
   granular per-item API above, which is the item waiting on the client-build drain;
   until then a user who reaches the cap has to delete notes by hand
 - [x] Stop hand-writing two divergent type views of `grading-exam-information.json`. One `grading-exam-information.ts` now owns the types and the import, and both components use it — the last two `as unknown as` casts in the frontend are gone. A complete draft-07 schema for the file already existed at `frontend/data/grading-exam-information.schema`, pointed at by the data's own `$schema` and enforced by nothing; a test now validates the data against it with ajv, so a transcription slip fails the suite with a path to the offending node instead of surfacing at runtime in whichever component happened to read it. Unifying the types exposed two ways the old ones were wrong: `Annotation.marker` was required though the schema makes it optional, and the file has a top-level `$schema` key, so `Partial<Record<GradeName, GradeManual>>` never described its shape
+- [ ] Give a flashcard's "known" flag a stable id. `knownFlashCards` is keyed by
+  `entry.index + 1` (`Flashcard.tsx`), and `index` is a field stored in
+  `word-list.json` that today equals the array position exactly, 0 through 537. So
+  the key is positional in everything but name: insert a word anywhere but the end
+  and renumber, and every later card's flag moves to a different word. That is worse
+  than the orphaning the other derived keys suffer, because nothing goes missing —
+  the flags stay, attached to the wrong words, and no screen shows anything unusual.
+  The filter for cards with content runs before the id is read, so filtering is not
+  the risk; editing the list is. An id that does not encode position, plus a migration
+  from the numbers already stored, is the fix
+- [ ] Key grading completions by something other than the displayed romaji.
+  `gradingFundamentalCompletionKey`/`gradingTheoryCompletionKey` in `GradingTest.tsx`
+  build `${grade}|${item.term.romaji}`, falling back to `item-${itemIndex}` where an
+  item has no term. Both halves are fragile in the same way as the hokei note keys:
+  correcting a spelling in the source clears every tick saved against the old one, and
+  reordering the items without a term moves ticks between them. The `sashikae sokuō
+  geri` → `sokutō` correction on 2026-08-16 landed on `techniques[].romaji` rather
+  than `term.romaji`, so nothing broke — the same correction one level up would have
+  silently cleared grading progress for every user, with no error and no way to find
+  out afterwards
+- [ ] Give a note its own timestamp. `notes` is `Record<string, string>` — the only
+  merged map whose entries carry no `updatedAt`, where `hokeiRanks`, `knownFlashCards`
+  and the three completion maps all do. That absence is the whole reason a note
+  disagreement has to be put to the user: `mergeMap` has no principled winner to pick,
+  so `escalates: true` is the honest setting rather than a considered one. Stored as
+  `{ text, updatedAt }` a note would settle itself like everything else, and the
+  conflict prompt could be reserved for cases that genuinely need a person. The value
+  shape changes, so this is a schema bump and belongs with the other one; reading
+  either shape during the rollout keeps it from being a hard cutover
+- [ ] Decide which of the synced fields are account data and which are device
+  preferences. `theme`, `language`, `hokeiListSelection` and `showKanjiOnHokeiCards`
+  describe how one device is set up, not what the user knows or has done, yet they
+  ride in the same document and go through `mergeScalar` like `grade` and
+  `kenshiNumber`. A genuine disagreement there sets `conflictDetected`, so two devices
+  that were each given a different theme can raise the same conflict dialog as two
+  devices disagreeing about the text of a note — and there is no right answer to offer,
+  since both devices are correct about themselves. Worth noting alongside the
+  `__conflictMarker` item above, which records that only notes and hokeiRanks raise the
+  user-facing prompt: scalars raise it too, asserted by `merge.test.ts` for `grade` and
+  `kenshiNumber`
 
 ## Correctness
 
@@ -104,13 +144,17 @@ The list is ordered by risk, not by effort.
   a placeholder, which is harmless but is the same mistake. A grep for `vh|vw|dvh|dvw`
   across the stylesheets would find the rest. The guard in `HokeiCard.css.test.ts`
   covers only the focused card
-- [ ] Decide what to do with `backend/persistence/cmd/inspect`. It reports what is
+- [x] Decide what to do with `backend/persistence/cmd/inspect`. It reported what is
   actually stored in the `userdata` container per user — id scheme, item counts,
   whether a value survives — which was the only way to see inside it while the ids were
-  illegal and Data Explorer could not open them. That reason has gone away now the ids
-  are legal. It was committed by accident rather than by decision, it is rough, and it
-  needs a Cosmos key in the environment. Either tidy it into a proper read-only admin
-  command or delete it; leaving it as an unowned script is the worst of the three
+  illegal and Data Explorer could not open them. That reason had gone away now the ids
+  are legal. It was committed by accident rather than by decision, it was rough, and it
+  needed a Cosmos key in the environment. Deleted rather than tidied into an admin
+  command: nothing referenced it, its own header said "Temporary; deleted after use",
+  and there is no current need for it. If the question comes back, the useful part is
+  the query it settled — indexing is off on that container, so a scan needs
+  `EnableScanInQuery`, and `value` is reserved in the Cosmos dialect and has to be
+  reached as `c["value"]`
 - [x] Remove the duplicate keys in `frontend/src/assets/translations.json`. `kōbōgi` and `ukemi` each appeared twice in all three language sections. Removed the repeat occurrences rather than the first ones: a duplicate key keeps its original position and only its value is overwritten, so dropping the first would have moved the key to the end and changed the parsed key order. The values were identical, so the parsed object is unchanged — verified by comparing before and after, and confirmed independently by the build producing an identical bundle hash. A test now reads the file as text and fails on any duplicate, since the parsed form is exactly where one disappears
 - [x] Add tests for `weekly-copy.ts` — 23 covering every week type, the randori label, list joining per language and the basic-focus rules. Writing them found a real copy bug: the strikes-and-blocks rule matched `uke` unbounded, so `ukemi` matched it too and three of the 104 weeks with basic entries told the reader their grundarbete involved strikes when it was only falling. `uke` is bounded as a word now
 - [x] Test the two state machines in `App.tsx`. They were untestable rather than

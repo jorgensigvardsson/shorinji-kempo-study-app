@@ -65,10 +65,15 @@ export interface AdminUser {
 // Result of POST /auth/email/start. "oidc" means the domain has an OIDC provider
 // and the caller should redirect there; "existing"/"new" mean a code was emailed
 // (only "new" needs a name collected on verify).
+//
+// expiresInSeconds is the server's own TTL for the code it just sent, so the UI
+// can state it without keeping a second copy of the number. It is null when the
+// server didn't say — an older backend than this client — and the UI then simply
+// leaves the validity out rather than guessing at it.
 export type EmailStartResult =
   | { action: "oidc"; provider: string }
-  | { action: "existing" }
-  | { action: "new" };
+  | { action: "existing"; expiresInSeconds: number | null }
+  | { action: "new"; expiresInSeconds: number | null };
 
 // Thrown when the global code-sending rate limit (1 per 5 s) rejects a request.
 export class RateLimitError extends Error {
@@ -108,7 +113,12 @@ export class BackendSyncClient {
     });
     if (resp.status === 429) throw new RateLimitError();
     if (!resp.ok) throw new Error(`POST /auth/email/start: ${resp.status}`);
-    return resp.json() as Promise<EmailStartResult>;
+    const body = await resp.json() as { action: string; provider?: string; expires_in_seconds?: number };
+    if (body.action === "oidc") return { action: "oidc", provider: body.provider ?? "" };
+    return {
+      action: body.action === "new" ? "new" : "existing",
+      expiresInSeconds: typeof body.expires_in_seconds === "number" ? body.expires_in_seconds : null,
+    };
   }
 
   // Submits a verification code (and, for new users, a name). On success the

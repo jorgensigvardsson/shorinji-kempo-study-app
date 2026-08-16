@@ -1,12 +1,16 @@
 name: Deploy
+#
+# Called by ci.yml once its test jobs are green — never triggered on its own.
+# It used to trigger on `push` directly, which meant it raced the test workflow
+# instead of waiting for it: a red test did not stop a production deploy.
 
 on:
-  push:
-    branches: [deploy]
+  workflow_call: {}
 
 # id-token: write  — lets the job exchange a GitHub OIDC token for an Azure access token
 # packages: write  — lets the job push images to GHCR
 # contents: read   — lets the job check out code
+# The caller grants these too; a called workflow can only narrow them.
 permissions:
   contents: read
   packages: write

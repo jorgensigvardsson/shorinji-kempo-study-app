@@ -212,7 +212,7 @@ describe("FreePractice", () => {
     expect(screen.getByRole("heading", { name: "Uke och kontring" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Kōbōgi och idō kōbōgi" })).toBeTruthy();
     expect(screen.getByText("furiko zuki")).toBeTruthy();
-    expect(screen.getByText("sashikae sokuō geri")).toBeTruthy();
+    expect(screen.getByText("sashikae sokutō geri")).toBeTruthy();
     expect(screen.getByText("uchi oshi uke geri")).toBeTruthy();
     expect(screen.queryByText("harai uke geri")).toBeNull();
     expect(screen.queryByText(/^Från (?:\d+ kyū|Shodan|Nidan|Sandan|Yondan|Godan)$/)).toBeNull();

@@ -315,7 +315,7 @@ const SelectionWordLookup = () => {
                         </button>
                     </header>
                     {result.entries.length > 0 ? result.entries.map(entry => (
-                        <section key={entry.index} className="selection-lookup-entry">
+                        <section key={entry.id} className="selection-lookup-entry">
                             <div>
                                 <strong>{entry.romaji}</strong>
                                 {entry.kanji && <span lang="ja">{entry.kanji}</span>}

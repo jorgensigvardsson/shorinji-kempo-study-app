@@ -120,7 +120,9 @@ For email domains **without** a configured OIDC provider, users sign in with a o
 
 1. `POST /auth/email/start` `{email, language}`. If the domain actually has an OIDC provider it
    returns `{action:"oidc", provider}` (no email sent). Otherwise it emails a 6-digit code and
-   returns `{action:"existing"}` or `{action:"new"}` (whether the address is already a user).
+   returns `{action:"existing"}` or `{action:"new"}` (whether the address is already a user),
+   along with `expires_in_seconds` — the code's TTL, which the sign-in screen states to the user
+   rather than keeping its own copy of the number.
 2. `POST /auth/email/verify` `{email, code, name}`. On a valid code it looks up or creates the
    user (storing `name` as `DisplayName` only on creation) and issues the session cookies.
 
@@ -253,7 +255,7 @@ corporate domain at the appropriate provider.
 | GET | `/auth/resolve` | Check whether an email domain maps to a provider (used for inline form validation) |
 | GET | `/auth/login?email={e}` | Resolve domain → provider, initiate OIDC, redirect |
 | GET | `/auth/callback` | OIDC callback: validate, enroll or look up, issue JWT, redirect to frontend |
-| POST | `/auth/email/start` | Non-OIDC email login: emails a verification code. Returns `{action}` = `oidc` (redirect instead), `existing`, or `new` (collect a name). Globally rate-limited to 1 req / 5 s |
+| POST | `/auth/email/start` | Non-OIDC email login: emails a verification code. Returns `{action}` = `oidc` (redirect instead), `existing`, or `new` (collect a name), plus `expires_in_seconds` when a code was sent. Globally rate-limited to 1 req / 5 s |
 | POST | `/auth/email/verify` | Verify a code (and name, for new users); creates/looks up the user, issues JWT, sets cookies |
 | POST | `/auth/refresh` | Exchange refresh token for new access token (rotates the refresh token) |
 | POST | `/auth/logout` | Revoke refresh token, clear cookies |
@@ -395,8 +397,82 @@ database and containers on startup):
 
 ## Deployment
 
+### How a deploy is triggered
+`.github/workflows/ci.yml` is the only workflow with a trigger. It runs the test
+jobs on every push, and gates both deploys behind them with `needs:`:
+
+| Branch pushed    | What runs                                                   |
+|------------------|-------------------------------------------------------------|
+| anything         | Go tests + frontend tests                                    |
+| `deploy-staging` | tests, then `deploy-staging.yml` via `uses:`                 |
+| `deploy`         | tests, then `deploy.yml` via `uses:`                         |
+
+`deploy.yml` and `deploy-staging.yml` are reusable workflows (`on: workflow_call`)
+holding the deploy steps; neither can be triggered on its own. `ci.yml`'s
+`workflow_dispatch` deploys any branch on demand — pick the branch, set the
+`deploy` input to `staging` or `production` — which is how a deploy change is
+tried out before it reaches a deploy branch.
+
+Two things this shape fixes, both worth not reintroducing:
+
+- **A deploy uses the deploy workflow from the branch being deployed.** A local
+  `uses: ./.github/workflows/...` path resolves against the run's own commit.
+  The staging deploy used to hang off `workflow_run:`, and GitHub always
+  executes those from the *default* branch's copy of the file — so an edited
+  deploy step did nothing until merged to `main`, and on 2026-08-13 a staging
+  deploy silently dropped a new `FEEDBACK_EMAIL` parameter for exactly that
+  reason.
+- **A red test stops production.** `deploy.yml` used to trigger on `push`
+  itself, running alongside the test workflow rather than after it, so the
+  environment that mattered most had the weaker gate — none at all.
+
+### OIDC federated credentials
+Azure login is workload identity federation, so the `AZURE_CLIENT_ID` app
+registration must hold a federated credential matching the *subject* GitHub
+mints for the run. The subject is the ref the run executes from — the `uses:`
+call from `ci.yml` does not change that. **Three** credentials are needed, and
+all three are live:
+
+    subject                          serves                            credential name
+    …:ref:refs/heads/deploy-staging  staging deploy                    github-ref-deploy-staging
+    …:ref:refs/heads/deploy          prod deploy                       github-deploy-branch
+    …:ref:refs/heads/main            renew-certs.yml                   github-deploy-staging
+
+Read that last column twice. The credential *named* `github-deploy-staging`
+is the one carrying the `main` subject, and it has nothing to do with staging
+any more — it is what `renew-certs.yml` logs in with. The name is left over
+from when staging deploys really did run as `main`. Renaming is not possible
+in place; recreating it under an honest name is safe but has to be done as
+create-then-delete, since it is live.
+
+That credential is easy to mistake for leftovers. `renew-certs.yml` runs on
+`schedule:`, and GitHub always executes a scheduled workflow from the default
+branch, so it presents `ref:refs/heads/main` no matter what. **Deleting it
+breaks TLS renewal for both environments' backend hostnames** — and it would
+once have done so silently, surfacing only at the next bimonthly run or, worse,
+when a certificate expired. It now surfaces as a failed run and an email within
+a day of the renewal window opening; see the renewal-failure section below.
+
+Staging's deploy used to present `main` as well, because `workflow_run` also
+ran in the default branch's context. The first staging deploy after the
+`ci.yml` change failed on the difference:
+
+    AADSTS700213: No matching federated identity record found for presented
+    assertion subject 'repo:…:ref:refs/heads/deploy-staging'
+
+The pre-existing credential named `github-deploy-staging` is the one carrying
+the `main` subject, so adding the staging branch's credential needs a
+different name (`github-ref-deploy-staging`) — do not repurpose it.
+
+One consequence of keeping these branch-scoped: a `workflow_dispatch` deploy
+from some *other* branch presents that branch's subject and fails the same
+way until a credential exists for it. A flexible credential matching
+`ref:refs/heads/*`, or subjects keyed on GitHub Environments
+(`…:environment:staging`) instead of branches, would cover every branch at
+once — deliberately not done, to keep Azure trust narrow.
+
 ### Production
-Pushing to the `deploy` branch runs `.github/workflows/deploy.yml`:
+Deploying production runs `.github/workflows/deploy.yml`:
 
 1. **Backend images** — multi-stage Dockerfiles for auth and persistence, pushed to GHCR
 2. **Infrastructure** — `infrastructure/main.bicep` (modules: Cosmos DB free tier, Container
@@ -450,12 +526,10 @@ One-time Azure-side setup this doesn't automate:
   `sk-study-app-staging`, plus write access to the `sk-study-app-db` Cosmos
   account (or the whole `sk-study-app` resource group) so it can create the
   `shorinji-staging` database and containers there.
-- If OIDC login is scoped by branch, add a federated credential with
-  subject `repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/main`
-  — **not** `deploy-staging`. `deploy-staging.yml`'s Azure login runs inside
-  a `workflow_run` job, and GitHub always executes those in the default
-  branch's context, so the OIDC token's subject is `ref:refs/heads/main`
-  regardless of which branch actually pushed the triggering commit.
+- A federated credential on `AZURE_CLIENT_ID` with subject
+  `repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy-staging`.
+  See "OIDC federated credentials" below — staging's used to name `main`, and
+  the first deploy after the `ci.yml` change failed because of it.
 - Register `https://auth.app-staging.shorinjikempo.net/auth/callback` as an
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
@@ -497,13 +571,68 @@ One-time Azure-side setup this doesn't automate:
     password there first — it isn't guaranteed to match your Kundzon
     password) scoped to exactly: `CMD_API_LOGIN_TEST`, `CMD_API_DNS_CONTROL`,
     `CMD_API_SHOW_DOMAINS`, `CMD_API_DOMAIN_POINTER`.
-  - This workflow runs on `schedule:`, not `workflow_run`/`push`, so (unlike
-    `deploy-staging.yml`/`deploy.yml`) it must be merged to `main` to
-    actually fire — GitHub always evaluates a workflow's schedule using the
-    copy of the file on the default branch.
+  - This workflow runs on `schedule:`, so (unlike the deploy workflows, which
+    `ci.yml` calls from the pushed branch's own checkout) it must be merged to
+    `main` to actually fire — GitHub always evaluates a workflow's schedule
+    using the copy of the file on the default branch.
   - Bootstrap: run it once manually (workflow_dispatch) before the next
     `deploy-staging.yml`/`deploy.yml` run reaches its hostname-bind step,
     since that step expects the corresponding cert to already exist.
+
+#### What happens when renewal fails
+The renewal used to run on `0 3 1 */2 *` — day 1 of every second month — with
+no notification of its own beyond GitHub's default mail to whoever last touched
+the cron line. That combination had a single point of failure: one red run and
+the *next* attempt was ~60 days later, past the 90-day certificate's expiry.
+Any transient DirectAdmin, Let's Encrypt or Azure hiccup on that one morning
+was enough to take both backend hostnames off HTTPS two months later, with
+nothing in between saying so. Let's Encrypt is no help here either — it stopped
+sending certificate-expiry reminder mail in June 2025.
+
+It now runs **daily** (`17 3 * * *`) and is idempotent by construction:
+
+- Each run first asks both hostnames, over a real TLS handshake, what
+  certificate they are *serving* — not what Azure has stored, since uploading a
+  certificate and having a hostname bound to it are separate things and only
+  the handshake proves both. That is `.github/scripts/cert-days-left.sh`.
+- If more than `RENEW_BEFORE_DAYS` (30) days remain, the run stops there. An
+  ordinary day costs two handshakes. If fewer remain — or the handshake fails
+  outright, which is the "TLS is already broken" signal — it issues, uploads
+  and binds as before.
+- So a failed attempt is simply retried tomorrow, and every day after, until it
+  succeeds. There are ~30 chances before anything user-visible breaks, instead
+  of one. This is also why the threshold survives Let's Encrypt's phased move
+  to 45-day certificates without a cadence change.
+- After binding, the run re-probes until both hostnames actually serve a
+  certificate with more than the threshold left (10 attempts, 30s apart, for
+  propagation). A bind that silently kept serving the old certificate used to
+  leave a green run behind and expire anyway.
+- Every failed attempt emails `CERT_ALERT_EMAIL` (falling back to
+  `ACME_CONTACT_EMAIL`) via `.github/scripts/send-alert-email.py`, over the
+  same SMTP repository configuration the backend deploys with — no new
+  credentials, no third-party action. The subject carries the remaining
+  validity and escalates to `[URGENT]` under a fortnight. Both matrix legs
+  alert independently, so a staging-only failure is not mistaken for prod.
+- Whether alerting is configured at all is checked on *every* run, failing or
+  not, and warns if not: an alert path only exercised when something breaks is
+  an alert path nobody knows is broken.
+- To prove the mail actually *arrives*, dispatch the workflow with the
+  `test_alert` input ticked. It sends one alert per environment and stops,
+  inspecting and touching no certificates. The `force` input does **not** test
+  this: the real alert step is `if: failure()`, so a forced run that succeeds
+  sends nothing, and a forced run that fails cannot be ordered on demand.
+  `force` tests issuance, `test_alert` tests alerting; they are different
+  questions.
+
+Two failure modes this does *not* cover:
+- GitHub disables `schedule:` triggers in repositories with no activity for 60
+  days. Daily runs are not repository activity — commits are. A dormant repo
+  therefore still needs its scheduled workflow re-enabled by hand in the
+  Actions tab.
+- Each renewal registers a fresh ACME account, because certbot's `--config-dir`
+  lives in `$RUNNER_TEMP` and nothing persists between runs. Harmless at this
+  volume (accounts are only registered when a renewal is actually attempted),
+  but it is why the daily run must skip rather than reissue.
 
 Required repository configuration beyond what prod already had before staging existed:
 - Variable `AZURE_RESOURCE_GROUP_STAGING` — the staging resource group name.
@@ -515,6 +644,11 @@ Required repository configuration beyond what prod already had before staging ex
   `renew-certs.yml`, not staging-specific.
 - Variable `ACME_CONTACT_EMAIL` — contact address for the Let's Encrypt
   account used by `renew-certs.yml`. Also shared, not staging-specific.
+- Variable `CERT_ALERT_EMAIL` — optional. Where `renew-certs.yml` mails its
+  renewal failures; defaults to `ACME_CONTACT_EMAIL`. Set it to reach someone
+  other than the Let's Encrypt account contact, or to a comma-separated list.
+  The mail itself goes out over the existing `SMTP_HOST`/`SMTP_PORT`/
+  `SMTP_USERNAME`/`SMTP_FROM`/`SMTP_TLS` variables and `SMTP_PASSWORD` secret.
 
 ### Local development
 `docker-compose up` starts the frontend (Vite), auth (`:8081`), and persistence (`:8080`)

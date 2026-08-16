@@ -275,7 +275,13 @@ export function getWeeksWithKihonShoho(plan: GradePlan): Array<RegularWeek | Kih
 
 
 export interface WordListEntry {
-    index: number;
+    // Identity, not position. A flashcard's "known" flag is saved against this
+    // number in the user's synced document, so an entry keeps its id for as long
+    // as it exists: a new word takes max(id) + 1 wherever it is inserted in the
+    // file, and an id is never renumbered or reused. Renumbering would not lose
+    // anything visibly — it would silently move every later flag onto a different
+    // word. `assets/word-list.test.ts` fails if an id changes meaning.
+    id: number;
     kanji?: string;
     romaji?: string;
     meanings?: string[];

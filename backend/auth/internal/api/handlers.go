@@ -465,7 +465,7 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 	}
 	h.mu.Unlock()
 
-	if err := h.mailer.SendVerificationCode(r.Context(), addr, code, normalizeLang(req.Language)); err != nil {
+	if err := h.mailer.SendVerificationCode(r.Context(), addr, code, normalizeLang(req.Language), emailCodeTTL); err != nil {
 		log.Printf("emailStart: send code to %s: %v", addr, err)
 		http.Error(w, "could not send verification email", http.StatusBadGateway)
 		return
@@ -475,7 +475,12 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 	if isNew {
 		action = "new"
 	}
-	writeJSON(w, map[string]string{"action": action})
+	// The sign-in screen tells the user how long the code lasts, so it needs the
+	// TTL from here rather than a copy of the number that would drift from it.
+	writeJSON(w, map[string]any{
+		"action":             action,
+		"expires_in_seconds": int(emailCodeTTL.Seconds()),
+	})
 }
 
 // emailVerify checks a verification code and, on success, signs the user in —

@@ -22,7 +22,7 @@ const hasFlashCardContent = (entry: WordListEntry): entry is WordListEntry & { r
 const flashCards: FlashCardEntry[] = (wordList as WordListEntry[])
     .filter(hasFlashCardContent)
     .map(entry => ({
-        id: entry.index + 1,
+        id: entry.id,
         kanji: entry.kanji,
         romaji: entry.romaji,
         meanings: entry.meanings

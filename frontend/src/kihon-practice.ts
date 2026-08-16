@@ -33,11 +33,10 @@ export const hidariMigiMaeTechniques: KihonPracticeItem[] = [
     { name: "jun geri", introducedAt: "6 kyū" },
     { name: "gyaku geri", introducedAt: "6 kyū" },
     { name: "sashikomi mawashi geri", introducedAt: "5 kyū" },
-    { name: "sashikae sokuō geri", introducedAt: "4 kyū" },
+    { name: "sashikae sokutō geri", introducedAt: "4 kyū" },
     { name: "jō chū ni ren zuki", introducedAt: "3 kyū" },
     { name: "jō chū mawashi geri", introducedAt: "3 kyū" },
     { name: "ren geri", introducedAt: "1 kyū" },
-    { name: "sashikae sokutō geri", introducedAt: "1 kyū" },
 ];
 
 export const ukeCounterTechniques: KihonPracticeItem[] = [

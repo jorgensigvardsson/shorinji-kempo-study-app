@@ -102,7 +102,7 @@ func (s *SMTPSender) Describe() string {
 	return fmt.Sprintf("%s (tls: %s, from: %s, %s)", net.JoinHostPort(s.host, s.port), s.mode, s.from.Address, auth)
 }
 
-func (s *SMTPSender) SendVerificationCode(ctx context.Context, to, code, lang string) error {
+func (s *SMTPSender) SendVerificationCode(ctx context.Context, to, code, lang string, validFor time.Duration) error {
 	// The recipient is attacker-supplied and goes into a header, so it must be a
 	// single, well-formed address. Without this a CR/LF in the address would let
 	// a caller inject headers (a Bcc:, say) into the message.
@@ -111,7 +111,7 @@ func (s *SMTPSender) SendVerificationCode(ctx context.Context, to, code, lang st
 		return fmt.Errorf("smtp: invalid recipient address: %w", err)
 	}
 
-	rendered, err := render(code, lang)
+	rendered, err := render(code, lang, validFor)
 	if err != nil {
 		return err
 	}

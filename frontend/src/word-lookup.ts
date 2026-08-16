@@ -94,7 +94,7 @@ export const lookupWordEntries = (value: string, translator: Translator): WordLi
 
     const matches = tokens.flatMap(token => exactEntries(token, translator));
     return [...matches.reduce((unique, entry) => {
-        if (!unique.has(entry.index)) unique.set(entry.index, entry);
+        if (!unique.has(entry.id)) unique.set(entry.id, entry);
         return unique;
     }, new Map<number, WordListEntry>()).values()].slice(0, 5);
 };
