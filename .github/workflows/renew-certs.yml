@@ -133,6 +133,9 @@ jobs:
           SMTP_FROM:     ${{ vars.SMTP_FROM }}
           SMTP_TLS:      ${{ vars.SMTP_TLS || 'starttls' }}
           ALERT_TO:      ${{ vars.CERT_ALERT_EMAIL || vars.ACME_CONTACT_EMAIL }}
+          # Unsendable mail must fail this run: a green tick on the one job
+          # whose purpose is to prove delivery would be worse than no test.
+          ALERT_STRICT:  'true'
         run: |
           set -uo pipefail
 
