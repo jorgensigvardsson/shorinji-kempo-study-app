@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T06:40:41.382Z",
+    changes: [
+      {
+        emoji: "🪶",
+        sv: "Appens rubriker har fått en gemensam och lugnare hierarki. I veckoplanen har den överflödiga rubriken ”Veckans innehåll” lämnat plats åt små färgade rubriker för varje del, så planen blir lättare att överblicka.",
+        en: "Headings now share a calmer, more consistent hierarchy. In the weekly plan, the redundant “This week's content” heading has made room for small colored headings for each part, making the plan easier to scan.",
+        tr: "Uygulamadaki başlıklar artık daha sakin ve tutarlı bir düzene sahip. Haftalık planda gereksiz “Bu haftanın içeriği” başlığı kaldırılarak her bölüm için küçük renkli başlıklara yer açıldı; böylece planı gözden geçirmek kolaylaştı.",
+        ja: "アプリ全体の見出しを、より落ち着いた一貫性のある階層に整えました。週間計画では、重複していた「今週の内容」という見出しを表示せず、各項目を小さな色付き見出しで示すことで、内容を確認しやすくしました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T06:21:49.000Z",
     changes: [
       {

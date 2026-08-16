@@ -72,8 +72,8 @@ const Training = (props: Props) => {
                     <span>{translator.translate("Träning eller teori")}</span>
                 </button>
                 <header className="training-page-header training-landing-header">
-                    <h1>{translator.translate("Träning")}</h1>
-                    <p>{translator.translate("Hur vill du träna idag?")}</p>
+                    <h1 className="app-page-heading">{translator.translate("Träning")}</h1>
+                    <p className="app-intro-copy">{translator.translate("Hur vill du träna idag?")}</p>
                 </header>
                 <Grid items={choices} className="training-choice-grid" />
             </section>

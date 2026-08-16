@@ -53,7 +53,8 @@ describe("Kamoku weekly plan", () => {
     expect(screen.getByRole("heading", { name: "Veckoplan" })).toBeTruthy();
     expect(screen.getByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeTruthy();
     expect(screen.getByRole("region", { name: "Veckans innehåll" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Veckans grundarbete" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Veckans innehåll" }).classList.contains("visually-hidden")).toBe(true);
+    expect(screen.getByRole("heading", { name: "Veckans grundarbete" }).classList.contains("app-eyebrow-heading")).toBe(true);
     expect(screen.getByText("uwazeme")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Tekniker" })).toBeTruthy();
     expect(screen.getByText("gyaku gote")).toBeTruthy();

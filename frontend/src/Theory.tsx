@@ -62,8 +62,8 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
                 <span>{translator.translate("Träning eller teori")}</span>
             </button>
             <header className="theory-page-header">
-                <h1>{translator.translate("Teori")}</h1>
-                <p>{translator.translate("Vad vill du studera idag?")}</p>
+                <h1 className="app-page-heading">{translator.translate("Teori")}</h1>
+                <p className="app-intro-copy">{translator.translate("Vad vill du studera idag?")}</p>
             </header>
             <Grid items={items} className="theory-choice-grid" />
         </div>

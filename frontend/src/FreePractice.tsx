@@ -105,8 +105,8 @@ const FreePractice = (props: Props) => {
         <>
             <section className="free-practice-overview" hidden={activeArea !== null}>
                 <header className="free-practice-intro">
-                    <h1 ref={overviewHeadingRef} tabIndex={-1}>{translator.translate("Fri träning")}</h1>
-                    <p>{translator.translate("Välj ett träningsområde. Du kan byta när du vill.")}</p>
+                    <h1 className="app-view-heading" ref={overviewHeadingRef} tabIndex={-1}>{translator.translate("Fri träning")}</h1>
+                    <p className="app-intro-copy">{translator.translate("Välj ett träningsområde. Du kan byta när du vill.")}</p>
                 </header>
                 <Grid items={items} className="free-practice-grid" />
             </section>
@@ -118,8 +118,8 @@ const FreePractice = (props: Props) => {
                 {activeDefinition && (
                     <header className="free-practice-area-header">
                         <div>
-                            <h1 ref={areaHeadingRef} tabIndex={-1}>{translator.translate(activeDefinition.title)}</h1>
-                            <p>{translator.translate(activeDefinition.description)}</p>
+                            <h1 className="app-view-heading" ref={areaHeadingRef} tabIndex={-1}>{translator.translate(activeDefinition.title)}</h1>
+                            <p className="app-intro-copy">{translator.translate(activeDefinition.description)}</p>
                         </div>
                     </header>
                 )}
@@ -174,7 +174,7 @@ const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
                 {translator.translate("Den här sidan är fortfarande under utformning och kan ändras när som helst.")}
             </p>
             <section className="free-practice-section kihon-practice-group">
-                <h3>{translator.translate("Kaisoku dachi / Byakuren chūdan gamae")}</h3>
+                <h3 className="app-section-heading">{translator.translate("Kaisoku dachi / Byakuren chūdan gamae")}</h3>
                 <div className="kihon-practice-columns">
                     <KihonTechniqueList title={translator.translate("Angrepp")} items={kaisokuAttacks} selectedGrade={selectedGrade} dojoMode={dojoMode} />
                     <KihonTechniqueList title={translator.translate("Försvar")} items={kaisokuDefences} selectedGrade={selectedGrade} dojoMode={dojoMode} />
@@ -182,17 +182,17 @@ const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
             </section>
 
             <section className="free-practice-section kihon-practice-group">
-                <h3>{translator.translate("Hidari/migi mae")}</h3>
+                <h3 className="app-section-heading">{translator.translate("Hidari/migi mae")}</h3>
                 <KihonTechniqueList items={hidariMigiMaeTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
             </section>
 
             <section className="free-practice-section kihon-practice-group">
-                <h3>{translator.translate("Uke och kontring")}</h3>
+                <h3 className="app-section-heading">{translator.translate("Uke och kontring")}</h3>
                 <KihonTechniqueList items={ukeCounterTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
             </section>
 
             <section className="free-practice-section kihon-practice-group">
-                <h3>{translator.translate("Kōbōgi och idō kōbōgi")}</h3>
+                <h3 className="app-section-heading">{translator.translate("Kōbōgi och idō kōbōgi")}</h3>
                 <div className="kihon-practice-columns">
                     <KihonTechniqueList title="Kōbōgi" items={koboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
                     <KihonTechniqueList title="Idō kōbōgi" items={idoKoboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
@@ -270,7 +270,7 @@ const groupPracticeForms = (entries: TanenKihonHokei[]): PracticeFormFamily[] =>
 
 const PracticeFormMode = ({ title, entries, dojoMode }: { title: string; entries: TanenKihonHokei[]; dojoMode: boolean }) => (
     <section className="free-practice-section practice-form-mode">
-        <h3>{title}</h3>
+        <h3 className="app-section-heading">{title}</h3>
         <div className="practice-form-family-list">
             {groupPracticeForms(entries).map(group => (
                 <PracticeFormGroup key={group.title} title={group.title} entries={group.entries} dojoMode={dojoMode} />
@@ -357,7 +357,7 @@ const RandoriThemeGroup = ({ title, themes, dojoMode }: { title: string; themes:
 
     return (
         <section className="free-practice-section randori-theme-group">
-            <h3><PracticeTerm value={title} dojoMode={dojoMode} /></h3>
+            <h3 className="app-section-heading"><PracticeTerm value={title} dojoMode={dojoMode} /></h3>
             <ul className="free-practice-item-list randori-theme-list">
                 {themes.map(theme => (
                     <li key={`${theme.type}|${theme.restriction}`}>
@@ -555,7 +555,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
         <div className="free-practice-content">
             <section className="free-practice-section embu-builder">
                 <div className="embu-builder-heading">
-                    <h3>{translator.translate("Bygg embu")}</h3>
+                    <h3 className="app-section-heading">{translator.translate("Bygg embu")}</h3>
                     <span className="embu-experimental-label">
                         <ExclamationTriangle aria-hidden="true" />
                         {translator.translate("Experimentell")}
@@ -710,7 +710,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
             {selected && (
                 <section className="free-practice-section">
                     <div className="free-practice-section-heading">
-                        <h3>{translator.translate("Kumi-embu")}</h3>
+                        <h3 className="app-section-heading">{translator.translate("Kumi-embu")}</h3>
                     </div>
                     <ol className="free-practice-sequence-list">
                         {(selected.sequence.items ?? []).map((step, index) => {

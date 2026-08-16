@@ -2,23 +2,9 @@
   padding: 1.25rem 0.25rem 1.5rem;
 }
 
-.free-practice-intro h1,
-.free-practice-area-header h1 {
-  margin: 0;
-  color: var(--bs-emphasis-color);
-  font-size: clamp(1.55rem, 4vw, 2rem);
-  font-weight: 600;
-}
-
 .free-practice-intro h1:focus,
 .free-practice-area-header h1:focus {
   outline: 0;
-}
-
-.free-practice-intro p,
-.free-practice-area-header p {
-  margin: 0.45rem 0 0;
-  color: var(--bs-secondary-color);
 }
 
 .free-practice-grid {
@@ -74,10 +60,7 @@
 
 .free-practice-section > h3,
 .free-practice-section-heading h3 {
-  margin: 0 0 0.85rem;
-  color: var(--bs-emphasis-color);
-  font-size: 1.2rem;
-  font-weight: 600;
+  margin-bottom: 0.85rem;
 }
 
 .free-practice-section-heading {

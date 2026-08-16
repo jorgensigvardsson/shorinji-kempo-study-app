@@ -2,22 +2,6 @@
   padding: 0.5rem 0.25rem 1.35rem;
 }
 
-.kamoku-page-header h1 {
-  margin: 0;
-  color: var(--bs-emphasis-color);
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 650;
-  line-height: 1.1;
-}
-
-.kamoku-page-header p {
-  max-width: 42rem;
-  margin: 0.7rem 0 0;
-  color: var(--bs-secondary-color);
-  font-size: 1.05rem;
-  line-height: 1.6;
-}
-
 .kamoku-controls {
   margin-bottom: 2.5rem !important;
   padding: 0.5rem 0 1rem;
@@ -167,18 +151,6 @@
   margin: 0 0.25rem 3rem;
 }
 
-.kamoku-focus-eyebrow,
-.kamoku-section-title {
-  margin: 0;
-  color: var(--bs-primary);
-  font-family: var(--bs-body-font-family);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1.3;
-  text-transform: uppercase;
-}
-
 .kamoku-focus-groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
@@ -187,11 +159,7 @@
 }
 
 .kamoku-focus-group h3 {
-  margin: 0 0 0.85rem;
-  color: var(--bs-emphasis-color);
-  font-family: var(--app-display-font);
-  font-size: 1.12rem;
-  font-weight: 600;
+  margin-bottom: 0.85rem;
 }
 
 .kamoku-focus-group ul {

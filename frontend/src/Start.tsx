@@ -34,7 +34,7 @@ const Start = (props: Props) => {
                 {translator.translate("Gasshō")}
             </div>
             <header className="start-intro">
-                <h1>{translator.translate("Vad vill du göra idag?")}</h1>
+                <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
             </header>
             <Grid items={items} className="start-grid" />
         </div>

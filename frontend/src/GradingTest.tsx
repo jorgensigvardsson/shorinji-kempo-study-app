@@ -323,7 +323,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                     <div className="grading-category-heading">
                         <div className="text-muted small mb-1">{sentenceCase(translator.translate(selectedSection.title))}</div>
                         <div className="grading-category-title-line">
-                            <h2 className="mb-0">{title}</h2>
+                            <h2 className="app-view-heading">{title}</h2>
                             {isFundamentals && (
                                 <GradingCompletionProgress
                                     completed={completedFundamentalCount}
@@ -370,7 +370,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
     return (
         <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
             <header className="grading-page-header">
-                <h2 className="mb-0">{translator.translate(manual.title)}</h2>
+                <h2 className="app-view-heading">{translator.translate(manual.title)}</h2>
                 {manual.term && !translator.isJapanese && <div className="text-muted small mt-1">{sentenceCase(manual.term.romaji)}</div>}
             </header>
 
@@ -399,7 +399,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                         <section className="grading-section" key={`section-${sectionIndex}`}>
                             <header className="grading-section-heading">
                                 <div className="grading-section-title-line">
-                                    <h3 className="mb-0">{sentenceCase(translator.translate(section.title))}</h3>
+                                    <h3 className="app-section-heading">{sentenceCase(translator.translate(section.title))}</h3>
                                     {subject === "theory" && (
                                         <GradingCompletionProgress
                                             completed={completedTheoryItemCount}
@@ -548,7 +548,7 @@ const FundamentalsDetail = ({ item, grade, translator, showKanji, completions, e
 
             {groups.map((group, groupIndex) => (
                 <section className="grading-fundamental-group" key={group.title}>
-                    <h3>{group.translateTitle ? translator.translate(group.title) : group.title}</h3>
+                    <h3 className="app-eyebrow-heading">{group.translateTitle ? translator.translate(group.title) : group.title}</h3>
                     <div className="grading-fundamental-list">
                         {group.items.map(({ item: fundamentalItem, itemIndex }) => {
                             const { title, subtitle } = itemSummary(fundamentalItem, translator, showKanji);
