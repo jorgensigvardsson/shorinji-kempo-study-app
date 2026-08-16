@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T07:39:46.494Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Nya sidor öppnas nu högst upp. När du går tillbaka eller framåt kommer du tillbaka till samma plats på sidan som tidigare.",
+        en: "New pages now open at the top. When you go back or forward, you return to the same place on the page as before.",
+        tr: "Yeni sayfalar artık en üstten açılıyor. Geri veya ileri gittiğinizde sayfada daha önce bulunduğunuz yere dönüyorsunuz.",
+        ja: "新しいページは一番上から表示されるようになりました。戻る・進む操作では、そのページで以前見ていた位置に戻ります。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T07:22:55.237Z",
     changes: [
       {
