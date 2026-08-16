@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T10:12:00.000Z",
+    changes: [
+      {
+        emoji: "✍️",
+        sv: "En felstavning i graderingsmaterialet är rättad: `sashikae sokuō geri` heter `sashikae sokutō geri`. Det var samma spark hela tiden, så under Kihon står den nu på en enda rad, från 4 kyū.",
+        en: "A misspelling in the grading material has been corrected: `sashikae sokuō geri` is called `sashikae sokutō geri`. It was the same kick all along, so under Kihon it now appears on a single line, from 4 kyū.",
+        tr: "Derece sınavı materyalindeki bir yazım hatası düzeltildi: `sashikae sokuō geri` aslında `sashikae sokutō geri`. Baştan beri aynı tekmeydi; bu yüzden Kihon bölümünde artık tek bir satırda, 4 kyū'dan itibaren görünüyor.",
+        ja: "昇級試験科目の表記の誤りを修正しました。`sashikae sokuō geri` は `sashikae sokutō geri` です。もともと同じ蹴りだったため、基本のページでは4級からの一項目としてまとめて表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T06:21:49.000Z",
     changes: [
       {

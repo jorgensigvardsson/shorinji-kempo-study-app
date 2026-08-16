@@ -18,7 +18,7 @@ Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`
 - [ ] Audit the app's global text-zoom layout on narrow screens; the current whole-page zoom can push the right edge of controls and cards beyond the viewport, including the Dojo-mode control in the weekly plan
 - [ ] Add an option to show all techniques up to the user’s next grade, while keeping the focused weekly-plan view
 - [ ] Find a clear home in the future Study/Train structure for the existing tan’en and sōtai techniques and videos
-- [ ] Ask Sensei whether `sashikae sokuō geri` in the grading material is a misspelling of `sashikae sokutō geri`; keep the two source spellings unchanged and separate until this has been confirmed
+- [x] Ask Sensei whether `sashikae sokuō geri` in the grading material is a misspelling of `sashikae sokutō geri`. Confirmed: it is a misspelling. The spelling is corrected everywhere and the two entries are merged into one, introduced at 4 kyū
 - [ ] Review the proposed Free practice → Kihon lists with Sensei: starting-position groups, named uke/counter techniques, first-grade labels, and the separate kōbōgi/idō kōbōgi examples; correct the curated proposal without changing the canonical source data
 - [ ] Fine-tune the Kihon page under Training: review whether more headings are needed and whether techniques currently listed farther down should instead be grouped under Kaisoku/Byakuren chūdan gamae or another appropriate starting position
 - [x] Separate the grading-test material into a theoretical part under Theory and a practical training part under Training; preserve every requirement, note, sequence, video, and link while deciding how shared material should be presented without duplication
