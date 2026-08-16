@@ -1,16 +1,17 @@
 name: Deploy-Staging
+#
+# Called by ci.yml once its test jobs are green — never triggered on its own.
+# Everything here therefore runs in the context of the branch that was pushed
+# (or dispatched), including this file: a branch can change a deploy step and
+# see the change take effect without merging to `main` first.
 
 on:
-  workflow_run:
-    workflows: ["Test"]
-    branches:
-      - deploy-staging
-    types:
-      - completed
+  workflow_call: {}
 
 # id-token: write  — lets the job exchange a GitHub OIDC token for an Azure access token
 # packages: write  — lets the job push images to GHCR
 # contents: read   — lets the job check out code
+# The caller grants these too; a called workflow can only narrow them.
 permissions:
   contents: read
   packages: write
@@ -19,15 +20,12 @@ permissions:
 jobs:
   # ── 1. Build backend images and push to GHCR ────────────────────────────────
   build-backend:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     outputs:
       auth_image:        ${{ steps.build.outputs.auth_image }}
       persistence_image: ${{ steps.build.outputs.persistence_image }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -42,8 +40,8 @@ jobs:
           set -euo pipefail
           # GHCR requires lowercase owner
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          AUTH_IMAGE="ghcr.io/${OWNER}/sk-auth:staging-${{ github.event.workflow_run.head_sha }}"
-          PERSISTENCE_IMAGE="ghcr.io/${OWNER}/sk-persistence:staging-${{ github.event.workflow_run.head_sha }}"
+          AUTH_IMAGE="ghcr.io/${OWNER}/sk-auth:staging-${{ github.sha }}"
+          PERSISTENCE_IMAGE="ghcr.io/${OWNER}/sk-persistence:staging-${{ github.sha }}"
 
           docker build -f backend/auth/Dockerfile        -t "$AUTH_IMAGE"        backend/
           docker build -f backend/persistence/Dockerfile -t "$PERSISTENCE_IMAGE" backend/
@@ -66,8 +64,6 @@ jobs:
       api_url:  ${{ steps.bicep.outputs.api_url }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       # Workload identity federation — no stored Azure secret
       - name: Azure login (OIDC)
@@ -279,8 +275,6 @@ jobs:
       SITE_URL: https://app-staging.shorinjikempo.net
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - uses: actions/setup-node@v6
         with:
@@ -296,7 +290,7 @@ jobs:
           VITE_ENVIRONMENT:          staging
           # Identifies this build in feedback submissions; same SHA used to tag
           # the backend images built in the build-backend job above.
-          VITE_APP_VERSION:          ${{ github.event.workflow_run.head_sha }}
+          VITE_APP_VERSION:          ${{ github.sha }}
         run: |
           set -euo pipefail
           missing=()

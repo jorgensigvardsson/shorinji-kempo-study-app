@@ -1,0 +1,139 @@
+name: CI
+#
+# The whole pipeline in one workflow: tests run on every push, and a deploy
+# only starts once they are green (`needs:`). The deploy jobs are `uses:` calls
+# to the reusable workflows next to this file.
+#
+# Why this shape:
+#
+#   * Every branch tests its own deploy steps. A local `uses: ./...` path is
+#     resolved against *this run's* commit, so a branch that edits a deploy
+#     workflow runs the edited version. The previous `workflow_run` wiring
+#     could not: GitHub always executes a `workflow_run`-triggered workflow
+#     from the default branch's copy of the file, so a deploy change only took
+#     effect after being merged to `main` — which silently shipped a staging
+#     deploy without its new `FEEDBACK_EMAIL` parameter on 2026-08-13.
+#
+#   * A red test stops every deploy. `deploy.yml` used to trigger on `push` in
+#     parallel with the Test workflow, so production — the environment that
+#     matters most — had no gate at all.
+#
+# `workflow_dispatch` deploys any branch on demand, for trying deploy changes
+# out before they reach a deploy branch. The Run workflow button only appears
+# once this file is on `main` (GitHub reads the trigger list from the default
+# branch), but the run itself uses the selected branch's own workflow files.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy this branch once the tests pass'
+        type: choice
+        default: none
+        options:
+          - none
+          - staging
+          - production
+
+jobs:
+  go-test:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache-dependency-path: |
+            backend/auth/go.sum
+            backend/persistence/go.sum
+            backend/go.work.sum
+
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
+
+      - name: Run Go tests
+        run: gotestsum --junitfile test-results.xml ./auth/... ./persistence/... ./shared/...
+        working-directory: backend
+        continue-on-error: true
+        id: run-go-tests
+
+      - uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: Go
+          path: backend/test-results.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Fail job if Go tests failed
+        if: steps.run-go-tests.outcome == 'failure'
+        run: exit 1
+
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+        working-directory: frontend
+
+      - run: npx vitest run --config vitest.config.ts --reporter=default --reporter=junit --outputFile=test-results.xml
+        working-directory: frontend
+        continue-on-error: true
+        id: run-tests
+
+      - uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: Vitest
+          path: frontend/test-results.xml
+          reporter: jest-junit
+          fail-on-error: false
+
+      - name: Fail job if tests failed
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1
+
+  # ── Deploys ────────────────────────────────────────────────────────────────
+  # `needs:` is the gate — a failed or cancelled test job skips these entirely.
+  # Permissions are granted here because a called workflow can only narrow what
+  # its caller hands it, never widen it:
+  #   id-token: write  — exchange a GitHub OIDC token for an Azure access token
+  #   packages: write  — push backend images to GHCR
+  #   contents: read   — check out code
+  deploy-staging:
+    needs: [go-test, test]
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/deploy-staging') ||
+      (github.event_name == 'workflow_dispatch' && inputs.deploy == 'staging')
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-staging.yml
+    secrets: inherit
+
+  deploy-production:
+    needs: [go-test, test]
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/deploy') ||
+      (github.event_name == 'workflow_dispatch' && inputs.deploy == 'production')
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

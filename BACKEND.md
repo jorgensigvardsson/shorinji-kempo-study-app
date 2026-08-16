@@ -395,8 +395,37 @@ database and containers on startup):
 
 ## Deployment
 
+### How a deploy is triggered
+`.github/workflows/ci.yml` is the only workflow with a trigger. It runs the test
+jobs on every push, and gates both deploys behind them with `needs:`:
+
+| Branch pushed    | What runs                                                   |
+|------------------|-------------------------------------------------------------|
+| anything         | Go tests + frontend tests                                    |
+| `deploy-staging` | tests, then `deploy-staging.yml` via `uses:`                 |
+| `deploy`         | tests, then `deploy.yml` via `uses:`                         |
+
+`deploy.yml` and `deploy-staging.yml` are reusable workflows (`on: workflow_call`)
+holding the deploy steps; neither can be triggered on its own. `ci.yml`'s
+`workflow_dispatch` deploys any branch on demand — pick the branch, set the
+`deploy` input to `staging` or `production` — which is how a deploy change is
+tried out before it reaches a deploy branch.
+
+Two things this shape fixes, both worth not reintroducing:
+
+- **A deploy uses the deploy workflow from the branch being deployed.** A local
+  `uses: ./.github/workflows/...` path resolves against the run's own commit.
+  The staging deploy used to hang off `workflow_run:`, and GitHub always
+  executes those from the *default* branch's copy of the file — so an edited
+  deploy step did nothing until merged to `main`, and on 2026-08-13 a staging
+  deploy silently dropped a new `FEEDBACK_EMAIL` parameter for exactly that
+  reason.
+- **A red test stops production.** `deploy.yml` used to trigger on `push`
+  itself, running alongside the test workflow rather than after it, so the
+  environment that mattered most had the weaker gate — none at all.
+
 ### Production
-Pushing to the `deploy` branch runs `.github/workflows/deploy.yml`:
+Deploying production runs `.github/workflows/deploy.yml`:
 
 1. **Backend images** — multi-stage Dockerfiles for auth and persistence, pushed to GHCR
 2. **Infrastructure** — `infrastructure/main.bicep` (modules: Cosmos DB free tier, Container
@@ -450,12 +479,17 @@ One-time Azure-side setup this doesn't automate:
   `sk-study-app-staging`, plus write access to the `sk-study-app-db` Cosmos
   account (or the whole `sk-study-app` resource group) so it can create the
   `shorinji-staging` database and containers there.
-- If OIDC login is scoped by branch, add a federated credential with
-  subject `repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/main`
-  — **not** `deploy-staging`. `deploy-staging.yml`'s Azure login runs inside
-  a `workflow_run` job, and GitHub always executes those in the default
-  branch's context, so the OIDC token's subject is `ref:refs/heads/main`
-  regardless of which branch actually pushed the triggering commit.
+- If OIDC login is scoped by branch, the federated credential's subject must be
+  `repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy-staging`.
+  The OIDC token's subject follows the branch that actually triggered the run,
+  including through the `uses:` call from `ci.yml`. This changed when the
+  staging deploy stopped hanging off `workflow_run:` (which always ran in the
+  default branch's context, making the subject `ref:refs/heads/main` no matter
+  which branch pushed) — a branch-scoped credential still naming `main` will
+  now fail Azure login. Deploying an arbitrary branch via `ci.yml`'s
+  `workflow_dispatch` needs a credential matching that branch too, so a
+  branch-scoped setup is worth trading for a subject that covers the whole
+  repository if that flow is used often.
 - Register `https://auth.app-staging.shorinjikempo.net/auth/callback` as an
   additional redirect URI on the existing Google and Microsoft OAuth
   clients.
@@ -497,10 +531,10 @@ One-time Azure-side setup this doesn't automate:
     password there first — it isn't guaranteed to match your Kundzon
     password) scoped to exactly: `CMD_API_LOGIN_TEST`, `CMD_API_DNS_CONTROL`,
     `CMD_API_SHOW_DOMAINS`, `CMD_API_DOMAIN_POINTER`.
-  - This workflow runs on `schedule:`, not `workflow_run`/`push`, so (unlike
-    `deploy-staging.yml`/`deploy.yml`) it must be merged to `main` to
-    actually fire — GitHub always evaluates a workflow's schedule using the
-    copy of the file on the default branch.
+  - This workflow runs on `schedule:`, so (unlike the deploy workflows, which
+    `ci.yml` calls from the pushed branch's own checkout) it must be merged to
+    `main` to actually fire — GitHub always evaluates a workflow's schedule
+    using the copy of the file on the default branch.
   - Bootstrap: run it once manually (workflow_dispatch) before the next
     `deploy-staging.yml`/`deploy.yml` run reaches its hostname-bind step,
     since that step expects the corresponding cert to already exist.
