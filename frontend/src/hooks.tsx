@@ -1,6 +1,5 @@
 import { useState, useEffect, useSyncExternalStore } from 'react'
-import { setAppData, useAppData } from './persistence/use-app-data';
-import type { ThemePreference } from './persistence/schema';
+import { getThemePreference, setThemePreference, subscribeThemePreference } from './persistence/theme';
 import { getSyncProvider, setSyncProvider, subscribeSyncProvider, type SyncProvider } from './sync/provider';
 import { getSyncManager } from './sync/manager';
 import { getTranslations, subscribeTranslations } from './translations';
@@ -46,7 +45,9 @@ function applyTheme(theme: "light" | "dark") {
 }
 
 export function useTheme() {
-  const preference = useAppData("theme");
+  // Read from the device rather than the synced document: a theme suits the screen
+  // it is read on, not the person reading it. See persistence/theme.ts.
+  const preference = useSyncExternalStore(subscribeThemePreference, getThemePreference);
 
   // Applying the theme is a real side effect on the document, so this effect
   // stays. What went away is the write-back that persisted the preference the
@@ -69,7 +70,7 @@ export function useTheme() {
   return {
     theme: preference,
     effectiveTheme: preference === "system" ? getSystemTheme() : preference,
-    setTheme: (theme: ThemePreference) => setAppData("theme", theme)
+    setTheme: setThemePreference,
   };
 }
 

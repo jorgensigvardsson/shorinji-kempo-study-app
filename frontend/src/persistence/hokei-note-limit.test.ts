@@ -59,3 +59,57 @@ describe("note length", () => {
     expect(worstCaseBytes).toBeLessThan(1024 * 1024);
   });
 });
+
+// The stamp is what lets two devices settle a note between them without asking the
+// reader which of them was right. It has to be written whenever the note is.
+describe("note timestamps", () => {
+  beforeEach(() => {
+    getAppDataStore().set("notes", {});
+    getAppDataStore().set("notesUpdatedAt", {});
+  });
+
+  it("stamps a note when it is written", () => {
+    setHokeiNote("tsuki nuki [soto]", "något");
+
+    const stamp = getAppDataStore().get("notesUpdatedAt")["tsuki nuki [soto]"];
+    expect(stamp).toBeTypeOf("string");
+    expect(Number.isFinite(Date.parse(stamp))).toBe(true);
+  });
+
+  it("moves the stamp on when the note changes", async () => {
+    setHokeiNote("tsuki nuki [soto]", "första");
+    const first = getAppDataStore().get("notesUpdatedAt")["tsuki nuki [soto]"];
+
+    await new Promise(resolve => setTimeout(resolve, 2));
+    setHokeiNote("tsuki nuki [soto]", "andra");
+
+    expect(Date.parse(getAppDataStore().get("notesUpdatedAt")["tsuki nuki [soto]"]))
+      .toBeGreaterThan(Date.parse(first));
+  });
+
+  it("leaves the stamp alone when the same text is saved again", async () => {
+    setHokeiNote("tsuki nuki [soto]", "samma");
+    const first = getAppDataStore().get("notesUpdatedAt")["tsuki nuki [soto]"];
+
+    await new Promise(resolve => setTimeout(resolve, 2));
+    setHokeiNote("tsuki nuki [soto]", "samma");
+
+    // Re-saving unchanged text must not make this device look like the newer writer.
+    expect(getAppDataStore().get("notesUpdatedAt")["tsuki nuki [soto]"]).toBe(first);
+  });
+
+  it("takes the stamp away with the note", () => {
+    setHokeiNote("tsuki nuki [soto]", "något");
+    setHokeiNote("tsuki nuki [soto]", null);
+
+    expect("tsuki nuki [soto]" in getAppDataStore().get("notesUpdatedAt")).toBe(false);
+  });
+
+  it("stamps against the id, so each variation is stamped separately", () => {
+    setHokeiNote("uchi uke zuki [ura]", "ura");
+    setHokeiNote("uchi uke zuki [omote]", "omote");
+
+    const stamps = getAppDataStore().get("notesUpdatedAt");
+    expect(Object.keys(stamps).sort()).toEqual(["uchi uke zuki [omote]", "uchi uke zuki [ura]"]);
+  });
+});

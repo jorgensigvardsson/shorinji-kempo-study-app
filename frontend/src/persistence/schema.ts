@@ -1,7 +1,9 @@
 import type { GradeName } from "../data";
 import type { Language } from "../i18n";
 
-export type ThemePreference = "light" | "dark" | "system";
+// Theme is per-device and no longer part of the document; see persistence/theme.ts.
+// Re-exported here because callers have always imported it from the schema.
+export type { ThemePreference } from "./theme";
 export type HokeiRankValue = 1 | 2 | 3;
 
 export interface HokeiRankEntry {
@@ -30,10 +32,17 @@ export interface CurrentWeekAnchor {
 export interface AppDataState {
   grade: GradeName;
   language: Language;
-  theme: ThemePreference;
   currentWeekAnchor: CurrentWeekAnchor | null;
   kenshiNumber: string | undefined;
   notes: Record<string, string>;
+  // When each note was last written, keyed exactly as notes is. A sidecar rather than
+  // a richer note value: widening notes to { text, updatedAt } would make a build that
+  // predates the change render "[object Object]" in the editor and write it back as
+  // the note itself. A field it does not recognise is simply carried through.
+  //
+  // Sparse by design. Notes written before this existed have no entry, and the merge
+  // falls back to asking the reader for those, exactly as it did before.
+  notesUpdatedAt: Record<string, string>;
   hokeiRanks: Record<string, HokeiRankEntry>;
   hokeiListSelection: string;
   quizStreakHighScore: number;
@@ -56,9 +65,16 @@ export interface AppDataDocument {
 //
 // Bump it when a release starts writing fields an earlier release did not.
 //
-// 1 — grade, language, theme, currentWeekAnchor, kenshiNumber, notes,
+// 1 — grade, language, currentWeekAnchor, kenshiNumber, notes, notesUpdatedAt,
 //     hokeiRanks, hokeiListSelection, quizStreakHighScore, knownFlashCards,
 //     showKanjiOnHokeiCards, and the three completion maps.
+//
+// Deliberately not bumped for notesUpdatedAt. Bumping fires the compat gate, which
+// refuses writes from builds predating the compatibility header outright — and what
+// they would drop here is merge metadata, not anything anyone wrote. Losing a stamp
+// costs a conflict prompt; being locked out of sync costs everything. Whether any
+// such build is still syncing is answerable rather than a guess: the server logs
+// "outdated client wrote for %s: compat %d" for every one of them.
 export const APP_SCHEMA_VERSION = 1;
 
 // The highest schema this build can hold without losing anything — a different
@@ -116,7 +132,11 @@ export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(
 // syncProvider — whether this device is signed in. Per-device state, and circular
 // where it was: the document only exists on the server once signed in. See
 // sync/provider.ts, which also adopts the old value so nobody is signed out by the move.
-export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft", "syncProvider"]);
+// theme — which theme this device uses. A theme suits a screen and the light around
+// it, not a person, so two devices set differently were never a disagreement — yet as
+// a merged scalar it could raise a conflict prompt over a question with no wrong
+// answer. See persistence/theme.ts, which adopts the old value so nobody is reset.
+export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft", "syncProvider", "theme"]);
 
 // The fields of `data` this build has no schema for. They are never interpreted, only
 // preserved, so that a device running an older build cannot erase newer data simply by
@@ -187,10 +207,10 @@ export function createDefaultAppDataDocument(): AppDataDocument {
     data: {
       grade: "shodan",
       language: "sv",
-      theme: "system",
       currentWeekAnchor: null,
       kenshiNumber: undefined,
       notes: {},
+      notesUpdatedAt: {},
       hokeiRanks: {},
       hokeiListSelection: "own",
       quizStreakHighScore: 0,

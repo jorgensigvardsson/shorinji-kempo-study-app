@@ -30,11 +30,15 @@ export function useHokeiNote(hokeiId: string): string | null {
 export function setHokeiNote(hokeiId: string, note: string | null): void {
     const store = getAppDataStore();
     const existing = store.get("notes");
+    const stamps = store.get("notesUpdatedAt");
 
     if (note) {
         const capped = note.length > HOKEI_NOTE_MAX_LENGTH ? note.slice(0, HOKEI_NOTE_MAX_LENGTH) : note;
+        // Rewriting the same text keeps its original timestamp, so re-saving a note
+        // without changing it does not make this device look like the newer writer.
         if (existing[hokeiId] === capped) return;
         store.set("notes", { ...existing, [hokeiId]: capped });
+        store.set("notesUpdatedAt", { ...stamps, [hokeiId]: new Date().toISOString() });
         return;
     }
 
@@ -42,6 +46,14 @@ export function setHokeiNote(hokeiId: string, note: string | null): void {
     const remaining = { ...existing };
     delete remaining[hokeiId];
     store.set("notes", remaining);
+
+    // The stamp goes with the note. Left behind it would accumulate for every note
+    // ever deleted, and describe something no longer there.
+    if (hokeiId in stamps) {
+        const remainingStamps = { ...stamps };
+        delete remainingStamps[hokeiId];
+        store.set("notesUpdatedAt", remainingStamps);
+    }
 }
 
 /** The self-assessment saved against one technique, or null when unrated. */

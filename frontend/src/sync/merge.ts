@@ -33,16 +33,41 @@ export function mergeDocuments(
   const baseDocument = base;
   let conflictDetected = false;
 
+  // When each side last wrote each note. Sparse: notes written before the field
+  // existed, or by a build that does not know it, have no entry on either side.
+  const localNoteStamps = local.data.notesUpdatedAt ?? {};
+  const remoteNoteStamps = remote.data.notesUpdatedAt ?? {};
+
   // Every map field is the same three-way walk over the union of keys, differing only
   // in how entries are compared, who wins a genuine disagreement, and whether that
   // disagreement is something to ask the user about. Those differences are the rules
   // below; the walk itself is mergeMap.
   const notes = mergeMap<string>(baseDocument.data.notes, local.data.notes, remote.data.notes, {
-    // A note is text the user wrote. Picking a winner by timestamp would silently
-    // discard someone's writing, so a real disagreement goes to them.
-    escalates: true,
-    pickWinner: (localValue, remoteValue) => newerOf(local, remote) === local ? localValue : remoteValue,
+    // A note is text someone wrote, so discarding one needs a reason. A timestamp on
+    // both sides is that reason — the later writing is the one they meant to keep, and
+    // asking would be asking them to confirm something they already decided by typing.
+    //
+    // Without stamps on both sides there is no principled winner, so it goes to them,
+    // exactly as every note conflict did before this field existed.
+    escalates: key => !(key in localNoteStamps && key in remoteNoteStamps),
+    pickWinner: (localValue, remoteValue, key) => {
+      const localStamp = localNoteStamps[key];
+      const remoteStamp = remoteNoteStamps[key];
+      if (localStamp && remoteStamp) {
+        return parseTimestamp(localStamp) >= parseTimestamp(remoteStamp) ? localValue : remoteValue;
+      }
+      return newerOf(local, remote) === local ? localValue : remoteValue;
+    },
   });
+
+  // The stamps themselves are not the user's data, they describe it — so they never
+  // escalate, and the later of the two simply stands.
+  const notesUpdatedAt = mergeMap<string>(
+    baseDocument.data.notesUpdatedAt, local.data.notesUpdatedAt, remote.data.notesUpdatedAt, {
+      escalates: false,
+      pickWinner: (localValue, remoteValue) =>
+        parseTimestamp(localValue ?? "") >= parseTimestamp(remoteValue ?? "") ? localValue : remoteValue,
+    });
 
   const hokeiRanks = mergeMap<HokeiRankEntry>(baseDocument.data.hokeiRanks, local.data.hokeiRanks, remote.data.hokeiRanks, {
     escalates: true,
@@ -82,10 +107,10 @@ export function mergeDocuments(
     ...mergeUnknownFields(local, remote),
     grade: mergeScalar("grade"),
     language: mergeScalar("language"),
-    theme: mergeScalar("theme"),
     currentWeekAnchor: mergeScalar("currentWeekAnchor"),
     kenshiNumber: mergeScalar("kenshiNumber"),
     notes: notes.merged,
+    notesUpdatedAt: notesUpdatedAt.merged,
     hokeiRanks: hokeiRanks.merged,
     hokeiListSelection: mergeScalar("hokeiListSelection"),
     // A high score has an obvious winner, so it never disagrees.
@@ -138,9 +163,13 @@ export function mergeDocuments(
 interface MapMergeRules<TEntry> {
   // Whether a genuine disagreement is something to put to the user, or something this
   // code is entitled to settle on its own.
-  escalates: boolean;
+  //
+  // A predicate rather than a flag because notes answer it per entry: one with a
+  // timestamp on both sides settles itself, while one without has nothing to settle it
+  // by. Everything else answers the same way for every key.
+  escalates: boolean | ((key: string) => boolean);
   // Which side wins when both changed a key to different values.
-  pickWinner: (local: TEntry | undefined, remote: TEntry | undefined) => TEntry | undefined;
+  pickWinner: (local: TEntry | undefined, remote: TEntry | undefined, key: string) => TEntry | undefined;
   // Optional per-entry validation. An entry that fails is treated as absent, so a
   // malformed one is dropped rather than merged into a document as if it were real.
   accept?: (value: unknown) => TEntry | undefined;
@@ -181,8 +210,9 @@ function mergeMap<TEntry>(
       if (deepEqual(localEntry, remoteEntry)) {
         chosen = localEntry; // both moved the same way, which is agreement
       } else {
-        if (rules.escalates) conflicted = true;
-        chosen = rules.pickWinner(localEntry, remoteEntry);
+        const escalates = typeof rules.escalates === "function" ? rules.escalates(key) : rules.escalates;
+        if (escalates) conflicted = true;
+        chosen = rules.pickWinner(localEntry, remoteEntry, key);
       }
     } else if (localChanged) {
       chosen = localEntry;

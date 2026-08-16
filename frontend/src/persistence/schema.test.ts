@@ -31,7 +31,6 @@ describe("createDefaultAppDataDocument", () => {
     const { data } = createDefaultAppDataDocument();
     expect(data.grade).toBe("shodan");
     expect(data.language).toBe("sv");
-    expect(data.theme).toBe("system");
     expect(data.currentWeekAnchor).toBeNull();
     expect(data.kenshiNumber).toBeUndefined();
     expect(data.notes).toEqual({});

@@ -128,26 +128,39 @@ The list is ordered by risk, not by effort.
   gets no checkbox instead of a `grade|undefined` key several items would share.
   `grading-completions.test.ts` pins the ids, checked by renaming one the old way and
   watching it name the six orphaned keys
-- [ ] Give a note its own timestamp. `notes` is `Record<string, string>` — the only
-  merged map whose entries carry no `updatedAt`, where `hokeiRanks`, `knownFlashCards`
-  and the three completion maps all do. That absence is the whole reason a note
-  disagreement has to be put to the user: `mergeMap` has no principled winner to pick,
-  so `escalates: true` is the honest setting rather than a considered one. Stored as
-  `{ text, updatedAt }` a note would settle itself like everything else, and the
-  conflict prompt could be reserved for cases that genuinely need a person. The value
-  shape changes, so this is a schema bump and belongs with the other one; reading
-  either shape during the rollout keeps it from being a hard cutover
-- [ ] Decide which of the synced fields are account data and which are device
-  preferences. `theme`, `language`, `hokeiListSelection` and `showKanjiOnHokeiCards`
-  describe how one device is set up, not what the user knows or has done, yet they
-  ride in the same document and go through `mergeScalar` like `grade` and
-  `kenshiNumber`. A genuine disagreement there sets `conflictDetected`, so two devices
-  that were each given a different theme can raise the same conflict dialog as two
-  devices disagreeing about the text of a note — and there is no right answer to offer,
-  since both devices are correct about themselves. Worth noting alongside the
-  `__conflictMarker` item above, which records that only notes and hokeiRanks raise the
-  user-facing prompt: scalars raise it too, asserted by `merge.test.ts` for `grade` and
-  `kenshiNumber`
+- [x] Give a note its own timestamp. `notes` was the only merged map whose entries
+  carried no `updatedAt`, which was the whole reason a note disagreement had to be put
+  to the reader: `mergeMap` had no principled winner to pick, so `escalates: true` was
+  the honest setting rather than a considered one.
+  Done as a sidecar `notesUpdatedAt` keyed exactly as `notes`, rather than by widening
+  the value to `{ text, updatedAt }`. The widening is the obvious design and the wrong
+  one: a build predating it would render `[object Object]` in the editor and write that
+  back as the note's text — corrupting the writing, which is far worse than the prompt
+  being fixed. A field an old build does not recognise is simply carried through.
+  It needs no migration and no cutover. The map is sparse: notes written before it
+  existed have no stamp, and a disagreement without stamps on both sides still goes to
+  the reader, exactly as before. It improves as notes are edited rather than on a flag
+  day.
+  `escalates` became a per-key predicate rather than a flag, since notes now answer it
+  per entry. `APP_SCHEMA_VERSION` was deliberately not bumped: bumping fires the compat
+  gate, and what an old build would drop here is merge metadata rather than anything
+  anyone wrote. A lost stamp costs a prompt; being refused sync costs everything
+- [x] Decide which of the synced fields are account data and which are device
+  preferences. Decided: only `theme` is per-device. `language`, `hokeiListSelection`
+  and `showKanjiOnHokeiCards` follow the person rather than the screen, so they stay in
+  the document — someone who reads Turkish reads Turkish on every device they own.
+  `theme` is the one that genuinely belongs to the screen and the light around it, and
+  it was the worst of them as a merged scalar: two devices set differently were not a
+  disagreement at all, yet `mergeScalar` escalates one, so the app could put a conflict
+  prompt in front of someone over which theme they preferred — a question with no wrong
+  answer and nothing to resolve. It now lives in `persistence/theme.ts` with its own
+  external store, the same move `syncProvider` made, and is in `RETIRED_DATA_FIELDS` so
+  an older device cannot sync it back. It adopts whatever the document held on first
+  read, so nobody's screen is reset by the move.
+  Worth keeping from the investigation, since the `__conflictMarker` item above says
+  only notes and hokeiRanks raise the user-facing prompt: scalars raise it too, as
+  `merge.test.ts` asserts for `grade` and `kenshiNumber`. That is now a smaller
+  surface, but it is still not what that note claims
 
 ## Correctness
 

@@ -9,10 +9,10 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
     data: {
       grade: "shodan",
       language: "sv",
-      theme: "system",
       currentWeekAnchor: null,
       kenshiNumber: undefined,
       notes: {},
+      notesUpdatedAt: {},
       hokeiRanks: {},
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
@@ -548,5 +548,86 @@ describe("mergeDocuments — quizStreakHighScore", () => {
     const remote = makeDoc({ updatedAt: OLD });
     const result = mergeDocuments(base, local, remote);
     expect(result.document.data.quizStreakHighScore).toBe(0);
+  });
+});
+
+// A note used to be the one map with no per-entry timestamp, so every real
+// disagreement had to be put to the reader. With a stamp on both sides the later
+// writing simply wins; without one, nothing has changed.
+describe("mergeDocuments — note timestamps", () => {
+  const withNotes = (updatedAt: string, notes: Record<string, string>, stamps: Record<string, string> = {}) =>
+    makeDoc({ updatedAt, data: { ...makeDoc({ updatedAt }).data, notes, notesUpdatedAt: stamps } });
+
+  it("settles a disagreement silently when both sides stamped the note", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(OLD, { a: "mine" }, { a: "2026-08-16T10:00:00.000Z" });
+    const remote = withNotes(OLD, { a: "theirs" }, { a: "2026-08-16T12:00:00.000Z" });
+
+    const result = mergeDocuments(base, local, remote);
+
+    expect(result.document.data.notes.a).toBe("theirs");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("keeps the later note whichever side it is on", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(OLD, { a: "mine" }, { a: "2026-08-16T12:00:00.000Z" });
+    const remote = withNotes(NEW, { a: "theirs" }, { a: "2026-08-16T10:00:00.000Z" });
+
+    const result = mergeDocuments(base, local, remote);
+
+    // The note stamp decides, not which document was written last.
+    expect(result.document.data.notes.a).toBe("mine");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("still asks when only one side has a stamp", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(OLD, { a: "mine" }, { a: "2026-08-16T10:00:00.000Z" });
+    const remote = withNotes(NEW, { a: "theirs" });
+
+    expect(mergeDocuments(base, local, remote).conflictDetected).toBe(true);
+  });
+
+  it("still asks when neither side has a stamp — notes written before the field existed", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(OLD, { a: "mine" });
+    const remote = withNotes(NEW, { a: "theirs" });
+
+    expect(mergeDocuments(base, local, remote).conflictDetected).toBe(true);
+  });
+
+  it("does not ask about a note only one side touched", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(NEW, { a: "mine" }, { a: "2026-08-16T10:00:00.000Z" });
+    const remote = makeDoc({ updatedAt: OLD });
+
+    const result = mergeDocuments(base, local, remote);
+
+    expect(result.document.data.notes.a).toBe("mine");
+    expect(result.conflictDetected).toBe(false);
+  });
+
+  it("carries the stamps through so the next merge can use them", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(OLD, { a: "mine" }, { a: "2026-08-16T10:00:00.000Z" });
+    const remote = withNotes(NEW, { b: "theirs" }, { b: "2026-08-16T12:00:00.000Z" });
+
+    const result = mergeDocuments(base, local, remote);
+
+    expect(result.document.data.notesUpdatedAt).toEqual({
+      a: "2026-08-16T10:00:00.000Z",
+      b: "2026-08-16T12:00:00.000Z",
+    });
+  });
+
+  it("keeps the later stamp when both sides stamped the same note", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = withNotes(OLD, { a: "mine" }, { a: "2026-08-16T10:00:00.000Z" });
+    const remote = withNotes(OLD, { a: "theirs" }, { a: "2026-08-16T12:00:00.000Z" });
+
+    const result = mergeDocuments(base, local, remote);
+
+    expect(result.document.data.notesUpdatedAt.a).toBe("2026-08-16T12:00:00.000Z");
   });
 });

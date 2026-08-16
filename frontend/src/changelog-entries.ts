@@ -5,6 +5,39 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T14:25:49.000Z",
+    changes: [
+      {
+        emoji: "📝",
+        sv: "Anteckningar och självskattningar hör nu till en enskild teknik. Elva tekniker delar namn med en eller två andra – till exempel tsuki nuki soto, uchi och ryōte – och de delade tidigare på samma anteckning och samma stjärnbetyg. Nu har varje variation sin egen.",
+        en: "Notes and self-assessments now belong to one technique. Eleven techniques share a name with one or two others – tsuki nuki soto, uchi and ryōte, for instance – and used to share a single note and a single star rating between them. Each variation now has its own.",
+        tr: "Notlar ve öz değerlendirmeler artık tek bir tekniğe ait. On bir teknik adını bir ya da iki teknikle paylaşıyor – örneğin tsuki nuki soto, uchi ve ryōte – ve daha önce aynı notu ve aynı yıldız puanını paylaşıyorlardı. Artık her varyasyonun kendine ait olanı var.",
+        ja: "メモと自己評価が、それぞれの技に対して個別に保存されるようになりました。11の技は他の1つか2つと名前が重なっており（例えば突抜の外・内・両手）、これまでは同じメモと同じ星評価を共有していました。今後は変化ごとに別々に保存されます。",
+      },
+      {
+        emoji: "🌓",
+        sv: "Temat följer nu enheten i stället för kontot. Du kan ha mörkt tema i dojon på telefonen och ljust på datorn utan att de skriver över varandra – och appen frågar inte längre vilket av dem som gäller.",
+        en: "The theme now follows the device rather than the account. You can have dark in the dojo on your phone and light on your computer without one overwriting the other – and the app no longer asks which of them applies.",
+        tr: "Tema artık hesabı değil cihazı takip ediyor. Telefonunuzda dojoda koyu, bilgisayarınızda açık tema kullanabilirsiniz; biri diğerinin üzerine yazmıyor ve uygulama artık hangisinin geçerli olduğunu sormuyor.",
+        ja: "テーマがアカウントではなく端末ごとの設定になりました。道場ではスマートフォンをダークに、自宅のパソコンはライトに、と別々に設定でき、互いに上書きされることはありません。どちらを使うか尋ねられることもなくなりました。",
+      },
+      {
+        emoji: "🔀",
+        sv: "Om du redigerat samma anteckning på två enheter behåller appen den senaste ändringen i stället för att fråga dig vilken som gäller. Anteckningar skrivna innan den här ändringen saknar tidpunkt, och för dem frågar appen fortfarande.",
+        en: "If you have edited the same note on two devices, the app now keeps the most recent version instead of asking you which one applies. Notes written before this change carry no timestamp, and for those it still asks.",
+        tr: "Aynı notu iki cihazda düzenlediyseniz, uygulama artık hangisinin geçerli olduğunu sormak yerine en son sürümü saklıyor. Bu değişiklikten önce yazılan notlarda zaman damgası yok; onlar için hâlâ soruyor.",
+        ja: "同じメモを2台の端末で編集した場合、どちらを残すか尋ねる代わりに、最後に書かれた内容を保持するようになりました。この変更より前に書かれたメモには時刻が記録されていないため、その場合は引き続き確認を求めます。",
+      },
+      {
+        emoji: "✂️",
+        sv: "En anteckning kan nu vara högst 2000 tecken. Räknaren visas när du närmar dig gränsen. Det är gott om plats för en teknik, och det håller dina anteckningar innanför den storlek som går att synka.",
+        en: "A note can now be at most 2000 characters. The counter appears as you approach the limit. That is ample for a single technique, and it keeps your notes within the size that can be synced.",
+        tr: "Bir not artık en fazla 2000 karakter olabilir. Sayaç, sınıra yaklaştığınızda görünür. Tek bir teknik için fazlasıyla yeterli ve notlarınızı senkronize edilebilir boyutun içinde tutuyor.",
+        ja: "1つのメモは最大2000文字までになりました。上限に近づくと文字数が表示されます。1つの技について書くには十分な長さで、同期できる容量の範囲にメモを収めるためのものです。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T12:36:39.356Z",
     changes: [
       {

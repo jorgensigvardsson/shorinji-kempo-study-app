@@ -20,10 +20,10 @@ export class AppDataStore {
     this.callbacks = {
       grade: new Map<number, DataChangedCallback<"grade">>(),
       language: new Map<number, DataChangedCallback<"language">>(),
-      theme: new Map<number, DataChangedCallback<"theme">>(),
       currentWeekAnchor: new Map<number, DataChangedCallback<"currentWeekAnchor">>(),
       kenshiNumber: new Map<number, DataChangedCallback<"kenshiNumber">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
+      notesUpdatedAt: new Map<number, DataChangedCallback<"notesUpdatedAt">>(),
       hokeiRanks: new Map<number, DataChangedCallback<"hokeiRanks">>(),
       hokeiListSelection: new Map<number, DataChangedCallback<"hokeiListSelection">>(),
       quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
@@ -151,12 +151,12 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       ...unknownDataFields(input.data),
       grade: input.data?.grade ?? fallback.data.grade,
       language: input.data?.language ?? fallback.data.language,
-      theme: input.data?.theme ?? fallback.data.theme,
       currentWeekAnchor: isWeekAnchor(input.data?.currentWeekAnchor)
         ? input.data.currentWeekAnchor
         : fallback.data.currentWeekAnchor,
       kenshiNumber: readKenshiNumber(input.data?.kenshiNumber),
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
+      notesUpdatedAt: isRecord(input.data?.notesUpdatedAt) ? input.data.notesUpdatedAt : fallback.data.notesUpdatedAt,
       hokeiRanks: isRankRecord(input.data?.hokeiRanks) ? input.data.hokeiRanks : fallback.data.hokeiRanks,
       hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,

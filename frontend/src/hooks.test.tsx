@@ -4,30 +4,12 @@ import { renderHook, act } from "@testing-library/react";
 vi.mock("./persistence/store", () => ({ getAppDataStore: vi.fn() }));
 vi.mock("./sync/manager", () => ({ getSyncManager: vi.fn() }));
 
-import { getAppDataStore } from "./persistence/store";
 import { getSyncManager } from "./sync/manager";
 import { useTheme, useSyncProvider, useSyncState } from "./hooks";
 import { resetSyncProviderCache, setSyncProvider } from "./sync/provider";
+import { resetThemePreferenceCache, setThemePreference } from "./persistence/theme";
 
 type Listener = (v: unknown) => void;
-
-function makeStore(initial: Record<string, unknown> = {}) {
-  const listeners = new Map<string, Set<Listener>>();
-  const data: Record<string, unknown> = { theme: "system", syncProvider: "local", ...initial };
-
-  return {
-    get: vi.fn((key: string) => data[key]),
-    set: vi.fn((key: string, value: unknown) => {
-      data[key] = value;
-      listeners.get(key)?.forEach(cb => cb(value));
-    }),
-    subscribe: vi.fn((key: string, cb: Listener) => {
-      if (!listeners.has(key)) listeners.set(key, new Set());
-      listeners.get(key)!.add(cb);
-      return () => listeners.get(key)!.delete(cb);
-    }),
-  };
-}
 
 type SyncState = {
   status: string;
@@ -60,14 +42,14 @@ function makeManager(initialState: Partial<SyncState> = {}) {
 // ─── useTheme ────────────────────────────────────────────────────────────────
 
 describe("useTheme", () => {
-  let store: ReturnType<typeof makeStore>;
-
+  // Device-local now, like the sync provider below: these drive the real theme
+  // module through localStorage rather than the synced app-data store.
   beforeEach(() => {
-    store = makeStore({ theme: "light" });
-    vi.mocked(getAppDataStore).mockReturnValue(store as never);
+    localStorage.setItem("theme-preference", "light");
+    resetThemePreferenceCache();
   });
 
-  it("reads the current theme from the store", () => {
+  it("reads the current theme", () => {
     const { result } = renderHook(() => useTheme());
     expect(result.current.theme).toBe("light");
   });
@@ -83,8 +65,8 @@ describe("useTheme", () => {
   });
 
   it("effectiveTheme resolves system to light or dark", () => {
-    store = makeStore({ theme: "system" });
-    vi.mocked(getAppDataStore).mockReturnValue(store as never);
+    localStorage.setItem("theme-preference", "system");
+    resetThemePreferenceCache();
     const { result } = renderHook(() => useTheme());
     expect(["light", "dark"]).toContain(result.current.effectiveTheme);
   });
@@ -95,9 +77,9 @@ describe("useTheme", () => {
     expect(result.current.theme).toBe("dark");
   });
 
-  it("reflects a store-driven external change", () => {
+  it("reflects a change made elsewhere on this device", () => {
     const { result } = renderHook(() => useTheme());
-    act(() => store.set("theme", "dark"));
+    act(() => setThemePreference("dark"));
     expect(result.current.theme).toBe("dark");
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
   });
