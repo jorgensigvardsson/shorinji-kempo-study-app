@@ -245,6 +245,19 @@ describe("FreePractice", () => {
     expect(within(sotaiSection).getAllByRole("listitem")).toHaveLength(4);
   });
 
+  it("does not repeat the form name inside its video link", async () => {
+    const user = userEvent.setup();
+    renderPractice(<FreePracticeHarness />);
+
+    await user.click(screen.getByRole("button", { name: /Tan'en och sōtai/i }));
+
+    const item = screen.getAllByRole("listitem")
+      .find(li => li.textContent?.includes("tenchi ken dai ikkei (tan'en)"))!;
+
+    expect(within(item).getAllByText("tenchi ken dai ikkei (tan'en)")).toHaveLength(1);
+    expect(within(item).getByRole("link", { name: /YouTube/ })).toBeTruthy();
+  });
+
   it("shows the complete Randori progression with Gōhō before Jūhō and first grades", () => {
     renderPractice(<RandoriHarness />);
 
