@@ -427,27 +427,38 @@ Two things this shape fixes, both worth not reintroducing:
 ### OIDC federated credentials
 Azure login is workload identity federation, so the `AZURE_CLIENT_ID` app
 registration must hold a federated credential matching the *subject* GitHub
-mints for the run. The subject is the branch that triggered it — the `uses:`
-call from `ci.yml` does not change that. Two credentials, one per deploy
-branch:
+mints for the run. The subject is the ref the run executes from — the `uses:`
+call from `ci.yml` does not change that. **Three** credentials are needed, and
+all three are live:
 
-    repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy-staging
-    repo:jorgensigvardsson/shorinji-kempo-study-app:ref:refs/heads/deploy
+    …:ref:refs/heads/deploy-staging   staging deploy   (ci.yml → deploy-staging.yml)
+    …:ref:refs/heads/deploy           prod deploy      (ci.yml → deploy.yml)
+    …:ref:refs/heads/main             renew-certs.yml
 
-Staging's used to be `ref:refs/heads/main`, because `workflow_run` always ran
-in the default branch's context whatever branch pushed. That is gone, and the
-first staging deploy after the change failed on it:
+The last one is easy to mistake for leftovers. `renew-certs.yml` runs on
+`schedule:`, and GitHub always executes a scheduled workflow from the default
+branch, so it presents `ref:refs/heads/main` no matter what. **Deleting that
+credential breaks TLS renewal for both environments' backend hostnames** — and
+does so silently, surfacing only at the next scheduled run, or worse, when a
+certificate expires.
+
+Staging's deploy used to present `main` as well, because `workflow_run` also
+ran in the default branch's context. The first staging deploy after the
+`ci.yml` change failed on the difference:
 
     AADSTS700213: No matching federated identity record found for presented
     assertion subject 'repo:…:ref:refs/heads/deploy-staging'
 
-Adding the branch's credential fixes it; the `main` one is now unused and can
-be deleted. Note the consequence of keeping these branch-scoped: a
-`workflow_dispatch` deploy from some *other* branch presents that branch's
-subject and fails the same way until a credential exists for it. A flexible
-credential matching `ref:refs/heads/*`, or subjects keyed on GitHub
-Environments (`…:environment:staging`) instead of branches, would cover every
-branch at once — deliberately not done, to keep Azure trust narrow.
+The pre-existing credential named `github-deploy-staging` is the one carrying
+the `main` subject, so adding the staging branch's credential needs a
+different name (`github-ref-deploy-staging`) — do not repurpose it.
+
+One consequence of keeping these branch-scoped: a `workflow_dispatch` deploy
+from some *other* branch presents that branch's subject and fails the same
+way until a credential exists for it. A flexible credential matching
+`ref:refs/heads/*`, or subjects keyed on GitHub Environments
+(`…:environment:staging`) instead of branches, would cover every branch at
+once — deliberately not done, to keep Azure trust narrow.
 
 ### Production
 Deploying production runs `.github/workflows/deploy.yml`:
