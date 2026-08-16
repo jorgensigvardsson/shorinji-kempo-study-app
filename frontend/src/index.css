@@ -50,6 +50,54 @@ h3,
   font-family: var(--app-display-font);
 }
 
+/* Shared type hierarchy. Layout containers own their spacing; these classes
+   only describe the role a heading or its supporting copy plays. */
+.app-page-heading {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.app-view-heading {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: clamp(1.55rem, 4vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.app-section-heading {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.app-eyebrow-heading {
+  margin: 0;
+  color: var(--bs-primary);
+  font-family: var(--bs-body-font-family);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.app-intro-copy {
+  max-width: 42rem;
+  margin: 0.6rem 0 0;
+  color: var(--bs-secondary-color);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
 img.logo {
   height: 64px;
 }
@@ -82,12 +130,4 @@ table.hokei-individuals-table td {
   background-color: transparent;
   /* One card surface, no internal dividers — spacing separates the sections. */
   border: 0;
-}
-
-/* Gold accent for the notes box inside a hokei card. Bootstrap's *-bg-subtle
-   token is shaded toward black, which reads brown in dark mode — so mix the live
-   gold into the body surface to keep the hue, and edge it with a soft gold. */
-.hokei-notes-box {
-  background: color-mix(in srgb, var(--bs-primary) 20%, var(--bs-body-bg));
-  border: 1px solid color-mix(in srgb, var(--bs-primary) 45%, transparent);
 }

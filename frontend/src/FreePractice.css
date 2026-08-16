@@ -2,23 +2,9 @@
   padding: 1.25rem 0.25rem 1.5rem;
 }
 
-.free-practice-intro h1,
-.free-practice-area-header h1 {
-  margin: 0;
-  color: var(--bs-emphasis-color);
-  font-size: clamp(1.55rem, 4vw, 2rem);
-  font-weight: 600;
-}
-
 .free-practice-intro h1:focus,
 .free-practice-area-header h1:focus {
   outline: 0;
-}
-
-.free-practice-intro p,
-.free-practice-area-header p {
-  margin: 0.45rem 0 0;
-  color: var(--bs-secondary-color);
 }
 
 .free-practice-grid {
@@ -74,10 +60,7 @@
 
 .free-practice-section > h3,
 .free-practice-section-heading h3 {
-  margin: 0 0 0.85rem;
-  color: var(--bs-emphasis-color);
-  font-size: 1.2rem;
-  font-weight: 600;
+  margin-bottom: 0.85rem;
 }
 
 .free-practice-section-heading {
@@ -97,21 +80,18 @@
   min-width: 10rem;
 }
 
-.free-practice-item-list,
-.free-practice-sequence-list {
+.free-practice-item-list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.free-practice-item-list > li,
-.free-practice-sequence-list > li {
+.free-practice-item-list > li {
   padding: 0.9rem 0.25rem;
   border-bottom: 1px solid var(--bs-border-color);
 }
 
-.free-practice-item-list > li:first-child,
-.free-practice-sequence-list > li:first-child {
+.free-practice-item-list > li:first-child {
   border-top: 1px solid var(--bs-border-color);
 }
 
@@ -128,14 +108,9 @@
 }
 
 .free-practice-term-japanese,
-.free-practice-step-note,
 .free-practice-source-note {
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
-}
-
-.free-practice-step-note {
-  margin-top: 0.35rem;
 }
 
 .free-practice-source-note {
@@ -147,7 +122,7 @@
 .embu-builder {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .embu-builder-heading {
@@ -180,17 +155,13 @@
 .embu-experimental-note {
   width: min(100%, 42rem);
   margin: 0;
-  padding: 0.75rem 0.9rem;
-  border-left: 2px solid var(--bs-warning-border-subtle);
-  background: rgba(var(--bs-warning-rgb), 0.08);
   color: var(--bs-secondary-color);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
-.embu-overall-notes,
 .embu-technique-picker,
-.embu-draft-steps {
+.embu-draft-sequences {
   width: min(100%, 42rem);
 }
 
@@ -202,6 +173,27 @@
 
 .embu-technique-picker {
   position: relative;
+  padding-block: 0.25rem;
+}
+
+.embu-picker-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.embu-text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 0.82rem;
+}
+
+.embu-text-button:hover,
+.embu-text-button:focus-visible {
+  color: var(--bs-primary);
 }
 
 .embu-search-field {
@@ -264,55 +256,101 @@
   font-size: 0.8rem;
 }
 
-.embu-no-results,
-.embu-empty-state {
+.embu-no-results {
   margin: 0.65rem 0 0;
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
 }
 
-.embu-empty-state {
-  width: min(100%, 42rem);
+.embu-draft-sequences {
   margin: 0;
-  padding: 1.25rem 0;
-  border-block: 1px solid var(--bs-border-color);
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--bs-border-color);
 }
 
-.embu-draft-steps {
+.embu-sequence {
+  position: relative;
+  border-top: 1px solid var(--bs-border-color);
+  transition: background-color 120ms ease;
+}
+
+.embu-sequence.is-drop-target {
+  background: color-mix(in srgb, var(--bs-primary) 6%, transparent);
+}
+
+.embu-sequence-summary {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 2.75rem;
+  align-items: start;
+  min-height: 3.35rem;
+  padding-block: 0.25rem;
+}
+
+.embu-sequence-number,
+.embu-sequence-toggle {
+  display: flex;
+  grid-column: 1;
+  grid-row: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 2.85rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font: inherit;
+  font-weight: 600;
+}
+
+.embu-sequence-toggle {
+  border-radius: 0.4rem;
+}
+
+.embu-sequence-toggle:hover,
+.embu-sequence-toggle:focus-visible {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+}
+
+.embu-sequence-toggle svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.embu-sequence-hokeis {
+  grid-column: 2;
+  grid-row: 1;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.embu-draft-steps > li {
-  border-top: 1px solid var(--bs-border-color);
-}
-
-.embu-draft-steps > li:last-child {
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
-.embu-step-row {
+.embu-compact-hokei {
   display: grid;
+  position: relative;
   grid-template-columns: 2rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 4.2rem;
+  min-height: 2.85rem;
+  transition: opacity 100ms ease;
 }
 
-.embu-step-number {
-  color: var(--bs-secondary-color);
-  text-align: center;
+.embu-compact-hokei + .embu-compact-hokei {
+  border-top: 1px dotted color-mix(in srgb, var(--bs-border-color) 72%, transparent);
+}
+
+.embu-compact-hokei.is-dragging-placeholder {
+  visibility: hidden;
 }
 
 .embu-step-technique {
   min-width: 0;
-  padding: 0.7rem 0.35rem;
+  padding: 0.35rem 0.25rem;
   border: 0;
   background: transparent;
   color: var(--bs-emphasis-color);
   font: inherit;
-  font-weight: 600;
   text-align: left;
 }
 
@@ -321,16 +359,265 @@
   color: var(--bs-primary);
 }
 
-.embu-step-actions {
-  display: flex;
-  gap: 0.15rem;
+.embu-compact-hokei .free-practice-term {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.embu-step-actions button {
+.embu-compact-hokei .free-practice-term-japanese {
+  display: none;
+}
+
+.embu-hokei-drag-handle {
   display: inline-grid;
   place-items: center;
-  width: 2.25rem;
+  width: 2rem;
   height: 2.25rem;
+  padding: 0;
+  touch-action: none;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  cursor: grab;
+}
+
+.embu-hokei-drag-handle svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.embu-hokei-drag-handle:hover,
+.embu-hokei-drag-handle:focus-visible,
+.embu-hokei-drag-handle[aria-expanded="true"] {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+}
+
+.embu-compact-note {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  color: var(--bs-primary);
+}
+
+.embu-compact-note svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.embu-add-hokei,
+.embu-empty-sequence {
+  display: inline-grid;
+  grid-column: 3;
+  grid-row: 1;
+  place-items: center;
+  align-self: start;
+  min-width: 2.25rem;
+  min-height: 2.85rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--bs-primary);
+}
+
+.embu-add-hokei:hover,
+.embu-add-hokei:focus-visible,
+.embu-empty-sequence:hover,
+.embu-empty-sequence:focus-visible {
+  background: var(--bs-tertiary-bg);
+}
+
+.embu-add-hokei svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.embu-empty-sequence {
+  display: inline-flex;
+  grid-column: 2 / -1;
+  justify-self: start;
+  gap: 0.2rem;
+  padding-inline: 0.25rem 0.65rem;
+  font-size: 0.84rem;
+}
+
+.embu-empty-sequence svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.embu-sequence .embu-technique-picker {
+  width: auto;
+  margin: 0 0.75rem 0.85rem 3rem;
+  padding-top: 0.3rem;
+}
+
+.embu-drop-indicator {
+  height: 2.85rem;
+  margin: 0.15rem 0;
+  border: 1px dashed color-mix(in srgb, var(--bs-primary) 60%, transparent);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--bs-primary) 8%, transparent);
+}
+
+.embu-drop-indicator::before {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin-top: -2px;
+  border-radius: 999px;
+  background: var(--bs-primary);
+  content: "";
+}
+
+.embu-drag-preview {
+  display: flex;
+  position: fixed;
+  z-index: 1100;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: min(19rem, calc(100vw - 2rem));
+  padding: 0.65rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--bs-primary) 35%, var(--bs-border-color));
+  border-radius: 0.55rem;
+  background: var(--bs-body-bg);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.2);
+  color: var(--bs-emphasis-color);
+  pointer-events: none;
+}
+
+.embu-drag-preview svg {
+  flex: 0 0 auto;
+  color: var(--bs-secondary-color);
+}
+
+.embu-drag-preview span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.embu-move-menu {
+  grid-column: 1 / -1;
+  margin: 0.25rem 0 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.55rem;
+  background: var(--bs-body-bg);
+  box-shadow: 0 0.45rem 1rem rgba(0, 0, 0, 0.08);
+}
+
+.embu-move-menu-heading,
+.embu-move-step-buttons,
+.embu-move-destinations,
+.embu-move-destinations > div {
+  display: flex;
+  align-items: center;
+}
+
+.embu-move-menu-heading {
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.embu-move-menu-heading button,
+.embu-move-step-buttons button,
+.embu-move-destinations button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--bs-secondary-color);
+}
+
+.embu-move-menu-heading button {
+  width: 2rem;
+  height: 2rem;
+}
+
+.embu-move-step-buttons {
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.embu-move-step-buttons button {
+  gap: 0.25rem;
+  min-height: 2.15rem;
+  padding-inline: 0.65rem;
+  background: var(--bs-tertiary-bg);
+  font-size: 0.82rem;
+}
+
+.embu-move-destinations {
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+}
+
+.embu-move-destinations > div {
+  gap: 0.2rem;
+}
+
+.embu-move-destinations button {
+  width: 1.9rem;
+  height: 1.9rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.embu-move-menu button:hover:not(:disabled),
+.embu-move-menu button:focus-visible {
+  background: color-mix(in srgb, var(--bs-primary) 12%, var(--bs-tertiary-bg));
+  color: var(--bs-emphasis-color);
+}
+
+.embu-move-menu button:disabled {
+  opacity: 0.35;
+}
+
+.embu-sequence-details {
+  margin: 0 0.75rem 0.8rem 3rem;
+  padding: 0.15rem 0.8rem;
+  border-left: 2px solid color-mix(in srgb, var(--bs-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--bs-tertiary-bg) 60%, transparent);
+}
+
+.embu-hokei-details {
+  padding-block: 0.65rem;
+}
+
+.embu-hokei-details + .embu-hokei-details {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.embu-hokei-details-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.embu-hokei-details-name {
+  padding: 0.15rem 0;
+  color: var(--bs-emphasis-color);
+  font-weight: 600;
+}
+
+.embu-hokei-details-heading > button {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -338,33 +625,187 @@
   color: var(--bs-secondary-color);
 }
 
-.embu-step-actions button:hover:not(:disabled),
-.embu-step-actions button:focus-visible {
-  background: var(--bs-tertiary-bg);
+.embu-hokei-details-heading > button:hover,
+.embu-hokei-details-heading > button:focus-visible {
+  background: var(--bs-body-bg);
   color: var(--bs-emphasis-color);
 }
 
-.embu-step-actions button:disabled {
-  opacity: 0.25;
+.embu-builder-actions {
+  display: flex;
+  width: min(100%, 42rem);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.embu-transition {
+.embu-practice-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 10rem;
+}
+
+.embu-choice-page.is-dojo-mode .app-grid-title {
+  font-size: clamp(1.35rem, 4vw, 1.7rem);
+}
+
+.embu-practice {
+  width: min(100%, 52rem);
+}
+
+.embu-practice-sequence {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  gap: 0.45rem;
-  padding: 0 0 1rem;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
 }
 
-.embu-transition > span {
-  padding-top: 0.55rem;
+.embu-practice-number {
+  padding-top: 1.05rem;
   color: var(--bs-secondary-color);
-  text-align: center;
+  font-family: var(--app-display-font);
+  font-size: clamp(1.45rem, 4vw, 1.8rem);
+  line-height: 1.2;
+  text-align: right;
 }
 
-.embu-transition .form-control {
-  min-height: 3.25rem;
+.embu-practice-hokeis {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.embu-practice-hokeis > li {
+  padding-block: 0.9rem 1.15rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.embu-practice-hokeis > li:first-child {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.embu-practice-technique {
+  padding: 0.1rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-emphasis-color);
+  font-family: var(--app-display-font);
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.embu-practice-technique:hover:not(:disabled),
+.embu-practice-technique:focus-visible {
+  color: var(--bs-primary);
+}
+
+.embu-practice-attack {
+  margin-top: 0.35rem;
+  color: var(--bs-secondary-color);
+  font-size: clamp(1.15rem, 3vw, 1.35rem);
+  line-height: 1.4;
+}
+
+.embu-practice-comment {
+  margin-top: 0.75rem;
+  padding-left: 0.8rem;
+  border-left: 2px solid color-mix(in srgb, var(--bs-primary) 55%, transparent);
+  color: var(--bs-body-color);
+  font-size: clamp(1.2rem, 3vw, 1.45rem);
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.embu-practice-navigation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.embu-practice-navigation button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-primary);
+  font: inherit;
+}
+
+.embu-practice-navigation button:first-child {
+  justify-self: start;
+}
+
+.embu-practice-navigation button:last-child {
+  justify-self: end;
+}
+
+.embu-practice-navigation button:disabled {
+  color: var(--bs-tertiary-color);
+}
+
+.embu-practice-navigation .embu-practice-edit {
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
+}
+
+.embu-kumi-example.is-dojo-mode > .free-practice-section-heading h3 {
+  font-size: clamp(1.55rem, 4vw, 1.95rem);
+}
+
+.embu-kumi-example.is-dojo-mode .kumi-embu-sequence-list > li {
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  column-gap: 0.75rem;
+  padding-block: 1.1rem;
+}
+
+.embu-kumi-example.is-dojo-mode .kumi-embu-sequence-list > li::before {
+  font-family: var(--app-display-font);
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
+}
+
+.embu-kumi-example.is-dojo-mode .kumi-embu-term {
+  font-size: clamp(1.35rem, 4vw, 1.7rem);
+  line-height: 1.4;
+}
+
+.embu-kumi-example.is-dojo-mode .kumi-embu-step-button {
+  padding-block: 0.15rem;
+  font-weight: 600;
+}
+
+.embu-kumi-example.is-dojo-mode .kumi-embu-step-note {
+  margin-top: 0.5rem;
+  font-size: clamp(1.1rem, 3vw, 1.3rem);
+  line-height: 1.45;
+}
+
+.embu-kumi-example.is-dojo-mode > div[class*="mt-3"] a {
+  min-height: 2.75rem;
+  padding-block: 0.35rem;
+  font-size: 1.1rem;
+}
+
+.embu-hokei-note-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.15rem 0.45rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.embu-hokei-note-line > .inline-note.is-editing {
+  margin-top: 0.2rem;
 }
 
 .kihon-practice-proposal {
@@ -410,6 +851,26 @@
   min-width: 0;
 }
 
+/* Kihon in Dojo mode keeps only the exercise hierarchy and makes the terms
+   readable when the phone is lying beside the training area. */
+.kihon-practice-proposal.is-dojo-mode .kihon-practice-group > h3 {
+  font-size: clamp(1.45rem, 4vw, 1.8rem);
+  line-height: 1.3;
+}
+
+.kihon-practice-proposal.is-dojo-mode .kihon-technique-list > h4 {
+  font-size: 1.1rem;
+}
+
+.kihon-practice-proposal.is-dojo-mode .free-practice-item-list > li {
+  padding-block: 1rem;
+}
+
+.kihon-practice-proposal.is-dojo-mode .free-practice-term > span:first-child {
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  line-height: 1.4;
+}
+
 .free-practice-item-grade {
   flex: 0 0 auto;
   color: var(--bs-secondary-color);
@@ -438,12 +899,71 @@
   font-weight: 600;
 }
 
+/* Tan'en and Sōtai are followed while moving, so their Dojo mode prioritises
+   distance-readable names and generous video targets over compact metadata. */
+.free-practice-form-groups.is-dojo-mode {
+  gap: 3.5rem;
+}
+
+.free-practice-form-groups.is-dojo-mode .practice-form-mode > h3 {
+  font-size: clamp(1.65rem, 5vw, 2.1rem);
+  line-height: 1.25;
+}
+
+.free-practice-form-groups.is-dojo-mode .practice-form-family-list {
+  gap: 2.5rem;
+}
+
+.free-practice-form-groups.is-dojo-mode .practice-form-family > h4 {
+  font-size: 1.2rem;
+}
+
+.free-practice-form-groups.is-dojo-mode .free-practice-item-list > li {
+  padding-block: 1.1rem;
+}
+
+.free-practice-form-groups.is-dojo-mode .free-practice-term > span:first-child {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  line-height: 1.4;
+}
+
+.free-practice-form-groups.is-dojo-mode .free-practice-item-list a {
+  min-height: 2.75rem;
+  padding-block: 0.35rem;
+  font-size: 1.1rem;
+}
+
+.free-practice-form-groups.is-dojo-mode .free-practice-item-list a svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 .randori-practice-groups {
   gap: 2.75rem;
 }
 
 .randori-theme-group > h3 {
   margin-bottom: 1.15rem;
+}
+
+/* In Dojo mode the restriction is the instruction. Grades and source context
+   disappear, leaving a large, quickly scannable progression. */
+.randori-practice-groups.is-dojo-mode {
+  gap: 3.25rem;
+}
+
+.randori-practice-groups.is-dojo-mode .randori-theme-group > h3 {
+  font-size: clamp(1.55rem, 4vw, 1.95rem);
+  line-height: 1.25;
+}
+
+.randori-practice-groups.is-dojo-mode .randori-theme-list > li {
+  padding-block: 1.1rem;
+}
+
+.randori-practice-groups.is-dojo-mode .randori-theme-list .free-practice-term > span:first-child {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  line-height: 1.4;
 }
 
 .randori-theme-list > li {
@@ -455,43 +975,6 @@
 
 .randori-theme-list .free-practice-term {
   min-width: 0;
-}
-
-.free-practice-sequence-list {
-  counter-reset: practice-step;
-}
-
-.free-practice-sequence-list > li {
-  display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  column-gap: 0.5rem;
-  counter-increment: practice-step;
-}
-
-.free-practice-sequence-list > li::before {
-  content: counter(practice-step) ".";
-  grid-row: 1 / span 2;
-  color: var(--bs-secondary-color);
-}
-
-.kumi-embu-step-button {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--bs-body-color);
-  font: inherit;
-  text-align: left;
-}
-
-.kumi-embu-step-button:hover,
-.kumi-embu-step-button:focus-visible {
-  color: var(--bs-primary);
-}
-
-.kumi-embu-inline-term {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
 }
 
 @media (max-width: 35rem) {
@@ -514,13 +997,33 @@
     grid-template-columns: 1fr;
   }
 
-  .embu-step-row {
-    grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  .embu-practice-navigation {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .embu-step-actions button {
-    width: 2rem;
-    height: 2rem;
+  .embu-practice-navigation .embu-practice-edit {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+  }
+
+  .embu-sequence-summary {
+    grid-template-columns: 2.7rem minmax(0, 1fr) 2.5rem;
+  }
+
+  .embu-sequence .embu-technique-picker,
+  .embu-sequence-details {
+    margin-left: 2.7rem;
+  }
+
+  .embu-move-destinations {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .embu-move-destinations > div {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .embu-suggestions button {

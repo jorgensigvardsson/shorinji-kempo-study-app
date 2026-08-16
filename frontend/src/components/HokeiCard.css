@@ -13,7 +13,8 @@ body.card-focus-active::before {
   content: "";
 }
 
-.card-focus-active .app-floating-stack {
+.card-focus-active .app-floating-stack,
+.card-focus-active .training-controls-layer {
   display: none;
 }
 
@@ -56,13 +57,13 @@ body.card-focus-active::before {
   background: var(--bs-card-bg);
 }
 
-.focus-card.is-expanded .kamoku-card-name,
-.focus-card.is-expanded .card-head-title {
+.hokei-card.is-expanded .kamoku-card-name,
+.hokei-card.is-expanded .card-head-title {
   width: fit-content;
 }
 
-.focus-card.is-expanded .kamoku-card-name::after,
-.focus-card.is-expanded .card-head-title::after {
+.hokei-card.is-expanded .kamoku-card-name::after,
+.hokei-card.is-expanded .card-head-title::after {
   display: block;
   width: 100%;
   height: 0.2rem;
@@ -85,6 +86,11 @@ body.card-focus-active::before {
   border-color: var(--bs-border-color);
   border-radius: 0.65rem;
   box-shadow: var(--app-card-shadow);
+}
+
+.hokei-card {
+  container-name: hokei-card;
+  container-type: inline-size;
 }
 
 .kamoku-full-card.mt-2 {
@@ -249,33 +255,40 @@ body.card-focus-active::before {
 .kamoku-card-footer-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem 1.25rem;
 }
 
-.kamoku-card-footer-actions .hokei-notes-box {
-  flex: 1 1 0;
-  min-width: 0;
-  border: 0 !important;
-  background: transparent;
-  padding: 0.35rem 0 !important;
+.hokei-inline-note {
+  max-width: 100%;
+  padding-block: 0.35rem;
 }
 
-.kamoku-card-footer-actions .hokei-notes-box.is-open {
+.kamoku-card-footer-actions .hokei-inline-note {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.kamoku-card-footer-actions .hokei-inline-note.is-editing {
   flex-basis: 100%;
 }
 
 .kamoku-card-footer-actions .kamoku-video-link {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-width: 0;
   padding: 0.35rem 0;
+  font-size: 0.9rem;
 }
 
-@media (max-width: 35rem) {
-  .kamoku-card-footer-actions .hokei-notes-box,
+@container hokei-card (max-width: 30rem) {
+  .kamoku-card-footer-actions .hokei-inline-note {
+    width: auto;
+    flex: 1 1 12rem;
+  }
+
   .kamoku-card-footer-actions .kamoku-video-link {
     width: auto;
-    flex: 1 1 0;
+    flex: 0 0 auto;
   }
 
   .kamoku-card-stage {

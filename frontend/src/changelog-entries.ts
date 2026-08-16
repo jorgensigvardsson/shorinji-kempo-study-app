@@ -5,6 +5,61 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T12:36:39.356Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Träningsläget heter nu Dojo-läge. När det är påslaget skalas grader och annan kringinformation bort samtidigt som det du faktiskt tränar blir större, så innehållet går lättare att läsa med mobilen på golvet.",
+        en: "Training mode is now called Dojo mode. When enabled, grades and other supporting information are removed while the content you are practising becomes larger, making it easier to read with the phone on the floor.",
+        tr: "Antrenman modunun adı artık Dojo modu. Açıldığında dereceler ve diğer ikincil bilgiler gizlenirken çalıştığınız içerik büyütülüyor; böylece telefon yerdeyken okumak kolaylaşıyor.",
+        ja: "トレーニングモードの名称を「道場モード」に変更しました。有効にすると、級位などの補足情報を省き、実際に練習する内容を大きく表示するため、床に置いたスマートフォンからも読みやすくなります。",
+      },
+      {
+        emoji: "🧩",
+        sv: "Embu-byggaren är nu en kompakt planeringstavla med sex fasta sekvenser. Tryck på ett tekniknamn när du vill se attacken eller skriva kommentarer, och dra tekniker med sexpunktsreglaget för att flytta dem inom eller mellan sekvenser.",
+        en: "The Embu builder is now a compact planning board with six fixed sequences. Tap a technique name when you want to see the attack or write comments, and drag techniques by the six-dot handle to move them within or between sequences.",
+        tr: "Embu oluşturucu artık altı sabit diziden oluşan kompakt bir planlama panosu. Saldırıyı görmek veya yorum yazmak istediğinizde teknik adına dokunabilir, teknikleri altı noktalı tutamaktan sürükleyerek aynı dizi içinde ya da diziler arasında taşıyabilirsiniz.",
+        ja: "演武作成が、6つの固定された構成を並べたコンパクトな計画画面になりました。攻撃の確認やコメントの記入は技名を押して開き、6点のハンドルで技をドラッグして構成内や構成間を移動できます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T11:18:51.771Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Gyaku tenshin geri visar nu rätt utgångsställning: hiraki gamae.",
+        en: "Gyaku tenshin geri now shows the correct starting stance: hiraki gamae.",
+        tr: "Gyaku tenshin geri artık doğru başlangıç duruşunu gösteriyor: hiraki gamae.",
+        ja: "Gyaku tenshin geri の開始構えを、正しい hiraki gamae に修正しました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T11:10:15.322Z",
+    changes: [
+      {
+        emoji: "↕️",
+        sv: "Teknikkort öppnas nu direkt på sin plats i listan i stället för att ta över skärmen. Innehållet anpassas efter kortets egen bredd, så små förändringar av fönstret ger ett stabilare upplägg.",
+        en: "Technique cards now open directly in place in the list instead of taking over the screen. Their content adapts to the card's own width, making the layout more stable when the window changes slightly.",
+        tr: "Teknik kartları artık ekranı kaplamak yerine listedeki yerinde açılıyor. İçerik kartın kendi genişliğine göre uyarlanıyor; böylece pencere boyutundaki küçük değişikliklerde düzen daha kararlı kalıyor.",
+        ja: "技法カードが画面全体を覆わず、一覧のその場で開くようになりました。内容はカード自体の幅に合わせて調整されるため、画面幅が少し変わってもレイアウトが安定します。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T10:48:45.998Z",
+    changes: [
+      {
+        emoji: "✏️",
+        sv: "Anteckningar på hokei-kort visas nu kompakt bredvid videolänken och öppnas för redigering först när du trycker på pennan. Radbrytningar bevaras, och de flytande inställningarna döljs när ett kort är öppet så att inget hamnar i vägen.",
+        en: "Notes on hokei cards are now shown compactly beside the video link and open for editing only when you tap the pencil. Line breaks are preserved, and the floating settings are hidden while a card is open so nothing gets in the way.",
+        tr: "Hokei kartlarındaki notlar artık video bağlantısının yanında kompakt biçimde gösteriliyor ve yalnızca kaleme dokunduğunuzda düzenlemeye açılıyor. Satır sonları korunuyor ve bir kart açıkken hiçbir şeyin önünü kapatmaması için yüzen ayarlar gizleniyor.",
+        ja: "法形カードのメモを動画リンクの横にコンパクトに表示し、鉛筆を押したときだけ編集欄が開くようにしました。改行はそのまま保たれ、カードを開いている間は内容を隠さないようフローティング設定を非表示にします。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T10:12:00.000Z",
     changes: [
       {
@@ -13,6 +68,54 @@ export const CHANGELOG: ChangelogEntry[] = [
         en: "A misspelling in the grading material has been corrected: `sashikae sokuō geri` is called `sashikae sokutō geri`. It was the same kick all along, so under Kihon it now appears on a single line, from 4 kyū.",
         tr: "Derece sınavı materyalindeki bir yazım hatası düzeltildi: `sashikae sokuō geri` aslında `sashikae sokutō geri`. Baştan beri aynı tekmeydi; bu yüzden Kihon bölümünde artık tek bir satırda, 4 kyū'dan itibaren görünüyor.",
         ja: "昇級試験科目の表記の誤りを修正しました。`sashikae sokuō geri` は `sashikae sokutō geri` です。もともと同じ蹴りだったため、基本のページでは4級からの一項目としてまとめて表示されます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T08:57:35.671Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Embu och kumi-embu har fått varsitt tydligt val under Fri träning. Embu-byggaren leder dig genom sex sekvenser, låter varje sekvens innehålla flera hokei och ger varje teknik en egen kompakt kommentar. Kumi-embu visas nu med samma lugna upplägg under både träning och gradering.",
+        en: "Embu and kumi-embu now have separate, clear entrances under Free practice. The embu builder guides you through six sequences, allows several hokei in each sequence, and gives every technique its own compact comment. Kumi-embu now uses the same calm layout in both practice and grading.",
+        tr: "Embu ve kumi-embu artık Serbest çalışma altında ayrı ve anlaşılır seçeneklere sahip. Embu oluşturucu sizi altı dizi boyunca yönlendiriyor, her dizide birden fazla hokei kullanılmasına izin veriyor ve her tekniğe kendi kompakt yorumunu ekleme olanağı sunuyor. Kumi-embu artık hem çalışma hem de sınav bölümünde aynı sade düzenle gösteriliyor.",
+        ja: "自由練習で、演武と組演武をそれぞれ分かりやすく選べるようになりました。演武作成では6つの構成を順に組み立て、各構成に複数の法形を入れ、技ごとにコンパクトなコメントを残せます。組演武は練習と昇格考試の両方で、同じ落ち着いた表示になりました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T07:39:46.494Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Nya sidor öppnas nu högst upp. När du går tillbaka eller framåt kommer du tillbaka till samma plats på sidan som tidigare.",
+        en: "New pages now open at the top. When you go back or forward, you return to the same place on the page as before.",
+        tr: "Yeni sayfalar artık en üstten açılıyor. Geri veya ileri gittiğinizde sayfada daha önce bulunduğunuz yere dönüyorsunuz.",
+        ja: "新しいページは一番上から表示されるようになりました。戻る・進む操作では、そのページで以前見ていた位置に戻ります。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T07:22:55.237Z",
+    changes: [
+      {
+        emoji: "👋",
+        sv: "Startsidan hälsar dig nu välkommen med ditt namn efter Gasshō, när det finns ett namn på kontot.",
+        en: "The start page now welcomes you by name after Gasshō when your account has a name.",
+        tr: "Hesabınızda bir ad varsa başlangıç sayfası artık Gasshō'nun ardından adınızla sizi karşılıyor.",
+        ja: "アカウントに名前が登録されている場合、スタートページで「合掌」に続けて名前を表示するようになりました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-08-16T06:40:41.382Z",
+    changes: [
+      {
+        emoji: "🪶",
+        sv: "Appens rubriker har fått en gemensam och lugnare hierarki. I veckoplanen har den överflödiga rubriken ”Veckans innehåll” lämnat plats åt små färgade rubriker för varje del, så planen blir lättare att överblicka.",
+        en: "Headings now share a calmer, more consistent hierarchy. In the weekly plan, the redundant “This week's content” heading has made room for small colored headings for each part, making the plan easier to scan.",
+        tr: "Uygulamadaki başlıklar artık daha sakin ve tutarlı bir düzene sahip. Haftalık planda gereksiz “Bu haftanın içeriği” başlığı kaldırılarak her bölüm için küçük renkli başlıklara yer açıldı; böylece planı gözden geçirmek kolaylaştı.",
+        ja: "アプリ全体の見出しを、より落ち着いた一貫性のある階層に整えました。週間計画では、重複していた「今週の内容」という見出しを表示せず、各項目を小さな色付き見出しで示すことで、内容を確認しやすくしました。",
       },
     ],
   },

@@ -14,6 +14,7 @@ import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts'
 import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey, FontFamilyKanjiStorageKey } from './persistence/font-family.ts';
 import { type GradePlan } from './data.ts'
 import { getSyncManager } from './sync/manager.ts';
+import RouteScrollManager from './components/RouteScrollManager.tsx';
 
 // Grade and language are read straight from the app-data store by useAppData,
 // so they need no wrapper here and no trip through App's props.
@@ -28,6 +29,7 @@ function mountRoot() {
     <StrictMode>
       <ErrorBoundary>
         <BrowserRouter>
+          <RouteScrollManager />
           <App gradePlans={gradePlans as GradePlan[]} textSizeData={textSizeData}
                bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}
                kanjiFontFamilyData={kanjiFontFamilyData}/>

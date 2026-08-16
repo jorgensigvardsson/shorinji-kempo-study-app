@@ -12,12 +12,17 @@ interface StartRouteCard {
 
 interface Props {
     routes: StartRouteCard[];
+    displayName?: string;
 }
 
 const Start = (props: Props) => {
-    const { routes } = props;
+    const { routes, displayName } = props;
     const navigate = useNavigate();
     const translator = useContext(TranslatorContext);
+    const trimmedDisplayName = displayName?.trim();
+    const greeting = trimmedDisplayName
+        ? `${translator.translate("Gasshō")}, ${trimmedDisplayName}`
+        : translator.translate("Gasshō");
 
     const items: GridItem[] = routes.map((route) => ({
         key: route.path,
@@ -30,11 +35,11 @@ const Start = (props: Props) => {
 
     return (
         <div className="start-screen">
-            <div className="start-context" aria-label={translator.translate("Gasshō")}>
-                {translator.translate("Gasshō")}
+            <div className="start-context" aria-label={greeting}>
+                {greeting}
             </div>
             <header className="start-intro">
-                <h1>{translator.translate("Vad vill du göra idag?")}</h1>
+                <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
             </header>
             <Grid items={items} className="start-grid" />
         </div>

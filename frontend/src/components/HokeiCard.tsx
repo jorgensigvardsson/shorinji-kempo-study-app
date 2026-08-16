@@ -1,14 +1,14 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
 import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
 import type { Variant } from "react-bootstrap/esm/types";
-import { Collapse, Form } from "react-bootstrap";
-import { ChatFill, ChevronDown, ChevronRight, JournalText, PersonFill, ShieldFill } from "react-bootstrap-icons";
+import { ChatFill, PersonFill, ShieldFill } from "react-bootstrap-icons";
 import { setHokeiNote, setHokeiRank, useHokeiNote, useHokeiRank } from "../persistence/app-data";
 import StarRating from "./StarRating";
+import InlineNoteEditor from "./InlineNoteEditor";
 import VideoLink from "./VideoLink";
 import type { HokeiRankValue } from "../persistence/schema";
 import "./HokeiCard.css";
@@ -64,7 +64,6 @@ const HokeiCard = (props: HokeiCardProps) => {
             <CollapsibleCard
                 header={<DojoCardHeader hokei={hokei} />}
                 footer={footer}
-                focusOnOpen
                 defaultOpen={defaultOpen}
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
@@ -79,7 +78,6 @@ const HokeiCard = (props: HokeiCardProps) => {
             <CollapsibleCard
                 header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} showKanji={showKanji} />}
                 footer={kamokuFooter}
-                focusOnOpen
                 defaultOpen={defaultOpen}
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
@@ -104,7 +102,6 @@ const HokeiCard = (props: HokeiCardProps) => {
         return (
             <CollapsibleCard header={compactHeader} inlineChevron
                              footer={footer}
-                             focusOnOpen
                              defaultOpen={defaultOpen}
                              onOpenChange={onOpenChange}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
@@ -138,7 +135,6 @@ const HokeiCard = (props: HokeiCardProps) => {
     return (
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
                          footer={footer}
-                         focusOnOpen
                          defaultOpen={defaultOpen}
                          onOpenChange={onOpenChange}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
@@ -288,54 +284,20 @@ interface CardFooterProps {
 
 const CardFooter = ({hokei}: CardFooterProps) => {
     const savedNotes = useHokeiNote(hokei.hokei_name);
-    // Typing edits a draft; only blur writes it to the store. The draft follows
-    // the saved note whenever that changes underneath — the trim applied on
-    // save, or an edit arriving from another device over sync.
-    const [notes, setNotes] = useState(savedNotes);
-    const [lastSavedNotes, setLastSavedNotes] = useState(savedNotes);
-    if (lastSavedNotes !== savedNotes) {
-        setLastSavedNotes(savedNotes);
-        setNotes(savedNotes);
-    }
-    const [notesAreShown, setNotesAreShown] = useState<boolean>(!!savedNotes);
-    const notesRef = useRef<HTMLTextAreaElement>(null);
     const translator = useContext(TranslatorContext);
-
-    const persistNotes = () => {
-        let processedNotes = notes;
-        if (processedNotes !== null)
-            processedNotes = processedNotes.trim();
-        setHokeiNote(hokei.hokei_name, processedNotes);
-    }
-
-    // Focus when show changes to true
-    useEffect(() => {
-        if (notesAreShown && notesRef.current) {
-            notesRef.current.focus();
-            notesRef.current.selectionStart = notesRef.current.selectionEnd = notesRef.current.value.length;
-            notesRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
-        }
-    }, [notesAreShown]);
+    const hokeiName = translator.translate(hokei.hokei_name);
 
     return (
-        <div className={`p-2 rounded hokei-notes-box${notesAreShown ? " is-open" : ""}`}>
-            <div style={{ display: "flex", alignItems: "center", cursor: "pointer", justifyContent: "space-between" }} onClick={() => setNotesAreShown(!notesAreShown)}>
-                <div style={{ display: "flex", alignItems: "center" }} >
-                    <JournalText className="text-primary" style={{marginRight: "0.5em", display: "block"}}/>
-                    {translator.translate(notes ? "Mina anteckningar" : "Anteckningar")}
-                </div>
-                <div>
-                    {notesAreShown && <ChevronDown style={{marginLeft: "0.5rem", display: "block"}}/>}
-                    {notesAreShown || <ChevronRight style={{marginLeft: "0.5rem", display: "block"}}/>}
-                </div>
-            </div>
-            <Collapse in={notesAreShown}>
-                <div>
-                    <Form.Control className="mt-2 mb-2" as="textarea" rows={5} ref={notesRef} value={notes ?? ""}
-                                    onChange={e => setNotes(e.target.value)} onBlur={() => persistNotes()}/>
-                </div>
-            </Collapse>
-        </div>
+        <InlineNoteEditor
+            className="hokei-inline-note"
+            value={savedNotes ?? ""}
+            onSave={notes => setHokeiNote(hokei.hokei_name, notes || null)}
+            addLabel={translator.translate("Lägg till anteckningar för {0}", { params: [hokeiName] })}
+            editLabel={translator.translate("Redigera anteckningar för {0}", { params: [hokeiName] })}
+            inputLabel={translator.translate("Anteckningar för {0}", { params: [hokeiName] })}
+            placeholder={translator.translate("Skriv dina anteckningar…")}
+            emptyLabel={translator.translate("Anteckningar")}
+        />
     )
 }
 

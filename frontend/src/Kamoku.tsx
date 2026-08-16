@@ -92,10 +92,10 @@ const Kamoku = (props: Props) => {
 
 
     return (
-        <>
+        <div className={`kamoku-page${dojoMode ? " is-dojo-mode dojo-readable-hokei" : ""}`}>
             <header className="kamoku-page-header">
-                <h1>{translator.translate("Veckoplan")}</h1>
-                <p>{weekIntroduction(selectedWeekData, translator)}</p>
+                <h1 className="app-page-heading">{translator.translate("Veckoplan")}</h1>
+                {!dojoMode && <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>}
             </header>
             <div className="kamoku-controls training-view-controls mb-4">
                 <div className="kamoku-week-navigation">
@@ -155,13 +155,13 @@ const Kamoku = (props: Props) => {
             )}
             {primaryTechniques.length > 0 && (
                 <section className="kamoku-technique-section" aria-labelledby="kamoku-techniques-heading">
-                    <h2 id="kamoku-techniques-heading" className="kamoku-section-title">{translator.translate("Tekniker")}</h2>
+                    <h2 id="kamoku-techniques-heading" className="app-eyebrow-heading kamoku-section-title">{translator.translate("Tekniker")}</h2>
                     {primaryTechniques.map(entry => (
                         <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" showNotes showRating dojoMode={dojoMode} kamokuLayout />
                     ))}
                 </section>
             )}
-        </>
+        </div>
     )
 }
 
@@ -339,13 +339,13 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
 
     return (
         <section className="kamoku-week-focus" aria-labelledby="kamoku-week-focus-heading">
-            <h2 id="kamoku-week-focus-heading" className="kamoku-focus-eyebrow">
+            <h2 id="kamoku-week-focus-heading" className="visually-hidden">
                 {translator.translate("Veckans innehåll")}
             </h2>
             <div className="kamoku-focus-groups">
                 {groups.map(group => (
                     <section key={group.title} className="kamoku-focus-group">
-                        <h3>{translator.translate(group.title)}</h3>
+                        <h3 className="app-eyebrow-heading">{translator.translate(group.title)}</h3>
                         <ul>
                             {group.lines.map(line => (
                                 <li key={line.key}>
@@ -358,7 +358,7 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
                 ))}
                 {videos.length > 0 && (
                     <section className="kamoku-focus-group kamoku-focus-videos">
-                        <h3>{translator.translate("Videostöd")}</h3>
+                        <h3 className="app-eyebrow-heading">{translator.translate("Videostöd")}</h3>
                         {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-focus-video" />)}
                     </section>
                 )}
@@ -393,7 +393,7 @@ const ReferencedTechniqueSection = ({ title, entries, allGradePlans, dojoMode }:
 
     return (
         <section className="kamoku-technique-section">
-            <h2 className="kamoku-section-title">{translator.translate(title)}</h2>
+            <h2 className="app-eyebrow-heading kamoku-section-title">{translator.translate(title)}</h2>
             {techniques.map(entry => (
                 <HokeiCard key={entry.key} hokei={entry.hokei} className="mt-2" showNotes showRating dojoMode={dojoMode} kamokuLayout />
             ))}

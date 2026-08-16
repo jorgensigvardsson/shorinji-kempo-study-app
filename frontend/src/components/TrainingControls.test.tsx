@@ -31,7 +31,7 @@ const renderControls = (overrides: Partial<React.ComponentProps<typeof TrainingC
 describe("TrainingControls", () => {
   beforeEach(() => localStorage.removeItem("training-mode-intro-seen"));
 
-  it("requires confirmation the first time Training mode becomes relevant", async () => {
+  it("requires confirmation the first time Dojo mode becomes relevant", async () => {
     const user = userEvent.setup();
     renderControls();
 
@@ -43,14 +43,14 @@ describe("TrainingControls", () => {
     expect(localStorage.getItem("training-mode-intro-seen")).toBe("true");
   });
 
-  it("changes the displayed grade and Training mode from one compact panel", async () => {
+  it("changes the displayed grade and Dojo mode from one compact panel", async () => {
     localStorage.setItem("training-mode-intro-seen", "true");
     const user = userEvent.setup();
     const props = renderControls();
 
     await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
     await user.selectOptions(screen.getByRole("combobox", { name: "Visad grad" }), "5 kyū");
-    await user.click(screen.getByRole("checkbox", { name: "Träningsläge" }));
+    await user.click(screen.getByRole("checkbox", { name: "Dojo-läge" }));
 
     expect(props.onGradeChange).toHaveBeenCalledWith("5 kyū");
     expect(props.onTrainingModeChange).toHaveBeenCalledWith(true);
@@ -63,7 +63,7 @@ describe("TrainingControls", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Träningsverktyg" }));
     expect(screen.getByRole("combobox", { name: "Visad grad" })).toBeTruthy();
-    expect(screen.queryByRole("checkbox", { name: "Träningsläge" })).toBeNull();
+    expect(screen.queryByRole("checkbox", { name: "Dojo-läge" })).toBeNull();
   });
 
   it("stays hidden where neither control is relevant", () => {

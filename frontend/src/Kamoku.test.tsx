@@ -53,12 +53,22 @@ describe("Kamoku weekly plan", () => {
     expect(screen.getByRole("heading", { name: "Veckoplan" })).toBeTruthy();
     expect(screen.getByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeTruthy();
     expect(screen.getByRole("region", { name: "Veckans innehåll" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Veckans grundarbete" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Veckans innehåll" }).classList.contains("visually-hidden")).toBe(true);
+    expect(screen.getByRole("heading", { name: "Veckans grundarbete" }).classList.contains("app-eyebrow-heading")).toBe(true);
     expect(screen.getByText("uwazeme")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Tekniker" })).toBeTruthy();
     expect(screen.getByText("gyaku gote")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Kihon shohō, repetition, studier/i })).toBeNull();
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
+  });
+
+  it("removes the explanatory introduction and marks the page for larger dojo text", () => {
+    const { container } = render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} dojoMode />);
+
+    expect(container.querySelector(".kamoku-page.is-dojo-mode")).not.toBeNull();
+    expect(screen.queryByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeNull();
+    expect(screen.getByText("uwazeme")).toBeTruthy();
+    expect(screen.getByText("gyaku gote")).toBeTruthy();
   });
 
   it("keeps exact randori restrictions, embu and repetition in the open overview", () => {
