@@ -256,6 +256,7 @@ describe("FreePractice", () => {
 
     expect(within(item).getAllByText("tenchi ken dai ikkei (tan'en)")).toHaveLength(1);
     expect(within(item).getByRole("link", { name: /YouTube/ })).toBeTruthy();
+    expect(item.querySelector(".border")).toBeNull();
   });
 
   it("shows the complete Randori progression with Gōhō before Jūhō and first grades", () => {
