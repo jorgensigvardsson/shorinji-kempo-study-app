@@ -230,12 +230,17 @@ function structuredTechniqueGroupLabel(parentTerm: string | undefined, groupInde
     return structuredTechniqueGroupLabels[parentTerm]?.[groupIndex];
 }
 
-function gradingFundamentalCompletionKey(grade: GradeName, item: Item, itemIndex: number): string {
-    return `${grade}|${item.term?.romaji ?? `item-${itemIndex}`}`;
-}
-
-function gradingTheoryCompletionKey(grade: GradeName, item: Item, itemIndex: number): string {
-    return `${grade}|${item.term?.romaji ?? `item-${itemIndex}`}`;
+// Where a ticked item is stored. Built from the item's id rather than from how it
+// reads, so correcting a romaji leaves everyone's saved progress where it is — and
+// from the id rather than its position, so reordering the material does not hand one
+// item's ticks to another. Fundamental and theory completions live in separate maps,
+// which is what keeps their identical keys apart.
+//
+// An item with no id is one nothing is stored against, so it gets no key and no
+// checkbox. Returning undefined rather than falling back keeps a missing id from
+// quietly becoming a key that several items would share.
+function gradingCompletionKey(grade: GradeName, item: Item): string | undefined {
+    return item.id ? `${grade}|${item.id}` : undefined;
 }
 
 const GradingCompletionProgress = ({ completed, total, translator }: { completed: number; total: number; translator: Translator }) => (
@@ -313,9 +318,10 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         const isFundamentals = selectedItem.term?.romaji === "kiso kamoku";
         const fundamentalItems = selectedItem.items ?? [];
         const completedFundamentalCount = isFundamentals
-            ? fundamentalItems.filter((fundamentalItem, fundamentalIndex) =>
-                gradingFundamentalCompletions[gradingFundamentalCompletionKey(activeSelection.grade, fundamentalItem, fundamentalIndex)]
-              ).length
+            ? fundamentalItems.filter(fundamentalItem => {
+                const key = gradingCompletionKey(activeSelection.grade, fundamentalItem);
+                return key && gradingFundamentalCompletions[key];
+              }).length
             : 0;
         return (
             <div className={`grading-test-page grading-category-page grading-detail-enter${dojoMode ? " is-dojo-mode" : ""}`}>
@@ -377,9 +383,10 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
             <div className="grading-sections">
                 {sections.map(({ section, sectionIndex }) => {
                     const completedTheoryItemCount = subject === "theory" && selectedGrade
-                        ? section.items.filter((item, itemIndex) =>
-                            gradingTheoryCompletions[gradingTheoryCompletionKey(selectedGrade, item, itemIndex)]
-                          ).length
+                        ? section.items.filter(item => {
+                            const key = gradingCompletionKey(selectedGrade, item);
+                            return key && gradingTheoryCompletions[key];
+                          }).length
                         : 0;
                     const categoryItems: GridItem[] = section.items.map((item, itemIndex) => {
                         const summary = itemSummary(item, translator, showKanji);
@@ -424,7 +431,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                             && activeSelection.itemIndex === itemIndex;
                                         const detailsId = `grading-item-${subject}-${sectionIndex}-${itemIndex}`;
                                         const completionKey = selectedGrade
-                                            ? gradingTheoryCompletionKey(selectedGrade, item, itemIndex)
+                                            ? gradingCompletionKey(selectedGrade, item)
                                             : undefined;
                                         const completed = completionKey ? !!gradingTheoryCompletions[completionKey] : false;
                                         const rowContent = (
@@ -556,8 +563,8 @@ const FundamentalsDetail = ({ item, grade, translator, showKanji, completions, e
                             const detailsId = `grading-fundamental-${groupIndex}-${itemIndex}`;
                             const expanded = expandedKey === rowKey;
                             const expandable = hasFundamentalDetails(fundamentalItem);
-                            const completionKey = gradingFundamentalCompletionKey(grade, fundamentalItem, itemIndex);
-                            const completed = !!completions[completionKey];
+                            const completionKey = gradingCompletionKey(grade, fundamentalItem);
+                            const completed = completionKey ? !!completions[completionKey] : false;
                             const rowContent = (
                                 <>
                                     <span className="grading-fundamental-copy">
@@ -574,20 +581,22 @@ const FundamentalsDetail = ({ item, grade, translator, showKanji, completions, e
                             return (
                                 <article className={`grading-fundamental-item${expanded ? " is-expanded" : ""}${completed ? " is-complete" : ""}`} key={rowKey}>
                                     <div className="grading-fundamental-row">
-                                        <label className="grading-completion-control">
-                                            <input
-                                                type="checkbox"
-                                                className="grading-completion-input"
-                                                checked={completed}
-                                                aria-label={translator.translate(completed ? "Ta bort klarmarkering för {0}" : "Klarmarkera {0}", {
-                                                    params: [title],
-                                                })}
-                                                onChange={event => setGradingFundamentalCompletion(completionKey, event.currentTarget.checked)}
-                                            />
-                                            <span className="grading-completion-circle" aria-hidden="true">
-                                                {completed && <Check2 />}
-                                            </span>
-                                        </label>
+                                        {completionKey && (
+                                            <label className="grading-completion-control">
+                                                <input
+                                                    type="checkbox"
+                                                    className="grading-completion-input"
+                                                    checked={completed}
+                                                    aria-label={translator.translate(completed ? "Ta bort klarmarkering för {0}" : "Klarmarkera {0}", {
+                                                        params: [title],
+                                                    })}
+                                                    onChange={event => setGradingFundamentalCompletion(completionKey, event.currentTarget.checked)}
+                                                />
+                                                <span className="grading-completion-circle" aria-hidden="true">
+                                                    {completed && <Check2 />}
+                                                </span>
+                                            </label>
+                                        )}
                                         {expandable ? (
                                             <button
                                                 type="button"

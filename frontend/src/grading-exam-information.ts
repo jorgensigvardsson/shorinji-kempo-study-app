@@ -37,6 +37,14 @@ export interface TechniqueGroup {
 // The recursive node: a numbered or bulleted entry, with optional term, prose, points,
 // annotations, technique groups, nested items and videos.
 export interface Item {
+  // Present on the items whose completion the user can tick off: the gakka kamoku
+  // items, and the kiso kamoku sub-items. It names where that tick is stored in the
+  // synced document, so it is identity rather than description — correcting the
+  // romaji beside it is expected and leaves it alone, and changing it orphans every
+  // tick already saved. `assets/grading-completions.test.ts` fails if one changes.
+  //
+  // Absent on every other item, which nothing stores anything against.
+  id?: string;
   numbering?: Numbering;
   term?: Term;
   text?: string;

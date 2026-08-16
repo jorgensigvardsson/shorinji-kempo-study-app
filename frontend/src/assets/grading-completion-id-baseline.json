@@ -1,0 +1,96 @@
+{
+  "rokudan": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "kōjutsu shinsa": "kōjutsu shinsa",
+    "tai gamae, tai sabaki": "tai gamae, tai sabaki",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "kenkei betsu shitei kamoku": "kenkei betsu shitei kamoku"
+  },
+  "godan": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "item-1": null,
+    "kōjutsu shinsa": "kōjutsu shinsa",
+    "tai gamae, tai sabaki": "tai gamae, tai sabaki",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "kenkei betsu shitei kamoku": "kenkei betsu shitei kamoku"
+  },
+  "yondan": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "item-1": null,
+    "tai gamae, tai sabaki": "tai gamae, tai sabaki",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "kenkei betsu shitei kamoku": "kenkei betsu shitei kamoku"
+  },
+  "sandan": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "item-1": null,
+    "tai gamae, tai sabaki, umpohō": "tai gamae, tai sabaki, umpohō",
+    "ukemi": "ukemi",
+    "kihon kōgi": "kihon kōgi",
+    "kihon bōgi": "kihon bōgi",
+    "idō kōbōgi": "idō kōbōgi",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "tan'en kihon hōkei (sōtai)": "tan'en kihon hōkei (sōtai)"
+  },
+  "nidan": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "item-1": null,
+    "tai gamae, tai sabaki, umpohō": "tai gamae, tai sabaki, umpohō",
+    "ukemi": "ukemi",
+    "kihon kōgi": "kihon kōgi",
+    "kihon bōgi": "kihon bōgi",
+    "idō kōbōgi": "idō kōbōgi",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "tan'en kihon hōkei (sōtai)": "tan'en kihon hōkei (sōtai)"
+  },
+  "shodan": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "item-1": null,
+    "tai gamae, tai sabaki, umpohō": "tai gamae, tai sabaki, umpohō",
+    "ukemi": "ukemi",
+    "kihon kōgi": "kihon kōgi",
+    "kihon bōgi": "kihon bōgi",
+    "idō kōbōgi": "idō kōbōgi",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "tan'en kihon hōkei (sōtai)": "tan'en kihon hōkei (sōtai)"
+  },
+  "1 kyū": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "tai gamae, tai sabaki, umpohō": "tai gamae, tai sabaki, umpohō",
+    "ukemi": "ukemi",
+    "kihon kōgi": "kihon kōgi",
+    "kihon bōgi": "kihon bōgi",
+    "idō kōbōgi": "idō kōbōgi",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "tan'en kihon hōkei (sōtai)": "tan'en kihon hōkei (sōtai)"
+  },
+  "2 kyū": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "tai gamae, tai sabaki, umpohō": "tai gamae, tai sabaki, umpohō",
+    "ukemi": "ukemi",
+    "kihon kōgi": "kihon kōgi",
+    "kihon bōgi": "kihon bōgi",
+    "idō kōbōgi": "idō kōbōgi",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "tan'en kihon hōkei (sōtai)": "tan'en kihon hōkei (sōtai)"
+  },
+  "3 kyū": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai",
+    "tai gamae, tai sabaki, umpohō": "tai gamae, tai sabaki, umpohō",
+    "ukemi": "ukemi",
+    "kihon kōgi": "kihon kōgi",
+    "kihon bōgi": "kihon bōgi",
+    "idō kōbōgi": "idō kōbōgi",
+    "tan'en kihon hōkei": "tan'en kihon hōkei",
+    "tan'en kihon hōkei (sōtai)": "tan'en kihon hōkei (sōtai)"
+  },
+  "4 kyū": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai"
+  },
+  "5 kyū": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai"
+  },
+  "6 kyū": {
+    "jukensha ga teishutsu suru shukudai": "jukensha ga teishutsu suru shukudai"
+  }
+}
