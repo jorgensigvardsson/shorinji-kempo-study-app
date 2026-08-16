@@ -431,16 +431,24 @@ mints for the run. The subject is the ref the run executes from — the `uses:`
 call from `ci.yml` does not change that. **Three** credentials are needed, and
 all three are live:
 
-    …:ref:refs/heads/deploy-staging   staging deploy   (ci.yml → deploy-staging.yml)
-    …:ref:refs/heads/deploy           prod deploy      (ci.yml → deploy.yml)
-    …:ref:refs/heads/main             renew-certs.yml
+    subject                          serves                            credential name
+    …:ref:refs/heads/deploy-staging  staging deploy                    github-ref-deploy-staging
+    …:ref:refs/heads/deploy          prod deploy                       github-deploy-branch
+    …:ref:refs/heads/main            renew-certs.yml                   github-deploy-staging
 
-The last one is easy to mistake for leftovers. `renew-certs.yml` runs on
+Read that last column twice. The credential *named* `github-deploy-staging`
+is the one carrying the `main` subject, and it has nothing to do with staging
+any more — it is what `renew-certs.yml` logs in with. The name is left over
+from when staging deploys really did run as `main`. Renaming is not possible
+in place; recreating it under an honest name is safe but has to be done as
+create-then-delete, since it is live.
+
+That credential is easy to mistake for leftovers. `renew-certs.yml` runs on
 `schedule:`, and GitHub always executes a scheduled workflow from the default
-branch, so it presents `ref:refs/heads/main` no matter what. **Deleting that
-credential breaks TLS renewal for both environments' backend hostnames** — and
-does so silently, surfacing only at the next scheduled run, or worse, when a
-certificate expires.
+branch, so it presents `ref:refs/heads/main` no matter what. **Deleting it
+breaks TLS renewal for both environments' backend hostnames** — silently,
+surfacing only at the next scheduled run, or worse, when a certificate
+expires.
 
 Staging's deploy used to present `main` as well, because `workflow_run` also
 ran in the default branch's context. The first staging deploy after the
