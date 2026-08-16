@@ -359,7 +359,7 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
                 {videos.length > 0 && (
                     <section className="kamoku-focus-group kamoku-focus-videos">
                         <h3>{translator.translate("Videostöd")}</h3>
-                        {videos.map(video => <VideoLink key={video.url} video={video} plain className="kamoku-focus-video" />)}
+                        {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-focus-video" />)}
                     </section>
                 )}
             </div>

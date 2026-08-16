@@ -11,16 +11,12 @@ describe("VideoLink", () => {
     expect(screen.queryByRole("button", { name: "Video" })).toBeNull();
   });
 
-  it("keeps the box unless the caller asks for the plain look", () => {
-    const { container, rerender } = render(
+  it("carries no framing of its own beyond the caller's class", () => {
+    const { container } = render(
       <VideoLink video={{ url: "https://www.youtube.com/watch?v=example" }} className="mt-3" />
     );
 
-    expect(container.firstElementChild?.className).toBe("p-2 border border-primary rounded mt-3");
-
-    rerender(<VideoLink video={{ url: "https://www.youtube.com/watch?v=example" }} className="mt-3" plain />);
-
     expect(container.firstElementChild?.className).toBe("mt-3");
-    expect(screen.getByText("YouTube")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /YouTube/ })).toBeTruthy();
   });
 });

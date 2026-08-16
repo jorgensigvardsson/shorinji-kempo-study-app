@@ -290,7 +290,7 @@ const PracticeFormGroup = ({ title, entries, dojoMode }: { title: string; entrie
                     <li key={entry.hokei_name}>
                         <PracticeTerm value={entry.hokei_name} dojoMode={dojoMode} />
                         {(entry.videos ?? []).map(video => (
-                            <VideoLink key={video.url} video={video} plain className="mt-2" />
+                            <VideoLink key={video.url} video={video} className="mt-2" />
                         ))}
                     </li>
                 ))}
@@ -735,7 +735,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
                         })}
                     </ol>
                     {(selected.sequence.videos ?? []).map(video => (
-                        <VideoLink key={video.url} video={video} plain className="mt-3" />
+                        <VideoLink key={video.url} video={video} className="mt-3" />
                     ))}
                 </section>
             )}

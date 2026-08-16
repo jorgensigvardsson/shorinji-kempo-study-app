@@ -55,7 +55,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     const kamokuFooter = (showNotes || videos.length > 0) ? (
         <div className="kamoku-card-footer-actions">
             {showNotes && <CardFooter hokei={hokei}/>}
-            {videos.map(video => <VideoLink key={video.url} video={video} plain className="kamoku-video-link" />)}
+            {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-video-link" />)}
         </div>
     ) : undefined;
 
