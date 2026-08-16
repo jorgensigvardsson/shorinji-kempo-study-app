@@ -48,6 +48,8 @@ export function LoginScreen() {
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [needsName, setNeedsName] = useState(false);
+  // How long the code the server just sent stays valid; null until it says.
+  const [codeTtlSeconds, setCodeTtlSeconds] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -67,6 +69,7 @@ export function LoginScreen() {
         return; // page navigates away; keep the spinner
       }
       setNeedsName(result.action === "new");
+      setCodeTtlSeconds(result.expiresInSeconds);
       setPhase("code");
     } catch (err) {
       setError(err instanceof RateLimitError
@@ -111,6 +114,7 @@ export function LoginScreen() {
         return;
       }
       setNeedsName(result.action === "new");
+      setCodeTtlSeconds(result.expiresInSeconds);
       setCode("");
     } catch (err) {
       setError(err instanceof RateLimitError
@@ -126,8 +130,21 @@ export function LoginScreen() {
     setCode("");
     setName("");
     setNeedsName(false);
+    setCodeTtlSeconds(null);
     setError(null);
   };
+
+  // The validity is worded in whole minutes, so a TTL the server didn't state —
+  // or one shorter than a minute — leaves the sentence out entirely rather than
+  // rounding it down to "0 minutes".
+  const ttlMinutes = codeTtlSeconds !== null && codeTtlSeconds >= 60
+    ? Math.round(codeTtlSeconds / 60)
+    : null;
+  const validityText = ttlMinutes === null
+    ? null
+    : ttlMinutes === 1
+      ? translator.translate("Koden är giltig i en minut.")
+      : translator.translate("Koden är giltig i {0} minuter.", { params: [String(ttlMinutes)] });
 
   return (
     <div className="login-screen">
@@ -168,8 +185,8 @@ export function LoginScreen() {
         ) : (
           <Form onSubmit={(e) => { void handleCodeSubmit(e); }}>
             <p className="text-body-secondary">
-              {translator.translate("Vi har skickat en verifieringskod till din e-post.")}{" "}
-              {translator.translate("Koden är giltig i 10 minuter.")}
+              {translator.translate("Vi har skickat en verifieringskod till din e-post.")}
+              {validityText !== null && <> {validityText}</>}
             </p>
 
             {needsName && (

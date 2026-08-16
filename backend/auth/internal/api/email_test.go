@@ -128,6 +128,25 @@ func TestEmailStart_NewThenExisting(t *testing.T) {
 	}
 }
 
+// The sign-in screen states the code's validity from this field, so a response
+// without it (or with a stale number) puts the wrong duration in front of users.
+func TestEmailStart_ReportsCodeTTL(t *testing.T) {
+	sender := &fakeSender{}
+	h := newTestHandler(t, sender)
+
+	rec := postJSON(t, h.emailStart, "/auth/email/start", map[string]string{"email": "ttl@example.org"})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	var resp struct {
+		ExpiresInSeconds int `json:"expires_in_seconds"`
+	}
+	json.Unmarshal(rec.Body.Bytes(), &resp)
+	if want := int(emailCodeTTL.Seconds()); resp.ExpiresInSeconds != want {
+		t.Fatalf("expires_in_seconds = %d, want %d", resp.ExpiresInSeconds, want)
+	}
+}
+
 func TestEmailVerify_CreatesUserWithNameClaim(t *testing.T) {
 	sender := &fakeSender{}
 	h := newTestHandler(t, sender)

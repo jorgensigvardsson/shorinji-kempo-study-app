@@ -120,7 +120,9 @@ For email domains **without** a configured OIDC provider, users sign in with a o
 
 1. `POST /auth/email/start` `{email, language}`. If the domain actually has an OIDC provider it
    returns `{action:"oidc", provider}` (no email sent). Otherwise it emails a 6-digit code and
-   returns `{action:"existing"}` or `{action:"new"}` (whether the address is already a user).
+   returns `{action:"existing"}` or `{action:"new"}` (whether the address is already a user),
+   along with `expires_in_seconds` — the code's TTL, which the sign-in screen states to the user
+   rather than keeping its own copy of the number.
 2. `POST /auth/email/verify` `{email, code, name}`. On a valid code it looks up or creates the
    user (storing `name` as `DisplayName` only on creation) and issues the session cookies.
 
@@ -253,7 +255,7 @@ corporate domain at the appropriate provider.
 | GET | `/auth/resolve` | Check whether an email domain maps to a provider (used for inline form validation) |
 | GET | `/auth/login?email={e}` | Resolve domain → provider, initiate OIDC, redirect |
 | GET | `/auth/callback` | OIDC callback: validate, enroll or look up, issue JWT, redirect to frontend |
-| POST | `/auth/email/start` | Non-OIDC email login: emails a verification code. Returns `{action}` = `oidc` (redirect instead), `existing`, or `new` (collect a name). Globally rate-limited to 1 req / 5 s |
+| POST | `/auth/email/start` | Non-OIDC email login: emails a verification code. Returns `{action}` = `oidc` (redirect instead), `existing`, or `new` (collect a name), plus `expires_in_seconds` when a code was sent. Globally rate-limited to 1 req / 5 s |
 | POST | `/auth/email/verify` | Verify a code (and name, for new users); creates/looks up the user, issues JWT, sets cookies |
 | POST | `/auth/refresh` | Exchange refresh token for new access token (rotates the refresh token) |
 | POST | `/auth/logout` | Revoke refresh token, clear cookies |
