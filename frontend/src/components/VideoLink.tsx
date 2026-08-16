@@ -18,9 +18,11 @@ const youtubeId = (url: string): string | null => {
 interface VideoLinkProps {
     video: Video;
     className?: string;
+    /** Drops the box around the link, for places that already frame it themselves. */
+    plain?: boolean;
 }
 
-const VideoLink = ({ video, className }: VideoLinkProps) => {
+const VideoLink = ({ video, className, plain }: VideoLinkProps) => {
     const translator = useContext(TranslatorContext);
     const [show, setShow] = useState(false);
     const id = youtubeId(video.url);
@@ -28,7 +30,7 @@ const VideoLink = ({ video, className }: VideoLinkProps) => {
     const label = video.label ?? translator.translate("Video");
 
     return (
-        <div className={`p-2 border border-primary rounded ${className ?? ""}`.trim()}>
+        <div className={[plain ? null : "p-2 border border-primary rounded", className].filter(Boolean).join(" ")}>
             <div style={{ display: "grid", gridTemplateColumns: video.label ? "1fr auto" : "1fr", alignItems: "center", gap: "0.5rem" }}>
                 {video.label && <div role={id ? "button" : undefined}
                      style={{ minWidth: 0, cursor: id ? "pointer" : "default" }}

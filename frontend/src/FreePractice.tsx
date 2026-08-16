@@ -735,7 +735,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | 
                         })}
                     </ol>
                     {(selected.sequence.videos ?? []).map(video => (
-                        <VideoLink key={video.url} video={video} className="mt-3" />
+                        <VideoLink key={video.url} video={video} plain className="mt-3" />
                     ))}
                 </section>
             )}
