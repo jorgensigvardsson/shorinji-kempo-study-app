@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T11:18:51.771Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Gyaku tenshin geri visar nu rätt utgångsställning: hiraki gamae.",
+        en: "Gyaku tenshin geri now shows the correct starting stance: hiraki gamae.",
+        tr: "Gyaku tenshin geri artık doğru başlangıç duruşunu gösteriyor: hiraki gamae.",
+        ja: "Gyaku tenshin geri の開始構えを、正しい hiraki gamae に修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T11:10:15.322Z",
     changes: [
       {
