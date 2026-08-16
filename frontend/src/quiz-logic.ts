@@ -54,7 +54,7 @@ export const buildWordListCandidates = (entries: WordListEntry[]): QuizCandidate
       continue;
 
     const primaryMeaning = meanings[0];
-    const entryId = String(entry.index);
+    const entryId = String(entry.id);
 
     candidates.push({
       id: `word.meaning.${entryId}`,

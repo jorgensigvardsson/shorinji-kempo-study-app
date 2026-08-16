@@ -15,6 +15,21 @@ Any user-visible string passed to `translator.translate()` must have a correspon
 
 Strings wrapped with `noTranslate()` (imported from `frontend/src/i18n.ts`) are intentionally fixed in an unspecified language and must never be passed to `translator.translate()` or added to `translations.json`. The function is an identity marker — its purpose is to signal that translation is explicitly unwanted.
 
+## Word list ids
+
+Each entry in `frontend/src/assets/word-list.json` carries an `id`, and that id is
+identity rather than position. A flashcard's "known" flag is saved against it in the
+user's synced document, so the number already exists on other people's devices.
+
+- A new word takes `max(id) + 1`, wherever in the file it is inserted.
+- An id is never renumbered and never reused, including after a word is removed.
+- Correcting a word's spelling in place is fine — the id stays, and
+  `frontend/src/assets/word-list-id-baseline.json` is updated to match.
+
+Renumbering loses nothing visibly: it moves every later flag onto a different word,
+so the app reports that people know words they have never seen.
+`frontend/src/assets/word-list.test.ts` fails when an id changes meaning.
+
 ## Fonts: kanji, hiragana and katakana
 
 Japanese text carries its own font, separate from the body and heading fonts. Nothing marks it up as Japanese — no class, no `<span>`, no script detection. It works purely through the order of the font stack: the Latin faces come first, the Japanese faces sit behind them, and the browser falls through per character for anything the Latin faces cannot draw. Japanese mixed into a Latin sentence is handled by the same mechanism, mid-word.

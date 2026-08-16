@@ -1,6 +1,6 @@
 [
   {
-    "index": 0,
+    "id": 1,
     "kanji": "諸作法",
     "romaji": "shosahō",
     "meanings": [
@@ -8,7 +8,7 @@
     ]
   },
   {
-    "index": 1,
+    "id": 2,
     "kanji": "作法",
     "romaji": "sahō",
     "meanings": [
@@ -16,7 +16,7 @@
     ]
   },
   {
-    "index": 2,
+    "id": 3,
     "kanji": "礼儀作法",
     "romaji": "reigi sahō",
     "meanings": [
@@ -24,7 +24,7 @@
     ]
   },
   {
-    "index": 3,
+    "id": 4,
     "kanji": "礼式",
     "romaji": "reishiki",
     "meanings": [
@@ -32,7 +32,7 @@
     ]
   },
   {
-    "index": 4,
+    "id": 5,
     "kanji": "脚下照顧",
     "romaji": "kyakka shōko",
     "meanings": [
@@ -41,7 +41,7 @@
     ]
   },
   {
-    "index": 5,
+    "id": 6,
     "kanji": "合掌礼",
     "romaji": "gasshō rei",
     "meanings": [
@@ -49,7 +49,7 @@
     ]
   },
   {
-    "index": 6,
+    "id": 7,
     "kanji": "礼",
     "romaji": "rei",
     "meanings": [
@@ -57,7 +57,7 @@
     ]
   },
   {
-    "index": 7,
+    "id": 8,
     "kanji": "なおれ",
     "romaji": "naore",
     "meanings": [
@@ -65,7 +65,7 @@
     ]
   },
   {
-    "index": 8,
+    "id": 9,
     "kanji": "お願いします",
     "romaji": "onegaishimasu",
     "meanings": [
@@ -73,7 +73,7 @@
     ]
   },
   {
-    "index": 9,
+    "id": 10,
     "kanji": "ありがとうございました",
     "romaji": "arigatō gozaimashita",
     "meanings": [
@@ -81,7 +81,7 @@
     ]
   },
   {
-    "index": 10,
+    "id": 11,
     "kanji": "解散／わかれ",
     "romaji": "kaisan / wakare",
     "meanings": [
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "index": 11,
+    "id": 12,
     "kanji": "お互いに礼",
     "romaji": "otagai ni rei",
     "meanings": [
@@ -97,7 +97,7 @@
     ]
   },
   {
-    "index": 12,
+    "id": 13,
     "kanji": "正面",
     "romaji": "shōmen",
     "meanings": [
@@ -105,7 +105,7 @@
     ]
   },
   {
-    "index": 13,
+    "id": 14,
     "kanji": "集合",
     "romaji": "shūgō",
     "meanings": [
@@ -113,7 +113,7 @@
     ]
   },
   {
-    "index": 14,
+    "id": 15,
     "kanji": "整列",
     "romaji": "seiretsu",
     "meanings": [
@@ -121,7 +121,7 @@
     ]
   },
   {
-    "index": 15,
+    "id": 16,
     "kanji": "結手",
     "romaji": "kesshu",
     "meanings": [
@@ -129,7 +129,7 @@
     ]
   },
   {
-    "index": 16,
+    "id": 17,
     "kanji": "休め",
     "romaji": "yasume",
     "meanings": [
@@ -137,7 +137,7 @@
     ]
   },
   {
-    "index": 17,
+    "id": 18,
     "kanji": "右へならえ",
     "romaji": "migi e narae",
     "meanings": [
@@ -145,7 +145,7 @@
     ]
   },
   {
-    "index": 18,
+    "id": 19,
     "kanji": "前にならえ",
     "romaji": "mae ni narae",
     "meanings": [
@@ -153,7 +153,7 @@
     ]
   },
   {
-    "index": 19,
+    "id": 20,
     "kanji": "座り方",
     "romaji": "suwari kata",
     "meanings": [
@@ -161,7 +161,7 @@
     ]
   },
   {
-    "index": 20,
+    "id": 21,
     "kanji": "立ち方",
     "romaji": "tachi kata",
     "meanings": [
@@ -169,7 +169,7 @@
     ]
   },
   {
-    "index": 21,
+    "id": 22,
     "kanji": "着座",
     "romaji": "chakuza",
     "meanings": [
@@ -177,7 +177,7 @@
     ]
   },
   {
-    "index": 22,
+    "id": 23,
     "kanji": "正座",
     "romaji": "seiza",
     "meanings": [
@@ -185,7 +185,7 @@
     ]
   },
   {
-    "index": 23,
+    "id": 24,
     "kanji": "安座",
     "romaji": "anza",
     "meanings": [
@@ -193,7 +193,7 @@
     ]
   },
   {
-    "index": 24,
+    "id": 25,
     "kanji": "半跏趺坐",
     "romaji": "hankafuza",
     "meanings": [
@@ -201,7 +201,7 @@
     ]
   },
   {
-    "index": 25,
+    "id": 26,
     "kanji": "起立",
     "romaji": "kiritsu",
     "meanings": [
@@ -209,7 +209,7 @@
     ]
   },
   {
-    "index": 26,
+    "id": 27,
     "kanji": "服装",
     "romaji": "fukusō",
     "meanings": [
@@ -217,7 +217,7 @@
     ]
   },
   {
-    "index": 27,
+    "id": 28,
     "kanji": "態度",
     "romaji": "taido",
     "meanings": [
@@ -225,7 +225,7 @@
     ]
   },
   {
-    "index": 28,
+    "id": 29,
     "kanji": "言葉",
     "romaji": "kotoba",
     "meanings": [
@@ -233,7 +233,7 @@
     ]
   },
   {
-    "index": 29,
+    "id": 30,
     "kanji": "返事",
     "romaji": "henji",
     "meanings": [
@@ -241,7 +241,7 @@
     ]
   },
   {
-    "index": 30,
+    "id": 31,
     "kanji": "すみません",
     "romaji": "sumimasen",
     "meanings": [
@@ -249,7 +249,7 @@
     ]
   },
   {
-    "index": 31,
+    "id": 32,
     "kanji": "ごめんなさい",
     "romaji": "gomennasai",
     "meanings": [
@@ -257,7 +257,7 @@
     ]
   },
   {
-    "index": 32,
+    "id": 33,
     "kanji": "分かります",
     "romaji": "wakarimasu",
     "meanings": [
@@ -265,7 +265,7 @@
     ]
   },
   {
-    "index": 33,
+    "id": 34,
     "kanji": "挨拶",
     "romaji": "aisatsu",
     "meanings": [
@@ -273,7 +273,7 @@
     ]
   },
   {
-    "index": 34,
+    "id": 35,
     "kanji": "本部",
     "romaji": "hombu",
     "meanings": [
@@ -281,7 +281,7 @@
     ]
   },
   {
-    "index": 35,
+    "id": 36,
     "kanji": "開祖",
     "romaji": "kaiso",
     "meanings": [
@@ -289,7 +289,7 @@
     ]
   },
   {
-    "index": 36,
+    "id": 37,
     "kanji": "師家",
     "romaji": "shike",
     "meanings": [
@@ -297,7 +297,7 @@
     ]
   },
   {
-    "index": 37,
+    "id": 38,
     "kanji": "初代師家",
     "romaji": "shodai shike",
     "meanings": [
@@ -305,7 +305,7 @@
     ]
   },
   {
-    "index": 38,
+    "id": 39,
     "kanji": "代表",
     "romaji": "daihyō",
     "meanings": [
@@ -313,7 +313,7 @@
     ]
   },
   {
-    "index": 39,
+    "id": 40,
     "kanji": "管長",
     "romaji": "kanchō",
     "meanings": [
@@ -321,7 +321,7 @@
     ]
   },
   {
-    "index": 40,
+    "id": 41,
     "kanji": "支部",
     "romaji": "shibu",
     "meanings": [
@@ -329,7 +329,7 @@
     ]
   },
   {
-    "index": 41,
+    "id": 42,
     "kanji": "道院",
     "romaji": "dōin",
     "meanings": [
@@ -337,7 +337,7 @@
     ]
   },
   {
-    "index": 42,
+    "id": 43,
     "kanji": "支部長／部長",
     "romaji": "shibu-chō / bu-chō",
     "meanings": [
@@ -345,7 +345,7 @@
     ]
   },
   {
-    "index": 43,
+    "id": 44,
     "kanji": "副支部長",
     "romaji": "fuku shibu-chō",
     "meanings": [
@@ -353,7 +353,7 @@
     ]
   },
   {
-    "index": 44,
+    "id": 45,
     "kanji": "道院長",
     "romaji": "dōin-chō",
     "meanings": [
@@ -361,7 +361,7 @@
     ]
   },
   {
-    "index": 45,
+    "id": 46,
     "kanji": "先生",
     "romaji": "sensei",
     "meanings": [
@@ -369,7 +369,7 @@
     ]
   },
   {
-    "index": 46,
+    "id": 47,
     "kanji": "拳士",
     "romaji": "kenshi",
     "meanings": [
@@ -377,7 +377,7 @@
     ]
   },
   {
-    "index": 47,
+    "id": 48,
     "kanji": "先輩",
     "romaji": "sempai",
     "meanings": [
@@ -385,7 +385,7 @@
     ]
   },
   {
-    "index": 48,
+    "id": 49,
     "kanji": "後輩",
     "romaji": "kōhai",
     "meanings": [
@@ -393,7 +393,7 @@
     ]
   },
   {
-    "index": 49,
+    "id": 50,
     "kanji": "同輩",
     "romaji": "dōhai",
     "meanings": [
@@ -401,7 +401,7 @@
     ]
   },
   {
-    "index": 50,
+    "id": 51,
     "kanji": "見習い",
     "romaji": "minarai",
     "meanings": [
@@ -410,7 +410,7 @@
     ]
   },
   {
-    "index": 51,
+    "id": 52,
     "kanji": "初心者",
     "romaji": "shoshinsha",
     "meanings": [
@@ -418,7 +418,7 @@
     ]
   },
   {
-    "index": 52,
+    "id": 53,
     "kanji": "有段者",
     "romaji": "yūdansha",
     "meanings": [
@@ -426,7 +426,7 @@
     ]
   },
   {
-    "index": 53,
+    "id": 54,
     "kanji": "高段者",
     "romaji": "kōdansha",
     "meanings": [
@@ -434,7 +434,7 @@
     ]
   },
   {
-    "index": 54,
+    "id": 55,
     "kanji": "指導員",
     "romaji": "shidōin",
     "meanings": [
@@ -442,7 +442,7 @@
     ]
   },
   {
-    "index": 55,
+    "id": 56,
     "kanji": "指導者",
     "romaji": "shidōsha",
     "meanings": [
@@ -450,7 +450,7 @@
     ]
   },
   {
-    "index": 56,
+    "id": 57,
     "kanji": "主将",
     "romaji": "shushō",
     "meanings": [
@@ -458,7 +458,7 @@
     ]
   },
   {
-    "index": 57,
+    "id": 58,
     "kanji": "助教",
     "romaji": "jokyō",
     "meanings": [
@@ -466,7 +466,7 @@
     ]
   },
   {
-    "index": 58,
+    "id": 59,
     "kanji": "助士",
     "romaji": "joshi",
     "meanings": [
@@ -474,7 +474,7 @@
     ]
   },
   {
-    "index": 59,
+    "id": 60,
     "kanji": "相手",
     "romaji": "aite",
     "meanings": [
@@ -482,7 +482,7 @@
     ]
   },
   {
-    "index": 60,
+    "id": 61,
     "kanji": "主座",
     "romaji": "shuza",
     "meanings": [
@@ -490,7 +490,7 @@
     ]
   },
   {
-    "index": 61,
+    "id": 62,
     "kanji": "監督",
     "romaji": "kantoku",
     "meanings": [
@@ -498,7 +498,7 @@
     ]
   },
   {
-    "index": 62,
+    "id": 63,
     "kanji": "代議員",
     "romaji": "daigi-in",
     "meanings": [
@@ -506,7 +506,7 @@
     ]
   },
   {
-    "index": 63,
+    "id": 64,
     "kanji": "評議員",
     "romaji": "hyōgi-in",
     "meanings": [
@@ -514,7 +514,7 @@
     ]
   },
   {
-    "index": 64,
+    "id": 65,
     "kanji": "理事",
     "romaji": "riji",
     "meanings": [
@@ -522,7 +522,7 @@
     ]
   },
   {
-    "index": 65,
+    "id": 66,
     "kanji": "理事長",
     "romaji": "riji-chō",
     "meanings": [
@@ -530,7 +530,7 @@
     ]
   },
   {
-    "index": 66,
+    "id": 67,
     "kanji": "事務総長",
     "romaji": "jimusōchō",
     "meanings": [
@@ -538,7 +538,7 @@
     ]
   },
   {
-    "index": 67,
+    "id": 68,
     "kanji": "会長",
     "romaji": "kaichō",
     "meanings": [
@@ -546,7 +546,7 @@
     ]
   },
   {
-    "index": 68,
+    "id": 69,
     "kanji": "会員",
     "romaji": "kai-in",
     "meanings": [
@@ -554,7 +554,7 @@
     ]
   },
   {
-    "index": 69,
+    "id": 70,
     "kanji": "考試員",
     "romaji": "kōshi-in",
     "meanings": [
@@ -562,7 +562,7 @@
     ]
   },
   {
-    "index": 70,
+    "id": 71,
     "kanji": "審判員",
     "romaji": "shimpan-in",
     "meanings": [
@@ -570,7 +570,7 @@
     ]
   },
   {
-    "index": 71,
+    "id": 72,
     "kanji": "主審",
     "romaji": "shushin",
     "meanings": [
@@ -578,7 +578,7 @@
     ]
   },
   {
-    "index": 72,
+    "id": 73,
     "kanji": "副審",
     "romaji": "fukushin",
     "meanings": [
@@ -586,7 +586,7 @@
     ]
   },
   {
-    "index": 73,
+    "id": 74,
     "kanji": "少林寺拳法世界連合",
     "romaji": "shōrinji kempō sekai rengō",
     "meanings": [
@@ -594,7 +594,7 @@
     ]
   },
   {
-    "index": 74,
+    "id": 75,
     "kanji": "少林寺拳法連盟",
     "romaji": "shōrinji kempō renmei",
     "meanings": [
@@ -602,7 +602,7 @@
     ]
   },
   {
-    "index": 75,
+    "id": 76,
     "kanji": "金剛禅総本山少林寺",
     "romaji": "kongō zen sōhonzan shōrinji",
     "meanings": [
@@ -610,7 +610,7 @@
     ]
   },
   {
-    "index": 76,
+    "id": 77,
     "kanji": "禅林学",
     "romaji": "zenrin gakuen",
     "meanings": [
@@ -618,7 +618,7 @@
     ]
   },
   {
-    "index": 77,
+    "id": 78,
     "kanji": "武専コース",
     "romaji": "busen course",
     "meanings": [
@@ -626,7 +626,7 @@
     ]
   },
   {
-    "index": 78,
+    "id": 79,
     "kanji": "少 導 師",
     "romaji": "shōdōshi",
     "meanings": [
@@ -634,7 +634,7 @@
     ]
   },
   {
-    "index": 79,
+    "id": 80,
     "kanji": "権中導師",
     "romaji": "gon chūdōshi",
     "meanings": [
@@ -642,7 +642,7 @@
     ]
   },
   {
-    "index": 80,
+    "id": 81,
     "kanji": "中 導 師",
     "romaji": "chūdōshi",
     "meanings": [
@@ -650,7 +650,7 @@
     ]
   },
   {
-    "index": 81,
+    "id": 82,
     "kanji": "権大導師",
     "romaji": "gon daidōshi",
     "meanings": [
@@ -658,7 +658,7 @@
     ]
   },
   {
-    "index": 82,
+    "id": 83,
     "kanji": "大 導 師",
     "romaji": "daidōshi",
     "meanings": [
@@ -666,7 +666,7 @@
     ]
   },
   {
-    "index": 83,
+    "id": 84,
     "kanji": "権少法師",
     "romaji": "gon shōhōshi",
     "meanings": [
@@ -674,7 +674,7 @@
     ]
   },
   {
-    "index": 84,
+    "id": 85,
     "kanji": "少 法 師",
     "romaji": "shōhōshi",
     "meanings": [
@@ -682,7 +682,7 @@
     ]
   },
   {
-    "index": 85,
+    "id": 86,
     "kanji": "権中法師",
     "romaji": "gon chūhōshi",
     "meanings": [
@@ -690,7 +690,7 @@
     ]
   },
   {
-    "index": 86,
+    "id": 87,
     "kanji": "中 法 師",
     "romaji": "chūhōshi",
     "meanings": [
@@ -698,7 +698,7 @@
     ]
   },
   {
-    "index": 87,
+    "id": 88,
     "kanji": "権大法師",
     "romaji": "gon daihōshi",
     "meanings": [
@@ -706,7 +706,7 @@
     ]
   },
   {
-    "index": 88,
+    "id": 89,
     "kanji": "大 法 師",
     "romaji": "daihōshi",
     "meanings": [
@@ -714,7 +714,7 @@
     ]
   },
   {
-    "index": 89,
+    "id": 90,
     "kanji": "准拳士",
     "romaji": "junkenshi",
     "meanings": [
@@ -722,7 +722,7 @@
     ]
   },
   {
-    "index": 90,
+    "id": 91,
     "kanji": "少拳士",
     "romaji": "shōkenshi",
     "meanings": [
@@ -730,7 +730,7 @@
     ]
   },
   {
-    "index": 91,
+    "id": 92,
     "kanji": "中拳士",
     "romaji": "chūkenshi",
     "meanings": [
@@ -738,7 +738,7 @@
     ]
   },
   {
-    "index": 92,
+    "id": 93,
     "kanji": "正拳士",
     "romaji": "seikenshi",
     "meanings": [
@@ -746,7 +746,7 @@
     ]
   },
   {
-    "index": 93,
+    "id": 94,
     "kanji": "大拳士",
     "romaji": "daikenshi",
     "meanings": [
@@ -754,7 +754,7 @@
     ]
   },
   {
-    "index": 94,
+    "id": 95,
     "kanji": "准範士",
     "romaji": "junhanshi",
     "meanings": [
@@ -762,7 +762,7 @@
     ]
   },
   {
-    "index": 95,
+    "id": 96,
     "kanji": "正範士",
     "romaji": "seihanshi",
     "meanings": [
@@ -770,7 +770,7 @@
     ]
   },
   {
-    "index": 96,
+    "id": 97,
     "kanji": "大範士",
     "romaji": "daihanshi",
     "meanings": [
@@ -778,7 +778,7 @@
     ]
   },
   {
-    "index": 97,
+    "id": 98,
     "kanji": "四字熟語 ",
     "romaji": "yoji jukugo ",
     "meanings": [
@@ -786,7 +786,7 @@
     ]
   },
   {
-    "index": 98,
+    "id": 99,
     "kanji": "拳禅一如",
     "romaji": "ken zen ichinyo",
     "meanings": [
@@ -794,7 +794,7 @@
     ]
   },
   {
-    "index": 99,
+    "id": 100,
     "kanji": "力愛不二",
     "romaji": "riki ai funi",
     "meanings": [
@@ -802,7 +802,7 @@
     ]
   },
   {
-    "index": 100,
+    "id": 101,
     "kanji": "守主攻従",
     "romaji": "shushu kōju",
     "meanings": [
@@ -810,7 +810,7 @@
     ]
   },
   {
-    "index": 101,
+    "id": 102,
     "kanji": "不殺活人",
     "romaji": "fusatsu katsu jin",
     "meanings": [
@@ -818,7 +818,7 @@
     ]
   },
   {
-    "index": 102,
+    "id": 103,
     "kanji": "剛柔一体",
     "romaji": "gōjū ittai",
     "meanings": [
@@ -826,7 +826,7 @@
     ]
   },
   {
-    "index": 103,
+    "id": 104,
     "kanji": "組手主体",
     "romaji": "kumite shutai",
     "meanings": [
@@ -834,7 +834,7 @@
     ]
   },
   {
-    "index": 104,
+    "id": 105,
     "kanji": "自己確立",
     "romaji": "jiko kakuritsu",
     "meanings": [
@@ -842,7 +842,7 @@
     ]
   },
   {
-    "index": 105,
+    "id": 106,
     "kanji": "自他共楽",
     "romaji": "jita kyōraku",
     "meanings": [
@@ -850,7 +850,7 @@
     ]
   },
   {
-    "index": 106,
+    "id": 107,
     "kanji": "漸々修学",
     "romaji": "zen zen shūgaku",
     "meanings": [
@@ -858,7 +858,7 @@
     ]
   },
   {
-    "index": 107,
+    "id": 108,
     "kanji": "護身練胆",
     "romaji": "goshin rentan",
     "meanings": [
@@ -866,7 +866,7 @@
     ]
   },
   {
-    "index": 108,
+    "id": 109,
     "kanji": "精神修養",
     "romaji": "seishin shūyō",
     "meanings": [
@@ -874,7 +874,7 @@
     ]
   },
   {
-    "index": 109,
+    "id": 110,
     "kanji": "健康増進",
     "romaji": "kenkō zōshin",
     "meanings": [
@@ -882,7 +882,7 @@
     ]
   },
   {
-    "index": 110,
+    "id": 111,
     "kanji": "不撓不屈",
     "romaji": "futō fukutsu",
     "meanings": [
@@ -890,7 +890,7 @@
     ]
   },
   {
-    "index": 111,
+    "id": 112,
     "kanji": "天地陰陽",
     "romaji": "tenchi in'yō",
     "meanings": [
@@ -898,7 +898,7 @@
     ]
   },
   {
-    "index": 112,
+    "id": 113,
     "kanji": "幸福運動",
     "romaji": "kōfuku undō",
     "meanings": [
@@ -906,7 +906,7 @@
     ]
   },
   {
-    "index": 113,
+    "id": 114,
     "kanji": "一期一会",
     "romaji": "ichi-go ichi-e",
     "meanings": [
@@ -914,7 +914,7 @@
     ]
   },
   {
-    "index": 114,
+    "id": 115,
     "kanji": "一生懸命",
     "romaji": "isshō kenmei",
     "meanings": [
@@ -922,7 +922,7 @@
     ]
   },
   {
-    "index": 115,
+    "id": 116,
     "kanji": "身心一如",
     "romaji": "shin shin ichinyo",
     "meanings": [
@@ -930,7 +930,7 @@
     ]
   },
   {
-    "index": 116,
+    "id": 117,
     "kanji": "真純単一",
     "romaji": "shinjun tan'itsu",
     "meanings": [
@@ -938,7 +938,7 @@
     ]
   },
   {
-    "index": 117,
+    "id": 118,
     "kanji": "協力一致",
     "romaji": "kyōryoku itchi",
     "meanings": [
@@ -946,7 +946,7 @@
     ]
   },
   {
-    "index": 118,
+    "id": 119,
     "kanji": "身心練磨",
     "romaji": "shinshin renma",
     "meanings": [
@@ -954,7 +954,7 @@
     ]
   },
   {
-    "index": 119,
+    "id": 120,
     "kanji": "生涯修行",
     "romaji": "shōgai shugyō",
     "meanings": [
@@ -962,7 +962,7 @@
     ]
   },
   {
-    "index": 120,
+    "id": 121,
     "kanji": "一志一道",
     "romaji": "isshi ichidō",
     "meanings": [
@@ -970,7 +970,7 @@
     ]
   },
   {
-    "index": 121,
+    "id": 122,
     "kanji": "平常心",
     "romaji": "hei jo shin",
     "meanings": [
@@ -978,7 +978,7 @@
     ]
   },
   {
-    "index": 122,
+    "id": 123,
     "kanji": "心•気•力",
     "romaji": "shin, ki, ryoku",
     "meanings": [
@@ -986,7 +986,7 @@
     ]
   },
   {
-    "index": 123,
+    "id": 124,
     "kanji": "虚心坦懐",
     "romaji": "kyoshin taikan",
     "meanings": [
@@ -994,7 +994,7 @@
     ]
   },
   {
-    "index": 124,
+    "id": 125,
     "kanji": "諸法無我",
     "romaji": "shohō muga",
     "meanings": [
@@ -1002,7 +1002,7 @@
     ]
   },
   {
-    "index": 125,
+    "id": 126,
     "kanji": "諸行無常",
     "romaji": "shogyō mujō",
     "meanings": [
@@ -1010,7 +1010,7 @@
     ]
   },
   {
-    "index": 126,
+    "id": 127,
     "kanji": "愛民愛郷",
     "romaji": "aimin aikyō",
     "meanings": [
@@ -1018,7 +1018,7 @@
     ]
   },
   {
-    "index": 127,
+    "id": 128,
     "kanji": "不言実行",
     "romaji": "fugen jikkō",
     "meanings": [
@@ -1026,7 +1026,7 @@
     ]
   },
   {
-    "index": 128,
+    "id": 129,
     "kanji": "一拳多生",
     "romaji": "ikken tasshō",
     "meanings": [
@@ -1034,7 +1034,7 @@
     ]
   },
   {
-    "index": 129,
+    "id": 130,
     "kanji": "破邪顕正",
     "romaji": "haja kenshō",
     "meanings": [
@@ -1042,12 +1042,12 @@
     ]
   },
   {
-    "index": 130,
+    "id": 131,
     "kanji": "破邪の拳",
     "romaji": "haja no ken"
   },
   {
-    "index": 131,
+    "id": 132,
     "kanji": "済生利人",
     "romaji": "saisei rinin",
     "meanings": [
@@ -1055,7 +1055,7 @@
     ]
   },
   {
-    "index": 132,
+    "id": 133,
     "kanji": "夫婦相和",
     "romaji": "fūfu sōwa",
     "meanings": [
@@ -1063,7 +1063,7 @@
     ]
   },
   {
-    "index": 133,
+    "id": 134,
     "kanji": "自己修練",
     "romaji": "jiko shūren",
     "meanings": [
@@ -1071,7 +1071,7 @@
     ]
   },
   {
-    "index": 134,
+    "id": 135,
     "kanji": "同志相親",
     "romaji": "dōshi sōshin",
     "meanings": [
@@ -1079,7 +1079,7 @@
     ]
   },
   {
-    "index": 135,
+    "id": 136,
     "kanji": "明鏡止水",
     "romaji": "meikyō shisui",
     "meanings": [
@@ -1087,7 +1087,7 @@
     ]
   },
   {
-    "index": 136,
+    "id": 137,
     "kanji": "守破離",
     "romaji": "shu ha ri",
     "meanings": [
@@ -1095,7 +1095,7 @@
     ]
   },
   {
-    "index": 137,
+    "id": 138,
     "kanji": "直心",
     "romaji": "jikishin",
     "meanings": [
@@ -1103,7 +1103,7 @@
     ]
   },
   {
-    "index": 138,
+    "id": 139,
     "kanji": "鎮魂行を行います",
     "romaji": "chinkon gyō wo okonaimasu",
     "meanings": [
@@ -1111,7 +1111,7 @@
     ]
   },
   {
-    "index": 139,
+    "id": 140,
     "kanji": "○○を始めます",
     "romaji": "xx wo hajimemasu",
     "meanings": [
@@ -1119,7 +1119,7 @@
     ]
   },
   {
-    "index": 140,
+    "id": 141,
     "kanji": "稽古を終ります",
     "romaji": "keiko wo owarimasu",
     "meanings": [
@@ -1127,7 +1127,7 @@
     ]
   },
   {
-    "index": 141,
+    "id": 142,
     "kanji": "稽古",
     "romaji": "keiko",
     "meanings": [
@@ -1135,7 +1135,7 @@
     ]
   },
   {
-    "index": 142,
+    "id": 143,
     "kanji": "練習",
     "romaji": "renshū",
     "meanings": [
@@ -1143,7 +1143,7 @@
     ]
   },
   {
-    "index": 143,
+    "id": 144,
     "kanji": "はい",
     "romaji": "hai",
     "meanings": [
@@ -1151,7 +1151,7 @@
     ]
   },
   {
-    "index": 144,
+    "id": 145,
     "kanji": "いいえ",
     "romaji": "iie",
     "meanings": [
@@ -1159,7 +1159,7 @@
     ]
   },
   {
-    "index": 145,
+    "id": 146,
     "kanji": "号令",
     "romaji": "gōrei",
     "meanings": [
@@ -1167,7 +1167,7 @@
     ]
   },
   {
-    "index": 146,
+    "id": 147,
     "kanji": "始め",
     "romaji": "hajime",
     "meanings": [
@@ -1175,7 +1175,7 @@
     ]
   },
   {
-    "index": 147,
+    "id": 148,
     "kanji": "やめ",
     "romaji": "yame",
     "meanings": [
@@ -1183,7 +1183,7 @@
     ]
   },
   {
-    "index": 148,
+    "id": 149,
     "kanji": "終ります",
     "romaji": "owarimasu",
     "meanings": [
@@ -1191,7 +1191,7 @@
     ]
   },
   {
-    "index": 149,
+    "id": 150,
     "kanji": "用意",
     "romaji": "yōi",
     "meanings": [
@@ -1199,7 +1199,7 @@
     ]
   },
   {
-    "index": 150,
+    "id": 151,
     "kanji": "構えて",
     "romaji": "kamaete",
     "meanings": [
@@ -1207,7 +1207,7 @@
     ]
   },
   {
-    "index": 151,
+    "id": 152,
     "kanji": "単演",
     "romaji": "tan'en",
     "meanings": [
@@ -1215,7 +1215,7 @@
     ]
   },
   {
-    "index": 152,
+    "id": 153,
     "kanji": "相対",
     "romaji": "sōtai",
     "meanings": [
@@ -1223,7 +1223,7 @@
     ]
   },
   {
-    "index": 153,
+    "id": 154,
     "kanji": "交代",
     "romaji": "kōtai",
     "meanings": [
@@ -1231,7 +1231,7 @@
     ]
   },
   {
-    "index": 154,
+    "id": 155,
     "kanji": "反対",
     "romaji": "hantai",
     "meanings": [
@@ -1239,7 +1239,7 @@
     ]
   },
   {
-    "index": 155,
+    "id": 156,
     "kanji": "左",
     "romaji": "hidari",
     "meanings": [
@@ -1247,7 +1247,7 @@
     ]
   },
   {
-    "index": 156,
+    "id": 157,
     "kanji": "右",
     "romaji": "migi",
     "meanings": [
@@ -1255,7 +1255,7 @@
     ]
   },
   {
-    "index": 157,
+    "id": 158,
     "kanji": "左右",
     "romaji": "sayū",
     "meanings": [
@@ -1263,7 +1263,7 @@
     ]
   },
   {
-    "index": 158,
+    "id": 159,
     "kanji": "前",
     "romaji": "mae",
     "meanings": [
@@ -1271,7 +1271,7 @@
     ]
   },
   {
-    "index": 159,
+    "id": 160,
     "kanji": "後",
     "romaji": "ushiro/ato",
     "meanings": [
@@ -1279,7 +1279,7 @@
     ]
   },
   {
-    "index": 160,
+    "id": 161,
     "kanji": "前後",
     "romaji": "zengo",
     "meanings": [
@@ -1287,7 +1287,7 @@
     ]
   },
   {
-    "index": 161,
+    "id": 162,
     "kanji": "より",
     "romaji": "yori",
     "meanings": [
@@ -1295,7 +1295,7 @@
     ]
   },
   {
-    "index": 162,
+    "id": 163,
     "kanji": "から",
     "romaji": "kara",
     "meanings": [
@@ -1303,7 +1303,7 @@
     ]
   },
   {
-    "index": 163,
+    "id": 164,
     "kanji": "右拳から",
     "romaji": "migi ken kara",
     "meanings": [
@@ -1311,7 +1311,7 @@
     ]
   },
   {
-    "index": 164,
+    "id": 165,
     "kanji": "左足から",
     "romaji": "hidari ashi kara",
     "meanings": [
@@ -1319,7 +1319,7 @@
     ]
   },
   {
-    "index": 165,
+    "id": 166,
     "kanji": "右向け右",
     "romaji": "migi muke migi",
     "meanings": [
@@ -1327,7 +1327,7 @@
     ]
   },
   {
-    "index": 166,
+    "id": 167,
     "kanji": "左向け左",
     "romaji": "hidari muke hidari",
     "meanings": [
@@ -1335,7 +1335,7 @@
     ]
   },
   {
-    "index": 167,
+    "id": 168,
     "kanji": "まわれ右",
     "romaji": "maware migi",
     "meanings": [
@@ -1343,7 +1343,7 @@
     ]
   },
   {
-    "index": 168,
+    "id": 169,
     "kanji": "休憩",
     "romaji": "kyūkei",
     "meanings": [
@@ -1351,7 +1351,7 @@
     ]
   },
   {
-    "index": 169,
+    "id": 170,
     "kanji": "調息法",
     "romaji": "chosokuhō",
     "meanings": [
@@ -1359,7 +1359,7 @@
     ]
   },
   {
-    "index": 170,
+    "id": 171,
     "kanji": "深呼吸",
     "romaji": "shinkokyū",
     "meanings": [
@@ -1367,7 +1367,7 @@
     ]
   },
   {
-    "index": 171,
+    "id": 172,
     "kanji": "気合",
     "romaji": "kiai",
     "meanings": [
@@ -1375,7 +1375,7 @@
     ]
   },
   {
-    "index": 172,
+    "id": 173,
     "kanji": "極め",
     "romaji": "kime",
     "meanings": [
@@ -1383,7 +1383,7 @@
     ]
   },
   {
-    "index": 173,
+    "id": 174,
     "kanji": "早く",
     "romaji": "hayaku",
     "meanings": [
@@ -1391,7 +1391,7 @@
     ]
   },
   {
-    "index": 174,
+    "id": 175,
     "kanji": "ゆっくり",
     "romaji": "yukkuri",
     "meanings": [
@@ -1399,7 +1399,7 @@
     ]
   },
   {
-    "index": 175,
+    "id": 176,
     "kanji": "攻者",
     "romaji": "kōsha",
     "meanings": [
@@ -1407,7 +1407,7 @@
     ]
   },
   {
-    "index": 176,
+    "id": 177,
     "kanji": "守者",
     "romaji": "shusha",
     "meanings": [
@@ -1415,7 +1415,7 @@
     ]
   },
   {
-    "index": 177,
+    "id": 178,
     "kanji": "技あり",
     "romaji": "waza ari",
     "meanings": [
@@ -1423,7 +1423,7 @@
     ]
   },
   {
-    "index": 178,
+    "id": 179,
     "kanji": "有効",
     "romaji": "yūkō",
     "meanings": [
@@ -1431,7 +1431,7 @@
     ]
   },
   {
-    "index": 179,
+    "id": 180,
     "kanji": "それまで",
     "romaji": "soremade",
     "meanings": [
@@ -1439,7 +1439,7 @@
     ]
   },
   {
-    "index": 180,
+    "id": 181,
     "kanji": "わかれて",
     "romaji": "wakarete",
     "meanings": [
@@ -1447,7 +1447,7 @@
     ]
   },
   {
-    "index": 181,
+    "id": 182,
     "kanji": "武道",
     "romaji": "budō",
     "meanings": [
@@ -1455,7 +1455,7 @@
     ]
   },
   {
-    "index": 182,
+    "id": 183,
     "kanji": "道場",
     "romaji": "dōjō",
     "meanings": [
@@ -1463,7 +1463,7 @@
     ]
   },
   {
-    "index": 183,
+    "id": 184,
     "kanji": "道衣／道着",
     "romaji": "dōgi",
     "meanings": [
@@ -1471,7 +1471,7 @@
     ]
   },
   {
-    "index": 184,
+    "id": 185,
     "kanji": "上衣／上着",
     "romaji": "uwagi",
     "meanings": [
@@ -1479,7 +1479,7 @@
     ]
   },
   {
-    "index": 185,
+    "id": 186,
     "kanji": "ズボン",
     "romaji": "zubon",
     "meanings": [
@@ -1487,7 +1487,7 @@
     ]
   },
   {
-    "index": 186,
+    "id": 187,
     "kanji": "帯",
     "romaji": "obi",
     "meanings": [
@@ -1495,7 +1495,7 @@
     ]
   },
   {
-    "index": 187,
+    "id": 188,
     "kanji": "法衣",
     "romaji": "hōi",
     "meanings": [
@@ -1503,7 +1503,7 @@
     ]
   },
   {
-    "index": 188,
+    "id": 189,
     "kanji": "胸章",
     "romaji": "munashō",
     "meanings": [
@@ -1511,7 +1511,7 @@
     ]
   },
   {
-    "index": 189,
+    "id": 190,
     "kanji": "袖章",
     "romaji": "sodeshō",
     "meanings": [
@@ -1519,7 +1519,7 @@
     ]
   },
   {
-    "index": 190,
+    "id": 191,
     "kanji": "講話",
     "romaji": "kōwa",
     "meanings": [
@@ -1527,7 +1527,7 @@
     ]
   },
   {
-    "index": 191,
+    "id": 192,
     "kanji": "法話",
     "romaji": "hōwa",
     "meanings": [
@@ -1535,7 +1535,7 @@
     ]
   },
   {
-    "index": 192,
+    "id": 193,
     "kanji": "法階講座",
     "romaji": "hōkai kōza",
     "meanings": [
@@ -1543,7 +1543,7 @@
     ]
   },
   {
-    "index": 193,
+    "id": 194,
     "kanji": "学科",
     "romaji": "gakka",
     "meanings": [
@@ -1551,7 +1551,7 @@
     ]
   },
   {
-    "index": 194,
+    "id": 195,
     "kanji": "教範",
     "romaji": "kyōhan",
     "meanings": [
@@ -1559,7 +1559,7 @@
     ]
   },
   {
-    "index": 195,
+    "id": 196,
     "kanji": "読本",
     "romaji": "tokuhon",
     "meanings": [
@@ -1567,7 +1567,7 @@
     ]
   },
   {
-    "index": 196,
+    "id": 197,
     "kanji": "科目表",
     "romaji": "kamokuhyō",
     "meanings": [
@@ -1575,7 +1575,7 @@
     ]
   },
   {
-    "index": 197,
+    "id": 198,
     "kanji": "入門式",
     "romaji": "nyumonshiki",
     "meanings": [
@@ -1583,7 +1583,7 @@
     ]
   },
   {
-    "index": 198,
+    "id": 199,
     "kanji": "期生",
     "romaji": "kisei",
     "meanings": [
@@ -1591,7 +1591,7 @@
     ]
   },
   {
-    "index": 199,
+    "id": 200,
     "kanji": "会員証",
     "romaji": "kai-in shō",
     "meanings": [
@@ -1599,7 +1599,7 @@
     ]
   },
   {
-    "index": 200,
+    "id": 201,
     "kanji": "允可状",
     "romaji": "inkajō",
     "meanings": [
@@ -1607,7 +1607,7 @@
     ]
   },
   {
-    "index": 201,
+    "id": 202,
     "kanji": "合格証書",
     "romaji": "gōkaku shōsho",
     "meanings": [
@@ -1615,7 +1615,7 @@
     ]
   },
   {
-    "index": 202,
+    "id": 203,
     "kanji": "合宿",
     "romaji": "gasshuku",
     "meanings": [
@@ -1623,7 +1623,7 @@
     ]
   },
   {
-    "index": 203,
+    "id": 204,
     "kanji": "講習会",
     "romaji": "kōshūkai",
     "meanings": [
@@ -1631,7 +1631,7 @@
     ]
   },
   {
-    "index": 204,
+    "id": 205,
     "kanji": "研修会",
     "romaji": "kenshūkai",
     "meanings": [
@@ -1639,7 +1639,7 @@
     ]
   },
   {
-    "index": 205,
+    "id": 206,
     "kanji": "合同練習",
     "romaji": "gōdō renshū",
     "meanings": [
@@ -1647,7 +1647,7 @@
     ]
   },
   {
-    "index": 206,
+    "id": 207,
     "kanji": "試験",
     "romaji": "shiken",
     "meanings": [
@@ -1655,7 +1655,7 @@
     ]
   },
   {
-    "index": 207,
+    "id": 208,
     "kanji": "特別試験",
     "romaji": "tokubetsu shiken",
     "meanings": [
@@ -1663,7 +1663,7 @@
     ]
   },
   {
-    "index": 208,
+    "id": 209,
     "kanji": "考試",
     "romaji": "kōshi",
     "meanings": [
@@ -1671,7 +1671,7 @@
     ]
   },
   {
-    "index": 209,
+    "id": 210,
     "kanji": "大会",
     "romaji": "taikai",
     "meanings": [
@@ -1679,7 +1679,7 @@
     ]
   },
   {
-    "index": 210,
+    "id": 211,
     "kanji": "演武会",
     "romaji": "embukai",
     "meanings": [
@@ -1687,7 +1687,7 @@
     ]
   },
   {
-    "index": 211,
+    "id": 212,
     "kanji": "まんじ（卍）",
     "romaji": "manji",
     "meanings": [
@@ -1695,7 +1695,7 @@
     ]
   },
   {
-    "index": 212,
+    "id": 213,
     "kanji": "ダーマ",
     "romaji": "daama",
     "meanings": [
@@ -1703,7 +1703,7 @@
     ]
   },
   {
-    "index": 213,
+    "id": 214,
     "kanji": "易筋行",
     "romaji": "ekkin gyō",
     "meanings": [
@@ -1711,7 +1711,7 @@
     ]
   },
   {
-    "index": 214,
+    "id": 215,
     "kanji": "鎮魂行",
     "romaji": "chinkon gyō",
     "meanings": [
@@ -1719,7 +1719,7 @@
     ]
   },
   {
-    "index": 215,
+    "id": 216,
     "kanji": "座禅",
     "romaji": "zazen",
     "meanings": [
@@ -1727,7 +1727,7 @@
     ]
   },
   {
-    "index": 216,
+    "id": 217,
     "kanji": "打棒",
     "romaji": "dabō",
     "meanings": [
@@ -1735,7 +1735,7 @@
     ]
   },
   {
-    "index": 217,
+    "id": 218,
     "kanji": "作務",
     "romaji": "samu",
     "meanings": [
@@ -1743,7 +1743,7 @@
     ]
   },
   {
-    "index": 218,
+    "id": 219,
     "kanji": "剛法",
     "romaji": "gōhō",
     "meanings": [
@@ -1751,7 +1751,7 @@
     ]
   },
   {
-    "index": 219,
+    "id": 220,
     "kanji": "柔法",
     "romaji": "jūhō",
     "meanings": [
@@ -1759,7 +1759,7 @@
     ]
   },
   {
-    "index": 220,
+    "id": 221,
     "kanji": "整法(整体)",
     "romaji": "seihō (seitai)",
     "meanings": [
@@ -1767,7 +1767,7 @@
     ]
   },
   {
-    "index": 221,
+    "id": 222,
     "kanji": "拳系",
     "romaji": "kenkei",
     "meanings": [
@@ -1775,7 +1775,7 @@
     ]
   },
   {
-    "index": 222,
+    "id": 223,
     "kanji": "法形",
     "romaji": "hōkei",
     "meanings": [
@@ -1783,7 +1783,7 @@
     ]
   },
   {
-    "index": 223,
+    "id": 224,
     "kanji": "演武",
     "romaji": "embu",
     "meanings": [
@@ -1791,7 +1791,7 @@
     ]
   },
   {
-    "index": 224,
+    "id": 225,
     "kanji": "運用法",
     "romaji": "un'yōhō",
     "meanings": [
@@ -1799,7 +1799,7 @@
     ]
   },
   {
-    "index": 225,
+    "id": 226,
     "kanji": "乱捕り",
     "romaji": "randori",
     "meanings": [
@@ -1807,7 +1807,7 @@
     ]
   },
   {
-    "index": 226,
+    "id": 227,
     "kanji": "自由乱捕り",
     "romaji": "jiyū randori",
     "meanings": [
@@ -1815,7 +1815,7 @@
     ]
   },
   {
-    "index": 227,
+    "id": 228,
     "kanji": "限定乱捕り",
     "romaji": "gentei randori",
     "meanings": [
@@ -1823,7 +1823,7 @@
     ]
   },
   {
-    "index": 228,
+    "id": 229,
     "kanji": "防具",
     "romaji": "bōgu",
     "meanings": [
@@ -1831,7 +1831,7 @@
     ]
   },
   {
-    "index": 229,
+    "id": 230,
     "kanji": "胴",
     "romaji": "dō",
     "meanings": [
@@ -1839,7 +1839,7 @@
     ]
   },
   {
-    "index": 230,
+    "id": 231,
     "kanji": "八方目",
     "romaji": "happōmoku",
     "meanings": [
@@ -1847,7 +1847,7 @@
     ]
   },
   {
-    "index": 231,
+    "id": 232,
     "kanji": "目配り",
     "romaji": "mekubari",
     "meanings": [
@@ -1855,7 +1855,7 @@
     ]
   },
   {
-    "index": 232,
+    "id": 233,
     "kanji": "残心",
     "romaji": "zanshin",
     "meanings": [
@@ -1863,7 +1863,7 @@
     ]
   },
   {
-    "index": 233,
+    "id": 234,
     "kanji": "武階",
     "romaji": "bukai",
     "meanings": [
@@ -1871,7 +1871,7 @@
     ]
   },
   {
-    "index": 234,
+    "id": 235,
     "kanji": "法階",
     "romaji": "hōkai",
     "meanings": [
@@ -1879,7 +1879,7 @@
     ]
   },
   {
-    "index": 235,
+    "id": 236,
     "kanji": "僧階",
     "romaji": "sōkai",
     "meanings": [
@@ -1887,7 +1887,7 @@
     ]
   },
   {
-    "index": 236,
+    "id": 237,
     "kanji": "心",
     "romaji": "kokoro/shin",
     "meanings": [
@@ -1895,7 +1895,7 @@
     ]
   },
   {
-    "index": 237,
+    "id": 238,
     "kanji": "体",
     "romaji": "karada/tai",
     "meanings": [
@@ -1903,7 +1903,7 @@
     ]
   },
   {
-    "index": 238,
+    "id": 239,
     "kanji": "智",
     "romaji": "chi",
     "meanings": [
@@ -1911,7 +1911,7 @@
     ]
   },
   {
-    "index": 239,
+    "id": 240,
     "kanji": "気",
     "romaji": "ki",
     "meanings": [
@@ -1919,7 +1919,7 @@
     ]
   },
   {
-    "index": 240,
+    "id": 241,
     "kanji": "行",
     "romaji": "gyō",
     "meanings": [
@@ -1927,7 +1927,7 @@
     ]
   },
   {
-    "index": 241,
+    "id": 242,
     "kanji": "先",
     "romaji": "sen",
     "meanings": [
@@ -1935,7 +1935,7 @@
     ]
   },
   {
-    "index": 242,
+    "id": 243,
     "kanji": "勘",
     "romaji": "kan",
     "meanings": [
@@ -1943,7 +1943,7 @@
     ]
   },
   {
-    "index": 243,
+    "id": 244,
     "kanji": "当身",
     "romaji": "atemi",
     "meanings": [
@@ -1951,7 +1951,7 @@
     ]
   },
   {
-    "index": 244,
+    "id": 245,
     "kanji": "急所",
     "romaji": "kyūsho",
     "meanings": [
@@ -1959,7 +1959,7 @@
     ]
   },
   {
-    "index": 245,
+    "id": 246,
     "kanji": "攻防用器",
     "romaji": "kōbō yōki",
     "meanings": [
@@ -1967,7 +1967,7 @@
     ]
   },
   {
-    "index": 246,
+    "id": 247,
     "kanji": "法器",
     "romaji": "hōki",
     "meanings": [
@@ -1975,7 +1975,7 @@
     ]
   },
   {
-    "index": 247,
+    "id": 248,
     "kanji": "錫杖",
     "romaji": "shakujō",
     "meanings": [
@@ -1983,7 +1983,7 @@
     ]
   },
   {
-    "index": 248,
+    "id": 249,
     "kanji": "如意棒",
     "romaji": "nyoibō",
     "meanings": [
@@ -1991,7 +1991,7 @@
     ]
   },
   {
-    "index": 249,
+    "id": 250,
     "kanji": "独鈷",
     "romaji": "dokko",
     "meanings": [
@@ -1999,7 +1999,7 @@
     ]
   },
   {
-    "index": 250,
+    "id": 251,
     "kanji": "ソーエン",
     "romaji": "sōen",
     "meanings": [
@@ -2007,7 +2007,7 @@
     ]
   },
   {
-    "index": 251,
+    "id": 252,
     "kanji": "ワツー",
     "romaji": "wa-tsū",
     "meanings": [
@@ -2015,7 +2015,7 @@
     ]
   },
   {
-    "index": 252,
+    "id": 253,
     "kanji": "少年部",
     "romaji": "shōnembu",
     "meanings": [
@@ -2023,7 +2023,7 @@
     ]
   },
   {
-    "index": 253,
+    "id": 254,
     "kanji": "一般部",
     "romaji": "ippanbu",
     "meanings": [
@@ -2031,7 +2031,7 @@
     ]
   },
   {
-    "index": 254,
+    "id": 255,
     "kanji": "体操",
     "romaji": "taisō",
     "meanings": [
@@ -2039,7 +2039,7 @@
     ]
   },
   {
-    "index": 255,
+    "id": 256,
     "kanji": "運動",
     "romaji": "undō",
     "meanings": [
@@ -2047,7 +2047,7 @@
     ]
   },
   {
-    "index": 256,
+    "id": 257,
     "kanji": "準備体操／準備運動",
     "romaji": "junbi taisō/junbi undō",
     "meanings": [
@@ -2055,7 +2055,7 @@
     ]
   },
   {
-    "index": 257,
+    "id": 258,
     "kanji": "単演法形",
     "romaji": "tan'en hōkei",
     "meanings": [
@@ -2063,7 +2063,7 @@
     ]
   },
   {
-    "index": 258,
+    "id": 259,
     "kanji": "単独演武",
     "romaji": "tandoku embu",
     "meanings": [
@@ -2071,7 +2071,7 @@
     ]
   },
   {
-    "index": 259,
+    "id": 260,
     "kanji": "組演武",
     "romaji": "kumi embu",
     "meanings": [
@@ -2079,7 +2079,7 @@
     ]
   },
   {
-    "index": 260,
+    "id": 261,
     "kanji": "団体演武",
     "romaji": "dantai embu",
     "meanings": [
@@ -2087,7 +2087,7 @@
     ]
   },
   {
-    "index": 261,
+    "id": 262,
     "kanji": "ゼッケン",
     "romaji": "zekken",
     "meanings": [
@@ -2095,7 +2095,7 @@
     ]
   },
   {
-    "index": 262,
+    "id": 263,
     "kanji": "技術度",
     "romaji": "gijutsudo",
     "meanings": [
@@ -2103,7 +2103,7 @@
     ]
   },
   {
-    "index": 263,
+    "id": 264,
     "kanji": "表限度",
     "romaji": "hyōgendo",
     "meanings": [
@@ -2111,7 +2111,7 @@
     ]
   },
   {
-    "index": 264,
+    "id": 265,
     "kanji": "構成",
     "romaji": "kōsei",
     "meanings": [
@@ -2119,7 +2119,7 @@
     ]
   },
   {
-    "index": 265,
+    "id": 266,
     "kanji": "節度",
     "romaji": "setsudo",
     "meanings": [
@@ -2127,7 +2127,7 @@
     ]
   },
   {
-    "index": 266,
+    "id": 267,
     "kanji": "美しさ",
     "romaji": "utsukushisa",
     "meanings": [
@@ -2135,7 +2135,7 @@
     ]
   },
   {
-    "index": 267,
+    "id": 268,
     "kanji": "冴え",
     "romaji": "sae",
     "meanings": [
@@ -2143,7 +2143,7 @@
     ]
   },
   {
-    "index": 268,
+    "id": 269,
     "kanji": "表示",
     "romaji": "hyōji",
     "meanings": [
@@ -2151,7 +2151,7 @@
     ]
   },
   {
-    "index": 269,
+    "id": 270,
     "kanji": "移動練習",
     "romaji": "idō renshū",
     "meanings": [
@@ -2159,7 +2159,7 @@
     ]
   },
   {
-    "index": 270,
+    "id": 271,
     "kanji": "攻撃技",
     "romaji": "kōgeki waza",
     "meanings": [
@@ -2167,7 +2167,7 @@
     ]
   },
   {
-    "index": 271,
+    "id": 272,
     "kanji": "防御技",
     "romaji": "bōgyo waza",
     "meanings": [
@@ -2175,7 +2175,7 @@
     ]
   },
   {
-    "index": 272,
+    "id": 273,
     "kanji": "補技（仕掛け技）",
     "romaji": "hogi (shikake waza)",
     "meanings": [
@@ -2183,7 +2183,7 @@
     ]
   },
   {
-    "index": 273,
+    "id": 274,
     "kanji": "誘い",
     "romaji": "sasoi",
     "meanings": [
@@ -2191,7 +2191,7 @@
     ]
   },
   {
-    "index": 274,
+    "id": 275,
     "kanji": "前進",
     "romaji": "zenshin",
     "meanings": [
@@ -2199,7 +2199,7 @@
     ]
   },
   {
-    "index": 275,
+    "id": 276,
     "kanji": "裏",
     "romaji": "ura",
     "meanings": [
@@ -2207,7 +2207,7 @@
     ]
   },
   {
-    "index": 276,
+    "id": 277,
     "kanji": "表",
     "romaji": "omote",
     "meanings": [
@@ -2215,7 +2215,7 @@
     ]
   },
   {
-    "index": 277,
+    "id": 278,
     "kanji": "内",
     "romaji": "uchi/nai",
     "meanings": [
@@ -2223,7 +2223,7 @@
     ]
   },
   {
-    "index": 278,
+    "id": 279,
     "kanji": "外",
     "romaji": "soto/gai",
     "meanings": [
@@ -2231,7 +2231,7 @@
     ]
   },
   {
-    "index": 279,
+    "id": 280,
     "kanji": "順",
     "romaji": "jun",
     "meanings": [
@@ -2239,7 +2239,7 @@
     ]
   },
   {
-    "index": 280,
+    "id": 281,
     "kanji": "逆",
     "romaji": "gyaku",
     "meanings": [
@@ -2247,7 +2247,7 @@
     ]
   },
   {
-    "index": 281,
+    "id": 282,
     "kanji": "上段",
     "romaji": "jōdan",
     "meanings": [
@@ -2255,7 +2255,7 @@
     ]
   },
   {
-    "index": 282,
+    "id": 283,
     "kanji": "中段",
     "romaji": "chūdan",
     "meanings": [
@@ -2263,7 +2263,7 @@
     ]
   },
   {
-    "index": 283,
+    "id": 284,
     "kanji": "下段",
     "romaji": "gedan",
     "meanings": [
@@ -2271,7 +2271,7 @@
     ]
   },
   {
-    "index": 284,
+    "id": 285,
     "kanji": "片手",
     "romaji": "katate",
     "meanings": [
@@ -2279,7 +2279,7 @@
     ]
   },
   {
-    "index": 285,
+    "id": 286,
     "kanji": "両手",
     "romaji": "ryōte",
     "meanings": [
@@ -2287,7 +2287,7 @@
     ]
   },
   {
-    "index": 286,
+    "id": 287,
     "kanji": "諸手",
     "romaji": "morote",
     "meanings": [
@@ -2295,7 +2295,7 @@
     ]
   },
   {
-    "index": 287,
+    "id": 288,
     "kanji": "順手",
     "romaji": "jun te",
     "meanings": [
@@ -2303,7 +2303,7 @@
     ]
   },
   {
-    "index": 288,
+    "id": 289,
     "kanji": "逆手",
     "romaji": "gyaku te",
     "meanings": [
@@ -2311,7 +2311,7 @@
     ]
   },
   {
-    "index": 289,
+    "id": 290,
     "kanji": "拇指丘",
     "romaji": "boshi kyū",
     "meanings": [
@@ -2319,7 +2319,7 @@
     ]
   },
   {
-    "index": 290,
+    "id": 291,
     "kanji": "小指丘",
     "romaji": "shoshi kyū",
     "meanings": [
@@ -2327,7 +2327,7 @@
     ]
   },
   {
-    "index": 291,
+    "id": 292,
     "kanji": "各種",
     "romaji": "kaku shu",
     "meanings": [
@@ -2335,7 +2335,7 @@
     ]
   },
   {
-    "index": 292,
+    "id": 293,
     "kanji": "抜き手",
     "romaji": "nukite",
     "meanings": [
@@ -2343,7 +2343,7 @@
     ]
   },
   {
-    "index": 293,
+    "id": 294,
     "kanji": "間合",
     "romaji": "maai",
     "meanings": [
@@ -2351,7 +2351,7 @@
     ]
   },
   {
-    "index": 294,
+    "id": 295,
     "kanji": "一足一拳の間合",
     "romaji": "issoku ikken no maai",
     "meanings": [
@@ -2359,7 +2359,7 @@
     ]
   },
   {
-    "index": 295,
+    "id": 296,
     "kanji": "近間",
     "romaji": "chikama",
     "meanings": [
@@ -2367,7 +2367,7 @@
     ]
   },
   {
-    "index": 296,
+    "id": 297,
     "kanji": "遠間",
     "romaji": "tōma",
     "meanings": [
@@ -2375,7 +2375,7 @@
     ]
   },
   {
-    "index": 297,
+    "id": 298,
     "kanji": "引押",
     "romaji": "hiki oshi",
     "meanings": [
@@ -2383,7 +2383,7 @@
     ]
   },
   {
-    "index": 298,
+    "id": 299,
     "kanji": "正中線",
     "romaji": "seichūsen",
     "meanings": [
@@ -2391,7 +2391,7 @@
     ]
   },
   {
-    "index": 299,
+    "id": 300,
     "kanji": "演武線",
     "romaji": "embusen",
     "meanings": [
@@ -2399,7 +2399,7 @@
     ]
   },
   {
-    "index": 300,
+    "id": 301,
     "kanji": "技術",
     "romaji": "gijutsu",
     "meanings": [
@@ -2407,7 +2407,7 @@
     ]
   },
   {
-    "index": 301,
+    "id": 302,
     "kanji": "修行",
     "romaji": "shugyō",
     "meanings": [
@@ -2415,7 +2415,7 @@
     ]
   },
   {
-    "index": 302,
+    "id": 303,
     "kanji": "変化",
     "romaji": "henka",
     "meanings": [
@@ -2423,7 +2423,7 @@
     ]
   },
   {
-    "index": 303,
+    "id": 304,
     "kanji": "絡子",
     "romaji": "rakusu",
     "meanings": [
@@ -2431,7 +2431,7 @@
     ]
   },
   {
-    "index": 304,
+    "id": 305,
     "kanji": "輪袈裟",
     "romaji": "wagesa",
     "meanings": [
@@ -2439,7 +2439,7 @@
     ]
   },
   {
-    "index": 305,
+    "id": 306,
     "kanji": "念珠",
     "romaji": "nenju",
     "meanings": [
@@ -2447,7 +2447,7 @@
     ]
   },
   {
-    "index": 306,
+    "id": 307,
     "kanji": "祭壇",
     "romaji": "saidan",
     "meanings": [
@@ -2455,7 +2455,7 @@
     ]
   },
   {
-    "index": 307,
+    "id": 308,
     "kanji": "五具足",
     "romaji": "gogusoku",
     "meanings": [
@@ -2463,7 +2463,7 @@
     ]
   },
   {
-    "index": 308,
+    "id": 309,
     "kanji": "仁王 (像?)",
     "romaji": "niōsō",
     "meanings": [
@@ -2471,7 +2471,7 @@
     ]
   },
   {
-    "index": 309,
+    "id": 310,
     "kanji": "達磨／だるま",
     "romaji": "daruma",
     "meanings": [
@@ -2479,7 +2479,7 @@
     ]
   },
   {
-    "index": 310,
+    "id": 311,
     "kanji": "達磨大師",
     "romaji": "daruma daishi",
     "meanings": [
@@ -2487,7 +2487,7 @@
     ]
   },
   {
-    "index": 311,
+    "id": 312,
     "kanji": "釈尊",
     "romaji": "shakuson",
     "meanings": [
@@ -2495,7 +2495,7 @@
     ]
   },
   {
-    "index": 312,
+    "id": 313,
     "kanji": "教典",
     "romaji": "kyōten",
     "meanings": [
@@ -2503,7 +2503,7 @@
     ]
   },
   {
-    "index": 313,
+    "id": 314,
     "kanji": "聖句",
     "romaji": "seiku",
     "meanings": [
@@ -2511,7 +2511,7 @@
     ]
   },
   {
-    "index": 314,
+    "id": 315,
     "kanji": "誓願",
     "romaji": "seigan",
     "meanings": [
@@ -2519,7 +2519,7 @@
     ]
   },
   {
-    "index": 315,
+    "id": 316,
     "kanji": "礼拝詞",
     "romaji": "raihaishi",
     "meanings": [
@@ -2527,7 +2527,7 @@
     ]
   },
   {
-    "index": 316,
+    "id": 317,
     "kanji": "道訓",
     "romaji": "dōkun",
     "meanings": [
@@ -2535,7 +2535,7 @@
     ]
   },
   {
-    "index": 317,
+    "id": 318,
     "kanji": "信条",
     "romaji": "shinjō",
     "meanings": [
@@ -2543,7 +2543,7 @@
     ]
   },
   {
-    "index": 318,
+    "id": 319,
     "kanji": "振子突",
     "romaji": "furiko zuki",
     "meanings": [
@@ -2551,7 +2551,7 @@
     ]
   },
   {
-    "index": 319,
+    "id": 320,
     "kanji": "目打ち",
     "romaji": "me uchi",
     "meanings": [
@@ -2559,7 +2559,7 @@
     ]
   },
   {
-    "index": 320,
+    "id": 321,
     "kanji": "直蹴",
     "romaji": "choku geri",
     "meanings": [
@@ -2567,7 +2567,7 @@
     ]
   },
   {
-    "index": 321,
+    "id": 322,
     "kanji": "足刀蹴",
     "romaji": "sokutō geri",
     "meanings": [
@@ -2575,7 +2575,7 @@
     ]
   },
   {
-    "index": 322,
+    "id": 323,
     "kanji": "同時蹴",
     "romaji": "dōji geri",
     "meanings": [
@@ -2583,7 +2583,7 @@
     ]
   },
   {
-    "index": 323,
+    "id": 324,
     "kanji": "下段蹴",
     "romaji": "gedan geri",
     "meanings": [
@@ -2591,7 +2591,7 @@
     ]
   },
   {
-    "index": 324,
+    "id": 325,
     "kanji": "足払い",
     "romaji": "ashi barai",
     "meanings": [
@@ -2599,7 +2599,7 @@
     ]
   },
   {
-    "index": 325,
+    "id": 326,
     "kanji": "前進突",
     "romaji": "zenshin zuki",
     "meanings": [
@@ -2607,7 +2607,7 @@
     ]
   },
   {
-    "index": 326,
+    "id": 327,
     "kanji": "前進蹴",
     "romaji": "zenshin geri",
     "meanings": [
@@ -2615,7 +2615,7 @@
     ]
   },
   {
-    "index": 327,
+    "id": 328,
     "kanji": "胴蹴",
     "romaji": "dō geri",
     "meanings": [
@@ -2623,7 +2623,7 @@
     ]
   },
   {
-    "index": 328,
+    "id": 329,
     "kanji": "胴突",
     "romaji": "dō zuki",
     "meanings": [
@@ -2631,7 +2631,7 @@
     ]
   },
   {
-    "index": 329,
+    "id": 330,
     "kanji": "段受",
     "romaji": "dan uke",
     "meanings": [
@@ -2639,7 +2639,7 @@
     ]
   },
   {
-    "index": 330,
+    "id": 331,
     "kanji": "連受",
     "romaji": "ren uke",
     "meanings": [
@@ -2647,7 +2647,7 @@
     ]
   },
   {
-    "index": 331,
+    "id": 332,
     "kanji": "三防受",
     "romaji": "sambō uke",
     "meanings": [
@@ -2655,7 +2655,7 @@
     ]
   },
   {
-    "index": 332,
+    "id": 333,
     "kanji": "横転身",
     "romaji": "yoko tenshin",
     "meanings": [
@@ -2663,7 +2663,7 @@
     ]
   },
   {
-    "index": 333,
+    "id": 334,
     "kanji": "二連攻",
     "romaji": "ni renkō",
     "meanings": [
@@ -2671,7 +2671,7 @@
     ]
   },
   {
-    "index": 334,
+    "id": 335,
     "kanji": "三連攻",
     "romaji": "san renkō",
     "meanings": [
@@ -2679,7 +2679,7 @@
     ]
   },
   {
-    "index": 335,
+    "id": 336,
     "kanji": "上中二連攻",
     "romaji": "jō chū ni renkō",
     "meanings": [
@@ -2687,7 +2687,7 @@
     ]
   },
   {
-    "index": 336,
+    "id": 337,
     "kanji": "上中上三連攻",
     "romaji": "jō chū jō san renkō",
     "meanings": [
@@ -2695,7 +2695,7 @@
     ]
   },
   {
-    "index": 337,
+    "id": 338,
     "kanji": "連反攻",
     "romaji": "ren hankō",
     "meanings": [
@@ -2703,7 +2703,7 @@
     ]
   },
   {
-    "index": 338,
+    "id": 339,
     "kanji": "単攻撃",
     "romaji": "tan kōgeki",
     "meanings": [
@@ -2711,7 +2711,7 @@
     ]
   },
   {
-    "index": 339,
+    "id": 340,
     "kanji": "連攻撃",
     "romaji": "ren kōgeki",
     "meanings": [
@@ -2719,7 +2719,7 @@
     ]
   },
   {
-    "index": 340,
+    "id": 341,
     "kanji": "波浪脚撃",
     "romaji": "harō kyaku geki",
     "meanings": [
@@ -2727,7 +2727,7 @@
     ]
   },
   {
-    "index": 341,
+    "id": 342,
     "kanji": "反撃",
     "romaji": "hangeki",
     "meanings": [
@@ -2735,7 +2735,7 @@
     ]
   },
   {
-    "index": 342,
+    "id": 343,
     "kanji": "段反撃",
     "romaji": "dan hangeki",
     "meanings": [
@@ -2743,7 +2743,7 @@
     ]
   },
   {
-    "index": 343,
+    "id": 344,
     "kanji": "段反攻",
     "romaji": "dan hankō",
     "meanings": [
@@ -2751,7 +2751,7 @@
     ]
   },
   {
-    "index": 344,
+    "id": 345,
     "kanji": "段撃",
     "romaji": "dan geki",
     "meanings": [
@@ -2759,7 +2759,7 @@
     ]
   },
   {
-    "index": 345,
+    "id": 346,
     "kanji": "横転より起上がり",
     "romaji": "ōten yori okiagari",
     "meanings": [
@@ -2767,7 +2767,7 @@
     ]
   },
   {
-    "index": 346,
+    "id": 347,
     "kanji": "投げに対する受身",
     "romaji": "nage ni tai suru ukemi",
     "meanings": [
@@ -2775,7 +2775,7 @@
     ]
   },
   {
-    "index": 347,
+    "id": 348,
     "kanji": "腕後捻上",
     "romaji": "ude ushiro neji age",
     "meanings": [
@@ -2783,7 +2783,7 @@
     ]
   },
   {
-    "index": 348,
+    "id": 349,
     "kanji": "腕逆捕",
     "romaji": "ude gyaku dori",
     "meanings": [
@@ -2791,7 +2791,7 @@
     ]
   },
   {
-    "index": 349,
+    "id": 350,
     "kanji": "ハンマー投",
     "romaji": "hamma nage",
     "meanings": [
@@ -2799,7 +2799,7 @@
     ]
   },
   {
-    "index": 350,
+    "id": 351,
     "kanji": "背負投げ",
     "romaji": "seoi nage",
     "meanings": [
@@ -2807,7 +2807,7 @@
     ]
   },
   {
-    "index": 351,
+    "id": 352,
     "kanji": "一本背投",
     "romaji": "ippon se nage",
     "meanings": [
@@ -2815,7 +2815,7 @@
     ]
   },
   {
-    "index": 352,
+    "id": 353,
     "kanji": "肩車",
     "romaji": "kata guruma",
     "meanings": [
@@ -2823,7 +2823,7 @@
     ]
   },
   {
-    "index": 353,
+    "id": 354,
     "kanji": "空中転回",
     "romaji": "kūchū tenkai",
     "meanings": [
@@ -2831,7 +2831,7 @@
     ]
   },
   {
-    "index": 354,
+    "id": 355,
     "kanji": "連行",
     "romaji": "renkō",
     "meanings": [
@@ -2839,7 +2839,7 @@
     ]
   },
   {
-    "index": 355,
+    "id": 356,
     "kanji": "攻防技",
     "romaji": "kōbōgi",
     "meanings": [
@@ -2847,7 +2847,7 @@
     ]
   },
   {
-    "index": 356,
+    "id": 357,
     "kanji": "移動攻技",
     "romaji": "idō kōgi",
     "meanings": [
@@ -2855,7 +2855,7 @@
     ]
   },
   {
-    "index": 357,
+    "id": 358,
     "kanji": "移動防技",
     "romaji": "idō bōgi",
     "meanings": [
@@ -2863,7 +2863,7 @@
     ]
   },
   {
-    "index": 358,
+    "id": 359,
     "kanji": "移動攻防技",
     "romaji": "idō kōbōgi",
     "meanings": [
@@ -2871,7 +2871,7 @@
     ]
   },
   {
-    "index": 359,
+    "id": 360,
     "kanji": "縛法",
     "romaji": "bakuhō",
     "meanings": [
@@ -2879,7 +2879,7 @@
     ]
   },
   {
-    "index": 360,
+    "id": 361,
     "kanji": "押倒",
     "romaji": "oshi taoshi",
     "meanings": [
@@ -2887,7 +2887,7 @@
     ]
   },
   {
-    "index": 361,
+    "id": 362,
     "kanji": "—",
     "romaji": "ichi",
     "meanings": [
@@ -2895,7 +2895,7 @@
     ]
   },
   {
-    "index": 362,
+    "id": 363,
     "kanji": "二",
     "romaji": "ni",
     "meanings": [
@@ -2903,7 +2903,7 @@
     ]
   },
   {
-    "index": 363,
+    "id": 364,
     "kanji": "三",
     "romaji": "san",
     "meanings": [
@@ -2911,7 +2911,7 @@
     ]
   },
   {
-    "index": 364,
+    "id": 365,
     "kanji": "四",
     "romaji": "shi, yon",
     "meanings": [
@@ -2919,7 +2919,7 @@
     ]
   },
   {
-    "index": 365,
+    "id": 366,
     "kanji": "五",
     "romaji": "go",
     "meanings": [
@@ -2927,7 +2927,7 @@
     ]
   },
   {
-    "index": 366,
+    "id": 367,
     "kanji": "六",
     "romaji": "roku",
     "meanings": [
@@ -2935,7 +2935,7 @@
     ]
   },
   {
-    "index": 367,
+    "id": 368,
     "kanji": "七",
     "romaji": "shichi / nana",
     "meanings": [
@@ -2943,7 +2943,7 @@
     ]
   },
   {
-    "index": 368,
+    "id": 369,
     "kanji": "八",
     "romaji": "hachi",
     "meanings": [
@@ -2951,7 +2951,7 @@
     ]
   },
   {
-    "index": 369,
+    "id": 370,
     "kanji": "九",
     "romaji": "ku / kyū",
     "meanings": [
@@ -2959,7 +2959,7 @@
     ]
   },
   {
-    "index": 370,
+    "id": 371,
     "kanji": "十",
     "romaji": "jū",
     "meanings": [
@@ -2967,7 +2967,7 @@
     ]
   },
   {
-    "index": 371,
+    "id": 372,
     "kanji": "十一",
     "romaji": "jū-ichi",
     "meanings": [
@@ -2975,7 +2975,7 @@
     ]
   },
   {
-    "index": 372,
+    "id": 373,
     "kanji": "十二",
     "romaji": "jū-ni",
     "meanings": [
@@ -2983,7 +2983,7 @@
     ]
   },
   {
-    "index": 373,
+    "id": 374,
     "kanji": "二十",
     "romaji": "ni-jū",
     "meanings": [
@@ -2991,7 +2991,7 @@
     ]
   },
   {
-    "index": 374,
+    "id": 375,
     "kanji": "二十一",
     "romaji": "ni-jū-ichi",
     "meanings": [
@@ -2999,7 +2999,7 @@
     ]
   },
   {
-    "index": 375,
+    "id": 376,
     "kanji": "三十",
     "romaji": "san-jū",
     "meanings": [
@@ -3007,7 +3007,7 @@
     ]
   },
   {
-    "index": 376,
+    "id": 377,
     "kanji": "三十一",
     "romaji": "san-jū-ichi",
     "meanings": [
@@ -3015,7 +3015,7 @@
     ]
   },
   {
-    "index": 377,
+    "id": 378,
     "kanji": "百",
     "romaji": "hyaku",
     "meanings": [
@@ -3023,7 +3023,7 @@
     ]
   },
   {
-    "index": 378,
+    "id": 379,
     "kanji": "千",
     "romaji": "sen",
     "meanings": [
@@ -3031,7 +3031,7 @@
     ]
   },
   {
-    "index": 379,
+    "id": 380,
     "kanji": "八級",
     "romaji": "hachikyū",
     "meanings": [
@@ -3039,7 +3039,7 @@
     ]
   },
   {
-    "index": 380,
+    "id": 381,
     "kanji": "七級",
     "romaji": "nanakyū",
     "meanings": [
@@ -3047,7 +3047,7 @@
     ]
   },
   {
-    "index": 381,
+    "id": 382,
     "kanji": "六級",
     "romaji": "rokkyū",
     "meanings": [
@@ -3055,7 +3055,7 @@
     ]
   },
   {
-    "index": 382,
+    "id": 383,
     "kanji": "五級",
     "romaji": "gokyū",
     "meanings": [
@@ -3063,7 +3063,7 @@
     ]
   },
   {
-    "index": 383,
+    "id": 384,
     "kanji": "四級",
     "romaji": "yonkyū",
     "meanings": [
@@ -3071,7 +3071,7 @@
     ]
   },
   {
-    "index": 384,
+    "id": 385,
     "kanji": "三級",
     "romaji": "sankyū",
     "meanings": [
@@ -3079,7 +3079,7 @@
     ]
   },
   {
-    "index": 385,
+    "id": 386,
     "kanji": "二級",
     "romaji": "nikyū",
     "meanings": [
@@ -3087,7 +3087,7 @@
     ]
   },
   {
-    "index": 386,
+    "id": 387,
     "kanji": "一級",
     "romaji": "ikkyū",
     "meanings": [
@@ -3095,7 +3095,7 @@
     ]
   },
   {
-    "index": 387,
+    "id": 388,
     "kanji": "初段",
     "romaji": "shodan",
     "meanings": [
@@ -3103,7 +3103,7 @@
     ]
   },
   {
-    "index": 388,
+    "id": 389,
     "kanji": "二段",
     "romaji": "nidan",
     "meanings": [
@@ -3111,7 +3111,7 @@
     ]
   },
   {
-    "index": 389,
+    "id": 390,
     "kanji": "三段",
     "romaji": "sandan",
     "meanings": [
@@ -3119,7 +3119,7 @@
     ]
   },
   {
-    "index": 390,
+    "id": 391,
     "kanji": "四段",
     "romaji": "yondan",
     "meanings": [
@@ -3127,7 +3127,7 @@
     ]
   },
   {
-    "index": 391,
+    "id": 392,
     "kanji": "五段",
     "romaji": "godan",
     "meanings": [
@@ -3135,7 +3135,7 @@
     ]
   },
   {
-    "index": 392,
+    "id": 393,
     "kanji": "六段",
     "romaji": "rokudan",
     "meanings": [
@@ -3143,7 +3143,7 @@
     ]
   },
   {
-    "index": 393,
+    "id": 394,
     "kanji": "七段",
     "romaji": "nanadan",
     "meanings": [
@@ -3151,7 +3151,7 @@
     ]
   },
   {
-    "index": 394,
+    "id": 395,
     "kanji": "八段",
     "romaji": "hachidan",
     "meanings": [
@@ -3159,7 +3159,7 @@
     ]
   },
   {
-    "index": 395,
+    "id": 396,
     "kanji": "九段",
     "romaji": "kyūdan",
     "meanings": [
@@ -3167,7 +3167,7 @@
     ]
   },
   {
-    "index": 396,
+    "id": 397,
     "kanji": "科目",
     "romaji": "kamoku",
     "meanings": [
@@ -3176,7 +3176,7 @@
     ]
   },
   {
-    "index": 397,
+    "id": 398,
     "kanji": "昇格",
     "romaji": "shōkaku",
     "meanings": [
@@ -3184,7 +3184,7 @@
     ]
   },
   {
-    "index": 398,
+    "id": 399,
     "kanji": "実施",
     "romaji": "jisshi",
     "meanings": [
@@ -3193,7 +3193,7 @@
     ]
   },
   {
-    "index": 399,
+    "id": 400,
     "kanji": "要目",
     "romaji": "yōmoku",
     "meanings": [
@@ -3202,7 +3202,7 @@
     ]
   },
   {
-    "index": 400,
+    "id": 401,
     "kanji": "受験者",
     "romaji": "jukensha",
     "meanings": [
@@ -3211,7 +3211,7 @@
     ]
   },
   {
-    "index": 401,
+    "id": 402,
     "kanji": "宿題",
     "romaji": "shukudai",
     "meanings": [
@@ -3220,7 +3220,7 @@
     ]
   },
   {
-    "index": 402,
+    "id": 403,
     "kanji": "審査",
     "romaji": "shinsa",
     "meanings": [
@@ -3229,7 +3229,7 @@
     ]
   },
   {
-    "index": 403,
+    "id": 404,
     "kanji": "基礎",
     "romaji": "kiso",
     "meanings": [
@@ -3238,7 +3238,7 @@
     ]
   },
   {
-    "index": 404,
+    "id": 405,
     "kanji": "抽出",
     "romaji": "chūshutsu",
     "meanings": [
@@ -3247,7 +3247,7 @@
     ]
   },
   {
-    "index": 405,
+    "id": 406,
     "kanji": "構え",
     "romaji": "gamae",
     "meanings": [
@@ -3257,7 +3257,7 @@
     ]
   },
   {
-    "index": 406,
+    "id": 407,
     "kanji": "体構え",
     "romaji": "tai gamae",
     "meanings": [
@@ -3266,7 +3266,7 @@
     ]
   },
   {
-    "index": 407,
+    "id": 408,
     "kanji": "体捌き",
     "romaji": "tai sabaki",
     "meanings": [
@@ -3275,7 +3275,7 @@
     ]
   },
   {
-    "index": 408,
+    "id": 409,
     "kanji": "中段構え",
     "romaji": "chūdan gamae",
     "meanings": [
@@ -3283,7 +3283,7 @@
     ]
   },
   {
-    "index": 409,
+    "id": 410,
     "kanji": "一字構え",
     "romaji": "ichiji gamae",
     "meanings": [
@@ -3291,7 +3291,7 @@
     ]
   },
   {
-    "index": 410,
+    "id": 411,
     "kanji": "開き構え",
     "romaji": "hiraki gamae",
     "meanings": [
@@ -3299,7 +3299,7 @@
     ]
   },
   {
-    "index": 411,
+    "id": 412,
     "kanji": "正体構え",
     "romaji": "seitai gamae",
     "meanings": [
@@ -3307,7 +3307,7 @@
     ]
   },
   {
-    "index": 412,
+    "id": 413,
     "kanji": "技",
     "romaji": "waza",
     "meanings": [
@@ -3315,7 +3315,7 @@
     ]
   },
   {
-    "index": 413,
+    "id": 414,
     "kanji": "受け",
     "romaji": "uke",
     "meanings": [
@@ -3324,7 +3324,7 @@
     ]
   },
   {
-    "index": 414,
+    "id": 415,
     "kanji": "蹴り",
     "romaji": "keri/geri",
     "meanings": [
@@ -3332,7 +3332,7 @@
     ]
   },
   {
-    "index": 415,
+    "id": 416,
     "kanji": "突き",
     "romaji": "tsuki/zuki",
     "meanings": [
@@ -3340,7 +3340,7 @@
     ]
   },
   {
-    "index": 416,
+    "id": 417,
     "kanji": "打ち",
     "romaji": "uchi",
     "meanings": [
@@ -3348,7 +3348,7 @@
     ]
   },
   {
-    "index": 417,
+    "id": 418,
     "kanji": "投げ",
     "romaji": "nage",
     "meanings": [
@@ -3356,7 +3356,7 @@
     ]
   },
   {
-    "index": 418,
+    "id": 419,
     "kanji": "取り",
     "romaji": "tori/dori",
     "meanings": [
@@ -3364,7 +3364,7 @@
     ]
   },
   {
-    "index": 419,
+    "id": 420,
     "kanji": "捌き",
     "romaji": "sabaki",
     "meanings": [
@@ -3373,7 +3373,7 @@
     ]
   },
   {
-    "index": 420,
+    "id": 421,
     "kanji": "払い",
     "romaji": "harai",
     "meanings": [
@@ -3382,7 +3382,7 @@
     ]
   },
   {
-    "index": 421,
+    "id": 422,
     "kanji": "固め",
     "romaji": "gatame",
     "meanings": [
@@ -3391,7 +3391,7 @@
     ]
   },
   {
-    "index": 422,
+    "id": 423,
     "kanji": "拳",
     "romaji": "ken",
     "meanings": [
@@ -3400,7 +3400,7 @@
     ]
   },
   {
-    "index": 423,
+    "id": 424,
     "kanji": "転身",
     "romaji": "tenshin",
     "meanings": [
@@ -3409,7 +3409,7 @@
     ]
   },
   {
-    "index": 424,
+    "id": 425,
     "kanji": "受け身",
     "romaji": "ukemi",
     "meanings": [
@@ -3418,7 +3418,7 @@
     ]
   },
   {
-    "index": 425,
+    "id": 426,
     "kanji": "入り身",
     "romaji": "irimi",
     "meanings": [
@@ -3427,7 +3427,7 @@
     ]
   },
   {
-    "index": 426,
+    "id": 427,
     "kanji": "仁王拳",
     "romaji": "niō ken",
     "meanings": [
@@ -3435,7 +3435,7 @@
     ]
   },
   {
-    "index": 427,
+    "id": 428,
     "kanji": "金剛拳",
     "romaji": "kongō ken",
     "meanings": [
@@ -3443,7 +3443,7 @@
     ]
   },
   {
-    "index": 428,
+    "id": 429,
     "kanji": "龍王拳",
     "romaji": "ryūō ken",
     "meanings": [
@@ -3451,7 +3451,7 @@
     ]
   },
   {
-    "index": 429,
+    "id": 430,
     "kanji": "三合拳",
     "romaji": "sangō ken",
     "meanings": [
@@ -3459,7 +3459,7 @@
     ]
   },
   {
-    "index": 430,
+    "id": 431,
     "kanji": "龍華拳",
     "romaji": "ryūka ken",
     "meanings": [
@@ -3467,7 +3467,7 @@
     ]
   },
   {
-    "index": 431,
+    "id": 432,
     "kanji": "天王拳",
     "romaji": "ten'ō ken",
     "meanings": [
@@ -3475,7 +3475,7 @@
     ]
   },
   {
-    "index": 432,
+    "id": 433,
     "kanji": "羅漢拳",
     "romaji": "rakan ken",
     "meanings": [
@@ -3483,7 +3483,7 @@
     ]
   },
   {
-    "index": 433,
+    "id": 434,
     "kanji": "白蓮拳",
     "romaji": "byakuren ken",
     "meanings": [
@@ -3491,7 +3491,7 @@
     ]
   },
   {
-    "index": 434,
+    "id": 435,
     "kanji": "鶴立拳",
     "romaji": "kakuritsu ken",
     "meanings": [
@@ -3499,7 +3499,7 @@
     ]
   },
   {
-    "index": 435,
+    "id": 436,
     "kanji": "地王拳",
     "romaji": "chiō ken",
     "meanings": [
@@ -3507,7 +3507,7 @@
     ]
   },
   {
-    "index": 436,
+    "id": 437,
     "kanji": "五花拳",
     "romaji": "goka ken",
     "meanings": [
@@ -3515,7 +3515,7 @@
     ]
   },
   {
-    "index": 437,
+    "id": 438,
     "kanji": "天地拳",
     "romaji": "tenchi ken",
     "meanings": [
@@ -3523,7 +3523,7 @@
     ]
   },
   {
-    "index": 438,
+    "id": 439,
     "kanji": "義和拳",
     "romaji": "giwa ken",
     "meanings": [
@@ -3531,7 +3531,7 @@
     ]
   },
   {
-    "index": 439,
+    "id": 440,
     "kanji": "紅卍拳",
     "romaji": "kō manji ken",
     "meanings": [
@@ -3539,7 +3539,7 @@
     ]
   },
   {
-    "index": 440,
+    "id": 441,
     "kanji": "足",
     "romaji": "ashi",
     "meanings": [
@@ -3548,7 +3548,7 @@
     ]
   },
   {
-    "index": 441,
+    "id": 442,
     "kanji": "腕",
     "romaji": "ude",
     "meanings": [
@@ -3556,7 +3556,7 @@
     ]
   },
   {
-    "index": 442,
+    "id": 443,
     "kanji": "小手",
     "romaji": "kote",
     "meanings": [
@@ -3565,7 +3565,7 @@
     ]
   },
   {
-    "index": 443,
+    "id": 444,
     "kanji": "腰",
     "romaji": "koshi",
     "meanings": [
@@ -3573,7 +3573,7 @@
     ]
   },
   {
-    "index": 444,
+    "id": 445,
     "kanji": "膝",
     "romaji": "hiza",
     "meanings": [
@@ -3581,7 +3581,7 @@
     ]
   },
   {
-    "index": 445,
+    "id": 446,
     "kanji": "襟",
     "romaji": "eri",
     "meanings": [
@@ -3589,7 +3589,7 @@
     ]
   },
   {
-    "index": 446,
+    "id": 447,
     "kanji": "袖",
     "romaji": "sode",
     "meanings": [
@@ -3597,7 +3597,7 @@
     ]
   },
   {
-    "index": 447,
+    "id": 448,
     "kanji": "基本",
     "romaji": "kihon",
     "meanings": [
@@ -3606,7 +3606,7 @@
     ]
   },
   {
-    "index": 448,
+    "id": 449,
     "kanji": "連",
     "romaji": "ren",
     "meanings": [
@@ -3615,7 +3615,7 @@
     ]
   },
   {
-    "index": 449,
+    "id": 450,
     "kanji": "第",
     "romaji": "dai",
     "meanings": [
@@ -3623,7 +3623,7 @@
     ]
   },
   {
-    "index": 450,
+    "id": 451,
     "kanji": "系",
     "romaji": "kei",
     "meanings": [
@@ -3632,7 +3632,7 @@
     ]
   },
   {
-    "index": 451,
+    "id": 452,
     "kanji": "上げ",
     "romaji": "age",
     "meanings": [
@@ -3641,7 +3641,7 @@
     ]
   },
   {
-    "index": 452,
+    "id": 453,
     "kanji": "返し",
     "romaji": "kaeshi/gaeshi",
     "meanings": [
@@ -3649,7 +3649,7 @@
     ]
   },
   {
-    "index": 453,
+    "id": 454,
     "kanji": "抜き",
     "romaji": "nuki",
     "meanings": [
@@ -3658,7 +3658,7 @@
     ]
   },
   {
-    "index": 454,
+    "id": 455,
     "kanji": "巻き",
     "romaji": "maki",
     "meanings": [
@@ -3667,7 +3667,7 @@
     ]
   },
   {
-    "index": 455,
+    "id": 456,
     "kanji": "横",
     "romaji": "yoko",
     "meanings": [
@@ -3676,7 +3676,7 @@
     ]
   },
   {
-    "index": 456,
+    "id": 457,
     "kanji": "武術",
     "romaji": "bujutsu",
     "meanings": [
@@ -3685,7 +3685,7 @@
     ]
   },
   {
-    "index": 457,
+    "id": 458,
     "kanji": "霊性",
     "romaji": "reishō",
     "meanings": [
@@ -3694,7 +3694,7 @@
     ]
   },
   {
-    "index": 458,
+    "id": 459,
     "kanji": "正拳",
     "romaji": "seiken",
     "meanings": [
@@ -3703,7 +3703,7 @@
     ]
   },
   {
-    "index": 459,
+    "id": 460,
     "kanji": "裏拳",
     "romaji": "uraken",
     "meanings": [
@@ -3711,7 +3711,7 @@
     ]
   },
   {
-    "index": 460,
+    "id": 461,
     "kanji": "手",
     "romaji": "te",
     "meanings": [
@@ -3719,7 +3719,7 @@
     ]
   },
   {
-    "index": 461,
+    "id": 462,
     "kanji": "肘",
     "romaji": "hiji / empi",
     "meanings": [
@@ -3727,7 +3727,7 @@
     ]
   },
   {
-    "index": 462,
+    "id": 463,
     "kanji": "掌底",
     "romaji": "shōtei",
     "meanings": [
@@ -3735,7 +3735,7 @@
     ]
   },
   {
-    "index": 463,
+    "id": 464,
     "kanji": "押し",
     "romaji": "oshi",
     "meanings": [
@@ -3744,7 +3744,7 @@
     ]
   },
   {
-    "index": 464,
+    "id": 465,
     "kanji": "引き",
     "romaji": "hiki",
     "meanings": [
@@ -3752,7 +3752,7 @@
     ]
   },
   {
-    "index": 465,
+    "id": 466,
     "kanji": "直",
     "romaji": "choku",
     "meanings": [
@@ -3761,7 +3761,7 @@
     ]
   },
   {
-    "index": 466,
+    "id": 467,
     "kanji": "十字",
     "romaji": "jūji",
     "meanings": [
@@ -3770,7 +3770,7 @@
     ]
   },
   {
-    "index": 467,
+    "id": 468,
     "kanji": "流水",
     "romaji": "ryūsui",
     "meanings": [
@@ -3778,7 +3778,7 @@
     ]
   },
   {
-    "index": 468,
+    "id": 469,
     "kanji": "転換",
     "romaji": "tenkan",
     "meanings": [
@@ -3787,7 +3787,7 @@
     ]
   },
   {
-    "index": 469,
+    "id": 470,
     "kanji": "鍵",
     "romaji": "kagi",
     "meanings": [
@@ -3795,7 +3795,7 @@
     ]
   },
   {
-    "index": 470,
+    "id": 471,
     "kanji": "込み",
     "romaji": "komi",
     "meanings": [
@@ -3804,7 +3804,7 @@
     ]
   },
   {
-    "index": 471,
+    "id": 472,
     "kanji": "天秤",
     "romaji": "tembin",
     "meanings": [
@@ -3812,7 +3812,7 @@
     ]
   },
   {
-    "index": 472,
+    "id": 473,
     "kanji": "閂",
     "romaji": "kannuki",
     "meanings": [
@@ -3820,7 +3820,7 @@
     ]
   },
   {
-    "index": 473,
+    "id": 474,
     "kanji": "後手",
     "romaji": "gote",
     "meanings": [
@@ -3828,7 +3828,7 @@
     ]
   },
   {
-    "index": 474,
+    "id": 475,
     "kanji": "基本剛技",
     "romaji": "kihon kōgi",
     "meanings": [
@@ -3836,7 +3836,7 @@
     ]
   },
   {
-    "index": 475,
+    "id": 476,
     "kanji": "基本防技",
     "romaji": "kihon bōgi",
     "meanings": [
@@ -3844,7 +3844,7 @@
     ]
   },
   {
-    "index": 476,
+    "id": 477,
     "kanji": "剛法運用法",
     "romaji": "gōhō un'yōhō",
     "meanings": [
@@ -3852,7 +3852,7 @@
     ]
   },
   {
-    "index": 477,
+    "id": 478,
     "kanji": "柔法運用法",
     "romaji": "jūhō un'yōhō",
     "meanings": [
@@ -3860,7 +3860,7 @@
     ]
   },
   {
-    "index": 478,
+    "id": 479,
     "kanji": "肩",
     "romaji": "kata",
     "meanings": [
@@ -3868,7 +3868,7 @@
     ]
   },
   {
-    "index": 479,
+    "id": 480,
     "kanji": "首",
     "romaji": "kubi",
     "meanings": [
@@ -3877,7 +3877,7 @@
     ]
   },
   {
-    "index": 480,
+    "id": 481,
     "kanji": "胸",
     "romaji": "mune",
     "meanings": [
@@ -3886,7 +3886,7 @@
     ]
   },
   {
-    "index": 481,
+    "id": 482,
     "kanji": "下がり",
     "romaji": "sagari",
     "meanings": [
@@ -3895,7 +3895,7 @@
     ]
   },
   {
-    "index": 482,
+    "id": 483,
     "kanji": "千鳥",
     "romaji": "chidori",
     "meanings": [
@@ -3903,7 +3903,7 @@
     ]
   },
   {
-    "index": 483,
+    "id": 484,
     "kanji": "鉄槌",
     "romaji": "tettsui",
     "meanings": [
@@ -3911,7 +3911,7 @@
     ]
   },
   {
-    "index": 484,
+    "id": 485,
     "kanji": "背刀",
     "romaji": "haito",
     "meanings": [
@@ -3919,7 +3919,7 @@
     ]
   },
   {
-    "index": 485,
+    "id": 486,
     "kanji": "黙想",
     "romaji": "mokusō",
     "meanings": [
@@ -3927,7 +3927,7 @@
     ]
   },
   {
-    "index": 486,
+    "id": 487,
     "kanji": "送り",
     "romaji": "okuri",
     "meanings": [
@@ -3935,7 +3935,7 @@
     ]
   },
   {
-    "index": 487,
+    "id": 488,
     "kanji": "落とし",
     "romaji": "otoshi",
     "meanings": [
@@ -3943,7 +3943,7 @@
     ]
   },
   {
-    "index": 488,
+    "id": 489,
     "kanji": "切り",
     "romaji": "kiri",
     "meanings": [
@@ -3951,7 +3951,7 @@
     ]
   },
   {
-    "index": 489,
+    "id": 490,
     "kanji": "絞め",
     "romaji": "jime",
     "meanings": [
@@ -3959,7 +3959,7 @@
     ]
   },
   {
-    "index": 490,
+    "id": 491,
     "kanji": "波",
     "romaji": "nami",
     "meanings": [
@@ -3967,7 +3967,7 @@
     ]
   },
   {
-    "index": 491,
+    "id": 492,
     "kanji": "指",
     "romaji": "yubi",
     "meanings": [
@@ -3975,7 +3975,7 @@
     ]
   },
   {
-    "index": 492,
+    "id": 493,
     "kanji": "倒し",
     "romaji": "taoshi/daoshi",
     "meanings": [
@@ -3983,7 +3983,7 @@
     ]
   },
   {
-    "index": 493,
+    "id": 494,
     "kanji": "掬い",
     "romaji": "sukui",
     "meanings": [
@@ -3991,7 +3991,7 @@
     ]
   },
   {
-    "index": 494,
+    "id": 495,
     "kanji": "刈り",
     "romaji": "kari",
     "meanings": [
@@ -3999,7 +3999,7 @@
     ]
   },
   {
-    "index": 495,
+    "id": 496,
     "kanji": "振り",
     "romaji": "furi",
     "meanings": [
@@ -4007,7 +4007,7 @@
     ]
   },
   {
-    "index": 496,
+    "id": 497,
     "kanji": "握り",
     "romaji": "nigiri",
     "meanings": [
@@ -4015,7 +4015,7 @@
     ]
   },
   {
-    "index": 497,
+    "id": 498,
     "kanji": "廻し",
     "romaji": "mawashi",
     "meanings": [
@@ -4023,7 +4023,7 @@
     ]
   },
   {
-    "index": 498,
+    "id": 499,
     "kanji": "略",
     "romaji": "ryaku",
     "meanings": [
@@ -4031,7 +4031,7 @@
     ]
   },
   {
-    "index": 499,
+    "id": 500,
     "kanji": "攻め",
     "romaji": "zeme",
     "meanings": [
@@ -4039,7 +4039,7 @@
     ]
   },
   {
-    "index": 500,
+    "id": 501,
     "kanji": "押さえ",
     "romaji": "osae",
     "meanings": [
@@ -4047,7 +4047,7 @@
     ]
   },
   {
-    "index": 501,
+    "id": 502,
     "kanji": "挫き",
     "romaji": "kujiki",
     "meanings": [
@@ -4055,7 +4055,7 @@
     ]
   },
   {
-    "index": 502,
+    "id": 503,
     "kanji": "上",
     "romaji": "uwa",
     "meanings": [
@@ -4063,7 +4063,7 @@
     ]
   },
   {
-    "index": 503,
+    "id": 504,
     "kanji": "下",
     "romaji": "shita",
     "meanings": [
@@ -4071,7 +4071,7 @@
     ]
   },
   {
-    "index": 504,
+    "id": 505,
     "kanji": "立て",
     "romaji": "tate",
     "meanings": [
@@ -4079,7 +4079,7 @@
     ]
   },
   {
-    "index": 505,
+    "id": 506,
     "kanji": "背",
     "romaji": "se",
     "meanings": [
@@ -4087,7 +4087,7 @@
     ]
   },
   {
-    "index": 506,
+    "id": 507,
     "kanji": "半",
     "romaji": "han",
     "meanings": [
@@ -4095,7 +4095,7 @@
     ]
   },
   {
-    "index": 507,
+    "id": 508,
     "kanji": "両",
     "romaji": "ryō",
     "meanings": [
@@ -4103,7 +4103,7 @@
     ]
   },
   {
-    "index": 508,
+    "id": 509,
     "kanji": "虎",
     "romaji": "tora",
     "meanings": [
@@ -4111,7 +4111,7 @@
     ]
   },
   {
-    "index": 509,
+    "id": 510,
     "kanji": "燕",
     "romaji": "tsubame",
     "meanings": [
@@ -4119,7 +4119,7 @@
     ]
   },
   {
-    "index": 510,
+    "id": 511,
     "kanji": "木の葉",
     "romaji": "konoha",
     "meanings": [
@@ -4127,7 +4127,7 @@
     ]
   },
   {
-    "index": 511,
+    "id": 512,
     "kanji": "半月",
     "romaji": "hangetsu",
     "meanings": [
@@ -4135,7 +4135,7 @@
     ]
   },
   {
-    "index": 512,
+    "id": 513,
     "kanji": "三日月",
     "romaji": "mikazuki",
     "meanings": [
@@ -4143,7 +4143,7 @@
     ]
   },
   {
-    "index": 513,
+    "id": 514,
     "kanji": "龍",
     "romaji": "ryū",
     "meanings": [
@@ -4151,7 +4151,7 @@
     ]
   },
   {
-    "index": 514,
+    "id": 515,
     "kanji": "矢筈",
     "romaji": "yahazu",
     "meanings": [
@@ -4159,7 +4159,7 @@
     ]
   },
   {
-    "index": 515,
+    "id": 516,
     "kanji": "手首",
     "romaji": "tekubi",
     "meanings": [
@@ -4167,7 +4167,7 @@
     ]
   },
   {
-    "index": 516,
+    "id": 517,
     "kanji": "髪",
     "romaji": "kami/gami",
     "meanings": [
@@ -4175,7 +4175,7 @@
     ]
   },
   {
-    "index": 517,
+    "id": 518,
     "kanji": "金的",
     "romaji": "kinteki",
     "meanings": [
@@ -4183,7 +4183,7 @@
     ]
   },
   {
-    "index": 518,
+    "id": 519,
     "kanji": "水月",
     "romaji": "suigetsu",
     "meanings": [
@@ -4191,7 +4191,7 @@
     ]
   },
   {
-    "index": 519,
+    "id": 520,
     "kanji": "羽交い",
     "romaji": "hagai",
     "meanings": [
@@ -4199,7 +4199,7 @@
     ]
   },
   {
-    "index": 520,
+    "id": 521,
     "kanji": "熊手",
     "romaji": "kumade",
     "meanings": [
@@ -4207,7 +4207,7 @@
     ]
   },
   {
-    "index": 521,
+    "id": 522,
     "kanji": "屈身",
     "romaji": "kusshin",
     "meanings": [
@@ -4215,7 +4215,7 @@
     ]
   },
   {
-    "index": 522,
+    "id": 523,
     "kanji": "居捕り",
     "romaji": "idori",
     "meanings": [
@@ -4223,7 +4223,7 @@
     ]
   },
   {
-    "index": 523,
+    "id": 524,
     "kanji": "上膊",
     "romaji": "jōhaku",
     "meanings": [
@@ -4231,7 +4231,7 @@
     ]
   },
   {
-    "index": 524,
+    "id": 525,
     "kanji": "丁字",
     "romaji": "chōji",
     "meanings": [
@@ -4239,7 +4239,7 @@
     ]
   },
   {
-    "index": 525,
+    "id": 526,
     "kanji": "吊り",
     "romaji": "tsuri",
     "meanings": [
@@ -4247,7 +4247,7 @@
     ]
   },
   {
-    "index": 526,
+    "id": 527,
     "kanji": "三角",
     "romaji": "sankaku",
     "meanings": [
@@ -4255,7 +4255,7 @@
     ]
   },
   {
-    "index": 527,
+    "id": 528,
     "kanji": "挟み",
     "romaji": "hasami",
     "meanings": [
@@ -4263,7 +4263,7 @@
     ]
   },
   {
-    "index": 528,
+    "id": 529,
     "kanji": "開身",
     "romaji": "kaishin",
     "meanings": [
@@ -4271,7 +4271,7 @@
     ]
   },
   {
-    "index": 529,
+    "id": 530,
     "kanji": "振捨",
     "romaji": "furisute",
     "meanings": [
@@ -4279,7 +4279,7 @@
     ]
   },
   {
-    "index": 530,
+    "id": 531,
     "kanji": "短刀",
     "romaji": "tantō",
     "meanings": [
@@ -4287,7 +4287,7 @@
     ]
   },
   {
-    "index": 531,
+    "id": 532,
     "kanji": "天",
     "romaji": "ten",
     "meanings": [
@@ -4295,7 +4295,7 @@
     ]
   },
   {
-    "index": 532,
+    "id": 533,
     "kanji": "伏虎",
     "romaji": "fukko",
     "meanings": [
@@ -4303,7 +4303,7 @@
     ]
   },
   {
-    "index": 533,
+    "id": 534,
     "kanji": "口",
     "romaji": "kuchi/guchi",
     "meanings": [
@@ -4311,7 +4311,7 @@
     ]
   },
   {
-    "index": 534,
+    "id": 535,
     "kanji": "待ち",
     "romaji": "machi",
     "meanings": [
@@ -4319,7 +4319,7 @@
     ]
   },
   {
-    "index": 535,
+    "id": 536,
     "kanji": "輪",
     "romaji": "wa",
     "meanings": [
@@ -4327,7 +4327,7 @@
     ]
   },
   {
-    "index": 536,
+    "id": 537,
     "kanji": "四組",
     "romaji": "shikumi",
     "meanings": [
@@ -4335,7 +4335,7 @@
     ]
   },
   {
-    "index": 537,
+    "id": 538,
     "kanji": "守法",
     "romaji": "shuhō",
     "meanings": [

@@ -114,7 +114,7 @@ describe("pickDistractors", () => {
 
 describe("buildWordListCandidates", () => {
   const entry: WordListEntry = {
-    index: 1,
+    id: 1,
     romaji: "ippo",
     meanings: ["one step"],
   };
@@ -138,24 +138,24 @@ describe("buildWordListCandidates", () => {
   });
 
   it("skips entries without romaji", () => {
-    const noRomaji: WordListEntry = { index: 2, meanings: ["something"] };
+    const noRomaji: WordListEntry = { id: 2, meanings: ["something"] };
     expect(buildWordListCandidates([noRomaji])).toHaveLength(0);
   });
 
   it("skips entries without meanings", () => {
-    const noMeaning: WordListEntry = { index: 3, romaji: "nuki" };
+    const noMeaning: WordListEntry = { id: 3, romaji: "nuki" };
     expect(buildWordListCandidates([noMeaning])).toHaveLength(0);
   });
 
   it("deduplicates candidates with identical domain+question+answer", () => {
-    const dup: WordListEntry = { index: 99, romaji: "ippo", meanings: ["one step"] };
+    const dup: WordListEntry = { id: 99, romaji: "ippo", meanings: ["one step"] };
     const result = buildWordListCandidates([entry, dup]);
     const meaningCandidates = result.filter(c => c.domain === "word.meaning");
     expect(meaningCandidates).toHaveLength(1);
   });
 
   it("normalises extra whitespace in romaji and meanings", () => {
-    const messy: WordListEntry = { index: 5, romaji: "  ippo  ", meanings: ["  one step  "] };
+    const messy: WordListEntry = { id: 5, romaji: "  ippo  ", meanings: ["  one step  "] };
     const result = buildWordListCandidates([messy]);
     expect(result.find(c => c.domain === "word.meaning")?.correctAnswer).toBe("one step");
   });
@@ -237,14 +237,14 @@ describe("buildKamokuCandidates", () => {
 
 describe("buildQuizPool", () => {
   const wordEntries: WordListEntry[] = [
-    { index: 1, romaji: "alpha", meanings: ["a"] },
-    { index: 2, romaji: "beta", meanings: ["b"] },
-    { index: 3, romaji: "gamma", meanings: ["c"] },
+    { id: 1, romaji: "alpha", meanings: ["a"] },
+    { id: 2, romaji: "beta", meanings: ["b"] },
+    { id: 3, romaji: "gamma", meanings: ["c"] },
   ];
 
   it("filters out candidates whose domain has fewer than 3 options", () => {
     // single entry → only 1 domain value → not viable
-    const pool = buildQuizPool("shodan", [{ index: 1, romaji: "alpha", meanings: ["a"] }], []);
+    const pool = buildQuizPool("shodan", [{ id: 1, romaji: "alpha", meanings: ["a"] }], []);
     expect(pool.candidates).toHaveLength(0);
   });
 
