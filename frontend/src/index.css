@@ -131,11 +131,3 @@ table.hokei-individuals-table td {
   /* One card surface, no internal dividers — spacing separates the sections. */
   border: 0;
 }
-
-/* Gold accent for the notes box inside a hokei card. Bootstrap's *-bg-subtle
-   token is shaded toward black, which reads brown in dark mode — so mix the live
-   gold into the body surface to keep the hue, and edge it with a soft gold. */
-.hokei-notes-box {
-  background: color-mix(in srgb, var(--bs-primary) 20%, var(--bs-body-bg));
-  border: 1px solid color-mix(in srgb, var(--bs-primary) 45%, transparent);
-}

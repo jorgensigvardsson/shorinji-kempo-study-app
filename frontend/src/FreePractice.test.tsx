@@ -328,11 +328,11 @@ describe("FreePractice", () => {
     expect(screen.queryByRole("textbox", { name: "Anteckningar för hela embun" })).toBeNull();
 
     const displayedComment = screen.getByText((_, element) =>
-      element?.classList.contains("embu-hokei-comment") === true);
+      element?.classList.contains("inline-note-text") === true);
     expect(displayedComment.textContent).toBe("Byt sida lugnt\nArbeta med rytmen");
     const compactNoteLine = displayedComment.closest(".embu-hokei-note-line") as HTMLElement;
     expect(within(compactNoteLine).getByText("kōgeki: zuki")).toBeTruthy();
-    expect(compactNoteLine.querySelector(".embu-comment-display.has-comment")).not.toBeNull();
+    expect(compactNoteLine.querySelector(".inline-note.has-note")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Redigera kommentar till shita uke geri" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Embu och kumi-embu" }));

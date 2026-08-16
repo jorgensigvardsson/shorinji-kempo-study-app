@@ -448,71 +448,8 @@
   line-height: 1.5;
 }
 
-.embu-comment-display {
-  display: inline-flex;
-  min-width: 0;
-  align-items: flex-start;
-  gap: 0.25rem;
-}
-
-.embu-comment-display.has-comment {
-  flex: 1 1 12rem;
-  padding-left: 0.45rem;
-  border-left: 1px solid color-mix(in srgb, var(--bs-primary) 45%, transparent);
-  color: color-mix(in srgb, var(--bs-primary) 72%, var(--bs-body-color));
-}
-
-.embu-hokei-comment {
-  min-width: 0;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.embu-comment-pencil {
-  display: inline-grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 1.65rem;
-  height: 1.65rem;
-  margin: -0.15rem -0.25rem -0.15rem 0;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--bs-secondary-color);
-}
-
-.embu-comment-display.has-comment .embu-comment-pencil {
-  color: var(--bs-primary);
-}
-
-.embu-comment-pencil:hover,
-.embu-comment-pencil:focus-visible {
-  background: var(--bs-tertiary-bg);
-  color: var(--bs-emphasis-color);
-}
-
-.embu-comment-pencil svg {
-  width: 0.8rem;
-  height: 0.8rem;
-}
-
-.embu-comment-editor {
-  max-width: 32rem;
-  margin-top: 0.35rem;
-}
-
-.embu-comment-editor .form-control {
-  min-height: 4.5rem;
-  font-size: 0.9rem;
-  resize: vertical;
-}
-
-.embu-comment-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-top: 0.45rem;
+.embu-hokei-note-line > .inline-note.is-editing {
+  margin-top: 0.2rem;
 }
 
 .kihon-practice-proposal {

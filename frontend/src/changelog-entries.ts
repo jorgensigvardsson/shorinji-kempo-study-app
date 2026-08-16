@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-16T10:48:45.998Z",
+    changes: [
+      {
+        emoji: "✏️",
+        sv: "Anteckningar på hokei-kort visas nu kompakt bredvid videolänken och öppnas för redigering först när du trycker på pennan. Radbrytningar bevaras, och de flytande inställningarna döljs när ett kort är öppet så att inget hamnar i vägen.",
+        en: "Notes on hokei cards are now shown compactly beside the video link and open for editing only when you tap the pencil. Line breaks are preserved, and the floating settings are hidden while a card is open so nothing gets in the way.",
+        tr: "Hokei kartlarındaki notlar artık video bağlantısının yanında kompakt biçimde gösteriliyor ve yalnızca kaleme dokunduğunuzda düzenlemeye açılıyor. Satır sonları korunuyor ve bir kart açıkken hiçbir şeyin önünü kapatmaması için yüzen ayarlar gizleniyor.",
+        ja: "法形カードのメモを動画リンクの横にコンパクトに表示し、鉛筆を押したときだけ編集欄が開くようにしました。改行はそのまま保たれ、カードを開いている間は内容を隠さないようフローティング設定を非表示にします。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T08:57:35.671Z",
     changes: [
       {

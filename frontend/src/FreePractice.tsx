@@ -1,10 +1,11 @@
 import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, Pencil, People, Search, Trash } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowUp, Book, CardHeading, Collection, ExclamationTriangle, ListUl, People, Search, Trash } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import HokeiCard from "./components/HokeiCard";
+import InlineNoteEditor from "./components/InlineNoteEditor";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
 import List from "./List";
@@ -430,8 +431,6 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
     const [query, setQuery] = useState("");
     const [activeSuggestion, setActiveSuggestion] = useState(0);
     const [preview, setPreview] = useState<EmbuPreview | null>(null);
-    const [editingHokeiId, setEditingHokeiId] = useState<string | null>(null);
-    const [commentDraft, setCommentDraft] = useState("");
     const previewRequestId = useRef(0);
     const techniqueSearchRef = useRef<HTMLInputElement>(null);
     const techniques = useMemo(() => allGradePlans.flatMap(plan => plan.weeks.flatMap(week =>
@@ -558,10 +557,6 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         saveDraft({ ...draft, sequences });
         if (pickerTarget === sequenceId) setPickerTarget(sequences.length === 0 ? "new" : null);
         if (removedHokei) {
-            if (removedHokei.id === editingHokeiId) {
-                setEditingHokeiId(null);
-                setCommentDraft("");
-            }
             setPreview(current => current
                 && embuTechniqueKey(removedHokei) === embuTechniqueKey(current.technique) ? null : current);
         }
@@ -574,31 +569,18 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
 
     const selectView = (view: EmbuAreaView | null) => {
         setPreview(null);
-        setEditingHokeiId(null);
-        setCommentDraft("");
         onViewChange(view);
     };
 
-    const startEditingComment = (hokei: EmbuDraftHokei) => {
-        setEditingHokeiId(hokei.id);
-        setCommentDraft(hokei.comment);
-    };
-
-    const cancelEditingComment = () => {
-        setEditingHokeiId(null);
-        setCommentDraft("");
-    };
-
-    const saveHokeiComment = (sequenceId: string, hokeiId: string) => {
+    const saveHokeiComment = (sequenceId: string, hokeiId: string, comment: string) => {
         const sequence = draft.sequences.find(candidate => candidate.id === sequenceId);
         if (!sequence) return;
 
         updateSequence(sequenceId, {
             hokeis: sequence.hokeis.map(hokei => hokei.id === hokeiId
-                ? { ...hokei, comment: commentDraft.trim() ? commentDraft : "" }
+                ? { ...hokei, comment }
                 : hokei),
         });
-        cancelEditingComment();
     };
 
     const chooseActiveSuggestion = () => {
@@ -780,9 +762,6 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                             const technique = techniqueLookup.get(embuTechniqueKey(hokei))
                                                 ?? techniques.find(candidate => candidate.hokei.hokei_name === hokei.hokeiName);
                                             const attack = technique?.hokei.roles.attacker.action;
-                                            const commentLabel = hokei.comment
-                                                ? "Redigera kommentar till {0}"
-                                                : "Lägg till kommentar till {0}";
                                             return (
                                                 <li key={hokei.id}>
                                                     <div className="embu-hokei-content">
@@ -801,42 +780,15 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                                                     {translator.translate("kōgeki: {0}", { params: [translator.translate(attack)] })}
                                                                 </span>
                                                             )}
-                                                            {editingHokeiId !== hokei.id && (
-                                                                <span className={`embu-comment-display${hokei.comment ? " has-comment" : ""}`}>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="embu-comment-pencil"
-                                                                        aria-label={translator.translate(commentLabel, { params: [hokei.hokeiName] })}
-                                                                        title={translator.translate(commentLabel, { params: [hokei.hokeiName] })}
-                                                                        onClick={() => startEditingComment(hokei)}
-                                                                    >
-                                                                        <Pencil aria-hidden="true" />
-                                                                    </button>
-                                                                    {hokei.comment && <span className="embu-hokei-comment">{hokei.comment}</span>}
-                                                                </span>
-                                                            )}
+                                                            <InlineNoteEditor
+                                                                value={hokei.comment}
+                                                                onSave={comment => saveHokeiComment(sequence.id, hokei.id, comment)}
+                                                                addLabel={translator.translate("Lägg till kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                                editLabel={translator.translate("Redigera kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                                inputLabel={translator.translate("Kommentar till {0}", { params: [hokei.hokeiName] })}
+                                                                placeholder={translator.translate("Skriv din kommentar…")}
+                                                            />
                                                         </div>
-                                                        {editingHokeiId === hokei.id ? (
-                                                            <Form.Group className="embu-comment-editor">
-                                                                <Form.Control
-                                                                    as="textarea"
-                                                                    rows={3}
-                                                                    autoFocus
-                                                                    aria-label={translator.translate("Kommentar till {0}", { params: [hokei.hokeiName] })}
-                                                                    value={commentDraft}
-                                                                    placeholder={translator.translate("Skriv din kommentar…")}
-                                                                    onChange={event => setCommentDraft(event.target.value)}
-                                                                />
-                                                                <div className="embu-comment-actions">
-                                                                    <button type="button" className="btn btn-sm btn-primary" onClick={() => saveHokeiComment(sequence.id, hokei.id)}>
-                                                                        {translator.translate("Spara")}
-                                                                    </button>
-                                                                    <button type="button" className="embu-text-button" onClick={cancelEditingComment}>
-                                                                        {translator.translate("Avbryt")}
-                                                                    </button>
-                                                                </div>
-                                                            </Form.Group>
-                                                        ) : null}
                                                     </div>
                                                     <div className="embu-step-actions">
                                                         {sequence.hokeis.length > 1 && (

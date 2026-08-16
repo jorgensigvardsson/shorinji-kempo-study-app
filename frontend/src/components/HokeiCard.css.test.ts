@@ -34,6 +34,21 @@ describe("the focused card's geometry", () => {
     expect(focusCardRules().length).toBeGreaterThan(0);
   });
 
+  it("hides floating controls that would cover the focused card", () => {
+    expect(css).toMatch(
+      /\.card-focus-active \.app-floating-stack,\s*\.card-focus-active \.training-controls-layer\s*{\s*display:\s*none;/
+    );
+  });
+
+  it("keeps the compact video action beside a note until space runs out", () => {
+    expect(css).toMatch(
+      /\.kamoku-card-footer-actions \.kamoku-video-link\s*{[^}]*flex:\s*0 0 auto;/s
+    );
+    expect(css).not.toMatch(
+      /\.kamoku-card-footer-actions \.hokei-inline-note\.has-note\s*{[^}]*flex-basis:\s*100%/s
+    );
+  });
+
   // Every declaration that reaches for the viewport has to convert back out of the
   // zoomed coordinate space, or the card is sized against the wrong ruler.
   it("compensates for the app's zoom wherever it uses a viewport length", () => {
