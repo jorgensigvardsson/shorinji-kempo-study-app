@@ -446,9 +446,10 @@ create-then-delete, since it is live.
 That credential is easy to mistake for leftovers. `renew-certs.yml` runs on
 `schedule:`, and GitHub always executes a scheduled workflow from the default
 branch, so it presents `ref:refs/heads/main` no matter what. **Deleting it
-breaks TLS renewal for both environments' backend hostnames** — silently,
-surfacing only at the next scheduled run, or worse, when a certificate
-expires.
+breaks TLS renewal for both environments' backend hostnames** — and it would
+once have done so silently, surfacing only at the next bimonthly run or, worse,
+when a certificate expired. It now surfaces as a failed run and an email within
+a day of the renewal window opening; see the renewal-failure section below.
 
 Staging's deploy used to present `main` as well, because `workflow_run` also
 ran in the default branch's context. The first staging deploy after the
@@ -576,6 +577,54 @@ One-time Azure-side setup this doesn't automate:
     `deploy-staging.yml`/`deploy.yml` run reaches its hostname-bind step,
     since that step expects the corresponding cert to already exist.
 
+#### What happens when renewal fails
+The renewal used to run on `0 3 1 */2 *` — day 1 of every second month — with
+no notification of its own beyond GitHub's default mail to whoever last touched
+the cron line. That combination had a single point of failure: one red run and
+the *next* attempt was ~60 days later, past the 90-day certificate's expiry.
+Any transient DirectAdmin, Let's Encrypt or Azure hiccup on that one morning
+was enough to take both backend hostnames off HTTPS two months later, with
+nothing in between saying so. Let's Encrypt is no help here either — it stopped
+sending certificate-expiry reminder mail in June 2025.
+
+It now runs **daily** (`17 3 * * *`) and is idempotent by construction:
+
+- Each run first asks both hostnames, over a real TLS handshake, what
+  certificate they are *serving* — not what Azure has stored, since uploading a
+  certificate and having a hostname bound to it are separate things and only
+  the handshake proves both. That is `.github/scripts/cert-days-left.sh`.
+- If more than `RENEW_BEFORE_DAYS` (30) days remain, the run stops there. An
+  ordinary day costs two handshakes. If fewer remain — or the handshake fails
+  outright, which is the "TLS is already broken" signal — it issues, uploads
+  and binds as before.
+- So a failed attempt is simply retried tomorrow, and every day after, until it
+  succeeds. There are ~30 chances before anything user-visible breaks, instead
+  of one. This is also why the threshold survives Let's Encrypt's phased move
+  to 45-day certificates without a cadence change.
+- After binding, the run re-probes until both hostnames actually serve a
+  certificate with more than the threshold left (10 attempts, 30s apart, for
+  propagation). A bind that silently kept serving the old certificate used to
+  leave a green run behind and expire anyway.
+- Every failed attempt emails `CERT_ALERT_EMAIL` (falling back to
+  `ACME_CONTACT_EMAIL`) via `.github/scripts/send-alert-email.py`, over the
+  same SMTP repository configuration the backend deploys with — no new
+  credentials, no third-party action. The subject carries the remaining
+  validity and escalates to `[URGENT]` under a fortnight. Both matrix legs
+  alert independently, so a staging-only failure is not mistaken for prod.
+- Whether alerting is configured at all is checked on *every* run, failing or
+  not, and warns if not: an alert path only exercised when something breaks is
+  an alert path nobody knows is broken.
+
+Two failure modes this does *not* cover:
+- GitHub disables `schedule:` triggers in repositories with no activity for 60
+  days. Daily runs are not repository activity — commits are. A dormant repo
+  therefore still needs its scheduled workflow re-enabled by hand in the
+  Actions tab.
+- Each renewal registers a fresh ACME account, because certbot's `--config-dir`
+  lives in `$RUNNER_TEMP` and nothing persists between runs. Harmless at this
+  volume (accounts are only registered when a renewal is actually attempted),
+  but it is why the daily run must skip rather than reissue.
+
 Required repository configuration beyond what prod already had before staging existed:
 - Variable `AZURE_RESOURCE_GROUP_STAGING` — the staging resource group name.
 - Secret `STAGING_SIGNING_KEY_PEM` — a signing key generated the same way as
@@ -586,6 +635,11 @@ Required repository configuration beyond what prod already had before staging ex
   `renew-certs.yml`, not staging-specific.
 - Variable `ACME_CONTACT_EMAIL` — contact address for the Let's Encrypt
   account used by `renew-certs.yml`. Also shared, not staging-specific.
+- Variable `CERT_ALERT_EMAIL` — optional. Where `renew-certs.yml` mails its
+  renewal failures; defaults to `ACME_CONTACT_EMAIL`. Set it to reach someone
+  other than the Let's Encrypt account contact, or to a comma-separated list.
+  The mail itself goes out over the existing `SMTP_HOST`/`SMTP_PORT`/
+  `SMTP_USERNAME`/`SMTP_FROM`/`SMTP_TLS` variables and `SMTP_PASSWORD` secret.
 
 ### Local development
 `docker-compose up` starts the frontend (Vite), auth (`:8081`), and persistence (`:8080`)
