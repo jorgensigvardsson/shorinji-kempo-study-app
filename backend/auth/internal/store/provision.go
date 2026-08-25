@@ -50,9 +50,10 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 
 	// users — login-path access is all point reads (FindByID → ReadItem by /id),
 	// but the admin user-management UI needs a cross-partition SELECT * FROM c,
-	// which "none" indexing blocks. Use "consistent" with all paths excluded
-	// (the refresh_tokens precedent): zero write-time index overhead while still
-	// permitting the scan.
+	// which "none" indexing blocks. Use "consistent" so the scan is permitted at
+	// all, excluding every path but /branchId — which ListByBranches filters on
+	// for every federation and branch admin who opens a member list, and which
+	// would otherwise scan the whole container each time.
 	// NOTE: ProvisionCosmos ignores already-existing containers (409), so an
 	// existing users container's indexing policy must be updated out-of-band once.
 	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
@@ -61,7 +62,7 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		IndexingPolicy: &azcosmos.IndexingPolicy{
 			Automatic:     true,
 			IndexingMode:  azcosmos.IndexingMode("consistent"),
-			IncludedPaths: []azcosmos.IncludedPath{},
+			IncludedPaths: []azcosmos.IncludedPath{{Path: "/branchId/?"}},
 			ExcludedPaths: []azcosmos.ExcludedPath{{Path: "/*"}},
 		},
 	}, nil); err != nil && !isConflict(err) {
@@ -76,11 +77,23 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		return fmt.Errorf("cosmos create container %q: %w", identityIndexContainer, err)
 	}
 
-	// roles — point reads only (Roles → ReadItem by /id, where id = lowercased email).
+	// roles — mostly point reads (Roles → ReadItem by /id, where id = lowercased
+	// email), but ListAll needs a scan to answer "who administers this branch?",
+	// and "none" indexing blocks queries outright rather than merely making them
+	// expensive. "consistent" with every path excluded permits the scan at zero
+	// write-time cost.
+	// NOTE: as above, an already-provisioned roles container keeps its original
+	// "none" policy until it is changed out-of-band — and ListAll returns an
+	// error, not an empty list, until that is done.
 	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
 		ID:                     rolesContainer,
 		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/id"}, Kind: azcosmos.PartitionKeyKindHash},
-		IndexingPolicy:         noIndex,
+		IndexingPolicy: &azcosmos.IndexingPolicy{
+			Automatic:     true,
+			IndexingMode:  azcosmos.IndexingMode("consistent"),
+			IncludedPaths: []azcosmos.IncludedPath{},
+			ExcludedPaths: []azcosmos.ExcludedPath{{Path: "/*"}},
+		},
 	}, nil); err != nil && !isConflict(err) {
 		return fmt.Errorf("cosmos create container %q: %w", rolesContainer, err)
 	}

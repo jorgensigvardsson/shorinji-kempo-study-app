@@ -18,6 +18,11 @@ type RoleStore interface {
 	// assignment entirely so empties don't linger. Used by the admin UI to
 	// promote/demote users.
 	SetRoles(email string, roles []string) error
+	// ListAll returns every assignment. Point reads answer "what may this person
+	// do?"; this answers the reverse — "who administers this branch?" — which is
+	// what a join request needs before it can notify anybody. The store is tiny
+	// and the service caches the answer, so a full read is the right shape.
+	ListAll() ([]RoleRecord, error)
 }
 
 // NormalizeEmail lowercases and trims an email so role lookups are case-insensitive.

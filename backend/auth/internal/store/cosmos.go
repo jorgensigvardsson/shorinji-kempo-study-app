@@ -221,3 +221,45 @@ func (s *CosmosUserStore) Delete(id string) error {
 	}
 	return nil
 }
+
+// ListByBranches returns the users of the named branches in one cross-partition
+// query. This is the request-path listing for a federation or branch admin, so
+// unlike List it is not a scan of the whole container — provided /branchId is
+// indexed. See ProvisionCosmos, and note that an already-provisioned users
+// container keeps its original indexing policy until that is changed by hand.
+func (s *CosmosUserStore) ListByBranches(branchIDs []string) ([]*User, error) {
+	ids := make([]string, 0, len(branchIDs))
+	for _, id := range branchIDs {
+		if id != "" {
+			ids = append(ids, id)
+		}
+	}
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	ctx := context.Background()
+	opts := &azcosmos.QueryOptions{
+		QueryParameters: []azcosmos.QueryParameter{{Name: "@branchIds", Value: ids}},
+	}
+	pager := s.users.NewQueryItemsPager(
+		"SELECT * FROM c WHERE ARRAY_CONTAINS(@branchIds, c.branchId)",
+		azcosmos.NewPartitionKey(), opts)
+
+	var users []*User
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos list users by branch: %w", err)
+		}
+		for _, raw := range page.Items {
+			var u User
+			if err := json.Unmarshal(raw, &u); err != nil {
+				log.Printf("warning: cosmos list users by branch: unmarshal item: %v", err)
+				continue
+			}
+			users = append(users, &u)
+		}
+	}
+	return users, nil
+}

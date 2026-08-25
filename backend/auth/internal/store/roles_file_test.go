@@ -101,3 +101,40 @@ func TestFileRoleStore_SetRoles_ReplacesCaseVariant(t *testing.T) {
 		t.Fatalf("expected 2 roles after replacing case variant, got %v", roles)
 	}
 }
+
+func TestFileRoleStore_ListAll(t *testing.T) {
+	dir := t.TempDir()
+	s := NewFileRoleStore(dir)
+
+	if records, err := s.ListAll(); err != nil || len(records) != 0 {
+		t.Fatalf("empty store: got %d records, err %v", len(records), err)
+	}
+
+	// One written through the API, one planted with awkward casing — the reverse
+	// lookup must not miss an admin because somebody typed their address in caps.
+	if err := s.SetRoles("branch@example.com", []string{"branch_admin:karlstad"}); err != nil {
+		t.Fatalf("SetRoles: %v", err)
+	}
+	if err := s.SetRoles("Global@Example.COM", []string{"admin"}); err != nil {
+		t.Fatalf("SetRoles: %v", err)
+	}
+
+	records, err := s.ListAll()
+	if err != nil {
+		t.Fatalf("ListAll: %v", err)
+	}
+	if len(records) != 2 {
+		t.Fatalf("ListAll returned %d records, want 2", len(records))
+	}
+
+	byEmail := map[string][]string{}
+	for _, r := range records {
+		byEmail[r.ID] = r.Roles
+	}
+	if roles := byEmail["branch@example.com"]; len(roles) != 1 || roles[0] != "branch_admin:karlstad" {
+		t.Errorf("branch admin roles = %v", roles)
+	}
+	if roles := byEmail["global@example.com"]; len(roles) != 1 || roles[0] != "admin" {
+		t.Errorf("global admin roles = %v (was the key normalised?)", roles)
+	}
+}

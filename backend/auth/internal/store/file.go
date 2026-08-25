@@ -154,3 +154,29 @@ func (s *FileUserStore) Delete(id string) error {
 	}
 	return err
 }
+
+// ListByBranches filters the scan in memory. The Cosmos implementation pushes
+// the same predicate into a query; here there is nothing to push it into.
+func (s *FileUserStore) ListByBranches(branchIDs []string) ([]*User, error) {
+	wanted := make(map[string]bool, len(branchIDs))
+	for _, id := range branchIDs {
+		if id != "" {
+			wanted[id] = true
+		}
+	}
+	if len(wanted) == 0 {
+		return nil, nil
+	}
+	all, err := s.List()
+	if err != nil {
+		return nil, err
+	}
+	var users []*User
+	for _, u := range all {
+		// A branchless user cannot match: "" was never put in the set.
+		if wanted[u.BranchID] {
+			users = append(users, u)
+		}
+	}
+	return users, nil
+}

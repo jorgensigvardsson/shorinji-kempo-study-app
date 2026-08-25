@@ -92,3 +92,26 @@ func (s *FileRoleStore) SetRoles(email string, roles []string) error {
 	}
 	return os.WriteFile(s.path, out, 0o644)
 }
+
+// ListAll returns every role assignment. The whole store is one JSON object, so
+// this is the same read Roles performs, shaped differently.
+func (s *FileRoleStore) ListAll() ([]RoleRecord, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	data, err := os.ReadFile(s.path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var m map[string][]string
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, err
+	}
+	records := make([]RoleRecord, 0, len(m))
+	for email, roles := range m {
+		records = append(records, RoleRecord{ID: NormalizeEmail(email), Roles: roles})
+	}
+	return records, nil
+}

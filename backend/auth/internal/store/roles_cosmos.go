@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -85,4 +86,32 @@ func (s *CosmosRoleStore) SetRoles(email string, roles []string) error {
 		return fmt.Errorf("cosmos upsert roles %s: %w", id, err)
 	}
 	return nil
+}
+
+// ListAll returns every role assignment, cross-partition. It answers the reverse
+// question the point reads cannot — "who holds branch_admin for this branch?" —
+// which is how a join request finds the admins to notify.
+//
+// This requires the container to be queryable at all: it was provisioned with
+// "none" indexing originally, which blocks queries outright rather than merely
+// making them expensive. See ProvisionCosmos.
+func (s *CosmosRoleStore) ListAll() ([]RoleRecord, error) {
+	ctx := context.Background()
+	pager := s.container.NewQueryItemsPager("SELECT * FROM c", azcosmos.NewPartitionKey(), nil)
+	var records []RoleRecord
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos list roles: %w", err)
+		}
+		for _, raw := range page.Items {
+			var rec RoleRecord
+			if err := json.Unmarshal(raw, &rec); err != nil {
+				log.Printf("warning: cosmos list roles: unmarshal item: %v", err)
+				continue
+			}
+			records = append(records, rec)
+		}
+	}
+	return records, nil
 }
