@@ -14,9 +14,10 @@ import (
 // a database index replaces this once Cosmos DB is wired in.
 //
 // Every read honours the `_ts`/`ttl` contract in filettl.go, so a document that
-// has outlived its ttl is invisible here exactly as it would be in Cosmos. User
-// records never carry a ttl; the stores that will (join requests) get the
-// behaviour for free by living in the same package.
+// has outlived its ttl is invisible here exactly as it would be in Cosmos, and
+// is deleted on the spot — see the note on sweeping there. User records never
+// carry a ttl; the stores that will (join requests) get the behaviour for free
+// by living in the same package.
 type FileUserStore struct {
 	baseDir string
 }
@@ -38,6 +39,7 @@ func (s *FileUserStore) FindByID(id string) (*User, error) {
 		return nil, err
 	}
 	if expired(data, time.Now()) {
+		_ = os.Remove(s.path(id))
 		return nil, nil
 	}
 	var u User
@@ -60,11 +62,13 @@ func (s *FileUserStore) FindByLinkedIdentity(providerName, sub string) (*User, e
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
 			continue
 		}
-		data, err := os.ReadFile(filepath.Join(s.baseDir, e.Name()))
+		path := filepath.Join(s.baseDir, e.Name())
+		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
 		}
 		if expired(data, now) {
+			_ = os.Remove(path)
 			continue
 		}
 		var u User
@@ -82,6 +86,9 @@ func (s *FileUserStore) FindByLinkedIdentity(providerName, sub string) (*User, e
 // roles store lives in a subdirectory and the signing key is not a top-level
 // *.json file, so neither is picked up — the same scan profile as
 // FindByLinkedIdentity.
+//
+// It is also the only path that visits every document, so it is where expired
+// ones are reliably reclaimed rather than incidentally.
 func (s *FileUserStore) List() ([]*User, error) {
 	entries, err := os.ReadDir(s.baseDir)
 	if errors.Is(err, os.ErrNotExist) {
@@ -96,11 +103,13 @@ func (s *FileUserStore) List() ([]*User, error) {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
 			continue
 		}
-		data, err := os.ReadFile(filepath.Join(s.baseDir, e.Name()))
+		path := filepath.Join(s.baseDir, e.Name())
+		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
 		}
 		if expired(data, now) {
+			_ = os.Remove(path)
 			continue
 		}
 		var u User

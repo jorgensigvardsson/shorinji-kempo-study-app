@@ -61,6 +61,13 @@ func stampTimestamp(data []byte, now time.Time) ([]byte, error) {
 // expire it on the spot — destroying data to honour a deadline nobody recorded.
 // An undecodable document is likewise kept: whatever is wrong with it, expiry is
 // not the layer that should be deciding its fate.
+//
+// Callers delete what they find expired, rather than sweeping separately: by
+// the time this returns true the document has already been read and judged, so
+// removing it costs one syscall, while a sweeper would re-read files nobody
+// asked about. FileRefreshTokenStore.Find has done the same since long before
+// this existed. The consequence is that reads mutate, best-effort — nothing may
+// depend on an expired file still being on disk.
 func expired(data []byte, now time.Time) bool {
 	var meta ttlMeta
 	if err := json.Unmarshal(data, &meta); err != nil {

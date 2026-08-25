@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -100,48 +101,70 @@ func itoa(n int64) string {
 }
 
 // The contract the join-request store will depend on: a document that has
-// outlived its ttl is invisible through every read path, without anything
-// having deleted it.
-func TestFileUserStore_ExpiredDocumentIsInvisible(t *testing.T) {
-	dir := t.TempDir()
-	s := NewFileUserStore(dir)
-
-	live := &User{ID: "live", Email: "live@example.com",
-		LinkedIdentities: map[string]LinkedIdentity{"email": {Sub: "live@example.com"}}}
-	if err := s.Save(live); err != nil {
-		t.Fatalf("Save: %v", err)
+// outlived its ttl is invisible through every read path, and each of those
+// paths buries it on the way past.
+func TestFileUserStore_ExpiredDocumentIsSweptOnRead(t *testing.T) {
+	seed := func(t *testing.T) (*FileUserStore, string) {
+		t.Helper()
+		dir := t.TempDir()
+		s := NewFileUserStore(dir)
+		if err := s.Save(&User{ID: "live", Email: "live@example.com",
+			LinkedIdentities: map[string]LinkedIdentity{"email": {Sub: "live@example.com"}}}); err != nil {
+			t.Fatalf("Save: %v", err)
+		}
+		// Written by hand: a record stamped two hours ago with a one-hour ttl.
+		stale := `{"id":"stale","email":"stale@example.com",` +
+			`"linkedIdentities":{"email":{"sub":"stale@example.com"}},` +
+			`"ttl":3600,"_ts":` + itoa(time.Now().Add(-2*time.Hour).Unix()) + `}`
+		if err := os.WriteFile(filepath.Join(dir, "stale.json"), []byte(stale), 0o644); err != nil {
+			t.Fatalf("write stale record: %v", err)
+		}
+		return s, dir
 	}
 
-	// Written by hand: a record stamped two hours ago with a one-hour ttl.
-	stale := `{"id":"stale","email":"stale@example.com",` +
-		`"linkedIdentities":{"email":{"sub":"stale@example.com"}},` +
-		`"ttl":3600,"_ts":` + itoa(time.Now().Add(-2*time.Hour).Unix()) + `}`
-	if err := os.WriteFile(filepath.Join(dir, "stale.json"), []byte(stale), 0o644); err != nil {
-		t.Fatalf("write stale record: %v", err)
+	// Each read path gets its own store, so none of them can pass because
+	// another already did the cleaning.
+	//
+	// FindByLinkedIdentity is asked for the stale record deliberately: it stops
+	// at the first match, so it only buries what it passes on the way there.
+	reads := map[string]func(*testing.T, *FileUserStore){
+		"FindByID": func(t *testing.T, s *FileUserStore) {
+			if u, err := s.FindByID("stale"); err != nil || u != nil {
+				t.Errorf("FindByID(stale) = %v, %v; want nil, nil", u, err)
+			}
+		},
+		"FindByLinkedIdentity": func(t *testing.T, s *FileUserStore) {
+			if u, err := s.FindByLinkedIdentity("email", "stale@example.com"); err != nil || u != nil {
+				t.Errorf("FindByLinkedIdentity(stale) = %v, %v; want nil, nil", u, err)
+			}
+		},
+		"List": func(t *testing.T, s *FileUserStore) {
+			users, err := s.List()
+			if err != nil {
+				t.Fatalf("List: %v", err)
+			}
+			if len(users) != 1 || users[0].ID != "live" {
+				t.Errorf("List returned %d users, want only the live one", len(users))
+			}
+		},
 	}
 
-	if u, err := s.FindByID("stale"); err != nil || u != nil {
-		t.Errorf("FindByID(stale) = %v, %v; want nil, nil", u, err)
-	}
-	if u, err := s.FindByLinkedIdentity("email", "stale@example.com"); err != nil || u != nil {
-		t.Errorf("FindByLinkedIdentity(stale) = %v, %v; want nil, nil", u, err)
-	}
-	users, err := s.List()
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
-	if len(users) != 1 || users[0].ID != "live" {
-		t.Errorf("List returned %d users, want only the live one", len(users))
-	}
+	for name, read := range reads {
+		t.Run(name, func(t *testing.T) {
+			s, dir := seed(t)
+			read(t, s)
 
-	// Still on disk — the store filters, it does not sweep.
-	if _, err := os.Stat(filepath.Join(dir, "stale.json")); err != nil {
-		t.Errorf("expired record should remain on disk: %v", err)
-	}
-
-	// And the live record is unaffected by any of this.
-	if u, err := s.FindByID("live"); err != nil || u == nil {
-		t.Errorf("FindByID(live) = %v, %v; want the user", u, err)
+			if _, err := os.Stat(filepath.Join(dir, "stale.json")); !errors.Is(err, os.ErrNotExist) {
+				t.Errorf("expired record should have been swept; stat err = %v", err)
+			}
+			// The live record is untouched by any of it.
+			if _, err := os.Stat(filepath.Join(dir, "live.json")); err != nil {
+				t.Errorf("live record should remain on disk: %v", err)
+			}
+			if u, err := s.FindByID("live"); err != nil || u == nil {
+				t.Errorf("FindByID(live) = %v, %v; want the user", u, err)
+			}
+		})
 	}
 }
 
