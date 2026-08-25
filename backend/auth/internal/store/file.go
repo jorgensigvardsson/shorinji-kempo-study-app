@@ -31,6 +31,9 @@ func (s *FileUserStore) path(id string) string {
 }
 
 func (s *FileUserStore) FindByID(id string) (*User, error) {
+	if !safeFileID(id) {
+		return nil, nil
+	}
 	data, err := os.ReadFile(s.path(id))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
@@ -122,6 +125,9 @@ func (s *FileUserStore) List() ([]*User, error) {
 }
 
 func (s *FileUserStore) Save(user *User) error {
+	if !safeFileID(user.ID) {
+		return errors.New("user id is not usable as a filename")
+	}
 	if err := os.MkdirAll(s.baseDir, 0o755); err != nil {
 		return err
 	}
@@ -139,6 +145,9 @@ func (s *FileUserStore) Save(user *User) error {
 }
 
 func (s *FileUserStore) Delete(id string) error {
+	if !safeFileID(id) {
+		return nil
+	}
 	err := os.Remove(s.path(id))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
