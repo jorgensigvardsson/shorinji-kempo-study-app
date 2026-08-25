@@ -219,7 +219,7 @@ func (h *Handler) createBranch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := newUUID()
+	id, err := store.NewUUID()
 	if err != nil {
 		log.Printf("createBranch uuid: %v", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
