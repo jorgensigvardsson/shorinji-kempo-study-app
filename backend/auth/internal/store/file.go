@@ -6,11 +6,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // FileUserStore persists users as individual JSON files named by UUID.
 // FindByLinkedIdentity performs a linear scan — acceptable for small user counts;
 // a database index replaces this once Cosmos DB is wired in.
+//
+// Every read honours the `_ts`/`ttl` contract in filettl.go, so a document that
+// has outlived its ttl is invisible here exactly as it would be in Cosmos. User
+// records never carry a ttl; the stores that will (join requests) get the
+// behaviour for free by living in the same package.
 type FileUserStore struct {
 	baseDir string
 }
@@ -31,6 +37,9 @@ func (s *FileUserStore) FindByID(id string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	if expired(data, time.Now()) {
+		return nil, nil
+	}
 	var u User
 	if err := json.Unmarshal(data, &u); err != nil {
 		return nil, err
@@ -46,12 +55,16 @@ func (s *FileUserStore) FindByLinkedIdentity(providerName, sub string) (*User, e
 	if err != nil {
 		return nil, err
 	}
+	now := time.Now()
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
 			continue
 		}
 		data, err := os.ReadFile(filepath.Join(s.baseDir, e.Name()))
 		if err != nil {
+			continue
+		}
+		if expired(data, now) {
 			continue
 		}
 		var u User
@@ -77,6 +90,7 @@ func (s *FileUserStore) List() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	now := time.Now()
 	var users []*User
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
@@ -84,6 +98,9 @@ func (s *FileUserStore) List() ([]*User, error) {
 		}
 		data, err := os.ReadFile(filepath.Join(s.baseDir, e.Name()))
 		if err != nil {
+			continue
+		}
+		if expired(data, now) {
 			continue
 		}
 		var u User
@@ -100,6 +117,12 @@ func (s *FileUserStore) Save(user *User) error {
 		return err
 	}
 	data, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+	// Stamp the write time the way Cosmos stamps `_ts`, so any ttl on the
+	// document is measured from its most recent write.
+	data, err = stampTimestamp(data, time.Now())
 	if err != nil {
 		return err
 	}

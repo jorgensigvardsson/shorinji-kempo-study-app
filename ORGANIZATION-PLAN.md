@@ -179,8 +179,7 @@ type JoinRequest struct {
     DecidedAt          string `json:"decidedAt,omitempty"`
     DecidedBy          string `json:"decidedBy,omitempty"` // deciding admin's user id
     PreviouslyDeniedAt string `json:"previouslyDeniedAt,omitempty"`
-    ExpiresAt          string `json:"expiresAt,omitempty"` // RFC3339; set only on denial
-    TTL                int32  `json:"ttl,omitempty"`       // Cosmos housekeeping; mirrors ExpiresAt
+    TTL                int32  `json:"ttl,omitempty"`       // seconds; set only on denial
 }
 ```
 
@@ -192,14 +191,16 @@ Partitioning by email rather than by branch makes "one pending request per addre
 point read answers it — at the cost of a cross-partition query for "list requests for my branch".
 That container will hold tens of items; the trade is worth it.
 
-**Retention lives in the application, and Cosmos does the housekeeping.** Pending requests never
-expire (no `ExpiresAt`). Denial stamps `ExpiresAt` 90 days out, and every read filters expired
-records regardless of store. Cosmos *additionally* gets a matching per-item `ttl` so the rows
-actually disappear rather than accumulating. This is exactly the existing `refresh_tokens`
-arrangement — "DefaultTimeToLive is a 30-day safety net; the application checks ExpiresAt first"
-([provision.go:92](backend/auth/internal/store/provision.go:92)) — and it is what makes expiry behave
-identically on the file store, which has no TTL of its own. Approved requests are deleted outright:
-the user record supersedes them, so no applicant PII lingers.
+**Retention is a per-item `ttl`, honoured by both stores.** Pending requests never expire —
+they carry no `ttl` at all. Denial sets one 90 days out, after which Cosmos drops the row and the
+file store hides it. That parity is not free: the file store gained the `_ts`/`ttl` contract for
+this purpose (`filettl.go`), simulating the system timestamp Cosmos maintains, so a rule that only
+ever fires months later is not a rule that only works in production. Approved requests are deleted
+outright: the user record supersedes them, so no applicant PII lingers.
+
+One consequence worth knowing: `ttl` is measured from the *last write*, not from creation, because
+that is what `_ts` means in Cosmos. A denied record is never written again, so its clock never
+resets — but any future field that expires must not be attached to a document that gets re-saved.
 
 > **File-store hazard.** `FileUserStore.List()` scans `baseDir/*.json` and decodes each file into a
 > `User` — and `json.Unmarshal` does not fail on a document with none of the right fields, so a stray
@@ -309,8 +310,10 @@ choose to deploy it.
 - `ListByBranches` on `UserStore`: a Cosmos `ARRAY_CONTAINS` query, a filtered in-memory scan on the
   file side.
 - `ListAll` on `RoleStore`: a container scan on Cosmos, a single JSON read on the file side.
-- Expiry expressed as `ExpiresAt` and enforced in the application (§1.4), so the file store behaves
-  exactly like Cosmos without needing a TTL of its own.
+- A `ttl` contract in the file store (`filettl.go`, already built): writes stamp `_ts` the way
+  Cosmos does, and reads and scans skip documents that have outlived their `ttl`. Absent, zero and
+  -1 all mean "never expires", matching Cosmos; a document carrying a `ttl` but no `_ts` is kept
+  rather than treated as expired at the epoch.
 - `email.Sender` gains four methods; `LogSender` must implement them too or the build breaks — which
   is the point.
 
