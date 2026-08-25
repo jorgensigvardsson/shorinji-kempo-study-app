@@ -203,7 +203,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

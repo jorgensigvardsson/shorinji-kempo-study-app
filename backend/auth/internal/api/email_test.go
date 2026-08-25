@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/org"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
@@ -58,6 +59,7 @@ func newTestHandler(t *testing.T, sender *fakeSender) *Handler {
 		store.NewFileUserStore(dir),
 		store.NewFileRefreshTokenStore(dir),
 		store.NewFileRoleStore(dir),
+		testOrgTree(t, dir),
 		token.NewManager(key, "http://test"),
 		sender,
 		"http://frontend",
@@ -243,4 +245,15 @@ func TestNormalizeLang(t *testing.T) {
 			t.Errorf("normalizeLang(%q) = %q, want %q", in, got, want)
 		}
 	}
+}
+
+// testOrgTree gives the handler a real tree backed by the same temp directory,
+// so a test that needs a federation with branches under it can simply save them.
+func testOrgTree(t *testing.T, dir string) *org.Tree {
+	t.Helper()
+	tree := org.New(store.NewFileOrgStore(dir))
+	if err := tree.Reload(); err != nil {
+		t.Fatalf("load org tree: %v", err)
+	}
+	return tree
 }

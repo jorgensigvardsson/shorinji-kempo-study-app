@@ -11,7 +11,7 @@ import (
 )
 
 // authedRequest builds a request carrying an access-token cookie for a user with
-// the given id/email/roles, so requireAdmin (which reads roles off the token) sees them.
+// the given id/email/roles, so the scope checks (which read roles off the token) see them.
 func authedRequest(t *testing.T, h *Handler, method, path, id, email string, roles []string, body any, family ...string) *http.Request {
 	t.Helper()
 	fam := ""
@@ -144,7 +144,7 @@ func TestAdminSetRoles_PromoteDemoteAndSelfGuard(t *testing.T) {
 
 	// Promote u1.
 	rec := httptest.NewRecorder()
-	req := authedRequest(t, h, http.MethodPut, "/auth/admin/users/u1/roles", "admin", "admin@example.org", []string{"admin"}, map[string]bool{"admin": true})
+	req := authedRequest(t, h, http.MethodPut, "/auth/admin/users/u1/roles", "admin", "admin@example.org", []string{"admin"}, map[string][]string{"roles": {"admin"}})
 	req.SetPathValue("id", "u1")
 	h.adminSetRoles(rec, req)
 	if rec.Code != http.StatusNoContent {
@@ -156,7 +156,7 @@ func TestAdminSetRoles_PromoteDemoteAndSelfGuard(t *testing.T) {
 
 	// Demote u1.
 	rec = httptest.NewRecorder()
-	req = authedRequest(t, h, http.MethodPut, "/auth/admin/users/u1/roles", "admin", "admin@example.org", []string{"admin"}, map[string]bool{"admin": false})
+	req = authedRequest(t, h, http.MethodPut, "/auth/admin/users/u1/roles", "admin", "admin@example.org", []string{"admin"}, map[string][]string{"roles": {}})
 	req.SetPathValue("id", "u1")
 	h.adminSetRoles(rec, req)
 	if rec.Code != http.StatusNoContent {
@@ -168,7 +168,7 @@ func TestAdminSetRoles_PromoteDemoteAndSelfGuard(t *testing.T) {
 
 	// Self-demotion is blocked.
 	rec = httptest.NewRecorder()
-	req = authedRequest(t, h, http.MethodPut, "/auth/admin/users/admin/roles", "admin", "admin@example.org", []string{"admin"}, map[string]bool{"admin": false})
+	req = authedRequest(t, h, http.MethodPut, "/auth/admin/users/admin/roles", "admin", "admin@example.org", []string{"admin"}, map[string][]string{"roles": {}})
 	req.SetPathValue("id", "admin")
 	h.adminSetRoles(rec, req)
 	if rec.Code != http.StatusConflict {

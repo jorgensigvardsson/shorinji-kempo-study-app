@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/org"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
@@ -60,6 +61,7 @@ type Handler struct {
 	users              store.UserStore
 	refreshTokens      store.RefreshTokenStore
 	roles              store.RoleStore
+	orgs               *org.Tree // the organization tree, for resolving a branch to its federation
 	tokens             *token.Manager
 	mailer             email.Sender
 	frontendURL        string
@@ -79,6 +81,7 @@ func NewHandler(
 	users store.UserStore,
 	refreshTokens store.RefreshTokenStore,
 	roles store.RoleStore,
+	orgs *org.Tree,
 	tokens *token.Manager,
 	mailer email.Sender,
 	frontendURL string,
@@ -92,6 +95,7 @@ func NewHandler(
 		users:         users,
 		refreshTokens: refreshTokens,
 		roles:         roles,
+		orgs:          orgs,
 		tokens:        tokens,
 		mailer:        mailer,
 		frontendURL:   frontendURL,

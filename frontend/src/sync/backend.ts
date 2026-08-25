@@ -55,6 +55,7 @@ export interface AdminUser {
   id: string;
   email: string;
   displayName: string;
+  branchId?: string; // absent for a user admitted before the branch model existed
   linkedIdentities: Record<string, AdminLinkedIdentity>;
   roles: string[];
   oidc: boolean; // true when any linked identity is an OIDC provider (display name not editable)
@@ -358,13 +359,15 @@ export class BackendSyncClient {
     if (!resp.ok) throw new Error(`PATCH /auth/admin/users/${id}: ${resp.status}`);
   }
 
-  // Promotes (admin=true) or demotes (admin=false) a user. The backend rejects
-  // an admin demoting themselves with 409.
-  async adminSetAdmin(id: string, admin: boolean): Promise<void> {
+  // Replaces a user's roles with the given set. The backend checks only the
+  // roles that actually change, and only against what the caller already covers:
+  // 403 for a grant beyond their authority, 409 when an admin would strip their
+  // own global role.
+  async adminSetRoles(id: string, roles: string[]): Promise<void> {
     const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}/roles`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ admin }),
+      body: JSON.stringify({ roles }),
     });
     if (resp.status === 409) throw new Error("self-demotion");
     if (!resp.ok) throw new Error(`PUT /auth/admin/users/${id}/roles: ${resp.status}`);

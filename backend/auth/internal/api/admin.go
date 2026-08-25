@@ -6,27 +6,51 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/authz"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 )
 
-const adminRole = "admin"
-
-// requireAdmin authorizes a request as an admin. It returns the caller's claims
-// on success; otherwise it writes the appropriate error response (401 when the
-// token is missing/invalid, 403 when authenticated but lacking the admin role)
-// and returns a nil claims so the caller can return immediately.
-func (h *Handler) requireAdmin(w http.ResponseWriter, r *http.Request) *token.Claims {
+// requireAnyAdmin authorizes a request as some kind of admin: authenticated, and
+// holding at least one role this system recognises. It deliberately does not say
+// which — the endpoints below decide that per target, because "may you act on
+// this user?" depends on the branch that user is in, which is not known until
+// the user has been read.
+//
+// It returns the caller's claims on success; otherwise it writes the response
+// (401 when the token is missing or invalid, 403 when authenticated but holding
+// no admin role at all) and returns nil so the caller can return immediately.
+func (h *Handler) requireAnyAdmin(w http.ResponseWriter, r *http.Request) *token.Claims {
 	claims, err := h.claimsFromRequest(r)
 	if err != nil {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return nil
 	}
-	if !containsRole(claims.Roles, adminRole) {
-		http.Error(w, "forbidden", http.StatusForbidden)
-		return nil
+	for _, role := range claims.Roles {
+		if _, ok := authz.ScopeOf(role); ok {
+			return claims
+		}
 	}
-	return claims
+	http.Error(w, "forbidden", http.StatusForbidden)
+	return nil
+}
+
+// covers reports whether the caller holds authority over a scope. The nil check
+// is not superstition: a nil *org.Tree would satisfy the resolver interface as a
+// non-nil value and panic on first use, so it is turned back into an honest nil,
+// which authz reads as "no branch membership can be proven".
+func (h *Handler) covers(claims *token.Claims, scope authz.Scope) bool {
+	if h.orgs == nil {
+		return authz.Covers(claims.Roles, scope, nil)
+	}
+	return authz.Covers(claims.Roles, scope, h.orgs)
+}
+
+// canSee reports whether the caller may act on a particular user at all, which
+// is authority over the branch that user belongs to. A user with no branch
+// belongs to nobody, and so is visible to a global or WSKO admin alone.
+func (h *Handler) canSee(claims *token.Claims, user *store.User) bool {
+	return h.covers(claims, authz.Branch(user.BranchID))
 }
 
 // adminUser is the per-user shape returned by the admin listing. It embeds the
@@ -38,12 +62,14 @@ type adminUser struct {
 	OIDC  bool     `json:"oidc"` // true when any linked identity is an OIDC provider (not "email")
 }
 
-// adminListUsers returns every user with their resolved roles. Admin only.
+// adminListUsers returns the users the caller is allowed to see, with their
+// resolved roles.
 func (h *Handler) adminListUsers(w http.ResponseWriter, r *http.Request) {
-	if h.requireAdmin(w, r) == nil {
+	claims := h.requireAnyAdmin(w, r)
+	if claims == nil {
 		return
 	}
-	users, err := h.users.List()
+	users, err := h.visibleUsers(claims)
 	if err != nil {
 		log.Printf("adminListUsers: %v", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -60,14 +86,70 @@ func (h *Handler) adminListUsers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, out)
 }
 
+// visibleUsers resolves the caller's roles into a set of users. A global or WSKO
+// admin gets the full scan the listing has always done; anybody else gets the
+// members of the branches they administer, which for a federation admin means
+// every branch the tree files under their federation.
+func (h *Handler) visibleUsers(claims *token.Claims) ([]*store.User, error) {
+	if h.covers(claims, authz.WSKO()) {
+		return h.users.List()
+	}
+
+	seen := map[string]bool{}
+	var branchIDs []string
+	add := func(id string) {
+		if id != "" && !seen[id] {
+			seen[id] = true
+			branchIDs = append(branchIDs, id)
+		}
+	}
+	for _, role := range claims.Roles {
+		scope, ok := authz.ScopeOf(role)
+		if !ok {
+			continue
+		}
+		switch scope.Kind {
+		case authz.KindBranch:
+			add(scope.ID)
+		case authz.KindFederation:
+			if h.orgs != nil {
+				for _, id := range h.orgs.BranchesIn(scope.ID) {
+					add(id)
+				}
+			}
+		}
+	}
+	// No usable branches means nothing to show. ListByBranches is careful enough
+	// to say so rather than falling back to everything.
+	return h.users.ListByBranches(branchIDs)
+}
+
+// adminFindVisibleUser reads the target of an admin action and confirms the
+// caller may act on it. A user the caller cannot see is reported as 404 rather
+// than 403: the listing already hides them, and a 403 would confirm that an
+// account exists in a branch the caller has no business knowing about.
+func (h *Handler) adminFindVisibleUser(w http.ResponseWriter, claims *token.Claims, id, what string) *store.User {
+	user, err := h.users.FindByID(id)
+	if err != nil {
+		log.Printf("%s lookup %s: %v", what, id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return nil
+	}
+	if user == nil || !h.canSee(claims, user) {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return nil
+	}
+	return user
+}
+
 // adminUpdateUser edits an editable user field. Currently only the display name,
 // and only for users with no OIDC identity (OIDC display names come from the
-// provider). Admin only.
+// provider).
 func (h *Handler) adminUpdateUser(w http.ResponseWriter, r *http.Request) {
-	if h.requireAdmin(w, r) == nil {
+	claims := h.requireAnyAdmin(w, r)
+	if claims == nil {
 		return
 	}
-	id := r.PathValue("id")
 
 	var req struct {
 		DisplayName string `json:"displayName"`
@@ -77,14 +159,8 @@ func (h *Handler) adminUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.users.FindByID(id)
-	if err != nil {
-		log.Printf("adminUpdateUser lookup %s: %v", id, err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
+	user := h.adminFindVisibleUser(w, claims, r.PathValue("id"), "adminUpdateUser")
 	if user == nil {
-		http.Error(w, "user not found", http.StatusNotFound)
 		return
 	}
 	if hasOIDCIdentity(user) {
@@ -94,86 +170,98 @@ func (h *Handler) adminUpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	user.DisplayName = strings.TrimSpace(req.DisplayName)
 	if err := h.users.Save(user); err != nil {
-		log.Printf("adminUpdateUser save %s: %v", id, err)
+		log.Printf("adminUpdateUser save %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("admin updated display name for user %s", id)
+	log.Printf("admin updated display name for user %s", user.ID)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// adminSetRoles promotes or demotes a user's admin role. The body carries the
-// desired admin state; other roles (if any) are preserved. An admin cannot
-// remove their own admin role (lockout guard). Admin only.
+// adminSetRoles replaces a user's roles with the requested set.
+//
+// The caller must cover the scope of every role that actually changes, which is
+// the whole of the delegation rule and the reason it needs no rules of its own:
+// a federation admin may appoint branch admins inside their federation because
+// they cover those branches, and cannot mint a global admin because nothing
+// covers WSKO but WSKO. Roles that do not change are not re-checked, so an
+// assignment somebody further up made is preserved rather than quietly dropped
+// by an admin who could not have made it themselves.
 func (h *Handler) adminSetRoles(w http.ResponseWriter, r *http.Request) {
-	claims := h.requireAdmin(w, r)
+	claims := h.requireAnyAdmin(w, r)
 	if claims == nil {
 		return
 	}
-	id := r.PathValue("id")
 
 	var req struct {
-		Admin bool `json:"admin"`
+		Roles []string `json:"roles"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	user, err := h.users.FindByID(id)
-	if err != nil {
-		log.Printf("adminSetRoles lookup %s: %v", id, err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
+	user := h.adminFindVisibleUser(w, claims, r.PathValue("id"), "adminSetRoles")
 	if user == nil {
-		http.Error(w, "user not found", http.StatusNotFound)
-		return
-	}
-
-	if !req.Admin && user.ID == claims.Subject {
-		http.Error(w, "cannot remove your own admin role", http.StatusConflict)
 		return
 	}
 
 	current := h.rolesFor(user.Email)
-	next := setRole(current, adminRole, req.Admin)
+	next := dedupeRoles(req.Roles)
+
+	for _, role := range changedRoles(current, next) {
+		scope, ok := authz.ScopeOf(role)
+		if !ok {
+			http.Error(w, "unknown role", http.StatusBadRequest)
+			return
+		}
+		if !h.covers(claims, scope) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+	}
+
+	// Lockout guard: an admin may not strip their own authority over everything.
+	// Scoped roles are deliberately not guarded — somebody above can restore one,
+	// whereas the last global admin demoting themselves is unrecoverable.
+	if user.ID == claims.Subject {
+		for _, role := range []string{authz.RoleAdmin, authz.RoleWSKOAdmin} {
+			if containsRole(current, role) && !containsRole(next, role) {
+				http.Error(w, "cannot remove your own "+role+" role", http.StatusConflict)
+				return
+			}
+		}
+	}
+
 	if err := h.roles.SetRoles(user.Email, next); err != nil {
-		log.Printf("adminSetRoles save %s: %v", id, err)
+		log.Printf("adminSetRoles save %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("admin set admin=%t for user %s (%s)", req.Admin, id, user.Email)
+	log.Printf("admin %s set roles %v for user %s (%s)", claims.Subject, next, user.ID, user.Email)
 	w.WriteHeader(http.StatusNoContent)
 }
 
 // adminLogoutUser forcibly ends every session for the target user by revoking all
 // of their refresh tokens. The user's current access token keeps working until it
-// expires (≤ AccessTokenTTL); after that they can no longer refresh and are fully
-// logged out. Admin only.
+// expires (at most AccessTokenTTL); after that they can no longer refresh and are
+// fully logged out.
 func (h *Handler) adminLogoutUser(w http.ResponseWriter, r *http.Request) {
-	if h.requireAdmin(w, r) == nil {
+	claims := h.requireAnyAdmin(w, r)
+	if claims == nil {
 		return
 	}
-	id := r.PathValue("id")
-
-	user, err := h.users.FindByID(id)
-	if err != nil {
-		log.Printf("adminLogoutUser lookup %s: %v", id, err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
+	user := h.adminFindVisibleUser(w, claims, r.PathValue("id"), "adminLogoutUser")
 	if user == nil {
-		http.Error(w, "user not found", http.StatusNotFound)
 		return
 	}
 
-	if err := h.refreshTokens.DeleteByUserID(id); err != nil {
-		log.Printf("adminLogoutUser revoke %s: %v", id, err)
+	if err := h.refreshTokens.DeleteByUserID(user.ID); err != nil {
+		log.Printf("adminLogoutUser revoke %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("admin force-logged-out user %s (%s)", id, user.Email)
+	log.Printf("admin force-logged-out user %s (%s)", user.ID, user.Email)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -197,22 +285,36 @@ func containsRole(roles []string, role string) bool {
 	return false
 }
 
-// setRole returns roles with role added (want=true) or removed (want=false),
-// preserving the other roles and their order.
-func setRole(roles []string, role string, want bool) []string {
-	out := make([]string, 0, len(roles)+1)
-	present := false
+// dedupeRoles returns roles with blanks and duplicates removed, order preserved,
+// so a request cannot smuggle a grant past a check by repeating it.
+func dedupeRoles(roles []string) []string {
+	seen := make(map[string]bool, len(roles))
+	out := make([]string, 0, len(roles))
 	for _, r := range roles {
-		if r == role {
-			present = true
-			if !want {
-				continue
-			}
+		r = strings.TrimSpace(r)
+		if r == "" || seen[r] {
+			continue
 		}
+		seen[r] = true
 		out = append(out, r)
 	}
-	if want && !present {
-		out = append(out, role)
-	}
 	return out
+}
+
+// changedRoles returns the roles being added together with those being removed —
+// the symmetric difference, which is exactly the set the caller must be entitled
+// to grant or revoke.
+func changedRoles(current, next []string) []string {
+	var changed []string
+	for _, r := range next {
+		if !containsRole(current, r) {
+			changed = append(changed, r)
+		}
+	}
+	for _, r := range current {
+		if !containsRole(next, r) {
+			changed = append(changed, r)
+		}
+	}
+	return changed
 }

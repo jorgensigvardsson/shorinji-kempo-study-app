@@ -70,10 +70,12 @@ const AdminUsers = () => {
         setBusyId(u.id);
         setError(null);
         try {
-            await getSyncManager().adminSetAdmin(u.id, admin);
+            // The whole role set goes over, not a flag, so scoped roles this
+            // page does not show are carried through rather than dropped.
             const roles = admin
                 ? Array.from(new Set([...u.roles, "admin"]))
                 : u.roles.filter(r => r !== "admin");
+            await getSyncManager().adminSetRoles(u.id, roles);
             setUsers(prev => prev?.map(x => x.id === u.id ? { ...x, roles } : x) ?? prev);
         } catch (err) {
             if (err instanceof Error && err.message === "self-demotion") {

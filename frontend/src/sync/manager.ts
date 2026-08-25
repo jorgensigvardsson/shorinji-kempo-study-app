@@ -180,8 +180,8 @@ class SyncManager {
     await this.backendClient.adminUpdateDisplayName(id, displayName);
   }
 
-  async adminSetAdmin(id: string, admin: boolean): Promise<void> {
-    await this.backendClient.adminSetAdmin(id, admin);
+  async adminSetRoles(id: string, roles: string[]): Promise<void> {
+    await this.backendClient.adminSetRoles(id, roles);
   }
 
   async adminLogoutUser(id: string): Promise<void> {
