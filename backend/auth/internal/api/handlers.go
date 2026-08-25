@@ -61,7 +61,7 @@ type Handler struct {
 	users              store.UserStore
 	refreshTokens      store.RefreshTokenStore
 	roles              store.RoleStore
-	orgs               *org.Tree // the organization tree, for resolving a branch to its federation
+	orgs               *org.Tree // the organization tree; required, never nil
 	tokens             *token.Manager
 	mailer             email.Sender
 	frontendURL        string
@@ -143,15 +143,26 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
 	inner.HandleFunc("POST /auth/link", h.linkAccount)
 	inner.HandleFunc("DELETE /auth/link/{provider}", h.unlinkProvider)
+	// Unauthenticated by design: this is the branch picker somebody registering
+	// chooses from, which necessarily precedes having a session. It carries no
+	// personal data — see publicBranches in org.go.
+	inner.HandleFunc("GET /auth/org/branches", h.publicBranches)
 	// Feedback submission carries its own global rate limit on top of the per-IP
 	// one, same as email/start, since it triggers a real SMTP send.
 	inner.Handle("POST /auth/feedback", h.feedbackLimiter.Middleware(http.HandlerFunc(h.submitFeedback)))
-	// Admin-only user management (see admin.go). Authorization is enforced per
-	// handler via requireAdmin; the routes ride the same middleware chain below.
+	// Admin user management (see admin.go) and the organization tree (org.go).
+	// Authorization is enforced per handler — every one of these asks whether the
+	// caller covers the scope it touches, not merely whether they are an admin.
+	// The routes ride the same middleware chain below.
 	inner.HandleFunc("GET /auth/admin/users", h.adminListUsers)
 	inner.HandleFunc("PATCH /auth/admin/users/{id}", h.adminUpdateUser)
 	inner.HandleFunc("PUT /auth/admin/users/{id}/roles", h.adminSetRoles)
 	inner.HandleFunc("POST /auth/admin/users/{id}/logout", h.adminLogoutUser)
+	inner.HandleFunc("GET /auth/admin/org", h.adminOrgTree)
+	inner.HandleFunc("POST /auth/admin/federations", h.createFederation)
+	inner.HandleFunc("PATCH /auth/admin/federations/{id}", h.renameFederation)
+	inner.HandleFunc("POST /auth/admin/branches", h.createBranch)
+	inner.HandleFunc("PATCH /auth/admin/branches/{id}", h.updateBranch)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
