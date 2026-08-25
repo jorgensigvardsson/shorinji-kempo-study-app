@@ -29,7 +29,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - Vitest + Testing Library
 - PWA with service worker for offline use
 - Go backend services for identity (OIDC + email verification codes) and data persistence — see [BACKEND.md](BACKEND.md)
-- Azure Communication Services (Email) for sending verification codes — authenticated by a user-assigned managed identity (no stored key); see [BACKEND.md](BACKEND.md)
+- Plain SMTP for sending verification codes and notifications; see [BACKEND.md](BACKEND.md)
 
 ## Development
 
@@ -158,15 +158,36 @@ Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as
     -d '{"title":"New version available","body":"Open the app to update.","url":"/changelog"}'
   ```
 
-### Roles & the `admin` role
+### Roles
 
 The auth service stamps a `role` claim onto each access token, read from a Cosmos `roles` container (provisioned automatically on startup) and refreshed on every login and token refresh. The claim is forwarded to the web app via `GET /auth/me` so the UI can show or hide admin-only controls. The persistence service trusts the same claim to authorize broadcasts.
 
-To grant someone the `admin` role, add an item to the `roles` container keyed by their (lowercased) email:
+Roles mirror the organization — WSKO over national federations over branches — and are scoped by suffix:
+
+| Role | Authority |
+|---|---|
+| `admin` | Everything. The technical superuser |
+| `wsko_admin` | The whole organization |
+| `federation_admin:SE` | One federation and every branch in it |
+| `branch_admin:<uuid>` | One branch |
+
+Everything follows from one rule: **you may act on a scope you cover, and grant a role whose scope you cover.** So a federation admin can appoint branch admins inside their federation and cannot mint a global admin, without either being written down as a rule of its own. Roles are granted from the admin UI on that basis.
+
+The first grant in a fresh environment has to be made by hand, since there is nobody to delegate from. Add an item to the `roles` container keyed by the (lowercased) email:
 ```json
 { "id": "someone@example.com", "roles": ["admin"] }
 ```
 The change takes effect on their next login or hourly token refresh. Locally (file-store dev, no Cosmos), the same mapping lives in `backend/auth/data/roles/roles.json`: `{ "someone@example.com": ["admin"] }`.
+
+An empty organization is equally unhelpful, so `backend/auth/cmd/orgmigrate` seeds one and gives every existing user a branch. It reports what it would do and writes nothing until passed `--apply`, and is safe to run more than once:
+
+```bash
+cd backend/auth
+go run ./cmd/orgmigrate --data-dir ./data           # dry run
+go run ./cmd/orgmigrate --data-dir ./data --apply
+```
+
+It chooses its store the way the services do, so the same command migrates Cosmos when `COSMOS_ENDPOINT` and `COSMOS_KEY` are set.
 
 ## Deployment
 

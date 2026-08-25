@@ -5,6 +5,27 @@ user to exactly one branch, and replace the single global `admin` role with scop
 mirror the organization. Then gate account creation behind an admission decision made by the branch
 the applicant wants to join.
 
+## Status
+
+**Phase 1 is built** and deployed nowhere. Everything below runs on the file-based stores; no
+Cosmos account, staging or production has been touched, by decision — see §8.
+
+| | Where |
+|---|---|
+| ✅ Organization tree | `store.OrgNode` with file and Cosmos stores; `org.Tree` held in memory, loaded at startup |
+| ✅ Scoped roles | `authz.Covers` — the one function behind every organizational permission |
+| ✅ Scoped admin endpoints | listing, rename, set-roles, force-logout, each against the scope it touches |
+| ✅ Organization endpoints | public branch picker, scoped tree, create/rename/move |
+| ✅ Token claims | `branch` and `fed`, resolved when a token is minted; `/auth/me` resolves the federation too |
+| ✅ Migration tool | `backend/auth/cmd/orgmigrate` |
+| ⬜ Phase 2 | admission — §5 |
+| ⬜ Phase 3 | admin UI — §6 |
+| ⬜ Phase 4 | transfers — §7 |
+
+Two things carried over deliberately. `AdminUsers.tsx` is still the only admin page, changed no
+further than sending a role set instead of an admin flag; Phase 3 replaces it. And enrollment
+still creates users without a branch, which is why nothing ships before Phase 2.
+
 ## The organization
 
 ```
@@ -377,7 +398,7 @@ implementation filters in memory. `RoleStore` gains `ListAll`.
 | GET | `/auth/admin/org` | The tree as the caller may see it (whole tree for global/WSKO, own federation for a federation admin, own branch for a branch admin). Branches belonging to no federation come back as their own group, headed **WSKO** — they hang from the root, and a listing without that heading reads as though they had been left out |
 | POST | `/auth/admin/federations` | `{id, name}`; id validated as two uppercase letters. Requires `{wsko}` |
 | PATCH | `/auth/admin/federations/{id}` | Rename. Requires `{federation, id}` |
-| POST | `/auth/admin/branches` | `{name, federationId?}`. A federation admin's request is forced to their own federation regardless of what the body says; omitting `federationId` (direct WSKO member) requires `{wsko}` |
+| POST | `/auth/admin/branches` | `{name, federationId?}`. Placement comes from the body: an omitted `federationId` means WSKO-attached and requires `{wsko}`, and a federation the caller does not cover is refused. **As built, this refuses rather than forces** — an earlier draft rewrote a federation admin's request to their own federation, but silently changing a request to fit the requester's authority is a worse habit than refusing one that exceeds it, and the UI knows the federation to pre-fill |
 | PATCH | `/auth/admin/branches/{id}` | Rename and/or move. A move requires covering both old and new scope |
 | GET | `/auth/admin/users` | **Now scoped.** Global/WSKO → full scan as today; otherwise the union of `ListByBranches` over every branch the caller covers, deduplicated |
 | PUT | `/auth/admin/users/{id}/roles` | Body becomes `{roles: ["branch_admin:…"]}`, replacing `{admin: bool}`. Rejects 403 unless the caller covers the scope of **every** role added or removed, and 404 unless the caller can see the target user |
@@ -394,17 +415,25 @@ Phase 3.
 
 ### 4.3 The migration tool
 
-A one-shot in `tools/` (or a `tools/migrate` subcommand), written against the store interfaces so it
-runs against a local data dir or a Cosmos account depending on the same environment variables the
-services use. `--dry-run` supported, like its neighbour.
+`backend/auth/cmd/orgmigrate`, written against the store interfaces so it runs against a local data
+dir or a Cosmos account on the same environment variables the services read. (Not `tools/migrate`,
+which BACKEND.md described but which does not exist in the repo — and could not live there anyway,
+since importing `internal/store` requires being under `backend/auth/`.)
 
 1. Create federation `SE`, "Svenska Shorinji Kempoförbundet".
 2. Create the Karlstad branch under `SE`.
 3. Set `branchId` on every existing user to that branch.
 4. Grant nobody `wsko_admin` — `admin` already covers it.
 
-It is written in Phase 1 and used from then on — it seeds every local data dir throughout
-development, so by the time it runs against prod (§8) it is the most exercised code on the branch.
+Two properties it is built for. **A dry run is the default**: without `--apply` it writes nothing
+and reports what it would do, since a negated `--dry-run=false` is easiest to get wrong on the one
+run that matters. And **re-running is safe**: the branch is matched by name within its federation,
+because its id is a UUID and a second run would otherwise mint a duplicate and quietly split the
+club in two; users who already have a branch are counted and left alone, including any who have
+since moved, so it stays safe to run after Phase 2 exists.
+
+It is used from the moment it exists — it seeds every local data dir throughout development, so by
+the time it runs against prod (§8) it is the most exercised code on the branch.
 
 ---
 

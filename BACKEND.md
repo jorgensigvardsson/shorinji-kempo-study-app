@@ -177,6 +177,7 @@ with an account key and mail with a password.
   "id":          "550e8400-e29b-41d4-a716-446655440000",
   "email":       "jane@example.com",
   "displayName": "Jane Doe",
+  "branchId":    "8f3c0b1e-…",
   "linkedIdentities": {
     "google":    { "sub": "1234567890", "email": "jane@gmail.com" },
     "microsoft": { "sub": "abcdef1234", "email": "jane@company.com" }
@@ -186,19 +187,56 @@ with an account key and mail with a password.
 }
 ```
 - `id` is a server-generated UUID — stable regardless of which provider the user logs in with
+- `branchId` is the one branch this practitioner belongs to. It is absent only for accounts
+  created before the branch model existed; a user without one is visible to a global admin
+  alone, since an empty branch resolves to no federation and so to nobody's scope
 - `linkedIdentities` maps provider name → `{sub, email}` for each linked provider
 - Provider lookup happens only at login; the UUID is used for everything else.
   In Cosmos a dedicated `identity_index` container gives O(1) `FindByLinkedIdentity`
   lookups without cross-partition queries
 
+### Organization Node (`organizations` container)
+```json
+{ "id": "SE",  "type": "federation", "name": "Svenska Shorinji Kempoförbundet" }
+{ "id": "8f3c0b1e-…", "type": "branch", "name": "Shorinji Kempo Karlstad Branch", "federationId": "SE" }
+```
+The organization is WSKO over national federations over branches, and every practitioner
+belongs to exactly one branch. **WSKO itself is never stored**: it is the implicit root, and a
+branch with an empty `federationId` hangs directly from it — which makes "a branch belongs to
+a federation or to WSKO, never both and never neither" the shape of the data rather than a
+rule anybody has to check.
+
+Federation ids are ISO 3166-1 alpha-2 country codes and branch ids are UUIDs, so the two kinds
+share a container without their id spaces colliding. Names are the organization's own, in its
+own language, shown verbatim whatever language the reader is using — proper nouns, never
+translated.
+
+The tree is **held in memory** by the auth service (`internal/org`), loaded once at startup and
+rebuilt on every write, so resolving a branch to its federation on each token issue costs
+nothing. This works for the same reason OIDC pending state does: the service runs a single
+replica. A failed load is fatal rather than a warning — an empty tree is not a degraded tree,
+it silently strips every federation admin of every branch they administer.
+
 ### Role Record (`roles` container)
 ```json
-{ "id": "jane@example.com", "roles": ["admin"] }
+{ "id": "jane@example.com", "roles": ["admin", "branch_admin:8f3c0b1e-…"] }
 ```
-Keyed by lowercased email. Roles are managed **out-of-band** (an operator adds an item
-directly to the store); the auth service only reads them at token issuance and stamps them
-into the access token as the `role` claim. The `admin` role currently authorizes push
-broadcasts from the web UI.
+Keyed by lowercased email — deliberately, since that lets a role be granted to somebody who does
+not have an account yet. Roles are flat strings scoped by suffix:
+
+| Role | Authority |
+|---|---|
+| `admin` | Everything. The technical superuser: push broadcasts, force-logout, and all of the below |
+| `wsko_admin` | The whole organization. Defined and grantable, granted to nobody — so it can diverge from `admin` later without a migration to introduce it |
+| `federation_admin:<CC>` | One federation and every branch in it |
+| `branch_admin:<uuid>` | One branch |
+
+One function decides every organizational permission (`internal/authz`): does this role set cover
+this scope? Seeing a user is authority over their branch; creating a branch is authority over its
+federation; **granting a role is authority over the scope that role confers**, which is why
+delegating downwards needs no rule of its own. Roles are managed through the admin UI, and a
+caller may only add or remove roles whose scope they already cover — the first grant in a new
+environment is still made by writing to the store directly.
 
 ### App Data Document (`documents` container)
 ```json
@@ -222,11 +260,20 @@ One document per user. The `data` field is opaque to the persistence service.
   "iat":   1716400000,
   "exp":   1716403600,
   "email": "jane@example.com",
-  "role":  ["admin"]
+  "name":  "Jane Doe",
+  "role":  ["branch_admin:8f3c0b1e-…"],
+  "branch": "8f3c0b1e-…",
+  "fed":   "SE"
 }
 ```
 - `sub` is our internal UUID, not the provider's `sub` — stable across provider changes
 - `role` is omitted entirely when the user has no roles
+- `branch` and `fed` say where the holder trains, resolved when the token is minted so another
+  service can scope a request without calling back here. Both are omitted when empty, and empty
+  is meaningful in both directions: a member of a WSKO-attached branch has a branch and no
+  federation, and an account predating the branch model has neither. Both are stale for at most
+  the token's hour — the right precision for a branch transfer, the wrong one for anything that
+  must take effect at once
 - Signed RS256; the `kid` header is derived from the public key modulus hash, so it rotates
   automatically with the key
 - Access token lifetime: **1 hour**; the frontend silently refreshes on 401
@@ -264,15 +311,26 @@ corporate domain at the appropriate provider.
 | DELETE | `/auth/account` | Delete refresh tokens and the user record (JWT required) |
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
 | DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; 409 if it is the last one) |
-| GET | `/auth/admin/users` | List all users with their roles, linked identities, and an `oidc` flag (admin role required) |
-| PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) (admin) |
-| PUT | `/auth/admin/users/{id}/roles` | Promote/demote a user — body `{admin: bool}`; 409 on self-demotion (admin) |
-| POST | `/auth/admin/users/{id}/logout` | Force-logout a user: revoke all their refresh tokens (admin). Their access token stays valid until it expires (≤ 1 h) |
+| GET | `/auth/org/branches` | **Unauthenticated.** Every branch with its federation's name, for the branch picker somebody registering chooses from. No personal data of any kind |
+| GET | `/auth/admin/users` | List the users the caller may see, with their roles, linked identities, and an `oidc` flag |
+| PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) |
+| PUT | `/auth/admin/users/{id}/roles` | Replace a user's roles — body `{roles: [...]}`; 403 for a grant beyond the caller's authority, 409 on removing your own `admin`/`wsko_admin` |
+| POST | `/auth/admin/users/{id}/logout` | Force-logout a user: revoke all their refresh tokens. Their access token stays valid until it expires (≤ 1 h) |
+| GET | `/auth/admin/org` | The organization tree as the caller may see it. Branches in no federation come back as their own group, headed WSKO |
+| POST | `/auth/admin/federations` | Create a federation — body `{id, name}`, id an alpha-2 country code. WSKO authority |
+| PATCH | `/auth/admin/federations/{id}` | Rename a federation |
+| POST | `/auth/admin/branches` | Create a branch — body `{name, federationId?}`. An omitted `federationId` means WSKO-attached, and needs WSKO authority |
+| PATCH | `/auth/admin/branches/{id}` | Rename and/or move a branch. `name` and `federationId` are nullable, so "leave it alone" and "move it to WSKO" are different requests |
 
-The `/auth/admin/*` endpoints back the admin-only "Users" page. Authorization is enforced
-per handler (`requireAdmin` checks the `admin` role on the access token); listing is a full
-scan intended for low-frequency admin use, and filtering happens client-side. Promote/demote
-writes the `roles` store, so the change takes effect in a user's token on its next issue
+The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
+every one of them asks whether the caller **covers the scope the action touches** rather than
+merely whether they are an admin. A user outside the caller's scope is reported as 404 rather
+than 403: the listing already hides them, and a 403 would confirm that an account exists in a
+branch the caller has no business knowing about.
+
+Listing is a full scan for a global or WSKO admin and a `branchId` query otherwise, so it stays
+affordable as branches grow. Setting roles writes the `roles` store, so the change takes effect
+in a user's token on its next issue
 (login or hourly refresh); `/auth/me` reads roles live, so the admin UI reflects it at once.
 
 ### Persistence Service (`backend/persistence`, port 8080 in dev)
@@ -364,12 +422,18 @@ database and containers on startup):
 
 | Container | Service | Notes |
 |-----------|---------|-------|
-| `users` | auth | Point reads by UUID; indexing `consistent` with all paths excluded so the admin `SELECT * FROM c` listing works at zero write-time index cost. (An already-provisioned container keeps its old `none` policy — provisioning skips existing containers — so its indexing policy must be updated once out-of-band.) |
+| `users` | auth | Point reads by UUID; indexing `consistent` including `/branchId` (which the scoped admin listing filters on) and excluding everything else, so the full `SELECT * FROM c` listing also works at near-zero write-time cost |
 | `identity_index` | auth | O(1) provider→user lookup at login |
-| `roles` | auth | Out-of-band role assignments, keyed by email |
+| `roles` | auth | Role assignments keyed by email. `consistent` indexing with all paths excluded: point reads answer "what may this person do?", and a scan answers the reverse, "who administers this branch?" |
+| `organizations` | auth | Federations and branches. Read whole, once per process, into the in-memory tree |
 | `refresh_tokens` | auth | `consistent` indexing (all paths excluded) for partition scans |
 | `documents` | persistence | One app data document per user |
 | push subscriptions | persistence | Browser push subscriptions |
+
+**Provisioning skips containers that already exist** (409 ignored), so an indexing-policy change
+never reaches a live environment by deploying code. `users` gaining `/branchId`, and `roles`
+moving from `none` to `consistent`, must both be applied out-of-band before the code that depends
+on them goes live. `none` does not make a query expensive — it refuses it.
 
 ---
 
@@ -494,8 +558,12 @@ held in-process); persistence runs **min 0 / max 1**, scaling on HTTP traffic. S
 key, OIDC client secrets, VAPID keys, SMTP password) are injected via ACA secrets; the JWT signing
 key arrives as a PEM string (`SERVICE_KEY_PEM`), no file volume needed.
 
-`tools/migrate` is a one-shot tool that provisions Cosmos and migrates file-store data
-(users + identity index + documents); supports `--dry-run`.
+`backend/auth/cmd/orgmigrate` seeds the organization tree and gives every existing user a
+branch. It picks its store the way the services do — Cosmos when an endpoint and key are
+configured, files otherwise — so the same binary seeds a local data directory and later migrates
+production. It writes nothing without `--apply`, and is safe to run repeatedly: the branch is
+matched by name within its federation (its id is a UUID, so a second run would otherwise mint a
+duplicate and split the club in two), and a user who already has a branch is left alone.
 
 ### Staging
 Staging runs the same backend services as prod, deployed via
