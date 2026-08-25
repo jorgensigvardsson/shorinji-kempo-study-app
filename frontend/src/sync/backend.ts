@@ -127,10 +127,15 @@ export class BackendSyncClient {
     };
   }
 
-  // Submits a verification code (and, for new users, a name). On success the
+  // Submits a verification code (and, for a new address, a name). On success the
   // server sets the auth cookies; the caller then switches the provider to backend.
   // Returns the server's error code (e.g. "invalid_code", "too_many_attempts") on
   // a rejected code.
+  //
+  // A valid code for an address with no account is not a login: the server sets a
+  // join ticket instead of a session and answers {action: "join_required"}. That
+  // comes back as "join_required" so the caller cannot mistake it for a success
+  // and try to start a session that was never issued.
   async verifyEmailCode(email: string, code: string, name: string): Promise<{ ok: true } | { ok: false; error: string }> {
     const resp = await fetch(`${authUrl}/auth/email/verify`, {
       method: "POST",
@@ -138,7 +143,11 @@ export class BackendSyncClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, code, name }),
     });
-    if (resp.ok) return { ok: true };
+    if (resp.ok) {
+      const body = await resp.json().catch(() => ({})) as { action?: string };
+      if (body.action === "join_required") return { ok: false, error: "join_required" };
+      return { ok: true };
+    }
     if (resp.status === 400) {
       const body = await resp.json().catch(() => ({})) as { error?: string };
       return { ok: false, error: body.error ?? "invalid_code" };

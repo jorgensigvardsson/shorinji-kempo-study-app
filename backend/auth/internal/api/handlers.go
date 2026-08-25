@@ -164,6 +164,10 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	// chooses from, which necessarily precedes having a session. It carries no
 	// personal data — see publicBranches in org.go.
 	inner.HandleFunc("GET /auth/org/branches", h.publicBranches)
+	// Admission (see join.go). The context endpoint is authorized by the join
+	// ticket rather than by a session, since its whole audience is people who
+	// have proved an address and have no account.
+	inner.HandleFunc("GET /auth/join/context", h.joinContext)
 	// Feedback submission carries its own global rate limit on top of the per-IP
 	// one, same as email/start, since it triggers a real SMTP send.
 	inner.Handle("POST /auth/feedback", h.feedbackLimiter.Middleware(http.HandlerFunc(h.submitFeedback)))
@@ -382,28 +386,27 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil {
-		uuid, err := store.NewUUID()
-		if err != nil {
-			log.Printf("uuid generation: %v", err)
+		// Controlling an address is not grounds for an account. Hand back a join
+		// ticket instead of enrolling, and let the branch decide.
+		if err := h.setJoinTicket(w, token.JoinTicket{
+			Provider: ps.providerName,
+			Sub:      info.Sub,
+			Email:    info.Email,
+			Name:     info.DisplayName,
+		}); err != nil {
+			log.Printf("callback: issue join ticket for %s: %v", info.Email, err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
-		log.Printf("enrolling new user %s via %s (%s)", uuid, ps.providerName, info.Email)
-		user = &store.User{
-			ID:          uuid,
-			Email:       info.Email,
-			DisplayName: info.DisplayName,
-			LinkedIdentities: map[string]store.LinkedIdentity{
-				ps.providerName: {Sub: info.Sub, Email: info.Email},
-			},
-			CreatedAt: now,
-		}
-	} else {
-		// Keep provider email in sync in case it changed at the provider.
-		user.LinkedIdentities[ps.providerName] = store.LinkedIdentity{
-			Sub:   info.Sub,
-			Email: info.Email,
-		}
+		logJoinTicketIssued(ps.providerName, info.Email)
+		http.Redirect(w, r, h.frontendURL+"?join=1", http.StatusFound)
+		return
+	}
+
+	// Keep provider email in sync in case it changed at the provider.
+	user.LinkedIdentities[ps.providerName] = store.LinkedIdentity{
+		Sub:   info.Sub,
+		Email: info.Email,
 	}
 	user.LastLoginAt = now
 
@@ -571,22 +574,22 @@ func (h *Handler) emailVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil {
-		uuid, err := store.NewUUID()
-		if err != nil {
-			log.Printf("emailVerify: uuid generation: %v", err)
+		// A valid code proves the address and nothing more. The name is carried
+		// on the ticket rather than stored, since there is no user to store it on
+		// until a branch admits one.
+		if err := h.setJoinTicket(w, token.JoinTicket{
+			Provider: emailProviderName,
+			Sub:      addr,
+			Email:    addr,
+			Name:     strings.TrimSpace(req.Name),
+		}); err != nil {
+			log.Printf("emailVerify: issue join ticket for %s: %v", addr, err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
-		log.Printf("enrolling new user %s via email (%s)", uuid, addr)
-		user = &store.User{
-			ID:          uuid,
-			Email:       addr,
-			DisplayName: strings.TrimSpace(req.Name),
-			LinkedIdentities: map[string]store.LinkedIdentity{
-				emailProviderName: {Sub: addr, Email: addr},
-			},
-			CreatedAt: now,
-		}
+		logJoinTicketIssued(emailProviderName, addr)
+		writeJSON(w, map[string]string{"action": "join_required"})
+		return
 	}
 	user.LastLoginAt = now
 

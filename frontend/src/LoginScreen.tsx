@@ -94,9 +94,15 @@ export function LoginScreen() {
         getSyncManager().completeEmailLogin(); // switches provider → App hides the login screen
         return;
       }
-      setError(result.error === "too_many_attempts"
-        ? translator.translate("För många försök. Begär en ny kod.")
-        : translator.translate("Fel kod. Försök igen."));
+      if (result.error === "join_required") {
+        // Placeholder for the registration flow: the address is verified, but
+        // joining a branch is Phase 2b. Saying "wrong code" here would be a lie.
+        setError(translator.translate("E-postadressen är verifierad, men det finns inget konto för den ännu."));
+      } else {
+        setError(result.error === "too_many_attempts"
+          ? translator.translate("För många försök. Begär en ny kod.")
+          : translator.translate("Fel kod. Försök igen."));
+      }
     } catch {
       setError(translator.translate("Inloggning misslyckades. Försök igen."));
     } finally {

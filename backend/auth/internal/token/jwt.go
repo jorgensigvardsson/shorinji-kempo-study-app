@@ -16,6 +16,16 @@ import (
 // new access token transparently before it expires.
 const AccessTokenTTL = 1 * time.Hour
 
+// Audiences. The two kinds of token this service mints are signed by the same
+// key, so the audience is the only thing separating them, and both verifiers
+// require their own. Without that a join ticket — which proves an address and
+// names no user — would parse as an access token, and a caller would be holding
+// a session that belongs to nobody.
+const (
+	AccessAudience = "shorinji-persistence"
+	JoinAudience   = "shorinji-join"
+)
+
 type Claims struct {
 	jwt.RegisteredClaims
 	Email string `json:"email"`
@@ -79,7 +89,7 @@ func (m *Manager) Issue(id Identity) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.issuer,
 			Subject:   id.Subject,
-			Audience:  jwt.ClaimStrings{"shorinji-persistence"},
+			Audience:  jwt.ClaimStrings{AccessAudience},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 		},
@@ -102,7 +112,8 @@ func (m *Manager) Verify(tokenStr string) (*Claims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 		return &m.privateKey.PublicKey, nil
-	}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(m.issuer), jwt.WithExpirationRequired())
+	}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithIssuer(m.issuer),
+		jwt.WithAudience(AccessAudience), jwt.WithExpirationRequired())
 	if err != nil {
 		return nil, err
 	}
