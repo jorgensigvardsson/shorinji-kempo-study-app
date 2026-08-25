@@ -13,6 +13,7 @@ import (
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/api"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/org"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
@@ -38,6 +39,7 @@ func main() {
 	cosmosIdentityContainer := flag.String("cosmos-identity-index-container", envutil.String("COSMOS_IDENTITY_INDEX_CONTAINER", "identity_index"), "Cosmos container for identity index")
 	cosmosTokensContainer   := flag.String("cosmos-tokens-container",       envutil.String("COSMOS_TOKENS_CONTAINER",       "refresh_tokens"), "Cosmos container for refresh tokens")
 	cosmosRolesContainer    := flag.String("cosmos-roles-container",        envutil.String("COSMOS_ROLES_CONTAINER",        "roles"),          "Cosmos container for role assignments")
+	cosmosOrgsContainer     := flag.String("cosmos-orgs-container",         envutil.String("COSMOS_ORGS_CONTAINER",         "organizations"),  "Cosmos container for the organization tree")
 
 	// ── OIDC Providers ────────────────────────────────────────────────────────
 	googleClientID        := flag.String("google-client-id",        envutil.String("GOOGLE_CLIENT_ID",        ""),                                   "Google OAuth client ID")
@@ -89,9 +91,10 @@ func main() {
 	var userStore      store.UserStore
 	var refreshStore   store.RefreshTokenStore
 	var roleStore      store.RoleStore
+	var orgStore       store.OrgStore
 
 	if *cosmosEndpoint != "" && *cosmosKey != "" {
-		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer); err != nil {
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer, *cosmosOrgsContainer); err != nil {
 			log.Fatalf("cosmos provisioning: %v", err)
 		}
 
@@ -111,13 +114,32 @@ func main() {
 		if err != nil {
 			log.Fatalf("init Cosmos role store: %v", err)
 		}
+
+		orgStore, err = store.NewCosmosOrgStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosOrgsContainer)
+		if err != nil {
+			log.Fatalf("init Cosmos org store: %v", err)
+		}
 		log.Printf("using Cosmos DB stores (endpoint: %s, database: %s)", *cosmosEndpoint, *cosmosDatabase)
 	} else {
 		userStore    = store.NewFileUserStore(*dataDir)
 		refreshStore = store.NewFileRefreshTokenStore(*dataDir)
 		roleStore    = store.NewFileRoleStore(*dataDir)
+		orgStore     = store.NewFileOrgStore(*dataDir)
 		log.Printf("using file-based stores (data-dir: %s)", *dataDir)
 	}
+
+	// ── Organization tree ─────────────────────────────────────────────────────
+	// Held in memory: the service runs a single replica, and every token issued
+	// resolves a branch to its federation. A failure to load is fatal rather than
+	// a warning, because an empty tree is not a degraded tree — it silently strips
+	// every federation admin of every branch they administer, and the service would
+	// come up looking healthy while doing it.
+	orgTree := org.New(orgStore)
+	if err := orgTree.Reload(); err != nil {
+		log.Fatalf("load organization tree: %v", err)
+	}
+	log.Printf("organization tree loaded: federations=%d branches=%d",
+		len(orgTree.Federations()), len(orgTree.Branches()))
 
 	// ── OIDC providers ────────────────────────────────────────────────────────
 	providers := make(map[string]provider.Provider)

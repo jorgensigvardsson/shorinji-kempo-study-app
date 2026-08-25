@@ -15,7 +15,7 @@ import (
 // ignored for all create operations.
 // Assumes provisioned throughput mode; 400 RU/s is requested at the database level
 // so all containers share a single pool (free-tier eligible).
-func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexContainer, tokensContainer, rolesContainer string) error {
+func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexContainer, tokensContainer, rolesContainer, orgsContainer string) error {
 	cred, err := azcosmos.NewKeyCredential(key)
 	if err != nil {
 		return fmt.Errorf("cosmos key credential: %w", err)
@@ -83,6 +83,23 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		IndexingPolicy:         noIndex,
 	}, nil); err != nil && !isConflict(err) {
 		return fmt.Errorf("cosmos create container %q: %w", rolesContainer, err)
+	}
+
+	// organizations — the federations and branches. Read whole, once per process,
+	// into the in-memory tree; written by hand a few times a year. "consistent"
+	// with every path excluded permits the SELECT * FROM c scan at zero
+	// write-time index cost, the same arrangement refresh_tokens uses below.
+	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
+		ID:                     orgsContainer,
+		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/id"}, Kind: azcosmos.PartitionKeyKindHash},
+		IndexingPolicy: &azcosmos.IndexingPolicy{
+			Automatic:     true,
+			IndexingMode:  azcosmos.IndexingMode("consistent"),
+			IncludedPaths: []azcosmos.IncludedPath{},
+			ExcludedPaths: []azcosmos.ExcludedPath{{Path: "/*"}},
+		},
+	}, nil); err != nil && !isConflict(err) {
+		return fmt.Errorf("cosmos create container %q: %w", orgsContainer, err)
 	}
 
 	// refresh_tokens — point reads + partition-scoped scan in DeleteByUserID.
