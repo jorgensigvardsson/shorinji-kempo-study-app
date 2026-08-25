@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 )
 
 // authedRequest builds a request carrying an access-token cookie for a user with
@@ -18,7 +19,7 @@ func authedRequest(t *testing.T, h *Handler, method, path, id, email string, rol
 	if len(family) > 0 {
 		fam = family[0]
 	}
-	tok, err := h.tokens.Issue(id, email, "", roles, fam)
+	tok, err := h.tokens.Issue(token.Identity{Subject: id, Email: email, Roles: roles, Family: fam})
 	if err != nil {
 		t.Fatalf("issue token: %v", err)
 	}

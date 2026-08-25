@@ -31,6 +31,31 @@ type Claims struct {
 	// session (e.g. to log out every *other* session). Omitted when empty, which
 	// can happen for access tokens minted before this claim existed.
 	Family string `json:"fam,omitempty"`
+	// Branch is the branch the holder belongs to, and Federation the federation
+	// that branch sits in, resolved when the token is minted so a service can
+	// scope a request without asking the auth service anything.
+	//
+	// Both are omitted when empty, and empty is meaningful in both directions: a
+	// member of a WSKO-attached branch has no federation, and a user admitted
+	// before the branch model existed has neither. Both are stale for at most the
+	// token's lifetime, which is the right precision for a branch transfer and
+	// the wrong one for anything that must take effect at once.
+	Branch     string `json:"branch,omitempty"`
+	Federation string `json:"fed,omitempty"`
+}
+
+// Identity is everything a token says about its holder. It is a struct rather
+// than a parameter list because most of its fields are strings, and a caller
+// swapping two of them would mint a token that is wrong in a way nothing else
+// would notice.
+type Identity struct {
+	Subject    string
+	Email      string
+	Name       string
+	Roles      []string
+	Family     string
+	Branch     string
+	Federation string
 }
 
 type Manager struct {
@@ -47,22 +72,23 @@ func NewManager(key *rsa.PrivateKey, issuer string) *Manager {
 	return &Manager{privateKey: key, issuer: issuer, kid: kid}
 }
 
-// Issue mints a signed RS256 access token for the given user, stamping their
-// display name, roles, and the refresh-token family of the owning session.
-func (m *Manager) Issue(sub, email, name string, roles []string, family string) (string, error) {
+// Issue mints a signed RS256 access token describing the given identity.
+func (m *Manager) Issue(id Identity) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.issuer,
-			Subject:   sub,
+			Subject:   id.Subject,
 			Audience:  jwt.ClaimStrings{"shorinji-persistence"},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 		},
-		Email:  email,
-		Name:   name,
-		Roles:  roles,
-		Family: family,
+		Email:      id.Email,
+		Name:       id.Name,
+		Roles:      id.Roles,
+		Family:     id.Family,
+		Branch:     id.Branch,
+		Federation: id.Federation,
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t.Header["kid"] = m.kid

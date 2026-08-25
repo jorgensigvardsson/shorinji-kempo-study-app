@@ -250,3 +250,64 @@ func TestUpdateBranch_RenameIsLocalButMovingIsNot(t *testing.T) {
 		t.Errorf("renaming a branch outside the caller's scope: %d, want 404", code)
 	}
 }
+
+// What a token says about where its holder trains, resolved when the token is
+// minted so that no service has to ask the auth service afterwards.
+func TestIdentityFor_ResolvesBranchAndFederation(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+
+	cases := map[string]struct{ branch, federation string }{
+		"k1":     {"karlstad", "SE"},
+		"o1":     {"oslo", "NO"},
+		"t1":     {"tokyo", ""}, // attached to WSKO, so no federation
+		"nobody": {"", ""},      // no branch, so neither
+	}
+	for userID, want := range cases {
+		user, err := h.users.FindByID(userID)
+		if err != nil || user == nil {
+			t.Fatalf("seed user %s missing: %v", userID, err)
+		}
+		id := h.identityFor(user, "fam-1")
+		if id.Branch != want.branch || id.Federation != want.federation {
+			t.Errorf("%s: branch = %q, federation = %q; want %q and %q",
+				userID, id.Branch, id.Federation, want.branch, want.federation)
+		}
+		if id.Subject != userID || id.Family != "fam-1" {
+			t.Errorf("%s: subject = %q, family = %q", userID, id.Subject, id.Family)
+		}
+	}
+
+	// Roles come from the store at issue time, so a grant takes effect on the
+	// holder's next token rather than needing them to sign in again.
+	if err := h.roles.SetRoles("k1@example.org", []string{authz.BranchAdmin("karlstad")}); err != nil {
+		t.Fatalf("grant: %v", err)
+	}
+	user, _ := h.users.FindByID("k1")
+	if id := h.identityFor(user, "fam-1"); len(id.Roles) != 1 || id.Roles[0] != authz.BranchAdmin("karlstad") {
+		t.Errorf("roles = %v, want the branch admin grant", id.Roles)
+	}
+}
+
+// /auth/me is where the frontend learns its own branch, so it resolves the
+// federation rather than making the client fetch the tree to find out.
+func TestMe_CarriesBranchAndFederation(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+
+	rec := httptest.NewRecorder()
+	h.me(rec, authedRequest(t, h, http.MethodGet, "/auth/me", "k1", "k1@example.org", nil, nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	var got struct {
+		BranchID   string `json:"branchId"`
+		Federation string `json:"federation"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if got.BranchID != "karlstad" || got.Federation != "SE" {
+		t.Errorf("me = %+v, want karlstad in SE", got)
+	}
+}

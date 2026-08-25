@@ -115,6 +115,23 @@ func NewHandler(
 	return h
 }
 
+// identityFor assembles everything a token says about a user at the moment it
+// is minted: their roles, their branch, and the federation that branch belongs
+// to. Both places that issue a token go through here, so the two cannot drift
+// apart — which they would, silently, since a token missing a claim looks
+// exactly like a user who has nothing to put in it.
+func (h *Handler) identityFor(user *store.User, family string) token.Identity {
+	return token.Identity{
+		Subject:    user.ID,
+		Email:      user.Email,
+		Name:       user.DisplayName,
+		Roles:      h.rolesFor(user.Email),
+		Family:     family,
+		Branch:     user.BranchID,
+		Federation: h.orgs.FederationOf(user.BranchID),
+	}
+}
+
 // rolesFor resolves a user's roles, failing open to no roles so a roles-store
 // outage can never block login (least privilege: no roles ⇒ no admin powers).
 func (h *Handler) rolesFor(email string) []string {
@@ -411,7 +428,7 @@ func (h *Handler) issueSession(w http.ResponseWriter, user *store.User) error {
 	if err != nil {
 		return fmt.Errorf("family ID generate: %w", err)
 	}
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email), familyID)
+	accessToken, err := h.tokens.Issue(h.identityFor(user, familyID))
 	if err != nil {
 		return fmt.Errorf("token issue: %w", err)
 	}
@@ -608,7 +625,10 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(struct {
 		*store.User
 		Roles []string `json:"roles"`
-	}{User: user, Roles: roles})
+		// Resolved rather than stored: the branch knows its federation, and the
+		// frontend should not have to fetch the tree to find out.
+		Federation string `json:"federation,omitempty"`
+	}{User: user, Roles: roles, Federation: h.orgs.FederationOf(user.BranchID)})
 }
 
 func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
@@ -675,7 +695,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.tokens.Issue(user.ID, user.Email, user.DisplayName, h.rolesFor(user.Email), rt.FamilyID)
+	accessToken, err := h.tokens.Issue(h.identityFor(user, rt.FamilyID))
 	if err != nil {
 		log.Printf("token issue for %s: %v", user.ID, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)

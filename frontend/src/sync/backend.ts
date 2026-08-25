@@ -42,6 +42,11 @@ export interface BackendUserInfo {
   displayName: string;
   providers: string[];
   roles: string[];
+  // The branch this practitioner belongs to, and the federation it sits in.
+  // Both are empty for a member of a WSKO-attached branch (which has no
+  // federation) and for an account admitted before branches existed.
+  branchId: string;
+  federation: string;
 }
 
 // A linked provider identity as returned by the admin user listing.
@@ -208,13 +213,15 @@ export class BackendSyncClient {
         }
       }
       if (resp.ok) {
-        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[] };
+        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[]; branchId?: string; federation?: string };
         localStorage.setItem(connectedKey, "true");
         localStorage.setItem(userInfoKey, JSON.stringify({
           email: user.email,
           displayName: user.displayName,
           providers: Object.keys(user.linkedIdentities ?? {}),
           roles: user.roles ?? [],
+          branchId: user.branchId ?? "",
+          federation: user.federation ?? "",
         } satisfies BackendUserInfo));
         localStorage.removeItem(authExpiredKey);
         return true;
@@ -234,12 +241,15 @@ export class BackendSyncClient {
     if (!raw) return null;
     try {
       const parsed = JSON.parse(raw) as Partial<BackendUserInfo>;
-      // Default arrays so values cached before roles existed stay safe to read.
+      // Default every field, so info cached by a build that predates any of them
+      // stays safe to read rather than yielding undefined at the call site.
       return {
         email: parsed.email ?? "",
         displayName: parsed.displayName ?? "",
         providers: parsed.providers ?? [],
         roles: parsed.roles ?? [],
+        branchId: parsed.branchId ?? "",
+        federation: parsed.federation ?? "",
       };
     } catch { return null; }
   }
