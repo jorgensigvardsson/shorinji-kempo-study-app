@@ -33,6 +33,10 @@ the applicant wants to join.
 - **Everything is built against the file-based stores first.** Cosmos is a deployment detail, not a
   development dependency; nothing in this plan requires touching staging until the whole thing works
   locally. See §3.
+- **Nothing ships until every phase is done.** The four phases are a build order, not a release
+  schedule. Shipping Phase 1 alone would leave enrollment creating users with no branch — a state
+  only a global admin can see — and that window has no reason to exist in production when it costs
+  nothing locally. See §8.
 - **WSKO is implicit.** It is the root of the tree, not a stored record. There is one international
   body and modelling a second buys nothing but joins.
 - **The "at least 4 branches per federation" rule is not enforced.** It is a WSKO governance rule,
@@ -123,6 +127,12 @@ type User struct {
 Nullable at the schema level, non-null by invariant once Phase 2 ships. It has to be nullable: users
 created between Phase 1 and Phase 2 still auto-enroll without a branch, and the field is what the
 migration fills in.
+
+A user with no branch is visible only to a global admin: `Covers` reads an empty branch id the same
+way it reads an unknown one, which is the right answer — someone who belongs to nothing belongs to
+the root. After Phase 2 the state is unreachable, so writing a user without a branch is logged as a
+warning rather than tolerated quietly. The window in which it is reachable at all belongs to
+development, not to production; see §8.
 
 `users` container indexing must gain `/branchId`:
 
@@ -338,7 +348,7 @@ are what the existing handler tests already use, so new tests get scope coverage
 checks run with `npm run build` — **not** `tsc --noEmit`, which checks nothing in this repo.
 
 Deployment — the two Cosmos indexing changes, the provisioning additions, and running the migration
-against prod — is a single step at the very end, described in §4.3.
+against prod — happens once, after every phase is finished, and is described in §8.
 
 ---
 
@@ -364,7 +374,7 @@ implementation filters in memory. `RoleStore` gains `ListAll`.
 | Method | Path | Description |
 |---|---|---|
 | GET | `/auth/org/branches` | **Unauthenticated.** `[{id, name, federationId, federationName}]` for the Phase 2 branch picker. No PII — club lists are public information anyway. Served from the in-memory tree, so it costs nothing |
-| GET | `/auth/admin/org` | The tree as the caller may see it (whole tree for global/WSKO, own federation for a federation admin, own branch for a branch admin) |
+| GET | `/auth/admin/org` | The tree as the caller may see it (whole tree for global/WSKO, own federation for a federation admin, own branch for a branch admin). Branches belonging to no federation come back as their own group, headed **WSKO** — they hang from the root, and a listing without that heading reads as though they had been left out |
 | POST | `/auth/admin/federations` | `{id, name}`; id validated as two uppercase letters. Requires `{wsko}` |
 | PATCH | `/auth/admin/federations/{id}` | Rename. Requires `{federation, id}` |
 | POST | `/auth/admin/branches` | `{name, federationId?}`. A federation admin's request is forced to their own federation regardless of what the body says; omitting `federationId` (direct WSKO member) requires `{wsko}` |
@@ -382,7 +392,7 @@ a grant immediately rather than at the next token issue.
 full role array. No compatibility shim on the backend; the two ship together. The real UI arrives in
 Phase 3.
 
-### 4.3 Migration, and the one moment staging and prod are touched
+### 4.3 The migration tool
 
 A one-shot in `tools/` (or a `tools/migrate` subcommand), written against the store interfaces so it
 runs against a local data dir or a Cosmos account depending on the same environment variables the
@@ -393,14 +403,8 @@ services use. `--dry-run` supported, like its neighbour.
 3. Set `branchId` on every existing user to that branch.
 4. Grant nobody `wsko_admin` — `admin` already covers it.
 
-Run it locally first; it is the same code path that will later run against prod.
-
-When the feature is finished and you choose to deploy, the order for staging and then prod is:
-
-1. Apply the two indexing-policy changes out-of-band (`users` gains `/branchId`; `roles` goes
-   `none` → `consistent`). **Before** the code that queries them is live.
-2. Deploy. `ProvisionCosmos` creates `organizations` and `joinrequests` on startup.
-3. Run the migration tool.
+It is written in Phase 1 and used from then on — it seeds every local data dir throughout
+development, so by the time it runs against prod (§8) it is the most exercised code on the branch.
 
 ---
 
@@ -476,7 +480,7 @@ which also disposes of the 100-members-in-one-list problem — you are always in
 
 | Route | Contents |
 |---|---|
-| `/admin/organization` | The tree. Create/rename federations and branches, move branches. Rendered from `GET /auth/admin/org`, so a branch admin simply sees one node |
+| `/admin/organization` | The tree. Create/rename federations and branches, move branches. Rendered from `GET /auth/admin/org`, so a branch admin simply sees one node. Branches in no federation sit under a **WSKO** heading; that label is a proper noun like every other organization name, so it is a constant in the frontend rather than an entry in `translations.json` |
 | `/admin/branches/:id/members` | One branch's members, with a name/email filter |
 | `/admin/requests` | Pending join requests across the caller's scopes, with approve/deny |
 | `/admin/users/:id` | One user: display name, linked identities, roles (grantable within the caller's scope), force-logout |
@@ -521,7 +525,29 @@ approve/deny UI from Phase 2 almost wholesale.
 
 ---
 
-## 8. GDPR
+## 8. Shipping
+
+Nothing reaches staging or prod until all four phases are finished, for the reason given in the
+decisions: Phase 1 on its own would leave enrollment minting branchless users in the one environment
+where that is expensive. The whole feature lands in a single deploy.
+
+The order, staging first and then prod:
+
+1. Apply the two indexing-policy changes out-of-band — `users` gains `/branchId`, `roles` goes
+   `none` → `consistent`. **Before** the code that queries them is live, because `ProvisionCosmos`
+   skips containers that already exist and will not do it on the way past.
+2. Deploy. `ProvisionCosmos` creates `organizations` and `joinrequests` on startup.
+3. Run the migration tool (§4.3) — by then, the same tool that has been seeding local data dirs
+   for the whole of development.
+4. Grant the first scoped roles. This is the only grant that has to come from a global admin;
+   everything after it delegates downwards.
+
+Staging exists to rehearse exactly this sequence, which is the argument for running it there first
+rather than treating it as a second production.
+
+---
+
+## 9. GDPR
 
 Two additions to the register in BACKEND.md and to `PrivacyPolicy.tsx`:
 
@@ -537,7 +563,7 @@ short pre-account section, since it currently only describes authenticated users
 
 ---
 
-## 9. Documentation
+## 10. Documentation
 
 - **BACKEND.md** — new containers, the two indexing-policy changes and their out-of-band caveat, the
   scoped-role vocabulary, the `branch`/`fed` claims, the new endpoints, the admission flow diagram,
