@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
-import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
@@ -39,6 +39,7 @@ const Settings = page(() => import("./Settings.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
 const AdminUsers = page(() => import("./AdminUsers.tsx"));
 const AdminRequests = page(() => import("./AdminRequests.tsx"));
+const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
 const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
@@ -165,6 +166,12 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
     // it is a technical power rather than an organizational one, and the
     // persistence service checks for exactly that role.
     ...(isAnyAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
+        path: "/admin/organization",
+        component: () => <AdminOrganization />,
+        menuText: translator.translate("Organisation"),
+        icon: Diagram3,
+        hideOnStartPage: true,
+    } satisfies Route, {
         path: "/admin/requests",
         component: () => <AdminRequests />,
         menuText: translator.translate("Ansökningar"),
