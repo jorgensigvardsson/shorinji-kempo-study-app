@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
-import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
@@ -39,6 +39,7 @@ const Settings = page(() => import("./Settings.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
 const AdminRequests = page(() => import("./AdminRequests.tsx"));
 const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
+const MyBranch = page(() => import("./MyBranch.tsx"));
 const AdminBranchMembers = page(() => import("./AdminBranchMembers.tsx"));
 const AdminUser = page(() => import("./AdminUser.tsx"));
 const Groups = page(() => import("./Groups.tsx"));
@@ -162,6 +163,16 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
     },
+    // A member's own place in the organization, and the one thing they can do
+    // about it: ask another branch to take them in. Only for accounts — there is
+    // nothing to show somebody using the app without one.
+    ...(getSyncManager().getBackendUserInfo() !== null ? [{
+        path: "/branch",
+        component: () => <MyBranch />,
+        menuText: translator.translate("Min gren"),
+        icon: GeoAlt,
+        hideOnStartPage: true,
+    } satisfies Route] : []),
     // Two gates, not one. The organizational pages are for anybody holding a
     // scoped role — a branch admin sees their branch and nothing else, because
     // that is all the server returns them. Broadcasting stays on `admin` alone:

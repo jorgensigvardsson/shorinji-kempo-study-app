@@ -7,7 +7,7 @@ the applicant wants to join.
 
 ## Status
 
-**Phases 1 to 3 are built** and deployed nowhere. Everything below runs on the file-based stores;
+**All four phases are built** and deployed nowhere. Everything below runs on the file-based stores;
 no Cosmos account, staging or production has been touched, by decision — see §8.
 
 | | Where |
@@ -21,14 +21,15 @@ no Cosmos account, staging or production has been touched, by decision — see �
 | ✅ Admission (Phase 2) | enrollment issues a join ticket instead of an account; requests, decisions and their mail — §5 |
 | ✅ Admin UI (Phase 3) | organization tree, branch members, one user, the waiting list, and the menu's count — §6 |
 | ✅ Member language | reported by the app, so unprompted mail is written in a language the reader reads — §1.5 |
+| ✅ Transfers (Phase 4) | a member who has moved asks the club there to take them in; the one they left is told — §7 |
 
-`AdminUsers.tsx` is gone, and with it the flat list. What remains:
+Every phase in this document is built and green against the file-based stores. What remains is
+wording, translation, and the deployment nobody has attempted yet:
 
 | | What | Where |
 |---|---|---|
-| ⬜ | Phase 4 — branch transfers | §7 |
 | ⬜ | GDPR: the register row in BACKEND.md and the pre-account section in `PrivacyPolicy.tsx` | §9 |
-| ⬜ | Translation pass: the new Swedish UI strings, and a native reading of the ja/tr mail copy — including the admin notice, which grew copy in all four languages | |
+| ⬜ | Translation pass: the new Swedish UI strings, and a native reading of the ja/tr mail copy — the admin notice, and all four transfer messages, are a first pass | |
 | ⬜ | AGENTS.md: the covering rule, and that organization names are never translated | §10 |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 
@@ -574,7 +575,7 @@ off — offering a control the server would refuse is worse than offering none. 
 
 ---
 
-## 7. Phase 4 — Branch transfers — ⬜ not started
+## 7. Phase 4 — Branch transfers — ✅ built
 
 Members move to other towns; this is the most common real-world operation and the reason "change a
 user's branch" is deliberately absent from Phase 1's endpoints.
@@ -604,6 +605,27 @@ machinery.
 Structurally this is the join-request flow with a different source of truth for identity (an
 authenticated member rather than a join ticket), so it reuses the notification fan-out and the
 approve/deny UI from Phase 2 almost wholesale.
+
+**As built**, three things settled differently from the sketch above:
+
+- **The request is keyed by the member's user id**, not a UUID of its own. "One pending transfer per
+  member" is then structural rather than a rule somebody has to remember, and "do I have one?" is a
+  point read — exactly the trade `joinrequests` makes, for exactly the same reason. Nothing about the
+  member is stored on it beyond that id: their name, address and language live on the user record,
+  which is a point read away and cannot go stale against itself.
+- **A refusal is kept for ninety days and then leaves on its own**, the way a denied application
+  does, so asking again arrives with its history. The member can clear it themselves at any time —
+  there is no reason to make somebody live with the record of being told no.
+- **The branch being left is read at acceptance**, not taken from the request. If an admin moved the
+  member while it waited, the club that actually loses somebody is that one.
+
+The admin side is not a second queue: transfers appear under their own heading on `/admin/requests`,
+because an admin has one list of people waiting on them rather than two. The member side is
+`/branch` — where they train, and the one thing they can do about it.
+
+The moved member's token still names the old branch for up to an hour. That is left to expire rather
+than revoking their sessions: nothing in the app turns on it that they could not do anyway, and
+forcing somebody off every device over a piece of good news is a poor trade.
 
 ---
 

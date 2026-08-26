@@ -2,11 +2,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const adminListRequests = vi.fn();
+const adminListTransfers = vi.fn();
 let roles: string[] = [];
 
 vi.mock("./sync/manager", () => ({
   getSyncManager: () => ({
     adminListRequests,
+    adminListTransfers,
     getBackendUserInfo: () => ({ roles }),
   }),
 }));
@@ -18,10 +20,12 @@ const Badge = () => <span data-testid="count">{usePendingRequests()}</span>;
 describe("usePendingRequests", () => {
   beforeEach(() => {
     roles = ["branch_admin:b-karlstad"];
-    adminListRequests.mockReset().mockResolvedValue([{ email: "a@example.org" }, { email: "b@example.org" }]);
+    adminListRequests.mockReset().mockResolvedValue([{ email: "a@example.org" }]);
+    adminListTransfers.mockReset().mockResolvedValue([{ id: "u1" }]);
     publishPendingRequests(0);
   });
 
+  // Both kinds of request count: an admin has one queue, not two.
   it("counts who is waiting on an admin", async () => {
     render(<Badge />);
     await waitFor(() => expect(screen.getByTestId("count").textContent).toBe("2"));

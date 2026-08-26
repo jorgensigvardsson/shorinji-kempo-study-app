@@ -318,6 +318,9 @@ corporate domain at the appropriate provider.
 | POST | `/auth/sessions/logout-others` | Revoke every refresh token for the caller except the current session's family (JWT required); 409 if the token predates the `fam` claim |
 | GET | `/auth/me` | Return authenticated user info (UUID, email, linkedIdentities) |
 | PUT | `/auth/me/language` | Record the UI language the app is being used in — body `{language}`, a BCP 47-ish tag. Only affects unprompted mail; the write is skipped when unchanged |
+| GET | `/auth/transfer` | The caller's own branch-transfer request, or 204 when they have none. A refused one comes back too, until it expires |
+| POST | `/auth/transfer` | Ask a branch to take the member in — body `{toBranchId, note?}`. 409 when one is already waiting, or when it names the branch they are already in |
+| DELETE | `/auth/transfer` | Withdraw the caller's own transfer request, or clear a refused one |
 | DELETE | `/auth/account` | Delete refresh tokens and the user record (JWT required) |
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
 | DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; 409 if it is the last one) |
@@ -340,6 +343,9 @@ corporate domain at the appropriate provider.
 | | | The notice to those admins goes out once per language rather than once per admin: a message can be in only one, and admins deciding the same request are as likely to reply to each other as to us |
 | POST | `/auth/admin/requests/{email}/approve` | Admit the applicant: the account is written first, the request deleted after |
 | POST | `/auth/admin/requests/{email}/deny` | Decline, keeping the decision for 90 days so a re-application arrives with its history |
+| GET | `/auth/admin/transfers` | Pending transfers **into** branches the caller covers. Transfers out are absent: the branch being left is told when it happens and has nothing to decide |
+| POST | `/auth/admin/transfers/{id}/accept` | Move the member: `{id}` is their user id. The branch they leave is read fresh, so an admin who moved them meanwhile is the one told |
+| POST | `/auth/admin/transfers/{id}/reject` | Refuse, keeping the decision for 90 days |
 
 The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
 every one of them asks whether the caller **covers the scope the action touches** rather than
@@ -446,6 +452,7 @@ database and containers on startup):
 | `roles` | auth | Role assignments keyed by email. `consistent` indexing with all paths excluded: point reads answer "what may this person do?", and a scan answers the reverse, "who administers this branch?" |
 | `organizations` | auth | Federations and branches. Read whole, once per process, into the in-memory tree |
 | `joinrequests` | auth | Pending applications, keyed by address so one per address is structural. TTL enabled with no default: a pending request never expires, a declined one carries its own and leaves on its own |
+| `transfers` | auth | Pending branch transfers, keyed by the member's user id so one pending transfer per member is structural. Same TTL arrangement as `joinrequests` |
 | `refresh_tokens` | auth | `consistent` indexing (all paths excluded) for partition scans |
 | `documents` | persistence | One app data document per user |
 | push subscriptions | persistence | Browser push subscriptions |

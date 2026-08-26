@@ -123,6 +123,32 @@ export interface AdminBranchMembers {
   members: AdminUser[];
 }
 
+// A member's own transfer request, from GET /auth/transfer. A refused one comes
+// back too, until it expires: being told no is part of what somebody is entitled
+// to see about themselves.
+export interface MyTransfer {
+  toBranchId: string;
+  toBranchName: string;
+  note?: string;
+  status: "pending" | "rejected";
+  createdAt: string;
+  decidedAt?: string;
+}
+
+// A pending transfer as the admins of the receiving branch see it.
+export interface AdminTransfer {
+  id: string; // the member's user id
+  memberName: string;
+  memberEmail: string;
+  fromBranchId?: string;
+  fromBranchName?: string;
+  toBranchId: string;
+  toBranchName: string;
+  note?: string;
+  createdAt: string;
+  previouslyRejectedAt?: string;
+}
+
 // A pending join request, as the admins who may decide it see it.
 export interface AdminJoinRequest {
   email: string;
@@ -271,6 +297,37 @@ export class BackendSyncClient {
     const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}`);
     if (!resp.ok) throw new AdminRequestError(resp.status);
     return await resp.json() as AdminUser;
+  }
+
+  // ── Branch transfers ─────────────────────────────────────────────────────
+
+  // The caller's own transfer request, or null when they have none.
+  async myTransfer(): Promise<MyTransfer | null> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/transfer`);
+    if (resp.status === 204) return null;
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as MyTransfer;
+  }
+
+  // Asks a branch to take the member in. 409 means they already have a request
+  // waiting, or asked for the branch they are already in.
+  async requestTransfer(toBranchId: string, note: string): Promise<void> {
+    await this.adminWrite("POST", `${authUrl}/auth/transfer`, { toBranchId, note });
+  }
+
+  async withdrawTransfer(): Promise<void> {
+    await this.adminWrite("DELETE", `${authUrl}/auth/transfer`);
+  }
+
+  async adminListTransfers(): Promise<AdminTransfer[]> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/transfers`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as AdminTransfer[];
+  }
+
+  async adminDecideTransfer(memberId: string, accept: boolean): Promise<void> {
+    const action = accept ? "accept" : "reject";
+    await this.adminWrite("POST", `${authUrl}/auth/admin/transfers/${encodeURIComponent(memberId)}/${action}`);
   }
 
   async adminListRequests(): Promise<AdminJoinRequest[]> {

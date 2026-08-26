@@ -4,9 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const adminListRequests = vi.fn();
 const adminDecideRequest = vi.fn();
+const adminListTransfers = vi.fn();
+const adminDecideTransfer = vi.fn();
 
 vi.mock("./sync/manager", () => ({
-  getSyncManager: () => ({ adminListRequests, adminDecideRequest }),
+  getSyncManager: () => ({ adminListRequests, adminDecideRequest, adminListTransfers, adminDecideTransfer }),
 }));
 
 import AdminRequests from "./AdminRequests";
@@ -26,6 +28,8 @@ describe("AdminRequests", () => {
   beforeEach(() => {
     adminListRequests.mockReset().mockResolvedValue(waiting);
     adminDecideRequest.mockReset().mockResolvedValue(undefined);
+    adminListTransfers.mockReset().mockResolvedValue([]);
+    adminDecideTransfer.mockReset().mockResolvedValue(undefined);
   });
 
   it("shows who is waiting, in their own words", async () => {
@@ -97,5 +101,76 @@ describe("AdminRequests", () => {
     adminListRequests.mockResolvedValue(waiting);
     await userEvent.setup().click(screen.getByRole("button", { name: "Försök igen" }));
     expect(await screen.findByText("Hopeful Person")).toBeTruthy();
+  });
+});
+
+// A member who has moved is not a stranger at the door, and the two are read
+// differently — but they are decided the same way, on the same page, because an
+// admin has one queue rather than two.
+describe("AdminRequests, transfers", () => {
+  const moving = [{
+    id: "u1", memberName: "Moved Person", memberEmail: "moved@example.org",
+    fromBranchId: "b-oslo", fromBranchName: "Oslo",
+    toBranchId: "b-karlstad", toBranchName: "Karlstad",
+    note: "Har flyttat till Karlstad", createdAt: "2026-08-26T00:00:00Z",
+  }];
+
+  beforeEach(() => {
+    adminListRequests.mockReset().mockResolvedValue([]);
+    adminDecideRequest.mockReset().mockResolvedValue(undefined);
+    adminListTransfers.mockReset().mockResolvedValue(moving);
+    adminDecideTransfer.mockReset().mockResolvedValue(undefined);
+  });
+
+  it("says where a transferring member is coming from", async () => {
+    render(<AdminRequests />);
+    expect(await screen.findByText("Moved Person")).toBeTruthy();
+    expect(screen.getByText("Oslo → Karlstad")).toBeTruthy();
+    expect(screen.getByText("Har flyttat till Karlstad")).toBeTruthy();
+    expect(screen.getByText("Byte av gren")).toBeTruthy();
+  });
+
+  it("accepts a transfer in one click", async () => {
+    const user = userEvent.setup();
+    render(<AdminRequests />);
+    await screen.findByText("Moved Person");
+
+    await user.click(screen.getByRole("button", { name: "Godkänn" }));
+
+    await waitFor(() => expect(adminDecideTransfer).toHaveBeenCalledWith("u1", true));
+    await waitFor(() => expect(screen.queryByText("Moved Person")).toBeNull());
+    expect(adminDecideRequest).not.toHaveBeenCalled();
+  });
+
+  // A refusal sends a message nobody can unsend, whichever kind of request it is.
+  it("asks before refusing a transfer", async () => {
+    const user = userEvent.setup();
+    render(<AdminRequests />);
+    await screen.findByText("Moved Person");
+
+    await user.click(screen.getByRole("button", { name: "Neka" }));
+    expect(adminDecideTransfer).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Ja, neka" }));
+    await waitFor(() => expect(adminDecideTransfer).toHaveBeenCalledWith("u1", false));
+  });
+
+  it("shows both kinds under their own headings", async () => {
+    adminListRequests.mockResolvedValue([{
+      email: "hopeful@example.org", name: "Hopeful Person",
+      branchId: "b-karlstad", branchName: "Karlstad", createdAt: "2026-08-26T00:00:00Z",
+    }]);
+    render(<AdminRequests />);
+
+    expect(await screen.findByText("Nya medlemmar")).toBeTruthy();
+    expect(screen.getByText("Byte av gren")).toBeTruthy();
+    expect(screen.getByText("Hopeful Person")).toBeTruthy();
+    expect(screen.getByText("Moved Person")).toBeTruthy();
+  });
+
+  it("says nothing is waiting only when neither kind is", async () => {
+    adminListTransfers.mockResolvedValue([]);
+    render(<AdminRequests />);
+    expect(await screen.findByText("Inga ansökningar väntar.")).toBeTruthy();
   });
 });

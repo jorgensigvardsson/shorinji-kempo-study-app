@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { getSyncManager } from "./sync/manager";
 import { isAnyAdmin } from "./roles";
 
-// How many people are waiting on this admin's decision, kept where the menu can
-// see it. A request nobody notices is a request that rots: somebody applies,
-// nothing visibly happens, and the only sign is an email that was read on a
-// phone three weeks ago.
+// How many people are waiting on this admin's decision — applicants at the door
+// and members asking to transfer in — kept where the menu can see it. A request
+// nobody notices is a request that rots: somebody applies, nothing visibly
+// happens, and the only sign is an email read on a phone three weeks ago.
 //
 // The count is a courtesy rather than a source of truth — it is stale the moment
 // another admin decides something, and it is allowed to be. Anything that reads
@@ -38,8 +38,11 @@ export function usePendingRequests(): number {
     let live = true;
     void (async () => {
       try {
-        const waiting = await getSyncManager().adminListRequests();
-        if (live) publishPendingRequests(waiting.length);
+        const [waiting, moving] = await Promise.all([
+          getSyncManager().adminListRequests(),
+          getSyncManager().adminListTransfers(),
+        ]);
+        if (live) publishPendingRequests(waiting.length + moving.length);
       } catch {
         // A badge is not worth an error message. The queue page says so properly
         // when it cannot reach the server.

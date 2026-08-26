@@ -212,6 +212,26 @@ class SyncManager {
     return await this.backendClient.adminGetUser(id);
   }
 
+  async myTransfer() {
+    return await this.backendClient.myTransfer();
+  }
+
+  async requestTransfer(toBranchId: string, note: string) {
+    await this.backendClient.requestTransfer(toBranchId, note);
+  }
+
+  async withdrawTransfer() {
+    await this.backendClient.withdrawTransfer();
+  }
+
+  async adminListTransfers() {
+    return await this.backendClient.adminListTransfers();
+  }
+
+  async adminDecideTransfer(memberId: string, accept: boolean) {
+    await this.backendClient.adminDecideTransfer(memberId, accept);
+  }
+
   async adminListRequests() {
     return await this.backendClient.adminListRequests();
   }
