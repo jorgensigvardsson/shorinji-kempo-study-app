@@ -1546,6 +1546,7 @@
   "frivilligt": "任意",
   "T.ex. när du tränar, eller vem som kan känna igen dig.": "例：稽古している曜日や、あなたを知っている方など。",
   "Din ansökan är inskickad": "申請を送信しました",
+  "Din ansökan om medlemskap i {0} väntar på att godkännas. Du får ett mejl när den har behandlats.": "{0}への入会申請は承認待ちです。処理が完了するとメールが届きます。",
   "Återkalla ansökan": "申請を取り消す",
   "Ansökan kunde inte återkallas. Försök igen.": "申請を取り消せませんでした。もう一度お試しください。",
   "Det finns redan ett konto för den här adressen. Logga in i stället.": "このアドレスのアカウントはすでに存在します。ログインしてください。",

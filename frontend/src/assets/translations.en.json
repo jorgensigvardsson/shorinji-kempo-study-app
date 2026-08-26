@@ -1893,6 +1893,7 @@
   "frivilligt": "optional",
   "T.ex. när du tränar, eller vem som kan känna igen dig.": "For example when you train, or who might recognise you.",
   "Din ansökan är inskickad": "Your application has been sent",
+  "Din ansökan om medlemskap i {0} väntar på att godkännas. Du får ett mejl när den har behandlats.": "Your membership application to {0} is awaiting approval. You'll get an email once it has been processed.",
   "Återkalla ansökan": "Withdraw application",
   "Ansökan kunde inte återkallas. Försök igen.": "The application could not be withdrawn. Please try again.",
   "Det finns redan ett konto för den här adressen. Logga in i stället.": "There is already an account for this address. Sign in instead.",
