@@ -65,14 +65,14 @@ const AdminBranchMembers = () => {
     if (branch?.federationId !== undefined && branch.federationId !== "" && roles.includes(federationAdmin(branch.federationId))) {
       return translator.translate("Förbundsadministratör");
     }
-    if (roles.includes(branchAdmin(id))) return translator.translate("Grenadministratör");
+    if (roles.includes(branchAdmin(id))) return translator.translate("Klubbadministratör");
     return null;
   };
 
   if (missing) {
     return (
       <div>
-        <p className="text-body-secondary">{translator.translate("Den här grenen finns inte, eller så har du inte behörighet till den.")}</p>
+        <p className="text-body-secondary">{translator.translate("Den här klubben finns inte, eller så har du inte behörighet till den.")}</p>
         <Link to="/admin/organization">{translator.translate("Till organisationen")}</Link>
       </div>
     );
@@ -117,7 +117,7 @@ const AdminBranchMembers = () => {
       {members.length === 0 ? (
         <p className="text-body-secondary">
           {branch.members.length === 0
-            ? translator.translate("Grenen har inga medlemmar ännu.")
+            ? translator.translate("Klubben har inga medlemmar ännu.")
             : translator.translate("Ingen medlem matchar filtret.")}
         </p>
       ) : (

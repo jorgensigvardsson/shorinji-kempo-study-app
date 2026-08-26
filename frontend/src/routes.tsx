@@ -169,7 +169,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
     ...(getSyncManager().getBackendUserInfo() !== null ? [{
         path: "/branch",
         component: () => <MyBranch />,
-        menuText: translator.translate("Min gren"),
+        menuText: translator.translate("Min klubb"),
         icon: GeoAlt,
         hideOnStartPage: true,
     } satisfies Route] : []),

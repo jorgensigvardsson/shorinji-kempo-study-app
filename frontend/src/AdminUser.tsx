@@ -191,7 +191,7 @@ const AdminUser = () => {
       <p className="text-secondary">
         {branch !== undefined
           ? <Link to={`/admin/branches/${encodeURIComponent(branch.id)}/members`}>{branch.name}</Link>
-          : translator.translate("Ingen gren")}
+          : translator.translate("Ingen klubb")}
         {federation !== undefined && <> · {federation.name}</>}
       </p>
 

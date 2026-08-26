@@ -90,7 +90,7 @@ const MyBranch = () => {
   if (loadError) {
     return (
       <div>
-        <p className="text-danger">{translator.translate("Kunde inte hämta grenarna.")}</p>
+        <p className="text-danger">{translator.translate("Kunde inte hämta klubbarna.")}</p>
         <Button variant="outline-secondary" onClick={reload}>{translator.translate("Försök igen")}</Button>
       </div>
     );
@@ -119,13 +119,13 @@ const MyBranch = () => {
 
   return (
     <div>
-      <h1 className="h4">{translator.translate("Min gren")}</h1>
+      <h1 className="h4">{translator.translate("Min klubb")}</h1>
 
       <Card className="mb-3">
         <Card.Body>
           <div className="small text-body-secondary">{translator.translate("Du tränar i")}</div>
           <div className="fs-5">
-            {current?.name ?? <span className="text-body-secondary">{translator.translate("Ingen gren")}</span>}
+            {current?.name ?? <span className="text-body-secondary">{translator.translate("Ingen klubb")}</span>}
           </div>
           {current?.federationName !== undefined && current.federationName !== "" && (
             <div className="text-body-secondary">{current.federationName}</div>
@@ -144,7 +144,7 @@ const MyBranch = () => {
                   {translator.translate("Du har ansökt om att byta till")} <strong>{transfer.toBranchName}</strong>.
                 </div>
                 <div className="text-body-secondary small">
-                  {translator.translate("Grenens administratörer har fått din ansökan och svarar via e-post.")}
+                  {translator.translate("Klubbens administratörer har fått din ansökan och svarar via e-post.")}
                 </div>
                 <div>
                   <Button variant="outline-secondary" size="sm" disabled={busy} onClick={() => { void withdraw(); }}>
@@ -158,7 +158,7 @@ const MyBranch = () => {
                   {translator.translate("Din ansökan om att byta till")} <strong>{transfer.toBranchName}</strong> {translator.translate("godkändes inte.")}
                 </div>
                 <div className="text-body-secondary small">
-                  {translator.translate("Du är kvar i din nuvarande gren. Du kan ansöka igen.")}
+                  {translator.translate("Du är kvar i din nuvarande klubb. Du kan ansöka igen.")}
                 </div>
                 <div>
                   <Button variant="outline-secondary" size="sm" disabled={busy} onClick={() => { void withdraw(); }}>
@@ -173,17 +173,17 @@ const MyBranch = () => {
         <Card>
           <Card.Body className="d-flex flex-column gap-3">
             <div>
-              <Form.Label className="mb-1">{translator.translate("Byt gren")}</Form.Label>
+              <Form.Label className="mb-1">{translator.translate("Byt klubb")}</Form.Label>
               <div className="text-body-secondary small mb-2">
-                {translator.translate("Har du flyttat? Ansök hos den gren du vill träna i — deras administratörer avgör.")}
+                {translator.translate("Har du flyttat? Ansök hos den klubb du vill träna i — deras administratörer avgör.")}
               </div>
               <Form.Select
                 value={destination}
                 disabled={busy}
-                aria-label={translator.translate("Gren")}
+                aria-label={translator.translate("Klubb")}
                 onChange={e => setDestination(e.target.value)}
               >
-                <option value="">{translator.translate("Välj gren")}</option>
+                <option value="">{translator.translate("Välj klubb")}</option>
                 {headings.map(heading => (
                   <optgroup key={heading} label={heading}>
                     {(groups.get(heading) ?? []).map(branch => (

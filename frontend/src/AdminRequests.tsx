@@ -116,7 +116,7 @@ const AdminRequests = () => {
 
       {moving.length > 0 && (
         <>
-          <h2 className="h6 text-body-secondary mt-4">{translator.translate("Byte av gren")}</h2>
+          <h2 className="h6 text-body-secondary mt-4">{translator.translate("Byte av klubb")}</h2>
           {moving.map(transfer => (
             <DecisionCard
               key={transfer.id}

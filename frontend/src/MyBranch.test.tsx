@@ -43,7 +43,7 @@ describe("MyBranch", () => {
   // are already in is not on the list.
   it("offers every branch but their own, grouped by federation", async () => {
     render(<MyBranch />);
-    const picker = await screen.findByLabelText("Gren");
+    const picker = await screen.findByLabelText("Klubb");
     const options = [...(picker as HTMLSelectElement).options].map(o => o.value);
     expect(options).toContain("b-goteborg");
     expect(options).toContain("b-tokyo");
@@ -56,9 +56,9 @@ describe("MyBranch", () => {
   it("asks the branch the member picked", async () => {
     const user = userEvent.setup();
     render(<MyBranch />);
-    await screen.findByLabelText("Gren");
+    await screen.findByLabelText("Klubb");
 
-    await user.selectOptions(screen.getByLabelText("Gren"), "b-goteborg");
+    await user.selectOptions(screen.getByLabelText("Klubb"), "b-goteborg");
     await user.type(screen.getByLabelText("Meddelande (frivilligt)"), "Jag har flyttat");
     await user.click(screen.getByRole("button", { name: "Skicka ansökan" }));
 
@@ -67,7 +67,7 @@ describe("MyBranch", () => {
 
   it("will not send until a branch is chosen", async () => {
     render(<MyBranch />);
-    await screen.findByLabelText("Gren");
+    await screen.findByLabelText("Klubb");
     expect((screen.getByRole("button", { name: "Skicka ansökan" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
@@ -80,11 +80,11 @@ describe("MyBranch", () => {
 
     expect(await screen.findByText("Göteborg")).toBeTruthy();
     // While one is waiting there is nothing to fill in: one at a time.
-    expect(screen.queryByLabelText("Gren")).toBeNull();
+    expect(screen.queryByLabelText("Klubb")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Ta tillbaka ansökan" }));
     await waitFor(() => expect(withdrawTransfer).toHaveBeenCalled());
-    expect(await screen.findByLabelText("Gren")).toBeTruthy();
+    expect(await screen.findByLabelText("Klubb")).toBeTruthy();
   });
 
   // Being told no is part of what somebody is entitled to see about themselves,
@@ -106,9 +106,9 @@ describe("MyBranch", () => {
     requestTransfer.mockRejectedValue(new AdminRequestError(409));
     const user = userEvent.setup();
     render(<MyBranch />);
-    await screen.findByLabelText("Gren");
+    await screen.findByLabelText("Klubb");
 
-    await user.selectOptions(screen.getByLabelText("Gren"), "b-goteborg");
+    await user.selectOptions(screen.getByLabelText("Klubb"), "b-goteborg");
     await user.click(screen.getByRole("button", { name: "Skicka ansökan" }));
 
     expect(await screen.findByText("Du har redan en ansökan som väntar på svar.")).toBeTruthy();
@@ -118,18 +118,18 @@ describe("MyBranch", () => {
     listBranches.mockRejectedValue(new Error("offline"));
     render(<MyBranch />);
 
-    expect(await screen.findByText("Kunde inte hämta grenarna.")).toBeTruthy();
+    expect(await screen.findByText("Kunde inte hämta klubbarna.")).toBeTruthy();
     listBranches.mockResolvedValue(branches);
     await userEvent.setup().click(screen.getByRole("button", { name: "Försök igen" }));
-    expect(await screen.findByLabelText("Gren")).toBeTruthy();
+    expect(await screen.findByLabelText("Klubb")).toBeTruthy();
   });
 
   // A member admitted before branches existed, or one whose club was removed.
   it("copes with a member who belongs to no branch", async () => {
     branchId = "";
     render(<MyBranch />);
-    expect(await screen.findByText("Ingen gren")).toBeTruthy();
-    const picker = screen.getByLabelText("Gren") as HTMLSelectElement;
+    expect(await screen.findByText("Ingen klubb")).toBeTruthy();
+    const picker = screen.getByLabelText("Klubb") as HTMLSelectElement;
     expect([...picker.options].map(o => o.value)).toContain("b-karlstad");
   });
 });

@@ -55,16 +55,16 @@ type transferCopy struct {
 
 var transferTemplates = map[string]transferCopy{
 	"sv": {
-		noticeSubject:  "Ansökan om byte av gren: %s vill gå med i %s",
-		noticeHeading:  "Ansökan om byte av gren",
+		noticeSubject:  "Ansökan om byte av klubb: %s vill gå med i %s",
+		noticeHeading:  "Ansökan om byte av klubb",
 		noticeBody:     "%s <%s> vill byta till %s.",
-		noticeFrom:     "Nuvarande gren: %s.",
+		noticeFrom:     "Nuvarande klubb: %s.",
 		noticeNote:     "Med egna ord:",
 		noticeRejected: "Obs: den här medlemmen nekades tidigare, den %s.",
 		noticeAction:   "Öppna appen för att godkänna eller neka ansökan.",
 
-		departureSubject: "%s har bytt gren",
-		departureHeading: "En medlem har bytt gren",
+		departureSubject: "%s har bytt klubb",
+		departureHeading: "En medlem har bytt klubb",
 		departureBody:    "%s <%s> har lämnat %s och är nu medlem i %s.",
 
 		acceptedSubject: "Välkommen till %s",
@@ -73,7 +73,7 @@ var transferTemplates = map[string]transferCopy{
 
 		rejectedSubject: "Din ansökan om byte till %s",
 		rejectedHeading: "Din ansökan om byte har inte godkänts",
-		rejectedBody:    "Din ansökan om att byta till %s har inte godkänts. Du är kvar i din nuvarande gren — kontakta gärna klubben om du vill veta mer.",
+		rejectedBody:    "Din ansökan om att byta till %s har inte godkänts. Du är kvar i din nuvarande klubb — kontakta gärna klubben om du vill veta mer.",
 	},
 	"en": {
 		noticeSubject:  "Transfer request: %s wants to join %s",

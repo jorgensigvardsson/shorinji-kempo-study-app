@@ -51,8 +51,8 @@ describe("AdminBranchMembers", () => {
 
   it("says who administers the branch", async () => {
     renderAt();
-    expect(await screen.findByText("Grenadministratör")).toBeTruthy();
-    expect(screen.getAllByText("Grenadministratör")).toHaveLength(1);
+    expect(await screen.findByText("Klubbadministratör")).toBeTruthy();
+    expect(screen.getAllByText("Klubbadministratör")).toHaveLength(1);
   });
 
   // A branch outside the caller's authority answers 404, exactly as one that does
@@ -61,7 +61,7 @@ describe("AdminBranchMembers", () => {
   it("treats a branch it may not see as one that is not there", async () => {
     adminBranchMembers.mockRejectedValue(new AdminRequestError(404));
     renderAt("someone-elses");
-    expect(await screen.findByText("Den här grenen finns inte, eller så har du inte behörighet till den.")).toBeTruthy();
+    expect(await screen.findByText("Den här klubben finns inte, eller så har du inte behörighet till den.")).toBeTruthy();
   });
 
   it("offers a retry when the listing cannot be fetched", async () => {
@@ -77,6 +77,6 @@ describe("AdminBranchMembers", () => {
   it("says plainly when a branch has nobody in it yet", async () => {
     adminBranchMembers.mockResolvedValue({ ...branch, members: [] });
     renderAt();
-    expect(await screen.findByText("Grenen har inga medlemmar ännu.")).toBeTruthy();
+    expect(await screen.findByText("Klubben har inga medlemmar ännu.")).toBeTruthy();
   });
 });

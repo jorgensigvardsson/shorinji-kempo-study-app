@@ -52,7 +52,7 @@ describe("AdminOrganization", () => {
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     expect(await screen.findByText("Svenska Shorinji Kempoförbundet")).toBeTruthy();
     expect(cardFor("Svenska Shorinji Kempoförbundet").getByText("Karlstad")).toBeTruthy();
-    expect(cardFor("Norges Shorinji Kempo Forbund").getByText("Inga grenar här.")).toBeTruthy();
+    expect(cardFor("Norges Shorinji Kempo Forbund").getByText("Inga klubbar här.")).toBeTruthy();
   });
 
   // A branch under no federation belongs to WSKO, which is a place in the
@@ -69,8 +69,8 @@ describe("AdminOrganization", () => {
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Svenska Shorinji Kempoförbundet");
 
-    await user.click(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Ny gren" }));
-    await user.type(screen.getByLabelText("Grenens namn"), "Arvika");
+    await user.click(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Ny klubb" }));
+    await user.type(screen.getByLabelText("Klubbens namn"), "Arvika");
     await user.click(screen.getByRole("button", { name: "Lägg till" }));
 
     await waitFor(() => expect(adminCreateBranch).toHaveBeenCalledWith("Arvika", "SE"));
@@ -85,8 +85,8 @@ describe("AdminOrganization", () => {
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Tokyo Honbu");
 
-    await user.click(cardFor("WSKO").getByRole("button", { name: "Ny gren" }));
-    await user.type(screen.getByLabelText("Grenens namn"), "Shibuya");
+    await user.click(cardFor("WSKO").getByRole("button", { name: "Ny klubb" }));
+    await user.type(screen.getByLabelText("Klubbens namn"), "Shibuya");
     await user.click(screen.getByRole("button", { name: "Lägg till" }));
 
     await waitFor(() => expect(adminCreateBranch).toHaveBeenCalledWith("Shibuya", undefined));
@@ -146,7 +146,7 @@ describe("AdminOrganization", () => {
     expect(screen.queryByRole("button", { name: "Nytt förbund" })).toBeNull();
     expect(screen.queryByLabelText("Tillhör")).toBeNull();
     expect(screen.queryByText("WSKO")).toBeNull();
-    expect(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Ny gren" })).toBeTruthy();
+    expect(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Ny klubb" })).toBeTruthy();
   });
 
   // A branch admin may rename their own branch and nothing else — no adding
@@ -161,7 +161,7 @@ describe("AdminOrganization", () => {
     await screen.findByText("Karlstad");
 
     const se = cardFor("Svenska Shorinji Kempoförbundet");
-    expect(se.queryByRole("button", { name: "Ny gren" })).toBeNull();
+    expect(se.queryByRole("button", { name: "Ny klubb" })).toBeNull();
     expect(se.getAllByRole("button", { name: "Byt namn" })).toHaveLength(1); // the branch alone
   });
 

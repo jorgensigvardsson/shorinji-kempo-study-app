@@ -127,7 +127,7 @@ describe("AdminRequests, transfers", () => {
     expect(await screen.findByText("Moved Person")).toBeTruthy();
     expect(screen.getByText("Oslo → Karlstad")).toBeTruthy();
     expect(screen.getByText("Har flyttat till Karlstad")).toBeTruthy();
-    expect(screen.getByText("Byte av gren")).toBeTruthy();
+    expect(screen.getByText("Byte av klubb")).toBeTruthy();
   });
 
   it("accepts a transfer in one click", async () => {
@@ -163,7 +163,7 @@ describe("AdminRequests, transfers", () => {
     render(<AdminRequests />);
 
     expect(await screen.findByText("Nya medlemmar")).toBeTruthy();
-    expect(screen.getByText("Byte av gren")).toBeTruthy();
+    expect(screen.getByText("Byte av klubb")).toBeTruthy();
     expect(screen.getByText("Hopeful Person")).toBeTruthy();
     expect(screen.getByText("Moved Person")).toBeTruthy();
   });

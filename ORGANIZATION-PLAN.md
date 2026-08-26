@@ -22,13 +22,13 @@ no Cosmos account, staging or production has been touched, by decision — see �
 | ✅ Admin UI (Phase 3) | organization tree, branch members, one user, the waiting list, and the menu's count — §6 |
 | ✅ Member language | reported by the app, so unprompted mail is written in a language the reader reads — §1.5 |
 | ✅ GDPR wording | the register in BACKEND.md, and a privacy policy that no longer claims no other user can see you — §9 |
+| ✅ Swedish wording | one word for the organizational unit: **klubb** — see below |
 | ✅ Transfers (Phase 4) | a member who has moved asks the club there to take them in; the one they left is told — §7 |
 
 Every phase in this document is built and green against the file-based stores. What remains:
 
 | | What | Where |
 |---|---|---|
-| ⬜ | **The Swedish word is "klubb", not "gren."** The UI currently uses both | below |
 | ⬜ | A native reading of the ja/tr copy. Every UI string is translated, but the Japanese and Turkish are mine, not a speaker's — as is all of the mail copy | |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 
@@ -41,30 +41,27 @@ to keep apart. Granting or revoking it now requires holding it.
 Below, each phase heading carries its state; the design text is left as written, with **As built**
 notes where the code settled somewhere the plan did not foresee.
 
-### TODO: settle on "klubb"
+### One word each: klubb, branch, 支部, kulüp
 
-Decided: the Swedish user-facing word for the organizational unit is **klubb**. The registration
-screen already says it; everything written afterwards says *gren*, which is the word to remove.
+The Swedish user-facing word for the organizational unit is **klubb**. It used to be *gren* on
+everything written after the registration screen, which said *klubb* — and a reader who saw both
+would reasonably have assumed they were different things.
 
-This is a rename of user-visible Swedish only. The code, the API and these documents keep saying
-*branch* — the model is unchanged, and renaming `BranchID` to chase a Swedish preference would be
-churn with no reader on the other end.
+**The rename is user-visible Swedish only.** The code, the API and these documents say *branch*
+throughout: the code is written in English, the model has not changed, and renaming `BranchID` to
+chase a Swedish preference would be churn with no reader on the other end.
 
-What it touches:
+Two things made it more than a search and replace:
 
-- `MyBranch.tsx`, `AdminOrganization.tsx`, `AdminBranchMembers.tsx`, `AdminUser.tsx`,
-  `AdminRequests.tsx`, the menu entries in `routes.tsx`, and the two new sections of
-  `PrivacyPolicy.tsx`.
-- **The translation files, which is the part worth planning.** Swedish strings *are the keys*, so
-  every changed string is a new key in `translations.{ja,en,tr}.json` and an orphaned old one. Rename
-  keys and values together in one pass, then run the missing-key check, or the app will quietly fall
-  back to Swedish for the strings that were missed.
-- `changelog-entries.ts` — the entry announcing all of this says *gren* three times, and it has not
-  shipped yet, so it can simply be reworded rather than corrected later.
-- The Swedish mail copy in `backend/auth/internal/email/join.go` and `transfer.go`.
-
-Nothing on the English side changes: *branch* is what WSKO calls it in English, and *klubb* is what
-it is called in Swedish. The two are not required to be literal translations of each other.
+- **Swedish strings are the translation keys**, so every reworded string was a new key and an
+  orphaned old one. Source, tests and all three translation files moved in one pass, and the
+  missing-key check was run afterwards — a string missed here does not break, it silently shows
+  Swedish to everybody, which is the failure that would have gone unnoticed.
+- **Renaming merged two keys into one.** "Gren" and "Klubb" had been separate, and carried different
+  English (*branch* against *club*) and different Japanese (支部 against クラブ). Each language now
+  says one thing: *branch* in English, which is WSKO's own word; 支部 in Japanese, which is Shorinji
+  Kempo's; *kulüp* in Turkish, which it already said throughout. The four words are not literal
+  translations of each other, and do not need to be.
 
 ## The organization
 

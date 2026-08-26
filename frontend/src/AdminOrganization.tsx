@@ -203,7 +203,7 @@ const AdminOrganization = () => {
   return (
     <div>
       <p className="text-secondary">
-        {translator.translate("Förbund och grenar. En gren hör antingen till ett förbund eller direkt till WSKO.")}
+        {translator.translate("Förbund och klubbar. En klubb hör antingen till ett förbund eller direkt till WSKO.")}
       </p>
 
       {error !== null && <p className="text-danger">{error}</p>}
@@ -231,7 +231,7 @@ const AdminOrganization = () => {
                     {coversFederation(section.federationId) && (
                       <Button size="sm" variant="outline-primary" disabled={busy}
                               onClick={() => { setAddingBranchIn(section.federationId); setNewBranchName(""); setError(null); }}>
-                        {translator.translate("Ny gren")}
+                        {translator.translate("Ny klubb")}
                       </Button>
                     )}
                   </div>
@@ -241,7 +241,7 @@ const AdminOrganization = () => {
 
           <Card.Body className="d-flex flex-column gap-2">
             {section.branches.length === 0 && addingBranchIn !== section.federationId && (
-              <span className="text-body-secondary">{translator.translate("Inga grenar här.")}</span>
+              <span className="text-body-secondary">{translator.translate("Inga klubbar här.")}</span>
             )}
 
             {section.branches.map(branch => (
@@ -286,8 +286,8 @@ const AdminOrganization = () => {
                   style={{ maxWidth: "20rem" }}
                   value={newBranchName}
                   disabled={busy}
-                  placeholder={translator.translate("Grenens namn")}
-                  aria-label={translator.translate("Grenens namn")}
+                  placeholder={translator.translate("Klubbens namn")}
+                  aria-label={translator.translate("Klubbens namn")}
                   onChange={e => setNewBranchName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") createBranch(section.federationId); }}
                 />
