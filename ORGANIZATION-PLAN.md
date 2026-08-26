@@ -32,6 +32,7 @@ Every phase in this document is built and green against the file-based stores. W
 | ⬜ | A native reading of the ja/tr copy. Every UI string is translated, but the Japanese and Turkish are mine, not a speaker's — as is all of the mail copy | |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 | ⬜ | Who gets notified, and of what — needs a real look before shipping, see below | |
+| ⬜ | Loading indicators on every page that fetches from a backend service, before shipping — see below | |
 
 None of it blocks the rest, and nothing here has met Cosmos yet.
 
@@ -70,6 +71,19 @@ story as a whole, and it deserves one before this ships. Raised but not resolved
 None of this blocks what's built. It matters before more notification-sending flows are added on top
 of the current ad hoc per-flow decisions, since each one so far has picked its own answer rather than
 following a stated rule.
+
+### TODO: loading indicators wherever a page fetches from a backend service
+
+Both backend services are expected to run scaled to zero when idle, which is fine for cost and bad
+for a first impression: the request that wakes one up is slow in a way none of the requests after it
+are, and right now nothing on screen says so. `AdminOrganization.tsx` and `AdminRequests.tsx` are the
+two built in this document — the organization tree and the waiting list — but this is not specific to
+either of them; it applies to every page that fetches from either service on load, which is most of
+the app.
+
+Address this before shipping: an admin opening the organization page or the request queue for the
+first time in a while should see that something is happening, not a blank page that resolves itself
+seconds later with no explanation.
 
 ### One word each: klubb, branch, 支部, kulüp
 
