@@ -1,8 +1,9 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
-import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
+import { isAnyAdmin, isGlobalAdmin } from "./roles.ts";
 import Start from "./Start.tsx";
 import { TheoryToolPage, TrainingToolPage } from "./components/ToolPage.tsx";
 
@@ -37,6 +38,7 @@ const Training = page(() => import("./Training.tsx"));
 const Settings = page(() => import("./Settings.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
 const AdminUsers = page(() => import("./AdminUsers.tsx"));
+const AdminRequests = page(() => import("./AdminRequests.tsx"));
 const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
@@ -156,13 +158,26 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
         icon: Gear
-    }, ...(getSyncManager().getBackendUserInfo()?.roles.includes("admin") ? [{
+    },
+    // Two gates, not one. The organizational pages are for anybody holding a
+    // scoped role — a branch admin sees their branch and nothing else, because
+    // that is all the server returns them. Broadcasting stays on `admin` alone:
+    // it is a technical power rather than an organizational one, and the
+    // persistence service checks for exactly that role.
+    ...(isAnyAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
+        path: "/admin/requests",
+        component: () => <AdminRequests />,
+        menuText: translator.translate("Ansökningar"),
+        icon: PersonPlus,
+        hideOnStartPage: true,
+    } satisfies Route, {
         path: "/admin/users",
         component: () => <AdminUsers />,
         menuText: translator.translate("Användare"),
         icon: People,
         hideOnStartPage: true,
-    } satisfies Route, {
+    } satisfies Route] : []),
+    ...(isGlobalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
         path: "/broadcast",
         component: () => <Broadcast />,
         menuText: translator.translate("Skicka notis till alla"),

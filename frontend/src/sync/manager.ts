@@ -180,6 +180,34 @@ class SyncManager {
     await this.backendClient.adminUpdateDisplayName(id, displayName);
   }
 
+  async adminOrgTree() {
+    return await this.backendClient.adminOrgTree();
+  }
+
+  async adminCreateFederation(id: string, name: string) {
+    await this.backendClient.adminCreateFederation(id, name);
+  }
+
+  async adminRenameFederation(id: string, name: string) {
+    await this.backendClient.adminRenameFederation(id, name);
+  }
+
+  async adminCreateBranch(name: string, federationId?: string) {
+    await this.backendClient.adminCreateBranch(name, federationId);
+  }
+
+  async adminUpdateBranch(id: string, changes: { name?: string; federationId?: string }) {
+    await this.backendClient.adminUpdateBranch(id, changes);
+  }
+
+  async adminListRequests() {
+    return await this.backendClient.adminListRequests();
+  }
+
+  async adminDecideRequest(email: string, approve: boolean) {
+    await this.backendClient.adminDecideRequest(email, approve);
+  }
+
   async listBranches() {
     return await this.backendClient.listBranches();
   }

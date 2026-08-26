@@ -89,6 +89,36 @@ export interface JoinContext {
   pending?: { branchId: string; branchName: string; createdAt: string };
 }
 
+// The organization as GET /auth/admin/org returns it, scoped to what the caller
+// administers. Branches belonging to no federation come back separately because
+// WSKO is the root rather than a record with a name of its own.
+export interface AdminOrgBranch {
+  id: string;
+  name: string;
+}
+
+export interface AdminOrgFederation {
+  id: string;
+  name: string;
+  branches: AdminOrgBranch[];
+}
+
+export interface AdminOrgTree {
+  federations: AdminOrgFederation[];
+  wskoBranches: AdminOrgBranch[];
+}
+
+// A pending join request, as the admins who may decide it see it.
+export interface AdminJoinRequest {
+  email: string;
+  name: string;
+  note?: string;
+  branchId: string;
+  branchName: string;
+  createdAt: string;
+  previouslyDeniedAt?: string;
+}
+
 // Result of POST /auth/email/start. "oidc" means the domain has an OIDC provider
 // and the caller should redirect there; "existing"/"new" mean a code was emailed
 // (only "new" needs a name collected on verify).
@@ -103,6 +133,15 @@ export type EmailStartResult =
   | { action: "new"; expiresInSeconds: number | null };
 
 // Thrown when the global code-sending rate limit (1 per 5 s) rejects a request.
+// Carries the status of a refused admin write, so a page can say "you may not"
+// rather than "something went wrong" when the server has been specific.
+export class AdminRequestError extends Error {
+  constructor(readonly status: number) {
+    super(`admin request failed: ${status}`);
+    this.name = "AdminRequestError";
+  }
+}
+
 export class RateLimitError extends Error {
   constructor() {
     super("rate limited");
@@ -174,6 +213,59 @@ export class BackendSyncClient {
       return { ok: false, error: body.error ?? "invalid_code" };
     }
     throw new Error(`POST /auth/email/verify: ${resp.status}`);
+  }
+
+  // ── Admin: the organization and its waiting list ─────────────────────────
+
+  async adminOrgTree(): Promise<AdminOrgTree> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/org`);
+    if (!resp.ok) throw new Error(`GET /auth/admin/org: ${resp.status}`);
+    return await resp.json() as AdminOrgTree;
+  }
+
+  async adminCreateFederation(id: string, name: string): Promise<void> {
+    await this.adminWrite("POST", `${authUrl}/auth/admin/federations`, { id, name });
+  }
+
+  async adminRenameFederation(id: string, name: string): Promise<void> {
+    await this.adminWrite("PATCH", `${authUrl}/auth/admin/federations/${encodeURIComponent(id)}`, { name });
+  }
+
+  // An omitted federationId means the branch hangs directly from WSKO, which
+  // only a WSKO admin may do — the server refuses rather than reinterpreting.
+  async adminCreateBranch(name: string, federationId?: string): Promise<void> {
+    await this.adminWrite("POST", `${authUrl}/auth/admin/branches`,
+      federationId ? { name, federationId } : { name });
+  }
+
+  // Both fields are optional and distinct: omitting federationId leaves the
+  // branch where it is, while passing "" moves it to WSKO.
+  async adminUpdateBranch(id: string, changes: { name?: string; federationId?: string }): Promise<void> {
+    await this.adminWrite("PATCH", `${authUrl}/auth/admin/branches/${encodeURIComponent(id)}`, changes);
+  }
+
+  async adminListRequests(): Promise<AdminJoinRequest[]> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/requests`);
+    if (!resp.ok) throw new Error(`GET /auth/admin/requests: ${resp.status}`);
+    return await resp.json() as AdminJoinRequest[];
+  }
+
+  async adminDecideRequest(email: string, approve: boolean): Promise<void> {
+    const action = approve ? "approve" : "deny";
+    await this.adminWrite("POST", `${authUrl}/auth/admin/requests/${encodeURIComponent(email)}/${action}`);
+  }
+
+  // Shared plumbing for the admin writes above. A refusal carries the server's
+  // status so a caller can tell "you may not" from "that did not work".
+  private async adminWrite(method: string, url: string, body?: unknown): Promise<void> {
+    const resp = await this.fetchWithRefresh(url, {
+      method,
+      ...(body === undefined ? {} : {
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+    });
+    if (!resp.ok) throw new AdminRequestError(resp.status);
   }
 
   // ── Admission: joining a branch ──────────────────────────────────────────
