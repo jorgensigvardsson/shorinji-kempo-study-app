@@ -28,6 +28,13 @@ export const CHANGELOG: ChangelogEntry[] = [
         tr: "Başka bir şehre mi taşındınız? Kulübüm sayfasından başka bir kulübe geçmek için başvurabilirsiniz. Kararı geçmek istediğiniz kulüp verir, ayrıldığınız kulübe de bilgi verilir.",
         ja: "引っ越しをされた方は、「所属支部」から他の支部への移籍を申請できます。受け入れ側の支部が判断し、離れる支部にも通知されます。",
       },
+      {
+        emoji: "🔒",
+        sv: "Integritetspolicyn säger nu rakt ut att ingen administratör — varken klubbens, förbundets eller organisationens — kan läsa dina anteckningar eller dina självvärderingar. De sköter medlemskap, inte studier.",
+        en: "The privacy policy now says plainly that no administrator — of your branch, your federation or the organization — can read your notes or your self-assessments. They run memberships, not studies.",
+        tr: "Gizlilik politikası artık açıkça belirtiyor: hiçbir yönetici — ne kulübünüzün, ne federasyonunuzun, ne de organizasyonun yöneticisi — notlarınızı ya da öz değerlendirmelerinizi okuyamaz. Onlar üyeliği yürütür, çalışmayı değil.",
+        ja: "プライバシーポリシーに、支部・連盟・組織のいずれの管理者もあなたのメモや自己評価を読むことはできない、と明記しました。管理者が扱うのは会員管理であって、修練の中身ではありません。",
+      },
     ],
   },
   {

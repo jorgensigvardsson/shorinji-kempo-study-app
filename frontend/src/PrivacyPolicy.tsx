@@ -49,7 +49,14 @@ const PrivacyPolicy = () => {
       <p>
         {translator.translate("Administratörer för din klubb, för ditt förbund och för organisationen som helhet kan se ditt namn, din e-postadress och vilket inloggningssätt du använder. Det är vad som krävs för att kunna sköta medlemskapet. En administratör för en annan klubb ser dig inte alls.")}
       </p>
-      <p>{translator.translate("Din information är inte krypterad i vila. Systemadministratörer kan se dina uppgifter vid administrativa uppgifter.")}</p>
+      {/* The point worth saying out loud: the roles above are about running a
+          membership, and none of them reaches the study data. There is no admin
+          read path to a user's document — the persistence service only ever serves
+          the document belonging to the caller's own token. */}
+      <p>
+        {translator.translate("Ingen administratör kan läsa dina anteckningar eller dina självvärderingar — varken klubbens, förbundets eller organisationens. Det finns ingen sådan vy i appen och ingen väg dit via en högre roll: administratörsrollerna sköter medlemskap, inte studier.")}
+      </p>
+      <p>{translator.translate("Din information är inte krypterad i vila. Den som sköter driften av systemet tekniskt kan därför nå dina uppgifter vid administrativa uppgifter. Det är något annat än administratörsrollerna i organisationen, som inte har den möjligheten.")}</p>
       <p>{translator.translate("Dina uppgifter överförs aldrig till någon annan organisation, vare sig mot betalning eller gratis. Informationen stannar i det här systemet.")}</p>
       <p>{translator.translate("Du kan exportera alla dina uppgifter som en JSON-fil via Inställningar.")}</p>
       <p>{translator.translate("Du kan radera ditt konto och alla tillhörande uppgifter via Inställningar. Raderingen är omedelbar och permanent.")}</p>
