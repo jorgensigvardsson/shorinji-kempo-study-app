@@ -160,17 +160,28 @@ func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, fb FeedbackS
 // of them, since they are deciding the same thing and a reply is likely to be to
 // each other as much as to us — so the caller groups them by language and calls
 // this once per group, a message being able to be in only one.
-func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, lang string, n JoinRequestNotice) error {
+// parseRecipients validates every address before any of them reaches the wire.
+// A CR/LF smuggled into one would inject headers into the message, so the parse
+// is the check rather than a formality.
+func parseRecipients(to []string, what string) ([]string, error) {
 	if len(to) == 0 {
-		return errors.New("smtp: no recipients for the join request notice")
+		return nil, fmt.Errorf("smtp: no recipients for the %s", what)
 	}
 	rcpts := make([]string, 0, len(to))
 	for _, addr := range to {
 		parsed, err := mail.ParseAddress(addr)
 		if err != nil {
-			return fmt.Errorf("smtp: invalid notice recipient %q: %w", addr, err)
+			return nil, fmt.Errorf("smtp: invalid %s recipient %q: %w", what, addr, err)
 		}
 		rcpts = append(rcpts, parsed.Address)
+	}
+	return rcpts, nil
+}
+
+func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, lang string, n JoinRequestNotice) error {
+	rcpts, err := parseRecipients(to, "notice")
+	if err != nil {
+		return err
 	}
 	// The applicant's address becomes a Reply-To header, so it is re-parsed for
 	// the same reason every recipient is: a CR/LF in it would inject a header.
@@ -189,6 +200,64 @@ func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, lan
 		return err
 	}
 	return s.send(ctx, rcpts, msg)
+}
+
+// SendTransferRequestNotice mails the admins of the branch being asked to take a
+// member in. One message per language group, as with the join notice.
+func (s *SMTPSender) SendTransferRequestNotice(ctx context.Context, to []string, lang string, n TransferNotice) error {
+	rcpts, err := parseRecipients(to, "transfer notice")
+	if err != nil {
+		return err
+	}
+	// The member's address becomes a Reply-To header, so it is re-parsed for the
+	// same reason every recipient is: a CR/LF in it would inject a header.
+	member, err := mail.ParseAddress(n.MemberEmail)
+	if err != nil {
+		return fmt.Errorf("smtp: invalid member address: %w", err)
+	}
+	n.MemberEmail = member.Address
+
+	rendered, err := renderTransferNotice(n, lang)
+	if err != nil {
+		return err
+	}
+	msg, err := s.message(rcpts, rendered)
+	if err != nil {
+		return err
+	}
+	return s.send(ctx, rcpts, msg)
+}
+
+// SendTransferDeparture tells the branch a member has left. No Reply-To: nothing
+// is being asked of them, and the member is no longer theirs to answer for.
+func (s *SMTPSender) SendTransferDeparture(ctx context.Context, to []string, lang string, n DepartureNotice) error {
+	rcpts, err := parseRecipients(to, "departure notice")
+	if err != nil {
+		return err
+	}
+	member, err := mail.ParseAddress(n.MemberEmail)
+	if err != nil {
+		return fmt.Errorf("smtp: invalid member address: %w", err)
+	}
+	n.MemberEmail = member.Address
+
+	rendered, err := renderTransferDeparture(n, lang)
+	if err != nil {
+		return err
+	}
+	msg, err := s.message(rcpts, rendered)
+	if err != nil {
+		return err
+	}
+	return s.send(ctx, rcpts, msg)
+}
+
+func (s *SMTPSender) SendTransferDecision(ctx context.Context, to, branchName, lang string, accepted bool) error {
+	rendered, err := renderTransferDecision(branchName, lang, accepted)
+	if err != nil {
+		return err
+	}
+	return s.sendTo(ctx, to, rendered)
 }
 
 func (s *SMTPSender) SendJoinReceived(ctx context.Context, to, branchName, lang string) error {

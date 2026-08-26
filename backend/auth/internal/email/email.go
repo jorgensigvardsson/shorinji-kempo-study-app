@@ -35,6 +35,18 @@ type Sender interface {
 
 	// SendJoinDecision tells an applicant what was decided, either way.
 	SendJoinDecision(ctx context.Context, to, branchName, lang string, approved bool) error
+
+	// SendTransferRequestNotice tells the admins of a branch that a member of
+	// another one has asked to move to theirs. Grouped by language like the join
+	// notice, and for the same reason.
+	SendTransferRequestNotice(ctx context.Context, to []string, lang string, notice TransferNotice) error
+
+	// SendTransferDeparture tells a branch that one of its members has moved on.
+	// It asks nothing of them; a transfer is not a negotiation.
+	SendTransferDeparture(ctx context.Context, to []string, lang string, notice DepartureNotice) error
+
+	// SendTransferDecision tells a member what the receiving branch decided.
+	SendTransferDecision(ctx context.Context, to, branchName, lang string, accepted bool) error
 }
 
 // FeedbackSubmission is one in-app feedback submission, along with the context
@@ -345,6 +357,27 @@ func (LogSender) SendJoinRequestNotice(_ context.Context, to []string, lang stri
 
 func (LogSender) SendJoinReceived(_ context.Context, to, branchName, lang string) error {
 	log.Printf("[email:dev] join request received, to %s (%s), branch %q", to, lang, branchName)
+	return nil
+}
+
+func (LogSender) SendTransferRequestNotice(_ context.Context, to []string, lang string, n TransferNotice) error {
+	log.Printf("[email:dev] transfer request from %s <%s>: %q → %q, to %v (%s); note: %q",
+		n.MemberName, n.MemberEmail, n.FromBranchName, n.ToBranchName, to, lang, n.Note)
+	return nil
+}
+
+func (LogSender) SendTransferDeparture(_ context.Context, to []string, lang string, n DepartureNotice) error {
+	log.Printf("[email:dev] member departed: %s <%s> left %q for %q, telling %v (%s)",
+		n.MemberName, n.MemberEmail, n.FromBranchName, n.ToBranchName, to, lang)
+	return nil
+}
+
+func (LogSender) SendTransferDecision(_ context.Context, to, branchName, lang string, accepted bool) error {
+	outcome := "refused"
+	if accepted {
+		outcome = "accepted"
+	}
+	log.Printf("[email:dev] transfer %s, to %s (%s), branch %q", outcome, to, lang, branchName)
 	return nil
 }
 

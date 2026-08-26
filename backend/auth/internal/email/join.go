@@ -148,39 +148,13 @@ func renderJoinRequestNotice(n JoinRequestNotice, lang string) (message, error) 
 		declined = fmt.Sprintf(c.noticeDeclined, n.PreviouslyDeniedAt)
 	}
 
-	var html bytes.Buffer
-	err := joinNoticeHTMLTemplate.Execute(&html, struct {
-		Lang, Subject, Heading, Body, NoteLabel, Note, Declined, Action string
-	}{
-		Lang:      langAttr(lang),
-		Subject:   subject,
-		Heading:   c.noticeHeading,
-		Body:      body,
-		NoteLabel: c.noticeNote,
-		Note:      n.Note,
-		Declined:  declined,
-		Action:    c.noticeAction,
-	})
+	rendered, err := renderAdminNotice(lang, subject, c.noticeHeading, body,
+		c.noticeNote, n.Note, declined, c.noticeAction)
 	if err != nil {
-		return message{}, fmt.Errorf("render join request notice: %w", err)
+		return message{}, err
 	}
-
-	plain := body + "\n"
-	if n.Note != "" {
-		plain += fmt.Sprintf("\n%s\n%s\n", c.noticeNote, n.Note)
-	}
-	if declined != "" {
-		plain += "\n" + declined + "\n"
-	}
-	plain += "\n" + c.noticeAction + "\n"
-
-	return message{
-		senderName: lookup(lang).appName,
-		subject:    subject,
-		plain:      plain,
-		html:       html.String(),
-		replyTo:    n.ApplicantEmail,
-	}, nil
+	rendered.replyTo = n.ApplicantEmail
+	return rendered, nil
 }
 
 // renderJoinReceived confirms to the applicant that the request went somewhere,
@@ -228,6 +202,11 @@ func renderApplicantMessage(lang, subject, heading, body string) (message, error
 	}, nil
 }
 
+// The card the admin notices are drawn in — a join request, a transfer asking to
+// come in, a member leaving. All four fields are optional except the body, so one
+// template serves every message that says "somebody has done something and you
+// may want to act on it".
+//
 // A card in the app's gold, with a dark variant for clients that honour the
 // reader's system theme — the same shape as the verification-code mail, and no
 // images, since Gmail blocks data: URIs in <img>.
@@ -253,7 +232,11 @@ var applicantHTMLTemplate = template.Must(template.New("applicant").Parse(`<!DOC
 </td></tr></table>
 </body></html>`))
 
-var joinNoticeHTMLTemplate = template.Must(template.New("joinnotice").Parse(`<!DOCTYPE html>
+// The card an admin notice is drawn in: a join request, a transfer asking to
+// come in, a member leaving. Every field but the body is optional, so one
+// template serves any message that says "somebody has done something, and you
+// may want to act on it".
+var adminNoticeHTMLTemplate = template.Must(template.New("adminnotice").Parse(`<!DOCTYPE html>
 <html lang="{{.Lang}}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{.Subject}}</title>

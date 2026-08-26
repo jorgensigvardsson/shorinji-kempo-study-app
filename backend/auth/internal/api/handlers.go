@@ -64,6 +64,7 @@ type Handler struct {
 	roles              store.RoleStore
 	orgs               *org.Tree // the organization tree; required, never nil
 	joinRequests       store.JoinRequestStore
+	transfers          store.TransferStore
 	tokens             *token.Manager
 	mailer             email.Sender
 	frontendURL        string
@@ -73,6 +74,7 @@ type Handler struct {
 	feedbackRecipients []string                     // where POST /auth/feedback is relayed; empty disables the endpoint
 	feedbackLimiter    *ratelimit.GlobalRateLimiter // global cap on feedback-sending (protects the email quota)
 	joinLimiter        *ratelimit.GlobalRateLimiter // global cap on join requests (protects admins' inboxes as much as the quota)
+	transferLimiter    *ratelimit.GlobalRateLimiter // the same, for members asking to move between branches
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -86,6 +88,7 @@ func NewHandler(
 	roles store.RoleStore,
 	orgs *org.Tree,
 	joinRequests store.JoinRequestStore,
+	transfers store.TransferStore,
 	tokens *token.Manager,
 	mailer email.Sender,
 	frontendURL string,
@@ -101,6 +104,7 @@ func NewHandler(
 		roles:         roles,
 		orgs:          orgs,
 		joinRequests:  joinRequests,
+		transfers:     transfers,
 		tokens:        tokens,
 		mailer:        mailer,
 		frontendURL:   frontendURL,
@@ -117,8 +121,13 @@ func NewHandler(
 		// still than feedback: roughly one every twenty seconds, with a little
 		// slack for a club signing up together after a session.
 		joinLimiter: ratelimit.NewGlobal(0.05, 3),
-		pending:     make(map[string]pendingState),
-		emailCodes:  make(map[string]emailCode),
+		// Transferring is rarer still than joining, but a member can withdraw and
+		// ask again as often as they like, so it gets a cap of its own rather than
+		// sharing the applicants' — a club signing up together must not be held up
+		// by one restless member, or the other way round.
+		transferLimiter: ratelimit.NewGlobal(0.05, 3),
+		pending:         make(map[string]pendingState),
+		emailCodes:      make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -183,6 +192,12 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	// as much a quota as the relay is.
 	inner.Handle("POST /auth/join/request", h.joinLimiter.Middleware(http.HandlerFunc(h.joinRequest)))
 	inner.HandleFunc("POST /auth/join/withdraw", h.joinWithdraw)
+	// Branch transfers (see transfer.go). A member asks for themselves, so these
+	// are session-authorized; the request carries a global cap for the same reason
+	// joining does — it mails a club.
+	inner.HandleFunc("GET /auth/transfer", h.myTransfer)
+	inner.Handle("POST /auth/transfer", h.transferLimiter.Middleware(http.HandlerFunc(h.requestTransfer)))
+	inner.HandleFunc("DELETE /auth/transfer", h.withdrawTransfer)
 	// Feedback submission carries its own global rate limit on top of the per-IP
 	// one, same as email/start, since it triggers a real SMTP send.
 	inner.Handle("POST /auth/feedback", h.feedbackLimiter.Middleware(http.HandlerFunc(h.submitFeedback)))
@@ -204,6 +219,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/admin/requests", h.adminListRequests)
 	inner.HandleFunc("POST /auth/admin/requests/{email}/approve", h.adminApproveRequest)
 	inner.HandleFunc("POST /auth/admin/requests/{email}/deny", h.adminDenyRequest)
+	inner.HandleFunc("GET /auth/admin/transfers", h.adminListTransfers)
+	inner.HandleFunc("POST /auth/admin/transfers/{id}/accept", h.adminAcceptTransfer)
+	inner.HandleFunc("POST /auth/admin/transfers/{id}/reject", h.adminRejectTransfer)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 

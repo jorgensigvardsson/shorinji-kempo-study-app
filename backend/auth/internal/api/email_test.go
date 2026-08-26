@@ -41,8 +41,17 @@ type fakeSender struct {
 	decisionTo   string
 	decisionLang string
 	decided      bool // whether a decision mail was sent at all
-	approved     bool
-	joinErr      error
+
+	// Transfer mail. Both notices can go out more than once — one message per
+	// language — so both are kept as lists.
+	transferNotices      []sentTransferNotice
+	departures           []sentDeparture
+	transferDecisionTo   string
+	transferDecisionLang string
+	transferDecided      bool
+	transferAccepted     bool
+	approved             bool
+	joinErr              error
 }
 
 // sentNotice is one call to SendJoinRequestNotice: a set of admins who share a
@@ -51,6 +60,18 @@ type sentNotice struct {
 	to     []string
 	lang   string
 	notice email.JoinRequestNotice
+}
+
+type sentTransferNotice struct {
+	to     []string
+	lang   string
+	notice email.TransferNotice
+}
+
+type sentDeparture struct {
+	to     []string
+	lang   string
+	notice email.DepartureNotice
 }
 
 func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string, validFor time.Duration) error {
@@ -99,6 +120,7 @@ func newTestHandler(t *testing.T, sender *fakeSender) *Handler {
 		store.NewFileRoleStore(dir),
 		testOrgTree(t, dir),
 		store.NewFileJoinRequestStore(dir),
+		store.NewFileTransferStore(dir),
 		token.NewManager(key, "http://test"),
 		sender,
 		"http://frontend",
@@ -387,4 +409,20 @@ func testOrgTree(t *testing.T, dir string) *org.Tree {
 		t.Fatalf("load org tree: %v", err)
 	}
 	return tree
+}
+
+func (f *fakeSender) SendTransferRequestNotice(_ context.Context, to []string, lang string, n email.TransferNotice) error {
+	f.transferNotices = append(f.transferNotices, sentTransferNotice{to: to, lang: lang, notice: n})
+	return f.joinErr
+}
+
+func (f *fakeSender) SendTransferDeparture(_ context.Context, to []string, lang string, n email.DepartureNotice) error {
+	f.departures = append(f.departures, sentDeparture{to: to, lang: lang, notice: n})
+	return f.joinErr
+}
+
+func (f *fakeSender) SendTransferDecision(_ context.Context, to, branchName, lang string, accepted bool) error {
+	f.transferDecisionTo, f.transferDecisionLang = to, lang
+	f.transferDecided, f.transferAccepted = true, accepted
+	return f.joinErr
 }

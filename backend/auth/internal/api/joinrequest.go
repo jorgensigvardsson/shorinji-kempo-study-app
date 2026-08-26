@@ -19,16 +19,16 @@ import (
 // and when you train, short enough that the field is not a channel.
 const maxNoteLength = 500
 
-// joinRequestRecipients returns the addresses to tell about a request for a
-// branch: the branch's own admins, failing that the federation's, failing that
-// the global admins.
+// adminsForBranch returns the addresses to tell about something happening to a
+// branch — somebody applying, somebody asking to transfer in: the branch's own
+// admins, failing that the federation's, failing that the global admins.
 //
 // The fallback is the point. On the day this ships exactly one branch has an
 // admin, so notifying branch admins alone would mean almost every request
 // arriving nowhere — and a request nobody is told about is a person left waiting
 // with no way to tell the difference between "not yet" and "never". There is
 // always at least one global admin, so the chain always ends somewhere.
-func (h *Handler) joinRequestRecipients(branchID string) ([]string, error) {
+func (h *Handler) adminsForBranch(branchID string) ([]string, error) {
 	records, err := h.roles.ListAll()
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (h *Handler) joinRequest(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) announceJoinRequest(request *store.JoinRequest, branchName string) {
 	ctx := context.Background()
 
-	recipients, err := h.joinRequestRecipients(request.BranchID)
+	recipients, err := h.adminsForBranch(request.BranchID)
 	if err != nil {
 		log.Printf("joinRequest: resolve recipients for branch %s: %v", request.BranchID, err)
 	} else if len(recipients) == 0 {

@@ -108,7 +108,7 @@ func TestJoinRequestRecipients_FallsBackUpTheTree(t *testing.T) {
 	seed("local@example.org", authz.BranchAdmin("karlstad"))
 
 	got := func(branch string) []string {
-		to, err := h.joinRequestRecipients(branch)
+		to, err := h.adminsForBranch(branch)
 		if err != nil {
 			t.Fatalf("recipients for %s: %v", branch, err)
 		}
