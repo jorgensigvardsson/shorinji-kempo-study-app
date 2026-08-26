@@ -38,6 +38,7 @@ func main() {
 	cosmosTokens := flag.String("cosmos-tokens-container", envutil.String("COSMOS_TOKENS_CONTAINER", "refresh_tokens"), "Cosmos container for refresh tokens")
 	cosmosRoles := flag.String("cosmos-roles-container", envutil.String("COSMOS_ROLES_CONTAINER", "roles"), "Cosmos container for role assignments")
 	cosmosOrgs := flag.String("cosmos-orgs-container", envutil.String("COSMOS_ORGS_CONTAINER", "organizations"), "Cosmos container for the organization tree")
+	cosmosJoin := flag.String("cosmos-join-requests-container", envutil.String("COSMOS_JOIN_REQUESTS_CONTAINER", "joinrequests"), "Cosmos container for pending join requests")
 
 	federationID := flag.String("federation-id", "SE", "ISO 3166-1 alpha-2 country code for the federation to seed")
 	federationName := flag.String("federation-name", "Svenska Shorinji Kempoförbundet", "the federation's own name, in its own language")
@@ -52,7 +53,7 @@ func main() {
 	if *cosmosEndpoint != "" && *cosmosKey != "" {
 		if *apply {
 			if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase,
-				*cosmosUsers, *cosmosIdentity, *cosmosTokens, *cosmosRoles, *cosmosOrgs); err != nil {
+				*cosmosUsers, *cosmosIdentity, *cosmosTokens, *cosmosRoles, *cosmosOrgs, *cosmosJoin); err != nil {
 				log.Fatalf("cosmos provisioning: %v", err)
 			}
 		}

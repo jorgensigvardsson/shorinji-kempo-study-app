@@ -23,6 +23,17 @@ type Sender interface {
 
 	// SendFeedback relays an in-app feedback submission to the given recipients.
 	SendFeedback(ctx context.Context, to []string, submission FeedbackSubmission) error
+
+	// SendJoinRequestNotice tells the admins who will decide that somebody has
+	// asked to join their branch.
+	SendJoinRequestNotice(ctx context.Context, to []string, notice JoinRequestNotice) error
+
+	// SendJoinReceived confirms to an applicant that the request went somewhere,
+	// so that waiting does not look like nothing having happened.
+	SendJoinReceived(ctx context.Context, to, branchName, lang string) error
+
+	// SendJoinDecision tells an applicant what was decided, either way.
+	SendJoinDecision(ctx context.Context, to, branchName, lang string, approved bool) error
 }
 
 // FeedbackSubmission is one in-app feedback submission, along with the context
@@ -317,5 +328,25 @@ func (LogSender) SendVerificationCode(_ context.Context, to, code, lang string, 
 func (LogSender) SendFeedback(_ context.Context, to []string, fb FeedbackSubmission) error {
 	log.Printf("[email:dev] feedback from %s <%s> (app %s, lang %s, ua %q) for %v:\n%s",
 		fb.SubmitterName, fb.SubmitterEmail, fb.AppVersion, fb.Language, fb.UserAgent, to, fb.Message)
+	return nil
+}
+
+func (LogSender) SendJoinRequestNotice(_ context.Context, to []string, n JoinRequestNotice) error {
+	log.Printf("[email:dev] join request from %s <%s> for branch %q → %v; note: %q",
+		n.ApplicantName, n.ApplicantEmail, n.BranchName, to, n.Note)
+	return nil
+}
+
+func (LogSender) SendJoinReceived(_ context.Context, to, branchName, lang string) error {
+	log.Printf("[email:dev] join request received, to %s (%s), branch %q", to, lang, branchName)
+	return nil
+}
+
+func (LogSender) SendJoinDecision(_ context.Context, to, branchName, lang string, approved bool) error {
+	outcome := "declined"
+	if approved {
+		outcome = "approved"
+	}
+	log.Printf("[email:dev] join request %s, to %s (%s), branch %q", outcome, to, lang, branchName)
 	return nil
 }

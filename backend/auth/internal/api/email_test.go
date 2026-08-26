@@ -29,11 +29,38 @@ type fakeSender struct {
 	feedbackTo         []string
 	feedbackSubmission email.FeedbackSubmission
 	feedbackErr        error
+
+	// Join-request mail, recorded rather than sent. Who was told is as much a
+	// part of the behaviour as what they were told, so both are kept.
+	noticeTo     []string
+	notice       email.JoinRequestNotice
+	receivedTo   string
+	receivedLang string
+	decisionTo   string
+	decisionLang string
+	decided      bool // whether a decision mail was sent at all
+	approved     bool
+	joinErr      error
 }
 
 func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string, validFor time.Duration) error {
 	f.to, f.code, f.lang, f.validFor = to, code, lang, validFor
 	return f.err
+}
+
+func (f *fakeSender) SendJoinRequestNotice(_ context.Context, to []string, n email.JoinRequestNotice) error {
+	f.noticeTo, f.notice = to, n
+	return f.joinErr
+}
+
+func (f *fakeSender) SendJoinReceived(_ context.Context, to, branchName, lang string) error {
+	f.receivedTo, f.receivedLang = to, lang
+	return f.joinErr
+}
+
+func (f *fakeSender) SendJoinDecision(_ context.Context, to, branchName, lang string, approved bool) error {
+	f.decisionTo, f.decisionLang, f.decided, f.approved = to, lang, true, approved
+	return f.joinErr
 }
 
 func (f *fakeSender) SendFeedback(_ context.Context, to []string, submission email.FeedbackSubmission) error {
@@ -60,6 +87,7 @@ func newTestHandler(t *testing.T, sender *fakeSender) *Handler {
 		store.NewFileRefreshTokenStore(dir),
 		store.NewFileRoleStore(dir),
 		testOrgTree(t, dir),
+		store.NewFileJoinRequestStore(dir),
 		token.NewManager(key, "http://test"),
 		sender,
 		"http://frontend",

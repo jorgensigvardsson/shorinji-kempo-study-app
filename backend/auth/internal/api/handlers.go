@@ -62,6 +62,7 @@ type Handler struct {
 	refreshTokens      store.RefreshTokenStore
 	roles              store.RoleStore
 	orgs               *org.Tree // the organization tree; required, never nil
+	joinRequests       store.JoinRequestStore
 	tokens             *token.Manager
 	mailer             email.Sender
 	frontendURL        string
@@ -70,6 +71,7 @@ type Handler struct {
 	emailLimiter       *ratelimit.GlobalRateLimiter // global cap on code-sending (protects the email quota)
 	feedbackRecipients []string                     // where POST /auth/feedback is relayed; empty disables the endpoint
 	feedbackLimiter    *ratelimit.GlobalRateLimiter // global cap on feedback-sending (protects the email quota)
+	joinLimiter        *ratelimit.GlobalRateLimiter // global cap on join requests (protects admins' inboxes as much as the quota)
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -82,6 +84,7 @@ func NewHandler(
 	refreshTokens store.RefreshTokenStore,
 	roles store.RoleStore,
 	orgs *org.Tree,
+	joinRequests store.JoinRequestStore,
 	tokens *token.Manager,
 	mailer email.Sender,
 	frontendURL string,
@@ -96,6 +99,7 @@ func NewHandler(
 		refreshTokens: refreshTokens,
 		roles:         roles,
 		orgs:          orgs,
+		joinRequests:  joinRequests,
 		tokens:        tokens,
 		mailer:        mailer,
 		frontendURL:   frontendURL,
@@ -108,8 +112,12 @@ func NewHandler(
 		// Feedback is user-triggered but still a real SMTP send; cap it well
 		// below the verification-code limit since it's not latency-sensitive.
 		feedbackLimiter: ratelimit.NewGlobal(0.1, 2),
-		pending:         make(map[string]pendingState),
-		emailCodes:      make(map[string]emailCode),
+		// Joining is a once-in-a-lifetime act per person, so this can be slower
+		// still than feedback: roughly one every twenty seconds, with a little
+		// slack for a club signing up together after a session.
+		joinLimiter: ratelimit.NewGlobal(0.05, 3),
+		pending:     make(map[string]pendingState),
+		emailCodes:  make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -168,6 +176,11 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	// ticket rather than by a session, since its whole audience is people who
 	// have proved an address and have no account.
 	inner.HandleFunc("GET /auth/join/context", h.joinContext)
+	// Recording a request sends mail, and a declined applicant may apply again,
+	// so it carries a global cap on top of the per-IP one — an admin's inbox is
+	// as much a quota as the relay is.
+	inner.Handle("POST /auth/join/request", h.joinLimiter.Middleware(http.HandlerFunc(h.joinRequest)))
+	inner.HandleFunc("POST /auth/join/withdraw", h.joinWithdraw)
 	// Feedback submission carries its own global rate limit on top of the per-IP
 	// one, same as email/start, since it triggers a real SMTP send.
 	inner.Handle("POST /auth/feedback", h.feedbackLimiter.Middleware(http.HandlerFunc(h.submitFeedback)))
@@ -184,6 +197,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("PATCH /auth/admin/federations/{id}", h.renameFederation)
 	inner.HandleFunc("POST /auth/admin/branches", h.createBranch)
 	inner.HandleFunc("PATCH /auth/admin/branches/{id}", h.updateBranch)
+	inner.HandleFunc("GET /auth/admin/requests", h.adminListRequests)
+	inner.HandleFunc("POST /auth/admin/requests/{email}/approve", h.adminApproveRequest)
+	inner.HandleFunc("POST /auth/admin/requests/{email}/deny", h.adminDenyRequest)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 

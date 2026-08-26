@@ -67,11 +67,27 @@ func (h *Handler) joinContext(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	writeJSON(w, map[string]string{
+	out := map[string]any{
 		"email":    ticket.Email,
 		"name":     ticket.Name,
 		"provider": ticket.Provider,
-	})
+	}
+	// A returning applicant should land on their pending request rather than on
+	// an empty form that will only tell them they already have one.
+	if existing, err := h.joinRequests.Get(ticket.Email); err != nil {
+		log.Printf("joinContext: pending lookup for %s: %v", ticket.Email, err)
+	} else if existing != nil && existing.IsPending() {
+		branchName := ""
+		if branch, ok := h.orgs.Branch(existing.BranchID); ok {
+			branchName = branch.Name
+		}
+		out["pending"] = map[string]string{
+			"branchId":   existing.BranchID,
+			"branchName": branchName,
+			"createdAt":  existing.CreatedAt,
+		}
+	}
+	writeJSON(w, out)
 }
 
 // logJoinTicketIssued records that somebody proved an address and got no account

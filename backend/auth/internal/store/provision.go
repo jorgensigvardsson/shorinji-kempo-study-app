@@ -15,7 +15,7 @@ import (
 // ignored for all create operations.
 // Assumes provisioned throughput mode; 400 RU/s is requested at the database level
 // so all containers share a single pool (free-tier eligible).
-func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexContainer, tokensContainer, rolesContainer, orgsContainer string) error {
+func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexContainer, tokensContainer, rolesContainer, orgsContainer, joinRequestsContainer string) error {
 	cred, err := azcosmos.NewKeyCredential(key)
 	if err != nil {
 		return fmt.Errorf("cosmos key credential: %w", err)
@@ -133,6 +133,26 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		DefaultTimeToLive: &ttl,
 	}, nil); err != nil && !isConflict(err) {
 		return fmt.Errorf("cosmos create container %q: %w", tokensContainer, err)
+	}
+
+	// joinrequests — point reads by address (so one pending request per address is
+	// structural) plus a cross-partition scan to list a branch's. Time-to-live is
+	// enabled with no default, so a pending request never expires while a denied
+	// one carries its own ttl and leaves on its own — retention with no sweeper
+	// to write, and none to forget about either.
+	noDefaultTTL := int32(-1)
+	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
+		ID:                     joinRequestsContainer,
+		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/id"}, Kind: azcosmos.PartitionKeyKindHash},
+		IndexingPolicy: &azcosmos.IndexingPolicy{
+			Automatic:     true,
+			IndexingMode:  azcosmos.IndexingMode("consistent"),
+			IncludedPaths: []azcosmos.IncludedPath{},
+			ExcludedPaths: []azcosmos.ExcludedPath{{Path: "/*"}},
+		},
+		DefaultTimeToLive: &noDefaultTTL,
+	}, nil); err != nil && !isConflict(err) {
+		return fmt.Errorf("cosmos create container %q: %w", joinRequestsContainer, err)
 	}
 
 	return nil

@@ -40,6 +40,7 @@ func main() {
 	cosmosTokensContainer   := flag.String("cosmos-tokens-container",       envutil.String("COSMOS_TOKENS_CONTAINER",       "refresh_tokens"), "Cosmos container for refresh tokens")
 	cosmosRolesContainer    := flag.String("cosmos-roles-container",        envutil.String("COSMOS_ROLES_CONTAINER",        "roles"),          "Cosmos container for role assignments")
 	cosmosOrgsContainer     := flag.String("cosmos-orgs-container",         envutil.String("COSMOS_ORGS_CONTAINER",         "organizations"),  "Cosmos container for the organization tree")
+	cosmosJoinContainer     := flag.String("cosmos-join-requests-container", envutil.String("COSMOS_JOIN_REQUESTS_CONTAINER", "joinrequests"),   "Cosmos container for pending join requests")
 
 	// ── OIDC Providers ────────────────────────────────────────────────────────
 	googleClientID        := flag.String("google-client-id",        envutil.String("GOOGLE_CLIENT_ID",        ""),                                   "Google OAuth client ID")
@@ -92,9 +93,10 @@ func main() {
 	var refreshStore   store.RefreshTokenStore
 	var roleStore      store.RoleStore
 	var orgStore       store.OrgStore
+	var joinStore      store.JoinRequestStore
 
 	if *cosmosEndpoint != "" && *cosmosKey != "" {
-		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer, *cosmosOrgsContainer); err != nil {
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer, *cosmosOrgsContainer, *cosmosJoinContainer); err != nil {
 			log.Fatalf("cosmos provisioning: %v", err)
 		}
 
@@ -119,12 +121,18 @@ func main() {
 		if err != nil {
 			log.Fatalf("init Cosmos org store: %v", err)
 		}
+
+		joinStore, err = store.NewCosmosJoinRequestStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosJoinContainer)
+		if err != nil {
+			log.Fatalf("init Cosmos join request store: %v", err)
+		}
 		log.Printf("using Cosmos DB stores (endpoint: %s, database: %s)", *cosmosEndpoint, *cosmosDatabase)
 	} else {
 		userStore    = store.NewFileUserStore(*dataDir)
 		refreshStore = store.NewFileRefreshTokenStore(*dataDir)
 		roleStore    = store.NewFileRoleStore(*dataDir)
 		orgStore     = store.NewFileOrgStore(*dataDir)
+		joinStore    = store.NewFileJoinRequestStore(*dataDir)
 		log.Printf("using file-based stores (data-dir: %s)", *dataDir)
 	}
 
@@ -203,7 +211,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, joinStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

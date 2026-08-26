@@ -156,6 +156,70 @@ func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, fb FeedbackS
 	return s.send(ctx, rcpts, msg)
 }
 
+// SendJoinRequestNotice mails the deciding admins. One message addressed to all
+// of them, since they are deciding the same thing and a reply is likely to be to
+// each other as much as to us.
+func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, n JoinRequestNotice) error {
+	if len(to) == 0 {
+		return errors.New("smtp: no recipients for the join request notice")
+	}
+	rcpts := make([]string, 0, len(to))
+	for _, addr := range to {
+		parsed, err := mail.ParseAddress(addr)
+		if err != nil {
+			return fmt.Errorf("smtp: invalid notice recipient %q: %w", addr, err)
+		}
+		rcpts = append(rcpts, parsed.Address)
+	}
+	// The applicant's address becomes a Reply-To header, so it is re-parsed for
+	// the same reason every recipient is: a CR/LF in it would inject a header.
+	applicant, err := mail.ParseAddress(n.ApplicantEmail)
+	if err != nil {
+		return fmt.Errorf("smtp: invalid applicant address: %w", err)
+	}
+	n.ApplicantEmail = applicant.Address
+
+	rendered, err := renderJoinRequestNotice(n)
+	if err != nil {
+		return err
+	}
+	msg, err := s.message(rcpts, rendered)
+	if err != nil {
+		return err
+	}
+	return s.send(ctx, rcpts, msg)
+}
+
+func (s *SMTPSender) SendJoinReceived(ctx context.Context, to, branchName, lang string) error {
+	rendered, err := renderJoinReceived(branchName, lang)
+	if err != nil {
+		return err
+	}
+	return s.sendTo(ctx, to, rendered)
+}
+
+func (s *SMTPSender) SendJoinDecision(ctx context.Context, to, branchName, lang string, approved bool) error {
+	rendered, err := renderJoinDecision(branchName, lang, approved)
+	if err != nil {
+		return err
+	}
+	return s.sendTo(ctx, to, rendered)
+}
+
+// sendTo delivers one rendered message to one recipient, re-parsing the address
+// before it reaches a header.
+func (s *SMTPSender) sendTo(ctx context.Context, to string, rendered message) error {
+	parsed, err := mail.ParseAddress(to)
+	if err != nil {
+		return fmt.Errorf("smtp: invalid recipient %q: %w", to, err)
+	}
+	msg, err := s.message([]string{parsed.Address}, rendered)
+	if err != nil {
+		return err
+	}
+	return s.send(ctx, []string{parsed.Address}, msg)
+}
+
 func (s *SMTPSender) send(ctx context.Context, to []string, msg []byte) error {
 	// net/smtp has no context support, so dial and conversation share a single
 	// deadline covering the whole exchange. Without it an unresponsive relay would
