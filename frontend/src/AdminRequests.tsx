@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Badge, Button, Card, Spinner } from "react-bootstrap";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
+import { publishPendingRequests } from "./pendingRequests";
 import type { AdminJoinRequest } from "./sync/backend";
 
 // The waiting list: everybody who has asked to join a branch this admin
@@ -23,7 +24,11 @@ const AdminRequests = () => {
   const load = async () => {
     setLoadError(false);
     try {
-      setRequests(await getSyncManager().adminListRequests());
+      const waiting = await getSyncManager().adminListRequests();
+      setRequests(waiting);
+      // This is the one place that knows the true figure, so the menu's badge
+      // is corrected from here rather than left to go stale on its own.
+      publishPendingRequests(waiting.length);
     } catch {
       setLoadError(true);
     }
@@ -36,7 +41,9 @@ const AdminRequests = () => {
     setError(null);
     try {
       await getSyncManager().adminDecideRequest(request.email, approve);
-      setRequests(prev => prev?.filter(r => r.email !== request.email) ?? prev);
+      const left = (requests ?? []).filter(r => r.email !== request.email);
+      setRequests(left);
+      publishPendingRequests(left.length);
       setConfirmDeny(null);
     } catch {
       setError(translator.translate("Beslutet kunde inte sparas. Försök igen."));

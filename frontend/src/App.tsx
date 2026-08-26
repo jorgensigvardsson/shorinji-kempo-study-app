@@ -11,6 +11,7 @@ import { useIdleTask, useNavigationPending, useSyncProvider, useSyncState, useTh
 import { ensureTranslations } from './translations';
 import RouteContent from './components/RouteContent';
 import { getSyncManager } from './sync/manager';
+import { usePendingRequests } from './pendingRequests';
 import { LoginScreen } from './LoginScreen';
 import TrainingControls from './components/TrainingControls';
 import { useAppUpdate } from './app-update';
@@ -103,6 +104,8 @@ function App(props: Props) {
   // Account details arrive asynchronously after login. Subscribing to sync state
   // gives the route tree a fresh render once /auth/me has populated the cached user.
   const syncState = useSyncState();
+  // How many applicants are waiting on this admin, for the menu to say so.
+  const pendingRequests = usePendingRequests();
   const displayName = syncState.status === "local_only"
     ? undefined
     : getSyncManager().getBackendUserInfo()?.displayName;
@@ -117,6 +120,7 @@ function App(props: Props) {
     size => textSizeData.save(size),
     trainingMode,
     displayName,
+    pendingRequests,
   );
 
   // Fetch the other pages once the first one has settled. Without this a navigation

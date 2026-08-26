@@ -81,7 +81,8 @@ export const routeDescription = (route: Route) => {
 export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator,
                           textSize: number,
                           setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
-                          setTextSize: (size: number) => void, trainingMode: boolean, displayName?: string): Route[] => {
+                          setTextSize: (size: number) => void, trainingMode: boolean, displayName?: string,
+                          pendingRequests = 0): Route[] => {
     const routes: Route[] = [{
         path: "/",
         component: () => <Start routes={routes.filter(r => r.path && r.path !== "/" && !r.hideOnStartPage)
@@ -175,7 +176,12 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
     } satisfies Route, {
         path: "/admin/requests",
         component: () => <AdminRequests />,
-        menuText: translator.translate("Ansökningar"),
+        // The count rides in the menu text: a request nobody notices is a
+        // request that rots, and an admin should not have to open the page to
+        // learn that somebody is waiting.
+        menuText: pendingRequests > 0
+            ? `${translator.translate("Ansökningar")} (${pendingRequests})`
+            : translator.translate("Ansökningar"),
         icon: PersonPlus,
         hideOnStartPage: true,
     } satisfies Route, {
