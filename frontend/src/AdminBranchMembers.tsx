@@ -61,7 +61,7 @@ const AdminBranchMembers = () => {
   // What to say about a member's standing in a listing, which is a summary rather
   // than the whole role set — the detail page has room for that.
   const standing = (roles: string[]): string | null => {
-    if (roles.includes(ROLE_ADMIN) || roles.includes(ROLE_WSKO_ADMIN)) return translator.translate("Administratör för hela organisationen");
+    if (roles.includes(ROLE_ADMIN) || roles.includes(ROLE_WSKO_ADMIN)) return translator.translate("Administratör för hela WSKO");
     if (branch?.federationId !== undefined && branch.federationId !== "" && roles.includes(federationAdmin(branch.federationId))) {
       return translator.translate("Förbundsadministratör");
     }

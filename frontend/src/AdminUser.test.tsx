@@ -97,7 +97,7 @@ describe("AdminUser", () => {
     callerRoles = ["wsko_admin"];
     renderPage();
     await screen.findByText("Ann Ask");
-    expect(screen.getByLabelText("Administratör för hela organisationen")).toBeTruthy();
+    expect(screen.getByLabelText("Administratör för hela WSKO")).toBeTruthy();
     expect(screen.queryByLabelText("Teknisk administratör")).toBeNull();
   });
 

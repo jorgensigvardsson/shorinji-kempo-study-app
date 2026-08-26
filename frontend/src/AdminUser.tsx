@@ -153,7 +153,7 @@ const AdminUser = () => {
       label: `${translator.translate("Administratör för")} ${federation.name}`,
       offered: coversFederation(federation.id),
     }] : []),
-    { role: ROLE_WSKO_ADMIN, label: translator.translate("Administratör för hela organisationen"), offered: atWSKO },
+    { role: ROLE_WSKO_ADMIN, label: translator.translate("Administratör för hela WSKO"), offered: atWSKO },
     { role: ROLE_ADMIN, label: translator.translate("Teknisk administratör"), offered: callerRoles.includes(ROLE_ADMIN) },
   ];
 
