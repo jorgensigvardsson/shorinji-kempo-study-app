@@ -47,6 +47,11 @@ export interface BackendUserInfo {
   // federation) and for an account admitted before branches existed.
   branchId: string;
   federation: string;
+  // The UI language the server has been told this account uses. It exists so the
+  // app can tell when there is nothing to report, and so mail sent unprompted —
+  // "somebody has asked to join your branch" — is written in a language the
+  // reader reads.
+  language: string;
 }
 
 // A linked provider identity as returned by the admin user listing.
@@ -410,7 +415,7 @@ export class BackendSyncClient {
         }
       }
       if (resp.ok) {
-        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[]; branchId?: string; federation?: string };
+        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[]; branchId?: string; federation?: string; language?: string };
         localStorage.setItem(connectedKey, "true");
         localStorage.setItem(userInfoKey, JSON.stringify({
           email: user.email,
@@ -419,6 +424,7 @@ export class BackendSyncClient {
           roles: user.roles ?? [],
           branchId: user.branchId ?? "",
           federation: user.federation ?? "",
+          language: user.language ?? "",
         } satisfies BackendUserInfo));
         localStorage.removeItem(authExpiredKey);
         return true;
@@ -447,8 +453,33 @@ export class BackendSyncClient {
         roles: parsed.roles ?? [],
         branchId: parsed.branchId ?? "",
         federation: parsed.federation ?? "",
+        language: parsed.language ?? "",
       };
     } catch { return null; }
+  }
+
+  // Tells the server which language the app is being used in. The browser is the
+  // only place that knows, and the server has no other way to hear it — but it
+  // only matters for mail nobody asked for, so this is best-effort: nothing waits
+  // on it and a failure changes nothing anybody sees.
+  //
+  // Reported only when it differs from what the server already has, so opening
+  // the app is not a write.
+  async reportLanguage(language: string): Promise<void> {
+    const info = this.getUserInfo();
+    if (info === null || language === "" || info.language === language) return;
+    try {
+      const resp = await this.fetchWithRefresh(`${authUrl}/auth/me/language`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language }),
+      });
+      if (!resp.ok) return;
+      localStorage.setItem(userInfoKey, JSON.stringify({ ...info, language } satisfies BackendUserInfo));
+    } catch {
+      // Offline, or the server said no. Either way it will be reported again on
+      // the next start, and the reader gets the default language until then.
+    }
   }
 
   isConnected(): boolean {

@@ -183,13 +183,18 @@ with an account key and mail with a password.
     "microsoft": { "sub": "abcdef1234", "email": "jane@company.com" }
   },
   "createdAt":   "2026-05-22T18:00:00Z",
-  "lastLoginAt": "2026-05-22T18:00:00Z"
+  "lastLoginAt": "2026-05-22T18:00:00Z",
+  "language":    "sv"
 }
 ```
 - `id` is a server-generated UUID — stable regardless of which provider the user logs in with
 - `branchId` is the one branch this practitioner belongs to. It is absent only for accounts
   created before the branch model existed; a user without one is visible to a global admin
   alone, since an empty branch resolves to no federation and so to nobody's scope
+- `language` is the UI language the app last reported for this account, so that mail we send
+  unprompted — "somebody has asked to join your branch" — is written in a language the reader
+  reads. The browser is the only place that knows it, and it has no other reason to tell us.
+  Absent until the app reports one, in which case the default (`en`) applies
 - `linkedIdentities` maps provider name → `{sub, email}` for each linked provider
 - Provider lookup happens only at login; the UUID is used for everything else.
   In Cosmos a dedicated `identity_index` container gives O(1) `FindByLinkedIdentity`
@@ -312,6 +317,7 @@ corporate domain at the appropriate provider.
 | POST | `/auth/logout` | Revoke refresh token, clear cookies |
 | POST | `/auth/sessions/logout-others` | Revoke every refresh token for the caller except the current session's family (JWT required); 409 if the token predates the `fam` claim |
 | GET | `/auth/me` | Return authenticated user info (UUID, email, linkedIdentities) |
+| PUT | `/auth/me/language` | Record the UI language the app is being used in — body `{language}`, a BCP 47-ish tag. Only affects unprompted mail; the write is skipped when unchanged |
 | DELETE | `/auth/account` | Delete refresh tokens and the user record (JWT required) |
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
 | DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; 409 if it is the last one) |
@@ -331,6 +337,7 @@ corporate domain at the appropriate provider.
 | PATCH | `/auth/admin/branches/{id}` | Rename and/or move a branch. `name` and `federationId` are nullable, so "leave it alone" and "move it to WSKO" are different requests |
 | GET | `/auth/admin/branches/{id}/members` | One branch and everybody in it. A branch the caller does not cover answers 404, exactly as one that does not exist |
 | GET | `/auth/admin/requests` | Pending applications across every branch the caller covers |
+| | | The notice to those admins goes out once per language rather than once per admin: a message can be in only one, and admins deciding the same request are as likely to reply to each other as to us |
 | POST | `/auth/admin/requests/{email}/approve` | Admit the applicant: the account is written first, the request deleted after |
 | POST | `/auth/admin/requests/{email}/deny` | Decline, keeping the decision for 90 days so a re-application arrives with its history |
 

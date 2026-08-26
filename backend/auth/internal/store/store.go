@@ -23,6 +23,12 @@ type User struct {
 	LinkedIdentities map[string]LinkedIdentity `json:"linkedIdentities"` // provider name → identity
 	CreatedAt        string                    `json:"createdAt"`
 	LastLoginAt      string                    `json:"lastLoginAt"`
+	// Language is the UI language this member last used, as the app reports it.
+	// It is here so that mail we send them unprompted — "somebody has asked to
+	// join your branch" — can be written in a language they read: the browser
+	// knows it and the server would otherwise never hear. Empty means nobody has
+	// told us, and the default applies.
+	Language         string                    `json:"language,omitempty"`
 }
 
 type UserStore interface {

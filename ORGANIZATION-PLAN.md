@@ -20,6 +20,7 @@ no Cosmos account, staging or production has been touched, by decision — see �
 | ✅ Migration tool | `backend/auth/cmd/orgmigrate` |
 | ✅ Admission (Phase 2) | enrollment issues a join ticket instead of an account; requests, decisions and their mail — §5 |
 | ✅ Admin UI (Phase 3) | organization tree, branch members, one user, the waiting list, and the menu's count — §6 |
+| ✅ Member language | reported by the app, so unprompted mail is written in a language the reader reads — §1.5 |
 
 `AdminUsers.tsx` is gone, and with it the flat list. What remains:
 
@@ -27,8 +28,7 @@ no Cosmos account, staging or production has been touched, by decision — see �
 |---|---|---|
 | ⬜ | Phase 4 — branch transfers | §7 |
 | ⬜ | GDPR: the register row in BACKEND.md and the pre-account section in `PrivacyPolicy.tsx` | §9 |
-| ⬜ | `User.Language`, so admin notification mail renders in the reader's language rather than the app default | §1.5 |
-| ⬜ | Translation pass: the new Swedish UI strings, and a native reading of the ja/tr mail copy | |
+| ⬜ | Translation pass: the new Swedish UI strings, and a native reading of the ja/tr mail copy — including the admin notice, which grew copy in all four languages | |
 | ⬜ | AGENTS.md: the covering rule, and that organization names are never translated | §10 |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 
@@ -257,16 +257,22 @@ resets — but any future field that expires must not be attached to a document 
 > ([file.go:68](backend/auth/internal/store/file.go:68)). `FileOrgStore` and `FileJoinRequestStore`
 > must do the same: `organizations/` and `joinrequests/` under the data dir, never beside the users.
 
-### 1.5 User language (small, optional, recommended) — ⬜ not done
+### 1.5 User language — ✅ built
 
-Admin-facing mail ("a new membership request arrived") has no language to render in: the app's
-language lives in the browser. Adding `Language string` to `User`, written on the same `Save` that
-already updates `LastLoginAt`, fixes that for a handful of lines and is reusable for every future
-notification. Falls back to the app default when absent.
+Admin-facing mail ("a new membership request arrived") had no language to render in: the app's
+language lives in the browser. `User` now carries `Language`, and the app reports it through
+`PUT /auth/me/language` whenever it changes and once per session — both sides skip the write when
+nothing has changed, so opening the app is not a store write.
 
-**As built, it is not there.** The applicant's own mail is fine — the join request carries the
-language they applied in — but the notice to the deciding admins renders in English for everyone.
-Worth doing before this ships to a federation that does not read it.
+Two things it turned out to need beyond the field itself. An approved applicant keeps the language
+they applied in, which is the best guess anyone will ever have about the one to write to them in.
+And the notice to the deciding admins is sent **once per language rather than once per request**: a
+message can be in only one, and two Swedish admins still share a single thread. Grouping costs a
+full user scan — roles are keyed by email and users by UUID, with no index between them — which is
+the cheaper mistake for something that happens when somebody applies to a club.
+
+The tag is checked for shape rather than against a list of the languages the app ships, so adding
+one to the frontend needs no edit on the server; an unknown tag falls back when mail is rendered.
 
 ---
 

@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/authz"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 )
@@ -408,5 +410,87 @@ func TestJoinContext_ReportsAPendingRequest(t *testing.T) {
 	}
 	if pending["branchId"] != "karlstad" || pending["branchName"] != "Karlstad" {
 		t.Errorf("pending = %v", pending)
+	}
+}
+
+// Admins do not all read the same language, and a message can only be in one.
+// The notice therefore goes out once per language rather than once per request.
+func TestJoinRequest_NoticeGoesOutInEachAdminsLanguage(t *testing.T) {
+	sender := &fakeSender{}
+	h := newTestHandler(t, sender)
+	seedOrganization(t, h)
+
+	admins := []struct{ email, language string }{
+		{"sv-admin@example.org", "sv"},
+		{"ja-admin@example.org", "ja"},
+		{"quiet-admin@example.org", ""}, // never told us, so the default applies
+		{"sv-also@example.org", "sv"},
+	}
+	for i, admin := range admins {
+		seedUser(t, h, &store.User{
+			ID: "admin" + strconv.Itoa(i), Email: admin.email,
+			BranchID: "karlstad", Language: admin.language,
+		})
+		if err := h.roles.SetRoles(admin.email, []string{authz.BranchAdmin("karlstad")}); err != nil {
+			t.Fatalf("seed roles: %v", err)
+		}
+	}
+
+	ticket := ticketFor(t, h, "hopeful@example.org", "Hopeful Person")
+	if rec := applyAs(t, h, ticket, map[string]string{
+		"branchId": "karlstad", "name": "Hopeful Person", "language": "sv",
+	}); rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want 204", rec.Code)
+	}
+
+	// Three languages: Swedish, Japanese, and the default for the admin who has
+	// never told us. The two Swedes share one message rather than getting one
+	// each — they are deciding the same thing, and are as likely to reply to each
+	// other as to us.
+	got := map[string][]string{}
+	for _, sent := range sender.notices {
+		got[sent.lang] = append(got[sent.lang], sent.to...)
+	}
+	if len(got) != 3 {
+		t.Fatalf("sent %d messages, want one per language: %v", len(sender.notices), got)
+	}
+	if len(got["sv"]) != 2 {
+		t.Errorf("swedish notice went to %v, want both Swedish admins in one message", got["sv"])
+	}
+	if len(got["ja"]) != 1 || got["ja"][0] != "ja-admin@example.org" {
+		t.Errorf("japanese notice went to %v", got["ja"])
+	}
+	if len(got[email.DefaultLanguage]) != 1 || got[email.DefaultLanguage][0] != "quiet-admin@example.org" {
+		t.Errorf("default-language notice went to %v", got[email.DefaultLanguage])
+	}
+}
+
+// The language an applicant applied in is the best guess anyone will ever have
+// about the one to write to them in, so approval keeps it.
+func TestJoinRequest_ApprovalKeepsTheApplicantsLanguage(t *testing.T) {
+	sender := &fakeSender{}
+	h := newTestHandler(t, sender)
+	seedOrganization(t, h)
+
+	ticket := ticketFor(t, h, "hopeful@example.org", "Hopeful Person")
+	applyAs(t, h, ticket, map[string]string{
+		"branchId": "karlstad", "name": "Hopeful Person", "language": "ja",
+	})
+
+	rec := httptest.NewRecorder()
+	req := authedRequest(t, h, http.MethodPost, "/auth/admin/requests/hopeful@example.org/approve",
+		"caller", "caller@example.org", []string{authz.RoleAdmin}, nil)
+	req.SetPathValue("email", "hopeful@example.org")
+	h.adminApproveRequest(rec, req)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("approve: status = %d, want 204", rec.Code)
+	}
+
+	user, err := h.users.FindByLinkedIdentity(emailProviderName, "hopeful@example.org")
+	if err != nil || user == nil {
+		t.Fatalf("approved applicant has no user: %v", err)
+	}
+	if user.Language != "ja" {
+		t.Errorf("user language = %q, want ja", user.Language)
 	}
 }

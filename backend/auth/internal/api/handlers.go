@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -163,6 +164,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.Handle("POST /auth/email/start", h.emailLimiter.Middleware(http.HandlerFunc(h.emailStart)))
 	inner.HandleFunc("POST /auth/email/verify", h.emailVerify)
 	inner.HandleFunc("GET /auth/me", h.me)
+	inner.HandleFunc("PUT /auth/me/language", h.setMyLanguage)
 	inner.HandleFunc("POST /auth/logout", h.logout)
 	inner.HandleFunc("POST /auth/sessions/logout-others", h.logoutOtherSessions)
 	inner.HandleFunc("DELETE /auth/account", h.deleteAccount)
@@ -1100,3 +1102,57 @@ func randomString(n int) (string, error) {
 }
 
 // newUUID generates a random UUID v4.
+
+// validLanguage accepts a BCP 47-ish tag: two or three letters, optionally a
+// region. It is deliberately not a list of the languages the app ships, so that
+// adding one to the frontend needs no matching edit here — an unknown tag simply
+// falls back when mail is rendered. The shape check is there because this string
+// is stored and later reflected back to the client.
+var validLanguage = regexp.MustCompile(`^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$`)
+
+// setMyLanguage records the language the app is being used in, so unprompted mail
+// — a membership request landing in an admin's inbox — can be written in it. The
+// browser is the only place that knows, and it has no other reason to tell us.
+//
+// It is a write of the user's own record by the user themselves, so it needs no
+// scope check beyond being signed in.
+func (h *Handler) setMyLanguage(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.claimsFromRequest(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		Language string `json:"language"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	language := strings.ToLower(strings.TrimSpace(req.Language))
+	if !validLanguage.MatchString(language) {
+		http.Error(w, "not a language tag", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.users.FindByID(claims.Subject)
+	if err != nil || user == nil {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+	// The app reports its language whenever a session settles, which is far more
+	// often than anybody changes it. Writing only the change keeps a preference
+	// from costing a store write per login.
+	if user.Language == language {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	user.Language = language
+	if err := h.users.Save(user); err != nil {
+		log.Printf("setMyLanguage %s: %v", user.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

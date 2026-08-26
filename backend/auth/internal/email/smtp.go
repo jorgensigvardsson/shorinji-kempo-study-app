@@ -158,8 +158,9 @@ func (s *SMTPSender) SendFeedback(ctx context.Context, to []string, fb FeedbackS
 
 // SendJoinRequestNotice mails the deciding admins. One message addressed to all
 // of them, since they are deciding the same thing and a reply is likely to be to
-// each other as much as to us.
-func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, n JoinRequestNotice) error {
+// each other as much as to us — so the caller groups them by language and calls
+// this once per group, a message being able to be in only one.
+func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, lang string, n JoinRequestNotice) error {
 	if len(to) == 0 {
 		return errors.New("smtp: no recipients for the join request notice")
 	}
@@ -179,7 +180,7 @@ func (s *SMTPSender) SendJoinRequestNotice(ctx context.Context, to []string, n J
 	}
 	n.ApplicantEmail = applicant.Address
 
-	rendered, err := renderJoinRequestNotice(n)
+	rendered, err := renderJoinRequestNotice(n, lang)
 	if err != nil {
 		return err
 	}

@@ -106,6 +106,11 @@ function App(props: Props) {
   const syncState = useSyncState();
   // How many applicants are waiting on this admin, for the menu to say so.
   const pendingRequests = usePendingRequests();
+  // Tell the server which language the app is being used in: it needs one for
+  // mail it sends unprompted, and has no other way to learn it. Reported on
+  // every change and once per session; both sides skip the write when nothing
+  // has changed.
+  useEffect(() => { getSyncManager().reportLanguage(language); }, [language, syncState.status]);
   const displayName = syncState.status === "local_only"
     ? undefined
     : getSyncManager().getBackendUserInfo()?.displayName;

@@ -172,19 +172,78 @@ func (h *Handler) announceJoinRequest(request *store.JoinRequest, branchName str
 		// otherwise, and silence is the failure that matters here.
 		log.Printf("WARNING: join request from %s for branch %s has nobody to notify",
 			request.Email, request.BranchID)
-	} else if err := h.mailer.SendJoinRequestNotice(ctx, recipients, email.JoinRequestNotice{
-		ApplicantName:      request.Name,
-		ApplicantEmail:     request.Email,
-		BranchName:         branchName,
-		Note:               request.Note,
-		PreviouslyDeniedAt: request.PreviouslyDeniedAt,
-	}); err != nil {
-		log.Printf("joinRequest: notify %v: %v", recipients, err)
+	} else {
+		notice := email.JoinRequestNotice{
+			ApplicantName:      request.Name,
+			ApplicantEmail:     request.Email,
+			BranchName:         branchName,
+			Note:               request.Note,
+			PreviouslyDeniedAt: request.PreviouslyDeniedAt,
+		}
+		// One message per language rather than one per admin: admins deciding the
+		// same request are likely to reply to each other as much as to us, and a
+		// message can only be in one language. Two Swedes still get one thread.
+		for _, group := range h.groupByLanguage(recipients) {
+			if err := h.mailer.SendJoinRequestNotice(ctx, group.addresses, group.language, notice); err != nil {
+				log.Printf("joinRequest: notify %v: %v", group.addresses, err)
+			}
+		}
 	}
 
 	if err := h.mailer.SendJoinReceived(ctx, request.Email, branchName, request.Language); err != nil {
 		log.Printf("joinRequest: acknowledge to %s: %v", request.Email, err)
 	}
+}
+
+// recipientGroup is a set of admins who share a language, and so can share a
+// message.
+type recipientGroup struct {
+	language  string
+	addresses []string
+}
+
+// groupByLanguage sorts admin addresses into the language each of them last used
+// the app in, defaulting to the app's own when we have never been told.
+//
+// It costs a full user scan, which is worth being honest about: roles are keyed
+// by email and users by UUID, with no index between the two. Adding one means a
+// Cosmos indexing change owed out-of-band to every existing environment, for the
+// sake of a lookup that happens when somebody applies to a club — a few times a
+// year per branch. The scan is the cheaper mistake.
+func (h *Handler) groupByLanguage(addresses []string) []recipientGroup {
+	language := map[string]string{}
+	if users, err := h.users.List(); err != nil {
+		// Not fatal: everybody falls back to the default language, which is what
+		// they got before members carried one at all.
+		log.Printf("groupByLanguage: %v", err)
+	} else {
+		for _, u := range users {
+			if u.Language != "" {
+				language[strings.ToLower(u.Email)] = u.Language
+			}
+		}
+	}
+
+	byLanguage := map[string][]string{}
+	for _, addr := range addresses {
+		lang := language[strings.ToLower(addr)]
+		if lang == "" {
+			lang = email.DefaultLanguage
+		}
+		byLanguage[lang] = append(byLanguage[lang], addr)
+	}
+
+	languages := make([]string, 0, len(byLanguage))
+	for lang := range byLanguage {
+		languages = append(languages, lang)
+	}
+	sort.Strings(languages) // deterministic, so a test can say what it expects
+
+	groups := make([]recipientGroup, 0, len(languages))
+	for _, lang := range languages {
+		groups = append(groups, recipientGroup{language: lang, addresses: byLanguage[lang]})
+	}
+	return groups
 }
 
 // joinWithdraw lets an applicant take back a pending request, which is also how
@@ -308,6 +367,9 @@ func (h *Handler) adminApproveRequest(w http.ResponseWriter, r *http.Request) {
 			request.Provider: {Sub: request.Sub, Email: request.Email},
 		},
 		CreatedAt: now,
+		// They applied in some language; that is the best guess we will ever have
+		// about the one to write to them in, and it costs nothing to keep.
+		Language: request.Language,
 	}
 	if err := h.users.Save(user); err != nil {
 		log.Printf("adminApproveRequest: create user for %s: %v", request.Email, err)

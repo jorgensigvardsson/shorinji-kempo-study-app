@@ -18,15 +18,22 @@ type JoinRequestNotice struct {
 	PreviouslyDeniedAt string
 }
 
-// joinCopy is one language's worth of the messages an applicant receives. The
-// admin notice is deliberately absent: it goes to whoever administers a branch,
-// whose language we have no way of knowing, so it is written in English like the
-// feedback relay. The three below go to somebody who has just told us which
-// language they are using.
+// joinCopy is one language's worth of the join messages. Three of them go to an
+// applicant, who has just told us which language they are using; the fourth goes
+// to the admins who will decide, in whichever language each of them last used
+// the app in. That last part was not always knowable — the notice was written in
+// English for everyone until members started carrying a language of their own.
 type joinCopy struct {
 	receivedSubject string
 	receivedHeading string
 	receivedBody    string // %s = branch name
+
+	noticeSubject  string // %s = applicant name, %s = branch name
+	noticeHeading  string
+	noticeBody     string // %s = applicant name, %s = email, %s = branch name
+	noticeNote     string // heading above the applicant's own words
+	noticeDeclined string // %s = date this address was declined before
+	noticeAction   string // what to do next
 
 	approvedSubject string // %s = branch name
 	approvedHeading string
@@ -39,6 +46,13 @@ type joinCopy struct {
 
 var joinTemplates = map[string]joinCopy{
 	"sv": {
+		noticeSubject:  "Ansökan om medlemskap: %s vill gå med i %s",
+		noticeHeading:  "Ny ansökan om medlemskap",
+		noticeBody:     "%s <%s> har ansökt om medlemskap i %s.",
+		noticeNote:     "Med egna ord:",
+		noticeDeclined: "Obs: den här adressen nekades tidigare, den %s.",
+		noticeAction:   "Öppna appen för att godkänna eller neka ansökan.",
+
 		receivedSubject: "Vi har tagit emot din ansökan",
 		receivedHeading: "Ansökan mottagen",
 		receivedBody:    "Din ansökan om medlemskap i %s har skickats vidare till klubbens administratörer. Du får ett mejl så snart den har behandlats.",
@@ -52,6 +66,13 @@ var joinTemplates = map[string]joinCopy{
 		deniedBody:    "Din ansökan om medlemskap i %s har tyvärr inte godkänts. Kontakta klubben om du tror att det är ett misstag — du är välkommen att ansöka igen.",
 	},
 	"en": {
+		noticeSubject:  "Membership request: %s wants to join %s",
+		noticeHeading:  "New membership request",
+		noticeBody:     "%s <%s> has asked to join %s.",
+		noticeNote:     "In their own words:",
+		noticeDeclined: "Note: this address was previously declined on %s.",
+		noticeAction:   "Open the app to approve or decline the request.",
+
 		receivedSubject: "We have received your request",
 		receivedHeading: "Request received",
 		receivedBody:    "Your request to join %s has been passed to the branch's administrators. You will get an email as soon as it has been decided.",
@@ -65,6 +86,13 @@ var joinTemplates = map[string]joinCopy{
 		deniedBody:    "Your request to join %s was not approved. Please contact the branch if you believe that is a mistake — you are welcome to apply again.",
 	},
 	"ja": {
+		noticeSubject:  "入会申請: %s さんが %s への入会を希望しています",
+		noticeHeading:  "新しい入会申請",
+		noticeBody:     "%s <%s> さんが %s への入会を申請しました。",
+		noticeNote:     "本人からのメッセージ:",
+		noticeDeclined: "注意: このアドレスは %s に一度不承認となっています。",
+		noticeAction:   "アプリを開いて申請を承認または却下してください。",
+
 		receivedSubject: "申請を受け付けました",
 		receivedHeading: "申請を受け付けました",
 		receivedBody:    "%s への入会申請を支部の管理者に転送しました。結果が決まりましたらメールでお知らせします。",
@@ -78,6 +106,13 @@ var joinTemplates = map[string]joinCopy{
 		deniedBody:    "%s への入会申請は承認されませんでした。お心当たりのない場合は支部にお問い合わせください。再度申請していただくこともできます。",
 	},
 	"tr": {
+		noticeSubject:  "Üyelik başvurusu: %s, %s kulübüne katılmak istiyor",
+		noticeHeading:  "Yeni üyelik başvurusu",
+		noticeBody:     "%s <%s>, %s kulübüne katılmak için başvurdu.",
+		noticeNote:     "Kendi sözleriyle:",
+		noticeDeclined: "Not: bu adres daha önce %s tarihinde reddedildi.",
+		noticeAction:   "Başvuruyu onaylamak veya reddetmek için uygulamayı açın.",
+
 		receivedSubject: "Başvurunuzu aldık",
 		receivedHeading: "Başvuru alındı",
 		receivedBody:    "%s kulübüne katılma başvurunuz kulüp yöneticilerine iletildi. Karar verildiğinde size e-posta ile bildirilecektir.",
@@ -96,32 +131,51 @@ func lookupJoin(lang string) joinCopy {
 	if c, ok := joinTemplates[lang]; ok {
 		return c
 	}
-	return joinTemplates["en"]
+	return joinTemplates[DefaultLanguage]
 }
 
-// renderJoinRequestNotice builds the message the deciding admins receive. It is
-// in English for the reason given on joinCopy, and its Reply-To is the applicant:
-// the likeliest useful response to "somebody wants to join" is to ask them
-// something, and that should not require copying an address out of the body.
-func renderJoinRequestNotice(n JoinRequestNotice) (message, error) {
-	subject := fmt.Sprintf("Membership request: %s wants to join %s", n.ApplicantName, n.BranchName)
+// renderJoinRequestNotice builds the message the deciding admins receive, in the
+// language given — one send per language, since a single message cannot be in
+// two. Its Reply-To is the applicant: the likeliest useful response to "somebody
+// wants to join" is to ask them something, and that should not require copying an
+// address out of the body.
+func renderJoinRequestNotice(n JoinRequestNotice, lang string) (message, error) {
+	c := lookupJoin(lang)
+	subject := fmt.Sprintf(c.noticeSubject, n.ApplicantName, n.BranchName)
+	body := fmt.Sprintf(c.noticeBody, n.ApplicantName, n.ApplicantEmail, n.BranchName)
+	declined := ""
+	if n.PreviouslyDeniedAt != "" {
+		declined = fmt.Sprintf(c.noticeDeclined, n.PreviouslyDeniedAt)
+	}
 
 	var html bytes.Buffer
-	if err := joinNoticeHTMLTemplate.Execute(&html, n); err != nil {
+	err := joinNoticeHTMLTemplate.Execute(&html, struct {
+		Lang, Subject, Heading, Body, NoteLabel, Note, Declined, Action string
+	}{
+		Lang:      langAttr(lang),
+		Subject:   subject,
+		Heading:   c.noticeHeading,
+		Body:      body,
+		NoteLabel: c.noticeNote,
+		Note:      n.Note,
+		Declined:  declined,
+		Action:    c.noticeAction,
+	})
+	if err != nil {
 		return message{}, fmt.Errorf("render join request notice: %w", err)
 	}
 
-	plain := fmt.Sprintf("%s <%s> has asked to join %s.\n", n.ApplicantName, n.ApplicantEmail, n.BranchName)
+	plain := body + "\n"
 	if n.Note != "" {
-		plain += fmt.Sprintf("\nIn their own words:\n%s\n", n.Note)
+		plain += fmt.Sprintf("\n%s\n%s\n", c.noticeNote, n.Note)
 	}
-	if n.PreviouslyDeniedAt != "" {
-		plain += fmt.Sprintf("\nNote: this address was previously declined on %s.\n", n.PreviouslyDeniedAt)
+	if declined != "" {
+		plain += "\n" + declined + "\n"
 	}
-	plain += "\nSign in to the app to approve or decline the request.\n"
+	plain += "\n" + c.noticeAction + "\n"
 
 	return message{
-		senderName: "Shorinji Kempo Study App",
+		senderName: lookup(lang).appName,
 		subject:    subject,
 		plain:      plain,
 		html:       html.String(),
@@ -200,9 +254,9 @@ var applicantHTMLTemplate = template.Must(template.New("applicant").Parse(`<!DOC
 </body></html>`))
 
 var joinNoticeHTMLTemplate = template.Must(template.New("joinnotice").Parse(`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="{{.Lang}}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Membership request</title>
+<title>{{.Subject}}</title>
 <style>
 @media (prefers-color-scheme: dark) {
   .card { background: #1b1b1b !important; border-color: #3a3a3a !important; }
@@ -215,13 +269,12 @@ var joinNoticeHTMLTemplate = template.Must(template.New("joinnotice").Parse(`<!D
 <table role="presentation" class="card" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #e3e3e3;border-radius:12px;" cellpadding="0" cellspacing="0" border="0">
 <tr><td style="height:4px;background:#c8a44b;border-radius:12px 12px 0 0;"></td></tr>
 <tr><td style="padding:28px 32px 32px 32px;">
-<h1 style="margin:0 0 16px 0;font-size:20px;font-weight:600;color:#222;">Membership request</h1>
-<p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#444;">
-<strong>{{.ApplicantName}}</strong> &lt;{{.ApplicantEmail}}&gt; has asked to join <strong>{{.BranchName}}</strong>.
-</p>
-{{if .Note}}<p style="margin:0 0 16px 0;padding:12px 16px;background:#faf6ec;border-left:3px solid #c8a44b;font-size:15px;line-height:1.6;color:#444;white-space:pre-wrap;">{{.Note}}</p>{{end}}
-{{if .PreviouslyDeniedAt}}<p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;color:#8a6d1f;">This address was previously declined on {{.PreviouslyDeniedAt}}.</p>{{end}}
-<p style="margin:0;font-size:15px;line-height:1.6;color:#444;">Sign in to the app to approve or decline the request.</p>
+<h1 style="margin:0 0 16px 0;font-size:20px;font-weight:600;color:#222;">{{.Heading}}</h1>
+<p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#444;">{{.Body}}</p>
+{{if .Note}}<p style="margin:0 0 8px 0;font-size:14px;color:#666;">{{.NoteLabel}}</p>
+<p style="margin:0 0 16px 0;padding:12px 16px;background:#faf6ec;border-left:3px solid #c8a44b;font-size:15px;line-height:1.6;color:#444;white-space:pre-wrap;">{{.Note}}</p>{{end}}
+{{if .Declined}}<p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;color:#8a6d1f;">{{.Declined}}</p>{{end}}
+<p style="margin:0;font-size:15px;line-height:1.6;color:#444;">{{.Action}}</p>
 </td></tr></table>
 </td></tr></table>
 </body></html>`))

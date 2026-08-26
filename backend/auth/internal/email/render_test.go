@@ -62,3 +62,63 @@ func TestRender_OmitsAnUnstatableValidity(t *testing.T) {
 		t.Errorf("plain text left a blank paragraph behind:\n%q", msg.plain)
 	}
 }
+
+// The notice to the deciding admins used to be English for everyone, because the
+// server had no way of knowing what they read. Members now carry a language, so
+// it is written in theirs.
+func TestRenderJoinRequestNotice_Localized(t *testing.T) {
+	notice := JoinRequestNotice{
+		ApplicantName:      "Hopeful Person",
+		ApplicantEmail:     "hopeful@example.org",
+		BranchName:         "Karlstad",
+		Note:               "Jag tränar på tisdagar",
+		PreviouslyDeniedAt: "2026-05-01",
+	}
+
+	sv, err := renderJoinRequestNotice(notice, "sv")
+	if err != nil {
+		t.Fatalf("render sv: %v", err)
+	}
+	if !strings.Contains(sv.subject, "Ansökan om medlemskap") {
+		t.Errorf("swedish subject = %q", sv.subject)
+	}
+	if !strings.Contains(sv.plain, "Med egna ord:") || !strings.Contains(sv.plain, "Jag tränar på tisdagar") {
+		t.Errorf("swedish body left out the applicant's own words:\n%s", sv.plain)
+	}
+	// A re-application is not the same question as a first one, in any language.
+	if !strings.Contains(sv.plain, "2026-05-01") {
+		t.Errorf("swedish body did not mention the earlier refusal:\n%s", sv.plain)
+	}
+	// Replying to "somebody wants to join" usually means asking them something.
+	if sv.replyTo != "hopeful@example.org" {
+		t.Errorf("reply-to = %q", sv.replyTo)
+	}
+
+	// A language nobody has written copy for falls back rather than rendering
+	// empty, which is what makes an unknown tag safe to store.
+	fallback, err := renderJoinRequestNotice(notice, "fi")
+	if err != nil {
+		t.Fatalf("render fi: %v", err)
+	}
+	if !strings.Contains(fallback.subject, "Membership request") {
+		t.Errorf("fallback subject = %q, want the English copy", fallback.subject)
+	}
+}
+
+// The applicant writes their own name and note, and both land in an admin's mail
+// client. Nothing they type may become markup.
+func TestRenderJoinRequestNotice_EscapesTheApplicant(t *testing.T) {
+	rendered, err := renderJoinRequestNotice(JoinRequestNotice{
+		ApplicantName:  "<script>alert(1)</script>",
+		ApplicantEmail: "x@example.org",
+		BranchName:     "Karlstad",
+		Note:           "<img src=x onerror=alert(2)>",
+	}, "en")
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	// Escaped, the note still reads "onerror=" — what must not appear is a tag.
+	if strings.Contains(rendered.html, "<script>") || strings.Contains(rendered.html, "<img") {
+		t.Errorf("applicant input reached the HTML unescaped:\n%s", rendered.html)
+	}
+}

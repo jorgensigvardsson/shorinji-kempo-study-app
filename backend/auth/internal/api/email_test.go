@@ -31,7 +31,9 @@ type fakeSender struct {
 	feedbackErr        error
 
 	// Join-request mail, recorded rather than sent. Who was told is as much a
-	// part of the behaviour as what they were told, so both are kept.
+	// part of the behaviour as what they were told, so both are kept — and every
+	// send, since one request can now produce a message per language.
+	notices      []sentNotice
 	noticeTo     []string
 	notice       email.JoinRequestNotice
 	receivedTo   string
@@ -43,12 +45,21 @@ type fakeSender struct {
 	joinErr      error
 }
 
+// sentNotice is one call to SendJoinRequestNotice: a set of admins who share a
+// language, and the notice they were sent.
+type sentNotice struct {
+	to     []string
+	lang   string
+	notice email.JoinRequestNotice
+}
+
 func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string, validFor time.Duration) error {
 	f.to, f.code, f.lang, f.validFor = to, code, lang, validFor
 	return f.err
 }
 
-func (f *fakeSender) SendJoinRequestNotice(_ context.Context, to []string, n email.JoinRequestNotice) error {
+func (f *fakeSender) SendJoinRequestNotice(_ context.Context, to []string, lang string, n email.JoinRequestNotice) error {
+	f.notices = append(f.notices, sentNotice{to: to, lang: lang, notice: n})
 	f.noticeTo, f.notice = to, n
 	return f.joinErr
 }

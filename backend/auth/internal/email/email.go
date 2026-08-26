@@ -25,8 +25,9 @@ type Sender interface {
 	SendFeedback(ctx context.Context, to []string, submission FeedbackSubmission) error
 
 	// SendJoinRequestNotice tells the admins who will decide that somebody has
-	// asked to join their branch.
-	SendJoinRequestNotice(ctx context.Context, to []string, notice JoinRequestNotice) error
+	// asked to join their branch, in the language they last used the app in. The
+	// caller groups recipients by language and calls this once per group.
+	SendJoinRequestNotice(ctx context.Context, to []string, lang string, notice JoinRequestNotice) error
 
 	// SendJoinReceived confirms to an applicant that the request went somewhere,
 	// so that waiting does not look like nothing having happened.
@@ -111,11 +112,16 @@ var templates = map[string]localized{
 	},
 }
 
+// DefaultLanguage is what we write in when nobody has told us otherwise. It is
+// exported because callers group recipients by language before sending, and must
+// agree with this package about what an unknown one falls back to.
+const DefaultLanguage = "en"
+
 func lookup(lang string) localized {
 	if t, ok := templates[lang]; ok {
 		return t
 	}
-	return templates["en"]
+	return templates[DefaultLanguage]
 }
 
 // validityLine states how long the code lasts, in whole minutes. Part-minutes
@@ -331,9 +337,9 @@ func (LogSender) SendFeedback(_ context.Context, to []string, fb FeedbackSubmiss
 	return nil
 }
 
-func (LogSender) SendJoinRequestNotice(_ context.Context, to []string, n JoinRequestNotice) error {
-	log.Printf("[email:dev] join request from %s <%s> for branch %q → %v; note: %q",
-		n.ApplicantName, n.ApplicantEmail, n.BranchName, to, n.Note)
+func (LogSender) SendJoinRequestNotice(_ context.Context, to []string, lang string, n JoinRequestNotice) error {
+	log.Printf("[email:dev] join request from %s <%s> for branch %q → %v (%s); note: %q",
+		n.ApplicantName, n.ApplicantEmail, n.BranchName, to, lang, n.Note)
 	return nil
 }
 

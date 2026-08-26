@@ -113,6 +113,10 @@ class SyncManager {
     };
   }
 
+  reportLanguage(language: string): void {
+    void this.backendClient.reportLanguage(language);
+  }
+
   getBackendUserInfo(): BackendUserInfo | null {
     return this.backendClient.getUserInfo();
   }
