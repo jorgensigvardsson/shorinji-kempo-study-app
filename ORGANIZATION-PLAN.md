@@ -20,15 +20,26 @@ no Cosmos account, staging or production has been touched, by decision — see �
 | ✅ Migration tool | `backend/auth/cmd/orgmigrate` |
 | ✅ Admission (Phase 2) | enrollment issues a join ticket instead of an account; requests, decisions and their mail — §5 |
 | ✅ Admin UI (Phase 3) | organization tree, branch members, one user, the waiting list, and the menu's count — §6 |
-| ⬜ Phase 4 | transfers — §7 |
 
-`AdminUsers.tsx` is gone, and with it the flat list. What is left before this can ship is Phase 4,
-a translation pass over the new Swedish strings and the ja/tr mail copy, and §8's deployment
-sequence — nothing here has met Cosmos yet.
+`AdminUsers.tsx` is gone, and with it the flat list. What remains:
+
+| | What | Where |
+|---|---|---|
+| ⬜ | Phase 4 — branch transfers | §7 |
+| ⬜ | GDPR: the register row in BACKEND.md and the pre-account section in `PrivacyPolicy.tsx` | §9 |
+| ⬜ | `User.Language`, so admin notification mail renders in the reader's language rather than the app default | §1.5 |
+| ⬜ | Translation pass: the new Swedish UI strings, and a native reading of the ja/tr mail copy | |
+| ⬜ | AGENTS.md: the covering rule, and that organization names are never translated | §10 |
+| ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
+
+None of it blocks the rest, and nothing here has met Cosmos yet.
 
 One thing found while building Phase 3 and fixed there: both `admin` and `wsko_admin` scope to the
 root, so the covering rule alone let a WSKO admin grant `admin` — the one power the split was meant
 to keep apart. Granting or revoking it now requires holding it.
+
+Below, each phase heading carries its state; the design text is left as written, with **As built**
+notes where the code settled somewhere the plan did not foresee.
 
 ## The organization
 
@@ -149,9 +160,10 @@ type User struct {
 }
 ```
 
-Nullable at the schema level, non-null by invariant once Phase 2 ships. It has to be nullable: users
-created between Phase 1 and Phase 2 still auto-enroll without a branch, and the field is what the
-migration fills in.
+Nullable at the schema level, non-null by invariant now that Phase 2 is built: enrollment no longer
+creates a user at all, so every account is either admitted into a branch or migrated into one. The
+field stays nullable because the migration is what fills it in, and because a record written before
+all this existed must still decode.
 
 A user with no branch is visible only to a global admin: `Covers` reads an empty branch id the same
 way it reads an unknown one, which is the right answer — someone who belongs to nothing belongs to
@@ -188,10 +200,11 @@ type RoleStore interface {
 }
 ```
 
-`ListAll` needs the `roles` container to be **queryable**, and it currently uses `none` indexing,
-which blocks queries outright. Change it to `consistent` with all paths excluded — zero write-time
-cost, scan permitted. Same out-of-band caveat as above. The file store already holds the whole map in
-one JSON file, so `ListAll` there is a one-liner.
+`ListAll` needs the `roles` container to be **queryable**, and it used `none` indexing, which blocks
+queries outright. `provision.go` now creates it `consistent` with all paths excluded — zero
+write-time cost, scan permitted. That covers new environments only: staging and prod already have
+the container, so the change is owed to them out-of-band, exactly as above. The file store holds the
+whole map in one JSON file, so `ListAll` there is a one-liner.
 
 Like the org tree, the reverse index (role → emails) is held in memory in the auth service and
 rebuilt on write. It is needed to answer "who administers this branch?" when a join request arrives.
@@ -244,12 +257,16 @@ resets — but any future field that expires must not be attached to a document 
 > ([file.go:68](backend/auth/internal/store/file.go:68)). `FileOrgStore` and `FileJoinRequestStore`
 > must do the same: `organizations/` and `joinrequests/` under the data dir, never beside the users.
 
-### 1.5 User language (small, optional, recommended)
+### 1.5 User language (small, optional, recommended) — ⬜ not done
 
-Admin-facing mail ("a new membership request arrived") has no language to render in today: the app's
+Admin-facing mail ("a new membership request arrived") has no language to render in: the app's
 language lives in the browser. Adding `Language string` to `User`, written on the same `Save` that
 already updates `LastLoginAt`, fixes that for a handful of lines and is reusable for every future
 notification. Falls back to the app default when absent.
+
+**As built, it is not there.** The applicant's own mail is fine — the join request carries the
+language they applied in — but the notice to the deciding admins renders in English for everyone.
+Worth doing before this ships to a federation that does not read it.
 
 ---
 
@@ -318,6 +335,13 @@ Everything else falls out of it:
 The existing self-demotion guard generalizes: a caller may not strip their own `admin`/`wsko_admin`
 (409, as today). Scoped roles may be self-removed — someone above can always re-grant them.
 
+**As built, one rule does not fall out of covering.** `admin` and `wsko_admin` both scope to the
+root, so "grant what you cover" let a WSKO admin mint an `admin` — including for themselves, which
+is the whole of the difference between the two roles handed over in one click. Granting or revoking
+`admin` therefore requires holding `admin`, checked beside the covering test rather than inside it:
+it is a fact about that particular role, not a new shape of authority, and burying it in `Covers`
+would make the one function that answers everything answer something else as well.
+
 `Covers` is pure and takes the tree as a parameter, so its tests need no store at all.
 
 ---
@@ -338,7 +362,7 @@ choose to deploy it.
   `docker compose logs -f auth` and reaches nobody's inbox.
 - **The signing key is generated on first run**, so join tickets (§5.1) work locally with no setup.
 
-### 3.2 What this plan adds to keep the two stores at parity
+### 3.2 What this plan adds to keep the two stores at parity — ✅ all built
 
 - `FileOrgStore` and `FileJoinRequestStore` alongside their Cosmos twins, in **subdirectories** for
   the reason given in §1.4.
@@ -377,10 +401,11 @@ against prod — happens once, after every phase is finished, and is described i
 
 ---
 
-## 4. Phase 1 — Organization and scoped roles
+## 4. Phase 1 — Organization and scoped roles — ✅ built
 
 Backend only, plus the minimum frontend edit to keep the existing admin page compiling. No admission
 gate yet: enrollment still auto-creates users, who simply have no branch until an admin assigns one.
+(That window closed in Phase 2, and never existed anywhere but a local data dir.)
 
 ### 4.1 Auth service
 
@@ -405,17 +430,17 @@ implementation filters in memory. `RoleStore` gains `ListAll`.
 | POST | `/auth/admin/branches` | `{name, federationId?}`. Placement comes from the body: an omitted `federationId` means WSKO-attached and requires `{wsko}`, and a federation the caller does not cover is refused. **As built, this refuses rather than forces** — an earlier draft rewrote a federation admin's request to their own federation, but silently changing a request to fit the requester's authority is a worse habit than refusing one that exceeds it, and the UI knows the federation to pre-fill |
 | PATCH | `/auth/admin/branches/{id}` | Rename and/or move. A move requires covering both old and new scope |
 | GET | `/auth/admin/users` | **Now scoped.** Global/WSKO → full scan as today; otherwise the union of `ListByBranches` over every branch the caller covers, deduplicated |
-| PUT | `/auth/admin/users/{id}/roles` | Body becomes `{roles: ["branch_admin:…"]}`, replacing `{admin: bool}`. Rejects 403 unless the caller covers the scope of **every** role added or removed, and 404 unless the caller can see the target user |
+| PUT | `/auth/admin/users/{id}/roles` | Body becomes `{roles: ["branch_admin:…"]}`, replacing `{admin: bool}`. Rejects 403 unless the caller covers the scope of **every** role added or removed — and, for `admin` itself, unless they hold it (§2.3) — and 404 unless the caller can see the target user. Only the roles that actually *change* are checked, so a grant made from further up survives an edit by somebody who could not have made it |
 
 `GET /auth/me` returns `branchId`, the resolved federation, and live roles, so the admin UI reflects
 a grant immediately rather than at the next token issue.
 
 ### 4.2 Frontend (minimal)
 
-`AdminUsers.tsx` survives Phase 1 largely intact — its admin toggle switches from
+`AdminUsers.tsx` survived Phase 1 largely intact — its admin toggle switched from
 `adminSetAdmin(id, bool)` to `adminSetRoles(id, string[])` in `sync/backend.ts`, sending the target's
-full role array. No compatibility shim on the backend; the two ship together. The real UI arrives in
-Phase 3.
+full role array. No compatibility shim on the backend; the two shipped together. Phase 3 then deleted
+the page outright, so this edit exists only in the history.
 
 ### 4.3 The migration tool
 
@@ -441,7 +466,7 @@ the time it runs against prod (§8) it is the most exercised code on the branch.
 
 ---
 
-## 5. Phase 2 — Admission
+## 5. Phase 2 — Admission — ✅ built
 
 Split in two, because 5.1 is surgery on the two busiest paths in the auth service and deserves to
 land and be observed on its own before any UI depends on it.
@@ -504,9 +529,13 @@ verbatim) → pick a branch from `GET /auth/org/branches`, grouped by federation
 → submit → "request pending" screen. A returning applicant who re-verifies lands on that same pending
 screen with a **Withdraw** button.
 
+Built as `RegisterBranch.tsx`, with three states — the form, the pending request, and the one nobody
+designs for: a ticket that has expired or been lost, where the only honest thing to say is "verify
+your address again". Branches are grouped by federation with **WSKO** last.
+
 ---
 
-## 6. Phase 3 — Admin UI
+## 6. Phase 3 — Admin UI — ✅ built
 
 `AdminUsers.tsx` is deleted. Its flat list is replaced by navigation that follows the organization,
 which also disposes of the 100-members-in-one-list problem — you are always inside a single branch:
@@ -532,9 +561,14 @@ with `roles.ts` reading the role vocabulary the same way the server does. Two en
 underneath them: `GET /auth/admin/users/{id}` and `GET /auth/admin/branches/{id}/members`, so a page
 addressed by URL stands up on its own and a branch's members do not arrive by filtering everybody.
 
+Roles are granted from `/admin/users/:id`, each switch offered where the caller's own roles cover the
+scope that role confers. A role held from further up is shown as held but not as something to switch
+off — offering a control the server would refuse is worse than offering none. This is where the
+`admin`/`wsko_admin` hole in the Status section was found.
+
 ---
 
-## 7. Phase 4 — Branch transfers
+## 7. Phase 4 — Branch transfers — ⬜ not started
 
 Members move to other towns; this is the most common real-world operation and the reason "change a
 user's branch" is deliberately absent from Phase 1's endpoints.
@@ -587,11 +621,16 @@ The order, staging first and then prod:
 Staging exists to rehearse exactly this sequence, which is the argument for running it there first
 rather than treating it as a second production.
 
+**Where this stands: step 0 of 4.** Everything built so far runs on file-based stores and has been
+exercised there — the migration tool has seeded every local data dir since it existed, dry run then
+apply then re-apply. No Cosmos account has been touched, and the branch is not pushed.
+
 ---
 
-## 9. GDPR
+## 9. GDPR — ⬜ not done
 
-Two additions to the register in BACKEND.md and to `PrivacyPolicy.tsx`:
+The stores and their retention behaviour are built; the documents that describe them to a reader are
+not. Two additions to the register in BACKEND.md and to `PrivacyPolicy.tsx`:
 
 | Data | Where | Lawful basis | Retention |
 |---|---|---|---|
@@ -607,7 +646,9 @@ short pre-account section, since it currently only describes authenticated users
 
 ## 10. Documentation
 
-- **BACKEND.md** — new containers, the two indexing-policy changes and their out-of-band caveat, the
-  scoped-role vocabulary, the `branch`/`fed` claims, the new endpoints, the admission flow diagram,
-  the GDPR rows.
-- **AGENTS.md** — the covering rule, and the fact that organization names are never translated.
+- ✅ **BACKEND.md** — the `organizations` and `joinrequests` containers, the two indexing-policy
+  changes and their out-of-band caveat, the scoped-role vocabulary and the one rule that does not
+  follow from scope, the `branch`/`fed` claims, and every endpoint added by phases 1 to 3. Still
+  owed: the GDPR rows of §9, and an admission flow diagram.
+- ✅ **README.md** — the role table and the covering rule, with its `admin` exception.
+- ⬜ **AGENTS.md** — the covering rule, and the fact that organization names are never translated.
