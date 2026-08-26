@@ -258,3 +258,114 @@ func TestAdmin_UnrecognisedRolesAreNotAdminRoles(t *testing.T) {
 		}
 	}
 }
+
+// membersOf calls the per-branch listing and returns the ids, or the status when
+// the call was refused.
+func membersOf(t *testing.T, h *Handler, branchID string, roles []string) ([]string, int) {
+	t.Helper()
+	rec := httptest.NewRecorder()
+	req := authedRequest(t, h, http.MethodGet, "/auth/admin/branches/"+branchID+"/members", "caller", "caller@example.org", roles, nil)
+	req.SetPathValue("id", branchID)
+	h.adminBranchMembers(rec, req)
+	if rec.Code != http.StatusOK {
+		return nil, rec.Code
+	}
+	var got []adminUser
+	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	ids := make([]string, 0, len(got))
+	for _, u := range got {
+		ids = append(ids, u.ID)
+	}
+	sort.Strings(ids)
+	return ids, rec.Code
+}
+
+func TestAdminBranchMembers_OneBranchAtATime(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+
+	ids, _ := membersOf(t, h, "karlstad", []string{authz.RoleWSKOAdmin})
+	if len(ids) != 2 || ids[0] != "k1" || ids[1] != "k2" {
+		t.Errorf("karlstad members = %v, want [k1 k2]", ids)
+	}
+
+	// A branch admin gets their own branch, and the same answer as WSKO gets for
+	// it — the listing is the branch's, not a filtered view of something larger.
+	ids, _ = membersOf(t, h, "karlstad", []string{authz.BranchAdmin("karlstad")})
+	if len(ids) != 2 {
+		t.Errorf("branch admin sees %v, want both members", ids)
+	}
+
+	// The federation above it covers the branch too.
+	if _, code := membersOf(t, h, "goteborg", []string{authz.FederationAdmin("SE")}); code != http.StatusOK {
+		t.Errorf("federation admin on own branch: status = %d, want 200", code)
+	}
+}
+
+// A branch outside the caller's authority and a branch that does not exist give
+// the same answer, deliberately: a 403 for the first would tell an outsider which
+// ids are real.
+func TestAdminBranchMembers_HidesWhatIsNotCovered(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+
+	for _, branch := range []string{"oslo", "tokyo", "no-such-branch"} {
+		if _, code := membersOf(t, h, branch, []string{authz.BranchAdmin("karlstad")}); code != http.StatusNotFound {
+			t.Errorf("karlstad admin on %s: status = %d, want 404", branch, code)
+		}
+	}
+
+	// And an id nobody has, even for the admin who covers everything: WSKO
+	// authority over a branch that does not exist is authority over nothing.
+	if _, code := membersOf(t, h, "no-such-branch", []string{authz.RoleAdmin}); code != http.StatusNotFound {
+		t.Errorf("global admin on missing branch: status = %d, want 404", code)
+	}
+}
+
+func TestAdminGetUser_ScopedLikeTheListing(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+	if err := h.roles.SetRoles("k1@example.org", []string{authz.BranchAdmin("karlstad")}); err != nil {
+		t.Fatalf("seed roles: %v", err)
+	}
+
+	get := func(target string, roles []string) (adminUser, int) {
+		rec := httptest.NewRecorder()
+		req := authedRequest(t, h, http.MethodGet, "/auth/admin/users/"+target, "caller", "caller@example.org", roles, nil)
+		req.SetPathValue("id", target)
+		h.adminGetUser(rec, req)
+		var got adminUser
+		if rec.Code == http.StatusOK {
+			if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
+				t.Fatalf("decode: %v", err)
+			}
+		}
+		return got, rec.Code
+	}
+
+	user, code := get("k1", []string{authz.BranchAdmin("karlstad")})
+	if code != http.StatusOK {
+		t.Fatalf("own branch member: status = %d, want 200", code)
+	}
+	if user.Email != "k1@example.org" {
+		t.Errorf("email = %q, want k1@example.org", user.Email)
+	}
+	// The roles come from the role store rather than the user record, so the page
+	// showing them does not have to reconcile two sources.
+	if len(user.Roles) != 1 || user.Roles[0] != authz.BranchAdmin("karlstad") {
+		t.Errorf("roles = %v, want [%s]", user.Roles, authz.BranchAdmin("karlstad"))
+	}
+
+	// Somebody else's branch, and the user who belongs to no branch at all: both
+	// invisible to a branch admin, and reported as missing rather than refused.
+	for _, target := range []string{"o1", "nobody"} {
+		if _, code := get(target, []string{authz.BranchAdmin("karlstad")}); code != http.StatusNotFound {
+			t.Errorf("karlstad admin on %s: status = %d, want 404", target, code)
+		}
+	}
+	if _, code := get("nobody", []string{authz.RoleWSKOAdmin}); code != http.StatusOK {
+		t.Errorf("wsko admin on branchless user: status = %d, want 200", code)
+	}
+}

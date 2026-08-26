@@ -77,11 +77,7 @@ func (h *Handler) adminListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	out := make([]adminUser, 0, len(users))
 	for _, u := range users {
-		roles := h.rolesFor(u.Email)
-		if roles == nil {
-			roles = []string{} // marshal as [] rather than null
-		}
-		out = append(out, adminUser{User: u, Roles: roles, OIDC: hasOIDCIdentity(u)})
+		out = append(out, h.asAdminUser(u))
 	}
 	writeJSON(w, out)
 }
@@ -317,4 +313,71 @@ func changedRoles(current, next []string) []string {
 		}
 	}
 	return changed
+}
+
+// adminGetUser returns a single user, so a page addressed by its own URL can
+// stand up without having arrived from the listing first — a bookmarked link, or
+// a reload, has to work the same as a click.
+func (h *Handler) adminGetUser(w http.ResponseWriter, r *http.Request) {
+	claims := h.requireAnyAdmin(w, r)
+	if claims == nil {
+		return
+	}
+	user := h.adminFindVisibleUser(w, claims, r.PathValue("id"), "adminGetUser")
+	if user == nil {
+		return
+	}
+	writeJSON(w, h.asAdminUser(user))
+}
+
+// adminBranchMembers lists the members of one branch. It is the listing the
+// admin pages actually navigate by: a flat roll of everyone a WSKO admin may see
+// is a poor way to find the four people in a club, and the alternative — fetch
+// everything and filter in the browser — would send every one of those records
+// to a screen that wanted one branch's worth.
+//
+// A branch the caller does not cover is reported as not found rather than
+// forbidden, for the same reason the user lookup is: a 403 would confirm which
+// ids name real branches to somebody with no business knowing.
+func (h *Handler) adminBranchMembers(w http.ResponseWriter, r *http.Request) {
+	claims := h.requireAnyAdmin(w, r)
+	if claims == nil {
+		return
+	}
+	id := r.PathValue("id")
+	if !h.covers(claims, authz.Branch(id)) || !h.branchExists(id) {
+		http.Error(w, "branch not found", http.StatusNotFound)
+		return
+	}
+
+	users, err := h.users.ListByBranches([]string{id})
+	if err != nil {
+		log.Printf("adminBranchMembers %s: %v", id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	out := make([]adminUser, 0, len(users))
+	for _, u := range users {
+		out = append(out, h.asAdminUser(u))
+	}
+	writeJSON(w, out)
+}
+
+func (h *Handler) branchExists(id string) bool {
+	if h.orgs == nil {
+		return false
+	}
+	_, ok := h.orgs.Branch(id)
+	return ok
+}
+
+// asAdminUser dresses a stored user in what the admin pages need: the roles,
+// which live apart from the user record, and whether an identity provider owns
+// the display name.
+func (h *Handler) asAdminUser(u *store.User) adminUser {
+	roles := h.rolesFor(u.Email)
+	if roles == nil {
+		roles = []string{} // marshal as [] rather than null
+	}
+	return adminUser{User: u, Roles: roles, OIDC: hasOIDCIdentity(u)}
 }
