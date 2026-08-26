@@ -108,6 +108,16 @@ export interface AdminOrgTree {
   wskoBranches: AdminOrgBranch[];
 }
 
+// One branch and everybody in it, from GET /auth/admin/branches/{id}/members.
+// The branch names itself so a page opened from a bookmark can say whose members
+// these are without asking a second question.
+export interface AdminBranchMembers {
+  id: string;
+  name: string;
+  federationId?: string;
+  members: AdminUser[];
+}
+
 // A pending join request, as the admins who may decide it see it.
 export interface AdminJoinRequest {
   email: string;
@@ -242,6 +252,20 @@ export class BackendSyncClient {
   // branch where it is, while passing "" moves it to WSKO.
   async adminUpdateBranch(id: string, changes: { name?: string; federationId?: string }): Promise<void> {
     await this.adminWrite("PATCH", `${authUrl}/auth/admin/branches/${encodeURIComponent(id)}`, changes);
+  }
+
+  async adminBranchMembers(branchId: string): Promise<AdminBranchMembers> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/branches/${encodeURIComponent(branchId)}/members`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as AdminBranchMembers;
+  }
+
+  // A branch the caller does not cover answers 404, the same as one that does not
+  // exist — so a page cannot tell those apart, and should not try to.
+  async adminGetUser(id: string): Promise<AdminUser> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as AdminUser;
   }
 
   async adminListRequests(): Promise<AdminJoinRequest[]> {
@@ -545,15 +569,10 @@ export class BackendSyncClient {
   // Replaces a user's roles with the given set. The backend checks only the
   // roles that actually change, and only against what the caller already covers:
   // 403 for a grant beyond their authority, 409 when an admin would strip their
-  // own global role.
+  // own global role. The status comes through so a page can say which of those
+  // happened rather than "something went wrong".
   async adminSetRoles(id: string, roles: string[]): Promise<void> {
-    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}/roles`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roles }),
-    });
-    if (resp.status === 409) throw new Error("self-demotion");
-    if (!resp.ok) throw new Error(`PUT /auth/admin/users/${id}/roles: ${resp.status}`);
+    await this.adminWrite("PUT", `${authUrl}/auth/admin/users/${encodeURIComponent(id)}/roles`, { roles });
   }
 
   // Force-logs-out a user by revoking all their refresh tokens. Their access token

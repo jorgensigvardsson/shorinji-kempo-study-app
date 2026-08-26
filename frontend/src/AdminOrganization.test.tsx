@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -48,7 +49,7 @@ describe("AdminOrganization", () => {
   });
 
   it("shows each federation with its branches", async () => {
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     expect(await screen.findByText("Svenska Shorinji Kempoförbundet")).toBeTruthy();
     expect(cardFor("Svenska Shorinji Kempoförbundet").getByText("Karlstad")).toBeTruthy();
     expect(cardFor("Norges Shorinji Kempo Forbund").getByText("Inga grenar här.")).toBeTruthy();
@@ -58,14 +59,14 @@ describe("AdminOrganization", () => {
   // organization rather than a missing value — so it gets a heading of its own
   // instead of being mixed in or quietly left out.
   it("gathers root-attached branches under an explicit WSKO heading", async () => {
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     expect(await screen.findByText("Tokyo Honbu")).toBeTruthy();
     expect(cardFor("WSKO").getByText("Tokyo Honbu")).toBeTruthy();
   });
 
   it("creates a branch inside the federation whose button was pressed", async () => {
     const user = userEvent.setup();
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Svenska Shorinji Kempoförbundet");
 
     await user.click(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Ny gren" }));
@@ -81,7 +82,7 @@ describe("AdminOrganization", () => {
   // with an omitted id rather than an empty one.
   it("creates a root-attached branch with no federation", async () => {
     const user = userEvent.setup();
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Tokyo Honbu");
 
     await user.click(cardFor("WSKO").getByRole("button", { name: "Ny gren" }));
@@ -93,7 +94,7 @@ describe("AdminOrganization", () => {
 
   it("renames a branch", async () => {
     const user = userEvent.setup();
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Karlstad");
 
     const se = cardFor("Svenska Shorinji Kempoförbundet");
@@ -109,7 +110,7 @@ describe("AdminOrganization", () => {
 
   it("normalises a new federation's country code", async () => {
     const user = userEvent.setup();
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Tokyo Honbu");
 
     await user.click(screen.getByRole("button", { name: "Nytt förbund" }));
@@ -124,7 +125,7 @@ describe("AdminOrganization", () => {
   // the empty federation id is sent deliberately rather than omitted.
   it("moves a branch to WSKO", async () => {
     const user = userEvent.setup();
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Karlstad");
 
     await user.selectOptions(cardFor("Svenska Shorinji Kempoförbundet").getByLabelText("Tillhör"), "");
@@ -139,7 +140,7 @@ describe("AdminOrganization", () => {
   it("offers a federation admin only what their own federation allows", async () => {
     roles = ["federation_admin:SE"];
     adminOrgTree.mockResolvedValue({ federations: [tree.federations[0]], wskoBranches: [] });
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Karlstad");
 
     expect(screen.queryByRole("button", { name: "Nytt förbund" })).toBeNull();
@@ -156,7 +157,7 @@ describe("AdminOrganization", () => {
       federations: [{ id: "SE", name: "Svenska Shorinji Kempoförbundet", branches: [{ id: "b-karlstad", name: "Karlstad" }] }],
       wskoBranches: [],
     });
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Karlstad");
 
     const se = cardFor("Svenska Shorinji Kempoförbundet");
@@ -167,7 +168,7 @@ describe("AdminOrganization", () => {
   it("says so plainly when the server refuses", async () => {
     const user = userEvent.setup();
     adminCreateFederation.mockRejectedValue(new AdminRequestError(403));
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Tokyo Honbu");
 
     await user.click(screen.getByRole("button", { name: "Nytt förbund" }));
@@ -180,7 +181,7 @@ describe("AdminOrganization", () => {
 
   it("offers a retry when the tree cannot be fetched", async () => {
     adminOrgTree.mockRejectedValue(new Error("offline"));
-    render(<AdminOrganization />);
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
 
     expect(await screen.findByText("Kunde inte hämta organisationen.")).toBeTruthy();
     adminOrgTree.mockResolvedValue(tree);

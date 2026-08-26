@@ -200,6 +200,14 @@ class SyncManager {
     await this.backendClient.adminUpdateBranch(id, changes);
   }
 
+  async adminBranchMembers(branchId: string) {
+    return await this.backendClient.adminBranchMembers(branchId);
+  }
+
+  async adminGetUser(id: string) {
+    return await this.backendClient.adminGetUser(id);
+  }
+
   async adminListRequests() {
     return await this.backendClient.adminListRequests();
   }

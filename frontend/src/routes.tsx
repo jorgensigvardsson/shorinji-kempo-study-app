@@ -37,9 +37,10 @@ export const preloadPages = (): Promise<unknown[]> => Promise.all(pageLoaders.ma
 const Training = page(() => import("./Training.tsx"));
 const Settings = page(() => import("./Settings.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
-const AdminUsers = page(() => import("./AdminUsers.tsx"));
 const AdminRequests = page(() => import("./AdminRequests.tsx"));
 const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
+const AdminBranchMembers = page(() => import("./AdminBranchMembers.tsx"));
+const AdminUser = page(() => import("./AdminUser.tsx"));
 const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
@@ -178,11 +179,21 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         icon: PersonPlus,
         hideOnStartPage: true,
     } satisfies Route, {
-        path: "/admin/users",
-        component: () => <AdminUsers />,
+        // Reached from the organization rather than from the menu: a branch is
+        // how you find a member, and a member is how you find their standing.
+        path: "/admin/branches/:id/members",
+        component: () => <AdminBranchMembers />,
+        menuText: translator.translate("Medlemmar"),
+        icon: People,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    } satisfies Route, {
+        path: "/admin/users/:id",
+        component: () => <AdminUser />,
         menuText: translator.translate("Användare"),
         icon: People,
         hideOnStartPage: true,
+        hideFromMenu: true,
     } satisfies Route] : []),
     ...(isGlobalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
         path: "/broadcast",

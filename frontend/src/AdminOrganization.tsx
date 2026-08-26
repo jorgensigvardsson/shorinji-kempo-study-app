@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Badge, Button, Card, Form, Spinner } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminOrgBranch, type AdminOrgTree } from "./sync/backend";
@@ -249,7 +250,7 @@ const AdminOrganization = () => {
                   ? renameControls()
                   : (
                     <>
-                      <span>{branch.name}</span>
+                      <Link to={`/admin/branches/${encodeURIComponent(branch.id)}/members`}>{branch.name}</Link>
                       <div className="d-flex gap-2 align-items-center">
                         {coversBranch(branch, section.federationId) && (
                           <Button size="sm" variant="outline-secondary" disabled={busy}
