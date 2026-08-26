@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Badge, Button, Card, Form, Spinner } from "react-bootstrap";
+import { Badge, Button, Card, Form, Modal, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
@@ -56,6 +56,13 @@ const AdminOrganization = () => {
   const [addingFederation, setAddingFederation] = useState(false);
   const [newFederationId, setNewFederationId] = useState("");
   const [newFederationName, setNewFederationName] = useState("");
+
+  // The branch whose federation is being changed, and where to. Moving one is
+  // rare, irreversible from the destination's side, and changes who may see its
+  // members — so it is asked for in a dialog and confirmed, rather than being a
+  // dropdown that acts on the way past.
+  const [moving, setMoving] = useState<{ branch: AdminOrgBranch; from: string } | null>(null);
+  const [moveTo, setMoveTo] = useState(WSKO);
 
   const load = async () => {
     setLoadError(false);
@@ -131,10 +138,21 @@ const AdminOrganization = () => {
       () => { setAddingFederation(false); setNewFederationId(""); setNewFederationName(""); });
   };
 
-  const moveBranch = (branch: AdminOrgBranch, federationId: string) => {
+  const startMove = (branch: AdminOrgBranch, from: string) => {
+    setMoving({ branch, from });
+    // Opening on where it already is means the confirm button starts disabled:
+    // the dialog asks a question rather than proposing an answer.
+    setMoveTo(from);
+    setError(null);
+  };
+
+  const confirmMove = () => {
+    if (moving === null || moveTo === moving.from) return;
     // "" is a real destination here, not a missing one: it moves the branch out
     // of its federation and up to WSKO.
-    void write(() => getSyncManager().adminUpdateBranch(branch.id, { federationId }));
+    void write(
+      () => getSyncManager().adminUpdateBranch(moving.branch.id, { federationId: moveTo }),
+      () => setMoving(null));
   };
 
   if (tree === null && !loadError) {
@@ -259,18 +277,10 @@ const AdminOrganization = () => {
                           </Button>
                         )}
                         {atWSKO && (
-                          <Form.Select
-                            size="sm"
-                            style={{ width: "auto" }}
-                            value={section.federationId}
-                            disabled={busy}
-                            aria-label={translator.translate("Tillhör")}
-                            onChange={e => moveBranch(branch, e.target.value)}
-                          >
-                            {destinations.map(d => (
-                              <option key={d.id === WSKO ? "wsko" : d.id} value={d.id}>{d.label}</option>
-                            ))}
-                          </Form.Select>
+                          <Button size="sm" variant="outline-danger" disabled={busy}
+                                  onClick={() => startMove(branch, section.federationId)}>
+                            {translator.translate("Byt förbund")}
+                          </Button>
                         )}
                       </div>
                     </>
@@ -346,6 +356,41 @@ const AdminOrganization = () => {
           {translator.translate("Nytt förbund")}
         </Button>
       ))}
+
+      {/* A branch's federation decides who administers its members, so changing
+          it hands those members to a different set of people. That is worth a
+          deliberate act rather than a stray keystroke in a list. */}
+      <Modal show={moving !== null} onHide={() => setMoving(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="h5">{translator.translate("Byt förbund")}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* The club's own name, never translated — like every organization name. */}
+          <p className="fw-semibold mb-1">{moving?.branch.name}</p>
+          <p className="text-body-secondary">
+            {translator.translate("Att flytta en klubb till ett annat förbund ändrar vilka administratörer som kan se dess medlemmar.")}
+          </p>
+          <Form.Group controlId="moveBranchDestination">
+            <Form.Label>{translator.translate("Flytta till")}</Form.Label>
+            <Form.Select value={moveTo} disabled={busy} onChange={e => setMoveTo(e.target.value)}>
+              {destinations.map(d => (
+                <option key={d.id === WSKO ? "wsko" : d.id} value={d.id}>{d.label}</option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" disabled={busy} onClick={() => setMoving(null)}>
+            {translator.translate("Avbryt")}
+          </Button>
+          {/* Disabled until the destination actually differs: confirming a move
+              to where the branch already is would be a write that reads as one. */}
+          <Button variant="danger" disabled={busy || moving === null || moveTo === moving.from}
+                  onClick={confirmMove}>
+            {busy ? <Spinner size="sm" /> : translator.translate("Flytta klubben")}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -123,14 +123,30 @@ describe("AdminOrganization", () => {
 
   // Moving a branch out of a federation and up to WSKO is a real destination, so
   // the empty federation id is sent deliberately rather than omitted.
-  it("moves a branch to WSKO", async () => {
+  it("moves a branch to WSKO once the move is confirmed", async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Karlstad");
 
-    await user.selectOptions(cardFor("Svenska Shorinji Kempoförbundet").getByLabelText("Tillhör"), "");
+    await user.click(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Byt förbund" }));
+    await user.selectOptions(screen.getByLabelText("Flytta till"), "");
+    await user.click(screen.getByRole("button", { name: "Flytta klubben" }));
 
     await waitFor(() => expect(adminUpdateBranch).toHaveBeenCalledWith("b-karlstad", { federationId: "" }));
+  });
+
+  // The dialog is the whole point of the change: opening it must not move
+  // anything, and neither must confirming a destination nobody altered.
+  it("moves nothing until a different federation is chosen", async () => {
+    const user = userEvent.setup();
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+
+    await user.click(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Byt förbund" }));
+    expect((screen.getByRole("button", { name: "Flytta klubben" }) as HTMLButtonElement).disabled).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Avbryt" }));
+    expect(adminUpdateBranch).not.toHaveBeenCalled();
   });
 
   // What a federation admin is shown, which is not a matter of taste: a move
@@ -144,7 +160,7 @@ describe("AdminOrganization", () => {
     await screen.findByText("Karlstad");
 
     expect(screen.queryByRole("button", { name: "Nytt förbund" })).toBeNull();
-    expect(screen.queryByLabelText("Tillhör")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Byt förbund" })).toBeNull();
     expect(screen.queryByText("WSKO")).toBeNull();
     expect(cardFor("Svenska Shorinji Kempoförbundet").getByRole("button", { name: "Ny klubb" })).toBeTruthy();
   });
