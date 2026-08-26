@@ -215,6 +215,14 @@ func (h *Handler) adminSetRoles(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "forbidden", http.StatusForbidden)
 			return
 		}
+		// Covering WSKO is not enough to hand out the technical superuser. Both
+		// roles scope to the root, so the rule above would let a wsko_admin grant
+		// themselves the one power their own role deliberately withholds. Only an
+		// admin makes an admin — or unmakes one.
+		if role == authz.RoleAdmin && !containsRole(claims.Roles, authz.RoleAdmin) {
+			http.Error(w, "only an admin may grant or revoke the admin role", http.StatusForbidden)
+			return
+		}
 	}
 
 	// Lockout guard: an admin may not strip their own authority over everything.
@@ -345,7 +353,8 @@ func (h *Handler) adminBranchMembers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
-	if !h.covers(claims, authz.Branch(id)) || !h.branchExists(id) {
+	branch, ok := h.orgs.Branch(id)
+	if !ok || !h.covers(claims, authz.Branch(id)) {
 		http.Error(w, "branch not found", http.StatusNotFound)
 		return
 	}
@@ -360,15 +369,9 @@ func (h *Handler) adminBranchMembers(w http.ResponseWriter, r *http.Request) {
 	for _, u := range users {
 		out = append(out, h.asAdminUser(u))
 	}
-	writeJSON(w, out)
-}
-
-func (h *Handler) branchExists(id string) bool {
-	if h.orgs == nil {
-		return false
-	}
-	_, ok := h.orgs.Branch(id)
-	return ok
+	// The branch names itself in the response so a page opened straight from a
+	// bookmark can say whose members these are without a second request.
+	writeJSON(w, branchMembersResponse{ID: branch.ID, Name: branch.Name, FederationID: branch.FederationID, Members: out})
 }
 
 // asAdminUser dresses a stored user in what the admin pages need: the roles,
@@ -380,4 +383,12 @@ func (h *Handler) asAdminUser(u *store.User) adminUser {
 		roles = []string{} // marshal as [] rather than null
 	}
 	return adminUser{User: u, Roles: roles, OIDC: hasOIDCIdentity(u)}
+}
+
+// branchMembersResponse is one branch and everybody in it.
+type branchMembersResponse struct {
+	ID           string      `json:"id"`
+	Name         string      `json:"name"`
+	FederationID string      `json:"federationId,omitempty"`
+	Members      []adminUser `json:"members"`
 }

@@ -270,12 +270,18 @@ func membersOf(t *testing.T, h *Handler, branchID string, roles []string) ([]str
 	if rec.Code != http.StatusOK {
 		return nil, rec.Code
 	}
-	var got []adminUser
+	var got branchMembersResponse
 	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	ids := make([]string, 0, len(got))
-	for _, u := range got {
+	if got.ID != branchID {
+		t.Errorf("response branch = %q, want %q", got.ID, branchID)
+	}
+	if got.Name == "" {
+		t.Errorf("branch %s came back without a name", branchID)
+	}
+	ids := make([]string, 0, len(got.Members))
+	for _, u := range got.Members {
 		ids = append(ids, u.ID)
 	}
 	sort.Strings(ids)
@@ -367,5 +373,43 @@ func TestAdminGetUser_ScopedLikeTheListing(t *testing.T) {
 	}
 	if _, code := get("nobody", []string{authz.RoleWSKOAdmin}); code != http.StatusOK {
 		t.Errorf("wsko admin on branchless user: status = %d, want 200", code)
+	}
+}
+
+// Both `admin` and `wsko_admin` scope to the root, so the covering rule on its
+// own would let a WSKO admin grant the technical superuser — to somebody else, or
+// to themselves. That is the one power the two roles were split to keep apart.
+func TestAdminSetRoles_OnlyAnAdminMakesAnAdmin(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+
+	setRoles := func(callerRoles []string, target string, next []string) int {
+		rec := httptest.NewRecorder()
+		req := authedRequest(t, h, http.MethodPut, "/auth/admin/users/"+target+"/roles",
+			"caller", "caller@example.org", callerRoles, map[string]any{"roles": next})
+		req.SetPathValue("id", target)
+		h.adminSetRoles(rec, req)
+		return rec.Code
+	}
+
+	if code := setRoles([]string{authz.RoleWSKOAdmin}, "k1", []string{authz.RoleAdmin}); code != http.StatusForbidden {
+		t.Errorf("wsko admin granting admin: status = %d, want 403", code)
+	}
+	// Everything else at that level is still theirs to grant.
+	if code := setRoles([]string{authz.RoleWSKOAdmin}, "k1", []string{authz.RoleWSKOAdmin}); code != http.StatusNoContent {
+		t.Errorf("wsko admin granting wsko_admin: status = %d, want 204", code)
+	}
+	if code := setRoles([]string{authz.RoleAdmin}, "k2", []string{authz.RoleAdmin}); code != http.StatusNoContent {
+		t.Errorf("admin granting admin: status = %d, want 204", code)
+	}
+
+	// Nor may they take it away: revoking is a change to the same role, and an
+	// admin demoted by somebody who could not have appointed them is the same
+	// hole seen from the other side.
+	if err := h.roles.SetRoles("g1@example.org", []string{authz.RoleAdmin}); err != nil {
+		t.Fatalf("seed roles: %v", err)
+	}
+	if code := setRoles([]string{authz.RoleWSKOAdmin}, "g1", []string{}); code != http.StatusForbidden {
+		t.Errorf("wsko admin revoking admin: status = %d, want 403", code)
 	}
 }
