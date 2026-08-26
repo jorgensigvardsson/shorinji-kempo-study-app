@@ -7,8 +7,8 @@ the applicant wants to join.
 
 ## Status
 
-**Phase 1 is built** and deployed nowhere. Everything below runs on the file-based stores; no
-Cosmos account, staging or production has been touched, by decision — see §8.
+**Phases 1 to 3 are built** and deployed nowhere. Everything below runs on the file-based stores;
+no Cosmos account, staging or production has been touched, by decision — see §8.
 
 | | Where |
 |---|---|
@@ -18,13 +18,17 @@ Cosmos account, staging or production has been touched, by decision — see §8.
 | ✅ Organization endpoints | public branch picker, scoped tree, create/rename/move |
 | ✅ Token claims | `branch` and `fed`, resolved when a token is minted; `/auth/me` resolves the federation too |
 | ✅ Migration tool | `backend/auth/cmd/orgmigrate` |
-| ⬜ Phase 2 | admission — §5 |
-| ⬜ Phase 3 | admin UI — §6 |
+| ✅ Admission (Phase 2) | enrollment issues a join ticket instead of an account; requests, decisions and their mail — §5 |
+| ✅ Admin UI (Phase 3) | organization tree, branch members, one user, the waiting list, and the menu's count — §6 |
 | ⬜ Phase 4 | transfers — §7 |
 
-Two things carried over deliberately. `AdminUsers.tsx` is still the only admin page, changed no
-further than sending a role set instead of an admin flag; Phase 3 replaces it. And enrollment
-still creates users without a branch, which is why nothing ships before Phase 2.
+`AdminUsers.tsx` is gone, and with it the flat list. What is left before this can ship is Phase 4,
+a translation pass over the new Swedish strings and the ja/tr mail copy, and §8's deployment
+sequence — nothing here has met Cosmos yet.
+
+One thing found while building Phase 3 and fixed there: both `admin` and `wsko_admin` scope to the
+root, so the covering rule alone let a WSKO admin grant `admin` — the one power the split was meant
+to keep apart. Granting or revoking it now requires holding it.
 
 ## The organization
 
@@ -514,10 +518,19 @@ which also disposes of the 100-members-in-one-list problem — you are always in
 | `/admin/requests` | Pending join requests across the caller's scopes, with approve/deny |
 | `/admin/users/:id` | One user: display name, linked identities, roles (grantable within the caller's scope), force-logout |
 
-[routes.tsx:159](frontend/src/routes.tsx:159) currently gates on `roles.includes("admin")`; it
-becomes "holds any admin-ish role", with each page re-checking its own scope and the backend
-enforcing independently, as today. The menu carries a **pending-request count badge** — a request
-nobody notices is a request that rots.
+The menu gate is split in two: the organizational pages are offered to anybody holding a scoped
+role, while `/broadcast` stays on `admin` alone — a technical power rather than an organizational
+one, and the persistence service checks for exactly that role. Each page re-checks its own scope,
+and the backend enforces independently, as today.
+
+The menu carries the **pending-request count** — a request nobody notices is a request that rots.
+It is fetched once when an admin's session settles, and corrected by the queue page, which is the
+one place that knows the true figure.
+
+Built as `AdminOrganization.tsx`, `AdminBranchMembers.tsx`, `AdminUser.tsx` and `AdminRequests.tsx`,
+with `roles.ts` reading the role vocabulary the same way the server does. Two endpoints were added
+underneath them: `GET /auth/admin/users/{id}` and `GET /auth/admin/branches/{id}/members`, so a page
+addressed by URL stands up on its own and a branch's members do not arrive by filtering everybody.
 
 ---
 

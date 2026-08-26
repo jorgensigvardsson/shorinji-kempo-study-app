@@ -171,7 +171,7 @@ Roles mirror the organization — WSKO over national federations over branches �
 | `federation_admin:SE` | One federation and every branch in it |
 | `branch_admin:<uuid>` | One branch |
 
-Everything follows from one rule: **you may act on a scope you cover, and grant a role whose scope you cover.** So a federation admin can appoint branch admins inside their federation and cannot mint a global admin, without either being written down as a rule of its own. Roles are granted from the admin UI on that basis.
+Everything follows from one rule: **you may act on a scope you cover, and grant a role whose scope you cover.** So a federation admin can appoint branch admins inside their federation and cannot mint a global admin, without either being written down as a rule of its own. Roles are granted from the admin UI on that basis. One exception does not follow from scope: `admin` and `wsko_admin` both scope to the root, so granting or revoking `admin` requires holding `admin` — otherwise a WSKO admin could hand themselves the one power their own role withholds.
 
 The first grant in a fresh environment has to be made by hand, since there is nobody to delegate from. Add an item to the `roles` container keyed by the (lowercased) email:
 ```json

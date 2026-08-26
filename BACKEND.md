@@ -238,6 +238,10 @@ delegating downwards needs no rule of its own. Roles are managed through the adm
 caller may only add or remove roles whose scope they already cover — the first grant in a new
 environment is still made by writing to the store directly.
 
+One rule does not follow from scope: **`admin` is granted and revoked by an `admin` alone.** Both
+it and `wsko_admin` scope to the root, so covering alone would let a WSKO admin hand themselves the
+one power their own role deliberately withholds.
+
 ### App Data Document (`documents` container)
 ```json
 {
@@ -312,7 +316,11 @@ corporate domain at the appropriate provider.
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
 | DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; 409 if it is the last one) |
 | GET | `/auth/org/branches` | **Unauthenticated.** Every branch with its federation's name, for the branch picker somebody registering chooses from. No personal data of any kind |
+| GET | `/auth/join/context` | What is known about somebody who has proved an address and has no account, authorized by the join ticket rather than a session. Carries their pending request, if they already have one |
+| POST | `/auth/join/request` | Apply to a branch — body `{branchId, note?}`. Carries a global cap on top of the per-IP one: an admin's inbox is as much a quota as the relay is |
+| POST | `/auth/join/withdraw` | Take back a pending application |
 | GET | `/auth/admin/users` | List the users the caller may see, with their roles, linked identities, and an `oidc` flag |
+| GET | `/auth/admin/users/{id}` | One user, so a page addressed by URL stands up without having arrived from the listing |
 | PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) |
 | PUT | `/auth/admin/users/{id}/roles` | Replace a user's roles — body `{roles: [...]}`; 403 for a grant beyond the caller's authority, 409 on removing your own `admin`/`wsko_admin` |
 | POST | `/auth/admin/users/{id}/logout` | Force-logout a user: revoke all their refresh tokens. Their access token stays valid until it expires (≤ 1 h) |
@@ -321,6 +329,10 @@ corporate domain at the appropriate provider.
 | PATCH | `/auth/admin/federations/{id}` | Rename a federation |
 | POST | `/auth/admin/branches` | Create a branch — body `{name, federationId?}`. An omitted `federationId` means WSKO-attached, and needs WSKO authority |
 | PATCH | `/auth/admin/branches/{id}` | Rename and/or move a branch. `name` and `federationId` are nullable, so "leave it alone" and "move it to WSKO" are different requests |
+| GET | `/auth/admin/branches/{id}/members` | One branch and everybody in it. A branch the caller does not cover answers 404, exactly as one that does not exist |
+| GET | `/auth/admin/requests` | Pending applications across every branch the caller covers |
+| POST | `/auth/admin/requests/{email}/approve` | Admit the applicant: the account is written first, the request deleted after |
+| POST | `/auth/admin/requests/{email}/deny` | Decline, keeping the decision for 90 days so a re-application arrives with its history |
 
 The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
 every one of them asks whether the caller **covers the scope the action touches** rather than
@@ -426,6 +438,7 @@ database and containers on startup):
 | `identity_index` | auth | O(1) provider→user lookup at login |
 | `roles` | auth | Role assignments keyed by email. `consistent` indexing with all paths excluded: point reads answer "what may this person do?", and a scan answers the reverse, "who administers this branch?" |
 | `organizations` | auth | Federations and branches. Read whole, once per process, into the in-memory tree |
+| `joinrequests` | auth | Pending applications, keyed by address so one per address is structural. TTL enabled with no default: a pending request never expires, a declined one carries its own and leaves on its own |
 | `refresh_tokens` | auth | `consistent` indexing (all paths excluded) for partition scans |
 | `documents` | persistence | One app data document per user |
 | push subscriptions | persistence | Browser push subscriptions |
