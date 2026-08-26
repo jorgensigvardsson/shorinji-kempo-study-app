@@ -180,6 +180,22 @@ class SyncManager {
     await this.backendClient.adminUpdateDisplayName(id, displayName);
   }
 
+  async listBranches() {
+    return await this.backendClient.listBranches();
+  }
+
+  async getJoinContext() {
+    return await this.backendClient.getJoinContext();
+  }
+
+  async submitJoinRequest(branchId: string, name: string, note: string, language: string) {
+    return await this.backendClient.submitJoinRequest(branchId, name, note, language);
+  }
+
+  async withdrawJoinRequest(): Promise<void> {
+    await this.backendClient.withdrawJoinRequest();
+  }
+
   async adminSetRoles(id: string, roles: string[]): Promise<void> {
     await this.backendClient.adminSetRoles(id, roles);
   }

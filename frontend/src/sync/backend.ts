@@ -68,6 +68,27 @@ export interface AdminUser {
   lastLoginAt: string;
 }
 
+// A branch as the registration picker sees it, from the unauthenticated
+// GET /auth/org/branches. Branches with no federation belong to WSKO; the label
+// for that group is the frontend's to supply, since WSKO is not a stored
+// organization with a name of its own.
+export interface PublicBranch {
+  id: string;
+  name: string;
+  federationId?: string;
+  federationName?: string;
+}
+
+// What GET /auth/join/context knows about somebody who has proved an address and
+// has no account. `pending` is present when they have already applied, so a
+// returning applicant lands on their request rather than on an empty form.
+export interface JoinContext {
+  email: string;
+  name: string;
+  provider: string;
+  pending?: { branchId: string; branchName: string; createdAt: string };
+}
+
 // Result of POST /auth/email/start. "oidc" means the domain has an OIDC provider
 // and the caller should redirect there; "existing"/"new" mean a code was emailed
 // (only "new" needs a name collected on verify).
@@ -153,6 +174,57 @@ export class BackendSyncClient {
       return { ok: false, error: body.error ?? "invalid_code" };
     }
     throw new Error(`POST /auth/email/verify: ${resp.status}`);
+  }
+
+  // ── Admission: joining a branch ──────────────────────────────────────────
+  // These are authorized by the join-ticket cookie rather than by a session,
+  // since their whole audience is people who have no account yet. The cookie is
+  // httpOnly, so credentials: "include" is the only way it travels.
+
+  async listBranches(): Promise<PublicBranch[]> {
+    const resp = await fetch(`${authUrl}/auth/org/branches`);
+    if (!resp.ok) throw new Error(`GET /auth/org/branches: ${resp.status}`);
+    return await resp.json() as PublicBranch[];
+  }
+
+  // Returns null when there is no ticket — expired, or never issued — which is
+  // not an error but a reason to send the visitor back to verify their address.
+  async getJoinContext(): Promise<JoinContext | null> {
+    const resp = await fetch(`${authUrl}/auth/join/context`, { credentials: "include" });
+    if (resp.status === 401) return null;
+    if (!resp.ok) throw new Error(`GET /auth/join/context: ${resp.status}`);
+    return await resp.json() as JoinContext;
+  }
+
+  // "pending" means they have already applied and are waiting; "account_exists"
+  // means the address can simply sign in. Neither is a failure worth a stack
+  // trace, so both come back as a reason rather than an exception.
+  async submitJoinRequest(branchId: string, name: string, note: string, language: string):
+      Promise<{ ok: true } | { ok: false; reason: string }> {
+    const resp = await fetch(`${authUrl}/auth/join/request`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ branchId, name, note, language }),
+    });
+    if (resp.ok) return { ok: true };
+    if (resp.status === 409) {
+      const body = await resp.json().catch(() => ({})) as { reason?: string };
+      return { ok: false, reason: body.reason ?? "pending" };
+    }
+    if (resp.status === 429) throw new RateLimitError();
+    if (resp.status === 401) return { ok: false, reason: "no_ticket" };
+    return { ok: false, reason: "failed" };
+  }
+
+  async withdrawJoinRequest(): Promise<void> {
+    const resp = await fetch(`${authUrl}/auth/join/withdraw`, {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!resp.ok && resp.status !== 404) {
+      throw new Error(`POST /auth/join/withdraw: ${resp.status}`);
+    }
   }
 
   // In-flight refresh shared by all callers in this tab (single-flight).

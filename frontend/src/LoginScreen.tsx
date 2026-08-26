@@ -4,6 +4,7 @@ import { type Language, noTranslate, TranslatorImplementation } from "./i18n";
 import { useTranslations } from "./hooks";
 import { ensureAllTranslations } from "./translations";
 import PrivacyPolicy from "./PrivacyPolicy";
+import RegisterBranch from "./RegisterBranch";
 import { getSyncManager } from "./sync/manager";
 import { RateLimitError } from "./sync/backend";
 import "./LoginScreen.css";
@@ -27,8 +28,10 @@ function detectBrowserLanguage(): Language {
   return "sv";
 }
 
-// "email": collecting the address. "code": a code was emailed and we're awaiting it.
-type Phase = "email" | "code";
+// "email": collecting the address. "code": a code was emailed and we're awaiting
+// it. "join": the address is verified but has no account, so the visitor is
+// choosing a branch to apply to.
+type Phase = "email" | "code" | "join";
 
 export function LoginScreen() {
   const translations = useTranslations();
@@ -43,7 +46,23 @@ export function LoginScreen() {
     [translations, language]
   );
 
-  const [phase, setPhase] = useState<Phase>("email");
+  // An OIDC provider sends an unknown identity back to the app with ?join=1 and
+  // a join ticket in a cookie, so the phase has to be recoverable from the URL
+  // rather than only from a form submission in this tab.
+  const [phase, setPhase] = useState<Phase>(
+    () => new URLSearchParams(window.location.search).has("join") ? "join" : "email");
+
+  // Take the marker out of the address bar once it has been read: reloading the
+  // page should not re-enter registration if the ticket has since been spent.
+  useEffect(() => {
+    if (phase !== "join") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("join")) {
+      url.searchParams.delete("join");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [phase]);
+
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -95,14 +114,13 @@ export function LoginScreen() {
         return;
       }
       if (result.error === "join_required") {
-        // Placeholder for the registration flow: the address is verified, but
-        // joining a branch is Phase 2b. Saying "wrong code" here would be a lie.
-        setError(translator.translate("E-postadressen är verifierad, men det finns inget konto för den ännu."));
-      } else {
-        setError(result.error === "too_many_attempts"
-          ? translator.translate("För många försök. Begär en ny kod.")
-          : translator.translate("Fel kod. Försök igen."));
+        // The code was right; the address simply has no account behind it yet.
+        setPhase("join");
+        return;
       }
+      setError(result.error === "too_many_attempts"
+        ? translator.translate("För många försök. Begär en ny kod.")
+        : translator.translate("Fel kod. Försök igen."));
     } catch {
       setError(translator.translate("Inloggning misslyckades. Försök igen."));
     } finally {
@@ -133,6 +151,7 @@ export function LoginScreen() {
 
   const backToEmail = () => {
     setPhase("email");
+    setEmail("");
     setCode("");
     setName("");
     setNeedsName(false);
@@ -165,7 +184,9 @@ export function LoginScreen() {
           {translator.translate("Spara dina framsteg på alla enheter genom att logga in.")}
         </p>
 
-        {phase === "email" ? (
+        {phase === "join" ? (
+          <RegisterBranch translator={translator} language={language} onBack={backToEmail} />
+        ) : phase === "email" ? (
           <Form onSubmit={(e) => { void handleEmailSubmit(e); }}>
             <Form.Group className="mb-3" controlId="loginEmail">
               <Form.Label>{translator.translate("Din e-postadress")}</Form.Label>
