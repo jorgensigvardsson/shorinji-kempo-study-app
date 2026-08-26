@@ -2,6 +2,10 @@
 .env
 node_modules
 
+# Local dev data: signing key, user/org files, documents — bind-mounted by
+# docker-compose.yml so it's inspectable on the host. See backend/auth/cmd/devseed.
+/devdata/
+
 # Local backend development server output
 backend/*/.dev.*.log
 .codex/*.log

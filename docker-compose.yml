@@ -23,7 +23,7 @@ services:
       - ./backend:/app               # whole backend/ dir so go.work and shared/ are visible
       - go_root:/root/go             # covers pkg/mod AND bin — air persisted here
       - go_build:/root/.cache/go-build
-      - auth_data:/app/auth/data
+      - ./devdata/auth:/app/auth/data
     ports:
       - "8081:8081"
     environment:
@@ -36,10 +36,21 @@ services:
       MICROSOFT_REDIRECT_URI: "http://localhost:8081/auth/callback"
       MICROSOFT_CLIENT_ID: "${MICROSOFT_CLIENT_ID}"
       MICROSOFT_CLIENT_SECRET: "${MICROSOFT_CLIENT_SECRET}"
+      # No domain is routed to an OIDC provider locally, so every address —
+      # gmail.com included — signs in with an emailed code, which LogSender
+      # prints to this service's stdout. That is what makes the account seeded
+      # by cmd/devseed reachable at all: an OIDC "sub" is minted by the
+      # provider, so a seeded account can never carry the right one, and a
+      # gmail.com address routed to Google would be treated as a stranger.
+      # Set these to the production defaults to exercise the OIDC redirect.
+      GOOGLE_DOMAINS: ""
+      MICROSOFT_DOMAINS: ""
       COSMOS_ENDPOINT: "${COSMOS_ENDPOINT}"
       COSMOS_KEY: "${COSMOS_KEY}"
-      RATE_LIMIT_RPS: "1"
-      RATE_LIMIT_BURST: "5"
+      # Looser than production: React re-runs effects in development, so pages
+      # fetch twice and the production budget trips on an ordinary page load.
+      RATE_LIMIT_RPS: "20"
+      RATE_LIMIT_BURST: "60"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8081/healthz"]
       interval: 5s
@@ -58,7 +69,7 @@ services:
       - ./backend:/app               # whole backend/ dir so go.work and shared/ are visible
       - go_root:/root/go             # shared with auth — air only installed once
       - go_build:/root/.cache/go-build
-      - persistence_data:/app/persistence/data
+      - ./devdata/persistence:/app/persistence/data
     ports:
       - "8080:8080"
     environment:
@@ -84,5 +95,6 @@ volumes:
   frontend_modules:   # Linux-built node_modules, shadows the Windows copy
   go_root:            # shared Go root (module cache + air binary)
   go_build:           # shared Go build cache
-  auth_data:          # signing key + user files
-  persistence_data:   # document files
+  # Signing key, user files and documents live under ./devdata on the host (see
+  # .gitignore) rather than in named volumes, so they can be inspected, backed
+  # up, or wiped with `backend/auth/cmd/devseed` without going through Docker.
