@@ -5,6 +5,32 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-26T04:28:56.000Z",
+    changes: [
+      {
+        emoji: "🏛️",
+        sv: "Appen känner nu till organisationen: WSKO, nationella förbund och grenar. Varje medlem hör till en gren, och under Min gren ser du vilken.",
+        en: "The app now knows the organization: WSKO, national federations and branches. Every member belongs to a branch, and My branch shows you which.",
+        tr: "Uygulama artık organizasyonu tanıyor: WSKO, ulusal federasyonlar ve kulüpler. Her üye bir kulübe bağlıdır ve Kulübüm sayfasında hangisi olduğunu görebilirsiniz.",
+        ja: "アプリが組織の構造を扱えるようになりました。WSKO、各国連盟、支部の三層です。会員はいずれかの支部に所属し、「所属支部」のページで確認できます。",
+      },
+      {
+        emoji: "✋",
+        sv: "Nya konton godkänns av den gren man ansöker till. Du anger din e-postadress, väljer gren och skriver några rader om dig själv — grenens administratörer svarar via e-post.",
+        en: "New accounts are approved by the branch you apply to. You give your email address, pick a branch and write a few lines about yourself — the branch's administrators answer by email.",
+        tr: "Yeni hesaplar, başvurduğunuz kulüp tarafından onaylanır. E-posta adresinizi verir, bir kulüp seçer ve kendinizden kısaca bahsedersiniz — kulüp yöneticileri e-posta ile yanıtlar.",
+        ja: "新しいアカウントは、申請した支部が承認します。メールアドレスを入力し、支部を選び、自己紹介を少し書いていただくと、支部の管理者からメールで返事が届きます。",
+      },
+      {
+        emoji: "📦",
+        sv: "Har du flyttat? Under Min gren kan du ansöka om att byta till en annan gren. Den gren du vill träna i avgör, och den du lämnar får besked.",
+        en: "Moved to another town? My branch lets you ask to transfer to another branch. The branch you want to train in decides, and the one you leave is told.",
+        tr: "Başka bir şehre mi taşındınız? Kulübüm sayfasından başka bir kulübe geçmek için başvurabilirsiniz. Kararı geçmek istediğiniz kulüp verir, ayrıldığınız kulübe de bilgi verilir.",
+        ja: "引っ越しをされた方は、「所属支部」から他の支部への移籍を申請できます。受け入れ側の支部が判断し、離れる支部にも通知されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-16T15:18:52.722Z",
     changes: [
       {

@@ -21,16 +21,14 @@ no Cosmos account, staging or production has been touched, by decision — see �
 | ✅ Admission (Phase 2) | enrollment issues a join ticket instead of an account; requests, decisions and their mail — §5 |
 | ✅ Admin UI (Phase 3) | organization tree, branch members, one user, the waiting list, and the menu's count — §6 |
 | ✅ Member language | reported by the app, so unprompted mail is written in a language the reader reads — §1.5 |
+| ✅ GDPR wording | the register in BACKEND.md, and a privacy policy that no longer claims no other user can see you — §9 |
 | ✅ Transfers (Phase 4) | a member who has moved asks the club there to take them in; the one they left is told — §7 |
 
-Every phase in this document is built and green against the file-based stores. What remains is
-wording, translation, and the deployment nobody has attempted yet:
+Every phase in this document is built and green against the file-based stores. What remains:
 
 | | What | Where |
 |---|---|---|
-| ⬜ | GDPR: the register row in BACKEND.md and the pre-account section in `PrivacyPolicy.tsx` | §9 |
-| ⬜ | Translation pass: the new Swedish UI strings, and a native reading of the ja/tr mail copy — the admin notice, and all four transfer messages, are a first pass | |
-| ⬜ | AGENTS.md: the covering rule, and that organization names are never translated | §10 |
+| ⬜ | A native reading of the ja/tr copy. Every UI string is translated, but the Japanese and Turkish are mine, not a speaker's — as is all of the mail copy | |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 
 None of it blocks the rest, and nothing here has met Cosmos yet.
@@ -655,10 +653,17 @@ apply then re-apply. No Cosmos account has been touched, and the branch is not p
 
 ---
 
-## 9. GDPR — ⬜ not done
+## 9. GDPR — ✅ done
 
-The stores and their retention behaviour are built; the documents that describe them to a reader are
-not. Two additions to the register in BACKEND.md and to `PrivacyPolicy.tsx`:
+Both documents now describe what the stores actually hold. The register in BACKEND.md gained the
+rows below, and `PrivacyPolicy.tsx` gained a section on applicants — who are not users yet — and
+one on who can see what.
+
+The policy also needed a correction rather than an addition: it said no other user could see
+anything about you, which stopped being true the moment branches got administrators. It now says
+plainly that the administrators of your branch, your federation and the organization can see your
+name, address and sign-in method, that this is what running a membership requires, and that an
+administrator of another branch cannot see you at all.
 
 | Data | Where | Lawful basis | Retention |
 |---|---|---|---|
@@ -677,6 +682,7 @@ short pre-account section, since it currently only describes authenticated users
 - ✅ **BACKEND.md** — the `organizations` and `joinrequests` containers, the two indexing-policy
   changes and their out-of-band caveat, the scoped-role vocabulary and the one rule that does not
   follow from scope, the `branch`/`fed` claims, and every endpoint added by phases 1 to 3. Still
-  owed: the GDPR rows of §9, and an admission flow diagram.
+  owed: an admission flow diagram.
 - ✅ **README.md** — the role table and the covering rule, with its `admin` exception.
-- ⬜ **AGENTS.md** — the covering rule, and the fact that organization names are never translated.
+- ✅ **AGENTS.md** — the covering rule and its one exception, and the fact that organization names are
+  never translated (WSKO being the frontend constant it is).

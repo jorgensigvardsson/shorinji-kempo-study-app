@@ -80,5 +80,27 @@ Add a changelog entry before committing. This is user-facing, so make it less te
 
 Every backend HTTP endpoint in every service must be protected by a rate limiter. Use the `backend/shared/ratelimit` package (`IPRateLimiter`). No endpoint may be left unprotected. This is a hard requirement: the app runs on the developer's credit card.
 
+## Organization and authorization
+
+The app models Shorinji Kempo's structure: WSKO → national federations → branches. A member belongs
+to exactly one branch, and a branch belongs to a federation **or** directly to WSKO — never both,
+never neither. See `ORGANIZATION-PLAN.md` for the whole design and `BACKEND.md` for the as-built API.
+
+**One function answers every organizational permission**: `authz.Covers(roles, scope, tree)` in
+`backend/auth/internal/authz`. Seeing a user is authority over their branch; creating a branch is
+authority over its federation; granting a role is authority over the scope that role confers — which
+is why delegating downwards needs no rule of its own. Do not add a second place that decides who may
+do what; extend the scope vocabulary instead.
+
+One rule deliberately sits *beside* the covering test rather than inside it: `admin` and
+`wsko_admin` both scope to the root, so granting or revoking `admin` additionally requires holding
+it. It is a fact about that one role, not a new shape of authority.
+
+**Organization names are never translated.** "Svenska Shorinji Kempoförbundet" is a proper noun: it
+is stored once, in its own language, and displayed verbatim whatever language the reader is using.
+Never pass one to `translator.translate()` and never add one to `translations.json`. The only
+exception is the label **WSKO**, which is a constant in the frontend because WSKO is the root of the
+tree rather than a stored record with a name of its own.
+
 # MALIN.md
 This file contains additional instructions for the developer Malin Sigvardsson (and only her). She is a novice developer and need extra instructions.

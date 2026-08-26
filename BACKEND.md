@@ -388,9 +388,35 @@ for EU residents.
 | Preferred email address | `users` container | Contract (account function) |
 | Display name | `users` container | Contract (account function) |
 | Login timestamps | `users` container | Legitimate interest (security) |
+| Branch membership | `users` container | Contract (account function) |
+| UI language | `users` container | Legitimate interest (writing to somebody in a language they read) |
 | App data (grade, notes, ranks, flashcards, etc.) | `documents` container | Contract (core service) |
 | Refresh tokens | `refresh_tokens` container | Contract (session management) |
 | Push subscriptions (endpoint + keys, optional user ID) | push container | Consent (user subscribes) |
+
+### Data we hold on people who are not users
+| Data | Where | Lawful basis | Retention |
+|------|-------|-------------|-----------|
+| Join request (email, name, free-text note, chosen branch, provider identity) | `joinrequests` | Consent (the applicant submits it) | Deleted on approval; expires 90 days after denial; withdrawable by the applicant at any time while pending |
+
+An applicant is deliberately not a user: they exist in `joinrequests` and nowhere else until a
+branch admits them. That is what keeps the `users` container free of accounts nobody approved, and
+it is what makes the retention story a single sentence.
+
+### Data a member holds about their own membership
+| Data | Where | Lawful basis | Retention |
+|------|-------|-------------|-----------|
+| Branch transfer request (destination branch, free-text note) | `transfers` | Consent (the member submits it) | Deleted on acceptance; expires 90 days after refusal; withdrawable by the member at any time |
+
+**Erasure needs no dedicated path for any of these.** An applicant can withdraw a pending request
+themselves, a declined one expires on its own, and an approved one is superseded by the user record
+— which "Delete my account" already erases. The same holds for a transfer.
+
+**Who can see a member's data.** Administrators of a member's branch, of the federation above it,
+and of the organization as a whole can read that member's name, address, linked identities and
+roles; an administrator of any other branch cannot see them at all. Nobody but the member can read
+their study data. This is enforced per request by `authz.Covers` rather than by what the UI offers
+— see the scoped-role section above.
 
 We do **not** collect passwords, payment data, location, or behavioural tracking.
 
