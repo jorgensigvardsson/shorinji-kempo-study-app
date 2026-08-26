@@ -189,7 +189,7 @@ class SyncManager {
   }
 
   async adminCreateFederation(id: string, name: string) {
-    await this.backendClient.adminCreateFederation(id, name);
+    return await this.backendClient.adminCreateFederation(id, name);
   }
 
   async adminRenameFederation(id: string, name: string) {
@@ -197,7 +197,7 @@ class SyncManager {
   }
 
   async adminCreateBranch(name: string, federationId?: string) {
-    await this.backendClient.adminCreateBranch(name, federationId);
+    return await this.backendClient.adminCreateBranch(name, federationId);
   }
 
   async adminUpdateBranch(id: string, changes: { name?: string; federationId?: string }) {

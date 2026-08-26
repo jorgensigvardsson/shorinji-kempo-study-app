@@ -264,8 +264,12 @@ export class BackendSyncClient {
     return await resp.json() as AdminOrgTree;
   }
 
-  async adminCreateFederation(id: string, name: string): Promise<void> {
-    await this.adminWrite("POST", `${authUrl}/auth/admin/federations`, { id, name });
+  // Returns the new id (the server assigns it for a branch; for a federation
+  // it echoes back the one just sent) so a caller can jump straight to what
+  // it just created rather than hunting for it in a reloaded tree.
+  async adminCreateFederation(id: string, name: string): Promise<string> {
+    const node = await this.adminWriteJSON<{ id: string }>("POST", `${authUrl}/auth/admin/federations`, { id, name });
+    return node.id;
   }
 
   async adminRenameFederation(id: string, name: string): Promise<void> {
@@ -274,9 +278,10 @@ export class BackendSyncClient {
 
   // An omitted federationId means the branch hangs directly from WSKO, which
   // only a WSKO admin may do — the server refuses rather than reinterpreting.
-  async adminCreateBranch(name: string, federationId?: string): Promise<void> {
-    await this.adminWrite("POST", `${authUrl}/auth/admin/branches`,
+  async adminCreateBranch(name: string, federationId?: string): Promise<string> {
+    const node = await this.adminWriteJSON<{ id: string }>("POST", `${authUrl}/auth/admin/branches`,
       federationId ? { name, federationId } : { name });
+    return node.id;
   }
 
   // Both fields are optional and distinct: omitting federationId leaves the
@@ -342,7 +347,9 @@ export class BackendSyncClient {
   }
 
   // Shared plumbing for the admin writes above. A refusal carries the server's
-  // status so a caller can tell "you may not" from "that did not work".
+  // status so a caller can tell "you may not" from "that did not work". Most of
+  // these endpoints answer with an empty body, so parsing one here would break
+  // them — adminWriteJSON below is the separate path for the few that don't.
   private async adminWrite(method: string, url: string, body?: unknown): Promise<void> {
     const resp = await this.fetchWithRefresh(url, {
       method,
@@ -352,6 +359,18 @@ export class BackendSyncClient {
       }),
     });
     if (!resp.ok) throw new AdminRequestError(resp.status);
+  }
+
+  private async adminWriteJSON<T>(method: string, url: string, body?: unknown): Promise<T> {
+    const resp = await this.fetchWithRefresh(url, {
+      method,
+      ...(body === undefined ? {} : {
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+    });
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as T;
   }
 
   // ── Admission: joining a branch ──────────────────────────────────────────

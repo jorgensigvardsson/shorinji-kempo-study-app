@@ -41,11 +41,21 @@ const cardFor = (heading: string) => {
 
 describe("AdminOrganization", () => {
   beforeEach(() => {
+    // The list/tree choice persists to localStorage (see AdminOrganization.tsx)
+    // so it survives navigating away from the page and back — which means it
+    // survives just as readily from one test to the next unless cleared.
+    localStorage.clear();
     roles = ["wsko_admin"];
     adminOrgTree.mockReset().mockResolvedValue(tree);
-    for (const fn of [adminCreateFederation, adminRenameFederation, adminCreateBranch, adminUpdateBranch]) {
+    for (const fn of [adminRenameFederation, adminUpdateBranch]) {
       fn.mockReset().mockResolvedValue(undefined);
     }
+    // The real client returns the created node's id (see sync/backend.ts) —
+    // AdminOrganization.tsx uses it to pan the tree view to what was just
+    // created, so a mock that resolved undefined here would silently paper
+    // over that wiring being broken.
+    adminCreateFederation.mockReset().mockResolvedValue("DK");
+    adminCreateBranch.mockReset().mockResolvedValue("b-new");
   });
 
   it("shows each federation with its branches", async () => {
@@ -62,6 +72,46 @@ describe("AdminOrganization", () => {
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     expect(await screen.findByText("Tokyo Honbu")).toBeTruthy();
     expect(cardFor("WSKO").getByText("Tokyo Honbu")).toBeTruthy();
+  });
+
+  it("defaults to the list view", async () => {
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+    expect(screen.getByRole("button", { name: /Lista/ }).getAttribute("aria-pressed")).toBe("true");
+    expect(document.querySelector('[data-testid^="rf__node-"]')).toBeNull();
+  });
+
+  // The tree view is its own lazily-loaded chunk (see AdminOrganization.tsx),
+  // so switching to it is also the one place that exercises the Suspense
+  // boundary — findByText has to wait out both the import and the render.
+  it("switches to the tree view and shows the same organization there", async () => {
+    const user = userEvent.setup();
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+
+    await user.click(screen.getByRole("button", { name: /Träd/ }));
+
+    expect(await screen.findByText("Tokyo Honbu")).toBeTruthy();
+    expect(document.querySelector('[data-testid="rf__node-b-karlstad"]')).toBeTruthy();
+    // The list view's cards are gone rather than merely hidden underneath.
+    expect(document.querySelector(".card-header")).toBeNull();
+  });
+
+  // Opening a branch's members page and coming back unmounts and remounts
+  // this component — that is what a route change does — so the chosen view
+  // has to survive in something other than this component's own state.
+  it("keeps the tree view chosen after the page remounts", async () => {
+    const user = userEvent.setup();
+    const first = render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+    await user.click(screen.getByRole("button", { name: /Träd/ }));
+    await screen.findByText("Tokyo Honbu");
+    first.unmount();
+
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+    expect(screen.getByRole("button", { name: /Träd/ }).getAttribute("aria-pressed")).toBe("true");
+    expect(document.querySelector(".card-header")).toBeNull();
   });
 
   it("creates a branch inside the federation whose button was pressed", async () => {

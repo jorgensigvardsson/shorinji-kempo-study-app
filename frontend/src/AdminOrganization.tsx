@@ -1,10 +1,18 @@
-import { useContext, useEffect, useState } from "react";
+import { lazy, Suspense, useContext, useEffect, useState } from "react";
 import { Badge, Button, Card, Form, Modal, Spinner } from "react-bootstrap";
+import { Diagram3, ListUl } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminOrgBranch, type AdminOrgTree } from "./sync/backend";
 import { administeredBranches, administeredFederations, coversEverything } from "./roles";
+
+// Loaded only when somebody actually opens the tree view, not with the rest of
+// this page. @xyflow/react is the single heaviest dependency in the app, and
+// this page's own chunk is fetched for every admin the moment the app goes
+// idle (see routes.tsx, preloadPages) — that preload must not also drag in a
+// diagramming library on behalf of an admin who never leaves the list view.
+const AdminOrganizationTree = lazy(() => import("./AdminOrganizationTree"));
 
 // WSKO is the root of the organization rather than a record with a name, so it
 // has no id: on the wire a branch attached to it simply carries no federation.
@@ -12,6 +20,22 @@ import { administeredBranches, administeredFederations, coversEverything } from 
 // absence — a branch under no federation has a place, and saying so is the whole
 // difference between "belongs to WSKO" and "looks like it got lost".
 const WSKO = "";
+
+// Which view this admin last chose, kept per device like the theme preference
+// (persistence/theme.ts) — not because two views ever disagree the way two
+// devices can, but because the component unmounts on every navigation away
+// from this page (opening a branch's members, for instance) and remounts
+// with fresh state on the way back. Without this, "list" was the only view
+// that could ever survive a click through to somewhere else and back.
+const VIEW_STORAGE_KEY = "admin-organization-view";
+
+function readStoredView(): "list" | "tree" {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === "tree" ? "tree" : "list";
+  } catch {
+    return "list";
+  }
+}
 
 interface Section {
   federationId: string; // "" for WSKO
@@ -43,6 +67,21 @@ const AdminOrganization = () => {
   const [loadError, setLoadError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [view, setViewState] = useState<"list" | "tree">(readStoredView);
+  const setView = (next: "list" | "tree") => {
+    setViewState(next);
+    try {
+      localStorage.setItem(VIEW_STORAGE_KEY, next);
+    } catch {
+      // Storage full or blocked: the choice still holds for this visit.
+    }
+  };
+
+  // The id the tree view should pan itself to once it next has somewhere to
+  // put it — set right after creating a federation or branch, cleared by the
+  // tree once it has acted on it. A newly created thing is, almost by
+  // definition, off in a part of the canvas nobody was already looking at.
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   // Which thing is being renamed, and to what. One at a time: renaming is rare
   // enough that a second open editor would be clutter rather than convenience.
@@ -78,12 +117,16 @@ const AdminOrganization = () => {
   // Every write is followed by a reload rather than a local patch. The server
   // decides ids, ordering and what this caller may see, and a page that guessed
   // at those would drift from it in exactly the cases that matter.
-  const write = async (act: () => Promise<void>, done?: () => void) => {
+  //
+  // Generic over the result so a caller that creates something — the only
+  // writes with anything worth reporting back — can act on what the server
+  // handed back, without every other write needing to care that it exists.
+  const write = async <T,>(act: () => Promise<T>, done?: (result: T) => void) => {
     setBusy(true);
     setError(null);
     try {
-      await act();
-      done?.();
+      const result = await act();
+      done?.(result);
       await load();
     } catch (err) {
       setError(refusal(err));
@@ -126,7 +169,7 @@ const AdminOrganization = () => {
     // but the client's signature says "no federation" with undefined.
     void write(
       () => getSyncManager().adminCreateBranch(name, federationId === WSKO ? undefined : federationId),
-      () => { setAddingBranchIn(null); setNewBranchName(""); });
+      (newId) => { setAddingBranchIn(null); setNewBranchName(""); setFocusId(newId); });
   };
 
   const createFederation = () => {
@@ -135,7 +178,7 @@ const AdminOrganization = () => {
     if (id === "" || name === "") return;
     void write(
       () => getSyncManager().adminCreateFederation(id, name),
-      () => { setAddingFederation(false); setNewFederationId(""); setNewFederationName(""); });
+      (newId) => { setAddingFederation(false); setNewFederationId(""); setNewFederationName(""); setFocusId(newId); });
   };
 
   const startMove = (branch: AdminOrgBranch, from: string) => {
@@ -220,13 +263,54 @@ const AdminOrganization = () => {
 
   return (
     <div>
-      <p className="text-secondary">
-        {translator.translate("Förbund och klubbar. En klubb hör antingen till ett förbund eller direkt till WSKO.")}
-      </p>
+      <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+        <p className="text-secondary">
+          {translator.translate("Förbund och klubbar. En klubb hör antingen till ett förbund eller direkt till WSKO.")}
+        </p>
+        <div role="group" aria-label={translator.translate("Vy")} className="d-flex gap-1">
+          <Button size="sm" variant={view === "list" ? "primary" : "outline-secondary"}
+                  aria-pressed={view === "list"} onClick={() => setView("list")}>
+            <ListUl className="me-1" />{translator.translate("Lista")}
+          </Button>
+          <Button size="sm" variant={view === "tree" ? "primary" : "outline-secondary"}
+                  aria-pressed={view === "tree"} onClick={() => setView("tree")}>
+            <Diagram3 className="me-1" />{translator.translate("Träd")}
+          </Button>
+        </div>
+      </div>
 
       {error !== null && <p className="text-danger">{error}</p>}
 
-      {sections.map(section => (
+      {view === "tree" && (
+        <Suspense fallback={
+          <div className="d-flex align-items-center gap-2 p-3">
+            <Spinner animation="border" size="sm" /> {translator.translate("Laddar…")}
+          </div>
+        }>
+          <AdminOrganizationTree
+            translator={translator}
+            sections={sections}
+            atWSKO={atWSKO}
+            coversFederation={coversFederation}
+            coversBranch={coversBranch}
+            busy={busy}
+            isEditing={isEditing}
+            renameControls={renameControls}
+            startRename={startRename}
+            addingBranchIn={addingBranchIn}
+            newBranchName={newBranchName}
+            setNewBranchName={setNewBranchName}
+            setAddingBranchIn={setAddingBranchIn}
+            setError={setError}
+            createBranch={createBranch}
+            startMove={startMove}
+            focusId={focusId}
+            onFocused={() => setFocusId(null)}
+          />
+        </Suspense>
+      )}
+
+      {view === "list" && sections.map(section => (
         <Card key={section.federationId === WSKO ? "wsko" : section.federationId} className="mb-3">
           <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             {isEditing("federation", section.federationId)

@@ -22,6 +22,15 @@ export default defineConfig({
           if (!id.includes('node_modules')) return;
           // Workbox is already emitted separately by the PWA plugin.
           if (id.includes('workbox-window')) return;
+          // @xyflow is the single heaviest dependency in the app and is reached
+          // only from the organization page's tree view, itself a lazy import
+          // (see AdminOrganization.tsx). Forcing it into vendor would undo that:
+          // vendor loads for everyone the moment the app goes idle, which is
+          // precisely what an admin who never opens the tree view should not pay
+          // for. Its own dependencies (checked with `npm ls`: nothing else in
+          // this app uses them) need excluding by name individually, since a
+          // substring match on the importer's id would only catch @xyflow itself.
+          if (['@xyflow', 'd3-', 'classcat', 'zustand'].some(pkg => id.includes(`/node_modules/${pkg}`))) return;
           return 'vendor';
         },
       },
