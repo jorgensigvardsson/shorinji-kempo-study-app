@@ -31,6 +31,7 @@ Every phase in this document is built and green against the file-based stores. W
 |---|---|---|
 | ⬜ | A native reading of the ja/tr copy. Every UI string is translated, but the Japanese and Turkish are mine, not a speaker's — as is all of the mail copy | |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
+| ⬜ | Who gets notified, and of what — needs a real look before shipping, see below | |
 
 None of it blocks the rest, and nothing here has met Cosmos yet.
 
@@ -40,6 +41,35 @@ to keep apart. Granting or revoking it now requires holding it.
 
 Below, each phase heading carries its state; the design text is left as written, with **As built**
 notes where the code settled somewhere the plan did not foresee.
+
+### TODO: who gets notified, and of what
+
+§5.3 and §7 settled *who is notified* for the two flows built so far — a join request's branch, a
+transfer's destination branch and, on departure, the branch left — each by language rather than by
+person, and each decided narrowly while building that one flow. Nobody has looked at the notification
+story as a whole, and it deserves one before this ships. Raised but not resolved:
+
+- **Does a federation admin hear about their branches' join requests and transfers, or only the
+  branch admin?** Today it's the branch alone. A federation admin can already see everything under
+  them through the covering rule — whether they should also be *told*, unprompted, is a different
+  question with a different answer.
+- **Does a WSKO admin hear about anything happening below them?** Currently nothing — WSKO admins
+  learn of a request only by looking. Silence might be right; it might also mean an admin at the top
+  has no idea the organization is active at all.
+- **What happens as a branch or federation accumulates several admins?** Every admin at the relevant
+  scope is mailed today (grouped by language, per §5.3). That's fine at one or two; it is not
+  obviously fine at ten — this is where "who gets notified" turns into "how many people get the same
+  email," which is its own kind of noise.
+- **Is there ever a reason to notify *up* the tree on something other than a request?** A branch
+  moving to a different federation (the new "Byt förbund" control) changes who administers its
+  members with no notification to anyone — the admins gaining or losing sight of that branch's
+  members currently just have to notice.
+- **Should any of this be configurable per admin**, or is a fixed rule (branch only, or branch +
+  federation, or branch + federation + WSKO) good enough for an organization this size?
+
+None of this blocks what's built. It matters before more notification-sending flows are added on top
+of the current ad hoc per-flow decisions, since each one so far has picked its own answer rather than
+following a stated rule.
 
 ### One word each: klubb, branch, 支部, kulüp
 
