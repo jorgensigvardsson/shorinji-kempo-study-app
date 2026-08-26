@@ -180,10 +180,6 @@ export function LoginScreen() {
           <span className="login-screen-title">Shorinji Kempo</span>
         </div>
 
-        <p className="text-body-secondary login-screen-subtitle">
-          {translator.translate("Spara dina framsteg på alla enheter genom att logga in.")}
-        </p>
-
         {phase === "join" ? (
           <RegisterBranch translator={translator} language={language} onBack={backToEmail} />
         ) : phase === "email" ? (
