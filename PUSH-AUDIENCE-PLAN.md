@@ -5,6 +5,11 @@ cancelled practice without telling every phone in WSKO. Scope the send by the sa
 scopes everything else organizational, and resolve who is in that audience in **two batched queries,
 with no per-branch or per-user loop**.
 
+> **"User" here means a subscriber.** Somebody who has opted in and whose subscription this service
+> holds. A member with no subscription is not part of any audience and is not counted in any total —
+> "sent to the whole federation" always means the devices in it that asked to hear from us. The
+> distinction matters most in what the UI claims after a send (§8).
+
 ## Status
 
 **Nothing here is built.** This is a design, written against `org-structure` as it stands. The push
@@ -13,11 +18,14 @@ contact with the organization model.
 
 | | What | Where |
 |---|---|---|
+| ⚠️ | **Decide whether `wsko_admin` may send to `all`** — the one open question, and it reverses an existing deliberate choice either way | §4 |
 | ⬜ | Startup re-register — a prerequisite for everything else, useful on its own | §7 |
-| ⬜ | Audience on the send endpoint | §3, §4 |
-| ⬜ | Batch membership resolution | §5 |
-| ⬜ | Prune on 403, so a VAPID rotation cannot leave dead rows forever | §6 |
-| ⬜ | Frontend audience picker | §8 |
+| ⬜ | Audience as a list of scopes, `all` included | §3 |
+| ⬜ | Authorize every entry with `authz.Covers`; refuse the request, never an entry | §4 |
+| ⬜ | Batch membership resolution — two queries, and overlap deduplicated by construction | §5 |
+| ⬜ | Prune on 403, so a VAPID rotation cannot leave dead rows forever | §7 |
+| ⬜ | Frontend: no picker when the sender administers one branch | §8 |
+| ✅ | Build pipeline keeps sending to everybody, unchanged | §3.1 |
 
 ---
 
@@ -87,63 +95,118 @@ namespace where scope could not be enforced at all.
 
 ---
 
-## §3 The audience
+## §3 The audience is a list of scopes
 
-The send endpoint gains one optional field:
+The send endpoint gains one optional field: a **list of receivers**, each of which is *all*, a
+federation, or a branch, mixed freely in one send.
 
 ```json
 {
   "title": "Träningen på tisdag är inställd",
   "body":  "Hallen är dubbelbokad.",
   "url":   "/",
-  "audience": { "federations": ["SE"], "branches": ["uuid-a", "uuid-b"] }
+  "audience": [
+    { "kind": "federation", "id": "SE" },
+    { "kind": "branch", "id": "uuid-a" },
+    { "kind": "branch", "id": "uuid-b" }
+  ]
 }
 ```
 
-**An omitted audience means everybody, and still requires `admin`.** That keeps today's behaviour
-exactly as it is, and leaves the deploy announcement (`deploy.yml`, via `PUSH_ADMIN_TOKEN`)
-untouched.
+**This is `authz.Scope` on the wire.** `Kind` is already exactly `wsko | federation | branch`
+(`authz/scope.go`), and `ScopeOf` is already documented as *"the one validator for role input
+arriving over the wire"* — it rejects an unknown kind and a scoped entry with an empty id. Reusing
+the type means the audience needs no vocabulary of its own, and §4's authorization becomes a
+one-liner over it.
 
-`federations` is sugar: each expands to its branches via `org.Tree.BranchesIn`, and the result is
-unioned with `branches` into one flat set. The audience is therefore always *a set of branches* by
-the time anything is authorized or queried.
+The important consequence: **`all` is an ordinary member of the list, not a magic absence.** An
+earlier draft made "everybody" mean "audience omitted", which cannot express *"my federation, plus
+these two clubs elsewhere"* and cannot be authorized by the same rule as everything else. As a scope
+it is just `{ "kind": "wsko" }`, and who may name it falls out of §4 like every other entry.
 
-That shape is what satisfies "a subset of the branches". A single scope value could express "my
-federation" but not "three of my twelve clubs"; a list expresses both, and the federation shorthand
-keeps the common case short.
+**An omitted audience still means `[{ "kind": "wsko" }]`.** That is what keeps the deploy
+announcement working untouched — `deploy.yml:411` posts a body with no audience field, and must keep
+meaning *everybody* (§3.1).
+
+### §3.1 The build pipeline sends to all
+
+The new-version notification is the one send that is always global, and it is sent by CI rather than
+by a person: `deploy.yml:407` presents `PUSH_ADMIN_TOKEN` and posts title/body/url only.
+
+Two rules follow, and they are the same rule seen from both ends:
+
+- **Omission means `all`**, so the existing pipeline step needs no change at all.
+- **`PUSH_ADMIN_TOKEN` can only ever resolve to `all`.** It is a shared secret carrying no identity,
+  so there are no roles to check a narrower scope against. A request presenting the token and naming
+  a federation or a branch must be refused rather than honoured — not because it is dangerous (`all`
+  is the strictly larger power) but because it would be authorizing a scope decision with a
+  credential that cannot make one.
+
+Making the pipeline send `{"audience":[{"kind":"wsko"}]}` explicitly is optional and slightly better
+for the audit trail (§9), but it is not required and is not worth touching a deploy workflow for.
 
 ---
 
-## §4 Authorization — one rule, three tiers
+## §4 Authorization — one rule, every combination
 
-Every branch in the expanded set must satisfy:
+The caller's roles decide which receivers they may name. That is not a new rule and needs no new
+vocabulary: **every entry in the audience must satisfy `authz.Covers`**, and the whole request is
+refused unless all of them do.
 
 ```go
-authz.Covers(callerRoles, authz.Branch(branchID), tree)
+for _, scope := range audience {
+    if !authz.Covers(callerRoles, scope, tree) {
+        return errForbidden   // all-or-nothing: never silently drop an entry
+    }
+}
 ```
 
-That is the whole rule. The three tiers are not three code paths — they fall out of the covering
-relation exactly as the delegation rule does in `adminSetRoles`:
+The combinations the requirement asks for are not cases in this code — they are consequences of the
+covering relation, exactly as delegation is in `adminSetRoles`:
 
-| Caller | Names | Outcome |
+| Caller holds | May name | May not name |
 |---|---|---|
-| `branch_admin:B` | branch `B` | ✅ |
-| `branch_admin:B` | branch `C` | ❌ — the narrowest authority there is, and no view upwards |
-| `federation_admin:SE` | federation `SE` | ✅ expands to every branch under it |
-| `federation_admin:SE` | 3 of its 12 branches | ✅ each passes on its own |
-| `federation_admin:SE` | a branch in `NO` | ❌ |
-| `admin` / `wsko_admin` | any federations or branches | ✅ `KindWSKO` covers everything |
-| `admin` | *no audience* | ✅ everybody |
-| `wsko_admin` | *no audience* | ❌ — see below |
+| `branch_admin:B` | branch `B` | anything else — the narrowest authority there is, no view upwards |
+| `branch_admin:B` + `branch_admin:C` | `B`, `C`, or both in one send | the federation above them, even if it holds only `B` and `C` |
+| `federation_admin:SE` | federation `SE`; any subset of its branches; both at once | a branch in `NO`, or `all` |
+| `federation_admin:SE` + `branch_admin:X` (X in `NO`) | `SE` and `X` together | `NO`, or `all` |
+| `admin` | `all`, and any federations and branches | — |
+| `wsko_admin` | any federations and branches | `all` — see the open question |
 
-**`wsko_admin` still cannot send to everybody in one call, and should not gain that.** It can name
-every federation it wants to reach, which is the same set of devices arrived at deliberately rather
-than by omission. The distinction `roles.ts:33` draws is preserved: administering the organization
-is not the same as notifying every phone in it, and the unscoped send stays on `admin`.
+**A caller may hold several roles at different levels, and the union is what they may name.** Nothing
+special is needed for that: each entry is checked against the caller's whole role set, so a
+federation admin who also runs one club in another country can name both in a single send.
+
+**Refuse the whole request, never part of it.** Silently dropping an unauthorized entry would send a
+notification whose audience is not the one the sender chose, and they would have no way to tell.
 
 **Failures must not leak existence.** Naming a branch outside the caller's scope should be refused
 the way `adminBranchMembers` already refuses it — `404 branch not found` rather than `403`
 (`admin.go:357`) — so that a branch admin cannot enumerate the organization by probing.
+
+### ⚠️ Open question: may `wsko_admin` name `all`?
+
+**This needs a decision before implementation, and it is the one thing here that reverses an
+existing deliberate choice.** `authz.Covers` gives `KindWSKO` authority to *both* `admin` and
+`wsko_admin`, so `all` as a plain scope grants it to both. But `roles.ts:33` withheld exactly that
+on purpose:
+
+> The technical powers — push broadcasts above all — stay on `admin` alone: `wsko_admin` administers
+> the organization, which is not the same thing as being able to notify every phone in it.
+
+Two ways to settle it:
+
+| | Rule | Cost |
+|---|---|---|
+| **(a) Uniform** | `all` is just `authz.WSKO()`; `Covers` decides, so `wsko_admin` gains it | Reverses `roles.ts:33`. One less special case |
+| **(b) Reserved** *(recommended)* | `all` additionally requires `RoleAdmin` by name, like granting `admin` already does in `adminSetRoles` | One special case, written down once |
+
+A literal reading of the requirement — *receivers for which the user has an admin role* — points at
+(a). The recommendation is still **(b)**: the split was made deliberately and nothing in the new
+requirements asks to undo it, a WSKO admin can still reach every phone by naming the federations,
+and `adminSetRoles` already sets the precedent that one power is guarded by name rather than by
+scope. It is a one-line difference either way, so it can be revisited cheaply — but it should be
+chosen, not defaulted into.
 
 ---
 
@@ -151,7 +214,8 @@ the way `adminBranchMembers` already refuses it — `404 branch not found` rathe
 
 The expansion in §3 and the check in §4 are both **in-memory and free**: `org.Tree` is loaded at
 startup and rebuilt on write, and is documented as costing 0 RU. Only two things need the database,
-and each is asked exactly once no matter how many branches or federations the audience names.
+and each is asked exactly once no matter how many receivers the audience names — **two queries for a
+scoped send, one when the audience contains `all`**, never a query per branch.
 
 ```
    admin  ──POST /push/broadcast {audience}──▶  persistence
@@ -213,8 +277,14 @@ SELECT * FROM c WHERE ARRAY_CONTAINS(@userIds, c.userId)
 ```
 
 Deliberately the same shape as `ListByBranches`, for the same reason. The file store filters the
-directory read in memory; the existing `ListSubscriptions()` stays, and is what the unscoped send
-uses.
+directory read in memory.
+
+**An audience containing `all` skips ① entirely** and calls the existing `ListSubscriptions()` — one
+query, not two, and no membership resolution, since there is no question left to ask. That is also
+the only audience that reaches subscribers with no branch: a scoped send cannot match them (§6),
+which is right for "training is cancelled" and would be wrong for "new version available". The
+build pipeline's notification is therefore the one send that must stay global (§3.1), not merely the
+one that happens to be.
 
 **This needs no indexing change.** The `pushsubscriptions` container is created with Cosmos's
 *default* indexing policy — every path indexed — precisely because broadcast already scans it
@@ -223,6 +293,35 @@ a filter on `c.userId` is served by an index that is already there.
 
 That is worth stating plainly, because it is the opposite of the two changes `ORGANIZATION-PLAN.md`
 §1.2 and §1.3 still owe staging and production out-of-band. **This design adds no third one.**
+
+### Overlapping receivers, and why nobody hears it twice
+
+Receivers overlap the moment anyone names a federation and one of its branches, or `all` and
+anything else. **No duplicate delivery is possible, and no de-duplication pass is needed** — the
+pipeline is set-valued at every step, so a recipient cannot be reached twice by construction:
+
+| Step | Why a duplicate cannot survive |
+|---|---|
+| scopes → branch ids | expansion accumulates into a **set**. Branch `B` named directly and again via federation `SE` is one element |
+| `all` present | short-circuits: the audience is every subscription, so nothing is expanded or unioned at all |
+| branch ids → user ids | `User.BranchID` is a single value — *"the one branch this practitioner belongs to"* — so one user matches at most one branch in the `ARRAY_CONTAINS`, however many branches are named |
+| user ids → subscriptions | endpoint is the container's id and partition key, so each subscription is one row and is returned once |
+| subscriptions → sends | one `Send` per row |
+
+This is worth stating because it is a property of *this* design rather than of the problem. The
+per-branch loop rejected in §10 would have needed an explicit dedup pass and a bug the first time
+someone forgot it: a member of `B` reached once via `SE` and once via `B` would get the same
+notification twice.
+
+**One person with several devices still gets it on each of them, and that is not duplication.** A
+phone and a laptop are two subscriptions, and delivering to both is the point. The guarantee is
+*at most one delivery per subscription*, which is the only sense in which "duplicate" is
+well-defined here.
+
+> **Related, pre-existing, and worth knowing:** `SaveSubscription` upserts on endpoint, so a browser
+> shared by two accounts holds one subscription tagged with whoever enabled notifications last. The
+> earlier user stops receiving; they do not receive the later user's notifications *as well*. Not a
+> dedup problem, but the same corner of the data model, and unchanged by this design.
 
 ### On the size of `@userIds`
 
@@ -326,16 +425,37 @@ survivable. **Ship it before any migration step, not with one.**
 
 ---
 
-## §8 Frontend
+## §8 Frontend — the picker appears only when there is a choice
 
-- `routes.tsx:215` gates the page on `isGlobalAdmin`; it becomes `isAnyAdmin`.
-- The audience picker builds from `administeredBranches()` and `administeredFederations()`
-  (`roles.ts`), both of which already exist and already drive other admin pages. A branch admin with
-  exactly one branch should not be shown a picker containing one item — the same rule
-  `AdminOrganization` already follows.
+`routes.tsx:215` gates the page on `isGlobalAdmin`; it becomes `isAnyAdmin`.
+
+**The page shows what the sender's roles make available, and nothing else.** The candidate receivers
+come from `administeredFederations()` and `administeredBranches()` (`roles.ts`) plus `all` where §4
+permits it — the same helpers that already decide what `AdminOrganization.tsx:56` opens on, and they
+exist for exactly this reason: *"a branch admin should land in their own branch rather than on a list
+holding one item."*
+
+| The sender administers | The page shows |
+|---|---|
+| **exactly one branch, nothing else** | **no picker at all** — a line stating the message goes to every subscribed member of *that* branch, named |
+| one federation, nothing else | that federation preselected, with its branches offered as an optional narrowing |
+| anything else | the picker, listing only what they may name |
+
+The one-branch case is the common one and deserves to look it: a branch admin has no decision to
+make, so offering them a control with a single option is asking a question with one answer. State
+the destination as a fact — *"Notisen skickas till alla i Malmö Shorinji Kempo som har aktiverat
+notiser"* — and let them write the message.
+
+Everything the picker offers is enforced again in §4. A control that is merely hidden is a courtesy;
+`roles.ts` says so itself, and it is the server that counts.
+
+The rest:
+
 - The menu string **"Skicka notis till alla"** has to stop saying *till alla*.
 - The confirmation should name the audience, not just the count: *"Skickat till 23 mottagare i
   Malmö Shorinji Kempo"*. A send that cannot be recalled deserves to say what it did.
+- **Count subscribers, not members.** *"23 mottagare"* is 23 devices that opted in, not 23
+  practitioners in the club, and the copy should not let a sender infer their club ignored them.
 - Auth is expected to run scaled to zero, so the audience call can be slow the first time — this page
   is one of those covered by `ORGANIZATION-PLAN.md`'s outstanding loading-indicator work.
 
@@ -352,8 +472,8 @@ survivable. **Ship it before any migration step, not with one.**
   nice-to-have into a prerequisite: a notification cannot be recalled, and "who sent that to my
   club?" should have an answer.
 - **`PUSH_ADMIN_TOKEN` remains scope-blind**, necessarily — it is a shared secret carrying no
-  identity. It therefore only ever authorizes the unscoped send, which is precisely what the deploy
-  announcement needs. It must never be accepted alongside an `audience`.
+  identity, so it authorizes `all` and nothing narrower (§3.1). That is precisely what the deploy
+  announcement needs, and it means the pipeline requires no change.
 - **Rate limiting.** One global admin sending rarely is self-limiting. Every branch admin in WSKO is
   not.
 
