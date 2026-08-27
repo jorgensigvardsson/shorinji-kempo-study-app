@@ -25,6 +25,7 @@ contact with the organization model.
 | ⬜ | Batch membership resolution — two queries, and overlap deduplicated by construction | §5 |
 | ⬜ | Prune on 403, so a VAPID rotation cannot leave dead rows forever | §7 |
 | ⬜ | Frontend: no picker when the sender administers one branch | §8 |
+| ⬜ | Frontend: confirm any send wider than the sender's own club | §8.1 |
 | ✅ | Build pipeline keeps sending to everybody, unchanged | §3.1 |
 
 ---
@@ -280,11 +281,14 @@ Deliberately the same shape as `ListByBranches`, for the same reason. The file s
 directory read in memory.
 
 **An audience containing `all` skips ① entirely** and calls the existing `ListSubscriptions()` — one
-query, not two, and no membership resolution, since there is no question left to ask. That is also
-the only audience that reaches subscribers with no branch: a scoped send cannot match them (§6),
-which is right for "training is cancelled" and would be wrong for "new version available". The
-build pipeline's notification is therefore the one send that must stay global (§3.1), not merely the
-one that happens to be.
+query, not two, and no membership resolution, since there is no question left to ask.
+
+It is also the only audience that does not depend on the branch invariant holding. Every member
+belongs to a branch, so in a migrated system the two agree: naming every federation reaches the same
+people as `all`. Before `orgmigrate` has run, or if a single account ever slips the admission gate, a
+scoped send silently misses them while `all` does not — which is right for "training is cancelled"
+and wrong for "new version available". That is one more reason the build pipeline's notification
+stays global (§3.1) rather than being expressed as a list of federations.
 
 **This needs no indexing change.** The `pushsubscriptions` container is created with Cosmos's
 *default* indexing policy — every path indexed — precisely because broadcast already scans it
@@ -449,7 +453,51 @@ notiser"* — and let them write the message.
 Everything the picker offers is enforced again in §4. A control that is merely hidden is a courtesy;
 `roles.ts` says so itself, and it is the server that counts.
 
-The rest:
+### §8.1 Confirm anything wider than your own club
+
+A notification cannot be recalled, so a send that reaches beyond the sender's own club asks first.
+The rule is one line, and it falls out of the same two facts the page already has:
+
+> **Send without confirming only when the audience is exactly one branch, and that branch is the
+> sender's own.** Everything else confirms: several branches, a federation, `all`, or a single branch
+> the sender does not belong to.
+
+`BackendUserInfo` already carries `branchId` alongside `roles` (`sync/backend.ts:48`), so this needs
+no new plumbing — the comparison is against something the page has already loaded.
+
+| Sender | Audience | |
+|---|---|---|
+| `branch_admin:B`, member of `B` | branch `B` | sends |
+| `federation_admin:SE`, member of `B` | branch `B` | **confirms** — a higher tier reaching into a club they do not train at |
+| `federation_admin:SE`, member of `B` | branches `B` and `C` | **confirms** — more than one club |
+| `federation_admin:SE` | federation `SE` | **confirms** |
+| `admin` | `all` | **confirms** |
+
+That the no-confirm case coincides exactly with §8's no-picker case is a good sign rather than a
+coincidence: the branch admin telling their own club that training is cancelled is the routine,
+frequent, small-blast-radius send, and it is the only one that should feel routine.
+
+**Every member belongs to a branch**, so the sender's own branch is always known and the exception is
+always reachable. That invariant is what the admission gate exists to establish and what
+`orgmigrate` back-fills; `BranchID` is documented as empty *"only until the admission gate makes a
+branchless account impossible to create"*. Treat an empty `branchId` as "not my club" and confirm
+anyway — it costs one dialog in a state that should not exist, and it fails in the safe direction if
+it somehow does.
+
+**Name the audience rather than warning vaguely.** *"Det här meddelandet når alla 12 klubbar i
+Svenska Shorinji Kempoförbundet. Vill du skicka?"* tells the sender what they are about to do;
+*"a lot of people"* asks them to guess. The branch count is available client-side — the scoped tree
+is already fetched for `AdminOrganization`.
+
+An exact recipient count would be better still and is not free: it needs the §5 resolution without
+the send, so either a dry-run endpoint and a second round trip against a scale-to-zero service, or
+nothing. Worth adding only if the audience description turns out not to be enough.
+
+**This is a courtesy, not a control.** §4 decides what may be sent; §8.1 only slows down what may
+already be sent, and the server neither knows nor cares whether a dialog was shown. `roles.ts` makes
+the same point about hiding controls, and it applies here unchanged.
+
+### The rest
 
 - The menu string **"Skicka notis till alla"** has to stop saying *till alla*.
 - The confirmation should name the audience, not just the count: *"Skickat till 23 mottagare i
