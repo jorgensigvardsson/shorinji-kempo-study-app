@@ -33,6 +33,8 @@ Every phase in this document is built and green against the file-based stores. W
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 | ⬜ | Who gets notified, and of what — needs a real look before shipping, see below | |
 | ⬜ | Loading indicators on every page that fetches from a backend service, before shipping — see below | |
+| ⬜ | Audit trails for administrative operations (who did what and when?). Useful for general change logs. Don't fetch data by default, make "Show history" an explicit action. Audit trails should also be compartmentalized. A branch admin should not see how federations have moved, etc. | |
+
 
 None of it blocks the rest, and nothing here has met Cosmos yet.
 
