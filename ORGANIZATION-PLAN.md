@@ -32,6 +32,7 @@ Every phase in this document is built and green against the file-based stores. W
 | ⬜ | A native reading of the ja/tr copy. Every UI string is translated, but the Japanese and Turkish are mine, not a speaker's — as is all of the mail copy | |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 | ⬜ | Who gets notified, and of what — needs a real look before shipping, see below | |
+| ⬜ | Push notification audiences — a broadcast still reaches every phone in WSKO, so the send stays on `admin` alone and no branch admin can tell their own club anything. Designed, not built | [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md) |
 | ⬜ | Loading indicators on every page that fetches from a backend service, before shipping — see below | |
 | ⬜ | Audit trails for administrative operations (who did what and when?). Useful for general change logs. Don't fetch data by default, make "Show history" an explicit action. Audit trails should also be compartmentalized. A branch admin should not see how federations have moved, etc. | |
 
@@ -73,6 +74,14 @@ story as a whole, and it deserves one before this ships. Raised but not resolved
 None of this blocks what's built. It matters before more notification-sending flows are added on top
 of the current ad hoc per-flow decisions, since each one so far has picked its own answer rather than
 following a stated rule.
+
+**All of the above is about mail.** Push is the other half of the same question and is not asked
+anywhere in this document: `POST /push/broadcast` sends to every stored subscription, so the one
+audience that reaches every phone in the organization is the one nothing here scopes. That is why
+the send is confined to `admin` — which is a bound on who may send rather than on who receives, and
+it leaves a branch admin unable to tell their own club that training is cancelled. Designed, not
+built, in [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md); it reuses `authz.Covers` and the tree, so
+whatever rule this section settles on should be the same rule there.
 
 ### TODO: loading indicators wherever a page fetches from a backend service
 
