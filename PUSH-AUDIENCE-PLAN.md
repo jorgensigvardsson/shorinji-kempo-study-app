@@ -18,13 +18,13 @@ contact with the organization model.
 
 | | What | Where |
 |---|---|---|
-| ⚠️ | **Decide whether `wsko_admin` may send to `all`** — the one open question, and it reverses an existing deliberate choice either way | §4 |
+| ✅ | **Decided:** `wsko_admin` may send to `all` — it is `authz.WSKO()`, and `Covers` alone decides | §4 |
 | ⬜ | Startup re-register — a prerequisite for everything else, useful on its own | §7 |
 | ⬜ | Audience as a list of scopes, `all` included | §3 |
 | ⬜ | Authorize every entry with `authz.Covers`; refuse the request, never an entry | §4 |
 | ⬜ | Batch membership resolution — two queries, and overlap deduplicated by construction | §5 |
 | ⬜ | Prune on 403, so a VAPID rotation cannot leave dead rows forever | §7 |
-| ⬜ | Frontend: no picker when the sender administers one branch | §8 |
+| ⬜ | Frontend: no picker when the sender administers one branch; retire `isGlobalAdmin` | §8, §4 |
 | ⬜ | Frontend: confirm any send wider than the sender's own club | §8.1 |
 | ✅ | Build pipeline keeps sending to everybody, unchanged | §3.1 |
 
@@ -171,8 +171,7 @@ covering relation, exactly as delegation is in `adminSetRoles`:
 | `branch_admin:B` + `branch_admin:C` | `B`, `C`, or both in one send | the federation above them, even if it holds only `B` and `C` |
 | `federation_admin:SE` | federation `SE`; any subset of its branches; both at once | a branch in `NO`, or `all` |
 | `federation_admin:SE` + `branch_admin:X` (X in `NO`) | `SE` and `X` together | `NO`, or `all` |
-| `admin` | `all`, and any federations and branches | — |
-| `wsko_admin` | any federations and branches | `all` — see the open question |
+| `admin` / `wsko_admin` | `all`, and any federations and branches | — |
 
 **A caller may hold several roles at different levels, and the union is what they may name.** Nothing
 special is needed for that: each entry is checked against the caller's whole role set, so a
@@ -185,29 +184,50 @@ notification whose audience is not the one the sender chose, and they would have
 the way `adminBranchMembers` already refuses it — `404 branch not found` rather than `403`
 (`admin.go:357`) — so that a branch admin cannot enumerate the organization by probing.
 
-### ⚠️ Open question: may `wsko_admin` name `all`?
+### ✅ Settled: `wsko_admin` may name `all`
 
-**This needs a decision before implementation, and it is the one thing here that reverses an
-existing deliberate choice.** `authz.Covers` gives `KindWSKO` authority to *both* `admin` and
-`wsko_admin`, so `all` as a plain scope grants it to both. But `roles.ts:33` withheld exactly that
-on purpose:
+**Decided.** `all` is `authz.WSKO()` and nothing more; `Covers` decides who may name it, which is
+`admin` and `wsko_admin` alike. No special case, no guard by role name.
 
-> The technical powers — push broadcasts above all — stay on `admin` alone: `wsko_admin` administers
-> the organization, which is not the same thing as being able to notify every phone in it.
+This does reverse `roles.ts:33`, which withheld broadcast from `wsko_admin` on the grounds that
+*"`wsko_admin` administers the organization, which is not the same thing as being able to notify
+every phone in it."* That distinction made sense when the only send was to everybody. Once a send
+has an audience, authority over the root **is** the right to address the root, and keeping the two
+apart would have been the special case rather than the principle. **The comment and the gate both
+have to change when this is built** — see below.
 
-Two ways to settle it:
+### `all` is *almost* a shortcut for every federation and branch
 
-| | Rule | Cost |
-|---|---|---|
-| **(a) Uniform** | `all` is just `authz.WSKO()`; `Covers` decides, so `wsko_admin` gains it | Reverses `roles.ts:33`. One less special case |
-| **(b) Reserved** *(recommended)* | `all` additionally requires `RoleAdmin` by name, like granting `admin` already does in `adminSetRoles` | One special case, written down once |
+Close enough to think of it that way, but not close enough to implement it that way. Three
+differences, one of which is structural:
 
-A literal reading of the requirement — *receivers for which the user has an admin role* — points at
-(a). The recommendation is still **(b)**: the split was made deliberately and nothing in the new
-requirements asks to undo it, a WSKO admin can still reach every phone by naming the federations,
-and `adminSetRoles` already sets the precedent that one power is guarded by name rather than by
-scope. It is a one-line difference either way, so it can be revisited cheaply — but it should be
-chosen, not defaulted into.
+- **A branch can hang directly off WSKO.** `FederationID` is documented as *"empty = attached
+  directly to WSKO"*, and `BranchesIn("")` returns exactly those. So "every federation" misses them,
+  and `authz` agrees — a federation admin does not cover a branch attached straight to the root,
+  because it *"resolve[s] to `""` and [is] therefore not covered"*. Any client-side expansion would
+  have to remember to union in the root's own branches, and would silently drop a club the first
+  time somebody forgot.
+- **Untagged subscriptions.** A row with an empty `UserID` cannot be reached by any scoped send
+  (§6). `all` reaches it, because `ListSubscriptions()` does not ask who anybody is.
+- **It costs a query, and it grows.** Expanding client-side turns a one-query send into a two-query
+  one (§5), needs the whole tree in the browser, and produces a list that is stale the next time a
+  branch is created. `deploy.yml` could not do it at all — it has no tree and no session.
+
+So `all` stays a first-class scope on the wire, which is what §3 already specifies. It is a
+*shortcut* in the sense that matters to a person choosing receivers, and a distinct scope in the
+sense that matters to the code resolving them.
+
+### What this decision changes in the code
+
+Pleasantly little, and it deletes more than it adds:
+
+- `routes.tsx:215` is the **only** use of `isGlobalAdmin` in the app. §8 already replaces that gate
+  with `isAnyAdmin`, and "may name `all`" inside the page is `coversEverything()` — the predicate
+  `AdminOrganization.tsx:55` and `AdminUser.tsx:131` already use for exactly this question.
+  **`isGlobalAdmin` becomes dead code and should go**, taking the last asymmetry out of the
+  frontend's role vocabulary.
+- `roles.ts:33`'s comment is now wrong and must be rewritten rather than left to mislead.
+- Nothing changes server-side beyond §4's loop, which never had a special case to remove.
 
 ---
 
