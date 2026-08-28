@@ -3,6 +3,7 @@ import { Button, Card, Form, Spinner } from "react-bootstrap";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type MyTransfer, type PublicBranch } from "./sync/backend";
+import Loading from "./components/Loading";
 
 // The label for branches that belong to no federation. WSKO is the root of the
 // organization rather than a record with a name, so the heading is the
@@ -97,11 +98,7 @@ const MyBranch = () => {
   }
 
   if (branches === null) {
-    return (
-      <div className="d-flex align-items-center gap-2">
-        <Spinner animation="border" size="sm" /> {translator.translate("Laddar…")}
-      </div>
-    );
+    return <Loading />;
   }
 
   const current = branches.find(b => b.id === info?.branchId);

@@ -1,16 +1,17 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import Settings from "./Settings";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// The account panel is not what these tests are about, and left alone it reaches for
-// the auth service on every render.
+// The account panel reaches for the auth service, which most of these tests have no
+// interest in — and which the ones at the bottom are entirely about.
+const getBackendUserInfo = vi.fn<() => { email: string; displayName: string; providers: string[]; roles: string[] } | null>(() => null);
+const refreshBackendUserInfo = vi.fn<() => Promise<void>>(() => Promise.resolve());
+
 vi.mock("./sync/manager", () => ({
-  getSyncManager: () => ({
-    getBackendUserInfo: () => null,
-    refreshBackendUserInfo: () => Promise.resolve(),
-  }),
+  getSyncManager: () => ({ getBackendUserInfo, refreshBackendUserInfo }),
 }));
+
+import Settings from "./Settings";
 
 import { TranslatorImplementation } from "./i18n";
 import type { GradePlan } from "./data";
@@ -173,5 +174,60 @@ describe("Settings — kenshi number", () => {
     act(() => getAppDataStore().set("kenshiNumber", "1234567890"));
 
     expect((kenshiField() as HTMLInputElement).value).toBe("1234-567890");
+  });
+});
+
+// The account panel has nothing of its own to show until /auth/me answers, and the
+// auth service scales to zero: on the first visit in a while that answer is seconds
+// away, not milliseconds.
+describe("Settings — the account panel while the auth service answers", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    getBackendUserInfo.mockReset().mockReturnValue(null);
+    refreshBackendUserInfo.mockReset().mockReturnValue(new Promise(() => {}));
+  });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("says it is waiting rather than showing an empty account", () => {
+    renderSettings();
+    act(() => { vi.advanceTimersByTime(200); });
+
+    expect(screen.getByText("Laddar…")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Logga ut" })).toBeNull();
+  });
+
+  it("explains a wait long enough to be a service starting up", () => {
+    renderSettings();
+    act(() => { vi.advanceTimersByTime(3000); });
+
+    expect(screen.getByText("Servern startar. Det kan ta en stund.")).toBeDefined();
+  });
+
+  it("shows the account once it arrives", async () => {
+    const account = { email: "kenshi@example.org", displayName: "", providers: ["email"], roles: [] };
+    let answer: () => void = () => {};
+    refreshBackendUserInfo.mockReturnValue(new Promise<void>(resolve => {
+      answer = () => { getBackendUserInfo.mockReturnValue(account); resolve(); };
+    }));
+    renderSettings();
+    act(() => { vi.advanceTimersByTime(200); });
+
+    await act(async () => { answer(); await vi.advanceTimersByTimeAsync(0); });
+
+    expect(screen.getByText("kenshi@example.org")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Koppla bort" })).toBeDefined();
+    expect(screen.queryByText("Laddar…")).toBeNull();
+  });
+
+  // A wait that ends in nothing is not a wait any more. Leaving the spinner up
+  // would promise an account that is never coming.
+  it("says so when the account cannot be fetched at all", async () => {
+    refreshBackendUserInfo.mockReturnValue(Promise.reject(new Error("offline")));
+    renderSettings();
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(200); });
+
+    expect(screen.getByText("Kunde inte hämta kontouppgifterna.")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Logga ut" })).toBeDefined();
   });
 });

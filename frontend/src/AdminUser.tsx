@@ -5,6 +5,7 @@ import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminOrgTree, type AdminUser as User } from "./sync/backend";
 import { ROLE_ADMIN, ROLE_WSKO_ADMIN, administeredBranches, administeredFederations, branchAdmin, coversEverything, federationAdmin } from "./roles";
+import Loading from "./components/Loading";
 
 // Display names for the OIDC providers; "email" is translated inline.
 const providerDisplayName: Record<string, string> = {
@@ -115,11 +116,7 @@ const AdminUser = () => {
   }
 
   if (user === null) {
-    return (
-      <div className="d-flex align-items-center gap-2">
-        <Spinner animation="border" size="sm" /> {translator.translate("Laddar…")}
-      </div>
-    );
+    return <Loading />;
   }
 
   // Where this member sits, resolved through the tree the caller was served — so

@@ -4,6 +4,7 @@ import { TranslatorContext, type Translator } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { publishPendingRequests } from "./pendingRequests";
 import type { AdminJoinRequest, AdminTransfer } from "./sync/backend";
+import Loading from "./components/Loading";
 
 // Everybody waiting on this admin: people asking to be let in, and members who
 // have moved and are asking a club to take them over. The route is registered
@@ -62,7 +63,7 @@ const AdminRequests = () => {
   };
 
   if (requests === null && !loadError) {
-    return <div className="p-3"><Spinner size="sm" className="me-2" />{translator.translate("Hämtar ansökningar")}…</div>;
+    return <Loading className="p-3" label={`${translator.translate("Hämtar ansökningar")}…`} />;
   }
 
   if (loadError) {

@@ -11,6 +11,7 @@ import { toLocalDateKey } from "./utilities/current-week";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
 import { ensureAllTranslations } from "./translations";
 import { Download, Upload } from "react-bootstrap-icons";
+import Loading from "./components/Loading";
 
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
 
@@ -282,14 +283,19 @@ const AccountStatus = (props: { translator: Translator }) => {
     const [loggingOutOthers, setLoggingOutOthers] = useState(false);
     const [othersMessage, setOthersMessage] = useState<string | null>(null);
 
+    const [refreshFailed, setRefreshFailed] = useState(false);
+
     // Refresh account info from /auth/me on mount. The email (code) login flow
     // doesn't reload the page, so the cached user info can be empty or stale when
     // this panel first renders (OIDC is covered by its post-login page reload).
+    // With something cached the refresh happens behind what is already on screen;
+    // with nothing cached there is nothing to show but the wait itself, and on an
+    // auth service that has scaled to zero that wait is seconds long.
     useEffect(() => {
         let cancelled = false;
         getSyncManager().refreshBackendUserInfo()
             .then(() => { if (!cancelled) setUserInfo(getSyncManager().getBackendUserInfo()); })
-            .catch(() => {});
+            .catch(() => { if (!cancelled) setRefreshFailed(true); });
         return () => { cancelled = true; };
     }, []);
 
@@ -386,8 +392,19 @@ const AccountStatus = (props: { translator: Translator }) => {
 
     const canUnlink = (userInfo?.providers.length ?? 0) > 1;
 
+    // Nothing has arrived and nothing is cached: every control below is about an
+    // account this panel cannot describe yet, so the wait is all there is to show.
+    if (userInfo === null && !refreshFailed) {
+        return <Loading />;
+    }
+
     return (
         <>
+            {userInfo === null && (
+                <Form.Text className="d-block mt-1 mb-2 text-danger">
+                    {translator.translate("Kunde inte hämta kontouppgifterna.")}
+                </Form.Text>
+            )}
             {userInfo && (
                 <Form.Text className="d-block mt-1 mb-2">
                     {userInfo.displayName && <>{userInfo.displayName}<br /></>}

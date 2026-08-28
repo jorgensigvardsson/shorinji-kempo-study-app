@@ -6,6 +6,7 @@ import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminOrgBranch, type AdminOrgTree } from "./sync/backend";
 import { administeredBranches, administeredFederations, coversEverything } from "./roles";
+import Loading from "./components/Loading";
 
 // Loaded only when somebody actually opens the tree view, not with the rest of
 // this page. @xyflow/react is the single heaviest dependency in the app, and
@@ -199,11 +200,7 @@ const AdminOrganization = () => {
   };
 
   if (tree === null && !loadError) {
-    return (
-      <div className="d-flex align-items-center gap-2">
-        <Spinner animation="border" size="sm" /> {translator.translate("Laddar…")}
-      </div>
-    );
+    return <Loading />;
   }
 
   if (loadError) {
@@ -281,12 +278,10 @@ const AdminOrganization = () => {
 
       {error !== null && <p className="text-danger">{error}</p>}
 
+      {/* The tree's own chunk, not a service: a wait for it is the app fetching its
+          own code, and has nothing to do with anything starting up. */}
       {view === "tree" && (
-        <Suspense fallback={
-          <div className="d-flex align-items-center gap-2 p-3">
-            <Spinner animation="border" size="sm" /> {translator.translate("Laddar…")}
-          </div>
-        }>
+        <Suspense fallback={<Loading fromService={false} className="p-3" />}>
           <AdminOrganizationTree
             translator={translator}
             sections={sections}

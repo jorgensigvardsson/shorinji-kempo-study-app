@@ -3,6 +3,7 @@ import { Button, Form, Spinner } from "react-bootstrap";
 import type { Translator } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { RateLimitError, type JoinContext, type PublicBranch } from "./sync/backend";
+import Loading from "./components/Loading";
 
 // WSKO is the root of the organization and is never stored as a record, so
 // branches attached directly to it come back with no federation. The heading is
@@ -146,11 +147,14 @@ export function RegisterBranch({ translator, language, onBack }: Props) {
   };
 
   if (!loaded) {
+    // The translator is passed rather than taken from context: this screen runs on
+    // the language the visitor picked here, which is not the one the app holds.
     return (
-      <div className="text-center py-4">
-        <Spinner size="sm" className="me-2" />
-        {translator.translate("Hämtar klubbar")}…
-      </div>
+      <Loading
+        className="justify-content-center py-4"
+        translator={translator}
+        label={`${translator.translate("Hämtar klubbar")}…`}
+      />
     );
   }
 

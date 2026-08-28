@@ -1,10 +1,11 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Button, Card, Form, Spinner } from "react-bootstrap";
+import { Button, Card, Form } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminBranchMembers as Branch } from "./sync/backend";
 import { ROLE_ADMIN, ROLE_WSKO_ADMIN, branchAdmin, federationAdmin } from "./roles";
+import Loading from "./components/Loading";
 
 // One branch's members. This is what replaced the flat roll of everybody: a club
 // of a hundred is a page you can read, and the branch next door is not on it.
@@ -88,11 +89,7 @@ const AdminBranchMembers = () => {
   }
 
   if (branch === null) {
-    return (
-      <div className="d-flex align-items-center gap-2">
-        <Spinner animation="border" size="sm" /> {translator.translate("Laddar…")}
-      </div>
-    );
+    return <Loading />;
   }
 
   return (

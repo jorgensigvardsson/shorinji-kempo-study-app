@@ -7,7 +7,7 @@ import { getRoutes, preloadPages, routeText, type Route } from './routes';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
-import { useIdleTask, useNavigationPending, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
+import { useIdleTask, useLoadingPhase, useNavigationPending, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
 import { ensureTranslations } from './translations';
 import RouteContent from './components/RouteContent';
 import { getSyncManager } from './sync/manager';
@@ -104,6 +104,13 @@ function App(props: Props) {
   // Account details arrive asynchronously after login. Subscribing to sync state
   // gives the route tree a fresh render once /auth/me has populated the cached user.
   const syncState = useSyncState();
+  // Every page in the app reads data the persistence service holds, and the first
+  // sync after opening is the one that has to wake that service: until it lands,
+  // what is on screen is whatever this device last had rather than what the account
+  // holds. An ordinary sync is over in a moment and worth saying nothing about, so
+  // only one still running after the wake-up threshold raises the bar — the same bar
+  // a slow navigation raises, because it means the same thing.
+  const syncPending = useLoadingPhase(syncState.status === "syncing") === "cold";
   // How many applicants are waiting on this admin, for the menu to say so.
   const pendingRequests = usePendingRequests();
   // Tell the server which language the app is being used in: it needs one for
@@ -199,10 +206,11 @@ function App(props: Props) {
           from a measurement taken in screen pixels, would otherwise come out this much
           too large. See components/HokeiCard.css. */}
       <div style={{ zoom: textZoom, '--app-zoom-inverse': 1 / textZoom } as CSSProperties}>
-        {/* Only appears once a navigation has been waiting long enough that the tap
-            would otherwise look ignored — see useNavigationPending. */}
-        {navigationPending && <div className="app-navigation-pending d-print-none" role="status"
-                                   aria-label={translator.translate("Laddar…")} />}
+        {/* Only appears once a wait has gone on long enough to be worth mentioning:
+            a navigation that would otherwise look like an ignored tap, or a sync
+            slow enough to be one of the services starting up. */}
+        {(navigationPending || syncPending) && <div className="app-navigation-pending d-print-none" role="status"
+                                                    aria-label={translator.translate("Laddar…")} />}
         <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none" />
         <div className="app-route-content" style={{
           '--floating-stack-reserve': `${floatingReserve}px`,

@@ -24,6 +24,7 @@ no Cosmos account, staging or production has been touched, by decision — see �
 | ✅ GDPR wording | the register in BACKEND.md, and a privacy policy that no longer claims no other user can see you — §9 |
 | ✅ Swedish wording | one word for the organizational unit: **klubb** — see below |
 | ✅ Transfers (Phase 4) | a member who has moved asks the club there to take them in; the one they left is told — §7 |
+| ✅ Loading indicators | one indicator for every page that waits on a service, and it says so when the wait is a service starting up — see below |
 
 Every phase in this document is built and green against the file-based stores. What remains:
 
@@ -33,7 +34,6 @@ Every phase in this document is built and green against the file-based stores. W
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 | ⬜ | Who gets notified, and of what — needs a real look before shipping, see below | |
 | ⬜ | Push notification audiences — a broadcast still reaches every phone in WSKO, so the send stays on `admin` alone and no branch admin can tell their own club anything. Designed, not built; no open questions left. Sending to everybody becomes `authz.WSKO()` like any other scope, which settles `wsko_admin`'s side of it and retires `isGlobalAdmin` | [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md) |
-| ⬜ | Loading indicators on every page that fetches from a backend service, before shipping — see below | |
 | ⬜ | Audit trails for administrative operations (who did what and when?). Useful for general change logs. Don't fetch data by default, make "Show history" an explicit action. Audit trails should also be compartmentalized. A branch admin should not see how federations have moved, etc. | |
 
 
@@ -84,18 +84,38 @@ built, in [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md), where a push audience 
 of `authz.Scope` and every entry is checked with `Covers` — so whatever rule this section settles on
 is the rule push should follow too, rather than picking a fourth answer of its own.
 
-### TODO: loading indicators wherever a page fetches from a backend service
+### Loading indicators wherever a page fetches from a backend service
 
-Both backend services are expected to run scaled to zero when idle, which is fine for cost and bad
-for a first impression: the request that wakes one up is slow in a way none of the requests after it
-are, and right now nothing on screen says so. `AdminOrganization.tsx` and `AdminRequests.tsx` are the
-two built in this document — the organization tree and the waiting list — but this is not specific to
-either of them; it applies to every page that fetches from either service on load, which is most of
-the app.
+Both backend services run scaled to zero when idle, which is fine for cost and bad for a first
+impression: the request that wakes one up is slow in a way none of the requests after it are. The
+pages built in this document had each grown their own spinner; the rest of the app had none, and
+none of them said anything about *why* a wait was long.
 
-Address this before shipping: an admin opening the organization page or the request queue for the
-first time in a while should see that something is happening, not a blank page that resolves itself
-seconds later with no explanation.
+There is now one component, `components/Loading.tsx`, and every page that waits on a service uses
+it. It reads the wait in three stages (`useLoadingPhase` in `hooks.tsx`):
+
+- **Under 200 ms** it draws nothing. A warm service answers inside that, and an indicator that
+  appears and vanishes in two frames reads as a flicker rather than as progress. Same delay, and the
+  same reasoning, as the navigation indicator.
+- **Past 200 ms** it says what is being fetched — "Laddar…", or the page's own wording.
+- **Past 3 s** it says why: *Servern startar. Det kan ta en stund.* This is the whole point. The
+  wake-up is slow exactly once, for whoever asks first, and without a word about it the app simply
+  looks slow. A wait that is the app's own doing — a page chunk still arriving — says nothing of the
+  sort, which is what `fromService={false}` is for.
+
+Where it is used: the organization tree and the waiting list, one branch's members, one member, a
+member's own branch, the branch picker during registration, and the account panel in Settings —
+which had shown nothing at all while `/auth/me` was in flight, and now also says so when the answer
+never comes.
+
+The rest of the app is covered without touching every page. Study data is read from this device
+first, so no page is ever blank waiting for it, but until the first sync lands what is on screen is
+what this device last had rather than what the account holds. A sync still running after the wake-up
+threshold now raises the same thin bar at the top of the window that a slow navigation raises — an
+ordinary sync is over in a moment and says nothing.
+
+Actions that write are left as they were: a button that says *Skickar…* is already telling the truth
+about itself, and this was about pages that fetch.
 
 ### One word each: klubb, branch, 支部, kulüp
 

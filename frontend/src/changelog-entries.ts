@@ -35,6 +35,13 @@ export const CHANGELOG: ChangelogEntry[] = [
         tr: "Gizlilik politikası artık açıkça belirtiyor: hiçbir yönetici — ne kulübünüzün, ne federasyonunuzun, ne de organizasyonun yöneticisi — notlarınızı ya da öz değerlendirmelerinizi okuyamaz. Onlar üyeliği yürütür, çalışmayı değil.",
         ja: "プライバシーポリシーに、支部・連盟・組織のいずれの管理者もあなたのメモや自己評価を読むことはできない、と明記しました。管理者が扱うのは会員管理であって、修練の中身ではありません。",
       },
+      {
+        emoji: "⏳",
+        sv: "Sidor som hämtar något från servern säger nu till när det dröjer. Servern får sova när ingen använder appen, så den första sidan någon öppnar kan ta några sekunder — nu står det på skärmen i stället för att sidan bara ser tom ut.",
+        en: "Pages that fetch something from the server now say so when it takes a while. The server is allowed to sleep when nobody is using the app, so the first page anyone opens can take a few seconds — now it says so on screen instead of the page just looking empty.",
+        tr: "Sunucudan bir şey getiren sayfalar artık beklerken bunu söylüyor. Uygulamayı kimse kullanmadığında sunucu uykuya geçebildiği için, açılan ilk sayfa birkaç saniye sürebilir — artık sayfa boş görünmek yerine bunu ekranda belirtiyor.",
+        ja: "サーバーからデータを取得しているページが、時間がかかるときにその旨を表示するようになりました。誰も使っていないあいだサーバーは休止するため、最初に開いたページだけ数秒かかることがあります。これまでは何も出ないままでしたが、画面でお知らせします。",
+      },
     ],
   },
   {
