@@ -24,15 +24,32 @@ const (
 	KindBranch     Kind = "branch"
 )
 
-// Scope is a place in the organization that authority can be held over.
+// Scope is a place in the organization that authority can be held over. The
+// JSON tags let it decode straight off the wire as a push-notification
+// audience entry (PUSH-AUDIENCE-PLAN.md §3): {"kind":"branch","id":"…"}.
 type Scope struct {
-	Kind Kind
-	ID   string // empty for KindWSKO, which is a singleton
+	Kind Kind   `json:"kind"`
+	ID   string `json:"id,omitempty"` // empty for KindWSKO, which is a singleton
 }
 
 func WSKO() Scope                { return Scope{Kind: KindWSKO} }
 func Federation(id string) Scope { return Scope{Kind: KindFederation, ID: id} }
 func Branch(id string) Scope     { return Scope{Kind: KindBranch, ID: id} }
+
+// Valid reports whether s is a shape ScopeOf could have produced: a known
+// Kind, with an ID present for every kind but WSKO and absent for it. It is
+// ScopeOf's counterpart for scope input that already arrives as {kind, id} —
+// an audience entry off the wire — rather than as a role string.
+func (s Scope) Valid() bool {
+	switch s.Kind {
+	case KindWSKO:
+		return s.ID == ""
+	case KindFederation, KindBranch:
+		return s.ID != ""
+	default:
+		return false
+	}
+}
 
 // The role vocabulary. Roles are flat strings carried in the JWT's existing
 // "role" claim, scoped by suffix, so every exact-match check that already exists

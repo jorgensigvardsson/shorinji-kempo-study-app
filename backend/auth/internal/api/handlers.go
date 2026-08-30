@@ -216,6 +216,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("POST /auth/admin/branches", h.createBranch)
 	inner.HandleFunc("PATCH /auth/admin/branches/{id}", h.updateBranch)
 	inner.HandleFunc("GET /auth/admin/branches/{id}/members", h.adminBranchMembers)
+	inner.HandleFunc("POST /auth/admin/push-audience", h.adminPushAudience)
 	inner.HandleFunc("GET /auth/admin/requests", h.adminListRequests)
 	inner.HandleFunc("POST /auth/admin/requests/{email}/approve", h.adminApproveRequest)
 	inner.HandleFunc("POST /auth/admin/requests/{email}/deny", h.adminDenyRequest)

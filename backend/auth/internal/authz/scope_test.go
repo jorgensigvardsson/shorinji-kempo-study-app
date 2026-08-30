@@ -36,6 +36,31 @@ func TestScopeOf(t *testing.T) {
 	}
 }
 
+// Valid is ScopeOf's counterpart for scope input that already arrives as
+// {kind, id} — a push-notification audience entry — rather than as a role
+// string, so every scope ScopeOf can produce must round-trip as Valid, and
+// every shape ScopeOf refuses (an empty id on a scoped kind) must too.
+func TestScopeValid(t *testing.T) {
+	cases := []struct {
+		scope Scope
+		valid bool
+	}{
+		{WSKO(), true},
+		{Federation("SE"), true},
+		{Branch("8f3c"), true},
+		{Scope{Kind: KindWSKO, ID: "SE"}, false}, // wsko is a singleton; an id makes it unrecognisable
+		{Scope{Kind: KindFederation, ID: ""}, false},
+		{Scope{Kind: KindBranch, ID: ""}, false},
+		{Scope{Kind: "planet", ID: "earth"}, false},
+		{Scope{}, false},
+	}
+	for _, c := range cases {
+		if got := c.scope.Valid(); got != c.valid {
+			t.Errorf("Scope%+v.Valid() = %t, want %t", c.scope, got, c.valid)
+		}
+	}
+}
+
 func TestRoleBuilders(t *testing.T) {
 	if got := FederationAdmin("SE"); got != "federation_admin:SE" {
 		t.Errorf("FederationAdmin(SE) = %q", got)
