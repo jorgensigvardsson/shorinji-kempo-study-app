@@ -66,7 +66,9 @@ func (s *Sender) Send(sub *store.PushSubscription, payload Payload) error {
 	io.Copy(io.Discard, resp.Body) // drain so the connection can be reused
 
 	switch {
-	case resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone:
+	// 403 means the VAPID key no longer matches this subscription — as dead as
+	// 404/410, just reported differently (PUSH-AUDIENCE-PLAN.md §7).
+	case resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone || resp.StatusCode == http.StatusForbidden:
 		return ErrGone
 	case resp.StatusCode >= 200 && resp.StatusCode < 300:
 		return nil

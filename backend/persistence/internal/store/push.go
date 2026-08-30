@@ -19,4 +19,11 @@ type PushStore interface {
 	SaveSubscription(sub *PushSubscription) error
 	DeleteSubscription(endpoint string) error
 	ListSubscriptions() ([]*PushSubscription, error)
+
+	// ListSubscriptionsForUsers returns the subscriptions belonging to any of
+	// the given user ids — the scoped counterpart to ListSubscriptions, for a
+	// push audience narrower than everybody. Given no ids it returns nothing
+	// without touching the store, matching UserStore.ListByBranches on the
+	// auth side.
+	ListSubscriptionsForUsers(userIDs []string) ([]*PushSubscription, error)
 }

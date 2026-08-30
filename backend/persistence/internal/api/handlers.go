@@ -1,12 +1,14 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/authclient"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/push"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
@@ -27,6 +29,11 @@ type Handler struct {
 	pushStore      store.PushStore
 	pushSender     *push.Sender
 	pushAdminToken string
+
+	// audienceClient resolves a scoped push audience against the auth service,
+	// forwarding the caller's own access_token cookie. Nil means a cookie-based
+	// broadcast cannot be scoped — see resolveAudience in push_handlers.go.
+	audienceClient audienceResolver
 
 	// The split-item store the document is migrating to. Nil means the migration is
 	// not enabled and nothing is written to it.
@@ -93,11 +100,21 @@ func NewHandler(s store.Store, ks KeySource, frontendURL, issuerURL string, limi
 	return &Handler{store: s, jwks: ks, frontendURL: frontendURL, issuerURL: issuerURL, limiter: limiter}
 }
 
+// audienceResolver resolves a push audience against the auth service.
+// *authclient.Client implements it; tests use a stub so they don't need a real
+// auth service listening.
+type audienceResolver interface {
+	ResolveAudience(ctx context.Context, accessToken string, audience []authclient.Scope) (*authclient.Result, int, error)
+}
+
 // WithPush enables the push-notification endpoints. Call before Register.
-func (h *Handler) WithPush(ps store.PushStore, sender *push.Sender, adminToken string) *Handler {
+// audienceClient may be nil, in which case a cookie-authorized (as opposed to
+// PUSH_ADMIN_TOKEN-authorized) broadcast cannot be resolved and is refused.
+func (h *Handler) WithPush(ps store.PushStore, sender *push.Sender, adminToken string, audienceClient audienceResolver) *Handler {
 	h.pushStore = ps
 	h.pushSender = sender
 	h.pushAdminToken = adminToken
+	h.audienceClient = audienceClient
 	return h
 }
 
@@ -110,8 +127,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 
 	// Web Push — only when configured. subscribe requires a signed-in user (the
 	// app has no anonymous mode); unsubscribe stays open so a device can always
-	// drop its own endpoint, even after the session is gone; broadcast is guarded
-	// by a bearer token or the admin role inside the handler.
+	// drop its own endpoint, even after the session is gone; broadcast resolves
+	// and authorizes its audience inside the handler — see resolveAudience in
+	// push_handlers.go.
 	if h.pushSender != nil && h.pushStore != nil {
 		inner.HandleFunc("GET /push/public-key", h.publicKey)
 		inner.Handle("POST /push/subscribe", authMiddleware(h.jwks, h.issuerURL, http.HandlerFunc(h.subscribe)))

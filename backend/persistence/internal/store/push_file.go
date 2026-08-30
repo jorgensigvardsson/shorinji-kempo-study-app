@@ -73,3 +73,25 @@ func (s *FilePushStore) ListSubscriptions() ([]*PushSubscription, error) {
 	}
 	return subs, nil
 }
+
+// ListSubscriptionsForUsers is ListSubscriptions filtered to a set of user ids.
+func (s *FilePushStore) ListSubscriptionsForUsers(userIDs []string) ([]*PushSubscription, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	wanted := make(map[string]bool, len(userIDs))
+	for _, id := range userIDs {
+		wanted[id] = true
+	}
+	all, err := s.ListSubscriptions()
+	if err != nil {
+		return nil, err
+	}
+	var subs []*PushSubscription
+	for _, sub := range all {
+		if wanted[sub.UserID] {
+			subs = append(subs, sub)
+		}
+	}
+	return subs, nil
+}

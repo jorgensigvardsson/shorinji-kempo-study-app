@@ -88,3 +88,34 @@ func (s *CosmosPushStore) ListSubscriptions() ([]*PushSubscription, error) {
 	}
 	return subs, nil
 }
+
+// ListSubscriptionsForUsers is ListSubscriptions filtered to a set of user ids —
+// one cross-partition query no matter how many ids are named. pushsubscriptions
+// uses Cosmos's default (fully indexed) policy, so this needs no provisioning
+// change: the container already serves a filter on c.userId.
+func (s *CosmosPushStore) ListSubscriptionsForUsers(userIDs []string) ([]*PushSubscription, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	ctx := context.Background()
+	opts := &azcosmos.QueryOptions{QueryParameters: []azcosmos.QueryParameter{{Name: "@userIds", Value: userIDs}}}
+	pager := s.container.NewQueryItemsPager(
+		"SELECT * FROM c WHERE ARRAY_CONTAINS(@userIds, c.userId)",
+		azcosmos.NewPartitionKey(), opts)
+	var subs []*PushSubscription
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos list subscriptions for users: %w", err)
+		}
+		for _, item := range page.Items {
+			var cs cosmosSubscription
+			if err := json.Unmarshal(item, &cs); err != nil {
+				return nil, fmt.Errorf("cosmos unmarshal subscription: %w", err)
+			}
+			sub := cs.PushSubscription
+			subs = append(subs, &sub)
+		}
+	}
+	return subs, nil
+}

@@ -77,3 +77,43 @@ func TestFilePushStore_DeleteMissing_NoError(t *testing.T) {
 		t.Errorf("delete missing should be a no-op, got %v", err)
 	}
 }
+
+func TestFilePushStore_ListSubscriptionsForUsers(t *testing.T) {
+	s := NewFilePushStore(t.TempDir())
+
+	a := sampleSub("https://push.example/a")
+	a.UserID = "user-a"
+	b := sampleSub("https://push.example/b")
+	b.UserID = "user-b"
+	c := sampleSub("https://push.example/c")
+	c.UserID = "user-a" // same user, second device
+	for _, sub := range []*PushSubscription{a, b, c} {
+		if err := s.SaveSubscription(sub); err != nil {
+			t.Fatalf("save %s: %v", sub.Endpoint, err)
+		}
+	}
+
+	subs, err := s.ListSubscriptionsForUsers([]string{"user-a"})
+	if err != nil {
+		t.Fatalf("list for users: %v", err)
+	}
+	if len(subs) != 2 {
+		t.Fatalf("expected 2 subscriptions for user-a, got %d: %+v", len(subs), subs)
+	}
+	for _, sub := range subs {
+		if sub.UserID != "user-a" {
+			t.Errorf("unexpected subscription for %s in result: %+v", sub.UserID, sub)
+		}
+	}
+}
+
+func TestFilePushStore_ListSubscriptionsForUsers_NoIDs(t *testing.T) {
+	s := NewFilePushStore(t.TempDir())
+	if err := s.SaveSubscription(sampleSub("https://push.example/a")); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	subs, err := s.ListSubscriptionsForUsers(nil)
+	if err != nil || subs != nil {
+		t.Fatalf("expected (nil, nil) with no ids, got (%v, %v)", subs, err)
+	}
+}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/api"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/authclient"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/jwks"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/push"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
@@ -96,7 +97,7 @@ func main() {
 	handler := api.NewHandler(s, keyCache, *frontendURL, *authIssuerURL, limiter)
 	if *vapidPublicKey != "" && *vapidPrivateKey != "" {
 		sender := push.New(*vapidPublicKey, *vapidPrivateKey, *vapidSubject)
-		handler.WithPush(pushStore, sender, *pushAdminToken)
+		handler.WithPush(pushStore, sender, *pushAdminToken, authclient.New(*authIssuerURL))
 		log.Printf("push notifications enabled (broadcast %s)",
 			map[bool]string{true: "authorized via PUSH_ADMIN_TOKEN", false: "disabled — no PUSH_ADMIN_TOKEN"}[*pushAdminToken != ""])
 	} else {
