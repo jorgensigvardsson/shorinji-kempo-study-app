@@ -6,6 +6,7 @@ import { getSyncManager } from "./sync/manager";
 import type { AdminOrgBranch, AdminOrgFederation, AdminOrgTree } from "./sync/backend";
 import { administeredBranches, administeredFederations, coversEverything } from "./roles";
 import Loading from "./components/Loading";
+import FederationFlag from "./components/FederationFlag";
 
 // A federation's place in the audience: either the whole thing, or a specific
 // subset of its branches narrowed to. Selecting any branch replaces the
@@ -214,7 +215,7 @@ const Broadcast = () => {
                                     <Form.Check
                                         type="checkbox"
                                         id={`audience-fed-${federationId}`}
-                                        label={federation?.name ?? federationId}
+                                        label={<><FederationFlag federationId={federationId} className="me-1" />{federation?.name ?? federationId}</>}
                                         checked={sel.whole}
                                         onChange={e => toggleFederationWhole(federationId, e.target.checked)}
                                     />

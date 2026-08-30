@@ -14,6 +14,20 @@ export default defineConfig({
     cssCodeSplit: false,
     rollupOptions: {
       output: {
+        // flag-icons' CSS references every country's SVG via url(), and Vite
+        // extracts each one it finds a reference to as an ordinary hashed
+        // asset — all ~140 of them, since the CSS is one file covering every
+        // flag rather than only the handful this app's federations actually
+        // use. Routing them into their own subdirectory is what lets the PWA
+        // config below exclude just this directory from the offline
+        // precache, rather than shipping every unused flag to every device
+        // on install. They're still served from this app's own origin and
+        // normally HTTP-cached once fetched — only the eager precache is
+        // being avoided.
+        assetFileNames: (assetInfo) => {
+          const isFlag = assetInfo.originalFileNames?.some(f => f.includes("flag-icons"));
+          return isFlag ? "assets/flags/[name]-[hash][extname]" : "assets/[name]-[hash][extname]";
+        },
         // React and the UI libraries are the largest thing in the bundle and the
         // thing that changes least, so they go in their own chunk: an app release
         // then only invalidates the app's own code, and the browser can fetch both
@@ -62,6 +76,10 @@ export default defineConfig({
       },
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // See the assetFileNames comment above: flag-icons' SVGs are the vast
+        // majority of it, unused by nearly every device that would otherwise
+        // precache them.
+        globIgnores: ['assets/flags/**'],
       },
     }),
   ],

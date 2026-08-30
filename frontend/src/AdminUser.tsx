@@ -6,6 +6,7 @@ import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminOrgTree, type AdminUser as User } from "./sync/backend";
 import { ROLE_ADMIN, ROLE_WSKO_ADMIN, administeredBranches, administeredFederations, branchAdmin, coversEverything, federationAdmin } from "./roles";
 import Loading from "./components/Loading";
+import FederationFlag from "./components/FederationFlag";
 
 // Display names for the OIDC providers; "email" is translated inline.
 const providerDisplayName: Record<string, string> = {
@@ -189,7 +190,7 @@ const AdminUser = () => {
         {branch !== undefined
           ? <Link to={`/admin/branches/${encodeURIComponent(branch.id)}/members`}>{branch.name}</Link>
           : translator.translate("Ingen klubb")}
-        {federation !== undefined && <> · {federation.name}</>}
+        {federation !== undefined && <> · <FederationFlag federationId={federation.id} className="me-1" />{federation.name}</>}
       </p>
 
       {error !== null && <p className="text-danger">{error}</p>}

@@ -4,6 +4,7 @@ import StagingBadge from './components/StagingBadge.tsx'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/bootstrap-theme.scss';
+import 'flag-icons/css/flag-icons.min.css';
 import App from './App.tsx'
 import { BrowserRouter } from "react-router-dom";
 import gradePlans from './assets/kamokuhyo.json';

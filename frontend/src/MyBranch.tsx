@@ -4,6 +4,7 @@ import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type MyTransfer, type PublicBranch } from "./sync/backend";
 import Loading from "./components/Loading";
+import FederationFlag from "./components/FederationFlag";
 
 // The label for branches that belong to no federation. WSKO is the root of the
 // organization rather than a record with a name, so the heading is the
@@ -125,7 +126,10 @@ const MyBranch = () => {
             {current?.name ?? <span className="text-body-secondary">{translator.translate("Ingen klubb")}</span>}
           </div>
           {current?.federationName !== undefined && current.federationName !== "" && (
-            <div className="text-body-secondary">{current.federationName}</div>
+            <div className="text-body-secondary">
+              {current.federationId !== undefined && <FederationFlag federationId={current.federationId} className="me-1" />}
+              {current.federationName}
+            </div>
           )}
         </Card.Body>
       </Card>
