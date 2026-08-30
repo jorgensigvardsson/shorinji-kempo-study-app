@@ -117,6 +117,12 @@ func TestCreateFederation(t *testing.T) {
 			"caller", "caller@example.org", roles, body))
 		return rec.Code
 	}
+	createRec := func(roles []string, body any) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		h.createFederation(rec, authedRequest(t, h, http.MethodPost, "/auth/admin/federations",
+			"caller", "caller@example.org", roles, body))
+		return rec
+	}
 	global := []string{authz.RoleAdmin}
 
 	if code := create(global, map[string]string{"id": "JP", "name": "全日本少林寺拳法連盟"}); code != http.StatusCreated {
@@ -131,6 +137,22 @@ func TestCreateFederation(t *testing.T) {
 	}
 	if code := create(global, map[string]string{"id": "SWE", "name": "Alpha-3"}); code != http.StatusBadRequest {
 		t.Errorf("alpha-3 id: %d, want 400", code)
+	}
+	// Well-formed — two uppercase letters — but not a real country: exactly the
+	// shape a typo for Japan's real code (JP) takes. The body carries a
+	// machine-readable reason, not just a generic 400, since the frontend
+	// cannot show Go prose to a Japanese or Turkish admin and "bad request"
+	// alone is indistinguishable from a blank name or any other rejected field.
+	rec := createRec(global, map[string]string{"id": "JA", "name": "Typo for Japan"})
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("well-formed but unassigned id: %d, want 400", rec.Code)
+	}
+	var body struct{ Error string `json:"error"` }
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode body: %v", err)
+	}
+	if body.Error != "invalid_federation_id" {
+		t.Errorf(`body error = %q, want "invalid_federation_id"`, body.Error)
 	}
 	if code := create(global, map[string]string{"id": "DK", "name": "  "}); code != http.StatusBadRequest {
 		t.Errorf("blank name: %d, want 400", code)

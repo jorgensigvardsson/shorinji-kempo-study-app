@@ -128,7 +128,13 @@ func (h *Handler) createFederation(w http.ResponseWriter, r *http.Request) {
 	id := strings.ToUpper(strings.TrimSpace(req.ID))
 	name := strings.TrimSpace(req.Name)
 	if !store.ValidFederationID(id) {
-		http.Error(w, "federation id must be an ISO 3166-1 alpha-2 country code", http.StatusBadRequest)
+		// A machine-readable reason, not just prose: the frontend cannot show
+		// this text to a Japanese or Turkish admin, and "invalid" alone (the
+		// generic 400 copy) was indistinguishable from a blank name or any
+		// other rejected field — precisely the gap that let "JA", typed for
+		// Japan's real code (JP), look accepted right up until the flag next
+		// to it never rendered.
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "invalid_federation_id"})
 		return
 	}
 	if name == "" {

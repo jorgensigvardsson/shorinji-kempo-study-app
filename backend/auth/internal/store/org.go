@@ -1,6 +1,10 @@
 package store
 
-import "strings"
+import (
+	"strings"
+
+	"golang.org/x/text/language"
+)
 
 // Node types in the organization tree. WSKO itself is never stored: it is the
 // implicit root, and a branch with no FederationID hangs directly from it. That
@@ -56,7 +60,7 @@ type OrgStore interface {
 // the validator allows the form now rather than after it is needed.
 func ValidFederationID(id string) bool {
 	code, suffix, hasSuffix := strings.Cut(id, "-")
-	if len(code) != 2 || code[0] < 'A' || code[0] > 'Z' || code[1] < 'A' || code[1] > 'Z' {
+	if !isCountryCode(code) {
 		return false
 	}
 	if !hasSuffix {
@@ -71,4 +75,23 @@ func ValidFederationID(id string) bool {
 		}
 	}
 	return true
+}
+
+// isCountryCode reports whether code is exactly two uppercase ASCII letters
+// naming a real ISO 3166-1 country. The shape check comes first and stays
+// strict on its own terms — language.ParseRegion is case-insensitive and
+// also accepts alpha-3 codes ("SWE"), neither of which this system allows,
+// since a federation id doubles as the exact suffix of a role string
+// (authz.FederationAdmin) that has to match it byte for byte.
+//
+// IsCountry rules out the shapes ISO reserves without assigning to any
+// country — XX, ZZ, the QM–QZ/XA–XZ user-assigned ranges, and supranational
+// groupings like EU — which is how "JA", well-formed but nobody's code, once
+// slipped through when this checked shape alone.
+func isCountryCode(code string) bool {
+	if len(code) != 2 || code[0] < 'A' || code[0] > 'Z' || code[1] < 'A' || code[1] > 'Z' {
+		return false
+	}
+	region, err := language.ParseRegion(code)
+	return err == nil && region.IsCountry()
 }

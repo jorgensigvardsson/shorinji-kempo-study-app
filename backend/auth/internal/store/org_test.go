@@ -22,6 +22,16 @@ func TestValidFederationID(t *testing.T) {
 		"SE-2-3", // not a tree
 		"SE 2",
 		" SE",
+		// Well-formed — two uppercase letters — but not a real country, which a
+		// shape-only check let through. JA is exactly the code entered by
+		// mistake for Japan (JP) that this validation exists to catch.
+		"JA",
+		"XX", // ISO's own placeholder for "no country"
+		"ZZ", // likewise
+		"AA", // reserved for user assignment, assigned to nobody
+		"QM", // the QM–QZ user-assigned range
+		"XA", // the XA–XZ user-assigned range
+		"EU", // a supranational grouping, not a country
 	}
 	for _, id := range invalid {
 		if ValidFederationID(id) {
