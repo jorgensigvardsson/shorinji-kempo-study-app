@@ -3,7 +3,7 @@ import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, Hou
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
-import { isAnyAdmin, isGlobalAdmin } from "./roles.ts";
+import { isAnyAdmin } from "./roles.ts";
 import Start from "./Start.tsx";
 import { TheoryToolPage, TrainingToolPage } from "./components/ToolPage.tsx";
 
@@ -212,10 +212,14 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideOnStartPage: true,
         hideFromMenu: true,
     } satisfies Route] : []),
-    ...(isGlobalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
+    ...(isAnyAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
+        // Who may reach the page depends only on holding some admin role; what
+        // they may send to is decided inside Broadcast.tsx itself (and, again,
+        // by the server) — a branch admin lands on a page with no picker at
+        // all rather than one offering "everybody".
         path: "/broadcast",
         component: () => <Broadcast />,
-        menuText: translator.translate("Skicka notis till alla"),
+        menuText: translator.translate("Skicka notis"),
         icon: Megaphone,
         hideOnStartPage: true,
     } satisfies Route] : []), {

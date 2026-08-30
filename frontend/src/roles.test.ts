@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   administeredBranches, administeredFederations, branchAdmin, coversEverything,
-  federationAdmin, isAnyAdmin, isGlobalAdmin, isKnownRole,
+  federationAdmin, isAnyAdmin, isKnownRole, isTechnicalAdmin,
 } from "./roles";
 
 describe("roles", () => {
@@ -23,12 +23,11 @@ describe("roles", () => {
     expect(isKnownRole(branchAdmin("8f3c"))).toBe(true);
   });
 
-  // Broadcasting a push notification is a technical power, not an
-  // organizational one: administering WSKO is not the same as being able to
-  // notify every phone in it.
-  it("keeps the global technical role separate from covering the organization", () => {
-    expect(isGlobalAdmin(["admin"])).toBe(true);
-    expect(isGlobalAdmin(["wsko_admin"])).toBe(false);
+  // The technical (root-like) role and organizational authority over WSKO are
+  // different axes: admin is always both, wsko_admin is only the second.
+  it("keeps the technical role separate from covering the organization", () => {
+    expect(isTechnicalAdmin(["admin"])).toBe(true);
+    expect(isTechnicalAdmin(["wsko_admin"])).toBe(false);
     expect(coversEverything(["wsko_admin"])).toBe(true);
     expect(coversEverything(["admin"])).toBe(true);
     expect(coversEverything([federationAdmin("SE")])).toBe(false);

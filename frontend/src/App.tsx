@@ -118,6 +118,20 @@ function App(props: Props) {
   // every change and once per session; both sides skip the write when nothing
   // has changed.
   useEffect(() => { getSyncManager().reportLanguage(language); }, [language, syncState.status]);
+  // Self-heals a subscription lost to any cause — a store issue, a rotated
+  // VAPID key — by re-registering whatever the browser already holds once
+  // signed in, rather than only on the two explicit opt-in actions
+  // (Settings, the one-time nudge). Best-effort and idempotent: subscribing
+  // upserts, so this is a no-op on every ordinary launch (PUSH-AUDIENCE-PLAN.md §7).
+  useEffect(() => {
+    if (syncState.status === "local_only" || !isPushSupported()) return;
+    void getCurrentSubscription().then(sub => {
+      if (sub !== null) return subscribeToPush();
+    }).catch(() => {
+      // Best-effort: a failure here just means the self-heal didn't happen
+      // this time, not that anything the user did failed.
+    });
+  }, [syncState.status]);
   const displayName = syncState.status === "local_only"
     ? undefined
     : getSyncManager().getBackendUserInfo()?.displayName;

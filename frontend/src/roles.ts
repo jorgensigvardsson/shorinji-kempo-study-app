@@ -30,10 +30,13 @@ export function isKnownRole(role: string): boolean {
     || isScoped(role, FEDERATION_ADMIN_PREFIX) || isScoped(role, BRANCH_ADMIN_PREFIX);
 }
 
-// Authority over the whole organization. The technical powers — push broadcasts
-// above all — stay on `admin` alone: `wsko_admin` administers the organization,
-// which is not the same thing as being able to notify every phone in it.
-export function isGlobalAdmin(roles: string[]): boolean {
+// `admin` alone — not `wsko_admin` — is the technical superuser: root in the
+// same sense a Unix root is, authority over the application itself, as
+// distinct from coversEverything's authority over the organization it
+// manages. Push broadcasts no longer need this (an audience is just another
+// scope, and wsko_admin covers wsko like anyone else who covers it), but the
+// next admin-only technical control will.
+export function isTechnicalAdmin(roles: string[]): boolean {
   return roles.includes(ROLE_ADMIN);
 }
 

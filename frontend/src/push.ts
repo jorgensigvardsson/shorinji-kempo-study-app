@@ -88,10 +88,20 @@ export async function unsubscribeFromPush(): Promise<void> {
   await sub.unsubscribe();
 }
 
+// One entry in a broadcast's audience — a WSKO/federation/branch scope,
+// mirroring authz.Scope's wire shape on the auth side. "kind":"wsko" carries
+// no id, since it's a singleton.
+export interface AudienceScope {
+  kind: "wsko" | "federation" | "branch";
+  id?: string;
+}
+
 export interface BroadcastPayload {
   title: string;
   body?: string;
   url?: string;
+  // Omitted (or absent) means everybody — see PUSH-AUDIENCE-PLAN.md §3.1.
+  audience?: AudienceScope[];
 }
 
 export interface BroadcastResult {
