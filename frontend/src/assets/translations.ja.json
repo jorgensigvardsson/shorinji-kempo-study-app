@@ -1524,6 +1524,7 @@
   "Du är kvar i din nuvarande klubb. Du kan ansöka igen.": "現在の支部に引き続き所属します。再度申請することもできます。",
   "Du har inte behörighet att göra det.": "その操作を行う権限がありません。",
   "Det finns redan ett förbund med den koden.": "そのコードの連盟はすでに存在します。",
+  "Landskoden måste vara en giltig ISO 3166-1 alpha-2-kod, till exempel SE eller JP.": "国コードは有効なISO 3166-1 alpha-2コード（例: SEやJP）である必要があります。",
   "Uppgifterna kunde inte godtas. Kontrollera dem och försök igen.": "入力内容を受け付けられませんでした。確認してもう一度お試しください。",
   "Ändringen kunde inte sparas. Försök igen.": "変更を保存できませんでした。もう一度お試しください。",
   "Beslutet kunde inte sparas. Försök igen.": "判断を保存できませんでした。もう一度お試しください。",

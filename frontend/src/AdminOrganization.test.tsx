@@ -245,6 +245,24 @@ describe("AdminOrganization", () => {
     expect(await screen.findByText("Du har inte behörighet att göra det.")).toBeTruthy();
   });
 
+  // A well-formed-but-unassigned code ("JA", typed for Japan's real code JP)
+  // gets its own message rather than the generic 400 one — the server sends a
+  // machine-readable reason precisely so this page can say what was wrong,
+  // not just that something was.
+  it("names the reason when a federation id is not a real country code", async () => {
+    const user = userEvent.setup();
+    adminCreateFederation.mockRejectedValue(new AdminRequestError(400, "invalid_federation_id"));
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Tokyo Honbu");
+
+    await user.click(screen.getByRole("button", { name: "Nytt förbund" }));
+    await user.type(screen.getByLabelText("Landskod"), "JA");
+    await user.type(screen.getByLabelText("Förbundets namn"), "Japan");
+    await user.click(screen.getByRole("button", { name: "Lägg till" }));
+
+    expect(await screen.findByText("Landskoden måste vara en giltig ISO 3166-1 alpha-2-kod, till exempel SE eller JP.")).toBeTruthy();
+  });
+
   it("offers a retry when the tree cannot be fetched", async () => {
     adminOrgTree.mockRejectedValue(new Error("offline"));
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);

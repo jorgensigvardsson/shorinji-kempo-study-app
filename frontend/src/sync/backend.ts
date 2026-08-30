@@ -176,11 +176,27 @@ export type EmailStartResult =
 // Thrown when the global code-sending rate limit (1 per 5 s) rejects a request.
 // Carries the status of a refused admin write, so a page can say "you may not"
 // rather than "something went wrong" when the server has been specific.
+//
+// reason is the body's machine-readable {"error": "…"} or {"reason": "…"}
+// field, when the server sent one — not the free text, which is in Go and
+// cannot be shown to a Japanese or Turkish admin. Most refusals carry none,
+// which is why it is optional rather than something every caller must check.
 export class AdminRequestError extends Error {
-  constructor(readonly status: number) {
-    super(`admin request failed: ${status}`);
+  constructor(readonly status: number, readonly reason?: string) {
+    super(`admin request failed: ${status}${reason ? ` (${reason})` : ""}`);
     this.name = "AdminRequestError";
   }
+}
+
+// Builds an AdminRequestError from a failed response, reading its body on the
+// chance it carries {"error": "…"} or {"reason": "…"} — both are in use
+// server-side for the same purpose under different names. Safe to call on any
+// failed response, including the many with no body at all: a decode failure
+// just leaves reason undefined rather than throwing a second, uglier error
+// out from under the first.
+async function adminRequestError(resp: Response): Promise<AdminRequestError> {
+  const body = await resp.json().catch(() => null) as { error?: string; reason?: string } | null;
+  return new AdminRequestError(resp.status, body?.error ?? body?.reason ?? undefined);
 }
 
 export class RateLimitError extends Error {
@@ -348,8 +364,10 @@ export class BackendSyncClient {
 
   // Shared plumbing for the admin writes above. A refusal carries the server's
   // status so a caller can tell "you may not" from "that did not work". Most of
-  // these endpoints answer with an empty body, so parsing one here would break
-  // them — adminWriteJSON below is the separate path for the few that don't.
+  // these endpoints answer with an empty body **on success**, so parsing one
+  // there would break them — adminWriteJSON below is the separate path for the
+  // few that don't. A failed response is read here regardless, on the chance
+  // it carries a machine-readable reason (adminRequestError below).
   private async adminWrite(method: string, url: string, body?: unknown): Promise<void> {
     const resp = await this.fetchWithRefresh(url, {
       method,
@@ -358,7 +376,7 @@ export class BackendSyncClient {
         body: JSON.stringify(body),
       }),
     });
-    if (!resp.ok) throw new AdminRequestError(resp.status);
+    if (!resp.ok) throw await adminRequestError(resp);
   }
 
   private async adminWriteJSON<T>(method: string, url: string, body?: unknown): Promise<T> {
@@ -369,7 +387,7 @@ export class BackendSyncClient {
         body: JSON.stringify(body),
       }),
     });
-    if (!resp.ok) throw new AdminRequestError(resp.status);
+    if (!resp.ok) throw await adminRequestError(resp);
     return await resp.json() as T;
   }
 

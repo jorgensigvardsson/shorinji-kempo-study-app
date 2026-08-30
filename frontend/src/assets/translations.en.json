@@ -1871,6 +1871,7 @@
   "Du är kvar i din nuvarande klubb. Du kan ansöka igen.": "You remain in your current branch. You are welcome to apply again.",
   "Du har inte behörighet att göra det.": "You do not have permission to do that.",
   "Det finns redan ett förbund med den koden.": "A federation with that code already exists.",
+  "Landskoden måste vara en giltig ISO 3166-1 alpha-2-kod, till exempel SE eller JP.": "The country code must be a valid ISO 3166-1 alpha-2 code, for example SE or JP.",
   "Uppgifterna kunde inte godtas. Kontrollera dem och försök igen.": "The details could not be accepted. Check them and try again.",
   "Ändringen kunde inte sparas. Försök igen.": "The change could not be saved. Please try again.",
   "Beslutet kunde inte sparas. Försök igen.": "The decision could not be saved. Please try again.",

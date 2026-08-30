@@ -1875,6 +1875,7 @@
   "Du är kvar i din nuvarande klubb. Du kan ansöka igen.": "Mevcut kulübünüzde kalmaya devam ediyorsunuz. Tekrar başvurabilirsiniz.",
   "Du har inte behörighet att göra det.": "Bunu yapma yetkiniz yok.",
   "Det finns redan ett förbund med den koden.": "Bu koda sahip bir federasyon zaten var.",
+  "Landskoden måste vara en giltig ISO 3166-1 alpha-2-kod, till exempel SE eller JP.": "Ülke kodu geçerli bir ISO 3166-1 alpha-2 kodu olmalıdır, örneğin SE veya JP.",
   "Uppgifterna kunde inte godtas. Kontrollera dem och försök igen.": "Bilgiler kabul edilemedi. Kontrol edip tekrar deneyin.",
   "Ändringen kunde inte sparas. Försök igen.": "Değişiklik kaydedilemedi. Lütfen tekrar deneyin.",
   "Beslutet kunde inte sparas. Försök igen.": "Karar kaydedilemedi. Lütfen tekrar deneyin.",

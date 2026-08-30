@@ -9,6 +9,7 @@ import "@xyflow/react/dist/style.css";
 import { useTheme } from "./hooks";
 import type { Translator } from "./i18n";
 import type { AdminOrgBranch } from "./sync/backend";
+import FederationFlag from "./components/FederationFlag";
 
 // WSKO is the root of the organization rather than a record with a name, so it
 // has no id on the wire. React Flow node ids must be non-empty strings, so it
@@ -60,6 +61,18 @@ interface GroupNodeData extends Record<string, unknown> {
   onAddBranchClick: () => void;
   onCreateBranch: () => void;
   onCancelAddBranch: () => void;
+  // Only ever set for the WSKO node: federations are peers of each other, so
+  // creating one is a WSKO-level act, the same way a new branch belongs to
+  // the federation it joins rather than to some branch already in it.
+  canAddFederation: boolean;
+  addFederationOpen: boolean;
+  newFederationId: string;
+  newFederationName: string;
+  onNewFederationIdChange: (v: string) => void;
+  onNewFederationNameChange: (v: string) => void;
+  onAddFederationClick: () => void;
+  onCreateFederation: () => void;
+  onCancelAddFederation: () => void;
   busy: boolean;
   translator: Translator;
 }
@@ -99,6 +112,7 @@ const GroupNode = ({ data }: NodeProps<GroupFlowNode>) => (
         <>
           <div className="d-flex justify-content-between align-items-start gap-2">
             <span className="fw-semibold">
+              {data.federationId !== null && <FederationFlag federationId={data.federationId} className="me-2" />}
               {data.title}
               {data.federationId !== null && (
                 <Badge bg="secondary" className="ms-2">{data.federationId}</Badge>
@@ -114,6 +128,11 @@ const GroupNode = ({ data }: NodeProps<GroupFlowNode>) => (
             {data.canAddBranch && !data.addOpen && (
               <Button size="sm" variant="outline-primary" disabled={data.busy} onClick={data.onAddBranchClick}>
                 {data.translator.translate("Ny klubb")}
+              </Button>
+            )}
+            {data.canAddFederation && !data.addFederationOpen && (
+              <Button size="sm" variant="outline-primary" disabled={data.busy} onClick={data.onAddFederationClick}>
+                {data.translator.translate("Nytt förbund")}
               </Button>
             )}
           </div>
@@ -138,6 +157,39 @@ const GroupNode = ({ data }: NodeProps<GroupFlowNode>) => (
               {data.busy ? <Spinner size="sm" /> : data.translator.translate("Lägg till")}
             </Button>
             <Button size="sm" variant="outline-secondary" disabled={data.busy} onClick={data.onCancelAddBranch}>
+              {data.translator.translate("Avbryt")}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {data.addFederationOpen && (
+        <div className="d-flex flex-column gap-2 mt-2">
+          <Form.Control
+            size="sm"
+            autoFocus
+            value={data.newFederationId}
+            disabled={data.busy}
+            placeholder={data.translator.translate("Landskod")}
+            aria-label={data.translator.translate("Landskod")}
+            onChange={e => data.onNewFederationIdChange(e.target.value)}
+          />
+          <Form.Control
+            size="sm"
+            value={data.newFederationName}
+            disabled={data.busy}
+            placeholder={data.translator.translate("Förbundets namn")}
+            aria-label={data.translator.translate("Förbundets namn")}
+            onChange={e => data.onNewFederationNameChange(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") data.onCreateFederation(); }}
+          />
+          <div className="d-flex gap-2">
+            <Button size="sm" variant="primary"
+                    disabled={data.busy || data.newFederationId.trim() === "" || data.newFederationName.trim() === ""}
+                    onClick={data.onCreateFederation}>
+              {data.busy ? <Spinner size="sm" /> : data.translator.translate("Lägg till")}
+            </Button>
+            <Button size="sm" variant="outline-secondary" disabled={data.busy} onClick={data.onCancelAddFederation}>
               {data.translator.translate("Avbryt")}
             </Button>
           </div>
@@ -193,6 +245,13 @@ interface Props {
   setAddingBranchIn: (v: string | null) => void;
   setError: (e: string | null) => void;
   createBranch: (federationId: string) => void;
+  addingFederation: boolean;
+  newFederationId: string;
+  setNewFederationId: (v: string) => void;
+  newFederationName: string;
+  setNewFederationName: (v: string) => void;
+  setAddingFederation: (v: boolean) => void;
+  createFederation: () => void;
   startMove: (branch: AdminOrgBranch, from: string) => void;
   // The id of a node just created elsewhere on this page, or null. Set once by
   // the caller right after a create succeeds; this component pans to it and
@@ -241,6 +300,8 @@ const AdminOrganizationTree = ({
   translator, sections, atWSKO, coversFederation, coversBranch, busy,
   isEditing, renameControls, startRename,
   addingBranchIn, newBranchName, setNewBranchName, setAddingBranchIn, setError, createBranch,
+  addingFederation, newFederationId, setNewFederationId, newFederationName, setNewFederationName,
+  setAddingFederation, createFederation,
   startMove, focusId, onFocused,
 }: Props) => {
   const { effectiveTheme } = useTheme();
@@ -315,6 +376,17 @@ const AdminOrganizationTree = ({
           onAddBranchClick: () => { setAddingBranchIn(section.federationId); setNewBranchName(""); setError(null); },
           onCreateBranch: () => createBranch(section.federationId),
           onCancelAddBranch: () => setAddingBranchIn(null),
+          // A federation is never where another federation gets created — see
+          // the WSKO node below, the only one where these are live.
+          canAddFederation: false,
+          addFederationOpen: false,
+          newFederationId: "",
+          newFederationName: "",
+          onNewFederationIdChange: () => {},
+          onNewFederationNameChange: () => {},
+          onAddFederationClick: () => {},
+          onCreateFederation: () => {},
+          onCancelAddFederation: () => {},
           busy,
           translator,
         } satisfies GroupNodeData,
@@ -356,6 +428,18 @@ const AdminOrganizationTree = ({
           onAddBranchClick: () => { setAddingBranchIn(""); setNewBranchName(""); setError(null); },
           onCreateBranch: () => createBranch(""),
           onCancelAddBranch: () => setAddingBranchIn(null),
+          // Federations are peers of each other, so creating one is a
+          // WSKO-level act — the reason this is live only here. atWSKO is
+          // already guaranteed true inside this block.
+          canAddFederation: atWSKO,
+          addFederationOpen: addingFederation,
+          newFederationId,
+          newFederationName,
+          onNewFederationIdChange: setNewFederationId,
+          onNewFederationNameChange: setNewFederationName,
+          onAddFederationClick: () => { setAddingFederation(true); setError(null); },
+          onCreateFederation: createFederation,
+          onCancelAddFederation: () => setAddingFederation(false),
           busy,
           translator,
         } satisfies GroupNodeData,
@@ -365,7 +449,9 @@ const AdminOrganizationTree = ({
     return { nodes: [...groupNodes, ...branchNodes], edges: flowEdges };
   }, [
     sections, atWSKO, coversFederation, coversBranch, busy, isEditing, renameControls, startRename,
-    addingBranchIn, newBranchName, setNewBranchName, setAddingBranchIn, setError, createBranch, startMove,
+    addingBranchIn, newBranchName, setNewBranchName, setAddingBranchIn, setError, createBranch,
+    addingFederation, newFederationId, setNewFederationId, newFederationName, setNewFederationName,
+    setAddingFederation, createFederation, startMove,
     translator,
   ]);
 

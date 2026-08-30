@@ -70,6 +70,13 @@ const baseProps = (): Props => ({
   setAddingBranchIn: vi.fn(),
   setError: vi.fn(),
   createBranch: vi.fn(),
+  addingFederation: false,
+  newFederationId: "",
+  setNewFederationId: vi.fn(),
+  newFederationName: "",
+  setNewFederationName: vi.fn(),
+  setAddingFederation: vi.fn(),
+  createFederation: vi.fn(),
   startMove: vi.fn(),
   focusId: null,
   onFocused: vi.fn(),
@@ -129,6 +136,51 @@ describe("AdminOrganizationTree", () => {
 
     await user.click(cardFor("WSKO").getByRole("button", { name: "Lägg till" }));
     expect(createBranch).toHaveBeenCalledWith("");
+  });
+
+  // Federations are peers of each other, so creating one is a WSKO-level act
+  // — offered only on the WSKO node, never on a federation's own.
+  it("offers creating a federation only on the WSKO node", async () => {
+    renderTree();
+    await screen.findByText("Karlstad");
+
+    expect(cardFor("WSKO").getByRole("button", { name: "Nytt förbund" })).toBeTruthy();
+    expect(cardFor("Svenska Shorinji Kempoförbundet").queryByRole("button", { name: "Nytt förbund" })).toBeNull();
+  });
+
+  it("opens the add-federation form from the WSKO node", async () => {
+    const user = userEvent.setup();
+    const setAddingFederation = vi.fn();
+    const setError = vi.fn();
+    renderTree({ setAddingFederation, setError });
+    await screen.findByText("Tokyo Honbu");
+
+    await user.click(cardFor("WSKO").getByRole("button", { name: "Nytt förbund" }));
+    expect(setAddingFederation).toHaveBeenCalledWith(true);
+    expect(setError).toHaveBeenCalledWith(null);
+  });
+
+  it("creates a federation from the WSKO node's own form", async () => {
+    const user = userEvent.setup();
+    const createFederation = vi.fn();
+    renderTree({
+      addingFederation: true, newFederationId: "DK", newFederationName: "Dansk Shorinji Kempo Forbund", createFederation,
+    });
+    await screen.findByText("Tokyo Honbu");
+
+    const wsko = cardFor("WSKO");
+    expect((wsko.getByLabelText("Landskod") as HTMLInputElement).value).toBe("DK");
+    await user.click(wsko.getByRole("button", { name: "Lägg till" }));
+    expect(createFederation).toHaveBeenCalled();
+  });
+
+  // Not offered at all to a caller who does not cover WSKO — the whole node
+  // is absent for them (see the test above), so there is nowhere for it to
+  // even be hidden-but-present.
+  it("never offers creating a federation without covering WSKO", async () => {
+    renderTree({ atWSKO: false, sections: [sections[0]] });
+    await screen.findByText("Karlstad");
+    expect(screen.queryByRole("button", { name: "Nytt förbund" })).toBeNull();
   });
 
   // A caller scoped to their own federation has no view of WSKO at all — the

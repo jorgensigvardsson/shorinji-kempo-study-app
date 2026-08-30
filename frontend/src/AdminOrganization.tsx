@@ -7,6 +7,7 @@ import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type AdminOrgBranch, type AdminOrgTree } from "./sync/backend";
 import { administeredBranches, administeredFederations, coversEverything } from "./roles";
 import Loading from "./components/Loading";
+import FederationFlag from "./components/FederationFlag";
 
 // Loaded only when somebody actually opens the tree view, not with the rest of
 // this page. @xyflow/react is the single heaviest dependency in the app, and
@@ -140,6 +141,9 @@ const AdminOrganization = () => {
     if (err instanceof AdminRequestError) {
       if (err.status === 403) return translator.translate("Du har inte behörighet att göra det.");
       if (err.status === 409) return translator.translate("Det finns redan ett förbund med den koden.");
+      if (err.reason === "invalid_federation_id") {
+        return translator.translate("Landskoden måste vara en giltig ISO 3166-1 alpha-2-kod, till exempel SE eller JP.");
+      }
       if (err.status === 400) return translator.translate("Uppgifterna kunde inte godtas. Kontrollera dem och försök igen.");
     }
     return translator.translate("Ändringen kunde inte sparas. Försök igen.");
@@ -298,6 +302,13 @@ const AdminOrganization = () => {
             setAddingBranchIn={setAddingBranchIn}
             setError={setError}
             createBranch={createBranch}
+            addingFederation={addingFederation}
+            newFederationId={newFederationId}
+            setNewFederationId={setNewFederationId}
+            newFederationName={newFederationName}
+            setNewFederationName={setNewFederationName}
+            setAddingFederation={setAddingFederation}
+            createFederation={createFederation}
             startMove={startMove}
             focusId={focusId}
             onFocused={() => setFocusId(null)}
@@ -313,6 +324,7 @@ const AdminOrganization = () => {
               : (
                 <>
                   <span className="fw-semibold">
+                    {section.federationId !== WSKO && <FederationFlag federationId={section.federationId} className="me-2" />}
                     {section.title}
                     {section.federationId !== WSKO && (
                       <Badge bg="secondary" className="ms-2">{section.federationId}</Badge>
@@ -329,6 +341,16 @@ const AdminOrganization = () => {
                       <Button size="sm" variant="outline-primary" disabled={busy}
                               onClick={() => { setAddingBranchIn(section.federationId); setNewBranchName(""); setError(null); }}>
                         {translator.translate("Ny klubb")}
+                      </Button>
+                    )}
+                    {/* Federations are peers of each other, so creating one is a
+                        WSKO-level act — no federation admin is above another.
+                        WSKO is where that act belongs, the same way a new
+                        branch belongs to the federation it joins. */}
+                    {section.federationId === WSKO && atWSKO && !addingFederation && (
+                      <Button size="sm" variant="outline-primary" disabled={busy}
+                              onClick={() => { setAddingFederation(true); setError(null); }}>
+                        {translator.translate("Nytt förbund")}
                       </Button>
                     )}
                   </div>
@@ -390,50 +412,42 @@ const AdminOrganization = () => {
                 </Button>
               </div>
             )}
-          </Card.Body>
-        </Card>
-      ))}
 
-      {/* Federations are peers of each other, so creating one is a WSKO-level act
-          — no federation admin is above another. */}
-      {atWSKO && (addingFederation ? (
-        <Card className="mb-3">
-          <Card.Body className="d-flex gap-2 flex-wrap align-items-center">
-            <Form.Control
-              size="sm"
-              autoFocus
-              style={{ width: "6rem" }}
-              value={newFederationId}
-              disabled={busy}
-              placeholder={translator.translate("Landskod")}
-              aria-label={translator.translate("Landskod")}
-              onChange={e => setNewFederationId(e.target.value)}
-            />
-            <Form.Control
-              size="sm"
-              style={{ maxWidth: "24rem" }}
-              value={newFederationName}
-              disabled={busy}
-              placeholder={translator.translate("Förbundets namn")}
-              aria-label={translator.translate("Förbundets namn")}
-              onChange={e => setNewFederationName(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") createFederation(); }}
-            />
-            <Button size="sm" variant="primary"
-                    disabled={busy || newFederationId.trim() === "" || newFederationName.trim() === ""}
-                    onClick={createFederation}>
-              {busy ? <Spinner size="sm" /> : translator.translate("Lägg till")}
-            </Button>
-            <Button size="sm" variant="outline-secondary" disabled={busy}
-                    onClick={() => setAddingFederation(false)}>
-              {translator.translate("Avbryt")}
-            </Button>
+            {section.federationId === WSKO && addingFederation && (
+              <div className="d-flex gap-2 flex-wrap align-items-center">
+                <Form.Control
+                  size="sm"
+                  autoFocus
+                  style={{ width: "6rem" }}
+                  value={newFederationId}
+                  disabled={busy}
+                  placeholder={translator.translate("Landskod")}
+                  aria-label={translator.translate("Landskod")}
+                  onChange={e => setNewFederationId(e.target.value)}
+                />
+                <Form.Control
+                  size="sm"
+                  style={{ maxWidth: "24rem" }}
+                  value={newFederationName}
+                  disabled={busy}
+                  placeholder={translator.translate("Förbundets namn")}
+                  aria-label={translator.translate("Förbundets namn")}
+                  onChange={e => setNewFederationName(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") createFederation(); }}
+                />
+                <Button size="sm" variant="primary"
+                        disabled={busy || newFederationId.trim() === "" || newFederationName.trim() === ""}
+                        onClick={createFederation}>
+                  {busy ? <Spinner size="sm" /> : translator.translate("Lägg till")}
+                </Button>
+                <Button size="sm" variant="outline-secondary" disabled={busy}
+                        onClick={() => setAddingFederation(false)}>
+                  {translator.translate("Avbryt")}
+                </Button>
+              </div>
+            )}
           </Card.Body>
         </Card>
-      ) : (
-        <Button variant="outline-primary" disabled={busy} onClick={() => { setAddingFederation(true); setError(null); }}>
-          {translator.translate("Nytt förbund")}
-        </Button>
       ))}
 
       {/* A branch's federation decides who administers its members, so changing
