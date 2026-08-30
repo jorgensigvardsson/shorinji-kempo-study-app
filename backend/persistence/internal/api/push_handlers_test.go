@@ -332,7 +332,7 @@ func TestBroadcast_TokenPath_DefaultAudience_Authorized(t *testing.T) {
 
 func TestBroadcast_TokenPath_ScopedAudience_403(t *testing.T) {
 	// PUSH_ADMIN_TOKEN carries no identity, so it may only ever mean everybody
-	// (PUSH-AUDIENCE-PLAN.md §3.1) — naming a branch is refused, not resolved.
+	// — naming a branch is refused, not resolved.
 	h, _, _ := newPushHandler(t, "secret", nil)
 	req := httptest.NewRequest(http.MethodPost, "/push/broadcast",
 		strings.NewReader(`{"title":"hi","audience":[{"kind":"branch","id":"karlstad"}]}`))

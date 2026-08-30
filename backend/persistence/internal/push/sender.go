@@ -67,7 +67,7 @@ func (s *Sender) Send(sub *store.PushSubscription, payload Payload) error {
 
 	switch {
 	// 403 means the VAPID key no longer matches this subscription — as dead as
-	// 404/410, just reported differently (PUSH-AUDIENCE-PLAN.md §7).
+	// 404/410, just reported differently.
 	case resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone || resp.StatusCode == http.StatusForbidden:
 		return ErrGone
 	case resp.StatusCode >= 200 && resp.StatusCode < 300:

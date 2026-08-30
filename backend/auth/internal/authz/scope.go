@@ -26,7 +26,7 @@ const (
 
 // Scope is a place in the organization that authority can be held over. The
 // JSON tags let it decode straight off the wire as a push-notification
-// audience entry (PUSH-AUDIENCE-PLAN.md §3): {"kind":"branch","id":"…"}.
+// audience entry: {"kind":"branch","id":"…"}.
 type Scope struct {
 	Kind Kind   `json:"kind"`
 	ID   string `json:"id,omitempty"` // empty for KindWSKO, which is a singleton

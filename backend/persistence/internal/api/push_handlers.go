@@ -94,7 +94,7 @@ func (s audienceScope) isWSKOOnly() bool { return s.Kind == "wsko" && s.ID == ""
 
 // broadcastRequest is the body POST /push/broadcast accepts. An omitted or
 // empty audience means everybody — the CI deploy announcement relies on this
-// (PUSH-AUDIENCE-PLAN.md §3.1) and must keep working with no change to it.
+// and must keep working with no change to it.
 type broadcastRequest struct {
 	push.Payload
 	Audience []audienceScope `json:"audience,omitempty"`
@@ -129,7 +129,7 @@ func (h *Handler) broadcast(w http.ResponseWriter, r *http.Request) {
 }
 
 // resolveAudience authorizes the request and returns who it reaches. Two
-// paths, matching PUSH-AUDIENCE-PLAN.md §3.1 and §5:
+// paths:
 //
 //   - PUSH_ADMIN_TOKEN bearer: no identity to check a scope against, so it may
 //     only ever mean everybody. Naming anything narrower is refused rather than

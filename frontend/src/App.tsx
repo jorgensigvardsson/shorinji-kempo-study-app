@@ -122,7 +122,7 @@ function App(props: Props) {
   // VAPID key — by re-registering whatever the browser already holds once
   // signed in, rather than only on the two explicit opt-in actions
   // (Settings, the one-time nudge). Best-effort and idempotent: subscribing
-  // upserts, so this is a no-op on every ordinary launch (PUSH-AUDIENCE-PLAN.md §7).
+  // upserts, so this is a no-op on every ordinary launch.
   useEffect(() => {
     if (syncState.status === "local_only" || !isPushSupported()) return;
     void getCurrentSubscription().then(sub => {

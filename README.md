@@ -149,7 +149,7 @@ Set the public key as the `VAPID_PUBLIC_KEY` repo *variable*, the private key as
 **Sending a broadcast** (e.g. announcing a new version). Three ways, all hit `POST /push/broadcast`:
 
 - **Automatically on deploy** — the final step of the `deploy` workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) sends a "New version available" notification once the stack restart succeeds. It uses `PUSH_ADMIN_TOKEN`; if that secret is unset the step is skipped, and a failed broadcast only warns (it never fails an otherwise-successful deploy). Production only — staging deploys deliberately stay quiet.
-- **From the app** — a signed-in user with the `admin` role gets a *Skicka notis till alla* form under Settings. The browser session cookie authorizes the call.
+- **From the app** — any signed-in admin reaches *Skicka notis* from the menu; who they may address depends on what they administer. A branch admin sees no picker at all and sends only to their own club; a federation or WSKO/technical admin can narrow to one federation, one or more branches, or (WSKO/technical only) everybody. The browser session cookie authorizes the call, and the server enforces the same scope again regardless of what the UI offered.
 - **From a script/CI** — present the `PUSH_ADMIN_TOKEN` as a bearer token:
   ```bash
   curl -X POST https://persistence.app.shorinjikempo.net/push/broadcast \

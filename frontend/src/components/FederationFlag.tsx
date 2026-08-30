@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 
-// Federations are identified by ISO 3166-1 alpha-2 country code (see
-// ORGANIZATION-PLAN.md), which is exactly what flag-icons' classes are named
-// after — "fi-se", "fi-jp" — so the id doubles as the lookup key with no
+// Federations are identified by ISO 3166-1 alpha-2 country code, which is
+// exactly what flag-icons' classes are named after — "fi-se", "fi-jp" — so
+// the id doubles as the lookup key with no
 // table of its own to keep in sync. A second federation for one country is
 // documented to become "SE-2"; it is still Swedish, so the suffix is
 // stripped before lookup rather than treated as part of the code. "" (a

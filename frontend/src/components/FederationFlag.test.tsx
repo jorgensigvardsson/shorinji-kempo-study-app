@@ -32,7 +32,7 @@ describe("FederationFlag", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  // Documented in ORGANIZATION-PLAN.md: a second federation for one country
+  // A second federation for one country
   // becomes "SE-2". It is still a Swedish federation, so it gets Sweden's
   // flag too — the same one "SE" gets, the suffix stripped before lookup.
   it("shows the base country's flag for a suffixed id like a second federation", () => {

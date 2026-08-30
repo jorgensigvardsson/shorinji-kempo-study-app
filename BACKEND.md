@@ -231,8 +231,8 @@ not have an account yet. Roles are flat strings scoped by suffix:
 
 | Role | Authority |
 |---|---|
-| `admin` | Everything. The technical superuser: push broadcasts, force-logout, and all of the below |
-| `wsko_admin` | The whole organization. Defined and grantable, granted to nobody — so it can diverge from `admin` later without a migration to introduce it |
+| `admin` | Everything. The technical superuser — root over the application itself, as distinct from `wsko_admin`'s authority over the organization it manages |
+| `wsko_admin` | The whole organization, including sending a push broadcast to everybody in it — `all` is just another audience scope, authorized like any other |
 | `federation_admin:<CC>` | One federation and every branch in it |
 | `branch_admin:<uuid>` | One branch |
 
@@ -346,6 +346,7 @@ corporate domain at the appropriate provider.
 | GET | `/auth/admin/transfers` | Pending transfers **into** branches the caller covers. Transfers out are absent: the branch being left is told when it happens and has nothing to decide |
 | POST | `/auth/admin/transfers/{id}/accept` | Move the member: `{id}` is their user id. The branch they leave is read fresh, so an admin who moved them meanwhile is the one told |
 | POST | `/auth/admin/transfers/{id}/reject` | Refuse, keeping the decision for 90 days |
+| POST | `/auth/admin/push-audience` | Resolve a push audience (a list of `{kind, id}` organizational scopes) into `{all:true}` or `{userIds:[...]}`; called by the persistence service on behalf of a signed-in sender, authorized the same way as everything else in this table |
 
 The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
 every one of them asks whether the caller **covers the scope the action touches** rather than
@@ -369,7 +370,7 @@ in a user's token on its next issue
 | GET | `/push/public-key` | VAPID public key for browser push subscription |
 | POST | `/push/subscribe` | Upsert a push subscription, tagged with the caller (JWT required) |
 | POST | `/push/unsubscribe` | Remove a push subscription by endpoint |
-| POST | `/push/broadcast` | Send a notification to all subscriptions (admin role or `PUSH_ADMIN_TOKEN` bearer) |
+| POST | `/push/broadcast` | Send a notification to an audience of organizational scopes — resolved via the auth service (cookie session) or, for a `PUSH_ADMIN_TOKEN` bearer, `all` only |
 
 The push endpoints are only registered when a VAPID key pair is configured.
 
@@ -453,13 +454,22 @@ Both controls are visible only when signed in.
 
 Standard Web Push (VAPID). The browser subscribes via the service worker using the key from
 `GET /push/public-key`; subscriptions are stored server-side, tagged with the user ID when the
-subscriber is signed in. `POST /push/broadcast` sends a payload (`title`, `body`, `url`) to
-every subscription and prunes dead ones.
+subscriber is signed in. `POST /push/broadcast` sends a payload (`title`, `body`, `url`) plus
+an optional `audience` (a list of `{kind: "wsko"|"federation"|"branch", id?}` scopes) to
+whoever that audience resolves to, and prunes dead subscriptions along the way. An omitted or
+empty audience means everybody.
 
 Broadcast is authorized two ways:
-- a signed-in user holding the `admin` role (web UI path)
-- the `PUSH_ADMIN_TOKEN` shared bearer token (scripts/CI path) — the production deploy
-  workflow uses this to announce new app versions after a successful deploy
+- a signed-in user holding any scoped admin role (web UI path) — the audience is forwarded with
+  the caller's own session cookie to auth's `POST /auth/admin/push-audience`, which checks every
+  entry against the caller's roles with the same `authz.Covers` rule every other admin action
+  uses and answers either "everybody" or exactly the covered users. A branch admin can only ever
+  reach their own branch; a federation or WSKO admin can narrow to any federation or branch they
+  cover, or address everybody they cover at once
+- the `PUSH_ADMIN_TOKEN` shared bearer token (scripts/CI path), restricted to the `wsko` (everybody)
+  scope — a shared secret carries no identity, so it may only ever mean everybody, never something
+  narrower. The production deploy workflow uses this to announce new app versions after a
+  successful deploy
 
 ---
 

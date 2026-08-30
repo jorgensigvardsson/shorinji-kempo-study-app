@@ -100,7 +100,7 @@ export interface BroadcastPayload {
   title: string;
   body?: string;
   url?: string;
-  // Omitted (or absent) means everybody — see PUSH-AUDIENCE-PLAN.md §3.1.
+  // Omitted (or absent) means everybody.
   audience?: AudienceScope[];
 }
 

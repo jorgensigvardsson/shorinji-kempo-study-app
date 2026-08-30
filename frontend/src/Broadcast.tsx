@@ -21,7 +21,7 @@ interface FederationSelection {
 // it is gated in routes.tsx by isAnyAdmin; what they may address here mirrors
 // what AdminOrganization.tsx already opens on (coversEverything,
 // administeredFederations, administeredBranches) — deciding what to *offer*
-// only, since the server (PUSH-AUDIENCE-PLAN.md §4) decides what is allowed.
+// only, since the server decides what is allowed.
 //
 // administeredFederations/administeredBranches read the caller's *explicit*
 // scoped roles, which is the wrong list for anybody who covers WSKO: a
@@ -130,7 +130,7 @@ const Broadcast = () => {
     // Send without confirming only when the audience is exactly the sender's
     // own branch. Everything else — several branches, a federation, wsko, or
     // a single branch that isn't the sender's own — asks first, since a push
-    // notification cannot be recalled (PUSH-AUDIENCE-PLAN.md §8.1). An empty
+    // notification cannot be recalled. An empty
     // branchId is treated as "not my club": it costs one extra dialog in a
     // state that should not exist, and fails in the safe direction if it does.
     const needsConfirm = (scopes: AudienceScope[]): boolean =>

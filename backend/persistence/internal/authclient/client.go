@@ -1,8 +1,8 @@
 // Package authclient asks the auth service who a push audience resolves to.
 //
 // Persistence cannot import auth's internal/authz — that package is deliberately
-// stdlib-only and lives in the auth module (PUSH-AUDIENCE-PLAN.md §10 considered
-// and rejected moving it to backend/shared) — so this defines its own copy of the
+// stdlib-only and lives in the auth module (moving it to backend/shared was
+// considered and rejected) — so this defines its own copy of the
 // wire shape rather than pulling in a module boundary for two field names.
 package authclient
 
@@ -56,8 +56,8 @@ func New(baseURL string) *Client {
 // every entry against the caller's own roles (forwarded via accessToken). A
 // 200 response decodes into Result; any other status is returned unexamined
 // for the caller to relay as-is — auth already decided what a failure may say
-// (PUSH-AUDIENCE-PLAN.md §4: refusals must not leak existence), and
-// persistence has nothing to add to that decision.
+// (refusals must not leak existence), and persistence has nothing to add to
+// that decision.
 func (c *Client) ResolveAudience(ctx context.Context, accessToken string, audience []Scope) (*Result, int, error) {
 	body, err := json.Marshal(struct {
 		Audience []Scope `json:"audience"`

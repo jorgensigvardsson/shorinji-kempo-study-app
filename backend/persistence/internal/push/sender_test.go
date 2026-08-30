@@ -58,7 +58,7 @@ func TestSend_NotFoundOrGone_ReturnsErrGone(t *testing.T) {
 
 // A key mismatch after VAPID rotation typically surfaces as 403, and it means
 // the subscription is exactly as dead as a 404/410 — it should prune the same
-// way (PUSH-AUDIENCE-PLAN.md §7).
+// way.
 func TestSend_Forbidden_ReturnsErrGone(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)

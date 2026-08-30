@@ -25,8 +25,7 @@ type pushAudienceResponse struct {
 
 // adminPushAudience resolves a push audience into the user ids that should
 // receive it, refusing the whole request unless the caller covers every scope
-// named — never dropping just the entries that don't (PUSH-AUDIENCE-PLAN.md
-// §4: "refuse the whole request, never part of it").
+// named — never dropping just the entries that don't.
 //
 // persistence is the only caller, forwarding the sender's own access_token
 // cookie, so the scope being enforced is always the caller's own.

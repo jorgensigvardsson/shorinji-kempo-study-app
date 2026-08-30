@@ -84,7 +84,7 @@ Every backend HTTP endpoint in every service must be protected by a rate limiter
 
 The app models Shorinji Kempo's structure: WSKO → national federations → branches. A member belongs
 to exactly one branch, and a branch belongs to a federation **or** directly to WSKO — never both,
-never neither. See `ORGANIZATION-PLAN.md` for the whole design and `BACKEND.md` for the as-built API.
+never neither. See `BACKEND.md` for the as-built API and role model.
 
 **One function answers every organizational permission**: `authz.Covers(roles, scope, tree)` in
 `backend/auth/internal/authz`. Seeing a user is authority over their branch; creating a branch is
