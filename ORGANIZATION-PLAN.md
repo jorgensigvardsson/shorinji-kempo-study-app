@@ -33,8 +33,8 @@ Every phase in this document is built and green against the file-based stores. W
 | ⬜ | A native reading of the ja/tr copy. Every UI string is translated, but the Japanese and Turkish are mine, not a speaker's — as is all of the mail copy | |
 | ⬜ | Deployment — the two out-of-band indexing changes, then deploy, then migrate | §8 |
 | ⬜ | Who gets notified, and of what — needs a real look before shipping, see below | |
-| ⬜ | Push notification audiences — a broadcast still reaches every phone in WSKO, so the send stays on `admin` alone and no branch admin can tell their own club anything. Designed, not built; no open questions left. Sending to everybody becomes `authz.WSKO()` like any other scope, which settles `wsko_admin`'s side of it and retires `isGlobalAdmin` | [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md) |
-| ⬜ | Audit trails for administrative operations (who did what and when?). Useful for general change logs. Don't fetch data by default, make "Show history" an explicit action. Audit trails should also be compartmentalized. A branch admin should not see how federations have moved, etc. | |
+| ✅ | Push notification audiences — a broadcast used to reach every phone in WSKO regardless of who sent it; a send now carries an audience of organizational scopes, authorized the same way everything else is. Sending to everybody is `authz.WSKO()` like any other scope, which settled `wsko_admin`'s side of it — `isGlobalAdmin` was renamed to `isTechnicalAdmin` and kept rather than retired, for technical-only controls still to come | [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md) |
+| ⬜ | Audit trails for administrative operations (who did what and when?). **Deprioritized by decision** — not needed at this point. Useful for general change logs if revisited. Don't fetch data by default, make "Show history" an explicit action. Audit trails should also be compartmentalized. A branch admin should not see how federations have moved, etc. | |
 
 
 None of it blocks the rest, and nothing here has met Cosmos yet.
@@ -75,14 +75,14 @@ None of this blocks what's built. It matters before more notification-sending fl
 of the current ad hoc per-flow decisions, since each one so far has picked its own answer rather than
 following a stated rule.
 
-**All of the above is about mail.** Push is the other half of the same question and is not asked
-anywhere in this document: `POST /push/broadcast` sends to every stored subscription, so the one
-audience that reaches every phone in the organization is the one nothing here scopes. That is why
-the send is confined to `admin` — which is a bound on who may send rather than on who receives, and
-it leaves a branch admin unable to tell their own club that training is cancelled. Designed, not
-built, in [PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md), where a push audience is literally a list
-of `authz.Scope` and every entry is checked with `Covers` — so whatever rule this section settles on
-is the rule push should follow too, rather than picking a fourth answer of its own.
+**All of the above is about mail.** Push was the other half of the same question and, until now, was
+not asked anywhere in this document: `POST /push/broadcast` used to send to every stored
+subscription regardless of who sent it. That is now built, in
+[PUSH-AUDIENCE-PLAN.md](PUSH-AUDIENCE-PLAN.md): a push audience is literally a list of `authz.Scope`
+and every entry is checked with `Covers`, on `POST /auth/admin/push-audience` — the same rule as
+everything else here, not a fourth answer of its own. The "who gets notified, and of what" review
+above is still open, and unprompted mail should end up following whatever it settles on; push
+already does, since it was built after that rule existed.
 
 ### Loading indicators wherever a page fetches from a backend service
 

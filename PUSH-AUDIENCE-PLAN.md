@@ -12,21 +12,36 @@ with no per-branch or per-user loop**.
 
 ## Status
 
-**Nothing here is built.** This is a design, written against `org-structure` as it stands. The push
-feature itself is built and deployed; §1 describes what it does today and why it does not survive
-contact with the organization model.
+**All of it is built**, against the file-based stores — nothing here has touched staging or
+production, same as the rest of `ORGANIZATION-PLAN.md`. §1 describes what push did before this;
+everything below is what replaced it.
 
 | | What | Where |
 |---|---|---|
 | ✅ | **Decided:** `wsko_admin` may send to `all` — it is `authz.WSKO()`, and `Covers` alone decides | §4 |
-| ⬜ | Startup re-register — a prerequisite for everything else, useful on its own | §7 |
-| ⬜ | Audience as a list of scopes, `all` included | §3 |
-| ⬜ | Authorize every entry with `authz.Covers`; refuse the request, never an entry | §4 |
-| ⬜ | Batch membership resolution — two queries, and overlap deduplicated by construction | §5 |
-| ⬜ | Prune on 403, so a VAPID rotation cannot leave dead rows forever | §7 |
-| ⬜ | Frontend: no picker when the sender administers one branch; retire `isGlobalAdmin` | §8, §4 |
-| ⬜ | Frontend: confirm any send wider than the sender's own club | §8.1 |
+| ✅ | Startup re-register | §7 |
+| ✅ | Audience as a list of scopes, `all` included | §3 |
+| ✅ | Authorize every entry with `authz.Covers`; refuse the request, never an entry | §4 |
+| ✅ | Batch membership resolution — two queries, and overlap deduplicated by construction | §5 |
+| ✅ | Prune on 403, so a VAPID rotation cannot leave dead rows forever | §7 |
+| ✅ | Frontend: no picker when the sender administers one branch | §8 |
+| ✅ | Frontend: confirm any send wider than the sender's own club | §8.1 |
 | ✅ | Build pipeline keeps sending to everybody, unchanged | §3.1 |
+
+**As built, one thing settled differently from the design text below.** §4's closing note says
+`isGlobalAdmin` "becomes dead code and should go." It was renamed to `isTechnicalAdmin` and kept,
+per the person building this: `admin` alone is root — a technical superuser distinct from
+`wsko_admin`'s organizational authority — and more admin-only technical controls (unrelated to
+organizational scope) are expected to need exactly that predicate, the same way this one no longer
+does. `routes.tsx`'s broadcast gate moved to `isAnyAdmin`, as the design still says; only the
+retirement of the predicate itself did not happen.
+
+Audience resolution is a new synchronous call from persistence to auth
+(`POST /auth/admin/push-audience`, `backend/persistence/internal/authclient`), forwarding the
+caller's own `access_token` cookie — the first such call between the two services (§5, §10). It
+carries a 25 s timeout, chosen to stay under persistence's own 30 s `http.Server.WriteTimeout`
+rather than reusing `jwks.Cache`'s 45 s cold-start figure, which times a background refresh rather
+than a live request.
 
 ---
 
@@ -224,9 +239,11 @@ Pleasantly little, and it deletes more than it adds:
 - `routes.tsx:215` is the **only** use of `isGlobalAdmin` in the app. §8 already replaces that gate
   with `isAnyAdmin`, and "may name `all`" inside the page is `coversEverything()` — the predicate
   `AdminOrganization.tsx:55` and `AdminUser.tsx:131` already use for exactly this question.
-  **`isGlobalAdmin` becomes dead code and should go**, taking the last asymmetry out of the
-  frontend's role vocabulary.
-- `roles.ts:33`'s comment is now wrong and must be rewritten rather than left to mislead.
+  **As built, `isGlobalAdmin` was renamed to `isTechnicalAdmin` and kept** rather than deleted —
+  see the Status section above. It stops being *used* here, which is the asymmetry that mattered.
+- `roles.ts:33`'s comment is now wrong and must be rewritten rather than left to mislead. **As
+  built**, rewritten to describe `isTechnicalAdmin` as the root/technical-superuser predicate
+  instead.
 - Nothing changes server-side beyond §4's loop, which never had a special case to remove.
 
 ---
