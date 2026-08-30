@@ -189,6 +189,8 @@ go run ./cmd/orgmigrate --data-dir ./data --apply
 
 It chooses its store the way the services do, so the same command migrates Cosmos when `COSMOS_ENDPOINT` and `COSMOS_KEY` are set.
 
+**Against a live environment, restart the auth service afterwards.** It holds the organization tree in an in-process cache that stays coherent by reloading it on every write the service's own API makes — a write from outside the running process (exactly what `orgmigrate` is) leaves that cache stale until the service restarts and loads the tree fresh from the store. On Azure Container Apps: `az containerapp revision restart --name <auth-app> --resource-group <rg> --revision <active-revision>`.
+
 ## Deployment
 
 Everything runs from one workflow, [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Every push runs the Go and frontend test jobs; a push to `deploy` then deploys production and a push to `deploy-staging` deploys staging, each as a `needs:`-gated job that calls [`deploy.yml`](.github/workflows/deploy.yml) or [`deploy-staging.yml`](.github/workflows/deploy-staging.yml). Those two files hold the deploy steps themselves and are never triggered on their own.
