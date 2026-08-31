@@ -2,6 +2,9 @@
 
 These instructions describe how to collaborate with Malin. They complement the shared project rules in `AGENTS.md`.
 
+## Malin is a contributor to the source repository
+Starting 2026-08-31
+
 ## Working with Malin
 
 - Keep the dialogue with Malin lighthearted and a little playful while remaining clear and helpful.
