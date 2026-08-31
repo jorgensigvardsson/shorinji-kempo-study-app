@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import type { QuizQuestion } from "./quiz-logic";
+import Quiz from "./Quiz";
 
 const question: QuizQuestion = {
   id: "question-1",
@@ -19,8 +21,8 @@ vi.mock("./quiz-logic", async () => {
 // Quiz reads the stored streak when its module is first loaded, so each test starts
 // from a fresh module registry with localStorage already holding what it should see.
 async function renderQuiz() {
-  const { default: Quiz } = await import("./Quiz");
-  return render(<Quiz myGrade="shodan" />);
+  const { default: FootStanceQuiz } = await import("./FootStanceQuiz");
+  return render(<FootStanceQuiz myGrade="shodan" />);
 }
 
 // Both faces of the card carry the footer; they always show the same streak.
@@ -35,7 +37,45 @@ afterEach(() => {
   localStorage.clear();
 });
 
+describe("Quiz menu", () => {
+  it("offers word-list, foot-stance, and hand-position quizzes", () => {
+    render(<MemoryRouter><Quiz /></MemoryRouter>);
+
+    expect(screen.getByRole("button", { name: /Ordlistequiz/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Fotställningsquiz/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Handpositionsquiz/i })).toBeTruthy();
+  });
+});
+
 describe("Quiz streak", () => {
+  it("starts with the foot-stance quiz and all techniques up to my grade", async () => {
+    await renderQuiz();
+
+    expect(screen.getByRole("heading", { name: "Fotställningsquiz" })).toBeTruthy();
+    expect((screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value).toBe("up-to-own");
+  });
+
+  it("starts the hand-position quiz with all techniques up to my grade", async () => {
+    const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
+    render(<HandPositionQuiz myGrade="shodan" />);
+
+    expect(screen.getByRole("heading", { name: "Handpositionsquiz" })).toBeTruthy();
+    expect((screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value).toBe("up-to-own");
+  });
+
+  it("keeps the technique selection after several questions", async () => {
+    const user = userEvent.setup();
+    await renderQuiz();
+
+    for (let questionNumber = 0; questionNumber < 3; questionNumber += 1) {
+      await user.click(screen.getByLabelText("Rätt alternativ"));
+      await user.click(screen.getByRole("button", { name: "Svara" }));
+      await user.click(screen.getByRole("button", { name: "Nästa fråga" }));
+    }
+
+    expect((screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value).toBe("up-to-own");
+  });
+
   it("picks up the streak stored on this device", async () => {
     localStorage.setItem("quizStreakCurrent", "4");
 

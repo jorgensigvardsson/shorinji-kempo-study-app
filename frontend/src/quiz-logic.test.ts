@@ -2,6 +2,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   buildWordListCandidates,
   buildKamokuCandidates,
+  buildFootStanceQuizPool,
+  buildHandPositionQuizPool,
   buildQuizPool,
   drawQuestion,
   pickDistractors,
@@ -288,7 +290,150 @@ describe("buildKamokuCandidates", () => {
   });
 });
 
+// ─── buildFootStanceQuizPool ─────────────────────────────────────────────────
+
+const footStanceHokei = (id: string, footStance: string[], variations: string[] = []): HokeiMoment => ({
+  ...baseHokei,
+  id,
+  hokei_name: id,
+  variations,
+  foot_stance: footStance,
+});
+
+const footStancePlan = (grade: GradePlan["grade"], moments: HokeiMoment[]): GradePlan => ({
+  grade,
+  weeks: [{ week: 1, type: "regular_week", moments }],
+});
+
+describe("buildFootStanceQuizPool", () => {
+  it("uses Tai, Hiraki, and Both as the three possible answers", () => {
+    const plan = footStancePlan("6 kyū", [
+      footStanceHokei("tai technique", ["tai gamae"]),
+      footStanceHokei("hiraki technique", ["hiraki gamae"]),
+      footStanceHokei("both technique", ["tai gamae", "hiraki gamae"]),
+    ]);
+
+    const pool = buildFootStanceQuizPool([plan], "6 kyū", "own");
+
+    expect(pool.candidates.map(candidate => candidate.correctAnswer)).toEqual([
+      "tai gamae",
+      "hiraki gamae",
+      "Båda",
+    ]);
+    expect(pool.domainOptions.get("foot_stance")).toEqual(["tai gamae", "hiraki gamae", "Båda"]);
+  });
+
+  it("skips techniques without foot-stance data", () => {
+    const plan = footStancePlan("6 kyū", [footStanceHokei("missing stance", [])]);
+    expect(buildFootStanceQuizPool([plan], "6 kyū", "own").candidates).toEqual([]);
+  });
+
+  it("supports own, up-to-own, a specific grade, and all grades", () => {
+    const plans = [
+      footStancePlan("6 kyū", [footStanceHokei("sixth kyu", ["tai gamae"])]),
+      footStancePlan("5 kyū", [footStanceHokei("fifth kyu", ["hiraki gamae"])]),
+      footStancePlan("4 kyū", [footStanceHokei("fourth kyu", ["tai gamae", "hiraki gamae"])]),
+    ];
+
+    expect(buildFootStanceQuizPool(plans, "5 kyū", "own").candidates).toHaveLength(1);
+    expect(buildFootStanceQuizPool(plans, "5 kyū", "up-to-own").candidates).toHaveLength(2);
+    expect(buildFootStanceQuizPool(plans, "5 kyū", "6 kyū").candidates).toHaveLength(1);
+    expect(buildFootStanceQuizPool(plans, "5 kyū", "all").candidates).toHaveLength(3);
+  });
+
+  it("includes variations in the technique shown in the question", () => {
+    const plan = footStancePlan("6 kyū", [
+      footStanceHokei("ryūsui geri", ["tai gamae", "hiraki gamae"], ["ushiro"]),
+    ]);
+
+    const [candidate] = buildFootStanceQuizPool([plan], "6 kyū", "own").candidates;
+    expect(candidate.questionArgs).toEqual(["ryūsui geri (ushiro)"]);
+  });
+});
+
 // ─── buildQuizPool ────────────────────────────────────────────────────────────
+
+// ─── buildHandPositionQuizPool ───────────────────────────────────────────────
+
+const handPositionHokei = (
+  id: string,
+  attackerStance?: string,
+  defenderStance?: string,
+  variations: string[] = [],
+): HokeiMoment => ({
+  ...baseHokei,
+  id,
+  hokei_name: id,
+  variations,
+  roles: {
+    attacker: { stance: attackerStance, action: "attack" },
+    defender: { stance: defenderStance, action: "defence" },
+  },
+});
+
+const handPositionPlan = (grade: GradePlan["grade"], moments: HokeiMoment[]): GradePlan => ({
+  grade,
+  weeks: [{ week: 1, type: "regular_week", moments }],
+});
+
+describe("buildHandPositionQuizPool", () => {
+  it("asks separately for the attacker's and defender's hand positions", () => {
+    const plans = [
+      handPositionPlan("6 kyū", [handPositionHokei("gyaku gote", "chūdan gamae", "ichiji gamae")]),
+      handPositionPlan("5 kyū", [handPositionHokei("uwa uke geri", "hassō gamae", "seiza")]),
+    ];
+
+    const pool = buildHandPositionQuizPool(plans, "6 kyū", "own");
+
+    expect(pool.candidates).toEqual([
+      expect.objectContaining({
+        id: "hand_position.attacker.gyaku gote",
+        question: "Vilken handposition har angriparen i \"{0}\"?",
+        correctAnswer: "chūdan gamae",
+      }),
+      expect.objectContaining({
+        id: "hand_position.defender.gyaku gote",
+        question: "Vilken handposition har försvararen i \"{0}\"?",
+        correctAnswer: "ichiji gamae",
+      }),
+    ]);
+    expect(pool.domainOptions.get("hand_position")).toEqual([
+      "chūdan gamae",
+      "ichiji gamae",
+      "hassō gamae",
+    ]);
+  });
+
+  it("skips role descriptions that are not gamae hand positions", () => {
+    const plan = handPositionPlan("6 kyū", [
+      handPositionHokei("instruction", "främre handen hålls högt", "erbjud jōhaku"),
+    ]);
+
+    expect(buildHandPositionQuizPool([plan], "6 kyū", "own").candidates).toEqual([]);
+  });
+
+  it("supports own, up-to-own, a specific grade, and all grades", () => {
+    const plans = [
+      handPositionPlan("6 kyū", [handPositionHokei("sixth kyu", "chūdan gamae")]),
+      handPositionPlan("5 kyū", [handPositionHokei("fifth kyu", "ichiji gamae")]),
+      handPositionPlan("4 kyū", [handPositionHokei("fourth kyu", "hassō gamae")]),
+    ];
+
+    expect(buildHandPositionQuizPool(plans, "5 kyū", "own").candidates).toHaveLength(1);
+    expect(buildHandPositionQuizPool(plans, "5 kyū", "up-to-own").candidates).toHaveLength(2);
+    expect(buildHandPositionQuizPool(plans, "5 kyū", "6 kyū").candidates).toHaveLength(1);
+    expect(buildHandPositionQuizPool(plans, "5 kyū", "all").candidates).toHaveLength(3);
+  });
+
+  it("includes variations in the technique shown in the question", () => {
+    const plan = handPositionPlan("6 kyū", [
+      handPositionHokei("ryūsui geri", "chūdan gamae", undefined, ["ushiro"]),
+    ]);
+
+    const [candidate] = buildHandPositionQuizPool([plan], "6 kyū", "own").candidates;
+    expect(candidate.questionArgs).toEqual(["ryūsui geri (ushiro)"]);
+  });
+});
 
 describe("buildQuizPool", () => {
   const wordEntries: WordListEntry[] = [

@@ -23,6 +23,154 @@ export interface QuizPool {
   domainOptions: Map<string, string[]>;
 }
 
+export type QuizGradeSelection = "all" | "own" | "up-to-own" | GradeName;
+
+const FOOT_STANCE_DOMAIN = "foot_stance";
+const TAI_GAMAE = "tai gamae";
+const HIRAKI_GAMAE = "hiraki gamae";
+const BOTH_FOOT_STANCES = "Båda";
+const HAND_POSITION_DOMAIN = "hand_position";
+
+export const buildFootStanceQuizPool = (
+  plans: GradePlan[],
+  myGrade: GradeName,
+  selection: QuizGradeSelection,
+): QuizPool => {
+  const candidates: QuizCandidate[] = [];
+  const seen = new Set<string>();
+
+  for (const plan of plans) {
+    if (!matchesGradeSelection(plan.grade, myGrade, selection))
+      continue;
+
+    for (const week of plan.weeks) {
+      for (const moment of getHokeiMoments(week)) {
+        const hokeiName = normalizeText(moment.hokei_name);
+        const stances = new Set(moment.foot_stance.map(normalizeKey));
+        const hasTai = stances.has(TAI_GAMAE);
+        const hasHiraki = stances.has(HIRAKI_GAMAE);
+
+        if (!hokeiName || (!hasTai && !hasHiraki))
+          continue;
+
+        const correctAnswer = hasTai && hasHiraki
+          ? BOTH_FOOT_STANCES
+          : hasTai ? TAI_GAMAE : HIRAKI_GAMAE;
+        const variations = moment.variations.map(normalizeText).filter(Boolean);
+        const techniqueLabel = variations.length > 0
+          ? `${hokeiName} (${variations.join(", ")})`
+          : hokeiName;
+        const dedupeKey = `${normalizeKey(techniqueLabel)}|${normalizeKey(correctAnswer)}`;
+
+        if (seen.has(dedupeKey))
+          continue;
+
+        seen.add(dedupeKey);
+        candidates.push({
+          id: `foot_stance.${moment.id}`,
+          question: `Vilken fotställning används i "{0}"?`,
+          questionArgs: [techniqueLabel],
+          correctAnswer,
+          domain: FOOT_STANCE_DOMAIN,
+        });
+      }
+    }
+  }
+
+  return {
+    candidates,
+    domainOptions: new Map([[FOOT_STANCE_DOMAIN, [TAI_GAMAE, HIRAKI_GAMAE, BOTH_FOOT_STANCES]]]),
+  };
+};
+
+export const buildHandPositionQuizPool = (
+  plans: GradePlan[],
+  myGrade: GradeName,
+  selection: QuizGradeSelection,
+): QuizPool => {
+  const candidates: QuizCandidate[] = [];
+  const handPositions: string[] = [];
+  const seen = new Set<string>();
+
+  // Distractors come from the real hand positions in the whole curriculum, not
+  // only the selected grade. Early grades otherwise have too few distinct
+  // positions to make a three-choice question.
+  for (const plan of plans) {
+    for (const week of plan.weeks) {
+      for (const moment of getHokeiMoments(week)) {
+        for (const role of [moment.roles.attacker, moment.roles.defender]) {
+          const position = normalizeText(role.stance);
+          if (isHandPosition(position) && !containsNormalized(handPositions, position))
+            handPositions.push(position);
+        }
+      }
+    }
+  }
+
+  const roles = [
+    { key: "attacker", question: "Vilken handposition har angriparen i \"{0}\"?" },
+    { key: "defender", question: "Vilken handposition har försvararen i \"{0}\"?" },
+  ] as const;
+
+  for (const plan of plans) {
+    if (!matchesGradeSelection(plan.grade, myGrade, selection))
+      continue;
+
+    for (const week of plan.weeks) {
+      for (const moment of getHokeiMoments(week)) {
+        const hokeiName = normalizeText(moment.hokei_name);
+        if (!hokeiName)
+          continue;
+
+        const variations = moment.variations.map(normalizeText).filter(Boolean);
+        const techniqueLabel = variations.length > 0
+          ? hokeiName + " (" + variations.join(", ") + ")"
+          : hokeiName;
+
+        for (const role of roles) {
+          const correctAnswer = normalizeText(moment.roles[role.key].stance);
+          if (!isHandPosition(correctAnswer))
+            continue;
+
+          const dedupeKey = [role.key, normalizeKey(techniqueLabel), normalizeKey(correctAnswer)].join("|");
+          if (seen.has(dedupeKey))
+            continue;
+
+          seen.add(dedupeKey);
+          candidates.push({
+            id: ["hand_position", role.key, moment.id].join("."),
+            question: role.question,
+            questionArgs: [techniqueLabel],
+            correctAnswer,
+            domain: HAND_POSITION_DOMAIN,
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    candidates,
+    domainOptions: new Map([[HAND_POSITION_DOMAIN, handPositions]]),
+  };
+};
+
+const isHandPosition = (value: string): boolean => normalizeKey(value).endsWith(" gamae");
+
+const matchesGradeSelection = (
+  grade: GradeName,
+  myGrade: GradeName,
+  selection: QuizGradeSelection,
+): boolean => {
+  if (selection === "all")
+    return true;
+  if (selection === "own")
+    return grade === myGrade;
+  if (selection === "up-to-own")
+    return compareGrades(grade, myGrade) <= 0;
+  return grade === selection;
+};
+
 export const buildQuizPool = (
   myGrade: GradeName,
   wordListData: WordListEntry[],

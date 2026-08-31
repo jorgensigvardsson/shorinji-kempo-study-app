@@ -74,7 +74,7 @@ describe("Theory", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("button", { name: /Quiz/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Quiz/i })).toBeNull();
     expect(screen.getByRole("button", { name: /Teknikgrupper/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Gradering/i })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Ordlista/i })).toBeNull();

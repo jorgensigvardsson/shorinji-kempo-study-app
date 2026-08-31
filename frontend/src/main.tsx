@@ -17,6 +17,18 @@ import { type GradePlan } from './data.ts'
 import { getSyncManager } from './sync/manager.ts';
 import RouteScrollManager from './components/RouteScrollManager.tsx';
 
+// Older development sessions registered the PWA worker on localhost. Vite no longer
+// does that, but an already-installed worker otherwise keeps controlling later
+// sessions and can serve stale modules during hot reload. Remove it once; production
+// builds keep their worker and offline support untouched.
+if (import.meta.env.DEV && "serviceWorker" in navigator) {
+  void navigator.serviceWorker.getRegistrations().then(async registrations => {
+    const wasControlled = navigator.serviceWorker.controller !== null;
+    const results = await Promise.all(registrations.map(registration => registration.unregister()));
+    if (wasControlled && results.some(Boolean)) window.location.reload();
+  });
+}
+
 // Grade and language are read straight from the app-data store by useAppData,
 // so they need no wrapper here and no trip through App's props.
 const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);

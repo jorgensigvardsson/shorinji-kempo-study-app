@@ -1,10 +1,11 @@
 .app-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
   gap: 0.5rem;
 }
 
 .app-grid-card {
+  min-width: 0;
   border: 1px solid var(--app-card-border);
   border-radius: 1rem;
   background: var(--bs-tertiary-bg);
@@ -32,6 +33,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .app-grid-icon {
@@ -47,6 +49,7 @@
 .app-grid-title {
   margin: 0;
   color: var(--bs-emphasis-color);
+  overflow-wrap: anywhere;
 }
 
 .app-grid-subtitle {

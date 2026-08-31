@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-31T17:40:00.000Z",
+    changes: [
+      {
+        emoji: "🎯",
+        sv: "Quizet är tillfälligt dolt när japanska är valt som appspråk. Vi ser över hur quizet ska fungera för japansktalande innan det kommer tillbaka.",
+        en: "The quiz is temporarily hidden when Japanese is selected as the app language. We are reviewing how it should work for Japanese speakers before bringing it back.",
+        tr: "Uygulama dili Japonca olarak seçildiğinde quiz geçici olarak gizleniyor. Geri getirmeden önce Japonca konuşanlar için nasıl çalışması gerektiğini yeniden değerlendiriyoruz.",
+        ja: "アプリの言語に日本語を選んだ場合、クイズは一時的に非表示になります。日本語話者に適した内容を見直したうえで、再公開する予定です。",
+      },
+      {
+        emoji: "🥋",
+        sv: "Quiz har nu tre tydliga val. Det vanliga ordlistequizet finns kvar, och du kan välja grad för att öva både fotställningar och angriparens eller försvararens handposition i varje teknik.",
+        en: "Quiz now has three clear choices. The familiar word-list quiz remains, and you can choose grades to practise both foot stances and the attacker's or defender's hand position in each technique.",
+        tr: "Quiz artık üç açık seçenek sunuyor. Alışılmış kelime listesi quizi yerinde dururken seviye seçerek her teknikte hem ayak duruşlarını hem de saldırganın veya savunmacının el duruşunu çalışabilirsin.",
+        ja: "クイズに三つの分かりやすい選択肢ができました。従来の用語集クイズに加え、級・段を選んで各技の足構えと、攻者・守者それぞれの手構えを練習できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-31T06:53:32.000Z",
     changes: [
       {

@@ -71,7 +71,10 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       devOptions: {
-        enabled: true,
+        // A development service worker fights Vite's module graph and can serve a
+        // half-updated app while files are being moved during hot reload. The real
+        // worker is still built and registered in preview/production.
+        enabled: false,
         type: 'module',
       },
       injectManifest: {

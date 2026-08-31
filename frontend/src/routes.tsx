@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
-import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
@@ -45,6 +45,9 @@ const AdminUser = page(() => import("./AdminUser.tsx"));
 const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
+const WordQuiz = page(() => import("./WordQuiz.tsx"));
+const FootStanceQuiz = page(() => import("./FootStanceQuiz.tsx"));
+const HandPositionQuiz = page(() => import("./HandPositionQuiz.tsx"));
 const GradingTest = page(() => import("./GradingTest.tsx"));
 const Flashcard = page(() => import("./Flashcard.tsx"));
 const TermsOfServices = page(() => import("./TermsOfServices.tsx"));
@@ -139,15 +142,36 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         icon: JournalText,
         hideOnStartPage: true,
         hideFromMenu: true,
-    } satisfies Route] : []), {
+    } satisfies Route] : []), ...(!translator.isJapanese ? [{
         path: "/quiz",
-        component: () => <TheoryToolPage><Quiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        component: () => <TheoryToolPage><Quiz /></TheoryToolPage>,
         menuText: translator.translate("Quiz"),
         startDescription: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
         icon: QuestionSquare,
         hideOnStartPage: true,
         hideFromMenu: true,
-    }, ...(!translator.isJapanese ? [{
+    }, {
+        path: "/quiz/words",
+        component: () => <TheoryToolPage><WordQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        menuText: translator.translate("Ordlistequiz"),
+        icon: JournalText,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/quiz/foot-stance",
+        component: () => <TheoryToolPage><FootStanceQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        menuText: translator.translate("Fotställningsquiz"),
+        icon: QuestionSquare,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/quiz/hand-position",
+        component: () => <TheoryToolPage><HandPositionQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        menuText: translator.translate("Handpositionsquiz"),
+        icon: HandIndex,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    } satisfies Route] : []), ...(!translator.isJapanese ? [{
         path: "/flashcard",
         component: () => <TheoryToolPage><Flashcard /></TheoryToolPage>,
         menuText: translator.translate("Flashkort"),

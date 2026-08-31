@@ -5,6 +5,50 @@
   padding: 1rem;
 }
 
+.quiz-menu-page {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.quiz-menu-header {
+  padding: 0.5rem 0.25rem 2rem;
+}
+
+.quiz-choice-grid {
+  gap: 0.75rem 1.5rem;
+}
+
+.quiz-choice-grid .app-grid-card {
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  box-shadow: none;
+}
+
+.quiz-choice-grid .app-grid-card-interactive:hover,
+.quiz-choice-grid .app-grid-card-interactive:focus-visible {
+  transform: none;
+  background: var(--bs-tertiary-bg);
+  box-shadow: none;
+}
+
+.quiz-page-heading {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.quiz-controls {
+  width: min(100%, 24rem);
+  margin: 0 auto 1.25rem;
+}
+
+.quiz-controls .form-label {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
 .quiz-scene {
   width: 100%;
   perspective: 1000px;

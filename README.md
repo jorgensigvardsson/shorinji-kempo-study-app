@@ -13,7 +13,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Grading** — theoretical requirements under Theory and practical requirements under Training, with grouped fundamentals and per-grade completion progress for large theory areas and fundamentals synced across devices
 - **Theory** — a shared entrance for technique groups, grading information, the word list, quiz, and flashcards
 - **Word List** — searchable dictionary of kanji, romaji, and technique terminology, with compact in-place lookup from selected or long-pressed text
-- **Quiz** — rapid-fire questions testing technique names and terminology, with streak counter and synced all-time high score
+- **Quiz** — choose between the existing word-list quiz and grade-filtered foot-stance or hand-position questions, all with a streak counter and synced all-time high score
 - **Flashcards** — spaced-repetition learning tool (non-Japanese languages)
 - **Focused technique cards** — calm full-card practice view, Dojo mode, notes, videos, and self-assessment
 - **Accounts** — sign in with an email code (or Google/Microsoft, when the address belongs to one); an account is required to use the app, and study data syncs automatically to the backend across devices

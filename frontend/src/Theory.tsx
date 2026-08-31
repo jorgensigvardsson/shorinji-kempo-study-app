@@ -37,14 +37,14 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             onSelect: () => navigate("/word-list"),
             navigatesTo: "/word-list",
         }] : []),
-        {
+        ...(showLanguageTools ? [{
             key: "quiz",
             title: translator.translate("Quiz"),
             subtitle: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
             icon: <QuestionSquare />,
             onSelect: () => navigate("/quiz"),
             navigatesTo: "/quiz",
-        },
+        }] : []),
         ...(showLanguageTools ? [{
             key: "flashcard",
             title: translator.translate("Flashkort"),
