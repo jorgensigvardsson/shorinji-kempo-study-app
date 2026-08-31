@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-08-31T06:53:32.000Z",
+    changes: [
+      {
+        emoji: "🧹",
+        sv: "Quizet använder nu bara korta, tydliga betydelser från ordlistan. Längre förklaringar stannar i ordlistan i stället för att dyka upp som svarsalternativ. På japanska visas inte längre frågor där kanji ska läsas som romaji.",
+        en: "The quiz now uses only short, clear meanings from the word list. Longer explanations stay in the word list instead of appearing as answer choices. In Japanese, questions that ask for a kanji reading in romaji are no longer shown.",
+        tr: "Quiz artık kelime listesindeki yalnızca kısa ve açık anlamları kullanıyor. Uzun açıklamalar cevap seçeneği olarak görünmek yerine kelime listesinde kalıyor. Japoncada kanjinin romaji okunuşunu soran sorular artık gösterilmiyor.",
+        ja: "クイズでは、用語集のうち短く明確な意味だけを出題するようになりました。詳しい説明は用語集に残り、選択肢には表示されません。日本語表示では、漢字をローマ字で読む問題も出題されなくなりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-26T04:28:56.000Z",
     changes: [
       {

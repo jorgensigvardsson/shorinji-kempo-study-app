@@ -1,4 +1,5 @@
 import { getHokeiMoments, type GradeName, type GradePlan, type WordListEntry } from "./data";
+import { quizMeaningEntryIds } from "./quiz-word-list-ids";
 import { compareGrades } from "./utilities/level";
 
 export interface QuizCandidate {
@@ -22,9 +23,14 @@ export interface QuizPool {
   domainOptions: Map<string, string[]>;
 }
 
-export const buildQuizPool = (myGrade: GradeName, wordListData: WordListEntry[], plans: GradePlan[]): QuizPool => {
+export const buildQuizPool = (
+  myGrade: GradeName,
+  wordListData: WordListEntry[],
+  plans: GradePlan[],
+  includeKanjiReadings: boolean,
+): QuizPool => {
   const candidates: QuizCandidate[] = [
-    ...buildWordListCandidates(wordListData),
+    ...buildWordListCandidates(wordListData, includeKanjiReadings),
     ...buildKamokuCandidates(plans, myGrade),
   ];
 
@@ -42,7 +48,7 @@ export const buildQuizPool = (myGrade: GradeName, wordListData: WordListEntry[],
   return { candidates: viableCandidates, domainOptions };
 };
 
-export const buildWordListCandidates = (entries: WordListEntry[]): QuizCandidate[] => {
+export const buildWordListCandidates = (entries: WordListEntry[], includeKanjiReadings = true): QuizCandidate[] => {
   const candidates: QuizCandidate[] = [];
 
   for (const entry of entries) {
@@ -50,29 +56,33 @@ export const buildWordListCandidates = (entries: WordListEntry[]): QuizCandidate
     const meanings = (entry.meanings ?? []).map(normalizeText).filter(Boolean);
     const kanji = normalizeText(entry.kanji);
 
-    if (!romaji || meanings.length === 0)
+    if (!romaji)
       continue;
 
     const primaryMeaning = meanings[0];
     const entryId = String(entry.id);
 
-    candidates.push({
-      id: `word.meaning.${entryId}`,
-      question: `Vad betyder "{0}"?`,
-      questionArgs: [romaji],
-      correctAnswer: primaryMeaning,
-      domain: "word.meaning",
-    });
+    if (primaryMeaning && quizMeaningEntryIds.has(entry.id)) {
+      candidates.push({
+        id: `word.meaning.${entryId}`,
+        question: `Vad betyder "{0}"?`,
+        questionArgs: [romaji],
+        correctAnswer: primaryMeaning,
+        domain: "word.meaning",
+      });
 
-    candidates.push({
-      id: `word.romaji_from_meaning.${entryId}`,
-      question: `Vilket romaji motsvarar "{0}"?`,
-      questionArgs: [primaryMeaning],
-      correctAnswer: romaji,
-      domain: "word.romaji",
-    });
+      candidates.push({
+        id: `word.romaji_from_meaning.${entryId}`,
+        question: `Vilket romaji motsvarar "{0}"?`,
+        questionArgs: [primaryMeaning],
+        correctAnswer: romaji,
+        domain: "word.romaji",
+      });
+    }
 
-    if (kanji) {
+    // In Japanese, showing kanji and asking for its romaji reading only tests a
+    // transliteration the reader does not need. Meaning questions still remain.
+    if (kanji && includeKanjiReadings) {
       candidates.push({
         id: `word.romaji_from_kanji.${entryId}`,
         question: `Hur läses "{0}" på romaji?`,
