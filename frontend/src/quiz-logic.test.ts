@@ -137,6 +137,15 @@ describe("buildWordListCandidates", () => {
     expect(kanjiQ?.correctAnswer).toBe("ippo");
   });
 
+  it("omits romaji-from-kanji candidates in Japanese", () => {
+    const withKanji = { ...entry, kanji: "一歩" };
+    const result = buildWordListCandidates([withKanji], false);
+
+    expect(result.some(c => c.id.startsWith("word.romaji_from_kanji"))).toBe(false);
+    expect(result.some(c => c.id.startsWith("word.meaning"))).toBe(true);
+    expect(result.some(c => c.id.startsWith("word.romaji_from_meaning"))).toBe(true);
+  });
+
   it("skips entries without romaji", () => {
     const noRomaji: WordListEntry = { id: 2, meanings: ["something"] };
     expect(buildWordListCandidates([noRomaji])).toHaveLength(0);
@@ -158,6 +167,51 @@ describe("buildWordListCandidates", () => {
     const messy: WordListEntry = { id: 5, romaji: "  ippo  ", meanings: ["  one step  "] };
     const result = buildWordListCandidates([messy]);
     expect(result.find(c => c.domain === "word.meaning")?.correctAnswer).toBe("one step");
+  });
+
+  it("keeps explanatory word-list meanings out of the quiz", () => {
+    const jime: WordListEntry = {
+      id: 490,
+      kanji: "絞め",
+      romaji: "jime",
+      meanings: ["strypning, kvävning (t.ex. kubi jime = halsstrypning)"],
+    };
+
+    const result = buildWordListCandidates([jime]);
+
+    expect(result.some(c => c.id === "word.meaning.490")).toBe(false);
+    expect(result.some(c => c.id === "word.romaji_from_meaning.490")).toBe(false);
+  });
+
+  it("still allows kanji reading questions for entries with explanatory meanings", () => {
+    const jime: WordListEntry = {
+      id: 490,
+      kanji: "絞め",
+      romaji: "jime",
+      meanings: ["strypning, kvävning (t.ex. kubi jime = halsstrypning)"],
+    };
+
+    const result = buildWordListCandidates([jime]);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: "word.romaji_from_kanji.490",
+        correctAnswer: "jime",
+      }),
+    ]);
+  });
+
+  it("keeps new word-list meanings out until their id is reviewed", () => {
+    const newEntry: WordListEntry = {
+      id: 999,
+      kanji: "新",
+      romaji: "new-word",
+      meanings: ["a short meaning"],
+    };
+
+    const result = buildWordListCandidates([newEntry]);
+
+    expect(result.map(c => c.id)).toEqual(["word.romaji_from_kanji.999"]);
   });
 });
 
@@ -245,17 +299,17 @@ describe("buildQuizPool", () => {
 
   it("filters out candidates whose domain has fewer than 3 options", () => {
     // single entry → only 1 domain value → not viable
-    const pool = buildQuizPool("shodan", [{ id: 1, romaji: "alpha", meanings: ["a"] }], []);
+    const pool = buildQuizPool("shodan", [{ id: 1, romaji: "alpha", meanings: ["a"] }], [], true);
     expect(pool.candidates).toHaveLength(0);
   });
 
   it("keeps candidates when the domain has at least 3 options", () => {
-    const pool = buildQuizPool("shodan", wordEntries, []);
+    const pool = buildQuizPool("shodan", wordEntries, [], true);
     expect(pool.candidates.length).toBeGreaterThan(0);
   });
 
   it("builds domainOptions map with deduplicated answers", () => {
-    const pool = buildQuizPool("shodan", wordEntries, []);
+    const pool = buildQuizPool("shodan", wordEntries, [], true);
     for (const [, values] of pool.domainOptions) {
       const lower = values.map(v => v.toLowerCase());
       expect(new Set(lower).size).toBe(lower.length);

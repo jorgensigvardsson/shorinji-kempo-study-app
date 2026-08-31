@@ -20,7 +20,12 @@ interface QuizProps {
 
 const Quiz = (props: QuizProps) => {
   const { myGrade } = props;
-  const quizPool = useMemo(() => buildQuizPool(myGrade, wordList as WordListEntry[], kamokuhyo as GradePlan[]), [myGrade]);
+  const translator = useContext(TranslatorContext);
+  const includeKanjiReadings = !translator.isJapanese;
+  const quizPool = useMemo(
+    () => buildQuizPool(myGrade, wordList as WordListEntry[], kamokuhyo as GradePlan[], includeKanjiReadings),
+    [myGrade, includeKanjiReadings],
+  );
   const [quizCard, setQuizCard] = useState<QuizQuestion | null>(() => drawQuestion(quizPool));
   const [recentQuestionIds, setRecentQuestionIds] = useState<string[]>([]);
   const [answer, setAnswer] = useState<number | null>(null);
@@ -28,8 +33,6 @@ const Quiz = (props: QuizProps) => {
   const [currentStreak, setCurrentStreak] = useState(currentStreakData.data ?? 0);
   const [highScore, setHighScore] = useState(highScoreData.data ?? 0);
   const previousQuizPool = useRef(quizPool);
-
-  const translator = useContext(TranslatorContext);
 
   const saveCurrentStreak = (streak: number) => {
     currentStreakData.save(streak);
