@@ -11,7 +11,7 @@ const Quiz = () => {
   const items: GridItem[] = [
     {
       key: "word-list-quiz",
-      title: translator.translate("Ordlistequiz"),
+      title: translator.translate("Ordlista"),
       subtitle: translator.translate("Öva ord, betydelser och tekniknamn."),
       icon: <JournalText />,
       onSelect: () => navigate("/quiz/words"),
@@ -19,7 +19,7 @@ const Quiz = () => {
     },
     {
       key: "foot-stance-quiz",
-      title: translator.translate("Fotställningsquiz"),
+      title: translator.translate("Fotställningar"),
       subtitle: translator.translate("Öva på tai gamae, hiraki gamae eller båda."),
       icon: <QuestionSquare />,
       onSelect: () => navigate("/quiz/foot-stance"),
@@ -27,7 +27,7 @@ const Quiz = () => {
     },
     {
       key: "hand-position-quiz",
-      title: translator.translate("Handpositionsquiz"),
+      title: translator.translate("Handpositioner"),
       subtitle: translator.translate("Öva handpositioner som ichiji gamae, hassō gamae och chūdan gamae."),
       icon: <HandIndex />,
       onSelect: () => navigate("/quiz/hand-position"),

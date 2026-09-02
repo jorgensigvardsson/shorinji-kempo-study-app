@@ -41,9 +41,9 @@ describe("Quiz menu", () => {
   it("offers word-list, foot-stance, and hand-position quizzes", () => {
     render(<MemoryRouter><Quiz /></MemoryRouter>);
 
-    expect(screen.getByRole("button", { name: /Ordlistequiz/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Fotställningsquiz/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Handpositionsquiz/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Ordlista/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Fotställningar/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Handpositioner/i })).toBeTruthy();
   });
 });
 

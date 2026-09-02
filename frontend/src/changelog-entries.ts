@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-02T17:06:00.000Z",
+    changes: [
+      {
+        emoji: "✨",
+        sv: "Quizvalen har fått kortare och lugnare namn: Ordlista, Fotställningar och Handpositioner.",
+        en: "The quiz choices now have shorter, calmer names: Word list, Foot stances, and Hand positions.",
+        tr: "Quiz seçenekleri artık daha kısa ve sade adlara sahip: Kelime listesi, Ayak duruşları ve El pozisyonları.",
+        ja: "クイズの選択肢が「用語集」「足構え」「手構え」という、より短く落ち着いた名前になりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-08-31T17:40:00.000Z",
     changes: [
       {
