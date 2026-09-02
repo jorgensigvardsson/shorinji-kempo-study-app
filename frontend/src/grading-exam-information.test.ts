@@ -58,6 +58,59 @@ describe("grading-exam-information.json", () => {
     expect(Array.isArray(manual?.sections)).toBe(true);
   });
 
+  it("keeps the official yondan through rokudan technical examinations complete", () => {
+    const expectedTerms = {
+      yondan: ["kiso kamoku", "chūshutsu kamoku", "kumi embu", "un'yōhō"],
+      godan: ["kiso kamoku", "chūshutsu kamoku", "kumi embu", "un'yōhō"],
+      rokudan: ["kiso kamoku", "chūshutsu kamoku", "un'yōhō"],
+    } as const;
+    const expectedFamilies = {
+      yondan: ["sangō ken eller ten'ō ken", "byakuren ken", "kakuritsu ken", "ryūō ken", "ryūka ken"],
+      godan: ["sangō ken eller ten'ō ken", "byakuren ken", "kakuritsu ken", "ryūō ken", "rakan ken"],
+      rokudan: ["sangō ken eller ten'ō ken", "byakuren ken", "kakuritsu ken", "ryūō ken", "rakan ken"],
+    } as const;
+
+    for (const grade of ["yondan", "godan", "rokudan"] as const) {
+      const manual = gradingManualFor(grade)!;
+      const technical = manual.sections.find(section => section.term?.romaji === "gijutsu kamoku")!;
+      expect(technical.items.map(item => item.term?.romaji)).toEqual(expectedTerms[grade]);
+
+      const fundamentals = technical.items.find(item => item.term?.romaji === "kiso kamoku")!;
+      const familySelection = fundamentals.items?.find(item => item.term?.romaji === "kenkei betsu shitei kamoku");
+      expect(familySelection).toBeDefined();
+      expect(familySelection?.items?.map(item => item.text)).toEqual(expectedFamilies[grade]);
+    }
+
+    const yondanKumiEmbu = gradingManualFor("yondan")!.sections[1].items
+      .find(item => item.term?.romaji === "kumi embu")!;
+    const godanKumiEmbu = gradingManualFor("godan")!.sections[1].items
+      .find(item => item.term?.romaji === "kumi embu")!;
+    expect(yondanKumiEmbu.items?.map(item => item.term?.romaji)).toEqual([
+      "gedan gaeshi - tobi ren geri",
+      "chūdan gaeshi - uchi uke zuki",
+      "kubi jime shuhō jūji nage",
+      "maki komi gote",
+      "oshi uke maki nage",
+      "hangetsu gaeshi sukui kubi nage - fukko chi ni",
+    ]);
+    expect(godanKumiEmbu.items?.map(item => item.term?.romaji)).toEqual([
+      "kote nage",
+      "keri ten san - tora daoshi",
+      "katate nage kiri kaeshi",
+      "furisute omote nage",
+      "uwa uke tembin nage",
+      "kaishin zuki - osae kannuki nage soto",
+    ]);
+  });
+
+  it("uses the official high-dan home-assignment length", () => {
+    const expected = "Om japanska mellan 2 000 och 4 000 tecken. Om annat språk, mellan 1 000 och 1 600 ord.";
+    for (const grade of ["yondan", "godan", "rokudan"] as const) {
+      const assignment = gradingManualFor(grade)!.sections[0].items[0];
+      expect(assignment.annotations?.map(annotation => annotation.text)).toContain(expected);
+    }
+  });
+
   it("returns nothing for a grade the file does not cover, or for no grade at all", () => {
     // The file stops at rokudan; the higher dan grades exist as names but have no manual.
     expect(gradingManualFor("kudan")).toBeUndefined();
