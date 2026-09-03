@@ -17,6 +17,18 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    timestamp: "2026-09-02T17:32:58.285Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Graderingsmaterialet för yondan, godan och rokudan är nu kompletterat enligt WSKO:s curriculum. Bland annat finns kumi embu för yondan och godan samt un’yōhō för alla tre graderna med.",
+        en: "The grading material for yondan, godan and rokudan is now complete according to the WSKO curriculum. This includes paired embu for yondan and godan, and un’yōhō for all three grades.",
+        tr: "Yondan, godan ve rokudan derece sınavı içeriği artık WSKO müfredatına göre tamamlandı. Yondan ve godan için kumi embu ile üç derecenin tamamı için un’yōhō eklendi.",
+        ja: "四段・五段・六段の昇格考試内容を、WSKOのカリキュラムに沿って補完しました。四段・五段の組演武と、三つの段位すべての運用法が含まれます。",
+      }
+    ]
+  },
+  {
     timestamp: "2026-08-31T17:40:00.000Z",
     changes: [
       {

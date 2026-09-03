@@ -26,7 +26,7 @@
             "annotations": [
               {
                 "marker": "asterisk",
-                "text": "Om japanska mellan 2 000 och 3 200 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
+                "text": "Om japanska mellan 2 000 och 4 000 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
               }
             ],
             "items": [
@@ -155,7 +155,7 @@
                       "style": "circled",
                       "value": 3
                     },
-                    "text": "kakuritsu ken eller chiō ken"
+                    "text": "kakuritsu ken"
                   },
                   {
                     "numbering": {
@@ -192,6 +192,73 @@
                 "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
               }
             ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "un'yōhō"
+            },
+            "points": 100,
+            "description": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Obligatoriskt upp till 49 års ålder. Frivilligt från 50 års ålder och över."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "gōhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: tsuki och keri mot jōdan och chūdan."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: fria kontringar."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "jūhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: attackera genom att greppa handled, ärm eller krage."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: försvara och kontringsattackera med tekniker från ryūō ken, ryūka ken & rakan ken."
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -223,7 +290,7 @@
             "annotations": [
               {
                 "marker": "asterisk",
-                "text": "Om japanska mellan 2 000 och 3 200 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
+                "text": "Om japanska mellan 2 000 och 4 000 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
               }
             ],
             "items": [
@@ -392,7 +459,7 @@
                       "style": "circled",
                       "value": 3
                     },
-                    "text": "kakuritsu ken eller chiō ken"
+                    "text": "kakuritsu ken"
                   },
                   {
                     "numbering": {
@@ -407,6 +474,169 @@
                       "value": 5
                     },
                     "text": "rakan ken"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "chūshutsu kamoku",
+              "gloss": "utvalda tekniker"
+            },
+            "points": 100,
+            "description": "Fem gōhō waza (50 poäng) och fem jūhō waza (50 poäng) väljs ut från hela nidan kamoku till godan kamoku. Rakan appō exkluderas.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "kumi embu"
+            },
+            "points": 100,
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Ena sidan gör (1), (3) & (5) som shusha, andra sidan gör (2), (4) & (6) som shusha. Vem som gör vilken sida bestäms av kōshi-in (examinator)."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "kote nage"
+                },
+                "annotations": [
+                  {
+                    "marker": "asterisk",
+                    "text": "kōgeki: sashikomi mawashi geri och jō chū ni ren zuki"
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "keri ten san - tora daoshi"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "katate nage kiri kaeshi"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "furisute omote nage"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "uwa uke tembin nage"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "kaishin zuki - osae kannuki nage soto"
+                }
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 4
+            },
+            "term": {
+              "romaji": "un'yōhō"
+            },
+            "points": 100,
+            "description": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Obligatoriskt upp till 49 års ålder. Frivilligt från 50 års ålder och över."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "gōhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: tsuki och keri mot jōdan och chūdan."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: fria kontringar."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "jūhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: attackera genom att greppa handled, ärm eller krage."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: försvara och kontringsattackera med tekniker från ryūō ken, ryūka ken & rakan ken."
                   }
                 ]
               }
@@ -442,7 +672,7 @@
             "annotations": [
               {
                 "marker": "asterisk",
-                "text": "Om japanska mellan 2 000 och 3 200 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
+                "text": "Om japanska mellan 2 000 och 4 000 tecken. Om annat språk, mellan 1 000 och 1 600 ord."
               }
             ],
             "items": [
@@ -600,7 +830,7 @@
                       "style": "circled",
                       "value": 3
                     },
-                    "text": "kakuritsu ken eller chiō ken"
+                    "text": "kakuritsu ken"
                   },
                   {
                     "numbering": {
@@ -614,7 +844,164 @@
                       "style": "circled",
                       "value": 5
                     },
-                    "text": "rakan ken"
+                    "text": "ryūka ken"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 2
+            },
+            "term": {
+              "romaji": "chūshutsu kamoku",
+              "gloss": "utvalda tekniker"
+            },
+            "points": 100,
+            "description": "Fem gōhō waza (50 poäng) och fem jūhō waza (50 poäng) väljs ut från hela nidan kamoku till yondan kamoku.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Utför både vänster och höger sida, totalen bedöms och poängsätts."
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 3
+            },
+            "term": {
+              "romaji": "kumi embu"
+            },
+            "points": 100,
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Ena sidan gör (1), (3) & (5) som shusha, andra sidan gör (2), (4) & (6) som shusha. Vem som gör vilken sida bestäms av kōshi-in (examinator)."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "gedan gaeshi - tobi ren geri"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "chūdan gaeshi - uchi uke zuki"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 3
+                },
+                "term": {
+                  "romaji": "kubi jime shuhō jūji nage"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 4
+                },
+                "term": {
+                  "romaji": "maki komi gote"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 5
+                },
+                "term": {
+                  "romaji": "oshi uke maki nage"
+                }
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 6
+                },
+                "term": {
+                  "romaji": "hangetsu gaeshi sukui kubi nage - fukko chi ni"
+                }
+              }
+            ]
+          },
+          {
+            "numbering": {
+              "style": "numeric",
+              "value": 4
+            },
+            "term": {
+              "romaji": "un'yōhō"
+            },
+            "points": 100,
+            "description": "Bōgu (skydd) ska användas, kōsha (attackerare) och shusha (försvarare) utses, bedömning görs om korrekt försvar och kontringar utförs mot attackerna.",
+            "annotations": [
+              {
+                "marker": "kome",
+                "text": "Obligatoriskt upp till 49 års ålder. Frivilligt från 50 års ålder och över."
+              }
+            ],
+            "items": [
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 1
+                },
+                "term": {
+                  "romaji": "gōhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: tsuki och keri mot jōdan och chūdan."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: fria kontringar."
+                  }
+                ]
+              },
+              {
+                "numbering": {
+                  "style": "paren",
+                  "value": 2
+                },
+                "term": {
+                  "romaji": "jūhō un'yōhō"
+                },
+                "points": 50,
+                "items": [
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "kōsha: attackera genom att greppa handled, överarm, övre ärm och krage."
+                  },
+                  {
+                    "numbering": {
+                      "style": "bullet"
+                    },
+                    "text": "shusha: försvara och kontringsattackera med tekniker från ryūō ken, ryūka ken & rakan ken."
                   }
                 ]
               }
