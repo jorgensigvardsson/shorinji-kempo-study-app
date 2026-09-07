@@ -37,6 +37,25 @@ describe("AppDataStore — initial state", () => {
     expect(store.get("weeklyPlanCompletions")).toEqual({});
   });
 
+  it("adds an unset app name to documents saved before app names existed", () => {
+    const current = createDefaultAppDataDocument();
+    const oldData = { ...current.data } as Partial<AppDataDocument["data"]>;
+    delete oldData.appDisplayName;
+    const store = makeStore({ ...current, data: oldData as AppDataDocument["data"] });
+
+    expect(store.get("appDisplayName")).toBeNull();
+  });
+
+  it("keeps an intentional app name and limits malformed oversized values", () => {
+    const current = createDefaultAppDataDocument();
+    const store = makeStore({
+      ...current,
+      data: { ...current.data, appDisplayName: "M".repeat(150) },
+    });
+
+    expect(store.get("appDisplayName")).toBe("M".repeat(100));
+  });
+
   it("adds empty grading completions to older saved documents", () => {
     const current = createDefaultAppDataDocument();
     const oldData = { ...current.data } as Partial<AppDataDocument["data"]>;

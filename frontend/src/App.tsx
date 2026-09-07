@@ -60,6 +60,7 @@ function App(props: Props) {
   const [ kanjiFontFilter, setKanjiFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "japanese" });
   // The user's own grade, as stored and synced.
   const profileGrade = useAppData("grade");
+  const appDisplayName = useAppData("appDisplayName");
   // The training controls can temporarily show another grade's material without
   // touching the user's own grade. That override is session-only, and a real
   // grade change — from Settings, or arriving over sync — clears it. Resetting
@@ -132,9 +133,12 @@ function App(props: Props) {
       // this time, not that anything the user did failed.
     });
   }, [syncState.status]);
-  const displayName = syncState.status === "local_only"
+  const accountDisplayName = syncState.status === "local_only"
     ? undefined
     : getSyncManager().getBackendUserInfo()?.displayName;
+  // Null means no app-specific choice has been made, so the account identity is the
+  // prefill. An intentionally empty string stays empty and simply hides the greeting.
+  const displayName = appDisplayName === null ? accountDisplayName : appDisplayName;
   const routes = getRoutes(
     findGradePlan(gradePlans, displayGrade),
     findGradePlan(gradePlans, profileGrade),

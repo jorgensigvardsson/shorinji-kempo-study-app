@@ -184,7 +184,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={profileGradePlan} allGradePlans={allGradePlans} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
-        startDescription: translator.translate("Anpassa språk, tema, textstorlek och grad."),
+        startDescription: translator.translate("Anpassa appen, din profil och ditt konto."),
         icon: Gear
     },
     // A member's own place in the organization, and the one thing they can do

@@ -31,7 +31,7 @@ describe("createDefaultAppDataDocument", () => {
     const { data } = createDefaultAppDataDocument();
     expect(data.grade).toBe("shodan");
     expect(data.language).toBe("sv");
-    expect(data.currentWeekAnchor).toBeNull();
+    expect(data.appDisplayName).toBeNull();
     expect(data.kenshiNumber).toBeUndefined();
     expect(data.notes).toEqual({});
     expect(data.hokeiRanks).toEqual({});
@@ -57,7 +57,7 @@ describe("unknownDataFields", () => {
 
   it("drops retired fields, which are unrecognised but deliberately unwanted", () => {
     const { data } = createDefaultAppDataDocument();
-    const withRetired = { ...data, embuDraft: { notes: "x", steps: [] }, futureField: 1 };
+    const withRetired = { ...data, embuDraft: { notes: "x", steps: [] }, currentWeekAnchor: { week: 3, anchorDate: "2026-09-01" }, futureField: 1 };
     expect(unknownDataFields(withRetired)).toEqual({ futureField: 1 });
   });
 

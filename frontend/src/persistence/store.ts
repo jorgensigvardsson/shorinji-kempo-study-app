@@ -1,6 +1,6 @@
 import { LocalStorageBackend, type PersistenceBackend } from "./backend";
 import { deepEqual } from "../utilities/deep-equal";
-import { canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, unknownDataFields, type AppDataDocument, type AppDataState } from "./schema";
+import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, unknownDataFields, type AppDataDocument, type AppDataState } from "./schema";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
 type UnregisterDataChangedCallback = () => void;
@@ -20,7 +20,7 @@ export class AppDataStore {
     this.callbacks = {
       grade: new Map<number, DataChangedCallback<"grade">>(),
       language: new Map<number, DataChangedCallback<"language">>(),
-      currentWeekAnchor: new Map<number, DataChangedCallback<"currentWeekAnchor">>(),
+      appDisplayName: new Map<number, DataChangedCallback<"appDisplayName">>(),
       kenshiNumber: new Map<number, DataChangedCallback<"kenshiNumber">>(),
       notes: new Map<number, DataChangedCallback<"notes">>(),
       notesUpdatedAt: new Map<number, DataChangedCallback<"notesUpdatedAt">>(),
@@ -151,9 +151,11 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       ...unknownDataFields(input.data),
       grade: input.data?.grade ?? fallback.data.grade,
       language: input.data?.language ?? fallback.data.language,
-      currentWeekAnchor: isWeekAnchor(input.data?.currentWeekAnchor)
-        ? input.data.currentWeekAnchor
-        : fallback.data.currentWeekAnchor,
+      appDisplayName: input.data?.appDisplayName === null
+        ? null
+        : typeof input.data?.appDisplayName === "string"
+          ? input.data.appDisplayName.slice(0, APP_DISPLAY_NAME_MAX_LENGTH)
+          : fallback.data.appDisplayName,
       kenshiNumber: readKenshiNumber(input.data?.kenshiNumber),
       notes: isRecord(input.data?.notes) ? input.data.notes : fallback.data.notes,
       notesUpdatedAt: isRecord(input.data?.notesUpdatedAt) ? input.data.notesUpdatedAt : fallback.data.notesUpdatedAt,
@@ -188,15 +190,6 @@ function readKenshiNumber(value: unknown): string | undefined {
 
 function isRecord(value: unknown): value is Record<string, string> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isWeekAnchor(value: unknown): value is { week: number; anchorDate: string } {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return false;
-  }
-
-  const candidate = value as { week?: unknown; anchorDate?: unknown };
-  return typeof candidate.week === "number" && Number.isFinite(candidate.week) && typeof candidate.anchorDate === "string";
 }
 
 function isFlashCardKnownRecord(value: unknown): value is Record<string, { known: boolean; updatedAt: string }> {

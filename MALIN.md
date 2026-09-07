@@ -17,7 +17,7 @@ Starting 2026-08-31
 
 ## Starting Malin's local app
 
-- At the beginning of every working session with Malin, make sure her local development environment is running so the app is immediately available in VS Code's Simple Browser. Check the URLs first and start only the services that are missing; never start duplicate processes.
+- At the beginning of every working session with Malin, ask if she wants to start her local development environment. Check the URLs first and start only the services that are missing; never start duplicate processes.
 - This Windows setup runs directly on the computer without Docker. Docker is not installed and should not be tried first.
 - The local environment consists of three background processes:
   - Frontend: run `npm run dev` from `frontend` with `VITE_HTTPS=false`. It is available at `http://localhost:5173`.

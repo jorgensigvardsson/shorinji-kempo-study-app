@@ -24,15 +24,13 @@ export interface GradingCompletionEntry {
   completedAt: string;
 }
 
-export interface CurrentWeekAnchor {
-  week: number;
-  anchorDate: string; // YYYY-MM-DD in local time
-}
-
 export interface AppDataState {
   grade: GradeName;
   language: Language;
-  currentWeekAnchor: CurrentWeekAnchor | null;
+  // Null means that the person has not chosen an app-specific name yet. The UI can
+  // then prefill the account name without changing the identity held by the auth
+  // service. A string, including an empty one, is an intentional app-only choice.
+  appDisplayName: string | null;
   kenshiNumber: string | undefined;
   notes: Record<string, string>;
   // When each note was last written, keyed exactly as notes is. A sidecar rather than
@@ -68,6 +66,7 @@ export interface AppDataDocument {
 // 1 — grade, language, currentWeekAnchor, kenshiNumber, notes, notesUpdatedAt,
 //     hokeiRanks, hokeiListSelection, quizStreakHighScore, knownFlashCards,
 //     showKanjiOnHokeiCards, and the three completion maps.
+// 2 — appDisplayName.
 //
 // Deliberately not bumped for notesUpdatedAt. Bumping fires the compat gate, which
 // refuses writes from builds predating the compatibility header outright — and what
@@ -75,7 +74,7 @@ export interface AppDataDocument {
 // costs a conflict prompt; being locked out of sync costs everything. Whether any
 // such build is still syncing is answerable rather than a guess: the server logs
 // "outdated client wrote for %s: compat %d" for every one of them.
-export const APP_SCHEMA_VERSION = 1;
+export const APP_SCHEMA_VERSION = 2;
 
 // The highest schema this build can hold without losing anything — a different
 // question from which shape it writes, and the one that decides whether a write is
@@ -91,7 +90,7 @@ export const APP_SCHEMA_VERSION = 1;
 // Bump alongside APP_SCHEMA_VERSION, and only after checking the new schema really is
 // something older builds round-trip — additive fields are, renamed or restructured
 // ones are not.
-export const APP_SCHEMA_COMPAT_VERSION = 2;
+export const APP_SCHEMA_COMPAT_VERSION = 3;
 
 // What a request carrying neither header is taken to declare: the shape those builds
 // write, and the only shape they can hold. Builds before the compatibility header
@@ -113,6 +112,10 @@ export const LEGACY_SCHEMA_VERSION = 1;
 // 3 bytes a character) a full note is 6 KB, so it is the count of long notes that
 // matters rather than any single one.
 export const HOKEI_NOTE_MAX_LENGTH = 2000;
+
+// Kept comfortably above an ordinary name while preventing a pasted essay from
+// becoming part of every synchronized document and every greeting.
+export const APP_DISPLAY_NAME_MAX_LENGTH = 100;
 
 // The fields this build knows the meaning of. Anything else in a stored document was
 // written by a newer build and is carried through untouched rather than dropped.
@@ -136,7 +139,10 @@ export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(
 // it, not a person, so two devices set differently were never a disagreement — yet as
 // a merged scalar it could raise a conflict prompt over a question with no wrong
 // answer. See persistence/theme.ts, which adopts the old value so nobody is reset.
-export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft", "syncProvider", "theme"]);
+// currentWeekAnchor — the app once tried to infer a dojo's current curriculum week
+// from a date chosen in Settings. Dojos do not follow one shared calendar, so the
+// weekly plan now opens at the beginning and lets the reader navigate directly.
+export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft", "syncProvider", "theme", "currentWeekAnchor"]);
 
 // The fields of `data` this build has no schema for. They are never interpreted, only
 // preserved, so that a device running an older build cannot erase newer data simply by
@@ -207,7 +213,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
     data: {
       grade: "shodan",
       language: "sv",
-      currentWeekAnchor: null,
+      appDisplayName: null,
       kenshiNumber: undefined,
       notes: {},
       notesUpdatedAt: {},

@@ -369,7 +369,7 @@ const legacySchemaVersion = 1
 // this server. A write declaring less came from an older build; logging those is how
 // we know whether any build predating the safety work is still out there, without
 // having to refuse anything to find out. The line stops appearing once they are gone.
-const currentCompatVersion = 2
+const currentCompatVersion = 3
 
 // schemaTooOldError is the machine-readable reason in a 409 body, so the client can
 // tell "your app is too old" apart from any other conflict and say so plainly rather

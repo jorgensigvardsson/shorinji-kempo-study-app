@@ -1,19 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Button, Dropdown, Form } from "react-bootstrap";
+import "./Settings.css";
 import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
-import { canonicalKenshiNumber, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber, type CurrentWeekAnchor } from "./persistence/schema";
+import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
 import { humanGradeName, type GradePlan, type GradeName } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
-import { toLocalDateKey } from "./utilities/current-week";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
 import { ensureAllTranslations } from "./translations";
 import { Download, Upload } from "react-bootstrap-icons";
 import Loading from "./components/Loading";
 
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
+
+const textSizeOptions = [
+    { value: 1.0, label: "Liten" },
+    { value: DefaultTextSize, label: "Mindre" },
+    { value: 1.2, label: "Medium" },
+    { value: 1.3, label: "Större" },
+    { value: 1.4, label: "Störst" },
+] as const;
 
 interface Props {
     translator: Translator;
@@ -29,7 +37,8 @@ const Settings = (props: Props) => {
     const { translator, nextGrade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
     const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
-    const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
+    const [appDisplayName, setAppDisplayName] = useState<string | null>(() => store.get("appDisplayName"));
+    const [accountDisplayName, setAccountDisplayName] = useState(() => getSyncManager().getBackendUserInfo()?.displayName ?? "");
     // The field keeps the raw text so that what is typed stays put while it is being
     // typed; only a valid number reaches the store. Anything else is flagged instead
     // of being stored and quietly dropped the next time the document is loaded. The
@@ -48,13 +57,6 @@ const Settings = (props: Props) => {
             : (kenshiNumberLeft && !isCompleteKenshiNumber(kenshiNumberDigits))
                 ? translator.translate("Ett kenshinummer består av 9 eller 10 siffror, till exempel 123-456789.")
                 : null;
-    const availableWeeks = useMemo(
-        () => [...new Set(nextGrade.weeks.map(week => week.week))].sort((a, b) => a - b),
-        [nextGrade]
-    );
-    const selectedWeek = availableWeeks.includes(currentWeekAnchor?.week ?? -1)
-        ? currentWeekAnchor!.week
-        : (availableWeeks[0] ?? 1);
     // `name` is what the language calls itself, and is deliberately a constant rather
     // than a lookup in that language's own section: a language's own name is not a
     // translation of the interface, and treating it as one meant every section had to
@@ -81,7 +83,7 @@ const Settings = (props: Props) => {
         return translator.japanese(humanName);
     }
 
-    useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
+    useEffect(() => store.subscribe("appDisplayName", setAppDisplayName), [store]);
     // Follow the store only when it lands somewhere other than what this field already
     // holds — a sync or another tab. Writes made from here must not rewrite the text
     // mid-typing.
@@ -129,139 +131,176 @@ const Settings = (props: Props) => {
         input.click();
     };
 
-    const setAnchoredWeek = (week: number) => {
-        store.set("currentWeekAnchor", {
-            week,
-            anchorDate: toLocalDateKey()
-        });
-    };
-    
+    const displayedAppName = (appDisplayName ?? accountDisplayName).slice(0, APP_DISPLAY_NAME_MAX_LENGTH);
+
     return (
-        <div>
-            <Form.Group className="mb-3" controlId="settingsTheme">
-                <Form.Label>{translator.translate("Tema")}</Form.Label>
-                <Form.Select value={theme} onChange={e => setTheme(e.target.value as "light" | "dark" | "system")}>
-                    <option value={"light"}>{translator.translate("Ljust")}</option>
-                    <option value={"dark"}>{translator.translate("Mörkt")}</option>
-                    <option value={"system"}>{translator.translate("System")}</option>
-                </Form.Select>
-            </Form.Group>
+        <main className="settings-page">
+            <header className="settings-page-header">
+                <h1 className="app-page-heading">{translator.translate("Inställningar")}</h1>
+                <p className="app-intro-copy">{translator.translate("Här samlar du hur appen ser ut, vem du är och hur ditt konto fungerar.")}</p>
+            </header>
 
-            <Form.Group className="mb-3" controlId="settingsTheme">
-                <Form.Label>{translator.translate("Språk")}</Form.Label>
-                <Form.Select onChange={e => onSetLanguage(e.target.value as Language)} value={translator.currentLanguage}>
-                    {languages.map(language => (
-                        <option value={language.code} key={language.code}>
-                            {language.name} ({translator.translate(language.key)})
-                        </option>
-                    ))}
-                </Form.Select>
-            </Form.Group>
+            <div className="settings-sections">
+                <section className="settings-section" aria-labelledby="settings-appearance-heading">
+                    <div className="settings-section-header">
+                        <h2 id="settings-appearance-heading" className="app-section-heading">{translator.translate("Utseende")}</h2>
+                    </div>
+                    <div className="settings-form-grid settings-form-grid-three">
+                        <Form.Group controlId="settingsTheme">
+                            <Form.Label>{translator.translate("Tema")}</Form.Label>
+                            <Form.Select value={theme} onChange={e => setTheme(e.target.value as "light" | "dark" | "system")}>
+                                <option value="light">{translator.translate("Ljust")}</option>
+                                <option value="dark">{translator.translate("Mörkt")}</option>
+                                <option value="system">{translator.translate("System")}</option>
+                            </Form.Select>
+                        </Form.Group>
 
-            <Form.Group className="mb-3" controlId="textSize">
-                <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
-                <Form.Select onChange={e => onSetTextSize(parseFloat(e.target.value))} value={textSize}>
-                    <option value="1.0">{translator.translate("Liten")}</option>
-                    <option value={DefaultTextSize}>{translator.translate("Mindre")}</option>
-                    <option value="1.2">{translator.translate("Medium")}</option>
-                    <option value="1.3">{translator.translate("Större")}</option>
-                    <option value="1.4">{translator.translate("Störst")}</option>
-                </Form.Select>
-            </Form.Group>
+                        <Form.Group controlId="settingsLanguage">
+                            <Form.Label>{translator.translate("Språk")}</Form.Label>
+                            <Form.Select onChange={e => onSetLanguage(e.target.value as Language)} value={translator.currentLanguage}>
+                                {languages.map(language => (
+                                    <option value={language.code} key={language.code}>
+                                        {language.name} ({translator.translate(language.key)})
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
 
-            <Form.Group className="mb-3" controlId="settingsKenshiNumber">
-                <Form.Label>{translator.translate("Kenshinummer")}</Form.Label>
-                <Form.Control
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    value={kenshiNumberText}
-                    isInvalid={kenshiNumberError !== null}
-                    onChange={e => {
-                        const text = e.target.value ?? "";
-                        setKenshiNumberText(text);
-                        setKenshiNumberLeft(false);
+                        <Form.Group controlId="textSize">
+                            <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
+                            {/* A native select hands its menu to the operating system on many
+                                phones, which ignores option font sizes. This HTML dropdown keeps
+                                the preview visible everywhere. The whole app is already zoomed to
+                                the current choice, so dividing by it makes each row land at the
+                                size it will actually have after it is selected. */}
+                            <Dropdown className="settings-text-size-dropdown" onSelect={key => {
+                                const selected = Number(key);
+                                if (Number.isFinite(selected)) onSetTextSize(selected);
+                            }}>
+                                <Dropdown.Toggle id="textSize" variant="outline-secondary">
+                                    {translator.translate(textSizeOptions.find(option => option.value === textSize)?.label ?? "Medium")}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {textSizeOptions.map(option => (
+                                        <Dropdown.Item
+                                            key={option.value}
+                                            eventKey={String(option.value)}
+                                            active={option.value === textSize}
+                                            style={{ fontSize: `${option.value / textSize}rem` }}
+                                        >
+                                            {translator.translate(option.label)}
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </Form.Group>
+                    </div>
+                </section>
 
-                        // Spaces and the [n]nnn-nnnnnn hyphen are how a number gets written
-                        // down, so they are removed rather than rejected. A half-written
-                        // number leaves what is stored alone until it is whole again.
-                        const typedDigits = normalizeKenshiNumber(text);
-                        if (typedDigits.length === 0) {
-                            store.set("kenshiNumber", undefined);
-                        } else if (isCompleteKenshiNumber(typedDigits)) {
-                            store.set("kenshiNumber", canonicalKenshiNumber(typedDigits));
-                        }
-                    }}
-                    onBlur={() => {
-                        setKenshiNumberLeft(true);
-                        if (isCompleteKenshiNumber(kenshiNumberDigits)) {
-                            setKenshiNumberText(formatKenshiNumber(kenshiNumberDigits));
-                        }
-                    }}
-                />
-                <Form.Control.Feedback type="invalid">
-                    {kenshiNumberError}
-                </Form.Control.Feedback>
-            </Form.Group>
+                <section className="settings-section" aria-labelledby="settings-profile-heading">
+                    <div className="settings-section-header">
+                        <h2 id="settings-profile-heading" className="app-section-heading">{translator.translate("Om mig")}</h2>
+                    </div>
+                    <div className="settings-form-grid">
+                        <Form.Group className="settings-field-wide" controlId="settingsAppDisplayName">
+                            <Form.Label>{translator.translate("Namn i appen")}</Form.Label>
+                            <Form.Control
+                                type="text"
+                                autoComplete="name"
+                                maxLength={APP_DISPLAY_NAME_MAX_LENGTH}
+                                value={displayedAppName}
+                                onChange={e => store.set("appDisplayName", e.target.value.slice(0, APP_DISPLAY_NAME_MAX_LENGTH))}
+                                onBlur={e => store.set("appDisplayName", e.target.value.trim())}
+                            />
+                            <Form.Text className="d-block mt-2">
+                                {translator.translate("Det här namnet synkas mellan dina enheter men ändrar bara namnet i appen.")}
+                            </Form.Text>
+                            {appDisplayName !== null && accountDisplayName.trim() && (
+                                <Button className="mt-2" variant="link" size="sm" onClick={() => store.set("appDisplayName", null)}>
+                                    {translator.translate("Använd kontots namn")}
+                                </Button>
+                            )}
+                        </Form.Group>
 
-            <Form.Group className="mb-3" controlId="settingsLevel">
-                <Form.Label>{translator.translate("Min nästa grad")}</Form.Label>
-                {/* Every option comes from allGradePlans, so a miss should not happen —
-                    but doing nothing is the right answer if it ever does, rather than
-                    handing on an undefined grade. */}
-                <Form.Select onChange={e => {
-                    const plan = allGradePlans.find(x => x.grade === e.target.value);
-                    if (plan) onSetGrade(plan);
-                }} value={nextGrade.grade}>
-                    {
-                        allGradePlans.map(
-                            (l, i) => <option value={l.grade} key={i}>{gradeLabel(l.grade)}</option>
-                        )
-                    }
-                </Form.Select>
-            </Form.Group>
+                        <Form.Group controlId="settingsKenshiNumber">
+                            <Form.Label>{translator.translate("Kenshinummer")}</Form.Label>
+                            <Form.Control
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete="off"
+                                value={kenshiNumberText}
+                                isInvalid={kenshiNumberError !== null}
+                                onChange={e => {
+                                    const text = e.target.value ?? "";
+                                    setKenshiNumberText(text);
+                                    setKenshiNumberLeft(false);
+                                    const typedDigits = normalizeKenshiNumber(text);
+                                    if (typedDigits.length === 0) {
+                                        store.set("kenshiNumber", undefined);
+                                    } else if (isCompleteKenshiNumber(typedDigits)) {
+                                        store.set("kenshiNumber", canonicalKenshiNumber(typedDigits));
+                                    }
+                                }}
+                                onBlur={() => {
+                                    setKenshiNumberLeft(true);
+                                    if (isCompleteKenshiNumber(kenshiNumberDigits)) {
+                                        setKenshiNumberText(formatKenshiNumber(kenshiNumberDigits));
+                                    }
+                                }}
+                            />
+                            <Form.Control.Feedback type="invalid">{kenshiNumberError}</Form.Control.Feedback>
+                        </Form.Group>
 
-            <Form.Group className="mb-3">
-                <Form.Label>{translator.translate("Uppdateringsnotiser")}</Form.Label>
-                <NotificationPermissionControl translator={translator} />
-            </Form.Group>
+                        <Form.Group controlId="settingsLevel">
+                            <Form.Label>{translator.translate("Min nästa grad")}</Form.Label>
+                            <Form.Select onChange={e => {
+                                const plan = allGradePlans.find(x => x.grade === e.target.value);
+                                if (plan) onSetGrade(plan);
+                            }} value={nextGrade.grade}>
+                                {allGradePlans.map((plan, index) => (
+                                    <option value={plan.grade} key={index}>{gradeLabel(plan.grade)}</option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </div>
+                </section>
 
-            <Form.Group className="mb-3" controlId="settingsCurrentWeek">
-                <Form.Label>{translator.translate("Aktuell vecka")}</Form.Label>
-                <Form.Select value={selectedWeek} onChange={e => setAnchoredWeek(parseInt(e.target.value, 10))}>
-                    {availableWeeks.map(week => (
-                        <option key={week} value={week}>{translator.translate("Vecka")} {week}</option>
-                    ))}
-                </Form.Select>
-                <Form.Text className="d-block mt-2">
-                    {translator.translate("Välj vilken träningsvecka som ska visas på Kamoku-sidan. Appen kommer ihåg när du gjorde valet och räknar automatiskt upp veckan allt eftersom tiden går.")}
-                    {currentWeekAnchor && <> {translator.translate("Inställningen gjordes den {0}.", { params: [currentWeekAnchor.anchorDate] })}</>}
-                </Form.Text>
-            </Form.Group>
+                <section className="settings-section" aria-labelledby="settings-notifications-heading">
+                    <div className="settings-section-header">
+                        <h2 id="settings-notifications-heading" className="app-section-heading">{translator.translate("Notiser")}</h2>
+                    </div>
+                    <Form.Group>
+                        <Form.Label>{translator.translate("Uppdateringsnotiser")}</Form.Label>
+                        <NotificationPermissionControl translator={translator} />
+                    </Form.Group>
+                </section>
 
-            <Form.Group className="mb-3" controlId="settingsAccount">
-                <Form.Label>{translator.translate("Konto")}</Form.Label>
-                <AccountStatus translator={translator} />
-            </Form.Group>
+                <section className="settings-section" aria-labelledby="settings-account-heading">
+                    <div className="settings-section-header">
+                        <h2 id="settings-account-heading" className="app-section-heading">{translator.translate("Konto och inloggning")}</h2>
+                    </div>
+                    <AccountStatus translator={translator} onAccountDisplayNameChange={setAccountDisplayName} />
+                </section>
 
-            <Form.Group className="mb-3">
-                <Form.Label>{translator.translate("Exportera/importera data")}</Form.Label>
-                <Form.Text className="d-block mt-1 mb-2">
-                    {translator.translate("Ladda ner en säkerhetskopia av all din data, eller importera data från en tidigare nedladdning. Detta kan användas för att spara inställningar, dina anteckningar, dina självvärderingar, och annan information du samlat ihop.")}
-                </Form.Text>
-                <div className="d-flex gap-2">
-                    <Button variant="outline-secondary" size="sm" onClick={exportData}>
-                        <Download className="me-2" />
-                        {translator.translate("Ladda ner")}
-                    </Button>
-                    <Button variant="outline-secondary" size="sm" onClick={importData}>
-                        <Upload className="me-2" />
-                        {translator.translate("Importera")}
-                    </Button>
-                </div>
-            </Form.Group>
-        </div>
-    )
+                <section className="settings-section" aria-labelledby="settings-backup-heading">
+                    <div className="settings-section-header">
+                        <h2 id="settings-backup-heading" className="app-section-heading">{translator.translate("Säkerhetskopia")}</h2>
+                        <p>{translator.translate("Ladda ner en återläsningsbar kopia av dina inställningar och studiedata.")}</p>
+                    </div>
+                    <div className="d-flex gap-2 flex-wrap">
+                        <Button variant="outline-secondary" size="sm" onClick={exportData}>
+                            <Download className="me-2" />
+                            {translator.translate("Ladda ner")}
+                        </Button>
+                        <Button variant="outline-secondary" size="sm" onClick={importData}>
+                            <Upload className="me-2" />
+                            {translator.translate("Importera")}
+                        </Button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    );
 }
 
 const providerDisplayName: Record<string, string> = {
@@ -269,8 +308,8 @@ const providerDisplayName: Record<string, string> = {
     "microsoft": "Microsoft",
 };
 
-const AccountStatus = (props: { translator: Translator }) => {
-    const { translator } = props;
+const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChange: (name: string) => void }) => {
+    const { translator, onAccountDisplayNameChange } = props;
     const [userInfo, setUserInfo] = useState(() => getSyncManager().getBackendUserInfo());
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -294,10 +333,15 @@ const AccountStatus = (props: { translator: Translator }) => {
     useEffect(() => {
         let cancelled = false;
         getSyncManager().refreshBackendUserInfo()
-            .then(() => { if (!cancelled) setUserInfo(getSyncManager().getBackendUserInfo()); })
+            .then(() => {
+                if (cancelled) return;
+                const refreshed = getSyncManager().getBackendUserInfo();
+                setUserInfo(refreshed);
+                onAccountDisplayNameChange(refreshed?.displayName ?? "");
+            })
             .catch(() => { if (!cancelled) setRefreshFailed(true); });
         return () => { cancelled = true; };
-    }, []);
+    }, [onAccountDisplayNameChange]);
 
     // Consume link_success / link_error stashed by the sync manager after the redirect.
     useEffect(() => {
@@ -306,7 +350,9 @@ const AccountStatus = (props: { translator: Translator }) => {
         sessionStorage.removeItem("link_success");
         sessionStorage.removeItem("link_error");
         if (success) {
-            setUserInfo(getSyncManager().getBackendUserInfo());
+            const refreshed = getSyncManager().getBackendUserInfo();
+            setUserInfo(refreshed);
+            onAccountDisplayNameChange(refreshed?.displayName ?? "");
             setLinkEmail("");
             setLinkSuccess(true);
             const t = setTimeout(() => setLinkSuccess(false), 3500);
@@ -315,7 +361,7 @@ const AccountStatus = (props: { translator: Translator }) => {
         if (err === "already_linked") {
             setLinkError(translator.translate("Den här identiteten är redan kopplad till ett konto."));
         }
-    }, [translator]);
+    }, [onAccountDisplayNameChange, translator]);
 
     // Signing out flips the sync provider back to "local", which is what makes
     // App swap the whole UI for the login screen.
@@ -381,9 +427,9 @@ const AccountStatus = (props: { translator: Translator }) => {
             setUserInfo(getSyncManager().getBackendUserInfo());
         } catch (err) {
             if (err instanceof Error && err.message === "last-provider") {
-                setError(translator.translate("Det går inte att koppla bort den enda inloggningsmetoden."));
+                setError(translator.translate("Det går inte att ta bort det enda inloggningssättet."));
             } else {
-                setError(translator.translate("Kunde inte koppla bort kontot. Försök igen."));
+                setError(translator.translate("Kunde inte ta bort inloggningssättet. Försök igen."));
             }
         } finally {
             setUnlinkingProvider(null);
@@ -399,54 +445,69 @@ const AccountStatus = (props: { translator: Translator }) => {
     }
 
     return (
-        <>
+        <div className="settings-account">
             {userInfo === null && (
                 <Form.Text className="d-block mt-1 mb-2 text-danger">
                     {translator.translate("Kunde inte hämta kontouppgifterna.")}
                 </Form.Text>
             )}
             {userInfo && (
-                <Form.Text className="d-block mt-1 mb-2">
-                    {userInfo.displayName && <>{userInfo.displayName}<br /></>}
-                    {userInfo.email}
-                </Form.Text>
+                <div className="settings-account-identity">
+                    <span>{translator.translate("Inloggad som")}</span>
+                    <strong>{userInfo.email}</strong>
+                </div>
             )}
 
-            {/* Linked identities */}
-            <Form.Label className="mt-2 mb-1 fw-semibold">{translator.translate("Länkade inloggningssätt")}</Form.Label>
-            {userInfo?.providers.map(p => (
-                <div key={p} className="d-flex align-items-center gap-2 mb-1">
-                    <span className="text-body-secondary" style={{ minWidth: "6rem" }}>{p === "email" ? translator.translate("E-post") : (providerDisplayName[p] ?? p)}</span>
-                    <Button
-                        variant="outline-secondary"
-                        size="sm"
-                        disabled={!canUnlink || unlinkingProvider !== null}
-                        onClick={() => { void handleUnlink(p); }}
-                    >
-                        {unlinkingProvider === p ? "…" : translator.translate("Koppla bort")}
-                    </Button>
+            <div className="settings-account-block">
+                <h3 className="settings-subheading">{translator.translate("Inloggningssätt")}</h3>
+                <p className="settings-help-text">
+                    {translator.translate("Ett inloggningssätt är ett sätt att öppna samma konto. Tar du bort ett finns kontot och dina studiedata kvar.")}
+                </p>
+                <div className="settings-login-methods">
+                    {userInfo?.providers.map(p => (
+                        <div key={p} className="settings-login-method">
+                            <span>{p === "email" ? translator.translate("E-post") : (providerDisplayName[p] ?? p)}</span>
+                            {canUnlink ? (
+                                <Button
+                                    variant="outline-secondary"
+                                    size="sm"
+                                    disabled={unlinkingProvider !== null}
+                                    onClick={() => { void handleUnlink(p); }}
+                                >
+                                    {unlinkingProvider === p ? "…" : translator.translate("Ta bort inloggningssätt")}
+                                </Button>
+                            ) : (
+                                <small>{translator.translate("Ditt enda inloggningssätt")}</small>
+                            )}
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </div>
 
-            {/* Link another account */}
-            <Form as="form" onSubmit={(e) => handleLink(e)} className="mt-2 mb-3 d-flex gap-2 align-items-start flex-wrap">
-                <div style={{ flex: "1 1 12rem" }}>
-                    <Form.Control
-                        type="email"
-                        size="sm"
-                        placeholder="namn@example.com"
-                        value={linkEmail}
-                        onChange={e => { setLinkEmail(e.target.value); setLinkError(null); }}
-                        isInvalid={linkError !== null}
-                        isValid={linkSuccess}
-                    />
-                    {linkError && <Form.Control.Feedback type="invalid">{linkError}</Form.Control.Feedback>}
-                    {linkSuccess && <Form.Control.Feedback type="valid">{translator.translate("Konto länkat!")}</Form.Control.Feedback>}
-                </div>
-                <Button type="submit" variant="outline-primary" size="sm" disabled={!linkEmail.trim()}>
-                    {translator.translate("Länka")}
-                </Button>
-            </Form>
+            <div className="settings-account-block">
+                <h3 className="settings-subheading">{translator.translate("Lägg till inloggningssätt")}</h3>
+                <p className="settings-help-text">{translator.translate("Lägg till en annan e-postadress som du kan använda för samma konto.")}</p>
+                <Form as="form" onSubmit={(e) => handleLink(e)} className="settings-link-form">
+                    <div className="settings-link-input">
+                        <Form.Label visuallyHidden htmlFor="settingsLinkEmail">{translator.translate("E-postadress")}</Form.Label>
+                        <Form.Control
+                            id="settingsLinkEmail"
+                            type="email"
+                            size="sm"
+                            placeholder="namn@example.com"
+                            value={linkEmail}
+                            onChange={e => { setLinkEmail(e.target.value); setLinkError(null); }}
+                            isInvalid={linkError !== null}
+                            isValid={linkSuccess}
+                        />
+                        {linkError && <Form.Control.Feedback type="invalid">{linkError}</Form.Control.Feedback>}
+                        {linkSuccess && <Form.Control.Feedback type="valid">{translator.translate("Konto länkat!")}</Form.Control.Feedback>}
+                    </div>
+                    <Button type="submit" variant="outline-primary" size="sm" disabled={!linkEmail.trim()}>
+                        {translator.translate("Lägg till")}
+                    </Button>
+                </Form>
+            </div>
 
             {error && (
                 <Form.Text className="d-block mt-1 mb-2 text-danger">{error}</Form.Text>
@@ -454,38 +515,49 @@ const AccountStatus = (props: { translator: Translator }) => {
             {othersMessage && (
                 <Form.Text className="d-block mt-1 mb-2 text-success">{othersMessage}</Form.Text>
             )}
-            {!confirmDelete ? (
-                <div className="mt-1 d-flex gap-2 flex-wrap">
+            <div className="settings-account-block">
+                <h3 className="settings-subheading">{translator.translate("Sessioner")}</h3>
+                <div className="d-flex gap-2 flex-wrap">
                     <Button variant="outline-secondary" size="sm" onClick={handleLogout}>
                         {translator.translate("Logga ut")}
                     </Button>
                     <Button variant="outline-secondary" size="sm" onClick={() => { void handleLogoutOthers(); }} disabled={loggingOutOthers}>
                         {loggingOutOthers ? translator.translate("Loggar ut…") : translator.translate("Logga ut på alla andra enheter")}
                     </Button>
-                    <Button variant="outline-secondary" size="sm" onClick={() => { void handleExport(); }} disabled={exporting}>
-                        {exporting ? translator.translate("Exporterar...") : translator.translate("Exportera mina data")}
-                    </Button>
+                </div>
+            </div>
+
+            <div className="settings-account-block">
+                <h3 className="settings-subheading">{translator.translate("Fullständig kontokopia")}</h3>
+                <p className="settings-help-text">{translator.translate("Ladda ner kontouppgifter och studiedata tillsammans. Den här filen är till för insyn, inte för återläsning i appen.")}</p>
+                <Button variant="outline-secondary" size="sm" onClick={() => { void handleExport(); }} disabled={exporting}>
+                    {exporting ? translator.translate("Exporterar...") : translator.translate("Ladda ner kontokopia")}
+                </Button>
+            </div>
+
+            <div className="settings-danger-zone">
+                {!confirmDelete ? (
                     <Button variant="outline-danger" size="sm" onClick={() => setConfirmDelete(true)}>
                         {translator.translate("Radera konto")}
                     </Button>
-                </div>
-            ) : (
-                <div className="mt-1">
-                    <Form.Text className="d-block mb-2 text-danger">
-                        <strong>{translator.translate("Det här kan inte ångras.")}</strong>{" "}
-                        {translator.translate("All din data på servern raderas permanent.")}
-                    </Form.Text>
-                    <div className="d-flex gap-2">
-                        <Button variant="danger" size="sm" onClick={() => { void handleDeleteConfirm(); }} disabled={deleting}>
-                            {deleting ? translator.translate("Raderar...") : translator.translate("Ja, radera mitt konto")}
-                        </Button>
-                        <Button variant="outline-secondary" size="sm" onClick={() => setConfirmDelete(false)} disabled={deleting}>
-                            {translator.translate("Avbryt")}
-                        </Button>
+                ) : (
+                    <div>
+                        <Form.Text className="d-block mb-2 text-danger">
+                            <strong>{translator.translate("Det här kan inte ångras.")}</strong>{" "}
+                            {translator.translate("All din data på servern raderas permanent.")}
+                        </Form.Text>
+                        <div className="d-flex gap-2 flex-wrap">
+                            <Button variant="danger" size="sm" onClick={() => { void handleDeleteConfirm(); }} disabled={deleting}>
+                                {deleting ? translator.translate("Raderar...") : translator.translate("Ja, radera mitt konto")}
+                            </Button>
+                            <Button variant="outline-secondary" size="sm" onClick={() => setConfirmDelete(false)} disabled={deleting}>
+                                {translator.translate("Avbryt")}
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            )}
-        </>
+                )}
+            </div>
+        </div>
     );
 }
 

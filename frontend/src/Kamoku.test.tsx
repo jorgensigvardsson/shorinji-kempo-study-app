@@ -37,7 +37,6 @@ const plan: GradePlan = {
 beforeEach(() => {
   getAppDataStore().set("weeklyPlanCompletions", {});
   getAppDataStore().set("showKanjiOnHokeiCards", false);
-  getAppDataStore().set("currentWeekAnchor", null);
 });
 
 describe("Kamoku weekly plan", () => {

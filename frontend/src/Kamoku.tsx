@@ -10,8 +10,7 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
     (tanenKihonHokeiData as TanenKihonHokei[]).map(t => [t.hokei_name.trim(), t])
 );
 import { getAppDataStore } from "./persistence/store";
-import type { CurrentWeekAnchor, WeeklyPlanCompletionEntry } from "./persistence/schema";
-import { resolveCurrentWeekNumber, toLocalDateKey } from "./utilities/current-week";
+import type { WeeklyPlanCompletionEntry } from "./persistence/schema";
 import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
 import "./Kamoku.css";
@@ -26,31 +25,21 @@ const Kamoku = (props: Props) => {
     const { myGrade, allGradePlans, dojoMode = false } = props;
     const store = getAppDataStore();
     const grade = allGradePlans.find(l => l.grade === myGrade) ?? allGradePlans[0];
-    const [currentWeekAnchor, setCurrentWeekAnchor] = useState<CurrentWeekAnchor | null>(() => store.get("currentWeekAnchor"));
     const [weeklyPlanCompletions, setWeeklyPlanCompletions] = useState(() => store.get("weeklyPlanCompletions"));
-    const [todayKey, setTodayKey] = useState(() => toLocalDateKey());
-    const [selectedWeek, setSelectedWeek] = useState(() => findSelectedWeekIndex(grade, currentWeekAnchor, toLocalDateKey()));
+    const [selectedWeek, setSelectedWeek] = useState(0);
+    const [selectedGrade, setSelectedGrade] = useState(grade.grade);
     const translator = useContext(TranslatorContext);
 
-    useEffect(() => store.subscribe("currentWeekAnchor", setCurrentWeekAnchor), [store]);
     useEffect(() => store.subscribe("weeklyPlanCompletions", setWeeklyPlanCompletions), [store]);
 
-    useEffect(() => {
-        setSelectedWeek(findSelectedWeekIndex(grade, currentWeekAnchor, todayKey));
-    }, [grade, currentWeekAnchor, todayKey]);
-
-    useEffect(() => {
-        const now = new Date();
-        const nextMidnight = new Date(now);
-        nextMidnight.setHours(24, 0, 0, 0);
-        const delay = Math.max(1000, nextMidnight.getTime() - now.getTime() + 100);
-
-        const timerId = window.setTimeout(() => {
-            setTodayKey(toLocalDateKey());
-        }, delay);
-
-        return () => window.clearTimeout(timerId);
-    }, [todayKey]);
+    // A grade change starts at its first week. Resetting during render avoids one
+    // frame where the newly selected grade is shown at the previous grade's week.
+    // Moving between weeks remains a direct choice made with the navigation buttons;
+    // there is no hidden calendar trying to decide which week a dojo ought to be on.
+    if (selectedGrade !== grade.grade) {
+        setSelectedGrade(grade.grade);
+        setSelectedWeek(0);
+    }
 
     const visibleWeekIndex = Math.min(selectedWeek, grade.weeks.length - 1);
     const selectedWeekData = grade.weeks[visibleWeekIndex];
@@ -413,13 +402,3 @@ const japaneseFocusLabel = (value: string, showKanji: boolean): string | undefin
         : undefined;
 
 export default Kamoku;
-
-function findSelectedWeekIndex(grade: GradePlan, anchor: CurrentWeekAnchor | null, todayKey: string): number {
-    if (grade.weeks.length === 0) {
-        return 0;
-    }
-
-    const weekNumber = resolveCurrentWeekNumber(anchor, grade.weeks.length, todayKey);
-    const index = grade.weeks.findIndex(week => week.week === weekNumber);
-    return index >= 0 ? index : 0;
-}

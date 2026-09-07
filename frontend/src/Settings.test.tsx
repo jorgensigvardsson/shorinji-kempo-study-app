@@ -177,12 +177,73 @@ describe("Settings — kenshi number", () => {
   });
 });
 
+describe("Settings — profile and structure", () => {
+  const account = { email: "malin@example.org", displayName: "Malin", providers: ["email"], roles: [] };
+
+  beforeEach(() => {
+    localStorage.clear();
+    getAppDataStore().set("appDisplayName", null);
+    getBackendUserInfo.mockReset().mockReturnValue(account);
+    refreshBackendUserInfo.mockReset().mockResolvedValue();
+  });
+
+  it("prefills the app name from the signed-in account", () => {
+    renderSettings();
+
+    expect((screen.getByLabelText("Namn i appen") as HTMLInputElement).value).toBe("Malin");
+  });
+
+  it("stores an edited app name in the synchronized document", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const field = screen.getByLabelText("Namn i appen");
+    await user.clear(field);
+    await user.type(field, "  Mallan  ");
+    await user.tab();
+
+    expect(getAppDataStore().get("appDisplayName")).toBe("Mallan");
+  });
+
+  it("can return to using the account name", async () => {
+    const user = userEvent.setup();
+    getAppDataStore().set("appDisplayName", "Mallis");
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Använd kontots namn" }));
+
+    expect(getAppDataStore().get("appDisplayName")).toBeNull();
+    expect((screen.getByLabelText("Namn i appen") as HTMLInputElement).value).toBe("Malin");
+  });
+
+  it("previews each text-size option at the size it will use", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    await user.click(screen.getByRole("button", { name: "Textstorlek" }));
+
+    const smallPreview = parseFloat((screen.getByText("Liten") as HTMLElement).style.fontSize);
+    const largestPreview = parseFloat((screen.getByText("Störst") as HTMLElement).style.fontSize);
+    expect(smallPreview).toBeCloseTo(1 / 1.1);
+    expect(largestPreview).toBeCloseTo(1.4 / 1.1);
+  });
+
+  it("groups settings under clear section headings", () => {
+    renderSettings();
+
+    for (const heading of ["Utseende", "Om mig", "Notiser", "Konto och inloggning", "Säkerhetskopia"]) {
+      expect(screen.getByRole("heading", { name: heading })).toBeDefined();
+    }
+    expect(screen.queryByText("Dina personliga uppgifter och vad du tränar mot.")).toBeNull();
+  });
+});
+
 // The account panel has nothing of its own to show until /auth/me answers, and the
 // auth service scales to zero: on the first visit in a while that answer is seconds
 // away, not milliseconds.
 describe("Settings — the account panel while the auth service answers", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    getAppDataStore().set("appDisplayName", null);
     getBackendUserInfo.mockReset().mockReturnValue(null);
     refreshBackendUserInfo.mockReset().mockReturnValue(new Promise(() => {}));
   });
@@ -215,8 +276,21 @@ describe("Settings — the account panel while the auth service answers", () => 
     await act(async () => { answer(); await vi.advanceTimersByTimeAsync(0); });
 
     expect(screen.getByText("kenshi@example.org")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Koppla bort" })).toBeDefined();
+    expect(screen.getByText("Ditt enda inloggningssätt")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Ta bort inloggningssätt" })).toBeNull();
     expect(screen.queryByText("Laddar…")).toBeNull();
+  });
+
+  it("offers removal only when another sign-in method will remain", async () => {
+    const account = { email: "kenshi@example.org", displayName: "", providers: ["email", "google"], roles: [] };
+    getBackendUserInfo.mockReturnValue(account);
+    refreshBackendUserInfo.mockResolvedValue();
+    renderSettings();
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+
+    expect(screen.getAllByRole("button", { name: "Ta bort inloggningssätt" })).toHaveLength(2);
+    expect(screen.getByText(/kontot och dina studiedata kvar/)).toBeDefined();
   });
 
   // A wait that ends in nothing is not a wait any more. Leaving the spinner up

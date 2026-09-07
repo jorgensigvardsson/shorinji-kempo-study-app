@@ -9,7 +9,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
     data: {
       grade: "shodan",
       language: "sv",
-      currentWeekAnchor: null,
+      appDisplayName: null,
       kenshiNumber: undefined,
       notes: {},
       notesUpdatedAt: {},
@@ -59,30 +59,12 @@ describe("mergeDocuments — null base", () => {
     expect("embuDraft" in result.document.data).toBe(false);
   });
 
-  // Two devices that built the same anchor in a different property order used to
-  // compare as different, and the merge asked the user which device was right about
-  // two identical values.
-  it("does not invent a conflict from the order an object's keys were written in", () => {
-    const base = makeDoc({ updatedAt: OLD });
-    localStorage.setItem("sync-base-document:backend", JSON.stringify(base));
-
-    const anchorOneWay = { week: 3, anchorDate: "2026-08-01" };
-    const anchorOtherWay = { anchorDate: "2026-08-01", week: 3 };
-    const local = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...base.data, currentWeekAnchor: anchorOneWay } });
-    const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, currentWeekAnchor: anchorOtherWay } });
-
-    const result = mergeDocuments(base, local, remote);
-
-    expect(result.conflictDetected).toBe(false);
-    expect(result.document.data.currentWeekAnchor).toEqual(anchorOneWay);
-  });
-
   it("still detects a real disagreement about the same field", () => {
     const base = makeDoc({ updatedAt: OLD });
     localStorage.setItem("sync-base-document:backend", JSON.stringify(base));
 
-    const local = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...base.data, currentWeekAnchor: { week: 3, anchorDate: "2026-08-01" } } });
-    const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, currentWeekAnchor: { week: 9, anchorDate: "2026-09-01" } } });
+    const local = makeDoc({ updatedAt: "2024-03-01T00:00:00.000Z", data: { ...base.data, grade: "nidan" } });
+    const remote = makeDoc({ updatedAt: NEW, data: { ...base.data, grade: "sandan" } });
 
     expect(mergeDocuments(base, local, remote).conflictDetected).toBe(true);
   });
@@ -158,6 +140,22 @@ describe("mergeDocuments — null base", () => {
     const remote = makeDoc({ updatedAt: OLD });
     const result = mergeDocuments(null, local, remote);
     expect(result.document.data.grade).toBe("shodan");
+    expect(result.conflictDetected).toBe(false);
+  });
+});
+
+describe("mergeDocuments — app name", () => {
+  it("carries an app name changed on one device to the other", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({
+      updatedAt: NEW,
+      data: { ...base.data, appDisplayName: "Malin" },
+    });
+    const remote = makeDoc({ updatedAt: OLD, data: { ...base.data } });
+
+    const result = mergeDocuments(base, local, remote);
+
+    expect(result.document.data.appDisplayName).toBe("Malin");
     expect(result.conflictDetected).toBe(false);
   });
 });

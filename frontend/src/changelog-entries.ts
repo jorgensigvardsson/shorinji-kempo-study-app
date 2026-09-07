@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-03T07:30:00.000Z",
+    changes: [
+      {
+        emoji: "⚙️",
+        sv: "Inställningarna har fått tydliga avsnitt för utseende, profil, notiser, konto och säkerhetskopior. Textstorlekarna går att förhandsgranska direkt i listan, och du kan välja vilket namn appen använder. Namnet synkas mellan dina enheter och ändras bara i appen.",
+        en: "Settings now has clear sections for appearance, profile, notifications, account and backups. Text sizes can be previewed directly in the list, and you can choose the name the app uses. The name syncs across your devices and changes only in the app.",
+        tr: "Ayarlar artık görünüm, profil, bildirimler, hesap ve yedeklemeler için açık bölümlere ayrıldı. Metin boyutlarını doğrudan listede önizleyebilir ve uygulamada kullanılacak adı seçebilirsiniz. Ad cihazlarınız arasında eşitlenir ve yalnızca uygulamada değişir.",
+        ja: "設定画面を、外観・プロフィール・通知・アカウント・バックアップの分かりやすい項目に整理しました。文字サイズは一覧でそのまま確認でき、アプリ内で使う名前も選べます。名前は端末間で同期され、変更されるのはアプリ内だけです。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-02T17:06:00.000Z",
     changes: [
       {

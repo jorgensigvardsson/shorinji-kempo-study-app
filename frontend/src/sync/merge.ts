@@ -107,7 +107,7 @@ export function mergeDocuments(
     ...mergeUnknownFields(local, remote),
     grade: mergeScalar("grade"),
     language: mergeScalar("language"),
-    currentWeekAnchor: mergeScalar("currentWeekAnchor"),
+    appDisplayName: mergeScalar("appDisplayName"),
     kenshiNumber: mergeScalar("kenshiNumber"),
     notes: notes.merged,
     notesUpdatedAt: notesUpdatedAt.merged,
