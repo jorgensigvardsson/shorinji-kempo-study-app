@@ -191,6 +191,15 @@ It chooses its store the way the services do, so the same command migrates Cosmo
 
 **Against a live environment, restart the auth service afterwards.** It holds the organization tree in an in-process cache that stays coherent by reloading it on every write the service's own API makes — a write from outside the running process (exactly what `orgmigrate` is) leaves that cache stale until the service restarts and loads the tree fresh from the store. On Azure Container Apps: `az containerapp revision restart --name <auth-app> --resource-group <rg> --revision <active-revision>`.
 
+### Getting members in
+
+Two ways, and they run in opposite directions:
+
+- **They apply.** Somebody proves an email address, picks a club, and its admins get a mail asking them to decide. *Ansökningar* in the menu is where that decision is made.
+- **An admin adds them.** *Organisation → the club → Lägg till medlem* takes a name and an address and makes the account there and then. This is the one for the people an instructor already trains: nobody registers, nobody waits.
+
+Somebody added this way is always emailed that it happened, in the adding admin's language, with the branch named and a line saying they can sign in and delete the account if it was a mistake. The account sits waiting for its address until they first sign in — by code or through Google/Microsoft, whichever their domain uses — and that sign-in claims it. The page says whether the mail actually got out, because the account exists either way and only the admin can put that right. See [`BACKEND.md`](BACKEND.md) for the mechanism.
+
 ## Deployment
 
 Everything runs from one workflow, [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Every push runs the Go and frontend test jobs; a push to `deploy` then deploys production and a push to `deploy-staging` deploys staging, each as a `needs:`-gated job that calls [`deploy.yml`](.github/workflows/deploy.yml) or [`deploy-staging.yml`](.github/workflows/deploy-staging.yml). Those two files hold the deploy steps themselves and are never triggered on their own.

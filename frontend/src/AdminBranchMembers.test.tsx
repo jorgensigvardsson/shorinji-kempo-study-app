@@ -4,9 +4,10 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const adminBranchMembers = vi.fn();
+const adminCreateUser = vi.fn();
 
 vi.mock("./sync/manager", () => ({
-  getSyncManager: () => ({ adminBranchMembers }),
+  getSyncManager: () => ({ adminBranchMembers, adminCreateUser }),
 }));
 
 import AdminBranchMembers from "./AdminBranchMembers";
@@ -33,6 +34,7 @@ const renderAt = (id = "b-karlstad") =>
 describe("AdminBranchMembers", () => {
   beforeEach(() => {
     adminBranchMembers.mockReset().mockResolvedValue(branch);
+    adminCreateUser.mockReset().mockResolvedValue({ user: member("u3", "Cia Ceder"), notified: true });
   });
 
   it("names the branch and lists its members by name", async () => {
@@ -78,5 +80,64 @@ describe("AdminBranchMembers", () => {
     adminBranchMembers.mockResolvedValue({ ...branch, members: [] });
     renderAt();
     expect(await screen.findByText("Klubben har inga medlemmar ännu.")).toBeTruthy();
+  });
+
+  describe("adding a member by hand", () => {
+    // Opens the form and fills it in, which every test below starts with.
+    const fillIn = async (name: string, email: string) => {
+      const user = userEvent.setup();
+      await user.click(await screen.findByRole("button", { name: "Lägg till medlem" }));
+      await user.type(screen.getByLabelText("Namn"), name);
+      await user.type(screen.getByLabelText("E-post"), email);
+      return user;
+    };
+
+    it("adds the member to the branch being looked at, and says they were told", async () => {
+      renderAt();
+      const user = await fillIn("Cia Ceder", "cia@example.org");
+      await user.click(screen.getByRole("button", { name: "Lägg till" }));
+
+      // The branch comes from the page's own url, not from anything typed, and
+      // the language is the admin's — the only guess going for somebody who has
+      // never opened the app.
+      expect(adminCreateUser).toHaveBeenCalledWith("b-karlstad", "cia@example.org", "Cia Ceder", "sv");
+      expect(await screen.findByText(/har lagts till och har fått ett mejl om kontot\./)).toBeTruthy();
+      // Reloaded rather than patched in: the list is sorted and the server owns
+      // the ids.
+      expect(adminBranchMembers).toHaveBeenCalledTimes(2);
+    });
+
+    // The account exists either way, so the admin is told which case they are in
+    // — they are the only one who can pick up the phone instead.
+    it("warns when the account was made but the message did not get out", async () => {
+      adminCreateUser.mockResolvedValue({ user: member("u3", "Cia Ceder"), notified: false });
+      renderAt();
+      const user = await fillIn("Cia Ceder", "cia@example.org");
+      await user.click(screen.getByRole("button", { name: "Lägg till" }));
+
+      expect(await screen.findByText(/mejlet om kontot kunde inte skickas/)).toBeTruthy();
+    });
+
+    it("says which refusal it was, so the admin knows what to change", async () => {
+      adminCreateUser.mockRejectedValue(new AdminRequestError(409, "account_exists"));
+      renderAt();
+      const user = await fillIn("Cia Ceder", "cia@example.org");
+      await user.click(screen.getByRole("button", { name: "Lägg till" }));
+
+      expect(await screen.findByText("Den e-postadressen har redan ett konto.")).toBeTruthy();
+      // The form stays open with what was typed still in it: the address is the
+      // one thing worth correcting, and retyping the name to do it is a tax.
+      expect(screen.getByLabelText("E-post").getAttribute("value")).toBe("cia@example.org");
+    });
+
+    it("will not send a half-filled form", async () => {
+      renderAt();
+      const user = userEvent.setup();
+      await user.click(await screen.findByRole("button", { name: "Lägg till medlem" }));
+      await user.type(screen.getByLabelText("Namn"), "Cia Ceder");
+
+      expect(screen.getByRole("button", { name: "Lägg till" }).hasAttribute("disabled")).toBe(true);
+      expect(adminCreateUser).not.toHaveBeenCalled();
+    });
   });
 });

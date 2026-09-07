@@ -73,6 +73,15 @@ export interface AdminUser {
   lastLoginAt: string;
 }
 
+// The result of adding a member by hand. The account and the message telling
+// them about it fail separately — the account is written first — so the server
+// reports both, and the page says so rather than leaving an admin to assume the
+// person has been told.
+export interface AdminCreatedUser {
+  user: AdminUser;
+  notified: boolean;
+}
+
 // A branch as the registration picker sees it, from the unauthenticated
 // GET /auth/org/branches. Branches with no federation belong to WSKO; the label
 // for that group is the frontend's to supply, since WSKO is not a stored
@@ -310,6 +319,20 @@ export class BackendSyncClient {
     const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/branches/${encodeURIComponent(branchId)}/members`);
     if (!resp.ok) throw new AdminRequestError(resp.status);
     return await resp.json() as AdminBranchMembers;
+  }
+
+  // Adds a member who never registered themselves. The server mails them, and
+  // says whether that got out: an account nobody knows they have is the one
+  // failure here worth an admin's attention.
+  //
+  // language is the admin's own — the only guess available at the address of
+  // somebody who has never opened the app, and one the app corrects for itself
+  // the first time they do.
+  async adminCreateUser(branchId: string, email: string, name: string, language: string): Promise<AdminCreatedUser> {
+    const created = await this.adminWriteJSON<AdminUser & { notified: boolean }>(
+      "POST", `${authUrl}/auth/admin/users`, { branchId, email, name, language });
+    const { notified, ...user } = created;
+    return { user, notified };
   }
 
   // A branch the caller does not cover answers 404, the same as one that does not

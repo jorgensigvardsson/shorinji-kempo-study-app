@@ -276,6 +276,14 @@ func (s *SMTPSender) SendJoinDecision(ctx context.Context, to, branchName, lang 
 	return s.sendTo(ctx, to, rendered)
 }
 
+func (s *SMTPSender) SendAccountCreated(ctx context.Context, to, branchName, lang string) error {
+	rendered, err := renderAccountCreated(branchName, lang)
+	if err != nil {
+		return err
+	}
+	return s.sendTo(ctx, to, rendered)
+}
+
 // sendTo delivers one rendered message to one recipient, re-parsing the address
 // before it reaches a header.
 func (s *SMTPSender) sendTo(ctx context.Context, to string, rendered message) error {

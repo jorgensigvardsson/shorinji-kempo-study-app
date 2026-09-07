@@ -36,6 +36,10 @@ type Sender interface {
 	// SendJoinDecision tells an applicant what was decided, either way.
 	SendJoinDecision(ctx context.Context, to, branchName, lang string, approved bool) error
 
+	// SendAccountCreated tells somebody that an administrator has made them an
+	// account they never asked for, and how to be rid of it if it was a mistake.
+	SendAccountCreated(ctx context.Context, to, branchName, lang string) error
+
 	// SendTransferRequestNotice tells the admins of a branch that a member of
 	// another one has asked to move to theirs. Grouped by language like the join
 	// notice, and for the same reason.
@@ -378,6 +382,11 @@ func (LogSender) SendTransferDecision(_ context.Context, to, branchName, lang st
 		outcome = "accepted"
 	}
 	log.Printf("[email:dev] transfer %s, to %s (%s), branch %q", outcome, to, lang, branchName)
+	return nil
+}
+
+func (LogSender) SendAccountCreated(_ context.Context, to, branchName, lang string) error {
+	log.Printf("[email:dev] account created by an admin, to %s (%s), branch %q", to, lang, branchName)
 	return nil
 }
 

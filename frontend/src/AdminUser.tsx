@@ -14,6 +14,12 @@ const providerDisplayName: Record<string, string> = {
   microsoft: "Microsoft",
 };
 
+// The placeholder an account carries between an admin creating it and the member
+// first signing in. It is not a way to sign in and so is not a sign-in method:
+// the page reports its presence as what it means — nobody has been here yet —
+// rather than listing it beside Google and Microsoft.
+const INVITE_PROVIDER = "invite";
+
 // A role this page can offer, with the reason it is or is not on the table.
 interface Grant {
   role: string;
@@ -182,6 +188,7 @@ const AdminUser = () => {
 
   const providerLabel = (p: string) => p === "email" ? translator.translate("E-post") : (providerDisplayName[p] ?? p);
   const nameValue = editedName ?? user.displayName;
+  const signInMethods = Object.entries(user.linkedIdentities).filter(([provider]) => provider !== INVITE_PROVIDER);
 
   return (
     <div>
@@ -229,7 +236,9 @@ const AdminUser = () => {
 
           <div>
             <div className="small text-body-secondary">{translator.translate("Inloggningssätt")}</div>
-            {Object.entries(user.linkedIdentities).map(([provider, identity]) => (
+            {signInMethods.length === 0 ? (
+              <div className="small">{translator.translate("Har inte loggat in ännu. Kontot väntar på e-postadressen ovan.")}</div>
+            ) : signInMethods.map(([provider, identity]) => (
               <div key={provider} className="text-break small">
                 {providerLabel(provider)}: {identity.email || identity.sub}
               </div>

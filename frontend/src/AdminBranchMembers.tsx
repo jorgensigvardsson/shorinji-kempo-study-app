@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Button, Card, Form } from "react-bootstrap";
+import { Alert, Button, Card, Form, Spinner } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
@@ -23,6 +23,19 @@ const AdminBranchMembers = () => {
   // Bumped to ask again. A retry re-runs the effect rather than firing a second
   // request beside it, so there is one place where the fetching happens.
   const [attempt, setAttempt] = useState(0);
+
+  // Adding a member by hand: the form is closed until asked for, since most
+  // visits to this page are to read the roll rather than to add to it.
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  // What to say after a successful add. It carries the name because the person
+  // is now somewhere in a sorted list rather than at the end of it, and whether
+  // the message reached them, which is the one part an admin may have to
+  // finish by hand.
+  const [added, setAdded] = useState<{ name: string; notified: boolean } | null>(null);
 
   // The fetch lives in the effect so that moving to another branch can abandon
   // the answer to the previous one: two navigations in quick order must not let
@@ -49,6 +62,49 @@ const AdminBranchMembers = () => {
   }, [id, attempt]);
 
   const retry = () => { setLoadError(false); setAttempt(n => n + 1); };
+
+  const openAddForm = () => {
+    setAdding(true);
+    setNewName("");
+    setNewEmail("");
+    setAddError(null);
+    setAdded(null);
+  };
+
+  const refusal = (err: unknown): string => {
+    if (err instanceof AdminRequestError) {
+      if (err.reason === "account_exists") return translator.translate("Den e-postadressen har redan ett konto.");
+      if (err.reason === "invalid_email") return translator.translate("E-postadressen ser inte ut att vara giltig.");
+      if (err.status === 403 || err.status === 404) return translator.translate("Du har inte behörighet att göra det.");
+      // The one refusal that is not about what was typed: mail costs money, so
+      // adding people is capped, and waiting a moment is the whole remedy.
+      if (err.status === 429) return translator.translate("För många på kort tid. Vänta en stund och försök igen.");
+    }
+    return translator.translate("Medlemmen kunde inte läggas till. Försök igen.");
+  };
+
+  const addMember = () => {
+    const name = newName.trim();
+    const email = newEmail.trim();
+    if (name === "" || email === "" || saving) return;
+    setSaving(true);
+    setAddError(null);
+    void (async () => {
+      try {
+        const created = await getSyncManager().adminCreateUser(id, email, name, translator.currentLanguage);
+        // Reloaded rather than patched in: the server decides the id and this
+        // list is sorted, so a locally appended row would sit in the wrong place
+        // until the next visit.
+        setBranch(await getSyncManager().adminBranchMembers(id));
+        setAdding(false);
+        setAdded({ name: created.user.displayName, notified: created.notified });
+      } catch (err) {
+        setAddError(refusal(err));
+      } finally {
+        setSaving(false);
+      }
+    })();
+  };
 
   const members = useMemo(() => {
     const list = [...(branch?.members ?? [])];
@@ -95,11 +151,75 @@ const AdminBranchMembers = () => {
   return (
     <div>
       <h1 className="h4">{branch.name}</h1>
-      <p className="text-secondary">
-        {branch.members.length === 1
-          ? translator.translate("1 medlem")
-          : `${branch.members.length} ${translator.translate("medlemmar")}`}
-      </p>
+      {/* The count and the add button share a row, so the margin the count used
+          to carry on its own moves out here — without it the button sits flush
+          against the first member. */}
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <p className="text-secondary mb-0">
+          {branch.members.length === 1
+            ? translator.translate("1 medlem")
+            : `${branch.members.length} ${translator.translate("medlemmar")}`}
+        </p>
+        {!adding && (
+          <Button size="sm" variant="outline-primary" onClick={openAddForm}>
+            {translator.translate("Lägg till medlem")}
+          </Button>
+        )}
+      </div>
+
+      {/* Somebody added this way never asked for an account, so the page says
+          plainly that a message went out to tell them — and says so louder when
+          it did not, since then only the admin can put it right. */}
+      {added !== null && (
+        <Alert variant={added.notified ? "success" : "warning"} className="mt-3" dismissible onClose={() => setAdded(null)}>
+          {added.notified
+            ? `${added.name} ${translator.translate("har lagts till och har fått ett mejl om kontot.")}`
+            : `${added.name} ${translator.translate("har lagts till, men mejlet om kontot kunde inte skickas. Berätta gärna själv.")}`}
+        </Alert>
+      )}
+
+      {adding && (
+        <Card className="my-3">
+          <Card.Body className="d-flex flex-column gap-2">
+            <p className="text-body-secondary small mb-1">
+              {translator.translate("Medlemmen får ett mejl om att kontot har skapats och loggar in med sin e-postadress — ingen registrering behövs.")}
+            </p>
+            {addError !== null && <p className="text-danger mb-1">{addError}</p>}
+            <div className="d-flex gap-2 flex-wrap align-items-center">
+              <Form.Control
+                size="sm"
+                autoFocus
+                style={{ maxWidth: "16rem" }}
+                value={newName}
+                disabled={saving}
+                placeholder={translator.translate("Namn")}
+                aria-label={translator.translate("Namn")}
+                onChange={e => setNewName(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") addMember(); }}
+              />
+              <Form.Control
+                size="sm"
+                type="email"
+                style={{ maxWidth: "20rem" }}
+                value={newEmail}
+                disabled={saving}
+                placeholder={translator.translate("E-post")}
+                aria-label={translator.translate("E-post")}
+                onChange={e => setNewEmail(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") addMember(); }}
+              />
+              <Button size="sm" variant="primary"
+                      disabled={saving || newName.trim() === "" || newEmail.trim() === ""}
+                      onClick={addMember}>
+                {saving ? <Spinner size="sm" /> : translator.translate("Lägg till")}
+              </Button>
+              <Button size="sm" variant="outline-secondary" disabled={saving} onClick={() => setAdding(false)}>
+                {translator.translate("Avbryt")}
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      )}
 
       {branch.members.length > 5 && (
         <Form.Control

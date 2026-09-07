@@ -52,6 +52,14 @@ type fakeSender struct {
 	transferAccepted     bool
 	approved             bool
 	joinErr              error
+
+	// The message telling somebody an admin has made them an account. Recorded
+	// rather than sent, and its own error, since the handler reports a failed
+	// send back to the admin instead of swallowing it.
+	createdTo     string
+	createdBranch string
+	createdLang   string
+	createdErr    error
 }
 
 // sentNotice is one call to SendJoinRequestNotice: a set of admins who share a
@@ -93,6 +101,11 @@ func (f *fakeSender) SendJoinReceived(_ context.Context, to, branchName, lang st
 func (f *fakeSender) SendJoinDecision(_ context.Context, to, branchName, lang string, approved bool) error {
 	f.decisionTo, f.decisionLang, f.decided, f.approved = to, lang, true, approved
 	return f.joinErr
+}
+
+func (f *fakeSender) SendAccountCreated(_ context.Context, to, branchName, lang string) error {
+	f.createdTo, f.createdBranch, f.createdLang = to, branchName, lang
+	return f.createdErr
 }
 
 func (f *fakeSender) SendFeedback(_ context.Context, to []string, submission email.FeedbackSubmission) error {

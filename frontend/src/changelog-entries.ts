@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-07T16:59:05.244Z",
+    changes: [
+      {
+        emoji: "👥",
+        sv: "Klubbadministratörer kan nu lägga till medlemmar direkt från klubbens medlemslista, så att den som ska med inte behöver registrera sig själv. Medlemmen får ett mejl om att kontot har skapats och loggar in med sin e-postadress — och kan logga in och radera kontot om det skulle vara ett misstag.",
+        en: "Branch administrators can now add members straight from the branch's member list, so nobody has to register themselves. The member gets an email saying the account has been created and signs in with their email address — and can sign in and delete the account if it was a mistake.",
+        tr: "Kulüp yöneticileri artık üyeleri doğrudan kulübün üye listesinden ekleyebiliyor; böylece kimsenin kendi kaydını yapmasına gerek kalmıyor. Üyeye hesabın oluşturulduğunu bildiren bir e-posta gönderilir ve üye e-posta adresiyle giriş yapar — bir hata olmuşsa giriş yapıp hesabı silebilir.",
+        ja: "支部の管理者が、会員一覧から直接メンバーを追加できるようになりました。本人が登録手続きをする必要はありません。追加された方にはアカウント作成のお知らせメールが届き、メールアドレスでログインできます。心当たりがない場合は、ログインしてアカウントを削除することもできます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-03T07:30:00.000Z",
     changes: [
       {

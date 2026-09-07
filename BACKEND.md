@@ -66,7 +66,11 @@ domain the user types — no provider picker is shown.
 5. Auth service validates state + nonce, exchanges the code for tokens, validates the ID token
 6. Auth service looks up the user by `(provider, sub)` in `linkedIdentities`:
    - **Existing user:** update `lastLoginAt`
-   - **New user:** generate a UUID, create a user record with this provider linked
+   - **No match, but an account is waiting for this address:** an admin created it by hand
+     (`POST /auth/admin/users`). The provider has just vouched for the address, which is what
+     entitles the holder to claim it — the `invite` placeholder is swapped for this identity
+   - **Neither:** no account is created. A join ticket is issued instead and the applicant is
+     sent to ask a branch to admit them (`/auth/join/*`)
 7. Auth service issues a signed JWT (`sub` = our UUID), delivers it as an httpOnly cookie,
    and redirects to the frontend
 8. Frontend detects successful login and switches the sync provider to `"backend"`
@@ -167,6 +171,29 @@ The deploy pipeline feeds the host, port, username, sender and TLS mode in as Gi
 ACA secret (`smtp-password`). Neither backend app carries a managed identity: Cosmos is reached
 with an account key and mail with a password.
 
+### Members added by an administrator
+Joining normally runs the other way round — the member proves an address, a branch admits them —
+which is the right shape for a stranger at the door and the wrong one for the twelve people an
+instructor already trains every Tuesday. `POST /auth/admin/users` lets the branch vouch first:
+
+1. An admin covering the branch posts `{email, name, branchId, language}`. The address is refused
+   if **any** account already uses it, as its own or as a linked identity's — a full scan of the
+   users container, since (provider, sub) is the only index and a Google `sub` is not an address.
+   The alternative to the scan is not a cheaper query but a second account for one person
+2. The account is written with a single `invite` placeholder identity whose `sub` is the
+   lowercased address (see the user record above). Any application they had pending is deleted:
+   left behind it would sit in the admin queue, and approving it creates rather than looks up
+3. They are mailed — always, since an account made in somebody's name must not happen quietly.
+   The message names the branch, not the admin, and says they can sign in and delete the account
+   if it was a mistake. It is written in the **admin's** language: the only guess available at an
+   address that has never opened the app, and one `PUT /auth/me/language` corrects on first use
+4. The response carries the created user plus `notified`. The account is written before the mail
+   goes out, so a relay that is down leaves a real account nobody knows they have — which the
+   admin who made it is the only person able to put right
+5. The first sign-in **claims** it, by either route: the OIDC callback and `/auth/email/verify`
+   both look for a waiting account when the identity does not match, and swap the placeholder for
+   the real identity. Every sign-in after that is an ordinary lookup
+
 ---
 
 ## Data Models
@@ -195,7 +222,11 @@ with an account key and mail with a password.
   unprompted — "somebody has asked to join your branch" — is written in a language the reader
   reads. The browser is the only place that knows it, and it has no other reason to tell us.
   Absent until the app reports one, in which case the default (`en`) applies
-- `linkedIdentities` maps provider name → `{sub, email}` for each linked provider
+- `linkedIdentities` maps provider name → `{sub, email}` for each linked provider. Two keys are
+  not providers: `email` is our own code login, and `invite` is a **placeholder** on an account an
+  admin created by hand, whose `sub` is the lowercased address it is waiting for. Nothing
+  authenticates against `invite` — it exists so the first real sign-in finds the account with a
+  point read instead of a scan, and it is replaced by the real identity when that happens
 - Provider lookup happens only at login; the UUID is used for everything else.
   In Cosmos a dedicated `identity_index` container gives O(1) `FindByLinkedIdentity`
   lookups without cross-partition queries
@@ -329,6 +360,7 @@ corporate domain at the appropriate provider.
 | POST | `/auth/join/request` | Apply to a branch — body `{branchId, note?}`. Carries a global cap on top of the per-IP one: an admin's inbox is as much a quota as the relay is |
 | POST | `/auth/join/withdraw` | Take back a pending application |
 | GET | `/auth/admin/users` | List the users the caller may see, with their roles, linked identities, and an `oidc` flag |
+| POST | `/auth/admin/users` | Add a member who never registered — body `{email, name, branchId, language?}`. Authority over the branch; 409 `account_exists` when the address is already in use anywhere, 404 for a branch the caller does not cover. Answers the created user plus `notified`, which says whether the message telling them got out. Globally rate-limited, like every endpoint here that sends mail |
 | GET | `/auth/admin/users/{id}` | One user, so a page addressed by URL stands up without having arrived from the listing |
 | PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) |
 | PUT | `/auth/admin/users/{id}/roles` | Replace a user's roles — body `{roles: [...]}`; 403 for a grant beyond the caller's authority, 409 on removing your own `admin`/`wsko_admin` |
@@ -403,6 +435,14 @@ for EU residents.
 An applicant is deliberately not a user: they exist in `joinrequests` and nowhere else until a
 branch admits them. That is what keeps the `users` container free of accounts nobody approved, and
 it is what makes the retention story a single sentence.
+
+**A member added by an administrator is the one exception**, and a deliberate one: their name and
+address sit in `users` before they have said anything to us. The lawful basis is the branch's
+legitimate interest in enrolling its own members, and the safeguards are that the person is
+**always** mailed the moment the account exists, that the message tells them how to delete it,
+and that deleting it is the same "Delete my account" every other member has. The alternative —
+holding them somewhere else until they first sign in — would be a second half-account with its
+own retention rules, and would still be their name and address either way.
 
 ### Data a member holds about their own membership
 | Data | Where | Lawful basis | Retention |

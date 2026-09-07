@@ -212,6 +212,10 @@ class SyncManager {
     return await this.backendClient.adminGetUser(id);
   }
 
+  async adminCreateUser(branchId: string, email: string, name: string, language: string) {
+    return await this.backendClient.adminCreateUser(branchId, email, name, language);
+  }
+
   async myTransfer() {
     return await this.backendClient.myTransfer();
   }

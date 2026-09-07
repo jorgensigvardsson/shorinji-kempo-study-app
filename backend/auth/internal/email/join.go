@@ -182,22 +182,36 @@ func renderJoinDecision(branchName, lang string, approved bool) (message, error)
 }
 
 func renderApplicantMessage(lang, subject, heading, body string) (message, error) {
+	return renderApplicantMessageWith(lang, subject, heading, body, "")
+}
+
+// renderApplicantMessageWith is the same message with a second, quieter
+// paragraph under the first — somewhere to put what the reader should do if the
+// message was not meant for them. An empty extra renders nothing at all, which
+// is why every message that has nothing to add goes through the four-argument
+// form above rather than passing "" itself.
+func renderApplicantMessageWith(lang, subject, heading, body, extra string) (message, error) {
 	var html bytes.Buffer
 	err := applicantHTMLTemplate.Execute(&html, struct {
-		Lang, Subject, Heading, Body string
+		Lang, Subject, Heading, Body, Extra string
 	}{
 		Lang:    langAttr(lang),
 		Subject: subject,
 		Heading: heading,
 		Body:    body,
+		Extra:   extra,
 	})
 	if err != nil {
 		return message{}, fmt.Errorf("render applicant message: %w", err)
 	}
+	plain := heading + "\n\n" + body + "\n"
+	if extra != "" {
+		plain += "\n" + extra + "\n"
+	}
 	return message{
 		senderName: lookup(lang).appName,
 		subject:    subject,
-		plain:      heading + "\n\n" + body + "\n",
+		plain:      plain,
 		html:       html.String(),
 	}, nil
 }
@@ -228,6 +242,7 @@ var applicantHTMLTemplate = template.Must(template.New("applicant").Parse(`<!DOC
 <tr><td style="padding:28px 32px 32px 32px;">
 <h1 style="margin:0 0 16px 0;font-size:20px;font-weight:600;color:#222;">{{.Heading}}</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#444;">{{.Body}}</p>
+{{if .Extra}}<p class="muted" style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;">{{.Extra}}</p>{{end}}
 </td></tr></table>
 </td></tr></table>
 </body></html>`))

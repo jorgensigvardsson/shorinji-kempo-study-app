@@ -38,6 +38,14 @@ const (
 	emailProviderName = "email"
 	emailCodeTTL      = 10 * time.Minute
 	emailCodeMaxTries = 5
+
+	// inviteProviderName is the linked-identity key an admin-created account
+	// carries until the person it was made for signs in. It is a placeholder, not
+	// a way in: nothing authenticates against it, and the first real sign-in
+	// replaces it (see invite.go). Its sub is the lowercased address, so finding
+	// the account waiting for an address is the same point read as finding the
+	// account behind a provider identity.
+	inviteProviderName = "invite"
 )
 
 // emailCode is a pending verification code, held in memory like OIDC pending
@@ -75,6 +83,7 @@ type Handler struct {
 	feedbackLimiter    *ratelimit.GlobalRateLimiter // global cap on feedback-sending (protects the email quota)
 	joinLimiter        *ratelimit.GlobalRateLimiter // global cap on join requests (protects admins' inboxes as much as the quota)
 	transferLimiter    *ratelimit.GlobalRateLimiter // the same, for members asking to move between branches
+	inviteLimiter      *ratelimit.GlobalRateLimiter // the same, for admins adding members by hand
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -126,7 +135,14 @@ func NewHandler(
 		// sharing the applicants' — a club signing up together must not be held up
 		// by one restless member, or the other way round.
 		transferLimiter: ratelimit.NewGlobal(0.05, 3),
-		pending:         make(map[string]pendingState),
+		// Adding a member by hand sends a real message, so it is capped like every
+		// other send — but at the verification code's steady rate rather than the
+		// applicants' trickle, and with room for a burst. An instructor entering
+		// the people already in front of them does it a few at a time, and unlike
+		// the flows above this one is behind an admin session: the cap is here to
+		// bound a mistake, not to hold off a stranger.
+		inviteLimiter: ratelimit.NewGlobal(0.2, 5),
+		pending:       make(map[string]pendingState),
 		emailCodes:      make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
@@ -206,6 +222,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	// caller covers the scope it touches, not merely whether they are an admin.
 	// The routes ride the same middleware chain below.
 	inner.HandleFunc("GET /auth/admin/users", h.adminListUsers)
+	// Adding a member by hand mails them, so it carries a global cap on top of
+	// the per-IP one, like every other endpoint here that sends.
+	inner.Handle("POST /auth/admin/users", h.inviteLimiter.Middleware(http.HandlerFunc(h.adminCreateUser)))
 	inner.HandleFunc("GET /auth/admin/users/{id}", h.adminGetUser)
 	inner.HandleFunc("PATCH /auth/admin/users/{id}", h.adminUpdateUser)
 	inner.HandleFunc("PUT /auth/admin/users/{id}/roles", h.adminSetRoles)
@@ -425,6 +444,17 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil {
+		// An admin may already have made this person an account, which the
+		// provider having just vouched for the address is what entitles them to
+		// claim. Only then is there really nobody here.
+		user, err = h.claimInvitedAccount(ps.providerName, info.Sub, info.Email)
+		if err != nil {
+			log.Printf("callback: invited account lookup for %s: %v", info.Email, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
+	if user == nil {
 		// Controlling an address is not grounds for an account. Hand back a join
 		// ticket instead of enrolling, and let the branch decide.
 		if err := h.setJoinTicket(w, token.JoinTicket{
@@ -522,6 +552,16 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	if user == nil {
+		// An account an admin made for this address is an existing account, not a
+		// new one — the difference decides whether the next screen asks for a name
+		// that has already been typed for them.
+		if user, err = h.invitedAccount(addr); err != nil {
+			log.Printf("emailStart: invited account lookup %s: %v", addr, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
 	isNew := user == nil
 
 	code, err := newNumericCode()
@@ -611,6 +651,17 @@ func (h *Handler) emailVerify(w http.ResponseWriter, r *http.Request) {
 		log.Printf("emailVerify: user lookup %s: %v", addr, err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
+	}
+	if user == nil {
+		// The same claim the OIDC callback makes: a code proves the address, and
+		// an account an admin made for that address has been waiting for exactly
+		// that proof.
+		user, err = h.claimInvitedAccount(emailProviderName, addr, addr)
+		if err != nil {
+			log.Printf("emailVerify: invited account lookup for %s: %v", addr, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
 	}
 	if user == nil {
 		// A valid code proves the address and nothing more. The name is carried

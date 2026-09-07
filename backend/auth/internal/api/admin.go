@@ -269,11 +269,14 @@ func (h *Handler) adminLogoutUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// hasOIDCIdentity reports whether the user has any linked identity other than the
-// email (code) provider.
+// hasOIDCIdentity reports whether an identity provider owns this user's display
+// name — which is what the flag it feeds actually means. Neither of the two keys
+// excluded here is a provider: the email one is our own code login, and the
+// invite one is a placeholder on an account nobody has signed into yet. An admin
+// who has just typed somebody's name must be able to correct it.
 func hasOIDCIdentity(u *store.User) bool {
 	for provider := range u.LinkedIdentities {
-		if provider != emailProviderName {
+		if provider != emailProviderName && provider != inviteProviderName {
 			return true
 		}
 	}
