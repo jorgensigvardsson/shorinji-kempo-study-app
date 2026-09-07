@@ -2,9 +2,15 @@ import { useContext, useEffect, useState, type ReactNode } from "react";
 import { Badge, Button, Card, Spinner } from "react-bootstrap";
 import { TranslatorContext, type Translator } from "./i18n";
 import { getSyncManager } from "./sync/manager";
-import { publishPendingRequests } from "./pendingRequests";
-import type { AdminJoinRequest, AdminTransfer } from "./sync/backend";
+import { loadAdminQueue, setAdminQueue } from "./pendingRequests";
+import { AdminRequestError, type AdminJoinRequest, type AdminTransfer } from "./sync/backend";
 import Loading from "./components/Loading";
+
+// How long to wait before the one quiet retry a rate-limited decision gets. A
+// refusal for rate means the request never reached the handler, so repeating it
+// cannot decide anything twice — and the app's own burstiness is the usual
+// reason for one, which a moment's pause is enough to clear.
+const RETRY_AFTER_MS = 800;
 
 // Everybody waiting on this admin: people asking to be let in, and members who
 // have moved and are asking a club to take them over. The route is registered
@@ -24,18 +30,14 @@ const AdminRequests = () => {
   // unsend.
   const [confirmDeny, setConfirmDeny] = useState<string | null>(null);
 
-  const load = async () => {
+  // `fresh` goes past the reading the menu badge may have taken moments ago,
+  // which is what a retry and a re-read after a failure both want.
+  const load = async (fresh = false) => {
     setLoadError(false);
     try {
-      const [waiting, moving] = await Promise.all([
-        getSyncManager().adminListRequests(),
-        getSyncManager().adminListTransfers(),
-      ]);
-      setRequests(waiting);
-      setTransfers(moving);
-      // This is the one place that knows the true figure, so the menu's count is
-      // corrected from here rather than left to go stale on its own.
-      publishPendingRequests(waiting.length + moving.length);
+      const queue = await loadAdminQueue({ fresh });
+      setRequests(queue.requests);
+      setTransfers(queue.transfers);
     } catch {
       setLoadError(true);
     }
@@ -48,15 +50,24 @@ const AdminRequests = () => {
     setBusyId(id);
     setError(null);
     try {
-      await act();
-      const waiting = (requests ?? []).filter(r => r.email !== id);
-      const moving = (transfers ?? []).filter(t => t.id !== id);
-      setRequests(waiting);
-      setTransfers(moving);
-      publishPendingRequests(waiting.length + moving.length);
+      await decideWithRetry(act);
+      const queue = {
+        requests: (requests ?? []).filter(r => r.email !== id),
+        transfers: (transfers ?? []).filter(t => t.id !== id),
+      };
+      setRequests(queue.requests);
+      setTransfers(queue.transfers);
+      // The row is gone for certain, so nobody needs to be sent to ask — and the
+      // menu's count is corrected from here rather than left to go stale.
+      setAdminQueue(queue);
       setConfirmDeny(null);
-    } catch {
-      setError(translator.translate("Beslutet kunde inte sparas. Försök igen."));
+    } catch (err) {
+      setError(refusal(err, translator));
+      // A request the server no longer has is one somebody else has already
+      // dealt with, so what is on screen is wrong and re-reading is the answer.
+      // Nothing else re-reads: after a refusal for rate, two more calls are the
+      // last thing the situation needs.
+      if (err instanceof AdminRequestError && err.status === 404) void load(true);
     } finally {
       setBusyId(null);
     }
@@ -70,7 +81,7 @@ const AdminRequests = () => {
     return (
       <div className="p-3">
         <p className="text-danger">{translator.translate("Kunde inte hämta ansökningarna.")}</p>
-        <Button variant="outline-secondary" onClick={() => { void load(); }}>
+        <Button variant="outline-secondary" onClick={() => { void load(true); }}>
           {translator.translate("Försök igen")}
         </Button>
       </div>
@@ -145,6 +156,32 @@ const AdminRequests = () => {
       )}
     </div>
   );
+};
+
+// Runs a decision, giving it one more go if the server refused it for rate. The
+// per-IP ceiling is shared by everyone in a household and spent by the app itself
+// on every page it opens, so a click can arrive to find nothing left — a
+// circumstance the admin neither caused nor can do anything about. Waiting a
+// moment and trying again is what she would have done herself.
+const decideWithRetry = async (act: () => Promise<void>): Promise<void> => {
+  try {
+    await act();
+  } catch (err) {
+    if (!(err instanceof AdminRequestError) || err.status !== 429) throw err;
+    await new Promise(resolve => setTimeout(resolve, RETRY_AFTER_MS));
+    await act();
+  }
+};
+
+// Turns a refusal into something worth reading. The distinction matters: "wait a
+// moment" and "somebody else got there first" ask opposite things of whoever is
+// looking, and for a long while both of them read "try again" — which is how a
+// rate limit came to look like a broken page.
+const refusal = (err: unknown, translator: Translator): string => {
+  const status = err instanceof AdminRequestError ? err.status : 0;
+  if (status === 429) return translator.translate("För många på kort tid. Vänta en stund och försök igen.");
+  if (status === 404) return translator.translate("Ansökan finns inte längre — någon annan kan ha hunnit före.");
+  return translator.translate("Beslutet kunde inte sparas. Försök igen.");
 };
 
 // One person waiting on a yes or a no. Both kinds of request are read the same

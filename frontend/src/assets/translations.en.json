@@ -1909,6 +1909,7 @@
   "Uppgifterna kunde inte godtas. Kontrollera dem och försök igen.": "The details could not be accepted. Check them and try again.",
   "Ändringen kunde inte sparas. Försök igen.": "The change could not be saved. Please try again.",
   "Beslutet kunde inte sparas. Försök igen.": "The decision could not be saved. Please try again.",
+  "Ansökan finns inte längre — någon annan kan ha hunnit före.": "That request is no longer there — somebody else may have got to it first.",
   "Kunde inte hämta organisationen.": "Could not fetch the organization.",
   "Kunde inte hämta medlemmarna.": "Could not fetch the members.",
   "Kunde inte hämta ansökningarna.": "Could not fetch the requests.",

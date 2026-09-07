@@ -1562,6 +1562,7 @@
   "Uppgifterna kunde inte godtas. Kontrollera dem och försök igen.": "入力内容を受け付けられませんでした。確認してもう一度お試しください。",
   "Ändringen kunde inte sparas. Försök igen.": "変更を保存できませんでした。もう一度お試しください。",
   "Beslutet kunde inte sparas. Försök igen.": "判断を保存できませんでした。もう一度お試しください。",
+  "Ansökan finns inte längre — någon annan kan ha hunnit före.": "その申請はもうありません。ほかの管理者が先に対応した可能性があります。",
   "Kunde inte hämta organisationen.": "組織を取得できませんでした。",
   "Kunde inte hämta medlemmarna.": "会員を取得できませんでした。",
   "Kunde inte hämta ansökningarna.": "申請を取得できませんでした。",

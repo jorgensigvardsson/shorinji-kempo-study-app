@@ -65,8 +65,21 @@ func main() {
 	feedbackEmail := flag.String("feedback-email", envutil.String("FEEDBACK_EMAIL", ""), "comma-separated recipient(s) for POST /auth/feedback (empty disables the endpoint)")
 
 	// ── Rate limiting ─────────────────────────────────────────────────────────
-	rateLimitRPS   := flag.Float64("rate-limit-rps",   envutil.Float64("RATE_LIMIT_RPS",   1.0), "max requests per second per IP (0 = disabled)")
-	rateLimitBurst := flag.Float64("rate-limit-burst", envutil.Float64("RATE_LIMIT_BURST", 5.0), "rate limit burst size")
+	// The ceiling is per IP, which is per household rather than per person: a
+	// family shares one public address, and so does everybody behind a mobile
+	// carrier. It also has to cover what one page costs — opening the admin queue
+	// is half a dozen calls in the same breath — so a budget of one request a
+	// second refused ordinary use, and did: an admin approving members hit 53
+	// rejections in a single minute on 2026-09-06, each one surfacing as a failure
+	// she could do nothing about.
+	//
+	// What this protects is not the wallet directly. The endpoints that cost real
+	// money — anything that sends mail — carry their own global caps, measured in
+	// seconds per message rather than messages per second, and those are unchanged.
+	// This is here to stop a scanner from grinding through the API, and 5/s with a
+	// burst of 20 still does that comfortably.
+	rateLimitRPS   := flag.Float64("rate-limit-rps",   envutil.Float64("RATE_LIMIT_RPS",   5.0),  "max requests per second per IP (0 = disabled)")
+	rateLimitBurst := flag.Float64("rate-limit-burst", envutil.Float64("RATE_LIMIT_BURST", 20.0), "rate limit burst size")
 
 	flag.Parse()
 

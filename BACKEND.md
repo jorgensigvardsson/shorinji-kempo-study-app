@@ -17,6 +17,28 @@ Every endpoint in both services is wrapped in the same middleware chain:
 `internal/api/handlers.go`). Rate limiting via `backend/shared/ratelimit` (`IPRateLimiter`)
 is a hard requirement on every endpoint.
 
+### What the per-IP limit is for, and what it is not
+
+The `IPRateLimiter` ceiling is auth 5 req/s (burst 20), persistence 2 req/s
+(burst 10), settable per deployment with `RATE_LIMIT_RPS` / `RATE_LIMIT_BURST`. It
+is there to stop a scanner grinding through the API — not to protect the mail
+quota or the bill, which is what the per-endpoint `GlobalRateLimiter`s do, and
+they are measured in seconds per message rather than messages per second.
+
+Two things make this budget smaller in practice than it looks, and both are worth
+remembering before lowering it:
+
+- **It is per IP, so it is per household.** A family shares one public address, as
+  does everybody behind a mobile carrier's NAT.
+- **One page view is not one request.** Opening the admin queue costs `/auth/me`,
+  possibly a refresh, and the queue itself.
+
+Set at 1 req/s with a burst of 5, this refused ordinary use: an admin approving
+members hit 53 rejections in a single minute on 2026-09-06, each surfacing to her
+as a decision that would not save. The frontend now retries a rate-limited write
+once (see `AdminRequests.tsx`) and names the refusal rather than reporting every
+failure identically, but the limit itself was the fault.
+
 ---
 
 ## Services

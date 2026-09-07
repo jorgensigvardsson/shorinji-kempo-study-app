@@ -12,6 +12,8 @@ vi.mock("./sync/manager", () => ({
 }));
 
 import AdminRequests from "./AdminRequests";
+import { forgetAdminQueue } from "./pendingRequests";
+import { AdminRequestError } from "./sync/backend";
 
 const waiting = [
   {
@@ -30,6 +32,7 @@ describe("AdminRequests", () => {
     adminDecideRequest.mockReset().mockResolvedValue(undefined);
     adminListTransfers.mockReset().mockResolvedValue([]);
     adminDecideTransfer.mockReset().mockResolvedValue(undefined);
+    forgetAdminQueue();
   });
 
   it("shows who is waiting, in their own words", async () => {
@@ -93,6 +96,73 @@ describe("AdminRequests", () => {
     expect(await screen.findByText("Inga ansökningar väntar.")).toBeTruthy();
   });
 
+  // Every refusal used to read the same: "the decision could not be saved".
+  // That sentence covered a rate limit, an application somebody else had already
+  // decided, and a genuine fault — three situations asking opposite things of
+  // whoever was reading it.
+  describe("when the server says no", () => {
+    it("tries a rate-limited decision once more before saying anything", async () => {
+      adminDecideRequest
+        .mockRejectedValueOnce(new AdminRequestError(429))
+        .mockResolvedValueOnce(undefined);
+      const user = userEvent.setup();
+      render(<AdminRequests />);
+      await screen.findByText("Hopeful Person");
+
+      await user.click(screen.getAllByRole("button", { name: "Godkänn" })[0]);
+
+      // The admin neither caused the refusal nor could act on it, so it never
+      // reaches her: the row simply goes, a moment later than it would have.
+      expect(await screen.findByText("Second Time")).toBeTruthy();
+      await waitFor(() => expect(screen.queryByText("Hopeful Person")).toBeNull(), { timeout: 3000 });
+      expect(adminDecideRequest).toHaveBeenCalledTimes(2);
+      expect(screen.queryByText(/kunde inte sparas/)).toBeNull();
+    });
+
+    it("says to wait when the retry is refused too", async () => {
+      adminDecideRequest.mockRejectedValue(new AdminRequestError(429));
+      const user = userEvent.setup();
+      render(<AdminRequests />);
+      await screen.findByText("Hopeful Person");
+
+      await user.click(screen.getAllByRole("button", { name: "Godkänn" })[0]);
+
+      expect(await screen.findByText("För många på kort tid. Vänta en stund och försök igen.", {}, { timeout: 3000 })).toBeTruthy();
+      // The applicant is still waiting, and the row still says so.
+      expect(screen.getByText("Hopeful Person")).toBeTruthy();
+      // Asking again is exactly what the situation cannot afford.
+      expect(adminListRequests).toHaveBeenCalledTimes(1);
+    });
+
+    // Two admins share a branch, and one of them gets there first.
+    it("re-reads the queue when a request has already been decided", async () => {
+      adminDecideRequest.mockRejectedValue(new AdminRequestError(404));
+      adminListRequests.mockResolvedValueOnce(waiting).mockResolvedValue([waiting[1]]);
+      const user = userEvent.setup();
+      render(<AdminRequests />);
+      await screen.findByText("Hopeful Person");
+
+      await user.click(screen.getAllByRole("button", { name: "Godkänn" })[0]);
+
+      expect(await screen.findByText("Ansökan finns inte längre — någon annan kan ha hunnit före.")).toBeTruthy();
+      // And the row it refers to goes, rather than staying to be clicked again
+      // until somebody reloads the whole page.
+      await waitFor(() => expect(screen.queryByText("Hopeful Person")).toBeNull());
+      expect(screen.getByText("Second Time")).toBeTruthy();
+    });
+
+    it("still says plainly when nothing else explains it", async () => {
+      adminDecideRequest.mockRejectedValue(new Error("offline"));
+      const user = userEvent.setup();
+      render(<AdminRequests />);
+      await screen.findByText("Hopeful Person");
+
+      await user.click(screen.getAllByRole("button", { name: "Godkänn" })[0]);
+
+      expect(await screen.findByText("Beslutet kunde inte sparas. Försök igen.")).toBeTruthy();
+      expect(screen.getByText("Hopeful Person")).toBeTruthy();
+    });
+  });
   it("offers a retry when the listing cannot be fetched", async () => {
     adminListRequests.mockRejectedValue(new Error("offline"));
     render(<AdminRequests />);
@@ -120,6 +190,7 @@ describe("AdminRequests, transfers", () => {
     adminDecideRequest.mockReset().mockResolvedValue(undefined);
     adminListTransfers.mockReset().mockResolvedValue(moving);
     adminDecideTransfer.mockReset().mockResolvedValue(undefined);
+    forgetAdminQueue();
   });
 
   it("says where a transferring member is coming from", async () => {

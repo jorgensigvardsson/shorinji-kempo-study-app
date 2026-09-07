@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-07T17:42:59.418Z",
+    changes: [
+      {
+        emoji: "🛠️",
+        sv: "Rättat ett fel som kunde få ansökningar att inte gå att godkänna. Appen bad servern om för mycket på en gång, servern sa nej, och sidan svarade bara att beslutet inte kunde sparas — så det enda som hjälpte var att ladda om. Nu står det vad som hände, och appen försöker själv igen när det bara var för snabbt.",
+        en: "Fixed a fault that could make applications impossible to approve. The app asked the server for too much at once, the server refused, and the page said only that the decision could not be saved — so the only thing that helped was reloading. It now says what happened, and retries by itself when the answer was merely \"too fast\".",
+        tr: "Başvuruların onaylanamamasına yol açabilen bir hata giderildi. Uygulama sunucudan aynı anda çok fazla şey istiyor, sunucu reddediyor ve sayfa yalnızca kararın kaydedilemediğini söylüyordu; tek çare sayfayı yeniden yüklemekti. Artık ne olduğu yazıyor ve sorun yalnızca hızdan kaynaklandıysa uygulama kendisi yeniden deniyor.",
+        ja: "申請を承認できなくなることがある不具合を修正しました。アプリが一度にサーバーへ要求を送りすぎ、サーバーがそれを断り、画面には「保存できませんでした」としか表示されないため、再読み込みするほかありませんでした。今後は理由が表示され、単に速すぎただけの場合はアプリが自動でやり直します。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-07T16:59:05.244Z",
     changes: [
       {
