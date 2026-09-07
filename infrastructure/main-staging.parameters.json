@@ -49,6 +49,12 @@
     },
     "cookieDomain": {
       "value": ".app-staging.shorinjikempo.net"
+    },
+    "logRetentionDays": {
+      "value": 30
+    },
+    "logDailyQuotaGb": {
+      "value": "0.023"
     }
   }
 }

@@ -678,8 +678,11 @@ Deploying production runs `.github/workflows/deploy.yml`:
 5. **Announcement** — a push broadcast ("New version available") via `PUSH_ADMIN_TOKEN`;
    non-fatal if it fails
 
-Scaling: auth runs **min 1 / max 1 replica** (OIDC pending state and verification codes are
-held in-process); persistence runs **min 0 / max 1**, scaling on HTTP traffic. Secrets (signing
+Scaling: both services run **min 0 / max 1 replica**, scaling on HTTP traffic. The ceiling of
+one is not a cost measure but a correctness one for auth — OIDC pending state, verification
+codes, the organization tree and the rate-limiter buckets are all held in-process, and a second
+replica would not share them. The floor of zero means anything held in-process is also lost
+whenever the app goes idle, which is why logs need somewhere to go (see *Logs* below). Secrets (signing
 key, OIDC client secrets, VAPID keys, SMTP password) are injected via ACA secrets; the JWT signing
 key arrives as a PEM string (`SERVICE_KEY_PEM`), no file volume needed.
 
@@ -842,6 +845,47 @@ Required repository configuration beyond what prod already had before staging ex
   other than the Let's Encrypt account contact, or to a comma-separated list.
   The mail itself goes out over the existing `SMTP_HOST`/`SMTP_PORT`/
   `SMTP_USERNAME`/`SMTP_FROM`/`SMTP_TLS` variables and `SMTP_PASSWORD` secret.
+
+### Logs
+
+Both environments send container stdout to their own Log Analytics workspace
+(`sk-study-app-logs`, `sk-study-app-staging-logs`), created by
+`infrastructure/modules/log-analytics.bicep` and named as the environment's
+`appLogsConfiguration` destination.
+
+This did not always exist. The environment previously named no destination at
+all, deliberately, to avoid ingestion costs — and since both apps scale to zero
+when idle, that meant every line the services wrote was discarded the moment the
+container stopped. There was no way to investigate a production failure after the
+fact, only to describe it.
+
+Two tables arrive, and no more:
+
+- `ContainerAppConsoleLogs_CL` — everything the services write to stdout: errors,
+  admin decisions, and the startup lines each cold start produces.
+- `ContainerAppSystemLogs_CL` — platform events for the app: scaling from zero,
+  revision provisioning, image pulls, failed probes.
+
+Per-request HTTP logs (`ContainerAppHTTPLogs`) are a separate opt-in via a
+diagnostic setting and are **not** enabled. They would be dominated by scanner
+traffic, and the request picture is already available for free — and for 93 days —
+in the container app's `Requests` metric, split by `statusCode`. That metric is
+what identified the rate limiting described under *What the per-IP limit is for*;
+reach for it before reaching for logs when the question is "how often, and what
+did the server answer".
+
+Ingestion is the whole cost, and the services log events rather than requests, so
+steady state is single-digit megabytes a month. Each workspace carries a daily cap
+of 0.023 GB — Azure's lowest permitted value, about 23 MB — as a backstop against
+a crash loop, not as the expected volume. Retention is 30 days, the minimum, which
+is also the amount included in the ingestion price.
+
+```bash
+az monitor log-analytics query \
+  --workspace "$(az monitor log-analytics workspace show -g sk-study-app -n sk-study-app-logs --query customerId -o tsv)" \
+  --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(2h) | order by TimeGenerated desc | project TimeGenerated, ContainerAppName_s, Log_s" \
+  -o table
+```
 
 ### Local development
 `docker-compose up` starts the frontend (Vite), auth (`:8081`), and persistence (`:8080`)

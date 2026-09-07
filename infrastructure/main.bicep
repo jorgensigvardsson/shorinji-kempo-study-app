@@ -120,6 +120,17 @@ param smtpTls string = 'starttls'
 @description('Comma-separated recipient(s) for feedback submissions.')
 param feedbackEmail string = ''
 
+// ── Logging ───────────────────────────────────────────────────────────────────
+// Both services write to stdout; the environment decides whether anyone can ever
+// read it. See modules/log-analytics.bicep for what this costs and why the cap
+// is where it is.
+
+@description('Days to keep container logs')
+param logRetentionDays int = 30
+
+@description('Hard ceiling on log ingestion per day, in GB. A string because ARM has no decimal parameter type; Azure refuses anything under 0.023.')
+param logDailyQuotaGb string = '0.023'
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -137,11 +148,22 @@ resource cosmosAccountRef 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' exi
   name: cosmosAccountName
 }
 
+module logAnalytics 'modules/log-analytics.bicep' = {
+  name: 'log-analytics'
+  params: {
+    name: '${namePrefix}-logs'
+    location: location
+    retentionDays: logRetentionDays
+    dailyQuotaGb: logDailyQuotaGb
+  }
+}
+
 module containerEnv 'modules/container-apps-env.bicep' = {
   name: 'container-apps-env'
   params: {
     name: namePrefix
     location: location
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
   }
 }
 

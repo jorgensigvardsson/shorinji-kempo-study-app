@@ -119,6 +119,18 @@ param smtpTls string = 'starttls'
 @description('Comma-separated recipient(s) for feedback submissions.')
 param feedbackEmail string = ''
 
+// ── Logging ───────────────────────────────────────────────────────────────────
+// Staging gets its own workspace rather than sharing production's: the point of
+// reading these logs is usually to find out what a release did, and two
+// environments in one table would make that harder, not cheaper. See
+// modules/log-analytics.bicep.
+
+@description('Days to keep container logs')
+param logRetentionDays int = 30
+
+@description('Hard ceiling on log ingestion per day, in GB. A string because ARM has no decimal parameter type; Azure refuses anything under 0.023.')
+param logDailyQuotaGb string = '0.023'
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 // Adds this environment's database to prod's existing free-tier Cosmos
@@ -143,11 +155,22 @@ resource cosmosAccountRef 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' exi
   scope: resourceGroup(cosmosResourceGroup)
 }
 
+module logAnalytics 'modules/log-analytics.bicep' = {
+  name: 'log-analytics'
+  params: {
+    name: '${namePrefix}-logs'
+    location: location
+    retentionDays: logRetentionDays
+    dailyQuotaGb: logDailyQuotaGb
+  }
+}
+
 module containerEnv 'modules/container-apps-env.bicep' = {
   name: 'container-apps-env'
   params: {
     name: namePrefix
     location: location
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
   }
 }
 
