@@ -11,6 +11,7 @@ import (
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/authz"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 )
 
 // maxNameLength bounds the name an admin types for somebody else. No name needs
@@ -90,7 +91,7 @@ func (h *Handler) adminCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if existing, err := h.userWithEmail(addr); err != nil {
-		log.Printf("adminCreateUser: duplicate check for %s: %v", addr, err)
+		log.Printf("adminCreateUser: duplicate check for %s: %v", logsafe.Email(addr), err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	} else if existing != nil {
@@ -128,7 +129,7 @@ func (h *Handler) adminCreateUser(w http.ResponseWriter, r *http.Request) {
 		Language: normalizeLang(req.Language),
 	}
 	if err := h.users.Save(user); err != nil {
-		log.Printf("adminCreateUser: save %s: %v", addr, err)
+		log.Printf("adminCreateUser: save %s: %v", logsafe.Email(addr), err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -138,20 +139,20 @@ func (h *Handler) adminCreateUser(w http.ResponseWriter, r *http.Request) {
 	// approved — and approving it would mint a *second* account for the same
 	// person, since approval creates rather than looks up.
 	if prior, err := h.joinRequests.Get(addr); err != nil {
-		log.Printf("adminCreateUser: request lookup for %s: %v", addr, err)
+		log.Printf("adminCreateUser: request lookup for %s: %v", logsafe.Email(addr), err)
 	} else if prior != nil {
 		if err := h.joinRequests.Delete(addr); err != nil {
-			log.Printf("adminCreateUser: delete superseded request for %s: %v", addr, err)
+			log.Printf("adminCreateUser: delete superseded request for %s: %v", logsafe.Email(addr), err)
 		} else {
-			log.Printf("adminCreateUser: %s was added directly; their %s request is superseded", addr, prior.Status)
+			log.Printf("adminCreateUser: %s was added directly; their %s request is superseded", logsafe.Email(addr), prior.Status)
 		}
 	}
 
-	log.Printf("admin %s created user %s (%s) in branch %s", claims.Subject, user.ID, addr, branch.ID)
+	log.Printf("admin %s created user %s in branch %s", claims.Subject, user.ID, branch.ID)
 
 	notified := true
 	if err := h.mailer.SendAccountCreated(context.Background(), user.Email, branch.Name, user.Language); err != nil {
-		log.Printf("adminCreateUser: notify %s: %v", addr, err)
+		log.Printf("adminCreateUser: notify %s: %v", logsafe.Email(addr), err)
 		notified = false
 	}
 	writeJSONStatus(w, http.StatusCreated, createdUserResponse{adminUser: h.asAdminUser(user), Notified: notified})
@@ -207,6 +208,6 @@ func (h *Handler) claimInvitedAccount(provider, sub, addr string) (*store.User, 
 	}
 	delete(user.LinkedIdentities, inviteProviderName)
 	user.LinkedIdentities[provider] = store.LinkedIdentity{Sub: sub, Email: addr}
-	log.Printf("account %s (%s), created by an admin, claimed via %s", user.ID, addr, provider)
+	log.Printf("account %s, created by an admin, claimed via %s", user.ID, provider)
 	return user, nil
 }

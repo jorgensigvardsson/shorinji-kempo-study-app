@@ -13,6 +13,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 )
 
 // maxNoteLength bounds the applicant's own words. Long enough to say who you are
@@ -151,7 +152,7 @@ func (h *Handler) joinRequest(w http.ResponseWriter, r *http.Request) {
 
 	// The ticket is spent: it bought exactly one request.
 	h.clearJoinTicket(w)
-	log.Printf("join request from %s for branch %s (%s)", request.Email, branch.ID, branch.Name)
+	log.Printf("join request from %s for branch %s (%s)", logsafe.Email(request.Email), branch.ID, branch.Name)
 
 	h.announceJoinRequest(request, branch.Name)
 	w.WriteHeader(http.StatusNoContent)
@@ -191,7 +192,7 @@ func (h *Handler) announceJoinRequest(request *store.JoinRequest, branchName str
 	}
 
 	if err := h.mailer.SendJoinReceived(ctx, request.Email, branchName, request.Language); err != nil {
-		log.Printf("joinRequest: acknowledge to %s: %v", request.Email, err)
+		log.Printf("joinRequest: acknowledge to %s: %v", logsafe.Email(request.Email), err)
 	}
 }
 
@@ -271,7 +272,7 @@ func (h *Handler) joinWithdraw(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("join request from %s withdrawn", ticket.Email)
+	log.Printf("join request from %s withdrawn", logsafe.Email(ticket.Email))
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -372,7 +373,7 @@ func (h *Handler) adminApproveRequest(w http.ResponseWriter, r *http.Request) {
 		Language: request.Language,
 	}
 	if err := h.users.Save(user); err != nil {
-		log.Printf("adminApproveRequest: create user for %s: %v", request.Email, err)
+		log.Printf("adminApproveRequest: create user for %s: %v", logsafe.Email(request.Email), err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -382,7 +383,7 @@ func (h *Handler) adminApproveRequest(w http.ResponseWriter, r *http.Request) {
 		log.Printf("adminApproveRequest: delete request %s: %v", request.ID, err)
 	}
 
-	log.Printf("admin %s approved %s into branch %s (user %s)", claims.Subject, request.Email, request.BranchID, user.ID)
+	log.Printf("admin %s approved %s into branch %s (user %s)", claims.Subject, logsafe.Email(request.Email), request.BranchID, user.ID)
 	h.mailDecision(request, true)
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -411,7 +412,7 @@ func (h *Handler) adminDenyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("admin %s declined %s for branch %s", claims.Subject, request.Email, request.BranchID)
+	log.Printf("admin %s declined %s for branch %s", claims.Subject, logsafe.Email(request.Email), request.BranchID)
 	h.mailDecision(request, false)
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -425,6 +426,6 @@ func (h *Handler) mailDecision(request *store.JoinRequest, approved bool) {
 		branchName = branch.Name
 	}
 	if err := h.mailer.SendJoinDecision(context.Background(), request.Email, branchName, request.Language, approved); err != nil {
-		log.Printf("join decision mail to %s: %v", request.Email, err)
+		log.Printf("join decision mail to %s: %v", logsafe.Email(request.Email), err)
 	}
 }

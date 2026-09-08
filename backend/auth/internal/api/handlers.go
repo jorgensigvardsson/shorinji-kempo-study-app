@@ -23,6 +23,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/csrf"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/secureheaders"
 )
@@ -171,7 +172,7 @@ func (h *Handler) identityFor(user *store.User, family string) token.Identity {
 func (h *Handler) rolesFor(email string) []string {
 	roles, err := h.roles.Roles(email)
 	if err != nil {
-		log.Printf("roles lookup for %s: %v", email, err)
+		log.Printf("roles lookup for %s: %v", logsafe.Email(email), err)
 		return nil
 	}
 	return roles
@@ -449,7 +450,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		// claim. Only then is there really nobody here.
 		user, err = h.claimInvitedAccount(ps.providerName, info.Sub, info.Email)
 		if err != nil {
-			log.Printf("callback: invited account lookup for %s: %v", info.Email, err)
+			log.Printf("callback: invited account lookup for %s: %v", logsafe.Email(info.Email), err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -463,7 +464,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 			Email:    info.Email,
 			Name:     info.DisplayName,
 		}); err != nil {
-			log.Printf("callback: issue join ticket for %s: %v", info.Email, err)
+			log.Printf("callback: issue join ticket for %s: %v", logsafe.Email(info.Email), err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -548,7 +549,7 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.users.FindByLinkedIdentity(emailProviderName, addr)
 	if err != nil {
-		log.Printf("emailStart: user lookup %s: %v", addr, err)
+		log.Printf("emailStart: user lookup %s: %v", logsafe.Email(addr), err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -557,7 +558,7 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 		// new one — the difference decides whether the next screen asks for a name
 		// that has already been typed for them.
 		if user, err = h.invitedAccount(addr); err != nil {
-			log.Printf("emailStart: invited account lookup %s: %v", addr, err)
+			log.Printf("emailStart: invited account lookup %s: %v", logsafe.Email(addr), err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -580,7 +581,7 @@ func (h *Handler) emailStart(w http.ResponseWriter, r *http.Request) {
 	h.mu.Unlock()
 
 	if err := h.mailer.SendVerificationCode(r.Context(), addr, code, normalizeLang(req.Language), emailCodeTTL); err != nil {
-		log.Printf("emailStart: send code to %s: %v", addr, err)
+		log.Printf("emailStart: send code to %s: %v", logsafe.Email(addr), err)
 		http.Error(w, "could not send verification email", http.StatusBadGateway)
 		return
 	}
@@ -648,7 +649,7 @@ func (h *Handler) emailVerify(w http.ResponseWriter, r *http.Request) {
 	// code was sent); the name is only stored when we actually create the user.
 	user, err := h.users.FindByLinkedIdentity(emailProviderName, addr)
 	if err != nil {
-		log.Printf("emailVerify: user lookup %s: %v", addr, err)
+		log.Printf("emailVerify: user lookup %s: %v", logsafe.Email(addr), err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -658,7 +659,7 @@ func (h *Handler) emailVerify(w http.ResponseWriter, r *http.Request) {
 		// that proof.
 		user, err = h.claimInvitedAccount(emailProviderName, addr, addr)
 		if err != nil {
-			log.Printf("emailVerify: invited account lookup for %s: %v", addr, err)
+			log.Printf("emailVerify: invited account lookup for %s: %v", logsafe.Email(addr), err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -673,7 +674,7 @@ func (h *Handler) emailVerify(w http.ResponseWriter, r *http.Request) {
 			Email:    addr,
 			Name:     strings.TrimSpace(req.Name),
 		}); err != nil {
-			log.Printf("emailVerify: issue join ticket for %s: %v", addr, err)
+			log.Printf("emailVerify: issue join ticket for %s: %v", logsafe.Email(addr), err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -1079,7 +1080,7 @@ func (h *Handler) submitFeedback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.mailer.SendFeedback(r.Context(), h.feedbackRecipients, submission); err != nil {
-		log.Printf("submitFeedback: send from %s: %v", user.Email, err)
+		log.Printf("submitFeedback: send from %s: %v", logsafe.Email(user.Email), err)
 		http.Error(w, "could not send feedback", http.StatusBadGateway)
 		return
 	}

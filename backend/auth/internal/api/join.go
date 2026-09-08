@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 )
 
 // joinCookieName holds the join ticket between proving an address and asking to
@@ -75,7 +76,7 @@ func (h *Handler) joinContext(w http.ResponseWriter, r *http.Request) {
 	// A returning applicant should land on their pending request rather than on
 	// an empty form that will only tell them they already have one.
 	if existing, err := h.joinRequests.Get(ticket.Email); err != nil {
-		log.Printf("joinContext: pending lookup for %s: %v", ticket.Email, err)
+		log.Printf("joinContext: pending lookup for %s: %v", logsafe.Email(ticket.Email), err)
 	} else if existing != nil && existing.IsPending() {
 		branchName := ""
 		if branch, ok := h.orgs.Branch(existing.BranchID); ok {
@@ -94,5 +95,5 @@ func (h *Handler) joinContext(w http.ResponseWriter, r *http.Request) {
 // for it. Worth a line: before the admission gate this was an enrolment, and the
 // absence of one is otherwise invisible.
 func logJoinTicketIssued(provider, email string) {
-	log.Printf("no account for %s identity (%s); issued a join ticket", provider, email)
+	log.Printf("no account for %s identity (%s); issued a join ticket", provider, logsafe.Email(email))
 }

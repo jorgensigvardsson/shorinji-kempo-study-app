@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/sha256"
 	"flag"
 	"log"
 	"net/http"
@@ -18,6 +19,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/envutil"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 )
 
@@ -101,6 +103,18 @@ func main() {
 		log.Println("signing key loaded from file")
 	}
 	tokenManager := token.NewManager(signingKey, *issuer)
+
+	// Keys the tokens that stand in for email addresses in the log (see
+	// shared/logsafe). Derived from the signing key rather than configured, so
+	// there is no new secret to create, distribute and eventually forget to set —
+	// and from the private exponent, never the modulus, which is published in the
+	// JWKS document and would make the key public along with it.
+	//
+	// Rotating the signing key changes every token, so lines written either side of
+	// a rotation cannot be tied together. Rotation is rare, and correlating a
+	// month-old log line is not a reason to defer one.
+	logsafeKey := sha256.Sum256(append([]byte("shorinji-kempo/log-pseudonym/v1"), signingKey.D.Bytes()...))
+	logsafe.Init(logsafeKey[:])
 
 	// ── Stores (file-based by default; Cosmos when endpoint is configured) ────
 	var userStore      store.UserStore

@@ -242,7 +242,7 @@ func (h *Handler) adminSetRoles(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("admin %s set roles %v for user %s (%s)", claims.Subject, next, user.ID, user.Email)
+	log.Printf("admin %s set roles %v for user %s", claims.Subject, next, user.ID)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -265,7 +265,7 @@ func (h *Handler) adminLogoutUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("admin force-logged-out user %s (%s)", user.ID, user.Email)
+	log.Printf("admin force-logged-out user %s", user.ID)
 	w.WriteHeader(http.StatusNoContent)
 }
 

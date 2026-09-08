@@ -13,6 +13,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 )
 
 // Branch transfers: a member has moved to another town and asks the club there
@@ -336,7 +337,7 @@ func (h *Handler) announceTransferDecision(member *store.User, transfer *store.T
 	ctx := context.Background()
 	if err := h.mailer.SendTransferDecision(ctx, member.Email, h.branchName(transfer.ToBranchID),
 		member.Language, accepted); err != nil {
-		log.Printf("transfer decision to %s: %v", member.Email, err)
+		log.Printf("transfer decision to %s: %v", logsafe.Email(member.Email), err)
 	}
 	if !accepted || leaving == "" || leaving == transfer.ToBranchID {
 		return
