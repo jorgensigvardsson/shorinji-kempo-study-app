@@ -1,7 +1,32 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+
+// Writes the commit this bundle was built from to a file the app can fetch at
+// runtime. The same value is compiled into the bundle as VITE_APP_VERSION, so
+// comparing the two answers "has the server moved on without me?" — the one
+// question a stale service worker cannot get wrong, because it never sees it:
+// .json is outside the injectManifest globPatterns below, so version.json is
+// excluded from the precache by construction, and nothing serves it but the
+// network. See src/app-update.ts, which is the only reader.
+function emitVersionFile(): Plugin {
+  let version = 'dev'
+  return {
+    name: 'emit-version-file',
+    apply: 'build',
+    configResolved(config) {
+      version = (config.env.VITE_APP_VERSION as string | undefined) || 'dev'
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: `${JSON.stringify({ version })}\n`,
+      })
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -58,6 +83,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    emitVersionFile(),
     ...(process.env.VITE_HTTPS !== 'false' ? [mkcert()] : []),
     react({
       babel: {

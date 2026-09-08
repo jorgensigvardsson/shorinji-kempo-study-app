@@ -180,7 +180,7 @@ function App(props: Props) {
 
   // Auto-apply pending versions for unauthenticated visitors (login screen);
   // authenticated users get the "Update" toast via the returned needRefresh.
-  const { needRefresh, applyUpdate, reloadIntoLatest } = useAppUpdate(showSignIn);
+  const { needRefresh, updating, applyUpdate, reloadIntoLatest } = useAppUpdate(showSignIn);
 
   // Training mode combines the existing Dojo presentation with the screen wake
   // lock. It can follow the user between training views, but the wake lock is
@@ -241,7 +241,7 @@ function App(props: Props) {
             reserved at the bottom of the page (--floating-stack-reserve) so
             nothing here ever covers content when scrolled to the end. */}
         <div ref={floatingRef} className="app-floating-stack d-print-none">
-          <AppToasts translator={translator} needRefresh={needRefresh} onUpdate={applyUpdate} onReloadIntoLatest={reloadIntoLatest} />
+          <AppToasts translator={translator} needRefresh={needRefresh} updating={updating} onUpdate={applyUpdate} onReloadIntoLatest={reloadIntoLatest} />
         </div>
         <TrainingControls
           grade={displayGrade}
@@ -353,8 +353,8 @@ const AppNavbar = (props: NavbarProps) => {
   );
 }
 
-const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpdate: () => void; onReloadIntoLatest: () => void }) => {
-  const { translator, needRefresh, onUpdate, onReloadIntoLatest } = props;
+const AppToasts = (props: { translator: Translator; needRefresh: boolean; updating: boolean; onUpdate: () => void; onReloadIntoLatest: () => void }) => {
+  const { translator, needRefresh, updating, onUpdate, onReloadIntoLatest } = props;
   const navigate = useNavigate();
   const lang = translator.currentLanguage;
 
@@ -491,8 +491,8 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
               </a>
             </div>
           </div>
-          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onUpdate}>
-            {translator.translate("Uppdatera")}
+          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onUpdate} disabled={updating}>
+            {updating ? translator.translate("Uppdaterar…") : translator.translate("Uppdatera")}
           </Button>
         </Toast.Body>
       </Toast>
@@ -511,8 +511,8 @@ const AppToasts = (props: { translator: Translator; needRefresh: boolean; onUpda
               {translator.translate("Dina ändringar sparas på den här enheten, men synkas inte förrän appen har uppdaterats.")}
             </div>
           </div>
-          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onReloadIntoLatest}>
-            {translator.translate("Uppdatera")}
+          <Button size="sm" variant="primary" className="app-update-toast-action" onClick={onReloadIntoLatest} disabled={updating}>
+            {updating ? translator.translate("Uppdaterar…") : translator.translate("Uppdatera")}
           </Button>
         </Toast.Body>
       </Toast>

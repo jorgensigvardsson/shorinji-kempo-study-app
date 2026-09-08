@@ -7,6 +7,16 @@ name: Deploy
 on:
   workflow_call: {}
 
+# One production deploy at a time. The frontend ships by rsyncing over the live web
+# root, so two overlapping runs interleave their file writes and deletes and can
+# leave the site serving one build's index.html alongside another build's chunks —
+# which is exactly the state that strands an installed PWA on a version it can no
+# longer replace. Queue rather than cancel: cancelling mid-rsync is the half-updated
+# site we are trying to avoid.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 # id-token: write  — lets the job exchange a GitHub OIDC token for an Azure access token
 # packages: write  — lets the job push images to GHCR
 # contents: read   — lets the job check out code

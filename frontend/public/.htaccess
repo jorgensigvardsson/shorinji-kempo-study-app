@@ -32,8 +32,15 @@ AddType application/manifest+json .webmanifest
     # The app shell, the service worker and the manifest are NOT fingerprinted.
     # Caching them would pin clients to a stale build after a deploy. This block
     # must stay after the one above — the last matching Header set wins.
+    #
+    # version.json is here for a stronger reason than staleness: it is how an
+    # installed app asks which build the server is actually serving, so a cached
+    # answer would defeat the entire point of asking. no-store, not no-cache.
     <FilesMatch "^(index\.html|sw\.js|registerSW\.js|site\.webmanifest)$">
         Header set Cache-Control "no-cache"
+    </FilesMatch>
+    <FilesMatch "^version\.json$">
+        Header set Cache-Control "no-store, must-revalidate"
     </FilesMatch>
 </IfModule>
 

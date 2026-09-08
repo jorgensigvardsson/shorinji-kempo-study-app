@@ -10,10 +10,13 @@ import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
 import { ensureAllTranslations } from "./translations";
-import { Download, Upload } from "react-bootstrap-icons";
+import { ArrowRepeat, Download, Upload } from "react-bootstrap-icons";
 import Loading from "./components/Loading";
+import { resetAppInstallation } from "./app-update";
 
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
+
+const appVersion = (import.meta.env.VITE_APP_VERSION as string | undefined) || "dev";
 
 const textSizeOptions = [
     { value: 1.0, label: "Liten" },
@@ -298,8 +301,50 @@ const Settings = (props: Props) => {
                         </Button>
                     </div>
                 </section>
+
+                <section className="settings-section" aria-labelledby="settings-app-heading">
+                    <div className="settings-section-header">
+                        <h2 id="settings-app-heading" className="app-section-heading">{translator.translate("Om appen")}</h2>
+                    </div>
+                    <AppInstallation translator={translator} />
+                </section>
             </div>
         </main>
+    );
+}
+
+// The manual way out of an app that will not update itself. The automatic recovery
+// in app-update.ts should mean nobody ever needs this, but "should" is doing a lot of
+// work in that sentence, and an installed app on a home screen may offer its user no
+// other way to clear a service worker that has got stuck on an old build.
+const AppInstallation = (props: { translator: Translator }) => {
+    const { translator } = props;
+    const [working, setWorking] = useState(false);
+
+    const reinstall = () => {
+        setWorking(true);
+        // Ends in a reload, so there is no finally: clearing the flag first would only
+        // re-enable the button for the moment before the page goes away.
+        void resetAppInstallation();
+    };
+
+    return (
+        <>
+            <p className="settings-help-text">
+                {translator.translate("Om appen fastnar på en gammal version kan du installera om den. Dina inställningar och studiedata påverkas inte — appen hämtas bara hem på nytt.")}
+            </p>
+            <div className="d-flex gap-2 flex-wrap align-items-center">
+                <Button variant="outline-secondary" size="sm" onClick={reinstall} disabled={working}>
+                    <ArrowRepeat className="me-2" />
+                    {working ? translator.translate("Installerar om…") : translator.translate("Installera om appen")}
+                </Button>
+                {/* Not decoration: the first useful question about a device that is
+                    behaving oddly is which build it is actually running. */}
+                <small className="settings-help-text">
+                    {translator.translate("Version")} <code>{appVersion.slice(0, 7)}</code>
+                </small>
+            </div>
+        </>
     );
 }
 

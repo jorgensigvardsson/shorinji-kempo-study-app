@@ -8,6 +8,11 @@ name: Deploy-Staging
 on:
   workflow_call: {}
 
+# One staging deploy at a time, for the reasons spelled out in deploy.yml.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
 # id-token: write  — lets the job exchange a GitHub OIDC token for an Azure access token
 # packages: write  — lets the job push images to GHCR
 # contents: read   — lets the job check out code
