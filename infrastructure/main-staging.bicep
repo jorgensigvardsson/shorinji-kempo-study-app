@@ -131,6 +131,9 @@ param logRetentionDays int = 30
 @description('Hard ceiling on log ingestion per day, in GB. A string because ARM has no decimal parameter type; Azure refuses anything under 0.023.')
 param logDailyQuotaGb string = '0.023'
 
+@description('Hard ceiling on Application Insights ingestion per day, in GB. Its own cap, so a runaway browser cannot crowd out container logs. 1 GB is far above the expected volume and is there to bound a mistake, not to budget for one.')
+param appInsightsDailyQuotaGb int = 1
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 // Adds this environment's database to prod's existing free-tier Cosmos
@@ -162,6 +165,18 @@ module logAnalytics 'modules/log-analytics.bicep' = {
     location: location
     retentionDays: logRetentionDays
     dailyQuotaGb: logDailyQuotaGb
+  }
+}
+
+// Browser usage telemetry — an experiment, staging only, deliberately not in
+// main.bicep. See modules/app-insights.bicep and frontend/src/telemetry.ts.
+module appInsights 'modules/app-insights.bicep' = {
+  name: 'app-insights'
+  params: {
+    name: '${namePrefix}-insights'
+    location: location
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+    dailyQuotaGb: appInsightsDailyQuotaGb
   }
 }
 
@@ -249,4 +264,8 @@ module persistenceApp 'modules/persistence-app.bicep' = {
 
 output authServiceUrl string = authBaseUrl
 output persistenceServiceUrl string = persistenceBaseUrl
+// Consumed by the frontend build (see deploy-staging.yml). Not a credential — it
+// ships inside the bundle and is visible to anyone who opens developer tools — but
+// it is what switches the telemetry on, and its absence is what compiles it out.
+output appInsightsConnectionString string = appInsights.outputs.connectionString
 output cosmosEndpoint string = cosmosAccountRef.properties.documentEndpoint

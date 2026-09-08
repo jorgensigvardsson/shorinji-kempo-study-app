@@ -38,6 +38,11 @@ const authExpiredKey = "sync-backend-auth-expired";
 const userInfoKey = "sync-backend-user";
 
 export interface BackendUserInfo {
+  // The account's own id, as /auth/me has always returned it. Kept because usage
+  // telemetry hashes it into an identifier that counts people rather than devices
+  // (see telemetry.ts) — a v4 UUID is the one input for which that hash is safe
+  // without a secret. Empty for a session stored before this field existed.
+  id: string;
   email: string;
   displayName: string;
   providers: string[];
@@ -532,9 +537,10 @@ export class BackendSyncClient {
         }
       }
       if (resp.ok) {
-        const user = await resp.json() as { email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[]; branchId?: string; federation?: string; language?: string };
+        const user = await resp.json() as { id?: string; email: string; displayName: string; linkedIdentities: Record<string, unknown>; roles?: string[]; branchId?: string; federation?: string; language?: string };
         localStorage.setItem(connectedKey, "true");
         localStorage.setItem(userInfoKey, JSON.stringify({
+          id: user.id ?? "",
           email: user.email,
           displayName: user.displayName,
           providers: Object.keys(user.linkedIdentities ?? {}),
@@ -564,6 +570,7 @@ export class BackendSyncClient {
       // Default every field, so info cached by a build that predates any of them
       // stays safe to read rather than yielding undefined at the call site.
       return {
+        id: parsed.id ?? "",
         email: parsed.email ?? "",
         displayName: parsed.displayName ?? "",
         providers: parsed.providers ?? [],

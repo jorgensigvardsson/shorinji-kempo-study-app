@@ -16,6 +16,7 @@
     "fonts:fetch": "tsx scripts/fetch-google-fonts.ts"
   },
   "dependencies": {
+    "@microsoft/applicationinsights-web": "^3.4.3",
     "@xyflow/react": "^12.11.5",
     "bootstrap": "^5.3.8",
     "flag-icons": "^7.5.0",

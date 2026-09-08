@@ -15,6 +15,7 @@ import { usePendingRequests } from './pendingRequests';
 import { LoginScreen } from './LoginScreen';
 import TrainingControls from './components/TrainingControls';
 import { useAppUpdate } from './app-update';
+import { useUsageTelemetry } from './telemetry';
 import { useTrainingMode } from './training-mode';
 import { markChangelogSeen, unseenChangelog, type ChangelogUpdate } from './changelog';
 import { getCurrentSubscription, isPushSupported, subscribeToPush } from './push';
@@ -181,6 +182,10 @@ function App(props: Props) {
   // Auto-apply pending versions for unauthenticated visitors (login screen);
   // authenticated users get the "Update" toast via the returned needRefresh.
   const { needRefresh, updating, applyUpdate, reloadIntoLatest } = useAppUpdate(showSignIn);
+
+  // Usage telemetry (see telemetry.ts). Inert unless a connection string was built
+  // in, throttled to one event an hour, and silent for anyone not signed in.
+  useUsageTelemetry();
 
   // Training mode combines the existing Dojo presentation with the screen wake
   // lock. It can follow the user between training views, but the wake lock is
