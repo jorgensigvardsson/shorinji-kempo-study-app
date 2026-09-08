@@ -14,6 +14,19 @@
 // Nothing in the backend talks to this. The browser posts straight to the
 // ingestion endpoint, which is the entire reason it was chosen over recording
 // sessions in a service: neither container is woken by any of it.
+//
+// ONE-TIME SUBSCRIPTION STEP. This is the first resource here in the
+// microsoft.insights namespace, and a namespace has to be registered on the
+// subscription before anything in it can be created:
+//
+//     az provider register --namespace Microsoft.Insights
+//
+// The deploy principal is resource-group-scoped and cannot do this itself, so the
+// pipeline cannot fix it for you — a fresh subscription fails the deployment with
+// MissingSubscriptionRegistration until somebody runs the line above by hand.
+// Registration is asynchronous and takes a few minutes; the deploy will keep
+// failing the same way until `az provider show -n Microsoft.Insights` reports
+// Registered, after which it needs no further attention, ever.
 
 @description('Resource name')
 param name string
