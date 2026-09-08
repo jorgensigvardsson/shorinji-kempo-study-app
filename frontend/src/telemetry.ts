@@ -111,6 +111,33 @@ function getClient(): ApplicationInsights | null {
       const properties = item.baseData?.properties as Record<string, unknown> | undefined;
       if (properties?.[Marker] !== true) return false;
       delete properties[Marker];
+
+      // The SDK attaches context of its own that none of the above asked for, and
+      // that no amount of configuration turns off. It was measured arriving in the
+      // workspace before this existed, which is the only reason it is known about:
+      //
+      //   ai.operation.name  the path the user was on, taken from window.location
+      //                      even with route tracking disabled. "/settings" is not
+      //                      a secret, but which pages somebody visits and when is
+      //                      exactly the profiling this was promised not to do.
+      //
+      //   ai.location.ip     not stored — ingestion masks it to 0.0.0.0 — but it is
+      //                      used first to look up a city, which then is stored.
+      //                      Pinning it here is the documented way to decline that:
+      //                      the lookup has nothing to work from and no location is
+      //                      recorded at all.
+      //
+      //   ai.user.id         a random value per page load, because cookies and
+      //   ai.session.id      storage are disabled and nothing can persist. Harmless,
+      //                      and meaningless: the pseudonym in the properties is the
+      //                      identifier that actually counts people.
+      const tags = item.tags as Record<string, unknown> | undefined;
+      if (tags) {
+        tags["ai.operation.name"] = "";
+        tags["ai.location.ip"] = "0.0.0.0";
+        tags["ai.user.id"] = "";
+        tags["ai.session.id"] = "";
+      }
       return true;
     });
 

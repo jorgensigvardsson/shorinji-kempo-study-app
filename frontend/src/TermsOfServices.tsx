@@ -18,6 +18,7 @@ const TermsOfServices = () => {
       </p>
 
       <p>{translator.translate("Om du skapar ett konto accepterar du att vi lagrar de uppgifter som beskrivs i integritetspolicyn.")}</p>
+      <p>{translator.translate("Appen skickar en liten mängd användningsstatistik, högst en gång i timmen per enhet, så att vi vet hur den används och kan hitta fel. Statistiken innehåller inga personuppgifter — varken namn, e-postadress, IP-adress eller vilka sidor du besöker. Integritetspolicyn beskriver den i sin helhet.")}</p>
       <p>{translator.translate("Du kan när som helst radera ditt konto från Inställningar.")}</p>
       <p>{translator.translate("Vi säljer inte dina uppgifter och delar dem inte med tredje part utan ditt samtycke.")}</p>
     </div>

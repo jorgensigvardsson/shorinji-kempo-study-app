@@ -24,8 +24,8 @@ let syncListeners: Array<() => void> = [];
 
 // Runs an item past every registered initializer, the way the SDK does before
 // sending. Anything an initializer rejects never leaves the device.
-const admit = (baseData: { name?: string; properties: Record<string, unknown> }, baseType: string): boolean =>
-    tracked.initializers.every(fn => fn({ baseType, baseData }));
+const admit = (baseData: { name?: string; properties: Record<string, unknown> }, baseType: string, tags: Record<string, unknown> = {}): boolean =>
+    tracked.initializers.every(fn => fn({ baseType, baseData, tags }));
 
 vi.mock("@microsoft/applicationinsights-web", () => ({
     SeverityLevel: { Error: 3 },
@@ -379,6 +379,29 @@ describe("the allow-list", () => {
         await settle();
 
         expect(JSON.stringify(tracked.events[0])).not.toContain("__explicit");
+    });
+
+    // The SDK attaches these regardless of configuration, and they were found
+    // arriving in the workspace: the page path, and an IP that ingestion uses to
+    // look up a city before masking it. Both are stripped on the way out, and the
+    // privacy policy says they are — so this is what keeps that sentence true.
+    it("strips the page path and declines the location lookup", async () => {
+        const { recordUsage } = await loadTelemetry();
+        recordUsage();
+        await settle();
+
+        const tags: Record<string, unknown> = {
+            "ai.operation.name": "/settings",
+            "ai.location.ip": "203.0.113.7",
+            "ai.user.id": "4AqGxUs2eT6o1tdN6FDT",
+            "ai.session.id": "9e+/LT4jtQbBTGCv",
+        };
+        admit({ name: "usage", properties: { __explicit: true } }, "EventData", tags);
+
+        expect(tags["ai.operation.name"]).toBe("");
+        expect(tags["ai.location.ip"]).toBe("0.0.0.0");
+        expect(tags["ai.user.id"]).toBe("");
+        expect(tags["ai.session.id"]).toBe("");
     });
 });
 

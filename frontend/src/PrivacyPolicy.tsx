@@ -10,8 +10,12 @@ const PrivacyPolicy = () => {
       <p>
         {translator.translate("Appen kräver ett konto, och kontot hör till en klubb. Dina studiedata sparas på din enhet och synkas med vår server så att du kommer åt dem från alla dina enheter.")}
       </p>
+      {/* This said "vi använder inte analysverktyg" until the app began sending
+          usage statistics, at which point it was simply untrue. What replaced it
+          says what is collected rather than what is not, and the section at the
+          bottom says it in full. */}
       <p>
-        {translator.translate("Vi använder inte analysverktyg och vi säljer inte användardata.")}
+        {translator.translate("Vi säljer inte användardata. Appen skickar en liten mängd användningsstatistik som inte innehåller några personuppgifter — se avsnittet Användningsstatistik längst ned.")}
       </p>
 
       {/* Somebody applying to join has given us their name, address and a few
@@ -60,6 +64,31 @@ const PrivacyPolicy = () => {
       <p>{translator.translate("Dina uppgifter överförs aldrig till någon annan organisation, vare sig mot betalning eller gratis. Informationen stannar i det här systemet.")}</p>
       <p>{translator.translate("Du kan exportera alla dina uppgifter som en JSON-fil via Inställningar.")}</p>
       <p>{translator.translate("Du kan radera ditt konto och alla tillhörande uppgifter via Inställningar. Raderingen är omedelbar och permanent.")}</p>
+      {/* Every claim below is enforced by code rather than by intention, and the
+          code is tested: see frontend/src/telemetry.ts and its tests. The page
+          path and the location lookup are stripped on the way out because the SDK
+          attaches them regardless of configuration — which was discovered by
+          reading what had actually arrived, not by trusting the settings. */}
+      <h3>{translator.translate("Användningsstatistik")}</h3>
+      <p>
+        {translator.translate("För att veta hur appen faktiskt används — hur många som använder den, hur ofta, och om den körs installerad på hemskärmen eller i en webbläsare — skickar appen en liten mängd statistik till Microsoft Azure Application Insights. Det sker högst en gång i timmen per enhet.")}
+      </p>
+      <p>
+        {translator.translate("Statistiken innehåller inga personuppgifter. Den innehåller inte ditt namn, din e-postadress eller ditt konto-id. Din IP-adress sparas inte, och ingen plats räknas fram ur den. Vilka sidor du besöker i appen registreras inte.")}
+      </p>
+      <p>
+        {translator.translate("Det enda som identifierar dig är ett kodat värde som räknas fram ur ditt konto-id. Värdet är detsamma på alla dina enheter, så att en person räknas som en person och inte som tre — men det går inte att räkna tillbaka till vem du är.")}
+      </p>
+      <p>
+        {translator.translate("Utöver det registreras vilken sorts webbläsare och vilket operativsystem du använder, och vilken version av appen din enhet kör. Versionen är med för att vi ska kunna se att en uppdatering faktiskt nått ut.")}
+      </p>
+      <p>
+        {translator.translate("Om något går sönder i appen skickas ett felmeddelande med teknisk information om felet, så att det går att rätta. Vi begränsar hur mycket av felet som skickas, och hur ofta samma fel rapporteras.")}
+      </p>
+      <p>
+        {translator.translate("Statistiken sparas i 30 dagar och raderas sedan automatiskt. Den används för att förstå hur appen används och för att hitta fel — aldrig för att följa vad en enskild person gör.")}
+      </p>
+
       <p>{translator.translate("Personuppgiftsansvarig: Jörgen Sigvardsson, jorgen.sigvardsson@gmail.com")}</p>
     </div>
   );
