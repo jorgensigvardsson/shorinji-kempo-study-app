@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { recordException } from '../telemetry';
 
 interface Props {
   children: ReactNode;
@@ -20,6 +21,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info.componentStack);
+    // The white-screen case, and the one failure a user is most likely to give up
+    // on rather than report. Identity-throttled and capped in telemetry.ts, and
+    // inert in any build without a connection string.
+    recordException(error, 'render');
   }
 
   render() {
