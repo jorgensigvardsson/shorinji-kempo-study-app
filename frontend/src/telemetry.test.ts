@@ -63,8 +63,33 @@ const loadTelemetry = async (connectionString: string = ConnectionString) => {
     return await import("./telemetry");
 };
 
-// The pseudonym is computed with Web Crypto, which resolves a microtask later.
-const settle = async () => { await new Promise(resolve => setTimeout(resolve, 0)); };
+// The pseudonym is computed with crypto.subtle.digest, which is a genuine
+// asynchronous operation rather than an already-resolved promise: one turn of the
+// event loop is not always enough to see its result, and on a loaded CI runner it
+// is reliably not enough.
+//
+// This was a single setTimeout(0) once, which passed locally, failed roughly one
+// run in six, and blocked a production deploy. Waiting for the delivery rather
+// than for a duration is what makes it deterministic — a slow machine now takes
+// longer rather than failing.
+const settle = async (events = 0, exceptions = 0): Promise<void> => {
+    const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+
+    // Nothing expected: drain enough turns that anything in flight would have
+    // landed, so an assertion that nothing was sent means it.
+    if (events === 0 && exceptions === 0) {
+        for (let i = 0; i < 30; i++) await tick();
+        return;
+    }
+
+    for (let i = 0; i < 500; i++) {
+        if (tracked.events.length >= events && tracked.exceptions.length >= exceptions) return;
+        await tick();
+    }
+    throw new Error(
+        `timed out waiting for ${events} event(s) and ${exceptions} exception(s); ` +
+        `saw ${tracked.events.length} and ${tracked.exceptions.length}`);
+};
 
 beforeEach(() => {
     localStorage.clear();
@@ -90,7 +115,7 @@ describe("usage events", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.events).toHaveLength(1);
         const event = tracked.events[0];
@@ -108,7 +133,7 @@ describe("usage events", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.events[0].properties.mode).toBe("standalone");
     });
@@ -120,7 +145,7 @@ describe("usage events", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.events[0].properties.mode).toBe("standalone");
         Reflect.deleteProperty(navigator, "standalone");
@@ -132,7 +157,7 @@ describe("usage events", () => {
 
         for (let i = 0; i < 20; i++) {
             recordUsage();
-            await settle();
+            await settle(1);
         }
 
         expect(tracked.events).toHaveLength(1);
@@ -141,11 +166,11 @@ describe("usage events", () => {
     it("sends again once the hour is up", async () => {
         const { recordUsage } = await loadTelemetry();
         recordUsage();
-        await settle();
+        await settle(1);
 
         localStorage.setItem("usage-telemetry-last-sent", String(Date.now() - 61 * 60 * 1000));
         recordUsage();
-        await settle();
+        await settle(2);
 
         expect(tracked.events).toHaveLength(2);
     });
@@ -173,7 +198,7 @@ describe("usage events", () => {
 
         userInfo = { id: TestUserId, email: TestEmail };
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.events).toHaveLength(1);
     });
@@ -183,12 +208,12 @@ describe("the identifier", () => {
     it("is the same person across devices and browsers", async () => {
         const { recordUsage } = await loadTelemetry();
         recordUsage();
-        await settle();
+        await settle(1);
         const first = tracked.events[0].properties.uid;
 
         localStorage.clear(); // A different device: no throttle state, same account.
         recordUsage();
-        await settle();
+        await settle(2);
 
         expect(tracked.events[1].properties.uid).toBe(first);
     });
@@ -196,12 +221,12 @@ describe("the identifier", () => {
     it("differs between people", async () => {
         const { recordUsage } = await loadTelemetry();
         recordUsage();
-        await settle();
+        await settle(1);
 
         userInfo = { id: "9f8e7d6c-1234-4abc-9def-000000000002", email: "other@example.org" };
         localStorage.clear();
         recordUsage();
-        await settle();
+        await settle(2);
 
         expect(tracked.events[1].properties.uid).not.toBe(tracked.events[0].properties.uid);
     });
@@ -211,7 +236,7 @@ describe("the identifier", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         const serialized = JSON.stringify(tracked.events[0]);
         for (const forbidden of [TestUserId, "9f8e7d6c", TestEmail, "example.org"]) {
@@ -226,7 +251,7 @@ describe("update events", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(2);
 
         const updated = tracked.events.find(e => e.name === "updated");
         expect(updated).toBeDefined();
@@ -239,7 +264,7 @@ describe("update events", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.events.find(e => e.name === "updated")).toBeUndefined();
     });
@@ -252,7 +277,7 @@ describe("update events", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.events.map(e => e.name)).toEqual(["updated"]);
     });
@@ -261,7 +286,7 @@ describe("update events", () => {
         localStorage.setItem("usage-telemetry-last-version", "87981b4");
         const { recordUsage } = await loadTelemetry();
         recordUsage();
-        await settle();
+        await settle(2);
 
         recordUsage();
         await settle();
@@ -281,7 +306,7 @@ describe("exceptions", () => {
         const { recordException } = await loadTelemetry();
 
         recordException(boom(), "render");
-        await settle();
+        await settle(0, 1);
 
         expect(tracked.exceptions).toHaveLength(1);
         expect(tracked.exceptions[0].properties.where).toBe("render");
@@ -295,7 +320,7 @@ describe("exceptions", () => {
         const { recordException } = await loadTelemetry();
 
         for (let i = 0; i < 500; i++) recordException(boom(), "render");
-        await settle();
+        await settle(0, 1);
 
         expect(tracked.exceptions).toHaveLength(1);
         expect(tracked.exceptions[0].properties.count).toBe(1);
@@ -306,7 +331,7 @@ describe("exceptions", () => {
 
         recordException(boom("first"), "render");
         recordException(boom("second"), "render");
-        await settle();
+        await settle(0, 2);
 
         expect(tracked.exceptions).toHaveLength(2);
     });
@@ -317,7 +342,7 @@ describe("exceptions", () => {
         const { recordException } = await loadTelemetry();
 
         for (let i = 0; i < 10; i++) recordException(boom(`failure ${i}`), "render");
-        await settle();
+        await settle(0, 3);
 
         expect(tracked.exceptions.length).toBeLessThanOrEqual(3);
     });
@@ -329,7 +354,7 @@ describe("exceptions", () => {
         const { recordException } = await loadTelemetry();
 
         recordException(boom(), "render");
-        await settle();
+        await settle(0, 1);
 
         expect(tracked.exceptions).toHaveLength(1);
         expect(tracked.exceptions[0].properties.uid).toBeUndefined();
@@ -341,7 +366,7 @@ describe("exceptions", () => {
         huge.stack = Array.from({ length: 100 }, (_, i) => `    at frame${i} (app.js:${i}:1)`).join("\n");
 
         recordException(huge, "render");
-        await settle();
+        await settle(0, 1);
 
         expect(tracked.exceptions[0].exception.message.length).toBeLessThanOrEqual(200);
         expect(tracked.exceptions[0].exception.stack!.split("\n").length).toBeLessThanOrEqual(6);
@@ -363,7 +388,7 @@ describe("the allow-list", () => {
         // Force construction of the client so the initializer is registered.
         const { recordUsage } = await import("./telemetry");
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(tracked.initializers).not.toHaveLength(0);
         const autoCollected = { baseType: "PageviewData", baseData: { name: "/dojo", properties: {} } };
@@ -376,7 +401,7 @@ describe("the allow-list", () => {
         const { recordUsage } = await loadTelemetry();
 
         recordUsage();
-        await settle();
+        await settle(1);
 
         expect(JSON.stringify(tracked.events[0])).not.toContain("__explicit");
     });
@@ -388,7 +413,7 @@ describe("the allow-list", () => {
     it("strips the page path and declines the location lookup", async () => {
         const { recordUsage } = await loadTelemetry();
         recordUsage();
-        await settle();
+        await settle(1);
 
         const tags: Record<string, unknown> = {
             "ai.operation.name": "/settings",
