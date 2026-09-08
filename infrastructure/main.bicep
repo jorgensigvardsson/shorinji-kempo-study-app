@@ -131,6 +131,9 @@ param logRetentionDays int = 30
 @description('Hard ceiling on log ingestion per day, in GB. A string because ARM has no decimal parameter type; Azure refuses anything under 0.023.')
 param logDailyQuotaGb string = '0.023'
 
+@description('Hard ceiling on Application Insights ingestion per day, in GB. Measured usage is a fraction of a megabyte a day, so this is a backstop against a mistake — a reporting loop, or somebody posting to the public ingestion address — rather than a budget.')
+param appInsightsDailyQuotaGb int = 1
+
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 module cosmos 'modules/cosmos.bicep' = {
@@ -155,6 +158,22 @@ module logAnalytics 'modules/log-analytics.bicep' = {
     location: location
     retentionDays: logRetentionDays
     dailyQuotaGb: logDailyQuotaGb
+  }
+}
+
+// Browser usage telemetry. Measured on staging before it came here: 620 billed
+// bytes per event, at most one an hour per device, which for this membership is a
+// fraction of a megabyte a day. It shares the workspace above, so that volume does
+// count against the workspace's daily cap alongside the container logs — with the
+// arithmetic as it stands there is a great deal of headroom, but the two are now
+// drawing on one budget and it is worth remembering which.
+module appInsights 'modules/app-insights.bicep' = {
+  name: 'app-insights'
+  params: {
+    name: '${namePrefix}-insights'
+    location: location
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+    dailyQuotaGb: appInsightsDailyQuotaGb
   }
 }
 
@@ -238,4 +257,8 @@ module persistenceApp 'modules/persistence-app.bicep' = {
 
 output authServiceUrl string = authBaseUrl
 output persistenceServiceUrl string = persistenceBaseUrl
+// Consumed by the frontend build (see deploy.yml). Not a credential — it ships
+// inside the bundle and is visible to anyone who opens developer tools — but it is
+// what switches telemetry on, and its absence is what compiles it out entirely.
+output appInsightsConnectionString string = appInsights.outputs.connectionString
 output cosmosEndpoint string = cosmos.outputs.endpoint

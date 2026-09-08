@@ -353,10 +353,24 @@ export function useUsageTelemetry(): void {
     const onError = (event: ErrorEvent) => recordException(event.error ?? event.message, "window");
     const onRejection = (event: PromiseRejectionEvent) => recordException(event.reason, "promise");
 
+    // The call above usually finds no user id to report. The account is read from
+    // localStorage, and on the first load after signing in — or after any upgrade
+    // that adds a field to what is cached there — it is not populated until
+    // /auth/me has answered, which happens after this component has mounted. Left
+    // at that, every user would silently miss an event per upgrade, and the
+    // measurement most distorted would be which devices took a new build: exactly
+    // what this was built to see.
+    //
+    // So the sync state is watched too. recordUsage does its own throttling, so
+    // subscribing to something that changes several times a settling session costs
+    // nothing: at most one usage event an hour still leaves the device.
+    const unsubscribe = getSyncManager().subscribe(() => recordUsage());
+
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("error", onError);
     window.addEventListener("unhandledrejection", onRejection);
     return () => {
+      unsubscribe();
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);

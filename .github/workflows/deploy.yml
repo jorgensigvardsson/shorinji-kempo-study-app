@@ -67,6 +67,9 @@ jobs:
     outputs:
       auth_url: ${{ steps.bicep.outputs.auth_url }}
       api_url:  ${{ steps.bicep.outputs.api_url }}
+      # Switches browser usage telemetry on in the frontend build. Empty (the
+      # module absent) compiles the SDK out entirely — see frontend/src/telemetry.ts.
+      appinsights_connection_string: ${{ steps.bicep.outputs.appinsights_connection_string }}
     steps:
       - uses: actions/checkout@v6
 
@@ -168,6 +171,10 @@ jobs:
 
           echo "auth_url=$(echo "$output" | jq -r '.authServiceUrl.value')"       >> "$GITHUB_OUTPUT"
           echo "api_url=$(echo "$output" | jq -r '.persistenceServiceUrl.value')" >> "$GITHUB_OUTPUT"
+          # // empty rather than a bare -r, so a template without the module yields
+          # an empty string instead of the literal "null" — which the frontend would
+          # dutifully treat as a connection string and fail to parse.
+          echo "appinsights_connection_string=$(echo "$output" | jq -r '.appInsightsConnectionString.value // empty')" >> "$GITHUB_OUTPUT"
 
       - name: Bind custom domain TLS certificates
         run: |
@@ -295,6 +302,10 @@ jobs:
           # Identifies this build in feedback submissions; same SHA used to tag
           # the backend images built in the build-backend job above.
           VITE_APP_VERSION:          ${{ github.sha }}
+          # Browser usage telemetry. write_var skips empty values, so an environment
+          # without the App Insights module never defines this and the SDK is
+          # compiled out of the bundle rather than shipped inert.
+          VITE_APPINSIGHTS_CONNECTION_STRING: ${{ needs.deploy-backend.outputs.appinsights_connection_string }}
         run: |
           set -euo pipefail
           missing=()
@@ -321,6 +332,7 @@ jobs:
           write_var VITE_API_URL               "$VITE_API_URL"
           write_var VITE_DEBUG                 "$VITE_DEBUG"
           write_var VITE_APP_VERSION           "$VITE_APP_VERSION"
+          write_var VITE_APPINSIGHTS_CONNECTION_STRING "$VITE_APPINSIGHTS_CONNECTION_STRING"
 
       - name: Build site
         run: |
