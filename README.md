@@ -49,6 +49,47 @@ docker compose up                      # frontend + auth + persistence
 docker compose up auth persistence     # backends only, alongside your own `npm run dev`
 ```
 
+### Seeding a local account
+
+The file-backed stores start empty, so a fresh checkout has nobody to sign in as and no
+branch for the registration screen to offer. `backend/auth/cmd/devseed` resets the auth
+service's data directory to the smallest usable organization — one federation, one branch,
+and one global admin (`--email`, defaulting to the repo owner's address) training in it:
+
+```bash
+cd backend/auth && go run ./cmd/devseed --apply         # services run directly
+docker compose exec auth go run ./cmd/devseed --apply    # or against the compose stack
+```
+
+Without `--apply` it reports what it would do and writes nothing. It always starts from
+empty and refuses to run while `COSMOS_*` is set, so it can only ever touch a local
+directory — never staging or production. Restart the auth service afterwards; it reads the
+organization tree once at startup. Then sign in as the admin — with no SMTP relay the
+verification code is printed to the auth log.
+
+### HTTPS (optional)
+
+The stack is HTTP by default; `localhost` is a secure context anyway. To serve it
+over TLS instead — useful for exercising the PWA or Web Push from a phone on the
+LAN — add the overlay:
+
+```bash
+infrastructure/scripts/gen-dev-cert.sh                              # once
+docker compose -f docker-compose.yml -f docker-compose.https.yml up
+```
+
+A Caddy container terminates TLS on the same three ports (5173, 8081, 8080) with a
+cert covering `localhost`, `nuc-dev` and `192.168.0.6`; the app services still
+speak plain HTTP behind it. The script also makes a small local CA — trust
+`infrastructure/dev-tls/certs/dev-ca.crt` once (the script header has the
+per-platform command) and every port is trusted with no click-through. Without
+that, the login screen fails: the page loads from `:5173` but its API calls to
+`:8081`/`:8080` are separate origins whose cert warning you never get to accept.
+
+`DEV_HOST` in `.env` (default `localhost`) chooses which of the three names the
+issuer, redirect and API URLs use — set it to `nuc-dev` or `192.168.0.6` to drive
+the stack from another device on the LAN.
+
 Compose reads Google/Microsoft OIDC credentials from a `.env` file in the repository root
 (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`);
 without them those providers stay disabled and every address falls back to an emailed code.

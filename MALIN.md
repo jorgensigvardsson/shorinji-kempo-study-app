@@ -21,6 +21,7 @@ Starting 2026-08-31
 - This Windows setup runs directly on the computer without Docker. Docker is not installed and should not be tried first.
 - The local environment consists of three background processes:
   - Frontend: run `npm run dev` from `frontend` with `VITE_HTTPS=false`. It is available at `http://localhost:5173`.
+    Malin's setup is HTTP only, which is fine — `localhost` is a secure context anyway. Serving over HTTPS needs the Docker overlay (`docker compose -f docker-compose.yml -f docker-compose.https.yml up`, see "HTTPS (optional)" in `README.md`), and Docker is not installed here.
   - Authentication backend: run `go run .` from `backend/auth`. Its health check is `http://localhost:8081/healthz`.
   - Persistence backend: run `go run .` from `backend/persistence`. Its health check is `http://localhost:8080/healthz`.
 - Start missing services as hidden background processes with PowerShell `Start-Process`. Redirect output to the existing ignored files in `.codex`: `vite.stdout.log`, `vite.stderr.log`, `auth.stdout.log`, `auth.stderr.log`, `persistence.stdout.log`, and `persistence.stderr.log`. Do not create new untracked log files.
@@ -28,6 +29,7 @@ Starting 2026-08-31
 - `Start-Process` can leave the Codex shell wrapper looking active even after the services have started. If that happens, stop only the yielded wrapper after the processes have launched, then check the three URLs; the hidden child processes should remain running.
 - Persistence may briefly log a JWKS connection failure when it starts before authentication. This is harmless only if it soon logs `jwks: loaded 1 key(s)` and the persistence health check returns HTTP 200.
 - When Malin asks for her local email login code, read the most recent `[email:dev] verification code` entry from `.codex/auth.stderr.log`.
+- If the local login has no account or the branch picker is empty, the data directory needs seeding — see "Seeding a local account" in `README.md`. Run `go run ./cmd/devseed --apply` from `backend/auth`, then restart the auth service. This deletes the local data directory, so confirm with Malin first.
 - To show the app inside VS Code: open the Command Palette with `Ctrl+Shift+P`, choose `Simple Browser: Show`, and enter `http://localhost:5173`.
 
 ## Protecting the app's content
