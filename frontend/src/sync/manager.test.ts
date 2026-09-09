@@ -399,7 +399,11 @@ describe("SyncManager", () => {
 
       // Four attempts: the first plus MAX_STALE_RETRIES.
       expect(mockBackendClient.uploadDocument).toHaveBeenCalledTimes(4);
-      expect(manager.getState().status).toBe("error");
+      // It gave up rather than looping, and did not pretend to have succeeded.
+      // Whether the user is told is a separate question with its own tests: a
+      // first failure is held quiet for the retry, since it is usually a service
+      // waking up rather than a fault.
+      expect(manager.getState().status).not.toBe("connected");
     });
 
     it("does not apply a merge the server refused", async () => {
@@ -587,7 +591,12 @@ describe("SyncManager", () => {
   // ─── error handling / retry ───────────────────────────────────────────────
 
   describe("retrySync / error handling", () => {
-    it("sets error state when syncNow throws a transient error via retrySync", async () => {
+    // Returning to the app after a while means waking two scaled-to-zero services,
+    // or a phone whose radio has not finished reconnecting. Both look like this and
+    // both fix themselves, so the first failure is not worth alarming anybody with
+    // — the retry is already scheduled.
+    it("says nothing on the first transient failure", async () => {
+      vi.useFakeTimers();
       mockBackendClient.downloadDocument.mockRejectedValue(new Error("network failure"));
       mockStore.getDocument.mockReturnValue(makeDoc());
 
@@ -595,8 +604,27 @@ describe("SyncManager", () => {
       manager.retrySync();
       await flushPromises();
 
+      expect(manager.getState().status).not.toBe("error");
+      vi.useRealTimers();
+    });
+
+    it("surfaces the failure once a retry has failed too", async () => {
+      vi.useFakeTimers();
+      mockBackendClient.downloadDocument.mockRejectedValue(new Error("network failure"));
+      mockStore.getDocument.mockReturnValue(makeDoc());
+
+      const manager = getSyncManager();
+      manager.retrySync();
+      await flushPromises();
+
+      // The first retry falls due after 10 s, and fails as well: by now this is a
+      // fault rather than a cold start, and worth telling somebody about.
+      await vi.advanceTimersByTimeAsync(10_000);
+      await flushPromises();
+
       expect(manager.getState().status).toBe("error");
       expect(manager.getState().message).toBe("network failure");
+      vi.useRealTimers();
     });
 
     it("sets auth_expired state (not error) when AuthExpiredError is thrown", async () => {
@@ -622,12 +650,14 @@ describe("SyncManager", () => {
       manager.retrySync();
       await flushPromises();
 
-      expect(manager.getState().status).toBe("error");
+      // Quiet so far: a retry is scheduled and the user is told nothing.
+      expect(manager.getState().status).not.toBe("error");
 
       // First retry delay is 10 000 ms.
       await vi.advanceTimersByTimeAsync(10_000);
       await flushPromises();
 
+      // ...and it worked, so there was never anything to report.
       expect(manager.getState().status).toBe("connected");
       vi.useRealTimers();
     });
@@ -664,6 +694,38 @@ describe("SyncManager", () => {
       await flushPromises();
       // subscribeDocument called exactly once (inside start)
       expect(mockStore.subscribeDocument).toHaveBeenCalledTimes(1);
+    });
+
+    // visibilitychange fires as the app comes to the foreground, which on a phone
+    // is a moment before the radio has finished reconnecting. Firing a request
+    // into that gap fails at once, and the first thing somebody sees on opening
+    // the app is a warning about it.
+    it("does not sync on returning to the app while offline", async () => {
+      const manager = getSyncManager();
+      manager.start();
+      await flushPromises();
+      mockBackendClient.downloadDocument.mockClear();
+
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: false });
+      document.dispatchEvent(new Event("visibilitychange"));
+      await flushPromises();
+
+      expect(mockBackendClient.downloadDocument).not.toHaveBeenCalled();
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: true });
+    });
+
+    // ...and the connection coming back is the one moment where trying again is
+    // certain to be worth it, rather than waiting out a retry delay.
+    it("syncs as soon as the connection returns", async () => {
+      const manager = getSyncManager();
+      manager.start();
+      await flushPromises();
+      mockBackendClient.downloadDocument.mockClear();
+
+      window.dispatchEvent(new Event("online"));
+      await flushPromises();
+
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalled();
     });
 
     it("sets local_only state when signed out on start", async () => {

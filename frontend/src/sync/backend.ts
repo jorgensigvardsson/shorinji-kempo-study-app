@@ -37,6 +37,30 @@ const connectedKey = "sync-backend-connected";
 const authExpiredKey = "sync-backend-auth-expired";
 const userInfoKey = "sync-backend-user";
 
+// How long a sync request may take before it is abandoned.
+//
+// Generous on purpose: both services scale to zero, so the first request after a
+// quiet period has to wake a container, and occasionally two of them in a row. Ten
+// or fifteen seconds is a normal cold start and must not be mistaken for a fault.
+// What this is for is the other case — a request that will never come back at all,
+// which without a deadline waits forever and leaves the app looking like it is
+// still working when nothing is.
+const RequestTimeoutMs = 30_000;
+
+// fetch, with a deadline. An expired deadline surfaces the same way a dropped
+// connection does — a rejected promise — so callers need no new error path.
+async function fetchWithTimeout(input: string, init: RequestInit = {}): Promise<Response> {
+  // AbortSignal.timeout would be tidier, but it is younger than some of the phones
+  // this runs on, and a study app is exactly the sort of thing kept on an old one.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RequestTimeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export interface BackendUserInfo {
   // The account's own id, as /auth/me has always returned it. Kept because usage
   // telemetry hashes it into an identifier that counts people rather than devices
@@ -492,7 +516,7 @@ export class BackendSyncClient {
   private async runRefresh(): Promise<boolean> {
     const doFetch = async (): Promise<boolean> => {
       try {
-        const resp = await fetch(`${authUrl}/auth/refresh`, { method: "POST", credentials: "include" });
+        const resp = await fetchWithTimeout(`${authUrl}/auth/refresh`, { method: "POST", credentials: "include" });
         return resp.ok;
       } catch {
         return false;
@@ -627,11 +651,11 @@ export class BackendSyncClient {
   }
 
   async downloadDocument(): Promise<RemoteDocument | null> {
-    let resp = await fetch(`${apiUrl}/api/v1/document`, { credentials: "include" });
+    let resp = await fetchWithTimeout(`${apiUrl}/api/v1/document`, { credentials: "include" });
     if (resp.status === 404) return null;
     if (resp.status === 401) {
       const refreshed = await this.tryRefresh();
-      if (refreshed) resp = await fetch(`${apiUrl}/api/v1/document`, { credentials: "include" });
+      if (refreshed) resp = await fetchWithTimeout(`${apiUrl}/api/v1/document`, { credentials: "include" });
     }
     if (resp.status === 401) {
       localStorage.setItem(authExpiredKey, "true");

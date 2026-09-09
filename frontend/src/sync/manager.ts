@@ -94,11 +94,39 @@ class SyncManager {
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && this.state.status === "connected") {
         this.clearScheduledSync();
+        this.syncWhenReachable();
+      }
+    });
+
+    // A device that regains its connection has almost certainly been unable to
+    // sync while it was gone, and is the one moment where trying again is
+    // guaranteed to be worth it.
+    window.addEventListener("online", () => {
+      if (this.state.status === "connected" || this.state.status === "error") {
+        this.clearRetryTimer();
+        this.retryCount = 0;
         this.syncNow().catch(error => this.handleSyncError(error));
       }
     });
 
     this.handleProviderChanged().catch(error => this.handleSyncError(error));
+  }
+
+  // Syncs on returning to the app, but not into a network that is not there yet.
+  //
+  // visibilitychange fires when the app comes to the foreground, which on a phone
+  // is a moment or two before the radio has finished reassociating. A fetch issued
+  // in that window does not wait — it fails at once, and the first thing the user
+  // sees on opening the app is a warning about it. Waiting for the browser to say
+  // it is online costs nothing when it already is.
+  private syncWhenReachable(): void {
+    if (navigator.onLine === false) {
+      // The "online" listener above will pick this up. Nothing is lost by
+      // waiting: there is no network to sync over.
+      debugLog("[sync] resumed while offline; waiting for the connection");
+      return;
+    }
+    this.syncNow().catch(error => this.handleSyncError(error));
   }
 
   getState(): SyncState {
@@ -633,7 +661,24 @@ class SyncManager {
         this.retryTimer = null;
         this.syncNow().catch(e => this.handleSyncError(e));
       }, delay);
-      this.setState({ status: "error", message: err.message, error: err });
+      // The first failure is reported to nobody, because on the evidence it is
+      // usually not a failure worth reporting. Coming back to the app after a
+      // while means the services have scaled to zero and the first request has to
+      // wake them — two of them, serially, once the hour-long access token has
+      // expired and the 401 sends us through the auth service as well. It can also
+      // mean a phone that has foregrounded the app before its radio finished
+      // reconnecting. Both fix themselves within seconds.
+      //
+      // Announcing "kunde inte synka, försöker igen automatiskt" in that moment
+      // tells the user about something already in hand, and teaches them to read a
+      // warning as noise. So the first attempt stays quiet and keeps the waking-up
+      // indicator up; if the retry ten seconds later fails too, something is
+      // actually wrong and the toast has earned its place.
+      if (this.retryCount > 1) {
+        this.setState({ status: "error", message: err.message, error: err });
+      } else {
+        this.setState({ status: "syncing", message: null, error: err });
+      }
     } else {
       this.retryCount = 0;
       this.setState({ status: "error", message: err.message, error: err });
