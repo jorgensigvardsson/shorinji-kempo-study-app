@@ -46,7 +46,7 @@ const HokeiCard = (props: HokeiCardProps) => {
     const videos = hokei.videos ?? [];
     const footer = (showNotes || videos.length > 0) ? (
         <>
-            {showNotes && <CardFooter hokei={hokei}/>}
+            {showNotes && <HokeiNoteEditor hokei={hokei}/>}
             {videos.map((video, i) => (
                 <VideoLink key={video.url} video={video} className={(i > 0 || showNotes) ? "mt-2" : undefined}/>
             ))}
@@ -55,7 +55,7 @@ const HokeiCard = (props: HokeiCardProps) => {
 
     const kamokuFooter = (showNotes || videos.length > 0) ? (
         <div className="kamoku-card-footer-actions">
-            {showNotes && <CardFooter hokei={hokei}/>}
+            {showNotes && <HokeiNoteEditor hokei={hokei}/>}
             {videos.map(video => <VideoLink key={video.url} video={video} className="kamoku-video-link" />)}
         </div>
     ) : undefined;
@@ -69,7 +69,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
             >
-                <DojoCardBody hokei={hokei} />
+                <HokeiDojoDetails hokei={hokei} />
             </CollapsibleCard>
         );
     }
@@ -83,7 +83,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                 onOpenChange={onOpenChange}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
             >
-                <KamokuCardBody hokei={hokei} showKanji={showKanji} />
+                <HokeiDetails hokei={hokei} showKanji={showKanji} />
             </CollapsibleCard>
         );
     }
@@ -204,7 +204,7 @@ const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
     );
 };
 
-const KamokuCardBody = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: boolean }) => {
+export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: boolean }) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
     const renderValue = (value?: string, suffix?: React.ReactNode) => value ? (
@@ -251,7 +251,7 @@ const KamokuCardBody = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: b
     );
 };
 
-const DojoCardBody = ({ hokei }: { hokei: HokeiMoment }) => {
+export const HokeiDojoDetails = ({ hokei }: { hokei: HokeiMoment }) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
     const renderRole = (label: string, role: HokeiMoment["roles"]["attacker"]) => (
@@ -279,11 +279,11 @@ const DojoCardBody = ({ hokei }: { hokei: HokeiMoment }) => {
     );
 };
 
-interface CardFooterProps {
+interface HokeiNoteEditorProps {
     hokei: HokeiMoment;
 }
 
-const CardFooter = ({hokei}: CardFooterProps) => {
+export const HokeiNoteEditor = ({hokei}: HokeiNoteEditorProps) => {
     const savedNotes = useHokeiNote(hokei.id);
     const translator = useContext(TranslatorContext);
     const hokeiName = translator.translate(hokei.hokei_name);

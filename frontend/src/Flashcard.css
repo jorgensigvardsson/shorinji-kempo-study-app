@@ -5,6 +5,102 @@
   padding: 1rem;
 }
 
+.hokei-flashcard-view {
+  width: 100%;
+}
+
+.hokei-flashcard-setup {
+  padding-top: 1rem;
+}
+
+.hokei-flashcard-grades {
+  width: min(100% - 2rem, 54rem);
+  margin: 0 auto 1rem;
+  padding: 0.25rem 0;
+}
+
+.hokei-flashcard-grades-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.hokei-flashcard-grades-heading h2 {
+  margin: 0 0 0.2rem;
+  font-family: var(--app-display-font);
+  font-size: 1.35rem;
+}
+
+.hokei-flashcard-grades-heading p {
+  margin: 0;
+  color: var(--bs-secondary-color);
+}
+
+.hokei-flashcard-select-all {
+  flex: 0 0 auto;
+  padding-inline: 0;
+}
+
+.hokei-flashcard-grade-list {
+  border-block: 1px solid var(--bs-border-color);
+}
+
+.hokei-flashcard-grade {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.25rem;
+  cursor: pointer;
+}
+
+.hokei-flashcard-grade + .hokei-flashcard-grade {
+  border-top: 1px solid var(--bs-border-color-translucent);
+}
+
+.hokei-flashcard-grade .form-check {
+  margin: 0;
+  min-height: auto;
+}
+
+.hokei-flashcard-grade-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.hokei-flashcard-grade-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.hokei-flashcard-grade-line span {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.hokei-flashcard-grade .progress {
+  height: 0.35rem;
+}
+
+.hokei-flashcard-start {
+  display: flex;
+  justify-content: center;
+  padding-top: 1.5rem;
+}
+
+.hokei-flashcard-session-actions {
+  width: min(100% - 2rem, 54rem);
+  margin: 0 auto -0.5rem;
+  text-align: end;
+}
+
+.hokei-flashcard-session-actions .btn {
+  padding-inline: 0;
+}
+
 .flashcard-drag-wrapper {
   position: relative;
   touch-action: none;
@@ -14,6 +110,15 @@
 
 .flashcard-drag-wrapper:active {
   cursor: grabbing;
+}
+
+.flashcard-drag-wrapper.is-horizontal-swipe {
+  touch-action: pan-y;
+  outline: none;
+}
+
+.flashcard-drag-wrapper.is-horizontal-swipe:focus-visible .flashcard-card {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-primary) 35%, transparent) !important;
 }
 
 .flashcard-swipe-indicator {
@@ -122,6 +227,7 @@
 
 .flashcard-main {
   flex: 1;
+  min-height: 0;
   display: grid;
   place-content: center;
   text-align: center;
@@ -155,6 +261,64 @@
   max-width: 40rem;
 }
 
+.flashcard-main-interactive {
+  place-content: stretch;
+  text-align: start;
+  overflow-y: auto;
+  user-select: text;
+  touch-action: pan-y;
+}
+
+.flashcard-hokei-front {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.flashcard-hokei-name {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: clamp(2.2rem, 7vw, 4.5rem);
+}
+
+.flashcard-hokei-japanese,
+.flashcard-hokei-variations {
+  margin: 0;
+  color: var(--bs-secondary-color);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+}
+
+.flashcard-hokei-back {
+  width: 100%;
+  display: grid;
+  align-content: start;
+  gap: 1.75rem;
+  padding: clamp(1rem, 4vw, 2.5rem) clamp(0.25rem, 3vw, 2rem);
+}
+
+.flashcard-hokei-back .dojo-card-body {
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.flashcard-hokei-back .dojo-foot-images {
+  justify-content: center;
+}
+
+.flashcard-hokei-back .dojo-foot-images .stance-icon {
+  width: clamp(4.75rem, 18vw, 7rem);
+  height: clamp(4.75rem, 18vw, 7rem);
+}
+
+.flashcard-hokei-back .dojo-roles {
+  gap: 1.25rem;
+}
+
+.flashcard-hokei-back .dojo-role {
+  grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: clamp(0.5rem, 2vw, 1rem);
+  font-size: clamp(1.05rem, 3vw, 1.35rem);
+  line-height: 1.45;
+}
+
 .flashcard-hint {
   margin: 0;
   text-align: center;
@@ -167,6 +331,25 @@
   display: flex;
   gap: 0.75rem;
   justify-content: center;
+}
+
+.flashcard-swipe-guide {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  margin: 0.85rem auto 0;
+  padding: 0 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+  opacity: 0.78;
+}
+
+.flashcard-swipe-guide span:last-child {
+  text-align: end;
+}
+
+.flashcard-swipe-guide-center {
+  opacity: 0.72;
 }
 
 .flashcard-learned-item {
@@ -188,6 +371,18 @@
 }
 
 @media (max-width: 768px) {
+  .hokei-flashcard-grades-heading {
+    align-items: start;
+  }
+
+  .hokei-flashcard-grades-heading p {
+    font-size: 0.9rem;
+  }
+
+  .hokei-flashcard-grade-line {
+    gap: 0.5rem;
+  }
+
   .flashcard-inner::before {
     min-height: 26rem;
   }
@@ -203,5 +398,13 @@
 
   .flashcard-hint {
     font-size: 1rem;
+  }
+
+  .flashcard-swipe-guide-center {
+    display: none;
+  }
+
+  .flashcard-swipe-guide {
+    grid-template-columns: 1fr 1fr;
   }
 }

@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-11T12:56:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Flashkorten har fått ett nytt Hokei-läge. Välj vilka grader du vill öva, vänd kortet för en luftig Dojo-vy med uppställning, utförande och egna anteckningar, och svep vänster för att öva igen eller höger när tekniken sitter.",
+        en: "Flashcards now have a new Hokei mode. Choose which grades to practise, turn the card for an airy Dojo view with stances, execution and your own notes, then swipe left to practise again or right when you know the technique.",
+        tr: "Bilgi kartlarına yeni bir Hokei modu eklendi. Çalışmak istediğiniz dereceleri seçin, duruşları, uygulamayı ve kendi notlarınızı gösteren ferah Dojo görünümü için kartı çevirin; tekrar çalışmak için sola, tekniği biliyorsanız sağa kaydırın.",
+        ja: "フラッシュカードに法形モードが加わりました。練習する級・段を選び、カードを裏返すと、構え・動作・自分のメモを見やすい道場表示で確認できます。もう一度練習する場合は左へ、できる場合は右へスワイプします。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-11T08:25:36.000Z",
     changes: [
       {
