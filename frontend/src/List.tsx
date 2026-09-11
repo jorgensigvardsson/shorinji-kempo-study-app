@@ -80,8 +80,20 @@ const List = (props: Props) => {
                         <option value="godan">{gradeLabel('godan', translator, showKanji)}</option>
                         <option value="rokudan">{gradeLabel('rokudan', translator, showKanji)}</option>
                     </Form.Select>
-                    <Form.Control placeholder={translator.translate("Sök...")} className="mt-3"
-                                value={filterText} onChange={e => setFilterText(e.target.value)} />
+                    <Form.Control
+                        type="search"
+                        enterKeyHint="search"
+                        placeholder={translator.translate("Sök...")}
+                        className="mt-3"
+                        value={filterText}
+                        onChange={e => setFilterText(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+                            e.preventDefault();
+                            setDebouncedFilterText(e.currentTarget.value);
+                            e.currentTarget.blur();
+                        }}
+                    />
                 </div>
             </div>
             {renderHokeis(filteredHokeis, dojoMode)}

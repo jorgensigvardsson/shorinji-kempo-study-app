@@ -21,6 +21,20 @@ export const CHANGELOG: ChangelogEntry[] = [
         tr: "Senkronizasyon artık uygulama birden fazla sekmede açıkken, hesap değiştirdiğinizde veya senkronizasyon sürerken değişiklik yaptığınızda kayıtlı verileri daha iyi koruyor.",
         ja: "複数のタブでアプリを開いている場合、アカウントを切り替えた場合、同期中に変更した場合でも、保存済みデータがより確実に保護されるようになりました。",
       },
+      {
+        emoji: "🔍",
+        sv: "På telefonen stänger Sök-knappen nu tangentbordet efter en tekniksökning, så att du ser resultaten direkt.",
+        en: "On phones, the Search button now closes the keyboard after a technique search so you can see the results straight away.",
+        tr: "Telefonlarda teknik aramasından sonra Ara düğmesi artık klavyeyi kapatıyor, böylece sonuçları hemen görebiliyorsunuz.",
+        ja: "スマートフォンで技を検索したあと、検索ボタンを押すとキーボードが閉じ、結果をすぐ確認できるようになりました。",
+      },
+      {
+        emoji: "⌨️",
+        sv: "Textfält behåller nu fokus medan du skriver, så att tangentbordet inte längre stängs efter varje tecken när du till exempel ändrar ditt namn.",
+        en: "Text fields now keep focus while you type, so the keyboard no longer closes after every character when, for example, you edit your name.",
+        tr: "Metin alanları artık yazarken odağı koruyor; örneğin adınızı düzenlerken klavye her karakterden sonra kapanmıyor.",
+        ja: "入力中もテキスト欄のフォーカスが維持されるようになり、名前の編集などで一文字入力するたびにキーボードが閉じることがなくなりました。",
+      },
     ],
   },
   {

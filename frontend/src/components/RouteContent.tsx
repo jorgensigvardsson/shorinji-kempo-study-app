@@ -36,10 +36,9 @@ const RouteContent = ({ routes, translator }: { routes: Route[]; translator: Tra
                 session restored where it was left. */}
             <Suspense fallback={<div className="app-route-loading" aria-busy="true" />}>
                 <Routes>
-                    {routes.filter(r => r.path && r.component).map((route, index) => {
-                        const Component = route.component!;
-                        return <DomRoute key={index} path={route.matchPath ?? route.path!} element={<Component />} />;
-                    })}
+                    {routes.filter(r => r.path && r.element).map((route, index) => (
+                        <DomRoute key={index} path={route.matchPath ?? route.path!} element={route.element} />
+                    ))}
                 </Routes>
             </Suspense>
         </ErrorBoundary>

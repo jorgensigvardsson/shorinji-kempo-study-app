@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { lazy } from "react";
+import { lazy, useState, type ReactNode } from "react";
 import { MemoryRouter, NavLink } from "react-router-dom";
 import RouteContent from "./RouteContent";
 import { TranslatorImplementation } from "../i18n";
@@ -13,8 +13,8 @@ import { preloadPages } from "../routes";
 // assertions below read as the copy actually shipped.
 const translator = new TranslatorImplementation({}, "sv");
 
-const route = (path: string, component: React.ComponentType): Route =>
-  ({ path, component, menuText: path, icon: House });
+const route = (path: string, element: ReactNode): Route =>
+  ({ path, element, menuText: path, icon: House });
 
 // React logs a rejected lazy import and the boundary catching it; that noise is the
 // expected outcome here, not a signal.
@@ -31,7 +31,7 @@ describe("RouteContent", () => {
     render(
       <MemoryRouter initialEntries={["/missing"]}>
         <nav data-testid="navbar">navbar</nav>
-        <RouteContent routes={[route("/missing", Missing)]} translator={translator} />
+        <RouteContent routes={[route("/missing", <Missing />)]} translator={translator} />
       </MemoryRouter>,
     );
 
@@ -52,7 +52,7 @@ describe("RouteContent", () => {
       <MemoryRouter initialEntries={["/missing"]}>
         <NavLink to="/working">gå vidare</NavLink>
         <RouteContent
-          routes={[route("/missing", Missing), route("/working", Working)]}
+          routes={[route("/missing", <Missing />), route("/working", <Working />)]}
           translator={translator}
         />
       </MemoryRouter>,
@@ -70,11 +70,39 @@ describe("RouteContent", () => {
 
     render(
       <MemoryRouter initialEntries={["/page"]}>
-        <RouteContent routes={[route("/page", Page)]} translator={translator} />
+        <RouteContent routes={[route("/page", <Page />)]} translator={translator} />
       </MemoryRouter>,
     );
 
     expect(await screen.findByText("sidan")).toBeDefined();
+  });
+
+  it("keeps the current page mounted when its route props change", async () => {
+    const user = userEvent.setup();
+    const Page = ({ label }: { label: string }) => {
+      const [text, setText] = useState("");
+      return <label>{label}<input value={text} onChange={event => setText(event.target.value)} /></label>;
+    };
+    const { rerender } = render(
+      <MemoryRouter initialEntries={["/page"]}>
+        <RouteContent routes={[route("/page", <Page label="före" />)]} translator={translator} />
+      </MemoryRouter>,
+    );
+    const field = screen.getByRole<HTMLInputElement>("textbox");
+    await user.type(field, "Malin");
+    field.setSelectionRange(2, 2);
+
+    rerender(
+      <MemoryRouter initialEntries={["/page"]}>
+        <RouteContent routes={[route("/page", <Page label="efter" />)]} translator={translator} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("efter")).toBeDefined();
+    expect(screen.getByRole("textbox")).toBe(field);
+    expect(field.value).toBe("Malin");
+    expect(document.activeElement).toBe(field);
+    expect(field.selectionStart).toBe(2);
   });
 });
 

@@ -1,4 +1,4 @@
-import { lazy, type ComponentType, type LazyExoticComponent } from "react";
+import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
 import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
@@ -61,7 +61,7 @@ export interface Route {
     // Router pattern to register, when a section owns more paths than the single
     // one its menu entry links to (e.g. /kamoku also serves /kamoku/free/hokei).
     matchPath?: string;
-    component?: React.ComponentType;
+    element?: ReactNode;
     href?: string;
     menuText: string | (() => string);
     startDescription?: string | (() => string);
@@ -88,31 +88,23 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
                           setTextSize: (size: number) => void, trainingMode: boolean, displayName?: string,
                           pendingRequests = 0): Route[] => {
     const routes: Route[] = [{
-        path: "/",
-        component: () => <Start routes={routes.filter(r => r.path && r.path !== "/" && !r.hideOnStartPage)
-                                              .map(r => ({ path: r.path!, title: routeText(r), description: routeDescription(r), icon: r.icon }))}
-                                displayName={displayName} />,
-        menuText: translator.translate("Start"),
-        icon: House,
-        showInMainMenu: true
-    }, {
         path: "/kamoku",
         matchPath: "/kamoku/*",
-        component: () => <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode}/>,
+        element: <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode}/>,
         menuText: translator.translate("Träning"),
         startDescription: translator.translate("Välj mellan veckans träning och fri träning."),
         icon: Book,
         showInMainMenu: true
     }, {
         path: "/theory",
-        component: () => <Theory showLanguageTools={!translator.isJapanese} />,
+        element: <Theory showLanguageTools={!translator.isJapanese} />,
         menuText: translator.translate("Teori"),
         startDescription: translator.translate("Studera ord och begrepp i lugn takt."),
         icon: JournalText,
         showInMainMenu: true,
     }, {
         path: "/theory/groups",
-        component: () => <TheoryToolPage><Groups allGradePlans={allGradePlans}/></TheoryToolPage>,
+        element: <TheoryToolPage><Groups allGradePlans={allGradePlans}/></TheoryToolPage>,
         menuText: translator.translate("Teknikgrupper"),
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection,
@@ -120,7 +112,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/theory/grading",
-        component: () => <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} /></TheoryToolPage>,
+        element: <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} /></TheoryToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -128,7 +120,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/training/grading",
-        component: () => <TrainingToolPage><GradingTest subject="technical" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TrainingToolPage>,
+        element: <TrainingToolPage><GradingTest subject="technical" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TrainingToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -136,7 +128,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, ...(!translator.isJapanese ? [{
         path: "/word-list",
-        component: () => <TheoryToolPage><WordList /></TheoryToolPage>,
+        element: <TheoryToolPage><WordList /></TheoryToolPage>,
         menuText: translator.translate("Ordlista"),
         startDescription: translator.translate("Slå upp ord på kanji, romaji och betydelse."),
         icon: JournalText,
@@ -144,7 +136,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     } satisfies Route] : []), ...(!translator.isJapanese ? [{
         path: "/quiz",
-        component: () => <TheoryToolPage><Quiz /></TheoryToolPage>,
+        element: <TheoryToolPage><Quiz /></TheoryToolPage>,
         menuText: translator.translate("Quiz"),
         startDescription: translator.translate("Svara på frågor och repetera tekniknamn i tempo."),
         icon: QuestionSquare,
@@ -152,28 +144,28 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/quiz/words",
-        component: () => <TheoryToolPage><WordQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        element: <TheoryToolPage><WordQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Ordlistequiz"),
         icon: JournalText,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
         path: "/quiz/foot-stance",
-        component: () => <TheoryToolPage><FootStanceQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        element: <TheoryToolPage><FootStanceQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Fotställningsquiz"),
         icon: QuestionSquare,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
         path: "/quiz/hand-position",
-        component: () => <TheoryToolPage><HandPositionQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        element: <TheoryToolPage><HandPositionQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Handpositionsquiz"),
         icon: HandIndex,
         hideOnStartPage: true,
         hideFromMenu: true,
     } satisfies Route] : []), ...(!translator.isJapanese ? [{
         path: "/flashcard",
-        component: () => <TheoryToolPage><Flashcard /></TheoryToolPage>,
+        element: <TheoryToolPage><Flashcard /></TheoryToolPage>,
         menuText: translator.translate("Flashkort"),
         startDescription: translator.translate("Öva med kort och bygg minnet steg för steg."),
         icon: CardHeading,
@@ -181,7 +173,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     } satisfies Route] : []), {
         path: "/settings",
-        component: () => <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={profileGradePlan} allGradePlans={allGradePlans} translator={translator}
+        element: <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={profileGradePlan} allGradePlans={allGradePlans} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa appen, din profil och ditt konto."),
@@ -192,7 +184,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
     // nothing to show somebody using the app without one.
     ...(getSyncManager().getBackendUserInfo() !== null ? [{
         path: "/branch",
-        component: () => <MyBranch />,
+        element: <MyBranch />,
         menuText: translator.translate("Min klubb"),
         icon: GeoAlt,
         hideOnStartPage: true,
@@ -204,13 +196,13 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
     // persistence service checks for exactly that role.
     ...(isAnyAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
         path: "/admin/organization",
-        component: () => <AdminOrganization />,
+        element: <AdminOrganization />,
         menuText: translator.translate("Organisation"),
         icon: Diagram3,
         hideOnStartPage: true,
     } satisfies Route, {
         path: "/admin/requests",
-        component: () => <AdminRequests />,
+        element: <AdminRequests />,
         // The count rides in the menu text: a request nobody notices is a
         // request that rots, and an admin should not have to open the page to
         // learn that somebody is waiting.
@@ -223,14 +215,14 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         // Reached from the organization rather than from the menu: a branch is
         // how you find a member, and a member is how you find their standing.
         path: "/admin/branches/:id/members",
-        component: () => <AdminBranchMembers />,
+        element: <AdminBranchMembers />,
         menuText: translator.translate("Medlemmar"),
         icon: People,
         hideOnStartPage: true,
         hideFromMenu: true,
     } satisfies Route, {
         path: "/admin/users/:id",
-        component: () => <AdminUser />,
+        element: <AdminUser />,
         menuText: translator.translate("Användare"),
         icon: People,
         hideOnStartPage: true,
@@ -242,39 +234,49 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         // by the server) — a branch admin lands on a page with no picker at
         // all rather than one offering "everybody".
         path: "/broadcast",
-        component: () => <Broadcast />,
+        element: <Broadcast />,
         menuText: translator.translate("Skicka notis"),
         icon: Megaphone,
         hideOnStartPage: true,
     } satisfies Route] : []), {
         path: "/changelog",
-        component: () => <Changelog />,
+        element: <Changelog />,
         menuText: translator.translate("Nyheter"),
         icon: Newspaper,
         hideOnStartPage: true,
     }, {
         path: "/terms-of-service",
-        component: () => <TermsOfServices />,
+        element: <TermsOfServices />,
         menuText: translator.translate("Användarvillkor"),
         startDescription: translator.translate("Läs villkoren för hur appen används."),
         icon: FileEarmarkText,
         hideOnStartPage: true
     }, {
         path: "/privacy-policy",
-        component: () => <PrivacyPolicy />,
+        element: <PrivacyPolicy />,
         menuText: translator.translate("Integritetspolicy"),
         startDescription: translator.translate("Se hur appen hanterar dina uppgifter."),
         icon: ShieldCheck,
         hideOnStartPage: true
     }, {
         path: "/feedback",
-        // Keep the component identity stable when App rebuilds the routes so
-        // background updates cannot reset the draft or interrupt typing.
-        component: Feedback,
+        element: <Feedback />,
         menuText: translator.translate("Skicka feedback"),
         icon: Envelope,
         hideOnStartPage: true
     }];
+
+    routes.unshift({
+        path: "/",
+        element: <Start
+            routes={routes.filter(route => route.path && !route.hideOnStartPage)
+                          .map(route => ({ path: route.path!, title: routeText(route), description: routeDescription(route), icon: route.icon }))}
+            displayName={displayName}
+        />,
+        menuText: translator.translate("Start"),
+        icon: House,
+        showInMainMenu: true,
+    });
 
     return routes;
 };
