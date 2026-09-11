@@ -157,6 +157,9 @@ func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+	if !requestAccountMatches(w, r, userID) {
+		return
+	}
 	doc, etag, err := h.loadDocument(userID)
 	if err != nil {
 		log.Printf("load document(%s): %v", userID, err)
@@ -176,10 +179,27 @@ func (h *Handler) getDocument(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(doc)
 }
 
+// A browser shares its authentication cookie between tabs. If one tab switches
+// accounts while another has a sync in flight, the request can otherwise arrive
+// authenticated as a different user from the one whose local document it carries.
+// New clients name the account they started the sync for; an empty value keeps older
+// clients compatible.
+func requestAccountMatches(w http.ResponseWriter, r *http.Request, userID string) bool {
+	expected := r.URL.Query().Get("account")
+	if expected == "" || expected == userID {
+		return true
+	}
+	http.Error(w, "account changed during sync", http.StatusConflict)
+	return false
+}
+
 func (h *Handler) putDocument(w http.ResponseWriter, r *http.Request) {
 	userID, ok := userIDFromContext(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if !requestAccountMatches(w, r, userID) {
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1 MB — Cosmos hard-limits items to 2 MB

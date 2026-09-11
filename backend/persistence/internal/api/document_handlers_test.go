@@ -47,6 +47,28 @@ func storedVersion(t *testing.T, h *Handler, userID string) int {
 	return doc.Version
 }
 
+func TestDocumentHandlers_RejectDifferentExpectedAccount(t *testing.T) {
+	h := newDocumentHandler(t)
+
+	getReq := asUser(httptest.NewRequest(http.MethodGet, "/api/v1/document?account=user-1", nil), "user-2")
+	getRec := httptest.NewRecorder()
+	h.getDocument(getRec, getReq)
+	if getRec.Code != http.StatusConflict {
+		t.Fatalf("GET got %d, want 409", getRec.Code)
+	}
+
+	putReq := asUser(httptest.NewRequest(
+		http.MethodPut,
+		"/api/v1/document?account=user-1",
+		strings.NewReader("{\"version\":1,\"data\":{}}"),
+	), "user-2")
+	putRec := httptest.NewRecorder()
+	h.putDocument(putRec, putReq)
+	if putRec.Code != http.StatusConflict {
+		t.Fatalf("PUT got %d, want 409", putRec.Code)
+	}
+}
+
 func TestGetDocument_NoDocument_Returns404(t *testing.T) {
 	if rec := getDocument(newDocumentHandler(t), "user-1"); rec.Code != http.StatusNotFound {
 		t.Fatalf("got %d, want 404", rec.Code)
@@ -331,6 +353,7 @@ func TestPutDocument_LegacyClientRecordedAsLegacyCompat(t *testing.T) {
 		t.Errorf("ClientCompat = %d, want %d — a build with no header claims only its own shape", got, legacySchemaVersion)
 	}
 }
+
 // ─── shadow writes to the split-item store ──────────────────────────────────────
 //
 // Every accepted document is also written split by field, to fill the container that

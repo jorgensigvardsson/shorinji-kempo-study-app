@@ -268,7 +268,9 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideOnStartPage: true
     }, {
         path: "/feedback",
-        component: () => <Feedback />,
+        // Keep the component identity stable when App rebuilds the routes so
+        // background updates cannot reset the draft or interrupt typing.
+        component: Feedback,
         menuText: translator.translate("Skicka feedback"),
         icon: Envelope,
         hideOnStartPage: true

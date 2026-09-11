@@ -258,3 +258,59 @@ describe("AppDataStore — setDocument", () => {
     expect(cb).toHaveBeenCalledOnce();
   });
 });
+
+describe("AppDataStore — account binding", () => {
+  it("claims legacy data for the first account and restores a separate copy on account switches", () => {
+    localStorage.clear();
+    const alice = createDefaultAppDataDocument();
+    alice.data.kenshiNumber = "0123456789";
+    const store = makeStore(alice);
+
+    expect(store.bindToAccount("alice@example.org")).toBe("claimed");
+    store.set("grade", "nidan");
+
+    expect(store.bindToAccount("bob@example.org")).toBe("switched");
+    expect(store.get("kenshiNumber")).toBeUndefined();
+    expect(store.get("grade")).toBe("shodan");
+    store.set("kenshiNumber", "1234567890");
+
+    expect(store.bindToAccount("alice@example.org")).toBe("switched");
+    expect(store.get("kenshiNumber")).toBe("0123456789");
+    expect(store.get("grade")).toBe("nidan");
+
+    expect(store.bindToAccount("bob@example.org")).toBe("switched");
+    expect(store.get("kenshiNumber")).toBe("1234567890");
+  });
+
+  it("loads a newer same-account copy written by another tab", () => {
+    localStorage.clear();
+    const stale = createDefaultAppDataDocument();
+    const store = makeStore(stale);
+    const latest = {
+      ...stale,
+      updatedAt: "2024-06-01T00:00:00.000Z",
+      data: { ...stale.data, kenshiNumber: "0123456789" },
+    };
+    localStorage.setItem("app-data-document-owner", "alice@example.org");
+    localStorage.setItem(
+      "app-data-document:account:alice%40example.org",
+      JSON.stringify(latest),
+    );
+
+    expect(store.bindToAccount("alice@example.org")).toBe("unchanged");
+
+    expect(store.get("kenshiNumber")).toBe("0123456789");
+  });
+
+  it("does not replace another tab's active account document", () => {
+    localStorage.clear();
+    const saved = vi.fn<(document: AppDataDocument) => void>();
+    const store = new AppDataStore({ load: d => d, save: saved });
+    store.bindToAccount("alice@example.org");
+    localStorage.setItem("app-data-document-owner", "bob@example.org");
+
+    store.set("grade", "nidan");
+
+    expect(saved).toHaveBeenCalledTimes(1);
+  });
+});

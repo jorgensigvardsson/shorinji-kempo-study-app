@@ -6,6 +6,8 @@ export interface MergeResult {
   conflictDetected: boolean;
 }
 
+export type ConflictPreference = "local" | "remote";
+
 function withDefaultData(doc: AppDataDocument): AppDataDocument {
   const { data: defaults } = createDefaultAppDataDocument();
   return { ...doc, data: { ...defaults, ...doc.data } };
@@ -14,7 +16,8 @@ function withDefaultData(doc: AppDataDocument): AppDataDocument {
 export function mergeDocuments(
   base: AppDataDocument | null,
   local: AppDataDocument,
-  remote: AppDataDocument
+  remote: AppDataDocument,
+  conflictPreference?: ConflictPreference,
 ): MergeResult {
   if (!base) {
     // No sync history on this device. Use schema defaults as the implicit common
@@ -50,6 +53,7 @@ export function mergeDocuments(
     // Without stamps on both sides there is no principled winner, so it goes to them,
     // exactly as every note conflict did before this field existed.
     escalates: key => !(key in localNoteStamps && key in remoteNoteStamps),
+    conflictPreference,
     pickWinner: (localValue, remoteValue, key) => {
       const localStamp = localNoteStamps[key];
       const remoteStamp = remoteNoteStamps[key];
@@ -71,6 +75,7 @@ export function mergeDocuments(
 
   const hokeiRanks = mergeMap<HokeiRankEntry>(baseDocument.data.hokeiRanks, local.data.hokeiRanks, remote.data.hokeiRanks, {
     escalates: true,
+    conflictPreference,
     pickWinner: (localValue, remoteValue) => newerRank(localValue, remoteValue, local, remote),
   });
 
@@ -145,6 +150,8 @@ export function mergeDocuments(
       }
 
       conflictDetected = true;
+      if (conflictPreference === "local") return localValue;
+      if (conflictPreference === "remote") return remoteValue;
       return newerOf(local, remote).data[key];
     }
 
@@ -168,6 +175,9 @@ interface MapMergeRules<TEntry> {
   // timestamp on both sides settles itself, while one without has nothing to settle it
   // by. Everything else answers the same way for every key.
   escalates: boolean | ((key: string) => boolean);
+  // Apply a user's answer only where both sides really changed the same entry.
+  // Independent changes from the other device still belong in the result.
+  conflictPreference?: ConflictPreference;
   // Which side wins when both changed a key to different values.
   pickWinner: (local: TEntry | undefined, remote: TEntry | undefined, key: string) => TEntry | undefined;
   // Optional per-entry validation. An entry that fails is treated as absent, so a
@@ -211,8 +221,14 @@ function mergeMap<TEntry>(
         chosen = localEntry; // both moved the same way, which is agreement
       } else {
         const escalates = typeof rules.escalates === "function" ? rules.escalates(key) : rules.escalates;
-        if (escalates) conflicted = true;
-        chosen = rules.pickWinner(localEntry, remoteEntry, key);
+        if (escalates) {
+          conflicted = true;
+          chosen = rules.conflictPreference === "local" ? localEntry
+            : rules.conflictPreference === "remote" ? remoteEntry
+              : rules.pickWinner(localEntry, remoteEntry, key);
+        } else {
+          chosen = rules.pickWinner(localEntry, remoteEntry, key);
+        }
       }
     } else if (localChanged) {
       chosen = localEntry;

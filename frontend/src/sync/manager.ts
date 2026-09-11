@@ -13,7 +13,8 @@ const debugWarn = (...args: unknown[]) => { if (debug) console.warn(...args); };
 type SyncStateListener = (state: SyncState) => void;
 type Unsubscribe = () => void;
 
-const baseDocumentStorageKey = "sync-base-document:backend";
+const legacyBaseDocumentStorageKey = "sync-base-document:backend";
+const baseDocumentStoragePrefix = "sync-base-document:backend:account:";
 const backupStoragePrefix = "sync-backup:backend:";
 
 // Storage left behind by the removed OneDrive/Google Drive sync: OAuth tokens,
@@ -59,9 +60,11 @@ class SyncManager {
   private isApplyingRemoteDocument = false;
   private pendingLocalDocument: AppDataDocument | null = null;
   private pendingRemoteDocument: AppDataDocument | null = null;
+  private pendingBaseDocument: AppDataDocument | null = null;
   // The version the pending conflict was read from. A user can leave the prompt up
   // for a long time, so by the time they answer the server may have moved on again.
   private pendingRemoteEtag: string | null = null;
+  private pendingAccountId = "";
   // A sync in progress, so the four things that can ask for one — the debounced
   // scheduler, the visibility handler, the retry timer and the user's "try now"
   // button — join it instead of running a second download/merge/upload over it.
@@ -71,6 +74,13 @@ class SyncManager {
   // its upload as stale. Each retry only loses to a device that wrote in the
   // meantime, so a small bound is enough; the scheduler covers the rest.
   private readonly MAX_STALE_RETRIES = 3;
+  // Kept per running tab. Reading one shared localStorage value before every merge
+  // let another tab move the common ancestor underneath this tab, turning an old
+  // empty value into an apparent deletion. It is persisted per account for reloads,
+  // while this in-memory copy remains this tab's own history.
+  private syncAccountKey: string | null = null;
+  private syncAccountId = "";
+  private baseDocument: AppDataDocument | null = null;
 
   start(): void {
     if (this.started) {
@@ -305,6 +315,9 @@ class SyncManager {
   // handleProviderChanged fires via the subscription and sets status to local_only.
   disconnect(): void {
     this.backendClient.disconnect();
+    this.syncAccountKey = null;
+    this.syncAccountId = "";
+    this.baseDocument = null;
     setSyncProvider("local");
   }
 
@@ -314,26 +327,39 @@ class SyncManager {
 
   async resolveConflict(choice: "local" | "remote"): Promise<void> {
     if (this.state.status !== "conflict_resolution") return;
+    const baseDoc = this.pendingBaseDocument;
     const localDoc = this.pendingLocalDocument;
     const remoteDoc = this.pendingRemoteDocument;
     if (!localDoc || !remoteDoc) return;
 
+    this.pendingBaseDocument = null;
     this.pendingLocalDocument = null;
     this.pendingRemoteDocument = null;
     const etag = this.pendingRemoteEtag;
+    const accountId = this.pendingAccountId;
     this.pendingRemoteEtag = null;
+    this.pendingAccountId = "";
 
-    const chosen = choice === "local" ? localDoc : remoteDoc;
+    // Apply the answer only to values that actually conflicted. Independent changes
+    // from both devices still belong to the user. Then layer on anything edited while
+    // the prompt was open, preferring that later local work if it touched the same
+    // value again.
+    const resolved = mergeDocuments(baseDoc, localDoc, remoteDoc, choice).document;
+    const current = this.store.getDocument();
+    const chosen = mergeDocuments(localDoc, current, resolved, "local").document;
 
     this.setState({ status: "syncing", message: "Synkar..." });
 
+    // Put the user's resolved document locally before the request. If a third device
+    // wins the server race, the fresh sync below can merge from the choice instead of
+    // forgetting what the user just selected.
     this.isApplyingRemoteDocument = true;
     this.store.setDocument(chosen);
     this.isApplyingRemoteDocument = false;
 
     try {
       if (this.backendClient.isConnected()) {
-        await this.backendClient.uploadDocument(chosen, etag);
+        await this.backendClient.uploadDocument(chosen, etag, accountId);
         this.saveBaseDocument(chosen);
       }
     } catch (error) {
@@ -395,9 +421,19 @@ class SyncManager {
       return { conflictDetected: false, pushedLocalChanges: false };
     }
 
+    if (!this.bindToAuthenticatedAccount()) {
+      debugWarn("[sync] refusing to sync without an authenticated account identity");
+      this.setState({ status: "disconnected", message: "Inte ansluten." });
+      return { conflictDetected: false, pushedLocalChanges: false };
+    }
+
     this.setState({ status: "syncing", message: "Synkar..." });
 
-    const remote = await this.backendClient.downloadDocument();
+    // Capture the account for this whole read/merge/write pass. The server checks
+    // this id against the cookie on both requests, so another tab changing the
+    // shared login in between cannot redirect this document into another account.
+    const accountId = this.syncAccountId;
+    const remote = await this.backendClient.downloadDocument(accountId);
     const remoteDocument = remote?.document ?? null;
     // Everything uploaded below is based on this exact version, and says so via
     // If-Match. A null etag means we read no document and are creating the first.
@@ -409,9 +445,12 @@ class SyncManager {
 
     if (!remoteDocument) {
       debugLog("[sync] No remote document found — uploading local as initial.");
-      const uploaded = await this.uploadOrRestart(localDocument, null, staleRetries);
+      const uploaded = await this.uploadOrRestart(localDocument, null, staleRetries, accountId);
       if (uploaded !== "ok") return uploaded;
       this.saveBaseDocument(localDocument);
+      if (!deepEqual(this.store.getDocument(), localDocument)) {
+        this.resyncWhenIdle = true;
+      }
       this.retryCount = 0;
       this.setState({
         status: "connected",
@@ -436,9 +475,11 @@ class SyncManager {
     if (mergeResult.conflictDetected) {
       debugWarn("[sync] Conflict detected — asking user to resolve.");
       this.backupDocument(localDocument);
+      this.pendingBaseDocument = baseDocument;
       this.pendingLocalDocument = localDocument;
       this.pendingRemoteDocument = remoteDocument;
       this.pendingRemoteEtag = baseEtag;
+      this.pendingAccountId = accountId;
       this.setState({ status: "conflict_resolution", message: null });
       return { conflictDetected: true, pushedLocalChanges: false };
     }
@@ -447,12 +488,18 @@ class SyncManager {
     // computed against a version that is no longer current, and applying it locally
     // first would leave this device holding a merge the server refused.
     if (mergedDiffersFromRemote) {
-      const uploaded = await this.uploadOrRestart(mergedDocument, baseEtag, staleRetries);
+      const uploaded = await this.uploadOrRestart(mergedDocument, baseEtag, staleRetries, accountId);
       if (uploaded !== "ok") return uploaded;
       debugLog("[sync] Uploaded merged document to remote.");
     }
 
-    if (mergedDiffersFromLocal) {
+    // A request can be slow enough for the user to edit while its upload is in
+    // flight. Applying the earlier merge now would erase that edit. Leave the newer
+    // local document in place and run one more merge against what the server accepted.
+    const localChangedWhileSyncing = !deepEqual(this.store.getDocument(), localDocument);
+    if (localChangedWhileSyncing) {
+      this.resyncWhenIdle = true;
+    } else if (mergedDiffersFromLocal) {
       this.isApplyingRemoteDocument = true;
       this.store.setDocument(mergedDocument);
       this.isApplyingRemoteDocument = false;
@@ -480,9 +527,10 @@ class SyncManager {
     document: AppDataDocument,
     etag: string | null,
     staleRetries: number,
+    accountId: string,
   ): Promise<"ok" | SyncResult> {
     try {
-      await this.backendClient.uploadDocument(document, etag);
+      await this.backendClient.uploadDocument(document, etag, accountId);
       return "ok";
     } catch (error) {
       if (!(error instanceof DocumentChangedError) || staleRetries >= this.MAX_STALE_RETRIES) {
@@ -600,28 +648,65 @@ class SyncManager {
     }
   }
 
+  private bindToAuthenticatedAccount(): boolean {
+    const info = this.backendClient.getUserInfo();
+    const accountKey = info?.email.trim().toLowerCase() ?? "";
+    const accountId = info?.id.trim() ?? "";
+    if (!accountKey) return false;
+    if (this.syncAccountKey === accountKey) {
+      this.syncAccountId = accountId;
+      return true;
+    }
+
+    const binding = this.store.bindToAccount(accountKey);
+    this.syncAccountKey = accountKey;
+    this.syncAccountId = accountId;
+
+    const scopedKey = this.baseStorageKey(accountKey);
+    let raw = localStorage.getItem(scopedKey);
+    // One-time migration: the unscoped document and base belonged to the account
+    // already signed in on this origin. Never carry that base into a different
+    // account, where it would describe somebody else's data.
+    if (raw === null && binding !== "switched") {
+      raw = localStorage.getItem(legacyBaseDocumentStorageKey);
+      if (raw !== null) localStorage.setItem(scopedKey, raw);
+    }
+    localStorage.removeItem(legacyBaseDocumentStorageKey);
+
+    if (raw === null) {
+      this.baseDocument = null;
+      return true;
+    }
+    try {
+      this.baseDocument = JSON.parse(raw) as AppDataDocument;
+    } catch {
+      this.baseDocument = null;
+    }
+    return true;
+  }
+
+  private baseStorageKey(accountKey: string): string {
+    return `${baseDocumentStoragePrefix}${encodeURIComponent(accountKey)}`;
+  }
+
   private saveBaseDocument(document: AppDataDocument): void {
-    localStorage.setItem(baseDocumentStorageKey, JSON.stringify(document));
+    this.baseDocument = document;
+    if (this.syncAccountKey !== null) {
+      localStorage.setItem(this.baseStorageKey(this.syncAccountKey), JSON.stringify(document));
+    }
   }
 
   private readBaseDocument(): AppDataDocument | null {
-    const raw = localStorage.getItem(baseDocumentStorageKey);
-    if (!raw) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(raw) as AppDataDocument;
-    } catch {
-      return null;
-    }
+    return this.baseDocument;
   }
 
   private backupDocument(document: AppDataDocument): void {
-    const key = `${backupStoragePrefix}${new Date().toISOString()}`;
+    const accountPart = this.syncAccountKey === null ? "" : `${encodeURIComponent(this.syncAccountKey)}:`;
+    const accountPrefix = `${backupStoragePrefix}${accountPart}`;
+    const key = `${accountPrefix}${new Date().toISOString()}`;
     localStorage.setItem(key, JSON.stringify(document));
 
-    const allKeys = Object.keys(localStorage).filter(k => k.startsWith(backupStoragePrefix)).sort();
+    const allKeys = Object.keys(localStorage).filter(k => k.startsWith(accountPrefix)).sort();
     for (const old of allKeys.slice(0, -5)) {
       localStorage.removeItem(old);
     }

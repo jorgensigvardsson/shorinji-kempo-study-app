@@ -21,6 +21,7 @@ async function flushPromises() {
 type MockClient = {
   beginAuthorization: ReturnType<typeof vi.fn>;
   completeAuthorizationIfPresent: ReturnType<typeof vi.fn>;
+  getUserInfo: ReturnType<typeof vi.fn>;
   isConnected: ReturnType<typeof vi.fn>;
   wasAuthExpired: ReturnType<typeof vi.fn>;
   disconnect: ReturnType<typeof vi.fn>;
@@ -32,6 +33,7 @@ function makeMockClient(): MockClient {
   return {
     beginAuthorization: vi.fn().mockResolvedValue(undefined),
     completeAuthorizationIfPresent: vi.fn().mockResolvedValue(false),
+    getUserInfo: vi.fn().mockReturnValue({ id: "user-1", email: "malin@example.org" }),
     isConnected: vi.fn().mockReturnValue(true),
     wasAuthExpired: vi.fn().mockReturnValue(false),
     disconnect: vi.fn(),
@@ -58,6 +60,7 @@ type MockStore = {
   setDocument: ReturnType<typeof vi.fn>;
   subscribe: ReturnType<typeof vi.fn>;
   subscribeDocument: ReturnType<typeof vi.fn>;
+  bindToAccount: ReturnType<typeof vi.fn>;
 };
 
 function makeMockStore(doc?: AppDataDocument): MockStore {
@@ -69,6 +72,7 @@ function makeMockStore(doc?: AppDataDocument): MockStore {
     setDocument: vi.fn(),
     subscribe: vi.fn().mockReturnValue(() => {}),
     subscribeDocument: vi.fn().mockReturnValue(() => {}),
+    bindToAccount: vi.fn().mockReturnValue("claimed"),
   };
 }
 
@@ -171,6 +175,17 @@ describe("SyncManager", () => {
       expect(manager.getState().status).toBe("disconnected");
     });
 
+    it("does not sync until the signed-in account can be identified", async () => {
+      mockBackendClient.getUserInfo.mockReturnValue(null);
+
+      const result = await getSyncManager().syncNow();
+
+      expect(result.pushedLocalChanges).toBe(false);
+      expect(mockStore.bindToAccount).not.toHaveBeenCalled();
+      expect(mockBackendClient.downloadDocument).not.toHaveBeenCalled();
+      expect(getSyncManager().getState().status).toBe("disconnected");
+    });
+
     it("uploads local doc as initial when no remote document exists", async () => {
       const localDoc = makeDoc({ updatedAt: "2024-06-01T00:00:00.000Z" });
       mockStore.getDocument.mockReturnValue(localDoc);
@@ -180,7 +195,8 @@ describe("SyncManager", () => {
       const result = await manager.syncNow();
 
       // No ETag: this upload claims to be creating the first document.
-      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc, null);
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc, null, "user-1");
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledWith("user-1");
       expect(result.pushedLocalChanges).toBe(true);
       expect(result.conflictDetected).toBe(false);
       expect(manager.getState().status).toBe("connected");
@@ -192,7 +208,39 @@ describe("SyncManager", () => {
 
       await getSyncManager().syncNow();
 
-      expect(localStorage.getItem("sync-base-document:backend")).not.toBeNull();
+      expect(
+        localStorage.getItem("sync-base-document:backend:account:malin%40example.org"),
+      ).not.toBeNull();
+    });
+
+    it("keeps this tab's merge base when another tab advances its stored base", async () => {
+      const baseDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
+      localStorage.setItem("sync-base-document:backend", JSON.stringify(baseDoc));
+      mockStore.getDocument.mockReturnValue(baseDoc);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(baseDoc));
+
+      const manager = getSyncManager();
+      await manager.syncNow();
+
+      const remoteDoc = makeDoc({
+        updatedAt: "2024-06-01T00:00:00.000Z",
+        data: { ...baseDoc.data, kenshiNumber: "0123456789" },
+      });
+      // Another tab has synced the new number and updated the shared persisted
+      // base. This running tab must still compare against its own earlier base.
+      localStorage.setItem(
+        "sync-base-document:backend:account:malin%40example.org",
+        JSON.stringify(remoteDoc),
+      );
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
+      mockStore.setDocument.mockClear();
+      mockBackendClient.uploadDocument.mockClear();
+
+      await manager.syncNow();
+
+      const applied = mockStore.setDocument.mock.calls[0][0] as AppDataDocument;
+      expect(applied.data.kenshiNumber).toBe("0123456789");
+      expect(mockBackendClient.uploadDocument).not.toHaveBeenCalled();
     });
 
     it("applies remote changes to local store when remote is newer", async () => {
@@ -315,15 +363,17 @@ describe("SyncManager", () => {
     }
 
     it("applies local doc and uploads when choice is 'local'", async () => {
-      const { manager, localDoc } = await enterConflict();
+      const { manager, localDoc, remoteDoc } = await enterConflict();
       mockBackendClient.uploadDocument.mockClear();
 
       await manager.resolveConflict("local");
 
-      expect(mockStore.setDocument).toHaveBeenCalledWith(localDoc);
+      const resolved = mockStore.setDocument.mock.calls[0][0] as AppDataDocument;
+      expect(resolved.data.grade).toBe(localDoc.data.grade);
+      expect(resolved.updatedAt).toBe(remoteDoc.updatedAt);
       // Resolving quotes the version the conflict was read from, so a device that
       // wrote while the prompt was open is not overwritten by the answer.
-      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(localDoc, "etag-remote");
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(resolved, "etag-remote", "user-1");
       expect(manager.getState().status).toBe("connected");
     });
 
@@ -334,8 +384,44 @@ describe("SyncManager", () => {
       await manager.resolveConflict("remote");
 
       expect(mockStore.setDocument).toHaveBeenCalledWith(remoteDoc);
-      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(remoteDoc, "etag-remote");
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(remoteDoc, "etag-remote", "user-1");
       expect(manager.getState().status).toBe("connected");
+    });
+
+    it("keeps independent remote data and edits made while the prompt is open", async () => {
+      const baseDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
+      const localDoc = makeDoc({
+        updatedAt: "2024-03-01T00:00:00.000Z",
+        data: { ...baseDoc.data, grade: "nidan" as const },
+      });
+      const remoteDoc = makeDoc({
+        updatedAt: "2024-06-01T00:00:00.000Z",
+        data: {
+          ...baseDoc.data,
+          grade: "sandan" as const,
+          kenshiNumber: "0123456789",
+        },
+      });
+      let currentDocument = localDoc;
+      localStorage.setItem("sync-base-document:backend", JSON.stringify(baseDoc));
+      mockStore.getDocument.mockImplementation(() => currentDocument);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
+
+      const manager = getSyncManager();
+      await manager.syncNow();
+
+      currentDocument = {
+        ...localDoc,
+        updatedAt: "2024-07-01T00:00:00.000Z",
+        data: { ...localDoc.data, language: "tr" as const },
+      };
+      await manager.resolveConflict("local");
+
+      const chosen = mockStore.setDocument.mock.calls[0][0] as AppDataDocument;
+      expect(chosen.data.grade).toBe("nidan");
+      expect(chosen.data.kenshiNumber).toBe("0123456789");
+      expect(chosen.data.language).toBe("tr");
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledWith(chosen, "etag-remote", "user-1");
     });
 
     it("records lastConflictResolutionAt after resolving", async () => {
@@ -588,6 +674,53 @@ describe("SyncManager", () => {
     });
   });
 
+  describe("edits made during upload", () => {
+    it("does not replace a newer local edit with the earlier merged document", async () => {
+      vi.useFakeTimers();
+      const baseDoc = makeDoc({ updatedAt: "2024-01-01T00:00:00.000Z" });
+      const localDoc = makeDoc({
+        updatedAt: "2024-03-01T00:00:00.000Z",
+        data: { ...baseDoc.data, grade: "nidan" as const },
+      });
+      const remoteDoc = makeDoc({
+        updatedAt: "2024-06-01T00:00:00.000Z",
+        data: { ...baseDoc.data, kenshiNumber: "0123456789" },
+      });
+      let currentDocument = localDoc;
+      localStorage.setItem("sync-base-document:backend", JSON.stringify(baseDoc));
+      mockStore.getDocument.mockImplementation(() => currentDocument);
+      mockBackendClient.downloadDocument.mockResolvedValue(stored(remoteDoc));
+
+      let releaseUpload: () => void = () => {};
+      mockBackendClient.uploadDocument.mockReturnValue(
+        new Promise<string>(resolve => {
+          releaseUpload = () => resolve("etag-uploaded");
+        }),
+      );
+
+      const manager = getSyncManager();
+      const sync = manager.syncNow();
+      await flushPromises();
+      expect(mockBackendClient.uploadDocument).toHaveBeenCalledOnce();
+
+      currentDocument = {
+        ...localDoc,
+        updatedAt: "2024-07-01T00:00:00.000Z",
+        data: { ...localDoc.data, language: "tr" as const },
+      };
+      releaseUpload();
+      await sync;
+
+      expect(mockStore.setDocument).not.toHaveBeenCalled();
+
+      // The later edit is picked up by the queued follow-up pass.
+      await vi.advanceTimersByTimeAsync(2500);
+      await flushPromises();
+      expect(mockBackendClient.downloadDocument).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
+    });
+  });
+
   // ─── error handling / retry ───────────────────────────────────────────────
 
   describe("retrySync / error handling", () => {
@@ -786,8 +919,11 @@ describe("SyncManager", () => {
       expect(localStorage.getItem("sync-google-drive-token")).toBeNull();
       expect(localStorage.getItem("sync-base-document:onedrive")).toBeNull();
       expect(localStorage.getItem("sync-backup:google-drive:2024-01-01T00:00:00.000Z")).toBeNull();
-      // The backend's own base document must survive the purge.
-      expect(localStorage.getItem("sync-base-document:backend")).not.toBeNull();
+      // The backend's own base document is migrated to the signed-in account.
+      expect(localStorage.getItem("sync-base-document:backend")).toBeNull();
+      expect(
+        localStorage.getItem("sync-base-document:backend:account:malin%40example.org"),
+      ).not.toBeNull();
     });
   });
 });

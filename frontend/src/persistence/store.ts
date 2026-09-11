@@ -5,6 +5,15 @@ import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, createDefaultAppDat
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
 type UnregisterDataChangedCallback = () => void;
 
+export type AccountBindingResult = "unchanged" | "claimed" | "switched";
+
+const activeDocumentOwnerKey = "app-data-document-owner";
+const accountDocumentPrefix = "app-data-document:account:";
+
+function accountDocumentKey(accountKey: string): string {
+  return `${accountDocumentPrefix}${encodeURIComponent(accountKey)}`;
+}
+
 export class AppDataStore {
   private readonly callbacks: {
     [K in keyof AppDataState]: Map<number, DataChangedCallback<K>>;
@@ -14,6 +23,7 @@ export class AppDataStore {
   private nextDocumentListenerId = 0;
   private document: AppDataDocument;
   private readonly documentCallbacks = new Map<number, (document: AppDataDocument) => void>();
+  private boundAccountKey: string | null = null;
 
   constructor(private readonly backend: PersistenceBackend<AppDataDocument> = new LocalStorageBackend<AppDataDocument>("app-data-document")) {
     this.document = sanitizeDocument(backend.load(createDefaultAppDataDocument()));
@@ -43,6 +53,65 @@ export class AppDataStore {
     return clone(this.document);
   }
 
+  // The app used to keep one device-local document regardless of who was signed in.
+  // That lets signing into a second account upload the first account's data when the
+  // second account has no server document yet. Claim the legacy document for the
+  // first authenticated account, then keep a separate device copy per account.
+  bindToAccount(accountKey: string): AccountBindingResult {
+    if (this.boundAccountKey === accountKey) return "unchanged";
+
+    const recordedOwner = localStorage.getItem(activeDocumentOwnerKey);
+    if (this.boundAccountKey === null && recordedOwner === null) {
+      this.boundAccountKey = accountKey;
+      localStorage.setItem(activeDocumentOwnerKey, accountKey);
+      this.persist(this.document);
+      return "claimed";
+    }
+
+    if (this.boundAccountKey === null && recordedOwner === accountKey) {
+      this.boundAccountKey = accountKey;
+      const stored = localStorage.getItem(accountDocumentKey(accountKey));
+      if (stored) {
+        try {
+          const latest = sanitizeDocument(JSON.parse(stored) as AppDataDocument);
+          // A second tab may have changed the active account document after this
+          // store was constructed. Start from that newer device copy instead of
+          // writing this tab's stale startup snapshot over it.
+          if (!deepEqual(latest, this.document)) {
+            this.replaceDocument(latest);
+          }
+          return "unchanged";
+        } catch {
+          // Repair a broken scoped copy from the valid active document already
+          // loaded by this store.
+        }
+      }
+      this.persist(this.document);
+      return "unchanged";
+    }
+
+    const previousAccount = this.boundAccountKey ?? recordedOwner;
+    if (previousAccount) {
+      localStorage.setItem(accountDocumentKey(previousAccount), JSON.stringify(this.document));
+    }
+
+    const stored = localStorage.getItem(accountDocumentKey(accountKey));
+    let next = createDefaultAppDataDocument();
+    if (stored) {
+      try {
+        next = sanitizeDocument(JSON.parse(stored) as AppDataDocument);
+      } catch {
+        // A broken device copy is not allowed to cross into another account. The
+        // server copy will refill a clean default document during the first sync.
+      }
+    }
+
+    this.boundAccountKey = accountKey;
+    localStorage.setItem(activeDocumentOwnerKey, accountKey);
+    this.replaceDocument(next);
+    return "switched";
+  }
+
   set<TKey extends keyof AppDataState>(key: TKey, value: AppDataState[TKey]): void {
     if (Object.is(this.document.data[key], value)) {
       return;
@@ -57,15 +126,19 @@ export class AppDataStore {
       },
     };
 
-    this.backend.save(this.document);
+    this.persist(this.document);
     this.notify(key, value);
     this.notifyDocument();
   }
 
   setDocument(document: AppDataDocument): void {
+    this.replaceDocument(sanitizeDocument(document));
+  }
+
+  private replaceDocument(document: AppDataDocument): void {
     const previous = this.document;
-    this.document = sanitizeDocument(document);
-    this.backend.save(this.document);
+    this.document = document;
+    this.persist(this.document);
 
     const keys = Object.keys(this.document.data) as Array<keyof AppDataState>;
     for (const key of keys) {
@@ -75,6 +148,17 @@ export class AppDataStore {
     }
 
     this.notifyDocument();
+  }
+
+  private persist(document: AppDataDocument): void {
+    if (this.boundAccountKey !== null) {
+      localStorage.setItem(accountDocumentKey(this.boundAccountKey), JSON.stringify(document));
+      // Another tab may have changed accounts, which changes the auth cookie for
+      // every tab. Keep this tab's old-account copy, but do not replace the active
+      // document now owned by the newly signed-in account.
+      if (localStorage.getItem(activeDocumentOwnerKey) !== this.boundAccountKey) return;
+    }
+    this.backend.save(document);
   }
 
   subscribe<TKey extends keyof AppDataState>(

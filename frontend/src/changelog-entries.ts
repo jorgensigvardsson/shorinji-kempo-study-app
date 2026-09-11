@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-11T08:25:36.000Z",
+    changes: [
+      {
+        emoji: "✍️",
+        sv: "Text du skriver i feedbackformuläret ligger nu kvar även när appen uppdaterar information i bakgrunden.",
+        en: "Text you write in the feedback form now stays in place even when the app updates information in the background.",
+        tr: "Geri bildirim formuna yazdığınız metin artık uygulama arka planda bilgileri güncellese bile yerinde kalıyor.",
+        ja: "フィードバックフォームへの入力中にアプリがバックグラウンドで情報を更新しても、入力した文章が消えなくなりました。",
+      },
+      {
+        emoji: "🛡️",
+        sv: "Synkningen skyddar nu sparade uppgifter bättre när appen är öppen i flera flikar, när du byter konto eller när du gör en ändring medan synkningen fortfarande pågår.",
+        en: "Sync now protects saved data better when the app is open in several tabs, when you switch accounts, or when you make a change while syncing is still in progress.",
+        tr: "Senkronizasyon artık uygulama birden fazla sekmede açıkken, hesap değiştirdiğinizde veya senkronizasyon sürerken değişiklik yaptığınızda kayıtlı verileri daha iyi koruyor.",
+        ja: "複数のタブでアプリを開いている場合、アカウントを切り替えた場合、同期中に変更した場合でも、保存済みデータがより確実に保護されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-07T17:42:59.418Z",
     changes: [
       {

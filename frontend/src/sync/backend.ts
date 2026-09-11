@@ -29,6 +29,14 @@ export interface RemoteDocument {
 // In development both services run on localhost via Docker Compose.
 const authUrl = (import.meta.env.VITE_AUTH_URL as string | undefined) ?? "http://localhost:8081";
 const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8080";
+
+function documentUrl(accountId: string): string {
+  const account = accountId.trim();
+  return account === ""
+    ? `${apiUrl}/api/v1/document`
+    : `${apiUrl}/api/v1/document?account=${encodeURIComponent(account)}`;
+}
+
 // Build identifier (the deployed commit SHA) baked in by CI; used only to give
 // feedback submissions context. Falls back to "dev" for local builds.
 const appVersion = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? "dev";
@@ -650,12 +658,12 @@ export class BackendSyncClient {
     localStorage.removeItem(userInfoKey);
   }
 
-  async downloadDocument(): Promise<RemoteDocument | null> {
-    let resp = await fetchWithTimeout(`${apiUrl}/api/v1/document`, { credentials: "include" });
+  async downloadDocument(accountId = ""): Promise<RemoteDocument | null> {
+    let resp = await fetchWithTimeout(documentUrl(accountId), { credentials: "include" });
     if (resp.status === 404) return null;
     if (resp.status === 401) {
       const refreshed = await this.tryRefresh();
-      if (refreshed) resp = await fetchWithTimeout(`${apiUrl}/api/v1/document`, { credentials: "include" });
+      if (refreshed) resp = await fetchWithTimeout(documentUrl(accountId), { credentials: "include" });
     }
     if (resp.status === 401) {
       localStorage.setItem(authExpiredKey, "true");
@@ -673,7 +681,7 @@ export class BackendSyncClient {
   // etag is the version this upload is based on: the one downloadDocument returned,
   // or null when the caller believes no document exists on the server yet. Either
   // way the server verifies the belief and answers 412 if it no longer holds.
-  async uploadDocument(document: AppDataDocument, etag: string | null): Promise<string | null> {
+  async uploadDocument(document: AppDataDocument, etag: string | null, accountId = ""): Promise<string | null> {
     const body = JSON.stringify(document);
     const init: RequestInit = {
       method: "PUT",
@@ -690,7 +698,7 @@ export class BackendSyncClient {
       },
       body,
     };
-    const resp = await this.fetchWithRefresh(`${apiUrl}/api/v1/document`, init);
+    const resp = await this.fetchWithRefresh(documentUrl(accountId), init);
     if (resp.status === 412) throw new DocumentChangedError();
     if (resp.status === 409) {
       const required = await readRequiredSchemaVersion(resp);

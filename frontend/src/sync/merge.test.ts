@@ -135,6 +135,27 @@ describe("mergeDocuments — null base", () => {
     expect(result.conflictDetected).toBe(true);
   });
 
+  it("applies a conflict choice only to the conflicting field", () => {
+    const base = makeDoc({ updatedAt: OLD });
+    const local = makeDoc({
+      updatedAt: "2024-03-01T00:00:00.000Z",
+      data: { ...base.data, grade: "nidan" },
+    });
+    const remote = makeDoc({
+      updatedAt: NEW,
+      data: { ...base.data, grade: "sandan", kenshiNumber: "0123456789" },
+    });
+
+    const keepLocalConflict = mergeDocuments(base, local, remote, "local");
+    expect(keepLocalConflict.conflictDetected).toBe(true);
+    expect(keepLocalConflict.document.data.grade).toBe("nidan");
+    expect(keepLocalConflict.document.data.kenshiNumber).toBe("0123456789");
+
+    const keepRemoteConflict = mergeDocuments(base, local, remote, "remote");
+    expect(keepRemoteConflict.document.data.grade).toBe("sandan");
+    expect(keepRemoteConflict.document.data.kenshiNumber).toBe("0123456789");
+  });
+
   it("both sides at defaults — no conflict", () => {
     const local = makeDoc({ updatedAt: NEW });
     const remote = makeDoc({ updatedAt: OLD });
