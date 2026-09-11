@@ -49,7 +49,9 @@ const WordQuiz = page(() => import("./WordQuiz.tsx"));
 const FootStanceQuiz = page(() => import("./FootStanceQuiz.tsx"));
 const HandPositionQuiz = page(() => import("./HandPositionQuiz.tsx"));
 const GradingTest = page(() => import("./GradingTest.tsx"));
+const FlashcardMenu = page(() => import("./FlashcardMenu.tsx"));
 const Flashcard = page(() => import("./Flashcard.tsx"));
+const HokeiFlashcard = page(() => import("./HokeiFlashcard.tsx"));
 const TermsOfServices = page(() => import("./TermsOfServices.tsx"));
 const PrivacyPolicy = page(() => import("./PrivacyPolicy.tsx"));
 const Changelog = page(() => import("./Changelog.tsx"));
@@ -165,9 +167,23 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     } satisfies Route] : []), ...(!translator.isJapanese ? [{
         path: "/flashcard",
-        element: <TheoryToolPage><Flashcard /></TheoryToolPage>,
+        element: <TheoryToolPage><FlashcardMenu /></TheoryToolPage>,
         menuText: translator.translate("Flashkort"),
         startDescription: translator.translate("Öva med kort och bygg minnet steg för steg."),
+        icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/flashcard/words",
+        element: <TheoryToolPage><Flashcard /></TheoryToolPage>,
+        menuText: translator.translate("Ordlista"),
+        icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/flashcard/hokei",
+        element: <TheoryToolPage><HokeiFlashcard allGradePlans={allGradePlans} myGrade={profileGradePlan.grade} /></TheoryToolPage>,
+        menuText: translator.translate("Hokei"),
         icon: CardHeading,
         hideOnStartPage: true,
         hideFromMenu: true,
