@@ -33,21 +33,47 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 
 ## Development
 
+Everything runs in Docker, with the working tree mounted into each container so the
+usual watchers still see your edits — Vite hot-reloads the app, air rebuilds and
+restarts each Go service:
+
 ```bash
+docker compose up
+```
+
+Then open <https://localhost:5173>. One nginx container terminates TLS there and routes
+by path to whichever service owns it — `/auth/*` to the auth service, `/api/*` and
+`/push/*` to persistence, everything else to Vite — so the whole stack is one origin.
+Nothing else is published: the three app services talk to each other by name on the
+compose network. See `infrastructure/dev-proxy/nginx.conf`.
+
+Production is arranged differently — each service has its own hostname, and the app is
+built with absolute `VITE_AUTH_URL`/`VITE_API_URL` pointing at them. Locally both are
+empty, which makes every call relative to the page. The consequence worth knowing is
+that no browser request is cross-origin here, so the CORS path the deployed app depends
+on is not exercised by running the stack; `backend/shared/cors` and staging cover it.
+The CSRF origin check does still run, on every write.
+
+The certificate is self-signed and committed (`localhost.pem`, `localhost.key`), so the
+browser asks once per hostname and remembers. It secures nothing — see
+`infrastructure/scripts/gen-dev-cert.sh`, which regenerates it.
+
+TLS is not decoration here: the service worker, Web Push and the auth service's `Secure`
+cookies all need a secure context, and `localhost` is only one for `localhost` — not for
+the LAN names a phone would use.
+
+The frontend's own toolchain still runs directly when you want it:
+
+```bash
+cd frontend
 npm install
-npm run dev       # start dev server
 npm test          # run tests
 npm run build     # production build
 ```
 
-The app requires an account, so the dev server alone stops at the login screen — the auth
-service must be reachable on `localhost:8081` before you can get in. Bring the backend up
-from the repository root:
-
-```bash
-docker compose up                      # frontend + auth + persistence
-docker compose up auth persistence     # backends only, alongside your own `npm run dev`
-```
+The app requires an account, so `npm run dev` on its own stops at the login screen: it
+has no backend, and the compose stack no longer publishes one for it to borrow. Use
+`docker compose up`.
 
 ### Seeding a local account
 
@@ -67,28 +93,26 @@ directory — never staging or production. Restart the auth service afterwards; 
 organization tree once at startup. Then sign in as the admin — with no SMTP relay the
 verification code is printed to the auth log.
 
-### HTTPS (optional)
+### Driving the stack from a phone
 
-The stack is HTTP by default; `localhost` is a secure context anyway. To serve it
-over TLS instead — useful for exercising the PWA or Web Push from a phone on the
-LAN — add the overlay:
+The certificate covers `localhost`, `nuc-dev` and `192.168.0.6`, so the same stack can
+be reached from another device on the LAN — which is the only way to exercise the PWA
+install flow or Web Push on a real phone.
+
+Set `DEV_HOST` in `.env` (default `localhost`) to the name that device will use:
 
 ```bash
-infrastructure/scripts/gen-dev-cert.sh                              # once
-docker compose -f docker-compose.yml -f docker-compose.https.yml up
+DEV_HOST=nuc-dev
 ```
 
-A Caddy container terminates TLS on the same three ports (5173, 8081, 8080) with a
-cert covering `localhost`, `nuc-dev` and `192.168.0.6`; the app services still
-speak plain HTTP behind it. The script also makes a small local CA — trust
-`infrastructure/dev-tls/certs/dev-ca.crt` once (the script header has the
-per-platform command) and every port is trusted with no click-through. Without
-that, the login screen fails: the page loads from `:5173` but its API calls to
-`:8081`/`:8080` are separate origins whose cert warning you never get to accept.
+It picks the origin the auth service issues tokens for, redirects back to, and accepts
+writes from — the CSRF check is an exact string match, so browsing to a name other than
+`DEV_HOST` gets you a login screen that refuses every POST. To cover a name not listed
+above, add it to `$sans` in `infrastructure/scripts/gen-dev-cert.sh`, re-run it, and
+`docker compose restart proxy`.
 
-`DEV_HOST` in `.env` (default `localhost`) chooses which of the three names the
-issuer, redirect and API URLs use — set it to `nuc-dev` or `192.168.0.6` to drive
-the stack from another device on the LAN.
+Using Google or Microsoft sign-in as well means registering
+`https://<DEV_HOST>:5173/auth/callback` as a redirect URI with that provider.
 
 Compose reads Google/Microsoft OIDC credentials from a `.env` file in the repository root
 (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`);

@@ -21,7 +21,8 @@ Starting 2026-08-31
 - This Windows setup runs directly on the computer without Docker. Docker is not installed and should not be tried first.
 - The local environment consists of three background processes:
   - Frontend: run `npm run dev` from `frontend` with `VITE_HTTPS=false`. It is available at `http://localhost:5173`.
-    Malin's setup is HTTP only, which is fine — `localhost` is a secure context anyway. Serving over HTTPS needs the Docker overlay (`docker compose -f docker-compose.yml -f docker-compose.https.yml up`, see "HTTPS (optional)" in `README.md`), and Docker is not installed here.
+    Malin's setup is HTTP only, which is fine — `localhost` is a secure context anyway. Serving over HTTPS needs the Docker stack (`docker compose up`, see "Development" in `README.md`), and Docker is not installed here.
+    With no `VITE_API_URL`/`VITE_AUTH_URL` set, the app falls back to `http://localhost:8081` and `http://localhost:8080` — which is exactly what these three processes serve, so nothing extra is needed here.
   - Authentication backend: run `go run .` from `backend/auth`. Its health check is `http://localhost:8081/healthz`.
   - Persistence backend: run `go run .` from `backend/persistence`. Its health check is `http://localhost:8080/healthz`.
 - Start missing services as hidden background processes with PowerShell `Start-Process`. Redirect output to the existing ignored files in `.codex`: `vite.stdout.log`, `vite.stderr.log`, `auth.stdout.log`, `auth.stderr.log`, `persistence.stdout.log`, and `persistence.stderr.log`. Do not create new untracked log files.

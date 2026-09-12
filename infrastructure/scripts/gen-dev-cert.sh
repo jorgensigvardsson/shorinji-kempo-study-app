@@ -1,50 +1,41 @@
 #!/usr/bin/env bash
 #
-# Certificates for local HTTPS development (docker-compose.https.yml).
+# Regenerates the self-signed certificate nginx serves the development stack
+# with (see infrastructure/dev-proxy/nginx.conf).
 #
-# Creates a tiny local CA once, then a leaf certificate signed by it covering
-# localhost, nuc-dev and 192.168.0.6 — so the same cert works whether you reach
-# the stack from this machine or from a phone on the LAN (see DEV_HOST in
-# docker-compose.https.yml).
+# The certificate and its key are committed to the repository on purpose:
+# they protect nothing. The stack they front is a developer's own machine, the
+# key is public to anyone who can clone this repo, and the only thing TLS buys
+# here is a secure context for the service worker, Web Push and the Secure
+# cookies the auth service sets — not confidentiality. Never serve anything
+# real with these.
 #
-# Trust the CA once and every port is trusted, with no click-through:
+# You should not normally need to run this. It exists for when the certificate
+# expires (ten years out, so roughly never), or when a new hostname has to be
+# covered — add it to $sans below and re-run.
 #
-#   Chrome/Chromium (Linux):
-#     certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n "shorinji-dev" \
-#       -i infrastructure/dev-tls/certs/dev-ca.crt
-#   Firefox: Settings → Privacy & Security → Certificates → View Certificates
-#     → Authorities → Import, tick "identify websites".
-#   macOS: double-click dev-ca.crt → Keychain → set to "Always Trust".
-#
-# Re-run this to rotate the leaf; the CA (and your trust of it) stays put.
-# Everything lands in infrastructure/dev-tls/certs/, which is gitignored.
+# The certificate is self-signed rather than issued by a local CA: the whole
+# stack is one origin now, so the browser asks about it once and remembers,
+# and there is no CA to install into a trust store on every device. Chrome
+# needs the click-through accepted once per hostname; Firefox the same.
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
-certs=dev-tls/certs
-mkdir -p "$certs"
+cd "$(dirname "$0")/../.."
 
-sans="subjectAltName=DNS:localhost,DNS:nuc-dev,IP:192.168.0.6"
+# Every name the dev stack is reached by: this machine, its LAN hostname, and
+# its LAN address — so the same certificate works from a phone on the network
+# (see DEV_HOST in docker-compose.yml).
+sans="DNS:localhost,DNS:nuc-dev,IP:127.0.0.1,IP:::1,IP:192.168.0.6"
 
-if [[ ! -f "$certs/dev-ca.key" ]]; then
-	openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
-		-keyout "$certs/dev-ca.key" -out "$certs/dev-ca.crt" \
-		-subj "/CN=Shorinji Kempo dev CA" \
-		-addext "basicConstraints=critical,CA:TRUE" \
-		-addext "keyUsage=critical,keyCertSign,cRLSign"
-	echo "Created a new local CA — import $certs/dev-ca.crt into your trust store (see this script's header)."
-fi
+openssl req -x509 -newkey rsa:2048 -sha256 -nodes -days 3650 \
+	-keyout localhost.key -out localhost.pem \
+	-subj "/CN=localhost/O=Shorinji Kempo study app (development only)" \
+	-addext "subjectAltName=$sans" \
+	-addext "basicConstraints=critical,CA:FALSE" \
+	-addext "keyUsage=critical,digitalSignature,keyEncipherment" \
+	-addext "extendedKeyUsage=serverAuth"
 
-openssl req -new -newkey rsa:2048 -nodes \
-	-keyout "$certs/dev.key" -out "$certs/dev.csr" \
-	-subj "/CN=localhost"
+chmod 644 localhost.key # not a secret; see the header
 
-openssl x509 -req -in "$certs/dev.csr" -days 825 \
-	-CA "$certs/dev-ca.crt" -CAkey "$certs/dev-ca.key" -CAcreateserial \
-	-extfile <(printf '%s\nbasicConstraints=CA:FALSE\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyEncipherment\n' "$sans") \
-	-out "$certs/dev.crt"
-
-rm -f "$certs/dev.csr"
-cat "$certs/dev-ca.crt" >>"$certs/dev.crt" # full chain, so Caddy serves leaf + CA
-
-echo "Wrote $certs/dev.crt (leaf + CA) and $certs/dev.key"
+echo "Wrote localhost.pem and localhost.key — restart the proxy to pick them up:"
+echo "  docker compose restart proxy"

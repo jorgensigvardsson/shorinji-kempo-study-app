@@ -1,14 +1,10 @@
 {
-  // Remote-SSH port forwarding for the docker compose stack. The HTTPS overlay
-  // (docker-compose.https.yml) puts Caddy on these ports serving TLS, so they
-  // must be forwarded as https — otherwise VS Code probes them as http, the
-  // probe fails against the TLS listener, and generated links use the wrong
-  // scheme. Harmless when running the plain-HTTP base stack: the label is just
-  // slightly wrong.
+  // Remote-SSH port forwarding for the docker compose stack. nginx is the only
+  // published port and it serves TLS, so it must be forwarded as https —
+  // otherwise VS Code probes it as http, the probe fails against the TLS
+  // listener, and generated links use the wrong scheme.
   "remote.autoForwardPortsSource": "hybrid",
   "remote.portsAttributes": {
-    "5173": { "label": "frontend", "protocol": "https", "onAutoForward": "silent" },
-    "8081": { "label": "auth", "protocol": "https", "onAutoForward": "silent" },
-    "8080": { "label": "persistence", "protocol": "https", "onAutoForward": "silent" }
+    "5173": { "label": "app (nginx)", "protocol": "https", "onAutoForward": "silent" }
   }
 }

@@ -30,15 +30,16 @@ function emitVersionFile(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  // docker-compose.https.yml puts a TLS-terminating Caddy proxy in front of this
-  // dev server, which still speaks plain HTTP. Two things then need help: the
-  // HMR client has to be told to use wss on the public port instead of the ws://
-  // it infers from a plain-HTTP server, and Vite's host check must accept the
-  // LAN names the self-signed cert covers. VITE_TLS_PROXY is set (to DEV_HOST)
-  // only by that overlay; without it this block is absent and nothing changes.
+  // docker-compose.yml puts a TLS-terminating nginx proxy in front of this dev
+  // server, which still speaks plain HTTP on the compose network. Two things
+  // then need help: the HMR client has to be told to use wss on the published
+  // port instead of the ws:// it infers from a plain-HTTP server, and Vite's
+  // host check must accept the name the browser used, which the proxy passes
+  // through. VITE_TLS_PROXY carries that name (DEV_HOST) and is set only by
+  // compose; running `npm run dev` directly leaves this block absent.
   server: process.env.VITE_TLS_PROXY
     ? {
-        allowedHosts: ['localhost', 'nuc-dev', '192.168.0.6'],
+        allowedHosts: [...new Set(['localhost', 'nuc-dev', '192.168.0.6', process.env.VITE_TLS_PROXY])],
         hmr: { protocol: 'wss', clientPort: 5173 },
       }
     : undefined,
