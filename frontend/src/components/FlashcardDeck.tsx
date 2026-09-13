@@ -85,7 +85,9 @@ const FlashcardDeck = ({
     const [showLearnedModal, setShowLearnedModal] = useState(false);
     const [selectedForRemoval, setSelectedForRemoval] = useState<Set<string>>(new Set());
     const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+    const dragOffsetRef = useRef({ x: 0, y: 0 });
     const hasDraggedRef = useRef(false);
+    const dragDirectionRef = useRef<"pending" | "horizontal" | "vertical">("pending");
 
     const effectiveCurrentCardId = currentCardId !== null
         && availableCards.some(card => card.id === currentCardId)
@@ -123,31 +125,41 @@ const FlashcardDeck = ({
         if (isFlying || isInteractiveTarget(event.target)) return;
         event.currentTarget.setPointerCapture?.(event.pointerId);
         dragStartRef.current = { x: event.clientX, y: event.clientY };
+        dragOffsetRef.current = { x: 0, y: 0 };
         hasDraggedRef.current = false;
+        dragDirectionRef.current = "pending";
     };
 
     const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
         if (!dragStartRef.current || isFlying) return;
         const dx = event.clientX - dragStartRef.current.x;
         const dy = event.clientY - dragStartRef.current.y;
-        if (Math.sqrt(dx * dx + dy * dy) <= 5) return;
+        if (Math.sqrt(dx * dx + dy * dy) <= 8) return;
         hasDraggedRef.current = true;
-        if (swipeOnly && Math.abs(dy) >= Math.abs(dx)) return;
+        if (swipeOnly && dragDirectionRef.current === "pending") {
+            dragDirectionRef.current = Math.abs(dx) > Math.abs(dy) ? "horizontal" : "vertical";
+        }
+        if (swipeOnly && dragDirectionRef.current === "vertical") return;
+        dragOffsetRef.current = { x: dx, y: dy };
         setIsDragging(true);
         setDragOffset({ x: dx, y: dy });
         setPendingAction(actionForSwipe(dx, dy, swipeOnly));
     };
 
-    const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const handlePointerUp = () => {
         if (!dragStartRef.current) return;
-        const dx = event.clientX - dragStartRef.current.x;
-        const dy = event.clientY - dragStartRef.current.y;
+        const { x: dx, y: dy } = dragOffsetRef.current;
         dragStartRef.current = null;
 
         if (!hasDraggedRef.current) {
             setIsDragging(false);
             setPendingAction("none");
             if (!isFlying) setShowBack(value => !value);
+            return;
+        }
+
+        if (swipeOnly && dragDirectionRef.current !== "horizontal") {
+            resetMotion();
             return;
         }
 
@@ -170,7 +182,9 @@ const FlashcardDeck = ({
 
     const handlePointerCancel = () => {
         dragStartRef.current = null;
+        dragOffsetRef.current = { x: 0, y: 0 };
         hasDraggedRef.current = false;
+        dragDirectionRef.current = "pending";
         resetMotion();
     };
 
@@ -292,37 +306,39 @@ const FlashcardDeck = ({
 
     return (
         <div className="flashcard-page">
-            <div
-                className={`flashcard-drag-wrapper ${swipeOnly ? "is-horizontal-swipe" : ""}`}
-                style={dragStyle}
-                role={swipeOnly ? "group" : undefined}
-                tabIndex={swipeOnly ? 0 : undefined}
-                aria-label={swipeOnly ? translator.translate("Svep vänster för att öva igen eller höger om du kan det.") : undefined}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerCancel}
-                onKeyDown={handleKeyDown}
-            >
-                <div className={`flashcard-scene ${showBack ? "is-flipped" : ""}`}>
-                    <div className="flashcard-inner">
-                        <FlashcardFace
-                            side="front"
-                            sideLabel={hideFaceLabels ? undefined : translator.translate("Framsida")}
-                            indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
-                            hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända")}
-                        >
-                            {currentCard.front}
-                        </FlashcardFace>
-                        <FlashcardFace
-                            side="back"
-                            sideLabel={hideFaceLabels ? undefined : translator.translate("Baksida")}
-                            indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
-                            hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända tillbaka")}
-                            interactive={currentCard.interactiveBack}
-                        >
-                            {currentCard.back}
-                        </FlashcardFace>
+            <div className="flashcard-swipe-stage">
+                <div
+                    className={`flashcard-drag-wrapper ${swipeOnly ? "is-horizontal-swipe" : ""}`}
+                    style={dragStyle}
+                    role={swipeOnly ? "group" : undefined}
+                    tabIndex={swipeOnly ? 0 : undefined}
+                    aria-label={swipeOnly ? translator.translate("Svep vänster för att öva igen eller höger om du kan det.") : undefined}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerCancel}
+                    onKeyDown={handleKeyDown}
+                >
+                    <div key={currentCard.id} className={`flashcard-scene ${showBack ? "is-flipped" : ""}`}>
+                        <div className="flashcard-inner">
+                            <FlashcardFace
+                                side="front"
+                                sideLabel={hideFaceLabels ? undefined : translator.translate("Framsida")}
+                                indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
+                                hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända")}
+                            >
+                                {currentCard.front}
+                            </FlashcardFace>
+                            <FlashcardFace
+                                side="back"
+                                sideLabel={hideFaceLabels ? undefined : translator.translate("Baksida")}
+                                indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
+                                hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända tillbaka")}
+                                interactive={currentCard.interactiveBack}
+                            >
+                                {currentCard.back}
+                            </FlashcardFace>
+                        </div>
                     </div>
                 </div>
                 {isDragging && pendingAction !== "none" && (

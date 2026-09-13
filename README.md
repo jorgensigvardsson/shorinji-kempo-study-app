@@ -37,6 +37,17 @@ Everything runs in Docker, with the working tree mounted into each container so 
 usual watchers still see your edits — Vite hot-reloads the app, air rebuilds and
 restarts each Go service:
 
+On Linux, add your user and group ids to the ignored `.env` file once. This keeps
+files created by the development containers editable by your normal user:
+
+```bash
+LOCAL_UID=1000
+LOCAL_GID=1000
+```
+
+Replace both values with the output of `id -u` and `id -g`. The defaults above suit
+most Linux installations; Docker Desktop can use them unchanged.
+
 ```bash
 docker compose up
 ```

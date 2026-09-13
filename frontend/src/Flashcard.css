@@ -101,8 +101,11 @@
   padding-inline: 0;
 }
 
-.flashcard-drag-wrapper {
+.flashcard-swipe-stage {
   position: relative;
+}
+
+.flashcard-drag-wrapper {
   touch-action: none;
   user-select: none;
   cursor: grab;

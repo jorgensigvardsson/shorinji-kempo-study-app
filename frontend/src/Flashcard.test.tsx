@@ -44,3 +44,43 @@ it("keeps word cards flippable and stores their historical numeric id", async ()
         expect(getAppDataStore().get("knownFlashCards")[wordId].known).toBe(true);
     });
 });
+
+it("ignores vertical and interrupted gestures instead of changing cards", async () => {
+    const { container } = render(<Flashcard />);
+    const initialIndex = container.querySelector(".flashcard-index")?.textContent;
+    const deck = screen.getByRole("group", {
+        name: "Svep vänster för att öva igen eller höger om du kan det.",
+    });
+
+    fireEvent.pointerDown(deck, { pointerId: 2, clientX: 100, clientY: 100 });
+    fireEvent.pointerMove(deck, { pointerId: 2, clientX: 102, clientY: 120 });
+    fireEvent.pointerUp(deck, { pointerId: 2, clientX: 0, clientY: 120 });
+
+    await new Promise(resolve => window.setTimeout(resolve, 450));
+    expect(container.querySelector(".flashcard-index")?.textContent).toBe(initialIndex);
+    expect(getAppDataStore().get("knownFlashCards")).toEqual({});
+});
+
+it("keeps swipe feedback stationary and mounts the next card on its front", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Flashcard />);
+    const deck = screen.getByRole("group", {
+        name: "Svep vänster för att öva igen eller höger om du kan det.",
+    });
+
+    await user.click(screen.getByRole("heading", { level: 1 }));
+    const flippedScene = container.querySelector(".flashcard-scene");
+    expect(flippedScene?.classList.contains("is-flipped")).toBe(true);
+
+    fireEvent.pointerDown(deck, { pointerId: 3, clientX: 140, clientY: 100 });
+    fireEvent.pointerMove(deck, { pointerId: 3, clientX: 20, clientY: 102 });
+    expect(container.querySelector(".flashcard-swipe-indicator")?.parentElement)
+        .toBe(container.querySelector(".flashcard-swipe-stage"));
+    fireEvent.pointerUp(deck, { pointerId: 3, clientX: 20, clientY: 102 });
+
+    await waitFor(() => {
+        const nextScene = container.querySelector(".flashcard-scene");
+        expect(nextScene).not.toBe(flippedScene);
+        expect(nextScene?.classList.contains("is-flipped")).toBe(false);
+    });
+});
