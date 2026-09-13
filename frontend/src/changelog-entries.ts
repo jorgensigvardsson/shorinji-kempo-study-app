@@ -5,14 +5,21 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-09-11T12:56:00.000Z",
+    timestamp: "2026-09-13T13:42:00.000Z",
     changes: [
       {
         emoji: "🥋",
-        sv: "Flashkorten har fått ett nytt Hokei-läge. Välj vilka grader du vill öva, vänd kortet för en luftig Dojo-vy med uppställning, utförande och egna anteckningar, och svep vänster för att öva igen eller höger när tekniken sitter.",
-        en: "Flashcards now have a new Hokei mode. Choose which grades to practise, turn the card for an airy Dojo view with stances, execution and your own notes, then swipe left to practise again or right when you know the technique.",
-        tr: "Bilgi kartlarına yeni bir Hokei modu eklendi. Çalışmak istediğiniz dereceleri seçin, duruşları, uygulamayı ve kendi notlarınızı gösteren ferah Dojo görünümü için kartı çevirin; tekrar çalışmak için sola, tekniği biliyorsanız sağa kaydırın.",
-        ja: "フラッシュカードに法形モードが加わりました。練習する級・段を選び、カードを裏返すと、構え・動作・自分のメモを見やすい道場表示で確認できます。もう一度練習する場合は左へ、できる場合は右へスワイプします。",
+        sv: "Flashkorten har fått en ny Hokei-variant. Välj vilka grader du vill öva och vänd kortet för att se uppställning, utförande och egna anteckningar.",
+        en: "Flashcards now have a new Hokei variant. Choose which grades to practise and turn the card to see stances, execution and your own notes.",
+        tr: "Bilgi kartlarına yeni bir Hokei türü eklendi. Çalışmak istediğiniz dereceleri seçin; duruşları, uygulamayı ve kendi notlarınızı görmek için kartı çevirin.",
+        ja: "フラッシュカードに新しい法形タイプが加わりました。練習する級・段を選び、カードを裏返すと構え・動作・自分のメモを確認できます。",
+      },
+      {
+        emoji: "✨",
+        sv: "Flashkorten har fått en lugnare och tydligare design. Onödiga etiketter och färgade knappar är borta, texten är lättare att läsa och du sveper vänster för att öva igen eller höger när du kan kortet.",
+        en: "Flashcards now have a calmer, clearer design. Unnecessary labels and coloured buttons are gone, the text is easier to read, and you swipe left to practise again or right when you know the card.",
+        tr: "Bilgi kartları artık daha sade ve anlaşılır bir tasarıma sahip. Gereksiz etiketler ve renkli düğmeler kaldırıldı, metin daha kolay okunuyor; tekrar çalışmak için sola, kartı biliyorsanız sağa kaydırabilirsiniz.",
+        ja: "フラッシュカードを、より落ち着いて分かりやすいデザインに整えました。不要な表示や色付きボタンを減らして文字を読みやすくし、もう一度練習する場合は左へ、できる場合は右へスワイプできます。",
       },
     ],
   },

@@ -277,10 +277,11 @@
 .flashcard-hokei-name {
   margin: 0;
   color: var(--bs-emphasis-color);
-  font-size: clamp(2.2rem, 7vw, 4.5rem);
+  font-size: clamp(3rem, 10vw, 6rem);
+  line-height: 1.05;
 }
 
-.flashcard-hokei-japanese,
+.flashcard-hokei-romaji,
 .flashcard-hokei-variations {
   margin: 0;
   color: var(--bs-secondary-color);
@@ -300,12 +301,13 @@
 }
 
 .flashcard-hokei-back .dojo-foot-images {
-  justify-content: center;
+  justify-content: flex-start;
+  padding-inline-start: calc(2rem + clamp(0.5rem, 2vw, 1rem));
 }
 
 .flashcard-hokei-back .dojo-foot-images .stance-icon {
-  width: clamp(4.75rem, 18vw, 7rem);
-  height: clamp(4.75rem, 18vw, 7rem);
+  width: clamp(4rem, 14vw, 5.5rem);
+  height: auto;
 }
 
 .flashcard-hokei-back .dojo-roles {
@@ -315,8 +317,8 @@
 .flashcard-hokei-back .dojo-role {
   grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.4fr);
   gap: clamp(0.5rem, 2vw, 1rem);
-  font-size: clamp(1.05rem, 3vw, 1.35rem);
-  line-height: 1.45;
+  font-size: clamp(1.25rem, 3.5vw, 1.65rem);
+  line-height: 1.5;
 }
 
 .flashcard-hint {

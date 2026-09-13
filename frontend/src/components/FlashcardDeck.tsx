@@ -18,6 +18,9 @@ export interface FlashcardDeckEntry {
 interface Props {
     cards: FlashcardDeckEntry[];
     swipeOnly?: boolean;
+    hideFaceLabels?: boolean;
+    hideFlipHints?: boolean;
+    hideIndexLabel?: boolean;
 }
 
 const SWIPE_THRESHOLD = 80;
@@ -44,7 +47,13 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
     target instanceof Element
     && target.closest("button, input, textarea, select, a, label, [contenteditable='true']") !== null;
 
-const FlashcardDeck = ({ cards, swipeOnly = false }: Props) => {
+const FlashcardDeck = ({
+    cards,
+    swipeOnly = false,
+    hideFaceLabels = false,
+    hideFlipHints = false,
+    hideIndexLabel = false,
+}: Props) => {
     const translator = useContext(TranslatorContext);
     const store = getAppDataStore();
     const [knownFlashCards, setKnownFlashCards] = useState<Record<string, FlashCardKnownEntry>>(
@@ -299,17 +308,17 @@ const FlashcardDeck = ({ cards, swipeOnly = false }: Props) => {
                     <div className="flashcard-inner">
                         <FlashcardFace
                             side="front"
-                            sideLabel={translator.translate("Framsida")}
-                            indexLabel={currentCard.indexLabel}
-                            hint={translator.translate("Tryck för att vända")}
+                            sideLabel={hideFaceLabels ? undefined : translator.translate("Framsida")}
+                            indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
+                            hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända")}
                         >
                             {currentCard.front}
                         </FlashcardFace>
                         <FlashcardFace
                             side="back"
-                            sideLabel={translator.translate("Baksida")}
-                            indexLabel={currentCard.indexLabel}
-                            hint={translator.translate("Tryck för att vända tillbaka")}
+                            sideLabel={hideFaceLabels ? undefined : translator.translate("Baksida")}
+                            indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
+                            hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända tillbaka")}
                             interactive={currentCard.interactiveBack}
                         >
                             {currentCard.back}
@@ -355,23 +364,25 @@ const FlashcardFace = ({
     children,
 }: {
     side: "front" | "back";
-    sideLabel: string;
+    sideLabel?: string;
     indexLabel?: ReactNode;
-    hint: string;
+    hint?: string;
     interactive?: boolean;
     children: ReactNode;
 }) => (
     <div className={`flashcard-face flashcard-${side}`}>
         <Card className="flashcard-card shadow-sm">
             <Card.Body className="flashcard-body">
-                <div className="flashcard-meta">
-                    <span className="flashcard-index">{indexLabel}</span>
-                    <span className="flashcard-side-label">{sideLabel}</span>
-                </div>
+                {(indexLabel || sideLabel) && (
+                    <div className="flashcard-meta">
+                        {indexLabel && <span className="flashcard-index">{indexLabel}</span>}
+                        {sideLabel && <span className="flashcard-side-label">{sideLabel}</span>}
+                    </div>
+                )}
                 <div className={`flashcard-main ${interactive ? "flashcard-main-interactive" : ""}`}>
                     {children}
                 </div>
-                <p className="flashcard-hint">{hint}</p>
+                {hint && <p className="flashcard-hint">{hint}</p>}
             </Card.Body>
         </Card>
     </div>

@@ -37,19 +37,20 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
         [gradeGroups, selectedGrades],
     );
     const cards = useMemo<FlashcardDeckEntry[]>(() => selectedHokeis.map(hokei => {
-        const name = translator.isJapanese
-            ? translator.japanese(hokei.hokei_name)
+        const romajiName = hokei.hokei_name;
+        const kanjiName = translator.japanese(hokei.hokei_name);
+        const learnedName = translator.isJapanese
+            ? kanjiName
             : translator.translate(hokei.hokei_name, { capitalize: true });
-        const japaneseName = !translator.isJapanese ? translator.japanese(hokei.hokei_name) : null;
         return {
             // Namespacing separates hokei progress from the historical numeric word ids.
             id: `hokei:${hokei.id}`,
             indexLabel: translator.translate("Hokei"),
             front: (
                 <div className="flashcard-hokei-front">
-                    <h1 className="flashcard-hokei-name">{name}</h1>
-                    {japaneseName && japaneseName !== hokei.hokei_name && (
-                        <p className="flashcard-hokei-japanese">{japaneseName}</p>
+                    <h1 className="flashcard-hokei-name">{kanjiName}</h1>
+                    {kanjiName !== romajiName && (
+                        <p className="flashcard-hokei-romaji">{romajiName}</p>
                     )}
                     {hokei.variations.length > 0 && (
                         <p className="flashcard-hokei-variations">
@@ -66,7 +67,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
             ),
             learnedLabel: (
                 <>
-                    <span className="fw-semibold">{name}</span>
+                    <span className="fw-semibold">{learnedName}</span>
                     {hokei.variations.length > 0 && (
                         <span className="text-muted ms-2 small">
                             {hokei.variations.map(variation => translator.translate(variation)).join(", ")}
@@ -97,7 +98,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
                         {translator.translate("Ändra grader")}
                     </Button>
                 </div>
-                <FlashcardDeck cards={cards} swipeOnly />
+                <FlashcardDeck cards={cards} swipeOnly hideFaceLabels hideFlipHints hideIndexLabel />
             </div>
         );
     }

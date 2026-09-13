@@ -54,7 +54,7 @@ const Flashcard = () => {
         };
     }), [translator]);
 
-    return <FlashcardDeck cards={cards} />;
+    return <FlashcardDeck cards={cards} swipeOnly hideFaceLabels hideFlipHints />;
 };
 
 export default Flashcard;

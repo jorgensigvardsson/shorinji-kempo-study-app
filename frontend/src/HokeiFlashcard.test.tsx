@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it } from "vitest";
 import type { GradePlan, HokeiMoment } from "./data";
 import HokeiFlashcard from "./HokeiFlashcard";
+import { TranslatorContext, TranslatorImplementation } from "./i18n";
 import { getAppDataStore } from "./persistence/store";
 
 const hokei: HokeiMoment = {
@@ -45,15 +46,27 @@ beforeEach(() => {
 
 it("shows a hokei name on the front and details with editable notes on the back", async () => {
     const user = userEvent.setup();
-    const { container } = render(<HokeiFlashcard allGradePlans={[plan]} myGrade="6 kyū" />);
+    const translator = new TranslatorImplementation({ ja: { "gyaku gote": "逆小手" } }, "sv");
+    const { container } = render(
+        <TranslatorContext.Provider value={translator}>
+            <HokeiFlashcard allGradePlans={[plan]} myGrade="6 kyū" />
+        </TranslatorContext.Provider>,
+    );
 
-    expect(screen.queryByRole("heading", { name: /Gyaku gote/i })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "逆小手" })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Nu kör vi" }));
-    expect(screen.getByRole("heading", { name: /Gyaku gote/i })).toBeDefined();
-    await user.click(screen.getByText("Tryck för att vända"));
+    expect(screen.getByRole("heading", { name: "逆小手" })).toBeDefined();
+    expect(container.querySelector(".flashcard-hokei-romaji")?.textContent).toBe("gyaku gote");
+    expect(screen.queryByText("Hokei")).toBeNull();
+    expect(screen.queryByText("Framsida")).toBeNull();
+    expect(screen.queryByText("Tryck för att vända")).toBeNull();
+    await user.click(screen.getByRole("heading", { name: "逆小手" }));
     expect(container.querySelector(".flashcard-scene")?.classList.contains("is-flipped")).toBe(true);
     expect(screen.queryByText("Uppställning")).toBeNull();
     expect(screen.queryByText("Utförande")).toBeNull();
+    expect(screen.queryByText("Baksida")).toBeNull();
+    expect(screen.queryByText("Tryck för att vända tillbaka")).toBeNull();
+    expect(container.querySelector<HTMLImageElement>(".dojo-foot-images .stance-icon")?.getAttribute("src")).toContain("tai_gamae");
     expect(screen.getByText("migi mae chūdan gamae")).toBeDefined();
     expect(screen.getByText("migi te kubi o nigiru")).toBeDefined();
 
