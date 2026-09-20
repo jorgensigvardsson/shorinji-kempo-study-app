@@ -1,12 +1,13 @@
 import { Badge, Button } from "react-bootstrap";
 import { XLg } from "react-bootstrap-icons";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import Grid, { type GridItem } from "./components/Grid";
 import "./Groups.css";
 import { compareGradeThenWeek } from "./utilities/level";
+import { useBrowserState } from "./browser-state";
 
 export interface Props {
     allGradePlans: GradePlan[];
@@ -29,7 +30,7 @@ interface HokeiGroup {
 const Groups = (props: Props) => {
     const { allGradePlans } = props;
     const translator = useContext(TranslatorContext);
-    const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
+    const [selectedGroupKey, setSelectedGroupKey] = useBrowserState<string | null>("technique-group", null, (value): value is string | null => value === null || typeof value === "string");
 
     const groups = useMemo(() => {
         const allHokeis = allGradePlans.flatMap(grade => grade.weeks.filter(w => w.type === "regular_week").map(w => ({ grade: grade.grade, week: w.week, moments: getHokeiMoments(w) })))

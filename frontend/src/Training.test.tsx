@@ -79,7 +79,7 @@ describe("Training", () => {
     const user = userEvent.setup();
     renderTraining("/kamoku", true);
 
-    await user.click(screen.getByRole("button", { name: "Träning eller teori" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
     expect(screen.getByTestId("location").textContent).toBe("/");
   });
 
@@ -91,7 +91,7 @@ describe("Training", () => {
     expect(screen.getByTestId("weekly-plan")).toBeTruthy();
     expect(screen.getByTestId("location").textContent).toBe("/kamoku/plan?source=start");
 
-    await user.click(screen.getByRole("button", { name: "Träningsval" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
     expect(screen.getByRole("button", { name: /Veckans träning/i })).toBeTruthy();
     expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start");
   });
@@ -106,7 +106,7 @@ describe("Training", () => {
 
     await user.click(screen.getByRole("button", { name: /Randori/i }));
     expect(screen.getByTestId("location").textContent).toBe("/kamoku/free/randori?source=start");
-    expect(screen.getByRole("button", { name: "Alla träningsområden" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tillbaka" })).toBeTruthy();
   });
 
   it("adds each training level to browser history", async () => {
@@ -135,7 +135,7 @@ describe("Training", () => {
     await user.click(screen.getByRole("button", { name: /Veckans träning/i }));
     expect(screen.getByTestId("weekly-plan").getAttribute("data-dojo-mode")).toBe("true");
 
-    await user.click(screen.getByRole("button", { name: "Träningsval" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
     await user.click(screen.getByRole("button", { name: /Fri träning/i }));
     await user.click(screen.getByRole("button", { name: /^Hokei/i }));
     expect(screen.getByTestId("all-hokei").getAttribute("data-dojo-mode")).toBe("true");
@@ -158,11 +158,12 @@ describe("TrainingToolPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByRole("button", { name: "Gradering" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Tillbaka" })).toHaveLength(1);
 
-    await user.click(screen.getByRole("button", { name: "Gradering" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
 
     expect(screen.getByTestId("location").textContent).toBe("/training/grading");
-    expect(screen.getAllByRole("button", { name: "Träning" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Tillbaka" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Träning" }).getAttribute("href")).toBe("/kamoku");
   });
 });

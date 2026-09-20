@@ -1,9 +1,10 @@
 import { useContext } from "react";
-import { ArrowLeft, Award, CardHeading, Collection, JournalText, QuestionSquare } from "react-bootstrap-icons";
+import { Award, CardHeading, Collection, JournalText, QuestionSquare } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 import "./Theory.css";
+import BackButton from "./components/BackButton";
 
 interface TheoryProps {
     showLanguageTools: boolean;
@@ -57,10 +58,7 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
 
     return (
         <div className="theory-page">
-            <button type="button" className="theory-back" onClick={() => navigate(-1)}>
-                <ArrowLeft aria-hidden="true" />
-                <span>{translator.translate("Träning eller teori")}</span>
-            </button>
+            <BackButton fallback="/" />
             <header className="theory-page-header">
                 <h1 className="app-page-heading">{translator.translate("Teori")}</h1>
                 <p className="app-intro-copy">{translator.translate("Vad vill du studera idag?")}</p>

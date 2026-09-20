@@ -9,6 +9,7 @@ import { parseTrainingPath, trainingPath, type TrainingView } from "./training-r
 import type { GradePlan, GradeName } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import "./Training.css";
+import { useAppBack } from "./use-app-back";
 
 interface Props {
     myGrade: GradeName;
@@ -22,6 +23,7 @@ const Training = (props: Props) => {
     const location = useLocation();
     const dojoMode = props.dojoMode ?? false;
     const { view, area: activePracticeArea } = parseTrainingPath(location.pathname);
+    const goBack = useAppBack(view === "landing" ? "/" : activePracticeArea ? "/kamoku/free" : "/kamoku");
     // A view stays mounted once seen, so its scroll position, filters, and open
     // cards survive switching away and back. Recording it from the URL rather
     // than from the click that got here also covers arriving by deep link or by
@@ -67,9 +69,9 @@ const Training = (props: Props) => {
     return (
         <div className="training-page">
             <section hidden={view !== "landing"}>
-                <button type="button" className="training-back" onClick={() => navigate(-1)}>
+                <button type="button" className="training-back" onClick={goBack}>
                     <ArrowLeft aria-hidden="true" />
-                    <span>{translator.translate("Träning eller teori")}</span>
+                    <span>{translator.translate("Tillbaka")}</span>
                 </button>
                 <header className="training-page-header training-landing-header">
                     <h1 className="app-page-heading">{translator.translate("Träning")}</h1>
@@ -79,9 +81,9 @@ const Training = (props: Props) => {
             </section>
 
             {view !== "landing" && (view === "plan" || activePracticeArea === null) && (
-                <button type="button" className="training-back" onClick={() => navigate(-1)}>
+                <button type="button" className="training-back" onClick={goBack}>
                     <ArrowLeft aria-hidden="true" />
-                    <span>{translator.translate("Träningsval")}</span>
+                    <span>{translator.translate("Tillbaka")}</span>
                 </button>
             )}
 
@@ -97,7 +99,7 @@ const Training = (props: Props) => {
                             {...props}
                             activeArea={activePracticeArea}
                             onAreaChange={selectPracticeArea}
-                            onBack={() => navigate(-1)}
+                            onBack={goBack}
                             dojoMode={dojoMode}
                         />
                     </div>

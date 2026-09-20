@@ -50,7 +50,7 @@ describe("Theory", () => {
       </MemoryRouter>,
     );
 
-    await user.click(screen.getByRole("button", { name: "Teori" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
     expect(screen.getByTestId("location").textContent).toBe("/theory");
   });
 
@@ -63,7 +63,7 @@ describe("Theory", () => {
       </MemoryRouter>,
     );
 
-    await user.click(screen.getByRole("button", { name: "Träning eller teori" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
     expect(screen.getByTestId("location").textContent).toBe("/");
   });
 

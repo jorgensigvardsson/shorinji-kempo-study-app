@@ -1,7 +1,7 @@
 import { useContext, type ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "react-bootstrap-icons";
+import { Link, useLocation } from "react-router-dom";
 import { TranslatorContext } from "../i18n";
+import BackButton from "./BackButton";
 import "./ToolPage.css";
 
 // The frame the tools under Teori and Träning sit in: the page itself plus a back
@@ -12,16 +12,15 @@ import "./ToolPage.css";
 
 // The two areas name their wrapper and back button differently, and the names are
 // load-bearing for the stylesheets, so they are spelled out rather than derived.
-const ToolPage = ({ className, backClassName, label, children }:
-    { className: string; backClassName: string; label: string; children: ReactNode }) => {
-    const navigate = useNavigate();
+const ToolPage = ({ className, backClassName, label, parent, children }:
+    { className: string; backClassName: string; label: string; parent: string; children: ReactNode }) => {
 
     return (
         <div className={className}>
-            <button type="button" className={backClassName} onClick={() => navigate(-1)}>
-                <ArrowLeft aria-hidden="true" />
-                <span>{label}</span>
-            </button>
+            <div className="navigation-section-heading">
+                <BackButton className={backClassName} fallback={parent} />
+                <Link to={parent} className="navigation-caption">{label}</Link>
+            </div>
             {children}
         </div>
     );
@@ -30,7 +29,7 @@ const ToolPage = ({ className, backClassName, label, children }:
 export const TheoryToolPage = ({ children }: { children: ReactNode }) => {
     const translator = useContext(TranslatorContext);
     return (
-        <ToolPage className="theory-tool-page" backClassName="theory-back" label={translator.translate("Teori")}>
+        <ToolPage className="theory-tool-page" backClassName="theory-back" label={translator.translate("Teori")} parent="/theory">
             {children}
         </ToolPage>
     );
@@ -46,7 +45,7 @@ export const TrainingToolPage = ({ children }: { children: ReactNode }) => {
 
     return (
         <ToolPage className="training-page" backClassName="training-back"
-                  label={translator.translate(isGradingCategory ? "Gradering" : "Träning")}>
+                  label={translator.translate(isGradingCategory ? "Gradering" : "Träning")} parent={isGradingCategory ? "/training/grading" : "/kamoku"}>
             {children}
         </ToolPage>
     );

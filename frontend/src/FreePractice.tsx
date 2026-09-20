@@ -129,7 +129,7 @@ const FreePractice = (props: Props) => {
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate(activeArea === "embu" && activeEmbuView !== null
                         ? "Embu och kumi-embu"
-                        : "Alla träningsområden")}</span>
+                        : "Tillbaka")}</span>
                 </button>
                 {activeDefinition && (
                     <header className="free-practice-area-header">

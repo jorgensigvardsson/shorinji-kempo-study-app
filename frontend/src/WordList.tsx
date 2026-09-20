@@ -6,13 +6,14 @@ import { normalizeString } from "./strings";
 import { TranslatorContext, type Translator } from "./i18n";
 import "./WordList.css";
 import { getMissingWordLookups, missingWordLookupsChanged } from "./missing-word-lookups";
+import { isText, useBrowserState } from "./browser-state";
 
 type SortKey = "kanji" | "romaji" | "meaning";
 
 const WordList = () => {
     const translator = useContext(TranslatorContext);
-    const [filterText, setFilterText] = useState("");
-    const [sortKey, setSortKey] = useState<SortKey>("romaji");
+    const [filterText, setFilterText] = useBrowserState("word-query", "", isText);
+    const [sortKey, setSortKey] = useBrowserState<SortKey>("word-sort", "romaji", (value): value is SortKey => value === "romaji" || value === "kanji" || value === "meaning");
     const [missingLookups, setMissingLookups] = useState(() => getMissingWordLookups());
     const filteredEntries = useMemo(() =>
         wordList
@@ -39,7 +40,7 @@ const WordList = () => {
     return (
         <div>
             <div className="mb-3">
-                <Form.Control placeholder={translator.translate("Filtrera...")}
+                <Form.Control type="search" aria-label={translator.translate("Sök i ordlistan")} placeholder={translator.translate("Filtrera...")}
                             value={filterText} onChange={e => setFilterText(e.target.value)}
                             name="filter"/>
 

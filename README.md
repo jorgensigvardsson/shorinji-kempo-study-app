@@ -4,6 +4,9 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 
 ## Features
 
+- **Navigation shortcuts** — mobile tabs keep Start, Training, Theory and Search visible. The start page offers a recent-activity resume button and shortcuts that can be starred in Search, without changing the content tree
+- **Search across the app** — find tools, techniques (including their variations), and translated dictionary meanings. Technique results open the existing card with the same personal notes and self-assessment
+- **Remembered place** — weekly-plan week, dictionary and technique-list filters, and selected technique group survive leaving and returning. Shortcuts and recent activities are saved per account in this browser; view filters and scroll positions last for the tab session, while the selected week survives closing the browser. These navigation preferences are not synced
 - **Training** — choose between a grade-based weekly plan and free practice, with app-style back navigation that preserves your place
 - **Contextual training tools** — a discreet global grade selector and a Training mode that combines the focused Dojo presentation with keeping the screen awake
 - **Weekly progress** — mark a training week as completed and retain its completion date across synced devices

@@ -4,7 +4,7 @@ import { findGradePlan, type GradePlan, type GradeName } from './data'
 import { TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, preloadPages, routeText, type Route } from './routes';
-import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
 import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
 import { useIdleTask, useLoadingPhase, useNavigationPending, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
@@ -24,6 +24,9 @@ import { getTrainingControlContext } from './training-controls-context';
 import { beginNavigation } from './navigation-pending';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
 import { setAppData, useAppData } from './persistence/use-app-data';
+import { NavigationMemoryProvider } from './navigation-memory';
+import { mainSection } from './navigation';
+import RouteScrollManager from './components/RouteScrollManager';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -224,11 +227,13 @@ function App(props: Props) {
 
   return (
     <TranslatorContext.Provider value={translator}>
+      <NavigationMemoryProvider account={getSyncManager().getBackendUserInfo()?.id || 'preview'} grade={displayGrade} allGradePlans={gradePlans} onGradeChange={setGradeOverride}>
+      <RouteScrollManager />
       {/* --app-zoom-inverse is published for the few places that have to undo the zoom
           rather than live inside it: anything sizing itself from a viewport length, or
           from a measurement taken in screen pixels, would otherwise come out this much
           too large. See components/HokeiCard.css. */}
-      <div style={{ zoom: textZoom, '--app-zoom-inverse': 1 / textZoom } as CSSProperties}>
+      <div className="app-shell" style={{ zoom: textZoom, '--app-zoom-inverse': 1 / textZoom } as CSSProperties}>
         {/* Only appears once a wait has gone on long enough to be worth mentioning:
             a navigation that would otherwise look like an ignored tap, or a sync
             slow enough to be one of the services starting up. */}
@@ -268,6 +273,7 @@ function App(props: Props) {
         />
         <SelectionWordLookup />
       </div>
+      </NavigationMemoryProvider>
     </TranslatorContext.Provider>
   )
 }
@@ -289,13 +295,13 @@ const AppNavbar = (props: NavbarProps) => {
   const isDropdownActive = dropdownRoutes.some(route => route.path && location.pathname === route.path);
 
   return (
-    <Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
+    <><Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand" onClick={() => beginNavigation("/")}>
           <img src="/shorinjikempo.svg" className="logo" />
           <span className="app-navbar-title">{translator.translate("Shorinji Kempo")}</span>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow(true)} />
+        <Navbar.Toggle aria-controls="basic-navbar-nav" aria-label={translator.translate("Mer")} onClick={() => setShow(true)} />
         <Navbar.Offcanvas id="basic-navbar-nav" placement="end" style={{ zoom: textZoom }}
           show={show} onHide={() => setShow(false)}>
           <Offcanvas.Header closeButton>
@@ -325,7 +331,9 @@ const AppNavbar = (props: NavbarProps) => {
                   {routeText(route)}
                 </Nav.Link>
               ) : (
-                <Nav.Link className="menu-item menu-no-wrap" as={NavLink} key={index} to={route.path!} onClick={() => beginNavigation(route.path!)}>
+                <Nav.Link className="menu-item menu-no-wrap" as={Link} active={mainSection(location.pathname) === route.path}
+                  aria-current={mainSection(location.pathname) === route.path ? 'page' : undefined}
+                  key={index} to={route.path!} onClick={() => beginNavigation(route.path!)}>
                   {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
                   {routeText(route)}
                 </Nav.Link>
@@ -355,6 +363,14 @@ const AppNavbar = (props: NavbarProps) => {
         </Navbar.Offcanvas>
       </Container>
     </Navbar>
+    <nav className="app-bottom-nav d-print-none" aria-label={translator.translate("Huvudnavigation")}>
+      {mainMenuRoutes.filter(route => route.path).map(route => <Link key={route.path} to={route.path!}
+        aria-current={mainSection(location.pathname) === route.path ? "page" : undefined}
+        onClick={() => { beginNavigation(route.path!); setShow(false); }}>
+        <route.icon size={21} aria-hidden="true" />
+        <span>{routeText(route)}</span>
+      </Link>)}
+    </nav></>
   );
 }
 

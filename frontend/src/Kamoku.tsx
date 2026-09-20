@@ -14,6 +14,7 @@ import type { WeeklyPlanCompletionEntry } from "./persistence/schema";
 import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
 import "./Kamoku.css";
+import { isIndex, useBrowserState } from "./browser-state";
 
 export interface Props {
     myGrade: GradeName;
@@ -26,20 +27,10 @@ const Kamoku = (props: Props) => {
     const store = getAppDataStore();
     const grade = allGradePlans.find(l => l.grade === myGrade) ?? allGradePlans[0];
     const [weeklyPlanCompletions, setWeeklyPlanCompletions] = useState(() => store.get("weeklyPlanCompletions"));
-    const [selectedWeek, setSelectedWeek] = useState(0);
-    const [selectedGrade, setSelectedGrade] = useState(grade.grade);
+    const [selectedWeek, setSelectedWeek] = useBrowserState(`week:${grade.grade}`, 0, isIndex, true);
     const translator = useContext(TranslatorContext);
 
     useEffect(() => store.subscribe("weeklyPlanCompletions", setWeeklyPlanCompletions), [store]);
-
-    // A grade change starts at its first week. Resetting during render avoids one
-    // frame where the newly selected grade is shown at the previous grade's week.
-    // Moving between weeks remains a direct choice made with the navigation buttons;
-    // there is no hidden calendar trying to decide which week a dojo ought to be on.
-    if (selectedGrade !== grade.grade) {
-        setSelectedGrade(grade.grade);
-        setSelectedWeek(0);
-    }
 
     const visibleWeekIndex = Math.min(selectedWeek, grade.weeks.length - 1);
     const selectedWeekData = grade.weeks[visibleWeekIndex];

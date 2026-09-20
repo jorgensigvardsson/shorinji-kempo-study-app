@@ -15,7 +15,6 @@ import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts'
 import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey, FontFamilyKanjiStorageKey } from './persistence/font-family.ts';
 import { type GradePlan } from './data.ts'
 import { getSyncManager } from './sync/manager.ts';
-import RouteScrollManager from './components/RouteScrollManager.tsx';
 
 // Older development sessions registered the PWA worker on localhost. Vite no longer
 // does that, but an already-installed worker otherwise keeps controlling later
@@ -42,7 +41,6 @@ function mountRoot() {
     <StrictMode>
       <ErrorBoundary>
         <BrowserRouter>
-          <RouteScrollManager />
           <App gradePlans={gradePlans as GradePlan[]} textSizeData={textSizeData}
                bodyFontFamilyData={bodyFontFamilyData} headingFontFamilyData={headingFontFamilyData}
                kanjiFontFamilyData={kanjiFontFamilyData}/>
@@ -63,4 +61,3 @@ function mountRoot() {
 // waits for a network fetch when this device belongs to a Turkish reader — who would
 // otherwise watch the interface arrive in Swedish and then change under them.
 void ensureTranslations(getAppDataStore().get("language")).then(mountRoot);
-

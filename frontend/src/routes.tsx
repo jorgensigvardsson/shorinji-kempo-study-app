@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
-import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, ShieldCheck } from "react-bootstrap-icons";
+import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
 import type { GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
@@ -57,6 +57,8 @@ const PrivacyPolicy = page(() => import("./PrivacyPolicy.tsx"));
 const Changelog = page(() => import("./Changelog.tsx"));
 const Theory = page(() => import("./Theory.tsx"));
 const Feedback = page(() => import("./Feedback.tsx"));
+const ActivitySearch = page(() => import("./ActivitySearch.tsx"));
+const Technique = page(() => import("./Technique.tsx"));
 
 export interface Route {
     path?: string;
@@ -104,6 +106,20 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         startDescription: translator.translate("Studera ord och begrepp i lugn takt."),
         icon: JournalText,
         showInMainMenu: true,
+    }, {
+        path: "/search",
+        element: <ActivitySearch allGradePlans={allGradePlans} />,
+        menuText: translator.translate("Sök"),
+        icon: Search,
+        showInMainMenu: true,
+        hideOnStartPage: true,
+    }, {
+        path: "/technique/:id",
+        element: <Technique allGradePlans={allGradePlans} />,
+        menuText: translator.translate("Tekniker"),
+        icon: Collection,
+        hideOnStartPage: true,
+        hideFromMenu: true,
     }, {
         path: "/theory/groups",
         element: <TheoryToolPage><Groups allGradePlans={allGradePlans}/></TheoryToolPage>,

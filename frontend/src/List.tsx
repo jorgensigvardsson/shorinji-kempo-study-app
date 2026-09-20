@@ -6,6 +6,7 @@ import { Form } from "react-bootstrap";
 import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
 import { load } from "./persistence/data";
+import { isText, useBrowserState } from "./browser-state";
 
 interface Props {
     grade: GradePlan;
@@ -20,8 +21,8 @@ const selectionData = load<string>("hokeiListSelection", "own");
 const List = (props: Props) => {
     const { grade, allGradePlans, dojoMode = false } = props;
     const [selection, setSelection] = useState<Selection>((selectionData.data ?? "own") as Selection);
-    const [filterText, setFilterText] = useState<string>("");
-    const [debouncedFilterText, setDebouncedFilterText] = useState<string>("");
+    const [filterText, setFilterText] = useBrowserState("hokei-query", "", isText);
+    const [debouncedFilterText, setDebouncedFilterText] = useState(filterText);
     const translator = useContext(TranslatorContext);
     const showKanji = !dojoMode;
 

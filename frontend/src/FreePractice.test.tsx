@@ -366,7 +366,7 @@ describe("FreePractice", () => {
     expect(screen.queryByRole("combobox")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Skapa embu" }));
 
-    expect(screen.queryByRole("button", { name: "Alla träningsområden" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Tillbaka" })).toBeNull();
     expect(screen.getByRole("button", { name: "Embu och kumi-embu" })).toBeTruthy();
     expect(screen.getByText("Experimentell").querySelector("svg")).toBeTruthy();
     expect(screen.getByText("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")).toBeTruthy();
@@ -446,7 +446,7 @@ describe("FreePractice", () => {
     expect(screen.getByRole("button", { name: "Skapa embu" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Träna embun" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Träna kumi-embu" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Alla träningsområden" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tillbaka" })).toBeTruthy();
   });
 
   it("finishes the builder after six sequences", async () => {
@@ -589,7 +589,7 @@ describe("FreePractice", () => {
     await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
     await user.click(screen.getByRole("button", { name: "Testa globalt träningsläge" }));
 
-    await user.click(screen.getByRole("button", { name: "Alla träningsområden" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
     expect(screen.getByRole("heading", { name: "Fri träning" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /Kihon/i }));
@@ -597,7 +597,7 @@ describe("FreePractice", () => {
     expect(screen.getByText("harai uke geri")).toBeTruthy();
     expect(screen.queryByText("Den här sidan är fortfarande under utformning och kan ändras när som helst.")).toBeNull();
     expect(screen.queryByText("Från 6 kyū")).toBeNull();
-    await user.click(screen.getByRole("button", { name: "Alla träningsområden" }));
+    await user.click(screen.getByRole("button", { name: "Tillbaka" }));
 
     await user.click(screen.getByRole("button", { name: /Embu och kumi-embu/i }));
     expect(screen.getByTestId("global-state").textContent).toBe("1 kyū|true");
