@@ -98,7 +98,8 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         menuText: translator.translate("Träning"),
         startDescription: translator.translate("Välj mellan veckans träning och fri träning."),
         icon: Book,
-        showInMainMenu: true
+        showInMainMenu: true,
+        hideOnStartPage: true,
     }, {
         path: "/theory",
         element: <Theory showLanguageTools={!translator.isJapanese} />,
@@ -106,6 +107,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         startDescription: translator.translate("Studera ord och begrepp i lugn takt."),
         icon: JournalText,
         showInMainMenu: true,
+        hideOnStartPage: true,
     }, {
         path: "/search",
         element: <ActivitySearch allGradePlans={allGradePlans} />,
@@ -209,7 +211,8 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
                                    textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa appen, din profil och ditt konto."),
-        icon: Gear
+        icon: Gear,
+        hideOnStartPage: true,
     },
     // A member's own place in the organization, and the one thing they can do
     // about it: ask another branch to take them in. Only for accounts — there is

@@ -85,8 +85,14 @@
   align-items: center;
   margin: 0.65rem 0 0.5rem;
   padding: 0.35rem 0;
-  color: var(--bs-secondary-color);
+  color: #80620a;
   font-family: var(--app-display-font);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+[data-bs-theme="dark"] .start-context {
+  color: #f3d36c;
 }
 
 .start-intro {

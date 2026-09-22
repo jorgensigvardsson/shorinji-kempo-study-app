@@ -6,7 +6,7 @@ import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastCon
 import { getRoutes, preloadPages, routeText, type Route } from './routes';
 import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Data } from './persistence/data';
-import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, Megaphone } from 'react-bootstrap-icons';
+import { ArrowClockwise, ArrowLeftRight, Bell, ExclamationTriangle, List as MenuIcon, Megaphone } from 'react-bootstrap-icons';
 import { useIdleTask, useLoadingPhase, useNavigationPending, useSyncProvider, useSyncState, useTheme, useTranslations, useWakeLock } from './hooks';
 import { ensureTranslations } from './translations';
 import RouteContent from './components/RouteContent';
@@ -293,9 +293,12 @@ const AppNavbar = (props: NavbarProps) => {
   const mainMenuRoutes = visibleMenuRoutes.filter(route => route.showInMainMenu);
   const dropdownRoutes = visibleMenuRoutes.filter(route => !route.showInMainMenu);
   const isDropdownActive = dropdownRoutes.some(route => route.path && location.pathname === route.path);
+  const mobileMainRoutes = mainMenuRoutes.filter(route => route.path && route.path !== "/search");
+  const mobileSection = mainSection(location.pathname);
+  const isMobileMoreActive = !["/", "/kamoku", "/theory", "/search"].includes(mobileSection);
 
   return (
-    <><Navbar expand="lg" className={`bg-body-tertiary ${className}`} sticky="top">
+    <><Navbar expand="lg" className={`app-top-navbar ${location.pathname === "/" ? "app-top-navbar-home" : ""} bg-body-tertiary ${className}`} sticky="top">
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand" onClick={() => beginNavigation("/")}>
           <img src="/shorinjikempo.svg" className="logo" />
@@ -364,12 +367,17 @@ const AppNavbar = (props: NavbarProps) => {
       </Container>
     </Navbar>
     <nav className="app-bottom-nav d-print-none" aria-label={translator.translate("Huvudnavigation")}>
-      {mainMenuRoutes.filter(route => route.path).map(route => <Link key={route.path} to={route.path!}
+      {mobileMainRoutes.map(route => <Link key={route.path} to={route.path!}
         aria-current={mainSection(location.pathname) === route.path ? "page" : undefined}
         onClick={() => { beginNavigation(route.path!); setShow(false); }}>
         <route.icon size={21} aria-hidden="true" />
         <span>{routeText(route)}</span>
       </Link>)}
+      <button type="button" className={isMobileMoreActive ? "is-active" : undefined}
+        aria-controls="basic-navbar-nav" aria-expanded={show} onClick={() => setShow(true)}>
+        <MenuIcon size={23} aria-hidden="true" />
+        <span>{translator.translate("Mer")}</span>
+      </button>
     </nav></>
   );
 }

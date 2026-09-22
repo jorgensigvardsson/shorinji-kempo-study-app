@@ -42,6 +42,35 @@
   line-height: 1.1;
 }
 
+/* On phones the persistent bottom navigation owns the primary destinations and
+   opens this navbar's offcanvas. Keep the offcanvas available while collapsing
+   the otherwise duplicated top row to zero height everywhere except Home, where
+   the original brand remains without its hamburger. Bootstrap restores the
+   unchanged desktop navbar at its existing lg breakpoint. */
+@media (max-width: 991.98px) {
+  .app-top-navbar {
+    min-height: 0;
+    padding-block: 0;
+  }
+
+  .app-top-navbar > .container {
+    min-height: 0;
+  }
+
+  .app-top-navbar .app-navbar-brand,
+  .app-top-navbar .navbar-toggler {
+    display: none;
+  }
+
+  .app-top-navbar.app-top-navbar-home {
+    padding: var(--bs-navbar-padding-y) var(--bs-navbar-padding-x);
+  }
+
+  .app-top-navbar.app-top-navbar-home .app-navbar-brand {
+    display: inline-flex;
+  }
+}
+
 .app-offcanvas-title {
   display: inline-flex;
   align-items: center;

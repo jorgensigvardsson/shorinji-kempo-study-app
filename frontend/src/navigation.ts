@@ -24,15 +24,15 @@ export const activities: Activity[] = [
     { path: "/kamoku/free/tanen-sotai", title: "Tan'en och sōtai", section: "Träning", icon: Collection },
     { path: "/kamoku/free/randori", title: "Randori", section: "Träning", icon: People },
     { path: "/kamoku/free/embu", title: "Embu och kumi-embu", section: "Träning", icon: CardHeading },
-    { path: "/training/grading", title: "Praktisk gradering", section: "Träning", icon: Award },
-    { path: "/theory/grading", title: "Teoretisk gradering", section: "Teori", icon: Award },
+    { path: "/training/grading", title: "Träna gradering", section: "Träning", icon: Award },
+    { path: "/theory/grading", title: "Teori gradering", section: "Teori", icon: Award },
     { path: "/theory/groups", title: "Teknikgrupper", section: "Teori", icon: Collection },
     { path: "/word-list", title: "Ordlista", section: "Teori", icon: JournalText, languageTool: true },
-    { path: "/quiz/words", title: "Ordlistequiz", section: "Teori", icon: QuestionSquare, languageTool: true },
-    { path: "/quiz/foot-stance", title: "Fotställningsquiz", section: "Teori", icon: QuestionSquare, languageTool: true },
-    { path: "/quiz/hand-position", title: "Handpositionsquiz", section: "Teori", icon: HandIndex, languageTool: true },
-    { path: "/flashcard/words", title: "Ordflashkort", section: "Teori", icon: CardHeading, languageTool: true },
-    { path: "/flashcard/hokei", title: "Hokeiflashkort", section: "Teori", icon: CardHeading, languageTool: true },
+    { path: "/quiz/words", title: "Quiz ordlista", section: "Teori", icon: QuestionSquare, languageTool: true },
+    { path: "/quiz/foot-stance", title: "Quiz fotställning", section: "Teori", icon: QuestionSquare, languageTool: true },
+    { path: "/quiz/hand-position", title: "Quiz handposition", section: "Teori", icon: HandIndex, languageTool: true },
+    { path: "/flashcard/words", title: "Flashkort ordlista", section: "Teori", icon: CardHeading, languageTool: true },
+    { path: "/flashcard/hokei", title: "Flashkort hokei", section: "Teori", icon: CardHeading, languageTool: true },
 ];
 
 export const availableActivities = (isJapanese: boolean) => activities.filter(activity => !isJapanese || !activity.languageTool);

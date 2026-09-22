@@ -44,11 +44,8 @@ const Start = (props: Props) => {
 
     return (
         <div className="start-screen">
-            {/* The gasshō hands are decoration on top of the word itself, so they
-                stay out of the accessible name — a screen reader should read the
-                greeting, not "folded hands". */}
             <div className="start-context" aria-label={greeting}>
-                {greeting} <span aria-hidden="true">🙏</span>
+                {greeting}
             </div>
             <header className="start-intro">
                 <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
@@ -58,7 +55,7 @@ const Start = (props: Props) => {
                 <span>{translator.translate("Sök funktion, teknik eller ord")}</span>
             </Link>
             {latestActivity && <button type="button" className="start-resume" onClick={() => memory.resume(latest)}>
-                <ClockHistory size={24} aria-hidden="true" />
+                <ClockHistory size={20} aria-hidden="true" />
                 <span>
                     <span className="start-resume-label">{translator.translate("Fortsätt där du slutade")}</span>
                     <strong>{activityLabel(latestActivity, translator)}</strong>
@@ -75,7 +72,7 @@ const Start = (props: Props) => {
                     {memory.pins.map(path => {
                         const activity = activityForUrl(path)!;
                         return <Link key={path} to={path} className="shortcut-link" onClick={() => beginNavigation(path)}>
-                            <activity.icon size={20} aria-hidden="true" />
+                            <activity.icon size={22} aria-hidden="true" />
                             <span>{translator.translate(activity.title)}</span>
                         </Link>;
                     })}
@@ -83,12 +80,6 @@ const Start = (props: Props) => {
                 {memory.pins.length === 0 && <p className="navigation-caption">{translator.translate("Stjärnmarkera funktioner i Sök för att lägga till genvägar.")}</p>}
             </section>
             <Grid items={items} className="start-grid" />
-            {memory.recent.length > 1 && <section className="start-recent" aria-labelledby="recent-heading">
-                <h2 id="recent-heading" className="app-eyebrow-heading">{translator.translate("Senast besökta")}</h2>
-                {memory.recent.slice(1).map(visit => <button type="button" key={visit.url} onClick={() => memory.resume(visit)}>
-                    <span>{activityLabel(memory.describe(visit.url)!, translator)}</span><ArrowRight aria-hidden="true" />
-                </button>)}
-            </section>}
         </div>
     );
 };

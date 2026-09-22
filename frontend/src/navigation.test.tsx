@@ -61,15 +61,15 @@ describe("navigation shortcuts and resume", () => {
     it("pins a feature from search and keeps it on this account's start page after remounting", async () => {
         const user = userEvent.setup();
         const { unmount } = render(<MemoryRouter initialEntries={["/search"]}><Harness /></MemoryRouter>);
-        await user.click(screen.getByRole("button", { name: "Lägg till genväg till Ordflashkort" }));
+        await user.click(screen.getByRole("button", { name: "Lägg till genväg till Flashkort ordlista" }));
         await user.click(screen.getByRole("link", { name: "Home" }));
-        expect(screen.getByRole("link", { name: "Ordflashkort" }).getAttribute("href")).toBe("/flashcard/words");
+        expect(screen.getByRole("link", { name: "Flashkort ordlista" }).getAttribute("href")).toBe("/flashcard/words");
         unmount();
         const restored = render(<MemoryRouter><Harness /></MemoryRouter>);
-        expect(screen.getByRole("link", { name: "Ordflashkort" })).toBeTruthy();
+        expect(screen.getByRole("link", { name: "Flashkort ordlista" })).toBeTruthy();
         restored.unmount();
         render(<MemoryRouter><Harness account="two" /></MemoryRouter>);
-        expect(screen.queryByRole("link", { name: "Ordflashkort" })).toBeNull();
+        expect(screen.queryByRole("link", { name: "Flashkort ordlista" })).toBeNull();
     });
 
     it("resumes a grading category and does not replace it with the home or settings page", async () => {

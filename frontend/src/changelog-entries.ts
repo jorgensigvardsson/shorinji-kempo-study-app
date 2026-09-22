@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-22T19:46:09.000Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Navigationen på telefoner har fått en tydligare bottenrad för Start, Träning, Teori och Mer. Startsidan samlar nu sök, den senaste aktiviteten och personliga genvägar, med Shorinji Kempo kvar högst upp.",
+        en: "Phone navigation now has a clearer bottom bar for Home, Training, Theory and More. The start page now brings together search, your latest activity and personal shortcuts, with Shorinji Kempo still at the top.",
+        tr: "Telefon navigasyonu artık Ana Sayfa, Antrenman, Teori ve Daha Fazla için daha anlaşılır bir alt çubuğa sahip. Başlangıç sayfası artık aramayı, son etkinliğinizi ve kişisel kısayollarınızı bir araya getirirken Shorinji Kempo adı üstte kalıyor.",
+        ja: "スマートフォンのナビゲーションを、ホーム・練習・学科・その他の分かりやすい下部バーに整理しました。スタート画面には検索、直前の活動、個人用ショートカットをまとめ、画面上部には少林寺拳法の表示を残しています。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-13T13:42:00.000Z",
     changes: [
       {

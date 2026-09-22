@@ -25,9 +25,7 @@ describe("Start", () => {
       </MemoryRouter>,
     );
 
-    // Looking the element up by the plain label, then finding the emoji only in
-    // the visible text, is what pins the hands to decoration rather than name.
-    expect(screen.getByLabelText("Gasshō, Malin").textContent).toBe("Gasshō, Malin 🙏");
+    expect(screen.getByLabelText("Gasshō, Malin").textContent).toBe("Gasshō, Malin");
   });
 
   it("keeps the plain greeting when the account has no display name", () => {
@@ -37,6 +35,6 @@ describe("Start", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByLabelText("Gasshō").textContent).toBe("Gasshō 🙏");
+    expect(screen.getByLabelText("Gasshō").textContent).toBe("Gasshō");
   });
 });
