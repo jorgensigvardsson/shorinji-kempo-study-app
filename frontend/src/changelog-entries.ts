@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-22T20:55:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Veckoplanen har fått tydligare veckonavigering och en mer synlig knapp för att markera veckan som tränad.",
+        en: "The weekly plan now has clearer week navigation and a more visible button for marking the week as practised.",
+        tr: "Haftalık planda artık haftalar arasında daha anlaşılır gezinme ve haftayı çalışıldı olarak işaretlemek için daha görünür bir düğme var.",
+        ja: "週間プランの週移動を分かりやすくし、その週を練習済みにするボタンも見つけやすくしました。",
+      },
+      {
+        emoji: "✨",
+        sv: "Grad och Dojo-läge väljs nu direkt på de träningssidor där de behövs. Gradvalet har stora, lätttryckta alternativ, och Hokei-flashkorten öppnas direkt med din grad vald.",
+        en: "Grade and Dojo mode can now be chosen directly on the training pages where they are needed. The grade picker has large, easy-to-tap choices, and Hokei flashcards open immediately with your grade selected.",
+        tr: "Kademe ve Dojo modu artık ihtiyaç duyulan antrenman sayfalarından doğrudan seçilebiliyor. Kademe seçicisinde dokunması kolay büyük seçenekler var ve Hokei bilgi kartları kendi kademeniz seçili olarak doğrudan açılıyor.",
+        ja: "級・段と道場モードを、必要な練習ページで直接選べるようにしました。級・段の選択肢は大きく押しやすく、法形フラッシュカードは自分の級・段が選ばれた状態ですぐに開きます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-22T19:46:09.000Z",
     changes: [
       {

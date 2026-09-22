@@ -5,7 +5,7 @@ describe("getTrainingControlContext", () => {
   it.each([
     ["/", false, false],
     ["/theory", false, false],
-    ["/theory/grading", true, false],
+    ["/theory/grading", true, true],
     ["/training/grading", true, true],
     ["/kamoku", false, false],
     ["/kamoku/plan", true, true],

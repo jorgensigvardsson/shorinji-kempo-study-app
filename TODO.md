@@ -10,9 +10,13 @@ Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`
 - [ ] Review the merged Training page on mobile and desktop
 - [ ] Consider a clearer navigation name than "Kamoku" for new users
 - [ ] Review other crowded pages one at a time and reduce unnecessary card styling
+- [ ] Bring back a softer, more fluid gradient color palette on cards so they feel warmer and less rigid; review the treatment across card types before applying it globally
 - [ ] Check that the merged Training page preserves all existing notes, ratings, filters, and links
 - [ ] Use bilingual Training labels: localized explanation first, with "Kamoku" and "All hokei" retained as Japanese terminology
 - [ ] Replace All hokei phone filters with a mobile-friendly filter panel
+- [ ] Refine the new “Visar …” choice panel so it feels lighter: let it cover almost the whole screen, but leave enough of the page visible that it does not feel like a heavy full-screen takeover
+- [x] Replace the flashcard grade picker with the same choice interaction and logic used by the Hokei picker. Done: Hokei flashcards now open directly at the user's grade, use “Tränar inför …”, and offer the shared choices without a separate setup page
+- [ ] Add the shared grade picker to the Randori page, using the same clear interaction and selection logic as the Hokei and Hokei-flashcard pages
 - [ ] Apply the calmer full-card layout to the All hokei section after comparing it in Kamoku
 - [ ] Allow users to fill in missing stance/action fields as personal overrides without modifying the canonical Kamokuhyo source data; include editing, clearing, persistence/sync, and a clear distinction between source content and personal additions
 - [ ] Collaboratively define calmer Shorinji Kempo theme colors and fonts before applying them across the app

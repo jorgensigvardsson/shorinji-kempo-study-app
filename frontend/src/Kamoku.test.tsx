@@ -144,6 +144,7 @@ describe("Kamoku weekly plan", () => {
     expect(controls?.querySelector("#kamoku-grade-select")).toBeNull();
     expect(controls?.querySelector("#dojo-mode")).toBeNull();
     expect(controls?.querySelector(".kamoku-week-navigation")).not.toBeNull();
+    expect(controls?.querySelector(".kamoku-week-completion-row")).not.toBeNull();
     expect(screen.getByText("Vecka 1")).toBeTruthy();
     expect(screen.getByText("av 1")).toBeTruthy();
   });

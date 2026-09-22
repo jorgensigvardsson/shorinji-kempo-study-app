@@ -27,6 +27,7 @@ import { setAppData, useAppData } from './persistence/use-app-data';
 import { NavigationMemoryProvider } from './navigation-memory';
 import { mainSection } from './navigation';
 import RouteScrollManager from './components/RouteScrollManager';
+import { TrainingViewSettingsContext } from './training-view-settings-context';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -242,10 +243,18 @@ function App(props: Props) {
         <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none" />
         <div className="app-route-content" style={{
           '--floating-stack-reserve': `${floatingReserve}px`,
-          '--training-controls-reserve': controlContext.showGrade || controlContext.showTrainingMode || isFontPickerEnabled ? '4.75rem' : '0px',
+          '--training-controls-reserve': isFontPickerEnabled ? '4.75rem' : '0px',
         } as CSSProperties}>
-          <RouteContent routes={routes} translator={translator} />
-          <Outlet />
+          <TrainingViewSettingsContext.Provider value={{
+            grade: displayGrade,
+            gradePlans,
+            onGradeChange: setGradeOverride,
+            dojoMode: trainingMode,
+            onDojoModeChange: setTrainingMode,
+          }}>
+            <RouteContent routes={routes} translator={translator} />
+            <Outlet />
+          </TrainingViewSettingsContext.Provider>
         </div>
         {/* Bottom-right floating stack for transient toasts. Its full height is
             reserved at the bottom of the page (--floating-stack-reserve) so
@@ -257,8 +266,8 @@ function App(props: Props) {
           grade={displayGrade}
           gradePlans={gradePlans}
           onGradeChange={setGradeOverride}
-          showGrade={controlContext.showGrade}
-          showTrainingMode={controlContext.showTrainingMode}
+          showGrade={false}
+          showTrainingMode={false}
           trainingMode={trainingMode}
           onTrainingModeChange={setTrainingMode}
           bodyFontPicker={isFontPickerEnabled

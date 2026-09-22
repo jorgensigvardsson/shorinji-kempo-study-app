@@ -19,6 +19,7 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
 );
 import { gradingManuals, type Item, type Numbering, type TechniqueGroup } from "./grading-exam-information";
 import "./GradingTest.css";
+import TrainingPageControls from "./components/TrainingPageControls";
 
 interface GradingTestProps {
     grade: GradeName | undefined;
@@ -327,6 +328,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
             : 0;
         return (
             <div className={`grading-test-page grading-category-page grading-detail-enter${dojoMode ? " is-dojo-mode" : ""}`}>
+                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
                 <header className="grading-category-header">
                     <div className="grading-category-heading">
                         <div className="text-muted small mb-1">{sentenceCase(translator.translate(selectedSection.title))}</div>
@@ -386,6 +388,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
             <header className="grading-page-header">
                 <h2 className="app-view-heading">{translator.translate(manual.title)}</h2>
+                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
                 {manual.term && !translator.isJapanese && <div className="text-muted small mt-1">{sentenceCase(manual.term.romaji)}</div>}
             </header>
 

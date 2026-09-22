@@ -8,6 +8,7 @@ import HokeiCard from "./components/HokeiCard";
 import InlineNoteEditor from "./components/InlineNoteEditor";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
+import TrainingPageControls from "./components/TrainingPageControls";
 import List from "./List";
 import { TranslatorContext } from "./i18n";
 import { gradeLabel, matchesString } from "./strings";
@@ -141,6 +142,10 @@ const FreePractice = (props: Props) => {
                                 <p className="app-intro-copy">{translator.translate(activeDefinition.description)}</p>
                             )}
                         </div>
+                        <TrainingPageControls
+                            showGrade={activeArea === "kihon" || activeArea === "embu"}
+                            showDojo
+                        />
                     </header>
                 )}
 

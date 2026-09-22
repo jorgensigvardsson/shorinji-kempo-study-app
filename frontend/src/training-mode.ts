@@ -11,7 +11,7 @@ import { TRAINING_ROOT } from "./training-routes";
 
 // The grading tool is reached from Träning but lives outside its path.
 const isTrainingPath = (pathname: string): boolean =>
-    pathname.startsWith(TRAINING_ROOT) || pathname === "/training/grading";
+    pathname.startsWith(TRAINING_ROOT) || pathname === "/training/grading" || pathname === "/theory/grading";
 
 export function useTrainingMode(): [boolean, (active: boolean) => void] {
     const location = useLocation();

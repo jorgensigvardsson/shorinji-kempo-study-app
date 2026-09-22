@@ -13,6 +13,7 @@ import { getAppDataStore } from "./persistence/store";
 import type { WeeklyPlanCompletionEntry } from "./persistence/schema";
 import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
+import TrainingPageControls from "./components/TrainingPageControls";
 import "./Kamoku.css";
 import { isIndex, useBrowserState } from "./browser-state";
 
@@ -75,6 +76,7 @@ const Kamoku = (props: Props) => {
         <div className={`kamoku-page${dojoMode ? " is-dojo-mode dojo-readable-hokei" : ""}`}>
             <header className="kamoku-page-header">
                 <h1 className="app-page-heading">{translator.translate("Veckoplan")}</h1>
+                <TrainingPageControls showGrade showDojo className="kamoku-page-controls" />
                 {!dojoMode && <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>}
             </header>
             <div className="kamoku-controls training-view-controls mb-4">
@@ -89,21 +91,10 @@ const Kamoku = (props: Props) => {
                         <ArrowLeft aria-hidden="true" />
                         <span>{translator.translate("Föregående")}</span>
                     </button>
-                    <div className="kamoku-week-center">
-                        <span className="kamoku-week-position">
-                            <span>{translator.translate("Vecka")} {selectedWeekNumber}</span>
-                            <span className="kamoku-week-total"> {translator.translate("av")} {grade.weeks.length}</span>
-                        </span>
-                        <WeekCompletionControl
-                            key={completionKey}
-                            completion={completion}
-                            grade={grade.grade}
-                            week={selectedWeekNumber}
-                            translator={translator}
-                            onMark={markWeekCompleted}
-                            onClear={clearWeekCompletion}
-                        />
-                    </div>
+                    <span className="kamoku-week-position">
+                        <span>{translator.translate("Vecka")} {selectedWeekNumber}</span>
+                        <span className="kamoku-week-total"> {translator.translate("av")} {grade.weeks.length}</span>
+                    </span>
                     <button
                         type="button"
                         className="kamoku-week-button kamoku-week-button-next"
@@ -114,6 +105,17 @@ const Kamoku = (props: Props) => {
                         <span>{translator.translate("Nästa")}</span>
                         <ArrowRight aria-hidden="true" />
                     </button>
+                    <div className="kamoku-week-completion-row">
+                        <WeekCompletionControl
+                            key={completionKey}
+                            completion={completion}
+                            grade={grade.grade}
+                            week={selectedWeekNumber}
+                            translator={translator}
+                            onMark={markWeekCompleted}
+                            onClear={clearWeekCompletion}
+                        />
+                    </div>
                 </div>
             </div>
             <WeeklyFocus week={selectedWeekData} translator={translator} dojoMode={dojoMode} />

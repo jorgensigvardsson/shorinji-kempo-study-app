@@ -2,6 +2,10 @@
   padding: 0.5rem 0.25rem 1.35rem;
 }
 
+.kamoku-page-controls {
+  margin-top: 1rem;
+}
+
 .kamoku-controls {
   margin-bottom: 2.5rem !important;
   padding: 0.5rem 0 1rem;
@@ -10,8 +14,12 @@
 .kamoku-week-navigation {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas:
+    "previous position next"
+    "completion completion completion";
   align-items: center;
-  gap: 1rem;
+  column-gap: 1rem;
+  row-gap: 0.85rem;
   margin-top: 0;
 }
 
@@ -28,10 +36,12 @@
 }
 
 .kamoku-week-button-previous {
+  grid-area: previous;
   justify-self: start;
 }
 
 .kamoku-week-button-next {
+  grid-area: next;
   justify-self: end;
 }
 
@@ -46,6 +56,7 @@
 }
 
 .kamoku-week-position {
+  grid-area: position;
   display: block;
   color: var(--bs-emphasis-color);
   font-family: var(--app-display-font);
@@ -56,11 +67,11 @@
   white-space: nowrap;
 }
 
-.kamoku-week-center {
+.kamoku-week-completion-row {
+  grid-area: completion;
   display: flex;
+  justify-content: center;
   align-items: center;
-  flex-direction: column;
-  gap: 0.45rem;
 }
 
 .kamoku-week-completion-group {
@@ -72,31 +83,43 @@
 .kamoku-week-completion {
   display: inline-flex;
   align-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--bs-tertiary-color);
+  gap: 0.45rem;
+  min-height: 2.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
   font: inherit;
-}
-
-.kamoku-week-completion {
-  gap: 0.3rem;
-  font-size: 0.76rem;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
 .kamoku-week-completion svg {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 1rem;
+  height: 1rem;
+  color: #9a7610;
 }
 
 .kamoku-week-completion:hover,
-.kamoku-week-completion:focus-visible,
+.kamoku-week-completion:focus-visible {
+  border-color: var(--bs-warning-border-subtle);
+  background: var(--bs-secondary-bg);
+  color: var(--bs-emphasis-color);
+}
+
 .kamoku-week-completion.is-complete {
-  color: var(--bs-secondary-color);
+  border-color: var(--bs-success-border-subtle);
+  background: var(--bs-success-bg-subtle);
+  color: var(--bs-success-text-emphasis);
 }
 
 .kamoku-week-completion.is-complete svg {
-  color: var(--bs-primary);
+  color: var(--bs-success-text-emphasis);
+}
+
+[data-bs-theme="dark"] .kamoku-week-completion:not(.is-complete) svg {
+  color: #f3d36c;
 }
 
 .kamoku-week-completion-details {
@@ -250,7 +273,8 @@
   }
 
   .kamoku-week-navigation {
-    gap: 0.65rem;
+    column-gap: 0.65rem;
+    row-gap: 0.75rem;
   }
 
   .kamoku-week-button {

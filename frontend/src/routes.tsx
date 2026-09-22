@@ -132,7 +132,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/theory/grading",
-        element: <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} /></TheoryToolPage>,
+        element: <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TheoryToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
