@@ -3,6 +3,9 @@
 Ideas and follow-up tasks to park without interrupting the current task.
 Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`.
 
+- [ ] **Jörgen / setup:** Stabilize Malin's usual Linux/Docker/Codex environment before her next coding session:
+  - Fix or report the Codex sandbox failure `error building bubblewrap command: mountinfo path is not absolute`. It reproduces even for `true` under the workspace sandbox, while `/usr/bin/bwrap` works directly. Observed with Ubuntu 26.04.1, bubblewrap 0.11.1, the VS Code extension's `codex-cli 0.155.0-alpha.16.3`, and `CODEX_PERMISSION_PROFILE=:workspace`. First update/reinstall the OpenAI/ChatGPT VS Code extension and restart the remote extension host; if it persists, report it with those details and reviewed Codex logs/session information. Do not disable AppArmor or the sandbox globally as a workaround.
+  - Make the Compose permission bootstrap cover the generated `backend/auth/tmp` and `backend/persistence/tmp` build directories using the configured `LOCAL_UID`/`LOCAL_GID` rather than a hard-coded id. They had been left owned by `root`, so Air could only run a stale binary after rebuilds failed. They are currently repaired to `1002:1002`; source files and `devdata` must remain untouched by this fix.
 - [ ] Add comments for repetition-and other cards
 - [ ] Review the merged Training page on mobile and desktop
 - [ ] Consider a clearer navigation name than "Kamoku" for new users

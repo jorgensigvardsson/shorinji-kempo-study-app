@@ -1,5 +1,9 @@
 # Project Guidelines
 
+## Pending handoff
+
+- When next working with Jörgen, immediately point out the unchecked **Jörgen / setup** action at the top of `TODO.md`. Remove this handoff reminder after he has acknowledged it; keep the TODO until the underlying issues are fixed and verified.
+
 ## Code changes
 
 - Don't make any code changes unless requested. Knowledge is king.
