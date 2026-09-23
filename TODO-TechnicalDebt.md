@@ -82,7 +82,51 @@ The list is ordered by risk, not by effort.
   Two functions turned out to be dead once the backfill endpoint went, and went with it:
   `authorizeAdmin` was its only caller, and `hasRole` fed only that. Push broadcasts
   authorize through `resolveAudience`, which was easy to misread as also needing them
-- [ ] Add the granular per-item API, and only then split `notes` per note and bucket the entry-timestamped maps. That split needs the key formats, which live in the client, so it belongs there rather than in the server. This is also the step that bumps the schema version, and so the one gated on the client-build drain
+- [ ] Add the granular per-item API, and only then split `notes`. That split needs the key
+  formats, which live in the client, so it belongs there rather than in the server. This is
+  also the step that bumps the schema version, and so the one gated on the client-build
+  drain.
+  Measured 2026-09-23, because the shape of this is decided by where the bytes actually
+  are. Worst case per field, from the id spaces we ship and the caps we enforce: `notes`
+  1398 KB, and everything else put together 71 KB — `notesUpdatedAt` 10, `hokeiRanks` 12,
+  `knownFlashCards` 32, `weeklyPlanCompletions` 5, the grading maps 13. So this entry used
+  to have it backwards: it said to split `notes` per note *and* bucket the entry-timestamped
+  maps, and the maps do not warrant bucketing at anything like current scale. The dividing
+  line is not how many keys a field has, it is who controls the size. `notes` is the only
+  user-authored free text left in the document — `appDisplayName` is capped at 100 and
+  `kenshiNumber` is a fixed format — so it is the only field bounded by how much somebody
+  types rather than by ids we add editorially.
+  Deferred deliberately, not forgotten: one item per note takes a full read from ~15 point
+  reads to ~250. That only lands on a fresh device, since the client keeps a local copy and
+  syncs deltas, but ~250 RU against a 400 RU/s database is a visible spike on a first sync,
+  which is the moment someone is least willing to wait for it. If the 1 MB cap ever strands
+  a real user, the cheaper shape is bucketing notes at 16: ~31 items total and an ~87 KB
+  ceiling per item, an order of magnitude fewer reads than per-note while still removing the
+  unbounded growth. Coarser ceiling, not no ceiling.
+  Two things to know before starting, both non-obvious:
+  `notesUpdatedAt` folds into the note item as `{text, updatedAt}`. The sidecar only exists
+  because widening the note value would make a build that predates the change render
+  `[object Object]` in the editor and write it back; a schema bump is exactly when that
+  becomes allowed. It also removes the sparse-stamp branch in `merge.ts`, where a note with
+  stamps on both sides settles itself and one without escalates to the reader.
+  The binding constraint is not item size but the 100-operation cap on a transactional
+  batch. At 237 note items a whole-document write or delete no longer fits in one. Ordinary
+  writes never touch that many under a granular API, but two paths do: scheme conversion,
+  which should write the new items in chunks and flip `itemScheme` in meta last so a
+  half-converted document still reads as the old scheme; and `deleteAccount`, which batches
+  a delete per item today and would simply be rejected. Meta gets deleted last there, so an
+  interrupted delete leaves a readable document rather than orphans. That path has now
+  needed care twice and failed silently once — write the test first.
+  One trap in the gate itself. This build declares `APP_SCHEMA_VERSION` 2 but
+  `APP_SCHEMA_COMPAT_VERSION` 3, pre-committing to hold schema 3 on the assumption that 3
+  will be additive and round-trip through `unknownDataFields`. Restructuring `notes` is not
+  additive, so numbering it 3 would let every installed build through the gate claiming
+  compat 3 and then drop what it cannot parse — the exact failure the gate exists to
+  prevent, arriving through the gate. It has to be 4 or higher, which makes the sequence
+  expand/migrate/contract: ship a build that understands the new shape but still writes the
+  old one and declares compat 4, wait for the drain (the server logs `outdated client wrote
+  for %s: compat %d, current %d` on every write below the current compat, so this is
+  answerable rather than guessed), and only then ship a build that writes it
 - [x] Drop `syncProvider` from the synced set. It now lives in its own `sync/provider.ts` with a tiny external store, retired from `AppDataState` and added to `RETIRED_DATA_FIELDS` so it does not come back the first time an old device syncs. On first read it adopts whatever the stored document said, so the move signs nobody out. Two things it fixes beyond tidiness: it was circular (the document only exists on the server once signed in), and it was a merged scalar, so signing out on one device was a change the merge could raise a conflict prompt about on another
 - [x] Decide what happens when the app-data document reaches its size cap. The 413 used
   to fall through to the generic error path — three retries of the same oversized body,
