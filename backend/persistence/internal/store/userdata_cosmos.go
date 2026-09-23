@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -14,8 +15,8 @@ import (
 // partition key.
 //
 // Sharing a partition is what makes a document writable in one transactional batch:
-// Cosmos only offers atomicity within a single partition. Without it a shadow write
-// could land half-applied, and a half-applied document is worse than none.
+// Cosmos only offers atomicity within a single partition. Without it a write could
+// land half-applied, and a half-applied document is worse than none.
 type CosmosUserDataStore struct {
 	container *azcosmos.ContainerClient
 }
@@ -287,4 +288,14 @@ func batchFailure(resp azcosmos.TransactionalBatchResponse) error {
 		}
 	}
 	return fmt.Errorf("batch rejected with no failing operation reported")
+}
+
+// statusOf digs the HTTP status out of a Cosmos error, so callers can tell a genuine
+// failure from a 404 that only means "nothing stored for this user".
+func statusOf(err error) int {
+	var respErr *azcore.ResponseError
+	if errors.As(err, &respErr) {
+		return respErr.StatusCode
+	}
+	return 0
 }

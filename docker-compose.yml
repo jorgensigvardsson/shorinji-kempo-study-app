@@ -162,7 +162,6 @@ services:
       COSMOS_DB_ENDPOINT: "${COSMOS_ENDPOINT}"
       COSMOS_DB_KEY: "${COSMOS_KEY}"
       COSMOS_DB_DATABASE: "shorinji"
-      COSMOS_DB_CONTAINER: "documents"
       RATE_LIMIT_RPS: "2"
       RATE_LIMIT_BURST: "10"
       # Web Push — dev-only VAPID key pair.

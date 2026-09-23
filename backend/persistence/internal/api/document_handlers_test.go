@@ -9,12 +9,11 @@ import (
 	"testing"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/persistence/internal/store"
-	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
 )
 
 func newDocumentHandler(t *testing.T) *Handler {
 	t.Helper()
-	return NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil)
+	return NewHandler(store.NewFileUserDataStore(t.TempDir()), nil, "http://frontend", testIssuer, nil)
 }
 
 func putDocument(h *Handler, userID, body string, headers map[string]string) *httptest.ResponseRecorder {
@@ -354,384 +353,44 @@ func TestPutDocument_LegacyClientRecordedAsLegacyCompat(t *testing.T) {
 	}
 }
 
-// ─── shadow writes to the split-item store ──────────────────────────────────────
-//
-// Every accepted document is also written split by field, to fill the container that
-// will replace the current one. Nothing reads it yet, which is the point: the split
-// runs against real documents while the old store is still authoritative, so a mistake
-// in it costs a backfill rather than data.
+// failingStore stands in for the store being broken or unreachable.
+type failingStore struct{}
 
-// failingUserDataStore stands in for the split store being broken or unreachable.
-type failingUserDataStore struct{ calls int }
-
-func (s *failingUserDataStore) SaveUnconditional(string, *store.Document) (string, error) {
-	s.calls++
-	return "", errors.New("shadow store unavailable")
+func (failingStore) Load(string) (*store.Document, string, error) { return nil, "", nil }
+func (failingStore) Save(string, *store.Document, string) (string, error) {
+	return "", errors.New("store unavailable")
 }
-func (s *failingUserDataStore) Save(string, *store.Document, string) (string, error) {
-	s.calls++
-	return "", errors.New("shadow store unavailable")
+func (failingStore) SaveUnconditional(string, *store.Document) (string, error) {
+	return "", errors.New("store unavailable")
 }
-func (s *failingUserDataStore) Load(string) (*store.Document, string, error) { return nil, "", nil }
-func (s *failingUserDataStore) Delete(string) error {
-	return errors.New("shadow store unavailable")
-}
+func (failingStore) Delete(string) error { return errors.New("store unavailable") }
 
-func newShadowingHandler(t *testing.T) (*Handler, store.UserDataStore) {
-	t.Helper()
-	shadow := store.NewFileUserDataStore(t.TempDir())
-	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil).WithUserDataShadow(shadow)
-	return h, shadow
-}
-
-func TestPutDocument_AcceptedWriteIsAlsoWrittenSplit(t *testing.T) {
-	h, shadow := newShadowingHandler(t)
-	body := `{"version":1,"data":{"grade":"nidan","notes":{"kote nage":"hold the elbow"}}}`
-
-	if rec := putDocument(h, "user-1", body, clientBuild("1", "2", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200", rec.Code)
-	}
-
-	got, _, err := shadow.Load("user-1")
-	if err != nil {
-		t.Fatalf("shadow Load: %v", err)
-	}
-	if got == nil {
-		t.Fatal("the accepted document was not written to the split store")
-	}
-	var data struct {
-		Grade string            `json:"grade"`
-		Notes map[string]string `json:"notes"`
-	}
-	if err := json.Unmarshal(got.Data, &data); err != nil {
-		t.Fatalf("unmarshal shadow data: %v", err)
-	}
-	if data.Grade != "nidan" || data.Notes["kote nage"] != "hold the elbow" {
-		t.Errorf("shadow document lost content: %+v", data)
-	}
-}
-
-// A rejected write must not reach the split store, or it would hold a version the
-// authoritative store refused.
-func TestPutDocument_RejectedWriteIsNotShadowed(t *testing.T) {
-	h, shadow := newShadowingHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("2", "2", map[string]string{"If-None-Match": "*"}))
-
-	// Refused: this client cannot hold the stored schema.
-	if rec := putDocument(h, "user-1", `{"version":99,"data":{"a":99}}`, clientBuild("1", "1", nil)); rec.Code != http.StatusConflict {
-		t.Fatalf("got %d, want 409", rec.Code)
-	}
-
-	got, _, _ := shadow.Load("user-1")
-	if got == nil {
-		t.Fatal("expected the first document to still be there")
-	}
-	if got.Version != 1 {
-		t.Errorf("shadow version %d, want 1 — the refused write must not have been shadowed", got.Version)
-	}
-}
-
-// The whole reason shadow failures are swallowed: a store nothing reads must not be
-// able to take syncing down.
-func TestPutDocument_ShadowFailureDoesNotFailTheRequest(t *testing.T) {
-	shadow := &failingUserDataStore{}
-	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil).WithUserDataShadow(shadow)
-
-	rec := putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
-	if rec.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 — a failing shadow store must not break syncing", rec.Code)
-	}
-	if shadow.calls != 1 {
-		t.Errorf("shadow Save called %d times, want 1", shadow.calls)
-	}
-	if storedVersion(t, h, "user-1") != 1 {
-		t.Error("the authoritative write should have landed regardless")
-	}
-}
-
-func TestPutDocument_NoShadowStore_StillWorks(t *testing.T) {
-	h := newDocumentHandler(t) // no WithUserDataShadow
-	if rec := putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"})); rec.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200", rec.Code)
-	}
-}
-
-func TestDeleteAccount_ClearsBothStores(t *testing.T) {
-	h, shadow := newShadowingHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
-
-	req := asUser(httptest.NewRequest(http.MethodDelete, "/api/v1/account", nil), "user-1")
+func deleteAccount(h *Handler, userID string) *httptest.ResponseRecorder {
+	req := asUser(httptest.NewRequest(http.MethodDelete, "/api/v1/account", nil), userID)
 	rec := httptest.NewRecorder()
 	h.deleteAccount(rec, req)
-	if rec.Code != http.StatusNoContent {
-		t.Fatalf("got %d, want 204", rec.Code)
-	}
+	return rec
+}
 
-	if got, _, _ := shadow.Load("user-1"); got != nil {
-		t.Error("the split store still holds data for a deleted account")
+func TestDeleteAccount_ClearsTheDocument(t *testing.T) {
+	h := newDocumentHandler(t)
+	putDocument(h, "user-1", `{"version":1,"data":{"a":1}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
+
+	if rec := deleteAccount(h, "user-1"); rec.Code != http.StatusNoContent {
+		t.Fatalf("got %d, want 204", rec.Code)
 	}
 	if rec := getDocument(h, "user-1"); rec.Code != http.StatusNotFound {
 		t.Errorf("GET after delete: got %d, want 404", rec.Code)
 	}
 }
 
-// Unlike a shadow write, failing to delete leaves data behind after someone asked for
-// it to be gone. That has to be reported, not swallowed.
-func TestDeleteAccount_ShadowDeleteFailureIsReported(t *testing.T) {
-	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil).
-		WithUserDataShadow(&failingUserDataStore{})
+// Failing to delete leaves data behind after someone asked for it to be gone. That
+// has to be reported rather than swallowed.
+func TestDeleteAccount_FailureIsReported(t *testing.T) {
+	h := NewHandler(failingStore{}, nil, "http://frontend", testIssuer, nil)
 
-	req := asUser(httptest.NewRequest(http.MethodDelete, "/api/v1/account", nil), "user-1")
-	rec := httptest.NewRecorder()
-	h.deleteAccount(rec, req)
-
-	if rec.Code != http.StatusInternalServerError {
+	if rec := deleteAccount(h, "user-1"); rec.Code != http.StatusInternalServerError {
 		t.Fatalf("got %d, want 500", rec.Code)
-	}
-}
-
-// ─── backfill ───────────────────────────────────────────────────────────────────
-
-func postBackfill(h *Handler, admin bool) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/userdata-backfill", nil)
-	if admin {
-		req = asUser(req, "admin-user")
-		req.Header.Set("Authorization", "Bearer "+testBackfillAdminToken)
-	}
-	rec := httptest.NewRecorder()
-	h.backfillUserData(rec, req)
-	return rec
-}
-
-const testBackfillAdminToken = "backfill-admin-token"
-
-func newBackfillHandler(t *testing.T) (*Handler, store.Store, store.UserDataStore) {
-	t.Helper()
-	dir := t.TempDir()
-	source := store.NewFileStore(dir)
-	shadow := store.NewFileUserDataStore(dir)
-	h := NewHandler(source, nil, "http://frontend", testIssuer, nil).
-		WithUserDataShadow(shadow)
-	h.pushAdminToken = testBackfillAdminToken
-	return h, source, shadow
-}
-
-func TestBackfillEndpoint_CopiesUsersThatNeverSynced(t *testing.T) {
-	h, source, shadow := newBackfillHandler(t)
-
-	// Written straight to the authoritative store, as a user who has not synced since
-	// shadow writes began would appear.
-	for _, id := range []string{"quiet-1", "quiet-2"} {
-		if _, err := source.Save(id, &store.Document{Version: 1, UpdatedAt: "2026-08-01T00:00:00Z", Data: json.RawMessage(`{"grade":"shodan"}`)}, ""); err != nil {
-			t.Fatalf("seed %s: %v", id, err)
-		}
-	}
-
-	rec := postBackfill(h, true)
-	if rec.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200", rec.Code)
-	}
-	var result store.BackfillResult
-	if err := json.Unmarshal(rec.Body.Bytes(), &result); err != nil {
-		t.Fatalf("decode result: %v", err)
-	}
-	if result.Total != 2 || result.Copied != 2 {
-		t.Errorf("got %+v, want 2 total / 2 copied", result)
-	}
-
-	for _, id := range []string{"quiet-1", "quiet-2"} {
-		got, _, err := shadow.Load(id)
-		if err != nil || got == nil {
-			t.Errorf("%s was not backfilled (err %v)", id, err)
-		}
-	}
-}
-
-func TestBackfillEndpoint_RequiresAdmin(t *testing.T) {
-	h, _, _ := newBackfillHandler(t)
-	if rec := postBackfill(h, false); rec.Code != http.StatusUnauthorized {
-		t.Fatalf("got %d, want 401", rec.Code)
-	}
-}
-
-func TestBackfillEndpoint_NotRegisteredWithoutShadowStore(t *testing.T) {
-	// No WithUserDataShadow: there is nothing to back fill into, so the route should
-	// not exist rather than answer.
-	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, ratelimit.New(100, 100))
-	mux := http.NewServeMux()
-	h.Register(mux)
-
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/userdata-backfill", nil)
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-
-	if rec.Code == http.StatusOK {
-		t.Errorf("got %d, want the route to be absent", rec.Code)
-	}
-}
-
-// And if it is somehow reached without a shadow store, it says so rather than panicking.
-func TestBackfillEndpoint_WithoutShadowStore_ReportsUnavailable(t *testing.T) {
-	h := NewHandler(store.NewFileStore(t.TempDir()), nil, "http://frontend", testIssuer, nil)
-	h.pushAdminToken = testBackfillAdminToken
-
-	if rec := postBackfill(h, true); rec.Code != http.StatusServiceUnavailable {
-		t.Fatalf("got %d, want 503", rec.Code)
-	}
-}
-
-// ─── reading from the split store ───────────────────────────────────────────────
-//
-// The migration step. Which store is read from — and which one a write's precondition
-// is checked against — swaps; the other keeps receiving every accepted document, so
-// turning it back off is a restart rather than a deploy.
-
-func newFlippedHandler(t *testing.T) (*Handler, store.Store, store.UserDataStore) {
-	t.Helper()
-	dir := t.TempDir()
-	legacy := store.NewFileStore(dir)
-	split := store.NewFileUserDataStore(dir)
-	h := NewHandler(legacy, nil, "http://frontend", testIssuer, nil).
-		WithUserDataShadow(split).
-		WithUserDataReads()
-	return h, legacy, split
-}
-
-func TestFlipped_WriteThenReadGoesThroughTheSplitStore(t *testing.T) {
-	h, legacy, split := newFlippedHandler(t)
-
-	rec := putDocument(h, "user-1", `{"version":1,"data":{"grade":"nidan"}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
-	if rec.Code != http.StatusOK {
-		t.Fatalf("PUT: got %d, want 200", rec.Code)
-	}
-
-	// Landed in the split store, which is now authoritative...
-	stored, _, err := split.Load("user-1")
-	if err != nil || stored == nil {
-		t.Fatalf("split store has no document (err %v)", err)
-	}
-	// ...and in the original, which is now the way back.
-	shadowed, _, err := legacy.Load("user-1")
-	if err != nil || shadowed == nil {
-		t.Fatalf("original container has no copy (err %v)", err)
-	}
-
-	get := getDocument(h, "user-1")
-	if get.Code != http.StatusOK {
-		t.Fatalf("GET: got %d, want 200", get.Code)
-	}
-	if get.Header().Get("ETag") != rec.Header().Get("ETag") {
-		t.Errorf("GET ETag %q != PUT ETag %q", get.Header().Get("ETag"), rec.Header().Get("ETag"))
-	}
-}
-
-// The concurrency guarantee has to survive the switch, or the flip quietly reopens the
-// lost update that started all of this.
-func TestFlipped_StaleIfMatchStillRejected(t *testing.T) {
-	h, _, _ := newFlippedHandler(t)
-	first := putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
-	shared := first.Header().Get("ETag")
-	if shared == "" {
-		t.Fatal("no ETag from the split store")
-	}
-
-	if rec := putDocument(h, "user-1", `{"version":2,"data":{}}`, clientBuild("1", "2", map[string]string{"If-Match": shared})); rec.Code != http.StatusOK {
-		t.Fatalf("device B: got %d, want 200", rec.Code)
-	}
-	rec := putDocument(h, "user-1", `{"version":3,"data":{}}`, clientBuild("1", "2", map[string]string{"If-Match": shared}))
-	if rec.Code != http.StatusPreconditionFailed {
-		t.Fatalf("device A: got %d, want 412", rec.Code)
-	}
-
-	if v := storedVersion(t, h, "user-1"); v != 2 {
-		t.Errorf("stored version %d, want 2 — device B's write must survive", v)
-	}
-}
-
-// A user the backfill never reached, or whose shadow write was swallowed, must not
-// look like a user who lost everything.
-func TestFlipped_DocumentMissingFromTheSplitStoreIsHealed(t *testing.T) {
-	h, legacy, split := newFlippedHandler(t)
-
-	// Only in the original container, as a user missed by the backfill would be.
-	if _, err := legacy.Save("stranded", &store.Document{Version: 5, UpdatedAt: "2026-08-01T00:00:00Z", Data: json.RawMessage(`{"grade":"sandan"}`)}, ""); err != nil {
-		t.Fatalf("seed: %v", err)
-	}
-
-	rec := getDocument(h, "stranded")
-	if rec.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 — a stranded document must not read as a 404", rec.Code)
-	}
-	var served store.Document
-	if err := json.Unmarshal(rec.Body.Bytes(), &served); err != nil {
-		t.Fatalf("decode: %v", err)
-	}
-	if served.Version != 5 {
-		t.Errorf("served version %d, want 5", served.Version)
-	}
-
-	// Healed, not merely fallen back to: the copy is now in the store being read.
-	healed, _, err := split.Load("stranded")
-	if err != nil || healed == nil {
-		t.Fatalf("document was not copied across (err %v)", err)
-	}
-
-	// And the ETag served has to be one the next write can be checked against.
-	etag := rec.Header().Get("ETag")
-	if etag == "" {
-		t.Fatal("no ETag served after healing")
-	}
-	if put := putDocument(h, "stranded", `{"version":6,"data":{}}`, clientBuild("1", "2", map[string]string{"If-Match": etag})); put.Code != http.StatusOK {
-		t.Fatalf("write against the healed ETag: got %d, want 200", put.Code)
-	}
-}
-
-func TestFlipped_GenuinelyAbsentDocumentIsStill404(t *testing.T) {
-	h, _, _ := newFlippedHandler(t)
-	if rec := getDocument(h, "nobody"); rec.Code != http.StatusNotFound {
-		t.Fatalf("got %d, want 404", rec.Code)
-	}
-}
-
-func TestFlipped_DeleteAccountClearsBothStores(t *testing.T) {
-	h, legacy, split := newFlippedHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("1", "2", map[string]string{"If-None-Match": "*"}))
-
-	req := asUser(httptest.NewRequest(http.MethodDelete, "/api/v1/account", nil), "user-1")
-	rec := httptest.NewRecorder()
-	h.deleteAccount(rec, req)
-	if rec.Code != http.StatusNoContent {
-		t.Fatalf("got %d, want 204", rec.Code)
-	}
-
-	// A copy left in either store would be healed straight back on the next read.
-	if doc, _, _ := split.Load("user-1"); doc != nil {
-		t.Error("split store still holds a deleted account")
-	}
-	if doc, _, _ := legacy.Load("user-1"); doc != nil {
-		t.Error("original container still holds a deleted account")
-	}
-}
-
-// Running the backfill after the switch would copy the rollback copy over every user's
-// current document.
-func TestFlipped_BackfillIsRefused(t *testing.T) {
-	h, _, _ := newFlippedHandler(t)
-	h.pushAdminToken = testBackfillAdminToken
-
-	if rec := postBackfill(h, true); rec.Code != http.StatusConflict {
-		t.Fatalf("got %d, want 409 — backfilling after the switch runs backwards", rec.Code)
-	}
-}
-
-// The schema gate has to read the store that is actually authoritative, or it would
-// check a client against a version nobody is serving.
-func TestFlipped_SchemaGateChecksTheStoreBeingRead(t *testing.T) {
-	h, _, _ := newFlippedHandler(t)
-	putDocument(h, "user-1", `{"version":1,"data":{}}`, clientBuild("2", "2", map[string]string{"If-None-Match": "*"}))
-
-	if rec := putDocument(h, "user-1", `{"version":9,"data":{}}`, clientBuild("1", "1", nil)); rec.Code != http.StatusConflict {
-		t.Fatalf("got %d, want 409", rec.Code)
 	}
 }
 

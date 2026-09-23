@@ -300,18 +300,33 @@ One rule does not follow from scope: **`admin` is granted and revoked by an `adm
 it and `wsko_admin` scope to the root, so covering alone would let a WSKO admin hand themselves the
 one power their own role deliberately withholds.
 
-### App Data Document (`documents` container)
+### App Data Document (`userdata` container)
+One document per user, stored as several items sharing the user as partition key: a `meta`
+envelope plus one item per top-level field of `data`.
+
 ```json
+// id: "meta", userId: "<user UUID>"
 {
-  "id":        "<user UUID>",
-  "userId":    "<user UUID>",
-  "version":   1,
-  "updatedAt": "2026-05-22T18:00:00Z",
-  "deviceId":  "...",
-  "data":      { }
+  "version":       1,
+  "updatedAt":     "2026-05-22T18:00:00Z",
+  "deviceId":      "...",
+  "schemaVersion": 2,
+  "clientCompat":  3,
+  "fields":        ["grade", "notes", "hokeiRanks"],
+  "itemScheme":    1
 }
+
+// id: "field_notes", userId: "<user UUID>"
+{ "value": { "kote nage": "hold the elbow" } }
 ```
-One document per user. The `data` field is opaque to the persistence service.
+
+The split is structural, not semantic — the service never interprets a field, which is what
+lets it carry fields the client has not invented yet. `fields` names the items to read back,
+so reassembly is point reads rather than a query and the container needs no indexing.
+
+Sharing a partition key is what makes a write atomic: Cosmos offers transactional batches
+only within one partition. Concurrency rides on the `meta` item — every write rewrites it, so
+an `If-Match` on it guards the whole batch.
 
 ### JWT Access Token Claims
 ```json
@@ -445,7 +460,7 @@ for EU residents.
 | Login timestamps | `users` container | Legitimate interest (security) |
 | Branch membership | `users` container | Contract (account function) |
 | UI language | `users` container | Legitimate interest (writing to somebody in a language they read) |
-| App data (grade, notes, ranks, flashcards, etc.) | `documents` container | Contract (core service) |
+| App data (grade, notes, ranks, flashcards, etc.) | `userdata` container | Contract (core service) |
 | Refresh tokens | `refresh_tokens` container | Contract (session management) |
 | Push subscriptions (endpoint + keys, optional user ID) | push container | Consent (user subscribes) |
 
@@ -552,7 +567,7 @@ database and containers on startup):
 | `joinrequests` | auth | Pending applications, keyed by address so one per address is structural. TTL enabled with no default: a pending request never expires, a declined one carries its own and leaves on its own |
 | `transfers` | auth | Pending branch transfers, keyed by the member's user id so one pending transfer per member is structural. Same TTL arrangement as `joinrequests` |
 | `refresh_tokens` | auth | `consistent` indexing (all paths excluded) for partition scans |
-| `documents` | persistence | One app data document per user |
+| `userdata` | persistence | One app data document per user, split into a `meta` item plus one item per field, partitioned by `/userId` so a whole document is written in one transactional batch. Indexing `none` — every access is a point read driven by the field list in `meta` |
 | push subscriptions | persistence | Browser push subscriptions |
 
 **Provisioning skips containers that already exist** (409 ignored), so an indexing-policy change

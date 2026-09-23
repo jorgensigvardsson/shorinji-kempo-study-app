@@ -290,9 +290,8 @@ func TestFileUserDataStore_Save_CreateWhenAlreadyExists_Rejected(t *testing.T) {
 	}
 }
 
-// Shadow writes and the backfill copy documents the authoritative store has already
-// ordered, so they must not be subject to a second check that could reject a write
-// which was never in conflict.
+// App versions predating optimistic concurrency send no precondition at all, so their
+// writes must not be subject to a check they never made a claim for.
 func TestFileUserDataStore_SaveUnconditional_IgnoresTheStoredVersion(t *testing.T) {
 	s := NewFileUserDataStore(t.TempDir())
 	if _, err := s.SaveUnconditional("user-1", &Document{Version: 1, UpdatedAt: "t1"}); err != nil {
