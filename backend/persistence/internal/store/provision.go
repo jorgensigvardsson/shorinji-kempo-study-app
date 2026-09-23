@@ -13,7 +13,7 @@ import (
 // ProvisionCosmos creates the persistence service database and containers if they
 // do not already exist. Safe to call on every startup — 409 Conflict responses
 // are silently ignored for all create operations.
-func ProvisionCosmos(endpoint, key, database, container, pushContainer, userDataContainer string) error {
+func ProvisionCosmos(endpoint, key, database, pushContainer, userDataContainer string) error {
 	cred, err := azcosmos.NewKeyCredential(key)
 	if err != nil {
 		return fmt.Errorf("cosmos key credential: %w", err)
@@ -37,27 +37,10 @@ func ProvisionCosmos(endpoint, key, database, container, pushContainer, userData
 		return fmt.Errorf("cosmos database client %q: %w", database, err)
 	}
 
-	// documents — all access is point reads (Load/Save/Delete by userID = item id = partition key).
-	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
-		ID:                     container,
-		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/id"}, Kind: azcosmos.PartitionKeyKindHash},
-		IndexingPolicy: &azcosmos.IndexingPolicy{
-			Automatic:     false,
-			IndexingMode:  azcosmos.IndexingMode("none"),
-			IncludedPaths: []azcosmos.IncludedPath{},
-			ExcludedPaths: []azcosmos.ExcludedPath{},
-		},
-	}, nil); err != nil && !isConflict(err) {
-		return fmt.Errorf("cosmos create container %q: %w", container, err)
-	}
-
-	// userdata — the document split across several items, partitioned by user rather
-	// than by item so that all of a user's items live together and can be written in
-	// one transactional batch. Cosmos cannot repartition a container in place, which
-	// is why this is a new one rather than a change to `documents`.
-	//
-	// Reassembly is point reads driven by the field list in the meta item, so no
-	// indexing is needed here either.
+	// userdata — the document split across several items, partitioned by user so that
+	// all of a user's items live together and can be written in one transactional
+	// batch. Access is point reads driven by the field list in the meta item, so no
+	// indexing is needed.
 	//
 	// Indexing stays off, which rules TTL out — Cosmos rejects a container that has
 	// both. That matters because an item whose id was built by the legacy scheme

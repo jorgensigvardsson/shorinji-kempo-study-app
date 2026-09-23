@@ -211,16 +211,3 @@ func bearerToken(r *http.Request) (string, bool) {
 	}
 	return strings.TrimPrefix(header, prefix), true
 }
-
-// authorizeAdmin allows the request when the caller is a signed-in user with the
-// "admin" role, or presents the PUSH_ADMIN_TOKEN as a bearer token.
-func (h *Handler) authorizeAdmin(r *http.Request) bool {
-	if hasRole(h.jwks, h.issuerURL, r, "admin") {
-		return true
-	}
-	if h.pushAdminToken == "" {
-		return false // no shared token configured ⇒ only the admin role works
-	}
-	token, ok := bearerToken(r)
-	return ok && subtle.ConstantTimeCompare([]byte(token), []byte(h.pushAdminToken)) == 1
-}

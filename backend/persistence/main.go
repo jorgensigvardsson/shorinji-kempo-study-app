@@ -29,11 +29,8 @@ func main() {
 	cosmosEndpoint  := flag.String("cosmosdb-endpoint",  envutil.String("COSMOS_DB_ENDPOINT",     ""),                                             "Cosmos DB account endpoint URL")
 	cosmosKey       := flag.String("cosmosdb-key",       envutil.String("COSMOS_DB_KEY",          ""),                                             "Cosmos DB account key")
 	cosmosDatabase  := flag.String("cosmosdb-database",  envutil.String("COSMOS_DB_DATABASE",     ""),                                             "Cosmos DB database name")
-	cosmosContainer := flag.String("cosmosdb-container", envutil.String("COSMOS_DB_CONTAINER",    ""),                                             "Cosmos DB container name")
 	pushContainer   := flag.String("cosmosdb-push-container", envutil.String("COSMOS_DB_PUSH_CONTAINER", "pushsubscriptions"),                    "Cosmos DB container name for push subscriptions")
-	userDataContainer := flag.String("cosmosdb-userdata-container", envutil.String("COSMOS_DB_USERDATA_CONTAINER", "userdata"),                   "Cosmos DB container name for the split-item document store")
-	userDataShadow  := flag.Bool("userdata-shadow-writes", envutil.Bool("USERDATA_SHADOW_WRITES", true),                                          "also write every accepted document to the split-item store")
-	userDataReads   := flag.Bool("userdata-reads",       envutil.Bool("USERDATA_READS",          false),                                         "serve reads from the split-item store, keeping the original written as the way back (requires the backfill to have run)")
+	userDataContainer := flag.String("cosmosdb-userdata-container", envutil.String("COSMOS_DB_USERDATA_CONTAINER", "userdata"),                   "Cosmos DB container name for the document store")
 	rateLimitRPS    := flag.Float64("rate-limit-rps",    envutil.Float64("RATE_LIMIT_RPS",        2.0),                                            "max requests per second per IP (0 = disabled)")
 	rateLimitBurst  := flag.Float64("rate-limit-burst",  envutil.Float64("RATE_LIMIT_BURST",      10.0),                                           "rate limit burst size")
 	vapidPublicKey  := flag.String("vapid-public-key",   envutil.String("VAPID_PUBLIC_KEY",       ""),                                             "VAPID public key (base64url); enables push when set with the private key")
@@ -43,42 +40,29 @@ func main() {
 
 	flag.Parse()
 
-	var s store.Store
+	var s store.UserDataStore
 	var pushStore store.PushStore
-	// The split-item store the document is migrating to: written alongside the store
-	// above, never read from, until the split has proven itself against real data.
-	var userDataStore store.UserDataStore
 	switch *storage {
 	case "file":
-		s = store.NewFileStore(*dataDir)
+		s = store.NewFileUserDataStore(*dataDir)
 		pushStore = store.NewFilePushStore(*dataDir)
-		if *userDataShadow {
-			userDataStore = store.NewFileUserDataStore(*dataDir)
-		}
 	case "cosmosdb":
-		if *cosmosEndpoint == "" || *cosmosKey == "" || *cosmosDatabase == "" || *cosmosContainer == "" {
-			log.Fatal("cosmosdb backend requires --cosmosdb-endpoint, --cosmosdb-key, --cosmosdb-database, and --cosmosdb-container")
+		if *cosmosEndpoint == "" || *cosmosKey == "" || *cosmosDatabase == "" {
+			log.Fatal("cosmosdb backend requires --cosmosdb-endpoint, --cosmosdb-key, and --cosmosdb-database")
 		}
-		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer, *pushContainer, *userDataContainer); err != nil {
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *pushContainer, *userDataContainer); err != nil {
 			log.Fatalf("cosmos provisioning: %v", err)
 		}
-		cs, err := store.NewCosmosDBStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosContainer)
+		uds, err := store.NewCosmosUserDataStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *userDataContainer)
 		if err != nil {
 			log.Fatalf("init CosmosDB store: %v", err)
 		}
-		s = cs
+		s = uds
 		ps, err := store.NewCosmosPushStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *pushContainer)
 		if err != nil {
 			log.Fatalf("init CosmosDB push store: %v", err)
 		}
 		pushStore = ps
-		if *userDataShadow {
-			uds, err := store.NewCosmosUserDataStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *userDataContainer)
-			if err != nil {
-				log.Fatalf("init CosmosDB user data store: %v", err)
-			}
-			userDataStore = uds
-		}
 	default:
 		log.Fatalf("unknown storage backend %q (choose file or cosmosdb)", *storage)
 	}
@@ -102,18 +86,6 @@ func main() {
 			map[bool]string{true: "authorized via PUSH_ADMIN_TOKEN", false: "disabled — no PUSH_ADMIN_TOKEN"}[*pushAdminToken != ""])
 	} else {
 		log.Print("push notifications disabled — set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to enable")
-	}
-
-	if userDataStore != nil {
-		handler.WithUserDataShadow(userDataStore)
-		if *userDataReads {
-			handler.WithUserDataReads()
-			log.Print("user data: reading from the split-item store; the original container is kept written as the way back")
-		} else {
-			log.Print("user data: writing the split-item store, still reading from the original")
-		}
-	} else {
-		log.Print("user data: split-item store disabled")
 	}
 
 	mux := http.NewServeMux()

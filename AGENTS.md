@@ -8,6 +8,8 @@
 
 - Don't commit unless requested.
 - Don't create or switch branches unless explicitly requested.
+- Do `git pull --rebase` when fetching changes from origin, unless it's impossible to do so. The `main` branch should
+  be free of zig zig commits.
 
 ## Translations
 

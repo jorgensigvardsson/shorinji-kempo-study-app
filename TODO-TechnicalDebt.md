@@ -63,6 +63,25 @@ The list is ordered by risk, not by effort.
   Nothing caught the original because the file store used in tests keeps a user's items
   in one JSON file, where ids are map keys and never touch a path — worth knowing the
   next time a store behaviour looks well covered
+- [x] Retire the original `documents` container and the dual-write machinery around it.
+  The split store had been authoritative since 2026-08-15, through a full rebuild of
+  both containers, so the copy had done its job. Removed on 2026-09-23: the old store
+  and its file backend, the backfill endpoint, shadow writes, read-through healing, and
+  the `USERDATA_READS` flag that chose between the two. `UserDataStore` is simply the
+  store now, and `Handler` holds one of them rather than a primary and a shadow.
+  Order mattered more than the diff: `ProvisionCosmos` recreates any container it finds
+  missing on every startup, so dropping the container first would only have had it come
+  back empty on the next restart. Code first, deploy, then drop. Deleting the resource
+  from `cosmos-database.bicep` does not delete the container either — ARM's incremental
+  mode leaves unreferenced resources alone — so the drop is a deliberate
+  `az cosmosdb sql container delete` against each environment, and is still outstanding.
+  What goes with it is the rollback: `USERDATA_READS=false` and a restart is no longer a
+  way back, and the container was the source the `userdata` rebuild was backfilled from.
+  The remaining net is the account's continuous backup (7-day PITR), which restores to a
+  new account — a procedure rather than a flag flip.
+  Two functions turned out to be dead once the backfill endpoint went, and went with it:
+  `authorizeAdmin` was its only caller, and `hasRole` fed only that. Push broadcasts
+  authorize through `resolveAudience`, which was easy to misread as also needing them
 - [ ] Add the granular per-item API, and only then split `notes` per note and bucket the entry-timestamped maps. That split needs the key formats, which live in the client, so it belongs there rather than in the server. This is also the step that bumps the schema version, and so the one gated on the client-build drain
 - [x] Drop `syncProvider` from the synced set. It now lives in its own `sync/provider.ts` with a tiny external store, retired from `AppDataState` and added to `RETIRED_DATA_FIELDS` so it does not come back the first time an old device syncs. On first read it adopts whatever the stored document said, so the move signs nobody out. Two things it fixes beyond tidiness: it was circular (the document only exists on the server once signed in), and it was a merged scalar, so signing out on one device was a change the merge could raise a conflict prompt about on another
 - [x] Decide what happens when the app-data document reaches its size cap. The 413 used

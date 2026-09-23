@@ -97,8 +97,8 @@ type DocumentMeta struct {
 	ClientCompat  int    `json:"clientCompat,omitempty"`
 
 	// Fields names the field items that make up this document, so reassembling it is
-	// a series of point reads rather than a query. That keeps the container free of
-	// any indexing requirement, like the one it is replacing.
+	// a series of point reads rather than a query. That is what keeps the container
+	// free of any indexing requirement at all.
 	Fields []string `json:"fields"`
 
 	// RawData holds `data` whole when it is not a JSON object and so cannot be split
@@ -243,29 +243,33 @@ func AssembleDocument(items []UserDataItem) (*Document, error) {
 	return doc, nil
 }
 
-// UserDataStore is the split-item store that will eventually replace Store.
+// UserDataStore holds one document per user, split across several items, with
+// optimistic concurrency.
+//
+// Every write states what the caller believed the stored state to be, and the store
+// refuses the write if that belief turned out to be wrong. Without it, two devices
+// syncing at the same time silently overwrite one another: both read the same
+// document, both merge their own changes into it, and whichever writes last wins.
 //
 // Concurrency rides on the meta item. Every write rewrites it — it carries updatedAt
 // and the field list — so its ETag identifies the document as a whole, and guarding it
 // inside the batch means a write based on a stale read is refused in full rather than
 // landing over someone else's. There is no need to hash the parts together: the item
 // they all move with already answers the question.
-//
-// Save is the checked write, for once reads are served from here. SaveUnconditional is
-// for shadow writes and the backfill, which are copies of a write the old store has
-// already accepted and ordered — adding a second concurrency check there would reject
-// writes that were never in conflict.
 type UserDataStore interface {
 	// Load returns the document and the ETag naming that exact version, or
 	// (nil, "", nil) when the user has nothing stored.
 	Load(userID string) (*Document, string, error)
 
 	// Save writes doc if the stored version still matches ifMatch. An empty ifMatch
-	// asserts nothing is stored yet. Either way a wrong assertion is
-	// ErrPreconditionFailed, as with Store.
+	// asserts nothing is stored yet — so two devices racing to create the first
+	// document cannot clobber each other either. Either way a wrong assertion is
+	// ErrPreconditionFailed.
 	Save(userID string, doc *Document, ifMatch string) (string, error)
 
-	// SaveUnconditional writes doc with no concurrency check.
+	// SaveUnconditional writes doc with no concurrency check, overwriting whatever is
+	// stored. It exists only for app versions predating optimistic concurrency, whose
+	// PUTs carry no precondition at all; see putDocument. Prefer Save.
 	SaveUnconditional(userID string, doc *Document) (string, error)
 
 	Delete(userID string) error
