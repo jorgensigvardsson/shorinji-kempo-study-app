@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   buildWordListCandidates,
   buildKamokuCandidates,
+  buildTechniqueGroupQuizPool,
   buildFootStanceQuizPool,
   buildHandPositionQuizPool,
   buildQuizPool,
@@ -255,9 +256,9 @@ describe("buildKamokuCandidates", () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
-  it("generates a technique-group question", () => {
+  it("leaves technique-group questions to their dedicated quiz", () => {
     const result = buildKamokuCandidates([shodanPlan], "shodan");
-    expect(result.some(c => c.domain === "kamoku.technique_group" && c.correctAnswer === "tsuki")).toBe(true);
+    expect(result.some(c => c.domain === "kamoku.technique_group")).toBe(false);
   });
 
   it("generates attacker-stance and attacker-action questions", () => {
@@ -287,6 +288,69 @@ describe("buildKamokuCandidates", () => {
       weeks: [{ week: 1, type: "regular_week", moments: [noName] }],
     };
     expect(buildKamokuCandidates([plan], "shodan")).toHaveLength(0);
+  });
+});
+
+// ─── buildTechniqueGroupQuizPool ─────────────────────────────────────────────
+
+describe("buildTechniqueGroupQuizPool", () => {
+  const techniqueGroupPlan = (grade: GradePlan["grade"], moments: HokeiMoment[]): GradePlan => ({
+    grade,
+    weeks: [{ week: 1, type: "regular_week", moments }],
+  });
+  const techniqueGroupHokei = (id: string, group: string = "", variations: string[] = []): HokeiMoment => ({
+    ...baseHokei,
+    id,
+    hokei_name: id,
+    technique_group: group,
+    variations,
+  });
+
+  it("asks which technique group a hōkei belongs to", () => {
+    const plans = [
+      techniqueGroupPlan("6 kyū", [techniqueGroupHokei("uwa uke geri", "niō ken")]),
+      techniqueGroupPlan("5 kyū", [techniqueGroupHokei("gyaku gote", "ryūō ken")]),
+      techniqueGroupPlan("4 kyū", [techniqueGroupHokei("kote nuki", "ryūka ken")]),
+    ];
+
+    const pool = buildTechniqueGroupQuizPool(plans, "6 kyū", "own");
+
+    expect(pool.candidates).toEqual([
+      expect.objectContaining({
+        id: "technique_group.uwa uke geri",
+        question: "Vilken teknikgrupp tillhör \"{0}\"?",
+        questionArgs: ["uwa uke geri"],
+        correctAnswer: "niō ken",
+      }),
+    ]);
+    expect(pool.domainOptions.get("technique_group")).toEqual(["niō ken", "ryūō ken", "ryūka ken"]);
+  });
+
+  it("skips hōkei without an explicit technique group", () => {
+    const plan = techniqueGroupPlan("godan", [techniqueGroupHokei("hagai jime to shuhō")]);
+    expect(buildTechniqueGroupQuizPool([plan], "godan", "own").candidates).toEqual([]);
+  });
+
+  it("supports own, up-to-own, a specific grade, and all grades", () => {
+    const plans = [
+      techniqueGroupPlan("6 kyū", [techniqueGroupHokei("sixth kyu", "niō ken")]),
+      techniqueGroupPlan("5 kyū", [techniqueGroupHokei("fifth kyu", "ryūō ken")]),
+      techniqueGroupPlan("4 kyū", [techniqueGroupHokei("fourth kyu", "ryūka ken")]),
+    ];
+
+    expect(buildTechniqueGroupQuizPool(plans, "5 kyū", "own").candidates).toHaveLength(1);
+    expect(buildTechniqueGroupQuizPool(plans, "5 kyū", "up-to-own").candidates).toHaveLength(2);
+    expect(buildTechniqueGroupQuizPool(plans, "5 kyū", "6 kyū").candidates).toHaveLength(1);
+    expect(buildTechniqueGroupQuizPool(plans, "5 kyū", "all").candidates).toHaveLength(3);
+  });
+
+  it("includes variations in the technique shown in the question", () => {
+    const plan = techniqueGroupPlan("nidan", [
+      techniqueGroupHokei("tsuki nuki", "ryūō ken", ["soto"]),
+    ]);
+
+    const [candidate] = buildTechniqueGroupQuizPool([plan], "nidan", "own").candidates;
+    expect(candidate.questionArgs).toEqual(["tsuki nuki (soto)"]);
   });
 });
 

@@ -46,6 +46,7 @@ const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
 const WordQuiz = page(() => import("./WordQuiz.tsx"));
+const TechniqueGroupQuiz = page(() => import("./TechniqueGroupQuiz.tsx"));
 const FootStanceQuiz = page(() => import("./FootStanceQuiz.tsx"));
 const HandPositionQuiz = page(() => import("./HandPositionQuiz.tsx"));
 const GradingTest = page(() => import("./GradingTest.tsx"));
@@ -167,6 +168,13 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         element: <TheoryToolPage><WordQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Ordlistequiz"),
         icon: JournalText,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/quiz/technique-groups",
+        element: <TheoryToolPage><TechniqueGroupQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        menuText: translator.translate("Teknikgruppsquiz"),
+        icon: Collection,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {

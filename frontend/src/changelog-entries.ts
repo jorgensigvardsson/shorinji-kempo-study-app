@@ -5,57 +5,35 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-09-26T14:31:00.000Z",
+    timestamp: "2026-09-26T15:36:06.000Z",
     changes: [
+      {
+        emoji: "🎯",
+        sv: "Ny quiz om teknikgrupper tillagd.",
+        en: "A new quiz about technique groups has been added.",
+        tr: "Teknik grupları hakkında yeni bir quiz eklendi.",
+        ja: "技術グループの新しいクイズを追加しました。",
+      },
       {
         emoji: "🥋",
-        sv: "Kumi-embu visar nu teknikkort direkt vid rätt sekvens i både fri träning och gradering. Kort från tidigare grader går att öppna, håller sig synliga på telefoner och stängs lugnt utan att man tappar sin plats.",
-        en: "Kumi-embu now shows technique cards directly beside the correct sequence in both free practice and grading. Techniques from earlier grades can be opened, stay visible on phones and close smoothly without losing your place.",
-        tr: "Kumi-embu artık hem serbest çalışmada hem de sınav bölümünde teknik kartlarını doğru dizinin yanında gösteriyor. Önceki derecelere ait teknikler açılabiliyor, telefonlarda görünür kalıyor ve konumunuzu kaybetmeden akıcı biçimde kapanıyor.",
-        ja: "自由練習と昇格考試の組演武で、技のカードを該当する構成のすぐ近くに表示するようにしました。以前の級・段の技も開くことができ、スマートフォンでも見失わず、位置を保ったまま滑らかに閉じられます。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-09-26T13:21:00.000Z",
-    changes: [
-      {
-        emoji: "👣",
-        sv: "Grunder skiljer nu tydligt på vändningar och fotförflyttningar. Ordlistan har kompletterats med nio namngivna förflyttningar.",
-        en: "Fundamentals now clearly separates turns from footwork. Nine named movements have also been added to the word list.",
-        tr: "Temel bilgiler artık dönüşleri ayak çalışmalarından açıkça ayırıyor. Sözlüğe ayrıca dokuz adlandırılmış hareket eklendi.",
-        ja: "基本項目で転換と運歩法を分かりやすく分け、用語集に9種類の足運びを追加しました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-09-26T12:45:00.000Z",
-    changes: [
-      {
-        emoji: "🥋",
-        sv: "Kōbōgi med furi zuki och kusshin uke visas nu som Kihon i stället för Hokei.",
-        en: "Kōbōgi with furi zuki and kusshin uke is now shown as Kihon instead of Hokei.",
-        tr: "Furi zuki ve kusshin uke içeren kōbōgi artık Hokei yerine Kihon olarak gösteriliyor.",
-        ja: "振突と屈身受の攻防技を、法形ではなく基本として表示するように修正しました。",
-      },
-    ],
-  },
-  {
-    timestamp: "2026-09-22T20:55:00.000Z",
-    changes: [
-      {
-        emoji: "🥋",
-        sv: "Veckoplanen har fått tydligare veckonavigering och en mer synlig knapp för att markera veckan som tränad.",
-        en: "The weekly plan now has clearer week navigation and a more visible button for marking the week as practised.",
-        tr: "Haftalık planda artık haftalar arasında daha anlaşılır gezinme ve haftayı çalışıldı olarak işaretlemek için daha görünür bir düğme var.",
-        ja: "週間プランの週移動を分かりやすくし、その週を練習済みにするボタンも見つけやすくしました。",
+        sv: "Kumi-embu visar teknikkort direkt vid rätt sekvens. Korten fungerar bättre på telefoner och du tappar inte platsen när de öppnas eller stängs.",
+        en: "Kumi-embu now shows technique cards directly beside the correct sequence. The cards work better on phones, and opening or closing one no longer makes you lose your place.",
+        tr: "Kumi-embu artık teknik kartlarını doğru dizinin yanında gösteriyor. Kartlar telefonlarda daha iyi çalışıyor ve açılıp kapandıklarında bulunduğunuz yeri kaybetmiyorsunuz.",
+        ja: "組演武で、技のカードを該当する構成のすぐ近くに表示するようにしました。スマートフォンでも使いやすくなり、カードを開閉しても見ていた位置を見失いません。",
       },
       {
         emoji: "✨",
-        sv: "Grad och Dojo-läge väljs nu direkt på de träningssidor där de behövs. Gradvalet har stora, lätttryckta alternativ, och Hokei-flashkorten öppnas direkt med din grad vald.",
-        en: "Grade and Dojo mode can now be chosen directly on the training pages where they are needed. The grade picker has large, easy-to-tap choices, and Hokei flashcards open immediately with your grade selected.",
-        tr: "Kademe ve Dojo modu artık ihtiyaç duyulan antrenman sayfalarından doğrudan seçilebiliyor. Kademe seçicisinde dokunması kolay büyük seçenekler var ve Hokei bilgi kartları kendi kademeniz seçili olarak doğrudan açılıyor.",
-        ja: "級・段と道場モードを、必要な練習ページで直接選べるようにしました。級・段の選択肢は大きく押しやすく、法形フラッシュカードは自分の級・段が選ばれた状態ですぐに開きます。",
+        sv: "Träningssidorna har fått tydligare veckonavigering och smidigare val för grad och Dojo-läge.",
+        en: "Training pages now have clearer week navigation and easier choices for grade and Dojo mode.",
+        tr: "Antrenman sayfalarında artık haftalar arasında daha anlaşılır gezinme ile kademe ve Dojo modu için daha kolay seçimler var.",
+        ja: "練習画面の週移動を分かりやすくし、級・段と道場モードも選びやすくしました。",
+      },
+      {
+        emoji: "👣",
+        sv: "Grunder och ordlista har kompletterats med namngivna fotförflyttningar, och en övning som låg under Hokei visas nu korrekt som Kihon.",
+        en: "Fundamentals and the word list now include named footwork, and an exercise previously listed under Hokei is now correctly shown as Kihon.",
+        tr: "Temel bilgiler ve sözlük, adlandırılmış ayak hareketleriyle tamamlandı; daha önce Hokei altında listelenen bir çalışma artık doğru şekilde Kihon olarak gösteriliyor.",
+        ja: "基本項目と用語集に名称のある足運びを追加し、これまで法形に分類されていた練習を正しく基本として表示するようにしました。",
       },
     ],
   },
