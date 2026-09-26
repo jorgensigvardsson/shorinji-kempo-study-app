@@ -5,6 +5,39 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-26T15:36:06.000Z",
+    changes: [
+      {
+        emoji: "🎯",
+        sv: "Ny quiz om teknikgrupper tillagd.",
+        en: "A new quiz about technique groups has been added.",
+        tr: "Teknik grupları hakkında yeni bir quiz eklendi.",
+        ja: "技術グループの新しいクイズを追加しました。",
+      },
+      {
+        emoji: "🥋",
+        sv: "Kumi-embu visar teknikkort direkt vid rätt sekvens. Korten fungerar bättre på telefoner och du tappar inte platsen när de öppnas eller stängs.",
+        en: "Kumi-embu now shows technique cards directly beside the correct sequence. The cards work better on phones, and opening or closing one no longer makes you lose your place.",
+        tr: "Kumi-embu artık teknik kartlarını doğru dizinin yanında gösteriyor. Kartlar telefonlarda daha iyi çalışıyor ve açılıp kapandıklarında bulunduğunuz yeri kaybetmiyorsunuz.",
+        ja: "組演武で、技のカードを該当する構成のすぐ近くに表示するようにしました。スマートフォンでも使いやすくなり、カードを開閉しても見ていた位置を見失いません。",
+      },
+      {
+        emoji: "✨",
+        sv: "Träningssidorna har fått tydligare veckonavigering och smidigare val för grad och Dojo-läge.",
+        en: "Training pages now have clearer week navigation and easier choices for grade and Dojo mode.",
+        tr: "Antrenman sayfalarında artık haftalar arasında daha anlaşılır gezinme ile kademe ve Dojo modu için daha kolay seçimler var.",
+        ja: "練習画面の週移動を分かりやすくし、級・段と道場モードも選びやすくしました。",
+      },
+      {
+        emoji: "👣",
+        sv: "Grunder och ordlista har kompletterats med namngivna fotförflyttningar, och en övning som låg under Hokei visas nu korrekt som Kihon.",
+        en: "Fundamentals and the word list now include named footwork, and an exercise previously listed under Hokei is now correctly shown as Kihon.",
+        tr: "Temel bilgiler ve sözlük, adlandırılmış ayak hareketleriyle tamamlandı; daha önce Hokei altında listelenen bir çalışma artık doğru şekilde Kihon olarak gösteriliyor.",
+        ja: "基本項目と用語集に名称のある足運びを追加し、これまで法形に分類されていた練習を正しく基本として表示するようにしました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-22T19:46:09.000Z",
     changes: [
       {

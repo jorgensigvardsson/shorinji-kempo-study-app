@@ -6,7 +6,7 @@ export interface TrainingControlContext {
 }
 
 export function getTrainingControlContext(pathname: string): TrainingControlContext {
-  if (pathname === "/theory/grading") return { showGrade: true, showTrainingMode: false };
+  if (pathname === "/theory/grading") return { showGrade: true, showTrainingMode: true };
   if (pathname === "/training/grading") return { showGrade: true, showTrainingMode: true };
   if (pathname !== TRAINING_ROOT && !pathname.startsWith(`${TRAINING_ROOT}/`)) {
     return { showGrade: false, showTrainingMode: false };

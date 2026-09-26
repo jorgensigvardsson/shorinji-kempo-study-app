@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { HandIndex, JournalText, QuestionSquare } from "react-bootstrap-icons";
+import { Collection, HandIndex, JournalText, QuestionSquare } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
@@ -16,6 +16,14 @@ const Quiz = () => {
       icon: <JournalText />,
       onSelect: () => navigate("/quiz/words"),
       navigatesTo: "/quiz/words",
+    },
+    {
+      key: "technique-group-quiz",
+      title: translator.translate("Teknikgrupper"),
+      subtitle: translator.translate("Öva vilken teknikgrupp varje hōkei tillhör."),
+      icon: <Collection />,
+      onSelect: () => navigate("/quiz/technique-groups"),
+      navigatesTo: "/quiz/technique-groups",
     },
     {
       key: "foot-stance-quiz",

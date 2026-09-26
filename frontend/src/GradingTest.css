@@ -6,6 +6,10 @@
   padding: 0.5rem 0 1.75rem;
 }
 
+.grading-page-controls {
+  margin-top: 1rem;
+}
+
 .grading-sections {
   display: flex;
   flex-direction: column;
@@ -167,10 +171,6 @@
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
   line-height: 1.5;
-}
-
-.grading-kumi-preview {
-  margin-top: 1.5rem;
 }
 
 .grading-fundamentals {

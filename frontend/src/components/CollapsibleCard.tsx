@@ -15,10 +15,11 @@ interface Props extends React.PropsWithChildren {
     defaultOpen?: boolean;
     focusOnOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
+    onCollapseExited?: () => void;
 }
 
 const CollapsibleCard = (props: Props) => {
-    const { className, header, footer, showCollapse, inlineChevron, defaultOpen = false, focusOnOpen = false, onOpenChange, children } = props;
+    const { className, header, footer, showCollapse, inlineChevron, defaultOpen = false, focusOnOpen = false, onOpenChange, onCollapseExited, children } = props;
     const [open, setOpen] = useState(defaultOpen);
     const cardRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
@@ -122,7 +123,7 @@ const CollapsibleCard = (props: Props) => {
                 </div>
             </Card.Header>
             {canCollapse && (
-                <Collapse in={open}>
+                <Collapse in={open} onExited={onCollapseExited}>
                     <div>
                         <Card.Body>{children}</Card.Body>
                         {footer && <Card.Footer className="border-top-0">{footer}</Card.Footer>}
