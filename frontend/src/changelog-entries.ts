@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-26T13:21:00.000Z",
+    changes: [
+      {
+        emoji: "👣",
+        sv: "Grunder skiljer nu tydligt på vändningar och fotförflyttningar. Ordlistan har kompletterats med nio namngivna förflyttningar.",
+        en: "Fundamentals now clearly separates turns from footwork. Nine named movements have also been added to the word list.",
+        tr: "Temel bilgiler artık dönüşleri ayak çalışmalarından açıkça ayırıyor. Sözlüğe ayrıca dokuz adlandırılmış hareket eklendi.",
+        ja: "基本項目で転換と運歩法を分かりやすく分け、用語集に9種類の足運びを追加しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-26T12:45:00.000Z",
     changes: [
       {

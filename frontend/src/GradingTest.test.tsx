@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
@@ -67,8 +67,8 @@ vi.mock("./assets/grading-exam-information.json", () => ({
                 points: 10,
                 techniqueGroups: [
                   { techniques: [{ romaji: "chūdan gamae" }] },
-                  { techniques: [{ romaji: "zen tenkan" }] },
-                  { techniques: [{ romaji: "chidori ashi" }] },
+                  { techniques: [{ romaji: "zen tenkan" }, { romaji: "han tenkan" }, { romaji: "jun sagari" }, { romaji: "hiraki sagari" }] },
+                  { techniques: [{ romaji: "chidori ashi" }, { romaji: "kani ashi" }, { romaji: "jūji ashi" }, { romaji: "kumo ashi" }] },
                 ],
               },
               {
@@ -291,14 +291,29 @@ describe("GradingTest subject split", () => {
     expect(container.querySelectorAll(".grading-completion-circle")).toHaveLength(4);
     expect(screen.queryByText("chūdan gamae")).toBeNull();
 
-    await user.click(screen.getByRole("button", { name: /Kroppsställning, kroppsföring och fotförflyttning/ }));
+    await user.click(screen.getByRole("button", { name: /Kroppsställning, vändningar och fotförflyttning/ }));
 
     expect(screen.getByText("Kroppsställningar")).toBeTruthy();
-    expect(screen.getByText("Kroppsföring")).toBeTruthy();
-    expect(screen.getByText("Fotförflyttning")).toBeTruthy();
+    const turns = screen.getByText("Vändningar").closest<HTMLElement>(".grading-technique-group");
+    const footwork = screen.getByText("Fotförflyttning").closest<HTMLElement>(".grading-technique-group");
+    expect(turns).toBeTruthy();
+    expect(footwork).toBeTruthy();
     expect(screen.getByText("chūdan gamae")).toBeTruthy();
-    expect(screen.getByText("zen tenkan")).toBeTruthy();
-    expect(screen.getByText("chidori ashi")).toBeTruthy();
+    expect(within(turns!).getByText("zen tenkan")).toBeTruthy();
+    expect(within(turns!).getByText("han tenkan")).toBeTruthy();
+    expect(within(turns!).queryByText("jun sagari")).toBeNull();
+    for (const movement of [
+      "chidori ashi",
+      "ushiro chidori ashi",
+      "jun sagari",
+      "hiraki sagari",
+      "mae chidori ashi",
+      "sashikomi ashi",
+      "sashikae ashi",
+      "kani ashi",
+      "kumo ashi",
+      "jūji ashi",
+    ]) expect(within(footwork!).getByText(movement)).toBeTruthy();
   });
 
   it("saves each fundamentals completion and updates the heading progress", async () => {
@@ -309,7 +324,7 @@ describe("GradingTest subject split", () => {
 
     expect(screen.getByLabelText("0 av 4 delar klarmarkerade")).toBeTruthy();
     const completion = screen.getByRole("checkbox", {
-      name: "Klarmarkera Kroppsställning, kroppsföring och fotförflyttning",
+      name: "Klarmarkera Kroppsställning, vändningar och fotförflyttning",
     });
 
     await user.click(completion);

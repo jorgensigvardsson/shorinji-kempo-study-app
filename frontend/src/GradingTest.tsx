@@ -64,8 +64,8 @@ const categoryTitles: Record<string, string> = {
     "gijutsu I": "Teknik I",
     "gijutsu II": "Teknik II",
     "hōkei kamoku": "Teknikämnen",
-    "tai gamae, tai sabaki": "Kroppsställning och kroppsföring",
-    "tai gamae, tai sabaki, umpohō": "Kroppsställning, kroppsföring och fotförflyttning",
+    "tai gamae, tai sabaki": "Kroppsställning och vändningar",
+    "tai gamae, tai sabaki, umpohō": "Kroppsställning, vändningar och fotförflyttning",
     "tai gamae": "Kroppsställning",
     "tai gamae, fujinhō": "Kroppsställning och fujinhō",
     "umpohō": "Fotförflyttning",
@@ -223,9 +223,49 @@ function groupFundamentalItems(items: Item[]): FundamentalItemGroup[] {
 }
 
 const structuredTechniqueGroupLabels: Record<string, string[]> = {
-    "tai gamae, tai sabaki": ["Kroppsställningar", "Kroppsföring"],
-    "tai gamae, tai sabaki, umpohō": ["Kroppsställningar", "Kroppsföring", "Fotförflyttning"],
+    "tai gamae, tai sabaki": ["Kroppsställningar", "Vändningar"],
+    "tai gamae, tai sabaki, umpohō": ["Kroppsställningar", "Vändningar", "Fotförflyttning"],
 };
+
+const turningNames = new Set(["zen tenkan", "han tenkan"]);
+const completeFootworkOrder = [
+    "chidori ashi",
+    "ushiro chidori ashi",
+    "jun sagari",
+    "hiraki sagari",
+    "mae chidori ashi",
+    "sashikomi ashi",
+    "sashikae ashi",
+    "kani ashi",
+    "kumo ashi",
+    "jūji ashi",
+];
+
+// The grading source deliberately stays verbatim. This presentation-only view
+// separates turns from footwork and supplements the umbrella term chidori ashi
+// with the named forward/backward movements used in training.
+function fundamentalTechniqueGroupsForDisplay(parentTerm: string | undefined, groups: TechniqueGroup[] | undefined): TechniqueGroup[] | undefined {
+    if (parentTerm !== "tai gamae, tai sabaki, umpohō" || groups?.length !== 3) return groups;
+
+    const [stances, movement, sourceFootwork] = groups;
+    const turns = movement.techniques.filter(technique => turningNames.has(technique.romaji));
+    const footworkTerms = [
+        ...movement.techniques.filter(technique => !turningNames.has(technique.romaji)),
+        ...sourceFootwork.techniques,
+        ...completeFootworkOrder.map(romaji => ({ romaji })),
+    ];
+    const termsByName = new Map(footworkTerms.map(term => [term.romaji, term]));
+    const orderedFootwork = [
+        ...completeFootworkOrder.flatMap(name => termsByName.get(name) ?? []),
+        ...footworkTerms.filter(term => !completeFootworkOrder.includes(term.romaji)),
+    ];
+
+    return [
+        stances,
+        { ...movement, techniques: turns },
+        { ...sourceFootwork, techniques: orderedFootwork },
+    ];
+}
 
 function structuredTechniqueGroupLabel(parentTerm: string | undefined, groupIndex: number, groupCount: number): string | undefined {
     if (!parentTerm || groupCount <= 1) return undefined;
@@ -859,13 +899,15 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
     );
 };
 
-const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured = false }: { groups: TechniqueGroup[] | undefined; translator: Translator; showKanji: boolean; parentTerm?: string; structured?: boolean }) => (
-    <>
-        {groups?.map((group, groupIndex) => (
+const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured = false }: { groups: TechniqueGroup[] | undefined; translator: Translator; showKanji: boolean; parentTerm?: string; structured?: boolean }) => {
+    const displayGroups = structured ? fundamentalTechniqueGroupsForDisplay(parentTerm, groups) : groups;
+
+    return <>
+        {displayGroups?.map((group, groupIndex) => (
             <div key={groupIndex} className={structured ? "grading-technique-group" : "mb-2"}>
-                {(group.context?.text || structuredTechniqueGroupLabel(parentTerm, groupIndex, groups.length)) && (
+                {(group.context?.text || structuredTechniqueGroupLabel(parentTerm, groupIndex, displayGroups.length)) && (
                     <div className={structured ? "grading-technique-group-title" : "text-muted small mb-1"}>
-                        {translator.translate(group.context?.text ?? structuredTechniqueGroupLabel(parentTerm, groupIndex, groups.length)!)}
+                        {translator.translate(group.context?.text ?? structuredTechniqueGroupLabel(parentTerm, groupIndex, displayGroups.length)!)}
                     </div>
                 )}
                 <ul className={structured ? "grading-technique-list" : "mb-0"}>
@@ -883,6 +925,6 @@ const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured
             </div>
         ))}
     </>
-);
+};
 
 export default GradingTest;
