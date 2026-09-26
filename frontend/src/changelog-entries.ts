@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-26T12:45:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Kōbōgi med furi zuki och kusshin uke visas nu som Kihon i stället för Hokei.",
+        en: "Kōbōgi with furi zuki and kusshin uke is now shown as Kihon instead of Hokei.",
+        tr: "Furi zuki ve kusshin uke içeren kōbōgi artık Hokei yerine Kihon olarak gösteriliyor.",
+        ja: "振突と屈身受の攻防技を、法形ではなく基本として表示するように修正しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-22T20:55:00.000Z",
     changes: [
       {

@@ -235,6 +235,7 @@ describe("FreePractice", () => {
     await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
     expect(screen.getByText("harai uke geri")).toBeTruthy();
     expect(screen.getByText("ren geri")).toBeTruthy();
+    expect(screen.getByText("furi zuki & kusshin uke")).toBeTruthy();
   });
 
   it("removes setup copy and enlarges the Kihon hierarchy in Dojo mode", () => {

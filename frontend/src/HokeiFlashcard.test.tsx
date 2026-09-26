@@ -1,8 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it } from "vitest";
-import type { GradePlan, HokeiMoment } from "./data";
+import { getAllHokeiMoments, type GradePlan, type HokeiMoment } from "./data";
 import HokeiFlashcard from "./HokeiFlashcard";
+import kamokuhyo from "./assets/kamokuhyo.json";
 import { TranslatorContext, TranslatorImplementation } from "./i18n";
 import { getAppDataStore } from "./persistence/store";
 
@@ -127,4 +128,12 @@ it("opens directly at the user's grade and changes grade through the shared pick
     expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
     expect(screen.getByRole("heading", { name: /Gyaku gote/i })).toBeDefined();
     expect(screen.queryByRole("heading", { name: /Uchi uke zuki/i })).toBeNull();
+});
+
+it("uses the confirmed Kamoku classification for Kihon, Zeme and Hagai jime", () => {
+    const ids = (kamokuhyo as GradePlan[]).flatMap(getAllHokeiMoments).map(moment => moment.id);
+
+    expect(ids).not.toContain("kōbōgi (furi zuki & kusshin uke)");
+    expect(ids).toContain("jitsugetsu zeme");
+    expect(ids).toContain("hagai jime to shuhō");
 });

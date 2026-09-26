@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GradePlan, HokeiMoment } from "./data";
+import type { GradePlan, HokeiMoment, KihonMoment } from "./data";
 import Kamoku from "./Kamoku";
 import { getAppDataStore } from "./persistence/store";
 import gradePlans from "./assets/kamokuhyo.json";
@@ -25,6 +25,18 @@ const hokei: HokeiMoment = {
   variations: [],
   technique_group: "jūhō",
   foot_stance: [],
+  roles: { attacker: {}, defender: {} },
+  kyohan_pages: [],
+};
+
+const kihon: KihonMoment = {
+  id: "kōbōgi (furi zuki & kusshin uke)",
+  type: "kihon_moment",
+  name: "kōbōgi (furi zuki & kusshin uke)",
+  ren_hanko: false,
+  variations: [],
+  technique_group: "niō ken",
+  foot_stance: ["tai gamae"],
   roles: { attacker: {}, defender: {} },
   kyohan_pages: [],
 };
@@ -60,6 +72,19 @@ describe("Kamoku weekly plan", () => {
     expect(screen.getByText("gyaku gote")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Kihon shohō, repetition, studier/i })).toBeNull();
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
+  });
+
+  it("shows a classified Kihon exercise under Kihon rather than Tekniker", () => {
+    const kihonPlan: GradePlan = {
+      grade: "2 kyū",
+      weeks: [{ week: 3, type: "regular_week", moments: [kihon] }],
+    };
+
+    render(<Kamoku myGrade="2 kyū" allGradePlans={[kihonPlan]} />);
+
+    expect(screen.getByRole("heading", { name: "Kihon" })).toBeTruthy();
+    expect(screen.getAllByText("kōbōgi (furi zuki & kusshin uke)")).toHaveLength(2);
+    expect(screen.queryByRole("heading", { name: "Tekniker" })).toBeNull();
   });
 
   it("removes the explanatory introduction and marks the page for larger dojo text", () => {

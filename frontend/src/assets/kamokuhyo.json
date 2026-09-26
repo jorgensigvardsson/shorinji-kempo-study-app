@@ -2159,8 +2159,8 @@
           },
           {
             "id": "kōbōgi (furi zuki & kusshin uke)",
-            "type": "hokei_moment",
-            "hokei_name": "kōbōgi (furi zuki & kusshin uke)",
+            "type": "kihon_moment",
+            "name": "kōbōgi (furi zuki & kusshin uke)",
             "variations": [],
             "technique_group": "niō ken",
             "ren_hanko": false,
