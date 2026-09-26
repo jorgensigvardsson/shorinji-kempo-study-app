@@ -33,10 +33,11 @@ interface HokeiCardProps {
     kamokuLayout?: boolean;
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
+    onCollapseExited?: () => void;
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange } = props;
+    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange, onCollapseExited } = props;
     const translator = useContext(TranslatorContext);
     const note = useHokeiNote(hokei.id);
     const rank = useHokeiRank(hokei.id);
@@ -66,7 +67,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                 header={<DojoCardHeader hokei={hokei} />}
                 footer={footer}
                 defaultOpen={defaultOpen}
-                onOpenChange={onOpenChange}
+                onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                 className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
             >
                 <HokeiDojoDetails hokei={hokei} />
@@ -80,7 +81,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                 header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} showKanji={showKanji} />}
                 footer={kamokuFooter}
                 defaultOpen={defaultOpen}
-                onOpenChange={onOpenChange}
+                onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
             >
                 <HokeiDetails hokei={hokei} showKanji={showKanji} />
@@ -104,7 +105,7 @@ const HokeiCard = (props: HokeiCardProps) => {
             <CollapsibleCard header={compactHeader} inlineChevron
                              footer={footer}
                              defaultOpen={defaultOpen}
-                             onOpenChange={onOpenChange}
+                             onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
                 <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
@@ -137,7 +138,7 @@ const HokeiCard = (props: HokeiCardProps) => {
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
                          footer={footer}
                          defaultOpen={defaultOpen}
-                         onOpenChange={onOpenChange}
+                         onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}

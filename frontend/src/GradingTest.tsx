@@ -1,11 +1,11 @@
-import { useContext, useMemo, useRef, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Badge } from "react-bootstrap";
 import { Award, Book, Check2, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
 import { useSearchParams } from "react-router-dom";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { noTranslate, TranslatorContext, type Translator } from "./i18n";
-import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
+import { getAllHokeiMoments, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
@@ -328,6 +328,13 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                     map.set(m.hokei_name, m);
         return map;
     }, [allGradePlans, selectedGrade]);
+    const kumiEmbuTechniques = useMemo<KumiEmbuTechniqueLink[]>(() => allGradePlans.flatMap(plan =>
+        getAllHokeiMoments(plan).map((hokei, index) => ({
+            key: `${plan.grade}|${hokei.id}|${index}`,
+            hokei,
+            grade: plan.grade,
+        }))
+    ), [allGradePlans]);
 
     const manual = selectedGrade ? allGrades[selectedGrade] : undefined;
     if (!manual) {
@@ -406,8 +413,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                 ) : isKumiEmbu ? (
                     <KumiEmbuDetail
                         item={selectedItem}
-                        grade={activeSelection.grade}
-                        hokeiMap={hokeiMap}
+                        techniques={kumiEmbuTechniques}
                         dojoMode={dojoMode}
                     />
                 ) : (
@@ -557,23 +563,12 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
     );
 };
 
-const KumiEmbuDetail = ({ item, grade, hokeiMap, dojoMode }: {
+const KumiEmbuDetail = ({ item, techniques, dojoMode }: {
     item: Item;
-    grade: GradeName;
-    hokeiMap: Map<string, HokeiMoment>;
+    techniques: KumiEmbuTechniqueLink[];
     dojoMode: boolean;
 }) => {
     const translator = useContext(TranslatorContext);
-    const [preview, setPreview] = useState<{ hokei: HokeiMoment; requestId: number } | null>(null);
-    const previewRequestId = useRef(0);
-    const techniques: KumiEmbuTechniqueLink[] = [...hokeiMap.entries()].map(([key, hokei]) => ({
-        key,
-        hokei,
-        onSelect: () => {
-            previewRequestId.current += 1;
-            setPreview({ hokei, requestId: previewRequestId.current });
-        },
-    }));
 
     return (
         <div className="grading-kumi-embu">
@@ -591,23 +586,6 @@ const KumiEmbuDetail = ({ item, grade, hokeiMap, dojoMode }: {
             {item.videos && item.videos.length > 0 && (
                 <div className="d-flex flex-column gap-2 mt-3">
                     {item.videos.map(video => <VideoLink key={video.url} video={video} />)}
-                </div>
-            )}
-            {preview && (
-                <div className="grading-kumi-preview">
-                    <HokeiCard
-                        key={`${preview.hokei.hokei_name}-${preview.requestId}`}
-                        hokei={preview.hokei}
-                        gradeName={grade}
-                        showNotes
-                        showRating
-                        dojoMode={dojoMode}
-                        kamokuLayout
-                        defaultOpen
-                        onOpenChange={open => {
-                            if (!open) setPreview(null);
-                        }}
-                    />
                 </div>
             )}
         </div>

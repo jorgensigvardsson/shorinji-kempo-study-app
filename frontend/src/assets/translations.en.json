@@ -916,6 +916,7 @@
   "Ingen teknik hittades.": "No technique found.",
   "Din embu är tom. Sök efter den första tekniken ovan.": "Your embu is empty. Search for the first technique above.",
   "Visa teknik {0}": "View technique {0}",
+  "Det finns ingen fast Kumi-embu för den valda graden.": "There is no fixed Kumi-embu for the selected grade.",
   "Flytta {0}": "Move {0}",
   "Flytta {0} upp": "Move {0} up",
   "Flytta {0} ner": "Move {0} down",

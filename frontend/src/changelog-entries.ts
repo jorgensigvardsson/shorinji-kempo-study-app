@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-26T14:31:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Kumi-embu visar nu teknikkort direkt vid rätt sekvens i både fri träning och gradering. Kort från tidigare grader går att öppna, håller sig synliga på telefoner och stängs lugnt utan att man tappar sin plats.",
+        en: "Kumi-embu now shows technique cards directly beside the correct sequence in both free practice and grading. Techniques from earlier grades can be opened, stay visible on phones and close smoothly without losing your place.",
+        tr: "Kumi-embu artık hem serbest çalışmada hem de sınav bölümünde teknik kartlarını doğru dizinin yanında gösteriyor. Önceki derecelere ait teknikler açılabiliyor, telefonlarda görünür kalıyor ve konumunuzu kaybetmeden akıcı biçimde kapanıyor.",
+        ja: "自由練習と昇格考試の組演武で、技のカードを該当する構成のすぐ近くに表示するようにしました。以前の級・段の技も開くことができ、スマートフォンでも見失わず、位置を保ったまま滑らかに閉じられます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-26T13:21:00.000Z",
     changes: [
       {

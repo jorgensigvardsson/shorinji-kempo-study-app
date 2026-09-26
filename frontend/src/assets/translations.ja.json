@@ -1040,6 +1040,7 @@
   "Ingen teknik hittades.": "技が見つかりません。",
   "Din embu är tom. Sök efter den första tekniken ovan.": "演武はまだ空です。上で最初の技を検索してください。",
   "Visa teknik {0}": "{0}の技を表示",
+  "Det finns ingen fast Kumi-embu för den valda graden.": "選択した級・段には規定の組演武がありません。",
   "Flytta {0}": "{0}を移動",
   "Flytta {0} upp": "{0}を上へ移動",
   "Flytta {0} ner": "{0}を下へ移動",

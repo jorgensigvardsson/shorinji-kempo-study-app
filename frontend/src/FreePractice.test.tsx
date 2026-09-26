@@ -540,6 +540,24 @@ describe("FreePractice", () => {
     expect(screen.queryByText("kōgeki: migi ryote yubi")).toBeNull();
   });
 
+  it("does not substitute another grade's Kumi-embu when the selected grade has none", async () => {
+    const user = userEvent.setup();
+    renderPractice(
+      <FreePractice
+        myGrade="rokudan"
+        allGradePlans={[{ grade: "rokudan", weeks: [] }]}
+        activeArea="embu"
+        onAreaChange={() => undefined}
+        onBack={() => undefined}
+        dojoMode={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Träna kumi-embu" }));
+    expect(screen.getByText("Det finns ingen fast Kumi-embu för den valda graden.")).toBeTruthy();
+    expect(document.querySelector(".kumi-embu-sequence-list")).toBeNull();
+  });
+
   it("links both existing technique cards in a composite kumi-embu step", async () => {
     const user = userEvent.setup();
     renderPractice(<KumiEmbuLinkHarness />);
@@ -553,10 +571,12 @@ describe("FreePractice", () => {
     await user.click(keriTenSan);
     const card = document.querySelector<HTMLElement>(".hokei-card.is-expanded");
     expect(card).not.toBeNull();
+    expect(card?.closest("li")).toBe(keriTenSan.closest("li"));
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
 
     await user.click(card!.querySelector<HTMLElement>(".card-header")!);
     await waitFor(() => expect(document.querySelector(".hokei-card")).toBeNull());
+    expect(document.querySelector(".kumi-embu-technique-preview")).toBeNull();
   });
 
   it("presents Kumi-embu with larger, simplified content in Dojo mode", async () => {

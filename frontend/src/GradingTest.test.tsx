@@ -103,7 +103,7 @@ vi.mock("./assets/grading-exam-information.json", () => ({
               },
               {
                 numbering: { style: "paren", value: 2 },
-                term: { romaji: "gyaku gote" },
+                term: { romaji: "gyaku gote - mae yubi gatame" },
               },
             ],
           },
@@ -127,7 +127,14 @@ const hokei = (hokeiName: string): HokeiMoment => ({
 });
 
 const plans = [
-  { grade: "6 kyū", weeks: [] },
+  {
+    grade: "6 kyū",
+    weeks: [{
+      week: 1,
+      type: "regular_week",
+      moments: [hokei("gyaku gote")],
+    }],
+  },
   {
     grade: "3 kyū",
     weeks: [{
@@ -258,6 +265,12 @@ describe("GradingTest subject split", () => {
     expect(screen.getByRole("button", { name: /Visa teknik Tai ten ichi/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Visa teknik Keri ten san/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Visa teknik Gyaku gote/i })).toBeTruthy();
+    const finish = screen.getByRole("button", { name: /Visa teknik Mae yubi gatame/i });
+    await user.click(finish);
+    const preview = container.querySelector(".kumi-embu-technique-preview");
+    expect(preview).not.toBeNull();
+    expect(preview?.closest("li")).toBe(finish.closest("li"));
+    expect(preview?.querySelector(".kamoku-card-name")?.textContent).toBe("Gyaku gote");
   });
 
   it("treats an opened technical category as exactly one back step", async () => {

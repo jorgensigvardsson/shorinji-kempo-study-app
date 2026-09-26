@@ -920,6 +920,7 @@
   "Ingen teknik hittades.": "Teknik bulunamadı.",
   "Din embu är tom. Sök efter den första tekniken ovan.": "Embunuz boş. Yukarıdan ilk tekniği arayın.",
   "Visa teknik {0}": "{0} tekniğini göster",
+  "Det finns ingen fast Kumi-embu för den valda graden.": "Seçilen derece için sabit bir Kumi-embu yoktur.",
   "Flytta {0}": "{0} tekniğini taşı",
   "Flytta {0} upp": "{0} tekniğini yukarı taşı",
   "Flytta {0} ner": "{0} tekniğini aşağı taşı",

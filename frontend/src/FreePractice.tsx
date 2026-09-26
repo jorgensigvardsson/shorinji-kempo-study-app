@@ -518,7 +518,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
             .find(item => item.term?.romaji === "kumi embu");
         return sequence ? [{ grade: plan.grade, sequence }] : [];
     }).sort((a, b) => compareGrades(a.grade, b.grade)), [allGradePlans]);
-    const selected = sequences.find(entry => entry.grade === myGrade) ?? sequences[0];
+    const selected = sequences.find(entry => entry.grade === myGrade);
 
     useEffect(() => draftData.registerListener(nextDraft => setDraft(fillEmbuSequenceSlots(nextDraft))), [draftData]);
 
@@ -746,7 +746,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
     const kumiEmbuTechniques: KumiEmbuTechniqueLink[] = techniques.map(technique => ({
         key: embuTechniqueKey(technique),
         hokei: technique.hokei,
-        onSelect: () => showTechnique(technique),
+        grade: technique.grade,
     }));
 
     const techniquePicker = pickerTarget !== null && pickerSequenceIndex >= 0 ? (
@@ -1147,19 +1147,25 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                 />
             )}
 
-            {activeView === "kumi" && selected && (
+            {activeView === "kumi" && (
                 <section className={`free-practice-section embu-kumi-example${dojoMode ? " is-dojo-mode" : ""}`}>
                     <div className="free-practice-section-heading">
                         <h3 className="app-section-heading">{translator.translate("Kumi-embu")}</h3>
                     </div>
-                    <KumiEmbuSequenceList
-                        items={selected.sequence.items ?? []}
-                        techniques={kumiEmbuTechniques}
-                        dojoMode={dojoMode}
-                    />
-                    {(selected.sequence.videos ?? []).map(video => (
-                        <VideoLink key={video.url} video={video} className="mt-3" />
-                    ))}
+                    {selected ? (
+                        <>
+                            <KumiEmbuSequenceList
+                                items={selected.sequence.items ?? []}
+                                techniques={kumiEmbuTechniques}
+                                dojoMode={dojoMode}
+                            />
+                            {(selected.sequence.videos ?? []).map(video => (
+                                <VideoLink key={video.url} video={video} className="mt-3" />
+                            ))}
+                        </>
+                    ) : (
+                        <p className="text-muted mb-0">{translator.translate("Det finns ingen fast Kumi-embu för den valda graden.")}</p>
+                    )}
                 </section>
             )}
         </div>
