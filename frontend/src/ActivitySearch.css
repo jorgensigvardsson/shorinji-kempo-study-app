@@ -5,7 +5,7 @@
 .search-results { list-style: none; padding: 0; margin: 0; }
 .search-results li { display: flex; border-bottom: 1px solid var(--bs-border-color); align-items: stretch; }
 .search-results a { display: flex; flex: 1; min-width: 0; gap: 0.8rem; align-items: center; padding: 0.85rem 0.4rem; text-decoration: none; color: var(--bs-body-color); }
-.search-results a > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.search-results a > span { flex: 1; min-width: 0; overflow-wrap: normal; word-break: normal; }
 .search-results a > svg { flex-shrink: 0; color: var(--bs-secondary-color); }
 .search-results a:hover { background: var(--bs-tertiary-bg); }
 .search-results small { display: block; margin-top: 0.15rem; color: var(--bs-secondary-color); }

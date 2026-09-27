@@ -30,3 +30,5 @@ SESSION.md
 src/assets/kamokuhyo2.json
 src/assets/kamokuhyo.json.bak.preupdate
 translation-exports/
+playwright-report/
+test-results/

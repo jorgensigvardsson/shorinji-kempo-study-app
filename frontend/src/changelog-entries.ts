@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-27T10:24:45.000Z",
+    changes: [
+      {
+        emoji: "🔠",
+        sv: "Textstorlekarna fungerar nu bättre på telefoner. Menyer, kort och ordlista håller sig inom skärmen även med större text.",
+        en: "Text sizes now work better on phones. Menus, cards and the word list stay within the screen even with larger text.",
+        tr: "Metin boyutları artık telefonlarda daha iyi çalışıyor. Daha büyük metin kullanıldığında bile menüler, kartlar ve sözlük ekranın içinde kalıyor.",
+        ja: "スマートフォンで文字サイズがより適切に機能するようになりました。文字を大きくしても、メニュー、カード、用語集が画面内に収まります。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-26T15:36:06.000Z",
     changes: [
       {

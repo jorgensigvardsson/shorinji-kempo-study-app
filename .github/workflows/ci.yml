@@ -107,6 +107,14 @@ jobs:
         if: steps.run-tests.outcome == 'failure'
         run: exit 1
 
+      - name: Install browser for responsive layout tests
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: Check every text size in a real browser
+        run: npm run test:layout
+        working-directory: frontend
+
   # ── Deploys ────────────────────────────────────────────────────────────────
   # `needs:` is the gate — a failed or cancelled test job skips these entirely.
   # Permissions are granted here because a called workflow can only narrow what

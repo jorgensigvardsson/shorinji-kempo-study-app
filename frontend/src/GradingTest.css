@@ -300,7 +300,8 @@
 }
 
 .grading-fundamental-subtitle {
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
   color: var(--bs-secondary-color);
   font-size: 0.82rem;
   line-height: 1.35;
@@ -355,7 +356,8 @@
   position: relative;
   min-width: 0;
   padding-left: 0.8rem;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
   line-height: 1.45;
 }
 

@@ -50,6 +50,17 @@ h3,
   font-family: var(--app-display-font);
 }
 
+/* Bootstrap cards normally use overflow-wrap: break-word. That is useful for
+   URLs, but it also turns a term such as "chūdan gamae" into "gama" + "e"
+   when a column gets tight. App content wraps between words by default;
+   user-entered notes and other genuinely unbroken content opt into `anywhere`
+   in their own component rules. */
+.card {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
 /* Shared type hierarchy. Layout containers own their spacing; these classes
    only describe the role a heading or its supporting copy plays. */
 .app-page-heading {

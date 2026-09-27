@@ -49,7 +49,8 @@
 .app-grid-title {
   margin: 0;
   color: var(--bs-emphasis-color);
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .app-grid-subtitle {
