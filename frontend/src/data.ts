@@ -104,8 +104,9 @@ export interface GodanHokeiMoment {
 }
 
 /**
- * A kyūsho-attack ("zeme") drill — not a defensive hōkei but a drill in
- * exploiting a specific vital point. Used from godan onwards.
+ * A kyūsho-attack ("zeme") using pressure points. Sensei confirmed these are
+ * correctly classified as hōkei within rakan appō, even though they are attacks
+ * rather than defensive hōkei. Used from godan onwards.
  */
 export interface KyushoZemeWeek {
   week: number;
@@ -125,7 +126,7 @@ export interface ReviewPreparationWeek {
   content: string[];
 }
 
-export type Moment = HokeiMoment | StandardMoment;
+export type Moment = HokeiMoment | KihonMoment | StandardMoment;
 
 /**
  * A link to a demonstration video. `label` distinguishes multiple videos for
@@ -145,6 +146,22 @@ export interface HokeiMoment {
   id: string;
   type: "hokei_moment";
   hokei_name: string;
+  ren_hanko: boolean;
+  variations: string[];
+  technique_group: string;
+  foot_stance: string[];
+  roles: Roles;
+  references?: string[];
+  kyohan_pages: number[];
+  videos?: Video[];
+}
+
+export interface KihonMoment {
+  // This record used to be a HokeiMoment, so its stable id may already own notes
+  // and ratings. The Kihon classification changes where it is shown, not its identity.
+  id: string;
+  type: "kihon_moment";
+  name: string;
   ren_hanko: boolean;
   variations: string[];
   technique_group: string;
@@ -205,7 +222,11 @@ export function isStandardMoment(moment: Moment): moment is StandardMoment {
 }
 
 export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
-  return "hokei_name" in moment;
+  return moment.type === "hokei_moment";
+}
+
+export function isKihonMoment(moment: Moment): moment is KihonMoment {
+  return moment.type === "kihon_moment";
 }
 
 /**
@@ -232,6 +253,9 @@ export function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
 }
 
 export function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
+  // hagai jime to shuhō is a boundary case rather than a strict Kyōhan hōkei,
+  // but Sensei confirmed that Kamoku intentionally lists it with the hōkei. Do
+  // not infer classification from its missing technique group or filter it out.
   return {
     id: m.hokei_name,
     type: "hokei_moment",
@@ -259,12 +283,25 @@ export function adaptKyushoZeme(z: KyushoZeme): HokeiMoment {
   };
 }
 
+export function adaptKihonMoment(m: KihonMoment): HokeiMoment {
+  return {
+    ...m,
+    type: "hokei_moment",
+    hokei_name: m.name,
+  };
+}
+
 export function getHokeiMoments(week: Week): HokeiMoment[] {
   if (isYondanWeek(week)) return week.moment ? [adaptYondanMoment(week.moment)] : [];
   if (isGodanWeek(week)) return [adaptGodanMoment(week.moment)];
   if (isKyushoZemeWeek(week)) return [adaptKyushoZeme(week.zeme)];
   if (!("moments" in week)) return [];
   return week.moments.filter(isHokeiMoment);
+}
+
+export function getKihonMoments(week: Week): KihonMoment[] {
+  if (!("moments" in week)) return [];
+  return week.moments.filter(isKihonMoment);
 }
 
 export function getStandardMoments(week: Week): StandardMoment[] {

@@ -7,6 +7,7 @@ import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
 import { load } from "./persistence/data";
 import { isText, useBrowserState } from "./browser-state";
+import { FocusChoicePicker } from "./components/TrainingPageControls";
 
 interface Props {
     grade: GradePlan;
@@ -24,7 +25,15 @@ const List = (props: Props) => {
     const [filterText, setFilterText] = useBrowserState("hokei-query", "", isText);
     const [debouncedFilterText, setDebouncedFilterText] = useState(filterText);
     const translator = useContext(TranslatorContext);
-    const showKanji = !dojoMode;
+    const visibleSelection = selection === "own" ? grade.grade : selection;
+    const selectionChoices = [
+        { value: "all", label: translator.translate("Alla") },
+        { value: "up-to-own", label: translator.translate("Alla till och med egna") },
+        ...allGradePlans.map(plan => ({
+            value: plan.grade,
+            label: gradeLabel(plan.grade, translator, false),
+        })),
+    ];
 
     const allHokeis = useMemo(() =>
         allGradePlans.flatMap(gradePlan => gradePlan.weeks.map(week => ({
@@ -60,27 +69,17 @@ const List = (props: Props) => {
         <>
             <div className="training-list-controls training-view-controls mb-4 is-single">
                 <div className="training-list-filters">
-                    <Form.Select value={selection} onChange={e => {
-                        const newSelection = e.target.value as Selection;
+                    <FocusChoicePicker
+                      title={translator.translate("Välj vad som visas")}
+                      value={visibleSelection}
+                      choices={selectionChoices}
+                      className="hokei-selection-control"
+                      onChange={value => {
+                        const newSelection = value as Selection;
                         selectionData.save(newSelection);
                         setSelection(newSelection);
-                    }}>
-                        <option value="all">{translator.translate('Alla')}</option>
-                        <option value="own">{translator.translate('Endast egna')}</option>
-                        <option value="up-to-own">{translator.translate('Alla till och med egna')}</option>
-                        <option value="6 kyū">{gradeLabel('6 kyū', translator, showKanji)}</option>
-                        <option value="5 kyū">{gradeLabel('5 kyū', translator, showKanji)}</option>
-                        <option value="4 kyū">{gradeLabel('4 kyū', translator, showKanji)}</option>
-                        <option value="3 kyū">{gradeLabel('3 kyū', translator, showKanji)}</option>
-                        <option value="2 kyū">{gradeLabel('2 kyū', translator, showKanji)}</option>
-                        <option value="1 kyū">{gradeLabel('1 kyū', translator, showKanji)}</option>
-                        <option value="shodan">{gradeLabel('shodan', translator, showKanji)}</option>
-                        <option value="nidan">{gradeLabel('nidan', translator, showKanji)}</option>
-                        <option value="sandan">{gradeLabel('sandan', translator, showKanji)}</option>
-                        <option value="yondan">{gradeLabel('yondan', translator, showKanji)}</option>
-                        <option value="godan">{gradeLabel('godan', translator, showKanji)}</option>
-                        <option value="rokudan">{gradeLabel('rokudan', translator, showKanji)}</option>
-                    </Form.Select>
+                      }}
+                    />
                     <Form.Control
                         type="search"
                         enterKeyHint="search"

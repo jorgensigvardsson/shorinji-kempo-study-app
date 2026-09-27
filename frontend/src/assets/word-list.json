@@ -3903,6 +3903,78 @@
     ]
   },
   {
+    "id": 539,
+    "kanji": "後千鳥足",
+    "romaji": "ushiro chidori ashi",
+    "meanings": [
+      "förflyttning snett bakåt"
+    ]
+  },
+  {
+    "id": 540,
+    "kanji": "順退り",
+    "romaji": "jun sagari",
+    "meanings": [
+      "vanlig reträtt rakt bakåt"
+    ]
+  },
+  {
+    "id": 541,
+    "kanji": "開退り",
+    "romaji": "hiraki sagari",
+    "meanings": [
+      "skridskoskär bakåt"
+    ]
+  },
+  {
+    "id": 542,
+    "kanji": "前千鳥足",
+    "romaji": "mae chidori ashi",
+    "meanings": [
+      "förflyttning snett framåt"
+    ]
+  },
+  {
+    "id": 543,
+    "kanji": "差込足",
+    "romaji": "sashikomi ashi",
+    "meanings": [
+      "förflyttning rakt framåt"
+    ]
+  },
+  {
+    "id": 544,
+    "kanji": "差替足",
+    "romaji": "sashikae ashi",
+    "meanings": [
+      "skridskoskär framåt"
+    ]
+  },
+  {
+    "id": 545,
+    "kanji": "蟹足",
+    "romaji": "kani ashi",
+    "meanings": [
+      "krabbsteg: isär först, sedan ihop"
+    ]
+  },
+  {
+    "id": 546,
+    "kanji": "蜘蛛足",
+    "romaji": "kumo ashi",
+    "meanings": [
+      "spindelsteg: ihop först, sedan isär"
+    ]
+  },
+  {
+    "id": 547,
+    "kanji": "十字足",
+    "romaji": "jūji ashi",
+    "meanings": [
+      "korssteg"
+    ]
+  },
+  {
     "id": 484,
     "kanji": "鉄槌",
     "romaji": "tettsui",

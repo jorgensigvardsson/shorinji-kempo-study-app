@@ -30,6 +30,65 @@ const TAI_GAMAE = "tai gamae";
 const HIRAKI_GAMAE = "hiraki gamae";
 const BOTH_FOOT_STANCES = "Båda";
 const HAND_POSITION_DOMAIN = "hand_position";
+const TECHNIQUE_GROUP_DOMAIN = "technique_group";
+
+export const buildTechniqueGroupQuizPool = (
+  plans: GradePlan[],
+  myGrade: GradeName,
+  selection: QuizGradeSelection,
+): QuizPool => {
+  const candidates: QuizCandidate[] = [];
+  const techniqueGroups: string[] = [];
+  const seen = new Set<string>();
+
+  // Distractors come from the real technique groups in the whole curriculum.
+  // A single early grade otherwise has too few groups for three useful choices.
+  for (const plan of plans) {
+    for (const week of plan.weeks) {
+      for (const moment of getHokeiMoments(week)) {
+        const techniqueGroup = normalizeText(moment.technique_group);
+        if (techniqueGroup && !containsNormalized(techniqueGroups, techniqueGroup))
+          techniqueGroups.push(techniqueGroup);
+      }
+    }
+  }
+
+  for (const plan of plans) {
+    if (!matchesGradeSelection(plan.grade, myGrade, selection))
+      continue;
+
+    for (const week of plan.weeks) {
+      for (const moment of getHokeiMoments(week)) {
+        const hokeiName = normalizeText(moment.hokei_name);
+        const techniqueGroup = normalizeText(moment.technique_group);
+        if (!hokeiName || !techniqueGroup)
+          continue;
+
+        const variations = moment.variations.map(normalizeText).filter(Boolean);
+        const techniqueLabel = variations.length > 0
+          ? `${hokeiName} (${variations.join(", ")})`
+          : hokeiName;
+        const dedupeKey = `${normalizeKey(techniqueLabel)}|${normalizeKey(techniqueGroup)}`;
+        if (seen.has(dedupeKey))
+          continue;
+
+        seen.add(dedupeKey);
+        candidates.push({
+          id: `technique_group.${moment.id}`,
+          question: `Vilken teknikgrupp tillhör "{0}"?`,
+          questionArgs: [techniqueLabel],
+          correctAnswer: techniqueGroup,
+          domain: TECHNIQUE_GROUP_DOMAIN,
+        });
+      }
+    }
+  }
+
+  return {
+    candidates,
+    domainOptions: new Map([[TECHNIQUE_GROUP_DOMAIN, techniqueGroups]]),
+  };
+};
 
 export const buildFootStanceQuizPool = (
   plans: GradePlan[],
@@ -256,7 +315,6 @@ export const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): Q
 
       for (const moment of hokeiMoments) {
         const hokeiName = normalizeText(moment.hokei_name);
-        const techniqueGroup = normalizeText(moment.technique_group);
         const attackerStance = normalizeText(moment.roles.attacker.stance);
         const attackerAction = normalizeText(moment.roles.attacker.action);
         const defenderStance = normalizeText(moment.roles.defender.stance);
@@ -264,16 +322,6 @@ export const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): Q
 
         if (!hokeiName)
           continue;
-
-        if (techniqueGroup) {
-          candidates.push({
-            id: `kamoku.technique_group.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vilken teknikgrupp tillhör "{0}"?`,
-            questionArgs: [hokeiName],
-            correctAnswer: techniqueGroup,
-            domain: "kamoku.technique_group",
-          });
-        }
 
         if (attackerStance) {
           candidates.push({

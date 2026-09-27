@@ -53,12 +53,12 @@
   text-decoration: none;
 }
 
-.settings-text-size-dropdown .dropdown-toggle,
-.settings-text-size-dropdown .dropdown-menu {
+.settings-dropdown .dropdown-toggle,
+.settings-dropdown .dropdown-menu {
   width: 100%;
 }
 
-.settings-text-size-dropdown .dropdown-toggle {
+.settings-dropdown .dropdown-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -68,7 +68,7 @@
   text-align: left;
 }
 
-.settings-text-size-dropdown .dropdown-item {
+.settings-dropdown .dropdown-item {
   padding-block: 0.5rem;
   line-height: 1.35;
 }

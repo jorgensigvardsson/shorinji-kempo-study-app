@@ -1,19 +1,30 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { experimentalEmbuDraftStorageKey, loadExperimentalEmbuDraft } from "./experimental-embu-draft";
 
-describe("experimental Embu draft persistence", () => {
+describe("Embu draft persistence", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it("stores drafts under a separate local-only key", () => {
+  it("stores drafts in the synchronized app document", () => {
     const data = loadExperimentalEmbuDraft();
-    data.save({ sequences: [] });
+    const draft = {
+      sequences: [{
+        id: "sequence-one",
+        hokeis: [{
+          id: "hokei-one",
+          hokeiName: "gyaku gote",
+          grade: "5 kyū" as const,
+          week: 3,
+          momentIndex: 0,
+          comment: "",
+        }],
+      }],
+    };
+    data.save(draft);
 
-    expect(JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!)).toEqual({
-      sequences: [],
-    });
-    expect(localStorage.getItem("app-data-document")).toBeNull();
+    expect(localStorage.getItem(experimentalEmbuDraftStorageKey)).toBeNull();
+    expect(JSON.parse(localStorage.getItem("app-data-document")!).data.embuDraft).toEqual(draft);
   });
 
   it("moves an existing local draft out of the old app-data document", () => {
@@ -44,7 +55,8 @@ describe("experimental Embu draft persistence", () => {
       }],
     };
     expect(loadExperimentalEmbuDraft().data).toEqual(expected);
-    expect(JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!)).toEqual(expected);
+    expect(localStorage.getItem(experimentalEmbuDraftStorageKey)).toBeNull();
+    expect(JSON.parse(localStorage.getItem("app-data-document")!).data.embuDraft).toEqual(expected);
   });
 
   it("moves sequence and overall notes onto techniques without losing either", () => {

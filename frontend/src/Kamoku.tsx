@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { TranslatorContext, type Translator } from "./i18n";
-import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme } from "./data";
+import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isKihonMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme, adaptKihonMoment } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
@@ -13,6 +13,7 @@ import { getAppDataStore } from "./persistence/store";
 import type { WeeklyPlanCompletionEntry } from "./persistence/schema";
 import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
+import TrainingPageControls from "./components/TrainingPageControls";
 import "./Kamoku.css";
 import { isIndex, useBrowserState } from "./browser-state";
 
@@ -45,6 +46,12 @@ const Kamoku = (props: Props) => {
             hokei,
         }))
         : [];
+    const kihonExercises = foundationalWeek
+        ? foundationalWeek.moments.filter(isKihonMoment).map((kihon, index) => ({
+            key: `${grade.grade}.${selectedWeekNumber}.kihon.${index}.${kihon.id}`,
+            kihon,
+        }))
+        : [];
     const yondanWeek = isYondanWeek(selectedWeekData) ? selectedWeekData : null;
     const godanWeek = isGodanWeek(selectedWeekData) ? selectedWeekData : null;
     const kyushoZemeWeek = isKyushoZemeWeek(selectedWeekData) ? selectedWeekData : null;
@@ -75,6 +82,7 @@ const Kamoku = (props: Props) => {
         <div className={`kamoku-page${dojoMode ? " is-dojo-mode dojo-readable-hokei" : ""}`}>
             <header className="kamoku-page-header">
                 <h1 className="app-page-heading">{translator.translate("Veckoplan")}</h1>
+                <TrainingPageControls showGrade showDojo className="kamoku-page-controls" />
                 {!dojoMode && <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>}
             </header>
             <div className="kamoku-controls training-view-controls mb-4">
@@ -89,21 +97,10 @@ const Kamoku = (props: Props) => {
                         <ArrowLeft aria-hidden="true" />
                         <span>{translator.translate("Föregående")}</span>
                     </button>
-                    <div className="kamoku-week-center">
-                        <span className="kamoku-week-position">
-                            <span>{translator.translate("Vecka")} {selectedWeekNumber}</span>
-                            <span className="kamoku-week-total"> {translator.translate("av")} {grade.weeks.length}</span>
-                        </span>
-                        <WeekCompletionControl
-                            key={completionKey}
-                            completion={completion}
-                            grade={grade.grade}
-                            week={selectedWeekNumber}
-                            translator={translator}
-                            onMark={markWeekCompleted}
-                            onClear={clearWeekCompletion}
-                        />
-                    </div>
+                    <span className="kamoku-week-position">
+                        <span>{translator.translate("Vecka")} {selectedWeekNumber}</span>
+                        <span className="kamoku-week-total"> {translator.translate("av")} {grade.weeks.length}</span>
+                    </span>
                     <button
                         type="button"
                         className="kamoku-week-button kamoku-week-button-next"
@@ -114,6 +111,17 @@ const Kamoku = (props: Props) => {
                         <span>{translator.translate("Nästa")}</span>
                         <ArrowRight aria-hidden="true" />
                     </button>
+                    <div className="kamoku-week-completion-row">
+                        <WeekCompletionControl
+                            key={completionKey}
+                            completion={completion}
+                            grade={grade.grade}
+                            week={selectedWeekNumber}
+                            translator={translator}
+                            onMark={markWeekCompleted}
+                            onClear={clearWeekCompletion}
+                        />
+                    </div>
                 </div>
             </div>
             <WeeklyFocus week={selectedWeekData} translator={translator} dojoMode={dojoMode} />
@@ -132,6 +140,14 @@ const Kamoku = (props: Props) => {
                     allGradePlans={allGradePlans}
                     dojoMode={dojoMode}
                 />
+            )}
+            {kihonExercises.length > 0 && (
+                <section className="kamoku-technique-section" aria-labelledby="kamoku-kihon-heading">
+                    <h2 id="kamoku-kihon-heading" className="app-eyebrow-heading kamoku-section-title">{translator.translate("Kihon")}</h2>
+                    {kihonExercises.map(entry => (
+                        <HokeiCard key={entry.key} hokei={adaptKihonMoment(entry.kihon)} className="mt-2" showNotes showRating dojoMode={dojoMode} kamokuLayout />
+                    ))}
+                </section>
             )}
             {primaryTechniques.length > 0 && (
                 <section className="kamoku-technique-section" aria-labelledby="kamoku-techniques-heading">
@@ -266,6 +282,7 @@ const WeeklyFocus = ({ week, translator, dojoMode }: { week: Week; translator: T
     if (week.type === "regular_week" || week.type === "kihon_only") {
         const kihonEntries = week.kihon_shoho ?? [];
         sourceStrings = kihonEntries.filter((entry): entry is string => typeof entry === "string");
+        sourceStrings.push(...week.moments.filter(isKihonMoment).map(moment => moment.name));
         const references = kihonEntries.filter(isHokeiRef);
         const standardMoments = week.moments.filter((moment): moment is StandardMoment => moment.type === "standard_moment");
 

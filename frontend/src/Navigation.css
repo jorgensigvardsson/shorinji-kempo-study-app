@@ -87,7 +87,8 @@
         color: var(--bs-secondary-color);
         font-size: 0.8rem;
         line-height: 1.2;
-        overflow-wrap: anywhere;
+        overflow-wrap: normal;
+        word-break: normal;
     }
     .app-bottom-nav button { border: 0; background: transparent; }
     .app-bottom-nav a[aria-current="page"],

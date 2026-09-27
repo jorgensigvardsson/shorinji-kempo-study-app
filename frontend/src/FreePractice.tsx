@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, ExclamationTriangle, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
@@ -8,6 +8,7 @@ import HokeiCard from "./components/HokeiCard";
 import InlineNoteEditor from "./components/InlineNoteEditor";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
+import TrainingPageControls from "./components/TrainingPageControls";
 import List from "./List";
 import { TranslatorContext } from "./i18n";
 import { gradeLabel, matchesString } from "./strings";
@@ -141,6 +142,10 @@ const FreePractice = (props: Props) => {
                                 <p className="app-intro-copy">{translator.translate(activeDefinition.description)}</p>
                             )}
                         </div>
+                        <TrainingPageControls
+                            showGrade={activeArea === "kihon" || activeArea === "randori" || activeArea === "embu"}
+                            showDojo
+                        />
                     </header>
                 )}
 
@@ -168,7 +173,7 @@ const FreePractice = (props: Props) => {
             )}
             {visitedAreas.has("randori") && (
                 <div hidden={activeArea !== "randori"}>
-                    <RandoriArea allGradePlans={props.allGradePlans} dojoMode={dojoMode} />
+                    <RandoriArea myGrade={props.myGrade} allGradePlans={props.allGradePlans} dojoMode={dojoMode} />
                 </div>
             )}
             {visitedAreas.has("embu") && (
@@ -332,10 +337,12 @@ interface RandoriTheme {
     introducedAt: GradeName;
 }
 
-const RandoriArea = ({ allGradePlans, dojoMode }: Pick<Props, "allGradePlans" | "dojoMode">) => {
+const RandoriArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "dojoMode">) => {
     const translator = useContext(TranslatorContext);
     const { gohoThemes, juhoThemes, otherThemes, unrestrictedFrom } = useMemo(() => {
-        const entries = allGradePlans.flatMap(plan => plan.weeks.flatMap(week =>
+        const entries = allGradePlans
+            .filter(plan => compareGrades(plan.grade, myGrade) <= 0)
+            .flatMap(plan => plan.weeks.flatMap(week =>
             getStandardMoments(week)
                 .filter(moment => moment.content.includes("randori"))
                 .map(moment => ({ moment, grade: plan.grade, week: week.week }))));
@@ -358,7 +365,7 @@ const RandoriArea = ({ allGradePlans, dojoMode }: Pick<Props, "allGradePlans" | 
             otherThemes: uniqueThemes.filter(theme => theme.type !== "gōhō" && theme.type !== "jūhō"),
             unrestrictedFrom: unrestrictedEntry?.grade,
         };
-    }, [allGradePlans]);
+    }, [allGradePlans, myGrade]);
 
     return (
         <div className={`free-practice-content randori-practice-groups${dojoMode ? " is-dojo-mode" : ""}`}>
@@ -513,7 +520,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
             .find(item => item.term?.romaji === "kumi embu");
         return sequence ? [{ grade: plan.grade, sequence }] : [];
     }).sort((a, b) => compareGrades(a.grade, b.grade)), [allGradePlans]);
-    const selected = sequences.find(entry => entry.grade === myGrade) ?? sequences[0];
+    const selected = sequences.find(entry => entry.grade === myGrade);
 
     useEffect(() => draftData.registerListener(nextDraft => setDraft(fillEmbuSequenceSlots(nextDraft))), [draftData]);
 
@@ -741,7 +748,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
     const kumiEmbuTechniques: KumiEmbuTechniqueLink[] = techniques.map(technique => ({
         key: embuTechniqueKey(technique),
         hokei: technique.hokei,
-        onSelect: () => showTechnique(technique),
+        grade: technique.grade,
     }));
 
     const techniquePicker = pickerTarget !== null && pickerSequenceIndex >= 0 ? (
@@ -851,17 +858,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         <div className={`free-practice-content embu-detail-view${dojoMode || activeView === "practice" ? " dojo-readable-hokei" : ""}`}>
             {activeView === "builder" && (
             <section className="free-practice-section embu-builder">
-                <div className="embu-builder-heading">
-                    <h3 className="app-section-heading">{translator.translate("Bygg embu")}</h3>
-                    <span className="embu-experimental-label">
-                        <ExclamationTriangle aria-hidden="true" />
-                        {translator.translate("Experimentell")}
-                    </span>
-                </div>
-                <p className="embu-experimental-note">
-                    {translator.translate("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")}
-                </p>
-
+                <h3 className="app-section-heading">{translator.translate("Bygg embu")}</h3>
                 <ol className="embu-draft-sequences">
                     {draft.sequences.map((sequence, sequenceIndex) => {
                         const isExpanded = expandedSequenceId === sequence.id;
@@ -1142,19 +1139,25 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                 />
             )}
 
-            {activeView === "kumi" && selected && (
+            {activeView === "kumi" && (
                 <section className={`free-practice-section embu-kumi-example${dojoMode ? " is-dojo-mode" : ""}`}>
                     <div className="free-practice-section-heading">
                         <h3 className="app-section-heading">{translator.translate("Kumi-embu")}</h3>
                     </div>
-                    <KumiEmbuSequenceList
-                        items={selected.sequence.items ?? []}
-                        techniques={kumiEmbuTechniques}
-                        dojoMode={dojoMode}
-                    />
-                    {(selected.sequence.videos ?? []).map(video => (
-                        <VideoLink key={video.url} video={video} className="mt-3" />
-                    ))}
+                    {selected ? (
+                        <>
+                            <KumiEmbuSequenceList
+                                items={selected.sequence.items ?? []}
+                                techniques={kumiEmbuTechniques}
+                                dojoMode={dojoMode}
+                            />
+                            {(selected.sequence.videos ?? []).map(video => (
+                                <VideoLink key={video.url} video={video} className="mt-3" />
+                            ))}
+                        </>
+                    ) : (
+                        <p className="text-muted mb-0">{translator.translate("Det finns ingen fast Kumi-embu för den valda graden.")}</p>
+                    )}
                 </section>
             )}
         </div>

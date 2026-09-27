@@ -1,31 +1,55 @@
-import type { GradeName } from "../data";
 import { load, type Data } from "./data";
+import { deepEqual } from "../utilities/deep-equal";
+import { getAppDataStore } from "./store";
+import {
+  isEmbuDraft,
+  type EmbuDraft, type EmbuDraftHokei, type EmbuDraftSequence,
+} from "./embu-draft-schema";
+export type { EmbuDraft, EmbuDraftHokei, EmbuDraftSequence } from "./embu-draft-schema";
 
 export const experimentalEmbuDraftStorageKey = "experimental-embu-draft";
-
-export interface EmbuDraftHokei {
-  id: string;
-  hokeiName: string;
-  grade: GradeName;
-  week: number;
-  momentIndex: number;
-  comment: string;
-}
-
-export interface EmbuDraftSequence {
-  id: string;
-  hokeis: EmbuDraftHokei[];
-}
-
-export interface EmbuDraft {
-  sequences: EmbuDraftSequence[];
-  pendingComment?: string;
-}
+const embuDraftMigrationCompleteKey = "experimental-embu-draft-migration-complete";
 
 export function loadExperimentalEmbuDraft(): Data<EmbuDraft> {
+  migrateExperimentalEmbuDraft();
+  return load(experimentalEmbuDraftStorageKey, { sequences: [] });
+}
+
+// Move a draft saved by the experimental builder into the permanent, synchronized
+// document. The local key is removed only after a valid draft has been copied, so a
+// malformed value remains available for manual recovery.
+export function migrateExperimentalEmbuDraft(): void {
+  prepareExperimentalEmbuDraftMigration();
+
+  const stored = localStorage.getItem(experimentalEmbuDraftStorageKey);
+  if (stored === null) {
+    localStorage.setItem(embuDraftMigrationCompleteKey, "true");
+    return;
+  }
+
+  try {
+    const draft = JSON.parse(stored) as unknown;
+    if (!isEmbuDraft(draft)) return;
+
+    const hasContent = draft.sequences.some(sequence => sequence.hokeis.length > 0)
+      || Boolean(draft.pendingComment?.trim());
+    const store = getAppDataStore();
+    if (hasContent && !deepEqual(store.get("embuDraft"), draft)) {
+      store.set("embuDraft", draft);
+    }
+    localStorage.removeItem(experimentalEmbuDraftStorageKey);
+    localStorage.setItem(embuDraftMigrationCompleteKey, "true");
+  } catch {
+    // A malformed local draft is deliberately left untouched for possible recovery.
+  }
+}
+
+export function prepareExperimentalEmbuDraftMigration(): void {
+  if (localStorage.getItem(experimentalEmbuDraftStorageKey) === null
+    && localStorage.getItem(embuDraftMigrationCompleteKey) === "true") return;
+
   migrateLegacyLocalDraft();
   migrateDraftComments();
-  return load(experimentalEmbuDraftStorageKey, { sequences: [] });
 }
 
 function migrateLegacyLocalDraft(): void {
@@ -121,23 +145,6 @@ function isStoredEmbuDraft(value: unknown): value is EmbuDraft | FlatEmbuDraft |
   return isEmbuDraft(value) || isFlatEmbuDraft(value) || isSequenceEmbuDraft(value);
 }
 
-function isEmbuDraft(value: unknown): value is EmbuDraft {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-  const candidate = value as { notes?: unknown; pendingComment?: unknown; sequences?: unknown; steps?: unknown };
-  if (!Array.isArray(candidate.sequences)) return false;
-  if (candidate.notes !== undefined || candidate.steps !== undefined) return false;
-  if (candidate.pendingComment !== undefined && typeof candidate.pendingComment !== "string") return false;
-
-  return candidate.sequences.every(sequence => {
-    if (typeof sequence !== "object" || sequence === null || Array.isArray(sequence)) return false;
-    const entry = sequence as Partial<EmbuDraftSequence> & { transition?: unknown };
-    return typeof entry.id === "string"
-      && entry.transition === undefined
-      && Array.isArray(entry.hokeis)
-      && entry.hokeis.every(isEmbuDraftHokei);
-  });
-}
-
 function isSequenceEmbuDraft(value: unknown): value is SequenceEmbuDraft {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   const candidate = value as { notes?: unknown; sequences?: unknown };
@@ -167,10 +174,6 @@ function isFlatEmbuDraft(value: unknown): value is FlatEmbuDraft {
   });
 }
 
-function isEmbuDraftHokei(value: unknown): value is EmbuDraftHokei {
-  return isLegacyEmbuDraftHokei(value)
-    && typeof (value as Partial<EmbuDraftHokei>).comment === "string";
-}
 
 function isLegacyEmbuDraftHokei(value: unknown): value is LegacyEmbuDraftHokei {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;

@@ -4,6 +4,7 @@
   // otherwise VS Code probes it as http, the probe fails against the TLS
   // listener, and generated links use the wrong scheme.
   "remote.autoForwardPortsSource": "hybrid",
+  "remote.restoreForwardedPorts": true,
   "remote.portsAttributes": {
     "5173": { "label": "app (nginx)", "protocol": "https", "onAutoForward": "silent" }
   }

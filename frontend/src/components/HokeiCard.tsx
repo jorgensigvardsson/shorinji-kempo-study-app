@@ -33,10 +33,11 @@ interface HokeiCardProps {
     kamokuLayout?: boolean;
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
+    onCollapseExited?: () => void;
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange } = props;
+    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange, onCollapseExited } = props;
     const translator = useContext(TranslatorContext);
     const note = useHokeiNote(hokei.id);
     const rank = useHokeiRank(hokei.id);
@@ -66,7 +67,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                 header={<DojoCardHeader hokei={hokei} />}
                 footer={footer}
                 defaultOpen={defaultOpen}
-                onOpenChange={onOpenChange}
+                onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                 className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
             >
                 <HokeiDojoDetails hokei={hokei} />
@@ -80,7 +81,7 @@ const HokeiCard = (props: HokeiCardProps) => {
                 header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank} showRating={showRating} showKanji={showKanji} />}
                 footer={kamokuFooter}
                 defaultOpen={defaultOpen}
-                onOpenChange={onOpenChange}
+                onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
             >
                 <HokeiDetails hokei={hokei} showKanji={showKanji} />
@@ -104,7 +105,7 @@ const HokeiCard = (props: HokeiCardProps) => {
             <CollapsibleCard header={compactHeader} inlineChevron
                              footer={footer}
                              defaultOpen={defaultOpen}
-                             onOpenChange={onOpenChange}
+                             onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                              className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
                 <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
@@ -137,7 +138,7 @@ const HokeiCard = (props: HokeiCardProps) => {
         <CollapsibleCard header={cardHead(translator, hokei.hokei_name, options)}
                          footer={footer}
                          defaultOpen={defaultOpen}
-                         onOpenChange={onOpenChange}
+                         onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
                          className={`app-grid-card hokei-card ${className ?? ""}`.trim()}>
             <div style={{ display: "flex", flexDirection: "column", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                 {hokei.foot_stance && hokei.foot_stance.length > 0 && <FootStancesElement hokei={hokei} showKanji={showKanji} />}
@@ -207,17 +208,23 @@ const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
 export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: boolean }) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
-    const renderValue = (value?: string, suffix?: React.ReactNode) => value ? (
-        <span className="kamoku-card-value">
+    const renderValue = (value?: string, columnLabel?: string, className = "", suffix?: React.ReactNode) => value ? (
+        <span className={`kamoku-card-value ${className}`.trim()}>
+            {columnLabel && <span className="kamoku-card-mobile-label">{translator.translate(columnLabel)}</span>}
             <span>{translator.translate(value)}{suffix}</span>
             {!translator.isJapanese && showKanji && <span className="kamoku-card-value-japanese">{translator.japanese(value)}</span>}
         </span>
-    ) : <span className="kamoku-card-empty">-</span>;
+    ) : (
+        <span className={`kamoku-card-value kamoku-card-empty ${className}`.trim()}>
+            {columnLabel && <span className="kamoku-card-mobile-label">{translator.translate(columnLabel)}</span>}
+            <span>-</span>
+        </span>
+    );
     const renderRole = (role: HokeiMoment["roles"]["attacker"], Icon: typeof PersonFill, label: string) => (
         <div className="kamoku-card-role-row">
             <Icon className="kamoku-card-role-icon" aria-label={translator.translate(label)} />
-            {renderValue(role.stance)}
-            {renderValue(role.action, label === "(F)" && hokei.ren_hanko
+            {renderValue(role.stance, "Stans", "kamoku-card-role-stance")}
+            {renderValue(role.action, "Utförande", "kamoku-card-role-action", label === "(F)" && hokei.ren_hanko
                 ? <i> ({translator.translate("ren hankō")})</i>
                 : undefined)}
         </div>
@@ -257,8 +264,8 @@ export const HokeiDojoDetails = ({ hokei }: { hokei: HokeiMoment }) => {
     const renderRole = (label: string, role: HokeiMoment["roles"]["attacker"]) => (
         <div className="dojo-role">
             <strong>{translator.translate(label)}</strong>
-            {role.stance && <div>{translator.translate(role.stance)}</div>}
-            {role.action && <div>{translator.translate(role.action)}{label === "(F)" && hokei.ren_hanko && <i> ({translator.translate("ren hankō")})</i>}</div>}
+            {role.stance && <div className="dojo-role-stance">{translator.translate(role.stance)}</div>}
+            {role.action && <div className="dojo-role-action">{translator.translate(role.action)}{label === "(F)" && hokei.ren_hanko && <i> ({translator.translate("ren hankō")})</i>}</div>}
         </div>
     );
 

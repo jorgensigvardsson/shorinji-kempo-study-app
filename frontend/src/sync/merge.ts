@@ -121,6 +121,7 @@ export function mergeDocuments(
     // A high score has an obvious winner, so it never disagrees.
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     knownFlashCards: knownFlashCards.merged,
+    embuDraft: mergeScalar("embuDraft"),
     showKanjiOnHokeiCards: mergeScalar("showKanjiOnHokeiCards"),
     weeklyPlanCompletions: weeklyPlanCompletions.merged,
     gradingFundamentalCompletions: gradingFundamentalCompletions.merged,

@@ -1,5 +1,5 @@
 import type { HokeiRef, StandardMoment, Week } from "./data";
-import { isHokeiMoment } from "./data";
+import { isHokeiMoment, isKihonMoment } from "./data";
 import type { Translator } from "./i18n";
 
 export const localizeSourceTerm = (value: string, translator: Translator, japanese: boolean, capitalize = false): string =>
@@ -57,7 +57,10 @@ export const weekIntroduction = (week: Week, translator: Translator): string => 
     }
 
     const sentences: string[] = [];
-    const basicEntries = (week.kihon_shoho ?? []).filter((entry): entry is string => typeof entry === "string");
+    const basicEntries = [
+        ...(week.kihon_shoho ?? []).filter((entry): entry is string => typeof entry === "string"),
+        ...week.moments.filter(isKihonMoment).map(moment => moment.name),
+    ];
     const basicFocus = describeBasicFocus(basicEntries, translator);
     if (basicFocus) {
         sentences.push(translator.translate("Veckans grundarbete rör sig kring {0}.", { params: [basicFocus] }));

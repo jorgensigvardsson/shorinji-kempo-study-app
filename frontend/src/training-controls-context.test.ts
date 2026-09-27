@@ -5,7 +5,7 @@ describe("getTrainingControlContext", () => {
   it.each([
     ["/", false, false],
     ["/theory", false, false],
-    ["/theory/grading", true, false],
+    ["/theory/grading", true, true],
     ["/training/grading", true, true],
     ["/kamoku", false, false],
     ["/kamoku/plan", true, true],
@@ -13,7 +13,7 @@ describe("getTrainingControlContext", () => {
     ["/kamoku/free/kihon", true, true],
     ["/kamoku/free/hokei", true, true],
     ["/kamoku/free/embu", true, true],
-    ["/kamoku/free/randori", false, true],
+    ["/kamoku/free/randori", true, true],
     ["/kamoku/free/tanen-sotai", false, true],
     // A path that merely starts with the same characters is not the training
     // section, and an unknown area falls back to the bare free-practice view.

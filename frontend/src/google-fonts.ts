@@ -1,13 +1,31 @@
 import { matchesString } from "./strings";
 import googleFontsData from "./assets/google-fonts.json";
 
-// Single on/off switch for the whole experimental font picker (VITE_DEBUG
-// locally, or on staging so it can be tried without a local build). This is
-// the one thing every other integration point (App.tsx, TrainingControls)
-// checks — see README.md's "Experimental font picker" section for the full
-// list of files/lines to delete when this feature is retired.
-export const isFontPickerEnabled =
-    import.meta.env.VITE_DEBUG === "true" || import.meta.env.VITE_ENVIRONMENT === "staging";
+interface FontPickerBuildEnvironment {
+    dev: boolean;
+    debug?: string;
+    environment?: string;
+    adminFontPicker?: string;
+}
+
+export const shouldEnableFontPicker = ({
+    dev,
+    debug,
+    environment,
+    adminFontPicker,
+}: FontPickerBuildEnvironment): boolean =>
+    dev ? debug === "true" : environment === "staging" && adminFontPicker === "true";
+
+// Production has no permissive fallback: a deployed build needs both the staging
+// identity and its dedicated admin-tool flag. VITE_DEBUG remains useful only while
+// running Vite's development server and cannot enable the picker in a production
+// bundle. The production workflow independently rejects the admin-tool flag.
+export const isFontPickerEnabled = shouldEnableFontPicker({
+    dev: import.meta.env.DEV,
+    debug: import.meta.env.VITE_DEBUG,
+    environment: import.meta.env.VITE_ENVIRONMENT,
+    adminFontPicker: import.meta.env.VITE_ADMIN_FONT_PICKER,
+});
 
 export type FontCategory = "serif" | "sans-serif" | "display" | "handwriting" | "monospace";
 

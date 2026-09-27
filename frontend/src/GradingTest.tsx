@@ -1,11 +1,11 @@
-import { useContext, useMemo, useRef, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Badge } from "react-bootstrap";
 import { Award, Book, Check2, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
 import { useSearchParams } from "react-router-dom";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Grid, { type GridItem } from "./components/Grid";
 import { noTranslate, TranslatorContext, type Translator } from "./i18n";
-import { isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
+import { getAllHokeiMoments, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
 import VideoLink from "./components/VideoLink";
@@ -19,6 +19,7 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
 );
 import { gradingManuals, type Item, type Numbering, type TechniqueGroup } from "./grading-exam-information";
 import "./GradingTest.css";
+import TrainingPageControls from "./components/TrainingPageControls";
 
 interface GradingTestProps {
     grade: GradeName | undefined;
@@ -63,8 +64,8 @@ const categoryTitles: Record<string, string> = {
     "gijutsu I": "Teknik I",
     "gijutsu II": "Teknik II",
     "hōkei kamoku": "Teknikämnen",
-    "tai gamae, tai sabaki": "Kroppsställning och kroppsföring",
-    "tai gamae, tai sabaki, umpohō": "Kroppsställning, kroppsföring och fotförflyttning",
+    "tai gamae, tai sabaki": "Kroppsställning och vändningar",
+    "tai gamae, tai sabaki, umpohō": "Kroppsställning, vändningar och fotförflyttning",
     "tai gamae": "Kroppsställning",
     "tai gamae, fujinhō": "Kroppsställning och fujinhō",
     "umpohō": "Fotförflyttning",
@@ -222,9 +223,49 @@ function groupFundamentalItems(items: Item[]): FundamentalItemGroup[] {
 }
 
 const structuredTechniqueGroupLabels: Record<string, string[]> = {
-    "tai gamae, tai sabaki": ["Kroppsställningar", "Kroppsföring"],
-    "tai gamae, tai sabaki, umpohō": ["Kroppsställningar", "Kroppsföring", "Fotförflyttning"],
+    "tai gamae, tai sabaki": ["Kroppsställningar", "Vändningar"],
+    "tai gamae, tai sabaki, umpohō": ["Kroppsställningar", "Vändningar", "Fotförflyttning"],
 };
+
+const turningNames = new Set(["zen tenkan", "han tenkan"]);
+const completeFootworkOrder = [
+    "chidori ashi",
+    "ushiro chidori ashi",
+    "jun sagari",
+    "hiraki sagari",
+    "mae chidori ashi",
+    "sashikomi ashi",
+    "sashikae ashi",
+    "kani ashi",
+    "kumo ashi",
+    "jūji ashi",
+];
+
+// The grading source deliberately stays verbatim. This presentation-only view
+// separates turns from footwork and supplements the umbrella term chidori ashi
+// with the named forward/backward movements used in training.
+function fundamentalTechniqueGroupsForDisplay(parentTerm: string | undefined, groups: TechniqueGroup[] | undefined): TechniqueGroup[] | undefined {
+    if (parentTerm !== "tai gamae, tai sabaki, umpohō" || groups?.length !== 3) return groups;
+
+    const [stances, movement, sourceFootwork] = groups;
+    const turns = movement.techniques.filter(technique => turningNames.has(technique.romaji));
+    const footworkTerms = [
+        ...movement.techniques.filter(technique => !turningNames.has(technique.romaji)),
+        ...sourceFootwork.techniques,
+        ...completeFootworkOrder.map(romaji => ({ romaji })),
+    ];
+    const termsByName = new Map(footworkTerms.map(term => [term.romaji, term]));
+    const orderedFootwork = [
+        ...completeFootworkOrder.flatMap(name => termsByName.get(name) ?? []),
+        ...footworkTerms.filter(term => !completeFootworkOrder.includes(term.romaji)),
+    ];
+
+    return [
+        stances,
+        { ...movement, techniques: turns },
+        { ...sourceFootwork, techniques: orderedFootwork },
+    ];
+}
 
 function structuredTechniqueGroupLabel(parentTerm: string | undefined, groupIndex: number, groupCount: number): string | undefined {
     if (!parentTerm || groupCount <= 1) return undefined;
@@ -287,6 +328,13 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                     map.set(m.hokei_name, m);
         return map;
     }, [allGradePlans, selectedGrade]);
+    const kumiEmbuTechniques = useMemo<KumiEmbuTechniqueLink[]>(() => allGradePlans.flatMap(plan =>
+        getAllHokeiMoments(plan).map((hokei, index) => ({
+            key: `${plan.grade}|${hokei.id}|${index}`,
+            hokei,
+            grade: plan.grade,
+        }))
+    ), [allGradePlans]);
 
     const manual = selectedGrade ? allGrades[selectedGrade] : undefined;
     if (!manual) {
@@ -327,6 +375,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
             : 0;
         return (
             <div className={`grading-test-page grading-category-page grading-detail-enter${dojoMode ? " is-dojo-mode" : ""}`}>
+                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
                 <header className="grading-category-header">
                     <div className="grading-category-heading">
                         <div className="text-muted small mb-1">{sentenceCase(translator.translate(selectedSection.title))}</div>
@@ -364,8 +413,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                 ) : isKumiEmbu ? (
                     <KumiEmbuDetail
                         item={selectedItem}
-                        grade={activeSelection.grade}
-                        hokeiMap={hokeiMap}
+                        techniques={kumiEmbuTechniques}
                         dojoMode={dojoMode}
                     />
                 ) : (
@@ -386,6 +434,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
             <header className="grading-page-header">
                 <h2 className="app-view-heading">{translator.translate(manual.title)}</h2>
+                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
                 {manual.term && !translator.isJapanese && <div className="text-muted small mt-1">{sentenceCase(manual.term.romaji)}</div>}
             </header>
 
@@ -514,23 +563,12 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
     );
 };
 
-const KumiEmbuDetail = ({ item, grade, hokeiMap, dojoMode }: {
+const KumiEmbuDetail = ({ item, techniques, dojoMode }: {
     item: Item;
-    grade: GradeName;
-    hokeiMap: Map<string, HokeiMoment>;
+    techniques: KumiEmbuTechniqueLink[];
     dojoMode: boolean;
 }) => {
     const translator = useContext(TranslatorContext);
-    const [preview, setPreview] = useState<{ hokei: HokeiMoment; requestId: number } | null>(null);
-    const previewRequestId = useRef(0);
-    const techniques: KumiEmbuTechniqueLink[] = [...hokeiMap.entries()].map(([key, hokei]) => ({
-        key,
-        hokei,
-        onSelect: () => {
-            previewRequestId.current += 1;
-            setPreview({ hokei, requestId: previewRequestId.current });
-        },
-    }));
 
     return (
         <div className="grading-kumi-embu">
@@ -548,23 +586,6 @@ const KumiEmbuDetail = ({ item, grade, hokeiMap, dojoMode }: {
             {item.videos && item.videos.length > 0 && (
                 <div className="d-flex flex-column gap-2 mt-3">
                     {item.videos.map(video => <VideoLink key={video.url} video={video} />)}
-                </div>
-            )}
-            {preview && (
-                <div className="grading-kumi-preview">
-                    <HokeiCard
-                        key={`${preview.hokei.hokei_name}-${preview.requestId}`}
-                        hokei={preview.hokei}
-                        gradeName={grade}
-                        showNotes
-                        showRating
-                        dojoMode={dojoMode}
-                        kamokuLayout
-                        defaultOpen
-                        onOpenChange={open => {
-                            if (!open) setPreview(null);
-                        }}
-                    />
                 </div>
             )}
         </div>
@@ -856,13 +877,15 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
     );
 };
 
-const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured = false }: { groups: TechniqueGroup[] | undefined; translator: Translator; showKanji: boolean; parentTerm?: string; structured?: boolean }) => (
-    <>
-        {groups?.map((group, groupIndex) => (
+const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured = false }: { groups: TechniqueGroup[] | undefined; translator: Translator; showKanji: boolean; parentTerm?: string; structured?: boolean }) => {
+    const displayGroups = structured ? fundamentalTechniqueGroupsForDisplay(parentTerm, groups) : groups;
+
+    return <>
+        {displayGroups?.map((group, groupIndex) => (
             <div key={groupIndex} className={structured ? "grading-technique-group" : "mb-2"}>
-                {(group.context?.text || structuredTechniqueGroupLabel(parentTerm, groupIndex, groups.length)) && (
+                {(group.context?.text || structuredTechniqueGroupLabel(parentTerm, groupIndex, displayGroups.length)) && (
                     <div className={structured ? "grading-technique-group-title" : "text-muted small mb-1"}>
-                        {translator.translate(group.context?.text ?? structuredTechniqueGroupLabel(parentTerm, groupIndex, groups.length)!)}
+                        {translator.translate(group.context?.text ?? structuredTechniqueGroupLabel(parentTerm, groupIndex, displayGroups.length)!)}
                     </div>
                 )}
                 <ul className={structured ? "grading-technique-list" : "mb-0"}>
@@ -880,6 +903,6 @@ const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured
             </div>
         ))}
     </>
-);
+};
 
 export default GradingTest;

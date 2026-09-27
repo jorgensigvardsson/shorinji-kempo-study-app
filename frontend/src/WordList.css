@@ -11,6 +11,7 @@
 .wordlist-table-wrapper {
   overflow-x: auto;
   margin-top: 1rem;
+  container-type: inline-size;
 }
 
 .wordlist-table {
@@ -25,7 +26,8 @@
 .wordlist-table td:nth-child(2) { width: 28%; }
 
 .wordlist-table td {
-  word-break: break-word;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .wordlist-table th:first-child,
@@ -60,6 +62,58 @@
 
 .wordlist-table tbody tr:hover {
   background: color-mix(in srgb, var(--bs-primary-bg-subtle) 35%, transparent 65%);
+}
+@container (max-width: 19rem) {
+  .wordlist-table {
+    display: block;
+    width: 100%;
+  }
+
+  .wordlist-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .wordlist-table tbody,
+  .wordlist-table tr {
+    display: block;
+  }
+
+  .wordlist-table tr {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .wordlist-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .wordlist-table td,
+  .wordlist-table td:first-child,
+  .wordlist-table td:nth-child(2),
+  .wordlist-table td:last-child {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 4.8rem minmax(0, 1fr);
+    gap: 0.55rem;
+    padding: 0.25rem 0.7rem;
+    border: 0;
+  }
+
+  .wordlist-table td::before {
+    content: attr(data-label);
+    color: var(--bs-secondary-color);
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 }
 
 .wordlist-missing-lookups {

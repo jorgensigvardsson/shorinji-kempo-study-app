@@ -109,10 +109,10 @@ describe("AppDataStore — fields from a newer build", () => {
     expect(() => store.setDocument(docWithNewerField())).not.toThrow();
   });
 
-  it("still drops retired fields", () => {
+  it("replaces a malformed Embu draft with the safe default", () => {
     const doc = createDefaultAppDataDocument();
-    const store = makeStore({ ...doc, data: { ...doc.data, embuDraft: { notes: "", steps: [] } } as AppDataDocument["data"] });
-    expect("embuDraft" in store.getDocument().data).toBe(false);
+    const store = makeStore({ ...doc, data: { ...doc.data, embuDraft: { notes: "", steps: [] } } as unknown as AppDataDocument["data"] });
+    expect(store.get("embuDraft")).toEqual({ sequences: [] });
   });
 
   it("still validates the fields it does know", () => {
