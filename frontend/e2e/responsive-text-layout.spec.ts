@@ -24,7 +24,8 @@ const viewports = [
 const routes = [
   { label: "start", path: "/" },
   { label: "veckoplan", path: "/kamoku/plan" },
-  { label: "fri träning", path: "/kamoku/free/embu" },
+  { label: "fri träning – embu", path: "/kamoku/free/embu" },
+  { label: "fri träning – randori", path: "/kamoku/free/randori" },
   { label: "gradering", path: "/training/grading" },
   { label: "hokei-flashkort", path: "/flashcard/hokei" },
   { label: "quiz", path: "/quiz" },

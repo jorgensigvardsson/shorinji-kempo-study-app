@@ -3,9 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { useState, type ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { GradePlan } from "./data";
+import type { GradeName, GradePlan } from "./data";
 import FreePractice from "./FreePractice";
 import { experimentalEmbuDraftStorageKey, type EmbuDraft } from "./persistence/experimental-embu-draft";
+import { TrainingViewSettingsContext } from "./training-view-settings-context";
 import type { PracticeArea } from "./practice-area";
 
 const plans: GradePlan[] = [
@@ -89,6 +90,29 @@ const RandoriHarness = () => (
     dojoMode={false}
   />
 );
+
+const RandoriGradeHarness = () => {
+  const [grade, setGrade] = useState<GradeName>("5 kyū");
+
+  return (
+    <TrainingViewSettingsContext.Provider value={{
+      grade,
+      gradePlans: randoriPlans,
+      onGradeChange: setGrade,
+      dojoMode: false,
+      onDojoModeChange: () => undefined,
+    }}>
+      <FreePractice
+        myGrade={grade}
+        allGradePlans={randoriPlans}
+        activeArea="randori"
+        onAreaChange={() => undefined}
+        onBack={() => undefined}
+        dojoMode={false}
+      />
+    </TrainingViewSettingsContext.Provider>
+  );
+};
 
 const embuPlans: GradePlan[] = [{
   grade: "5 kyū",
@@ -314,7 +338,7 @@ describe("FreePractice", () => {
     expect(item.querySelector(".border")).toBeNull();
   });
 
-  it("shows the complete Randori progression with Gōhō before Jūhō and first grades", () => {
+  it("shows the Randori progression up to the selected grade with Gōhō before Jūhō", () => {
     renderPractice(<RandoriHarness />);
 
     const gohoHeading = screen.getByRole("heading", { name: "gōhō" });
@@ -323,21 +347,34 @@ describe("FreePractice", () => {
 
     const gohoSection = gohoHeading.closest("section")!;
     const gohoSteps = within(gohoSection).getAllByRole("listitem");
-    expect(gohoSteps).toHaveLength(2);
+    expect(gohoSteps).toHaveLength(1);
     expect(gohoSteps[0].textContent).toContain("grundläggande gōhō-steg");
     expect(gohoSteps[0].textContent).toContain("5 kyū");
-    expect(gohoSteps[1].textContent).toContain("avancerat gōhō-steg");
-    expect(gohoSteps[1].textContent).toContain("1 kyū");
 
     const juhoSection = juhoHeading.closest("section")!;
     expect(within(juhoSection).getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeNull();
+  });
+
+  it("updates the Randori progression when the shared grade picker changes", async () => {
+    const user = userEvent.setup();
+    renderPractice(<RandoriGradeHarness />);
+
+    expect(screen.queryByText("avancerat gōhō-steg")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Visar 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "1 kyū" }));
+    expect(screen.getByText("avancerat gōhō-steg")).toBeTruthy();
+    expect(screen.queryByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Visar 1 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Shodan" }));
     expect(screen.getByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeTruthy();
   });
 
   it("keeps Randori restrictions but removes grades and source context in Dojo mode", () => {
     const { container } = renderPractice(
       <FreePractice
-        myGrade="5 kyū"
+        myGrade="1 kyū"
         allGradePlans={randoriPlans}
         activeArea="randori"
         onAreaChange={() => undefined}
