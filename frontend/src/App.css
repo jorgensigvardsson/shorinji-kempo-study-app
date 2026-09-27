@@ -3,13 +3,42 @@
 }
 
 .app-route-content {
-  padding: 0.5rem;
+  padding: 0.5rem var(--app-shell-inline-gutter, 0.5rem);
   /* Reserve room so floating toasts or training controls never cover the last
      line of content when scrolled to the bottom. 0 when both are absent. */
   padding-bottom: calc(0.5rem + var(--app-bottom-nav-height, 0px) + max(var(--floating-stack-reserve, 0px), var(--training-controls-reserve, 0px)));
   max-width: 48rem;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Larger text needs more of the phone width for content. Individual pages consume
+   --app-page-inline-gutter for their second, inner gutter; pages without one still
+   benefit from the shell gutter. */
+.app-shell {
+  --app-shell-inline-gutter: 0.5rem;
+  --app-page-inline-gutter: 1rem;
+  --app-card-inline-gutter: 1rem;
+}
+
+@media (max-width: 48rem) {
+  .app-shell[data-text-size="12"] {
+    --app-shell-inline-gutter: 0.4rem;
+    --app-page-inline-gutter: 0.75rem;
+    --app-card-inline-gutter: 0.85rem;
+  }
+
+  .app-shell[data-text-size="13"] {
+    --app-shell-inline-gutter: 0.3rem;
+    --app-page-inline-gutter: 0.55rem;
+    --app-card-inline-gutter: 0.7rem;
+  }
+
+  .app-shell[data-text-size="14"] {
+    --app-shell-inline-gutter: 0.25rem;
+    --app-page-inline-gutter: 0.4rem;
+    --app-card-inline-gutter: 0.6rem;
+  }
 }
 
 /* Placeholder while a page's chunk is on its way. It holds a viewport's worth of

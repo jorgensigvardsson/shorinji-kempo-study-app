@@ -11,7 +11,7 @@ import gradePlans from './assets/kamokuhyo.json';
 import { ensureTranslations } from './translations.ts';
 import { getAppDataStore } from './persistence/store.ts';
 import { load } from './persistence/data.ts';
-import { DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
+import { applyTextSize, DefaultTextSize, TextSizeStorageKey } from './persistence/text-size.ts';
 import { DefaultFontFamily, FontFamilyBodyStorageKey, FontFamilyHeadingStorageKey, FontFamilyKanjiStorageKey } from './persistence/font-family.ts';
 import { type GradePlan } from './data.ts'
 import { getSyncManager } from './sync/manager.ts';
@@ -31,6 +31,10 @@ if (import.meta.env.DEV && "serviceWorker" in navigator) {
 // Grade and language are read straight from the app-data store by useAppData,
 // so they need no wrapper here and no trip through App's props.
 const textSizeData = load<number>(TextSizeStorageKey, DefaultTextSize);
+// Apply the stored size before React's first paint. Scaling the root font makes
+// rem-based text and controls larger without changing the layout viewport, unlike
+// CSS zoom, so native menus and mobile widths keep using the same coordinate space.
+applyTextSize(textSizeData.data);
 const bodyFontFamilyData = load<string>(FontFamilyBodyStorageKey, DefaultFontFamily);
 const headingFontFamilyData = load<string>(FontFamilyHeadingStorageKey, DefaultFontFamily);
 const kanjiFontFamilyData = load<string>(FontFamilyKanjiStorageKey, DefaultFontFamily);

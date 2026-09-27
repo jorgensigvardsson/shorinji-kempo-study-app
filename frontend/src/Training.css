@@ -115,11 +115,32 @@
 .dojo-role {
   display: grid;
   grid-template-columns: 2.5rem minmax(0, 1fr) minmax(0, 1.5fr);
+  grid-template-areas: "role stance action";
   align-items: start;
   gap: 0.75rem;
   min-width: 0;
   font-size: 1.05rem;
   line-height: 1.45;
+}
+
+.dojo-role > strong {
+  grid-area: role;
+}
+
+.dojo-role-stance {
+  grid-area: stance;
+}
+
+.dojo-role-action {
+  grid-area: action;
+}
+
+.dojo-role-stance,
+.dojo-role-action {
+  min-width: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 .dojo-role strong {
@@ -175,8 +196,12 @@
 
 @container hokei-card (max-width: 30rem) {
   .dojo-role {
-    grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.35fr);
+    grid-template-columns: 2rem minmax(0, 1fr);
+    grid-template-areas:
+      "role stance"
+      ". action";
     gap: 0.5rem;
+    row-gap: 0.2rem;
     font-size: 1rem;
   }
 

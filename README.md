@@ -30,6 +30,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - React Router 7
 - Bootstrap 5
 - Vitest + Testing Library
+- Playwright layout checks across every user-selectable text size
 - PWA with service worker for offline use
 - Go backend services for identity (OIDC + email verification codes) and data persistence — see [BACKEND.md](BACKEND.md)
 - Plain SMTP for sending verification codes and notifications; see [BACKEND.md](BACKEND.md)
@@ -83,6 +84,9 @@ cd frontend
 npm install
 npm test          # run tests
 npm run build     # production build
+npx playwright install --with-deps chromium  # one-time browser setup
+npm run test:layout                          # responsive text-size matrix
+
 ```
 
 The app requires an account, so `npm run dev` on its own stops at the login screen: it

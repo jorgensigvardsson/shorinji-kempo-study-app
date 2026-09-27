@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 56rem;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1rem var(--app-page-inline-gutter, 1rem);
 }
 
 .hokei-flashcard-view {
@@ -10,9 +10,9 @@
 }
 
 .hokei-flashcard-filter {
-  width: min(100% - 2rem, 54rem);
+  width: min(100%, 56rem);
   margin: 0 auto;
-  padding: 1rem 0 0.25rem;
+  padding: 1rem var(--app-page-inline-gutter, 1rem) 0.25rem;
 }
 
 .flashcard-swipe-stage {
@@ -295,7 +295,19 @@
   }
 
   .flashcard-body {
-    padding: 1rem;
+    padding: 1rem var(--app-card-inline-gutter, 1rem);
+  }
+
+  .flashcard-hokei-back {
+    padding-inline: 0;
+  }
+
+  .flashcard-hokei-back .dojo-role {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    grid-template-areas:
+      "role stance"
+      ". action";
+    row-gap: 0.2rem;
   }
 
   .flashcard-meta {

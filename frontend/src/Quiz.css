@@ -2,14 +2,14 @@
   width: 100%;
   max-width: 56rem;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1rem var(--app-page-inline-gutter, 1rem);
 }
 
 .quiz-menu-page {
   width: 100%;
   max-width: 56rem;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1rem var(--app-page-inline-gutter, 1rem);
 }
 
 .quiz-menu-header {
@@ -153,6 +153,6 @@
   }
 
   .quiz-body {
-    padding: 1rem;
+    padding: 1rem var(--app-card-inline-gutter, 1rem);
   }
 }

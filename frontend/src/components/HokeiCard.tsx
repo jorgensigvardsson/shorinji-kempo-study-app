@@ -208,17 +208,23 @@ const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
 export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: boolean }) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
-    const renderValue = (value?: string, suffix?: React.ReactNode) => value ? (
-        <span className="kamoku-card-value">
+    const renderValue = (value?: string, columnLabel?: string, className = "", suffix?: React.ReactNode) => value ? (
+        <span className={`kamoku-card-value ${className}`.trim()}>
+            {columnLabel && <span className="kamoku-card-mobile-label">{translator.translate(columnLabel)}</span>}
             <span>{translator.translate(value)}{suffix}</span>
             {!translator.isJapanese && showKanji && <span className="kamoku-card-value-japanese">{translator.japanese(value)}</span>}
         </span>
-    ) : <span className="kamoku-card-empty">-</span>;
+    ) : (
+        <span className={`kamoku-card-value kamoku-card-empty ${className}`.trim()}>
+            {columnLabel && <span className="kamoku-card-mobile-label">{translator.translate(columnLabel)}</span>}
+            <span>-</span>
+        </span>
+    );
     const renderRole = (role: HokeiMoment["roles"]["attacker"], Icon: typeof PersonFill, label: string) => (
         <div className="kamoku-card-role-row">
             <Icon className="kamoku-card-role-icon" aria-label={translator.translate(label)} />
-            {renderValue(role.stance)}
-            {renderValue(role.action, label === "(F)" && hokei.ren_hanko
+            {renderValue(role.stance, "Stans", "kamoku-card-role-stance")}
+            {renderValue(role.action, "Utförande", "kamoku-card-role-action", label === "(F)" && hokei.ren_hanko
                 ? <i> ({translator.translate("ren hankō")})</i>
                 : undefined)}
         </div>
@@ -258,8 +264,8 @@ export const HokeiDojoDetails = ({ hokei }: { hokei: HokeiMoment }) => {
     const renderRole = (label: string, role: HokeiMoment["roles"]["attacker"]) => (
         <div className="dojo-role">
             <strong>{translator.translate(label)}</strong>
-            {role.stance && <div>{translator.translate(role.stance)}</div>}
-            {role.action && <div>{translator.translate(role.action)}{label === "(F)" && hokei.ren_hanko && <i> ({translator.translate("ren hankō")})</i>}</div>}
+            {role.stance && <div className="dojo-role-stance">{translator.translate(role.stance)}</div>}
+            {role.action && <div className="dojo-role-action">{translator.translate(role.action)}{label === "(F)" && hokei.ren_hanko && <i> ({translator.translate("ren hankō")})</i>}</div>}
         </div>
     );
 
