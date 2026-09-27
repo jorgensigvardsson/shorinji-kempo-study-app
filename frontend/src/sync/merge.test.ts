@@ -17,6 +17,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
       knownFlashCards: {},
+      embuDraft: { sequences: [] },
       showKanjiOnHokeiCards: true,
       weeklyPlanCompletions: {},
       gradingFundamentalCompletions: {},
@@ -48,15 +49,16 @@ const OLD = "2024-01-01T00:00:00.000Z";
 const NEW = "2024-06-01T00:00:00.000Z";
 
 describe("mergeDocuments — null base", () => {
-  it("drops legacy Embu drafts from synchronized documents", () => {
+  it("keeps Embu drafts synchronized and detects edits on both devices", () => {
     const local = makeDoc({ updatedAt: OLD });
     const remote = makeDoc({ updatedAt: NEW });
-    (local.data as AppDataDocument["data"] & { embuDraft: unknown }).embuDraft = { notes: "local", steps: [] };
-    (remote.data as AppDataDocument["data"] & { embuDraft: unknown }).embuDraft = { notes: "remote", steps: [] };
+    local.data.embuDraft = { sequences: [], pendingComment: "lokalt" };
+    remote.data.embuDraft = { sequences: [], pendingComment: "fjärr" };
 
     const result = mergeDocuments(null, local, remote);
 
-    expect("embuDraft" in result.document.data).toBe(false);
+    expect(result.document.data.embuDraft).toEqual(remote.data.embuDraft);
+    expect(result.conflictDetected).toBe(true);
   });
 
   it("still detects a real disagreement about the same field", () => {

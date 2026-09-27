@@ -112,6 +112,30 @@ it("keeps learned word cards when restarting the hokei deck", async () => {
     expect(getAppDataStore().get("knownFlashCards")["1"].known).toBe(true);
     expect(getAppDataStore().get("knownFlashCards")["hokei:gyaku gote"].known).toBe(false);
 });
+it("shows progress per grade and can reset every Hokei card without resetting word cards", async () => {
+    const user = userEvent.setup();
+    getAppDataStore().set("knownFlashCards", {
+        "1": { known: true, updatedAt: "2026-09-11T10:00:00.000Z" },
+        "hokei:gyaku gote": { known: true, updatedAt: "2026-09-11T10:00:00.000Z" },
+    });
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+
+    expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Framsteg 0/1" }));
+    const rows = screen.getAllByRole("listitem");
+    expect(rows[0].textContent).toContain("6 kyū1/1 · Trygg");
+    expect(rows[1].textContent).toContain("5 kyū0/1 · Bra att öva");
+
+    await user.click(screen.getByRole("button", { name: "Återställ alla Hokei-kort" }));
+    expect(screen.getByRole("heading", { name: "Återställa alla Hokei-kort?" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Återställ" }));
+
+    const progress = getAppDataStore().get("knownFlashCards");
+    expect(progress["1"].known).toBe(true);
+    expect(progress["hokei:gyaku gote"].known).toBe(false);
+    expect(progress["hokei:uchi uke zuki"].known).toBe(false);
+    expect(screen.getAllByRole("listitem")[0].textContent).toContain("0/1 · Bra att öva");
+});
 
 it("opens directly at the user's grade and changes grade through the shared picker", async () => {
     const user = userEvent.setup();
@@ -121,6 +145,7 @@ it("opens directly at the user's grade and changes grade through the shared pick
     expect(screen.getByRole("heading", { name: /Uchi uke zuki/i })).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
+    expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Alla" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Alla till och med egna" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "6 kyū" }));
@@ -128,6 +153,7 @@ it("opens directly at the user's grade and changes grade through the shared pick
     expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
     expect(screen.getByRole("heading", { name: /Gyaku gote/i })).toBeDefined();
     expect(screen.queryByRole("heading", { name: /Uchi uke zuki/i })).toBeNull();
+    expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
 });
 
 it("uses the confirmed Kamoku classification for Kihon, Zeme and Hagai jime", () => {

@@ -1,11 +1,14 @@
 import { useContext, useMemo, useState } from "react";
+import { Button, Modal, ProgressBar } from "react-bootstrap";
 import FlashcardDeck, { type FlashcardDeckEntry } from "./components/FlashcardDeck";
 import { HokeiDojoDetails, HokeiNoteEditor } from "./components/HokeiCard";
 import { getAllHokeiMoments, type GradeName, type GradePlan, type HokeiMoment } from "./data";
-import { TranslatorContext } from "./i18n";
+import { TranslatorContext, type Translator } from "./i18n";
 import { gradeLabel } from "./strings";
 import { compareGrades } from "./utilities/level";
 import { FocusChoicePicker } from "./components/TrainingPageControls";
+import type { FlashCardKnownEntry } from "./persistence/schema";
+import { setAppData, useAppData } from "./persistence/use-app-data";
 
 interface Props {
     allGradePlans: GradePlan[];
@@ -18,6 +21,12 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
     const translator = useContext(TranslatorContext);
     const gradeGroups = useMemo(() => hokeisByIntroducedGrade(allGradePlans), [allGradePlans]);
     const availableGrades = useMemo(() => gradeGroups.map(group => group.grade), [gradeGroups]);
+    const knownFlashCards = useAppData("knownFlashCards");
+    const [showProgress, setShowProgress] = useState(false);
+    const allHokeis = useMemo(
+        () => gradeGroups.flatMap(group => group.hokeis),
+        [gradeGroups],
+    );
     const [gradeSelection, setGradeSelection] = useState<GradeSelection>(myGrade);
     const selectedGrades = useMemo(() => new Set(availableGrades.filter(grade => {
         if (gradeSelection === "all") return true;
@@ -39,6 +48,8 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
             .flatMap(group => group.hokeis),
         [gradeGroups, selectedGrades],
     );
+    const selectedKnownCount = selectedHokeis.filter(hokei =>
+        knownFlashCards[`hokei:${hokei.id}`]?.known).length;
     const cards = useMemo<FlashcardDeckEntry[]>(() => selectedHokeis.map(hokei => {
         const romajiName = hokei.hokei_name;
         const kanjiName = translator.japanese(hokei.hokei_name);
@@ -81,6 +92,14 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
             interactiveBack: true,
         };
     }), [selectedHokeis, translator]);
+    const resetAllHokeiCards = () => {
+        const now = new Date().toISOString();
+        const updated = { ...knownFlashCards };
+        for (const hokei of allHokeis) {
+            updated[`hokei:${hokei.id}`] = { known: false, updatedAt: now };
+        }
+        setAppData("knownFlashCards", updated);
+    };
 
     return (
         <div className="hokei-flashcard-view">
@@ -92,7 +111,19 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
                     choices={gradeChoices}
                     onChange={value => setGradeSelection(value as GradeSelection)}
                 />
+                <Button type="button" variant="outline-secondary" className="hokei-flashcard-progress-trigger" onClick={() => setShowProgress(true)}>
+                    <span>{translator.translate("Framsteg")}</span>
+                    <span>{selectedKnownCount}/{selectedHokeis.length}</span>
+                </Button>
             </div>
+            <HokeiProgressModal
+                show={showProgress}
+                onHide={() => setShowProgress(false)}
+                gradeGroups={gradeGroups}
+                knownFlashCards={knownFlashCards}
+                onReset={resetAllHokeiCards}
+                translator={translator}
+            />
             <FlashcardDeck
                 key={gradeSelection}
                 cards={cards}
@@ -102,6 +133,98 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
                 hideIndexLabel
             />
         </div>
+    );
+};
+const HokeiProgressModal = ({
+    show,
+    onHide,
+    gradeGroups,
+    knownFlashCards,
+    onReset,
+    translator,
+}: {
+    show: boolean;
+    onHide: () => void;
+    gradeGroups: GradeGroup[];
+    knownFlashCards: Record<string, FlashCardKnownEntry>;
+    onReset: () => void;
+    translator: Translator;
+}) => {
+    const [confirmReset, setConfirmReset] = useState(false);
+
+    const close = () => {
+        setConfirmReset(false);
+        onHide();
+    };
+
+    const reset = () => {
+        onReset();
+        setConfirmReset(false);
+    };
+
+    return (
+        <Modal show={show} onHide={close} scrollable centered>
+            <Modal.Header closeButton>
+                <Modal.Title>{translator.translate("Framsteg")}</Modal.Title>
+            </Modal.Header>
+            {confirmReset ? (
+                <>
+                    <Modal.Body>
+                        <h3 className="h5">{translator.translate("Återställa alla Hokei-kort?")}</h3>
+                        <p className="mb-0">
+                            {translator.translate("Alla Hokei-kort markeras som kvar att öva. Flashkorten i ordlistan påverkas inte.")}
+                        </p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="outline-secondary" onClick={() => setConfirmReset(false)}>
+                            {translator.translate("Avbryt")}
+                        </Button>
+                        <Button variant="danger" onClick={reset}>
+                            {translator.translate("Återställ")}
+                        </Button>
+                    </Modal.Footer>
+                </>
+            ) : (
+                <>
+                    <Modal.Body>
+                        <p className="text-body-secondary">
+                            {translator.translate("Din trygghet bygger på vilka Hokei-kort du har markerat med Kan det.")}
+                        </p>
+                        <div className="hokei-flashcard-progress-list" role="list">
+                            {gradeGroups.map(group => {
+                                const known = group.hokeis.filter(hokei =>
+                                    knownFlashCards[`hokei:${hokei.id}`]?.known).length;
+                                const percent = group.hokeis.length === 0
+                                    ? 0
+                                    : Math.round(known / group.hokeis.length * 100);
+                                return (
+                                    <div className="hokei-flashcard-progress-row" role="listitem" key={group.grade}>
+                                        <div className="hokei-flashcard-progress-line">
+                                            <strong>{gradeLabel(group.grade, translator, false)}</strong>
+                                            <span>{known}/{group.hokeis.length} · {translator.translate(confidenceStatus(percent))}</span>
+                                        </div>
+                                        <ProgressBar
+                                            now={percent}
+                                            variant={percent === 100 ? "success" : percent >= 60 ? "info" : "warning"}
+                                            label={translator.translate("{0} procent trygg", { params: [String(percent)] })}
+                                            visuallyHidden
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="outline-danger" onClick={() => setConfirmReset(true)}>
+                            {translator.translate("Återställ alla Hokei-kort")}
+                        </Button>
+                        <Button variant="secondary" onClick={close}>
+                            {translator.translate("Stäng")}
+                        </Button>
+                    </Modal.Footer>
+                </>
+            )}
+        </Modal>
     );
 };
 
@@ -124,6 +247,12 @@ const hokeisByIntroducedGrade = (plans: GradePlan[]): GradeGroup[] => {
         if (hokeis.length > 0) result.push({ grade: plan.grade, hokeis });
     }
     return result;
+};
+
+const confidenceStatus = (percent: number): "Trygg" | "På god väg" | "Bra att öva" => {
+    if (percent === 100) return "Trygg";
+    if (percent >= 60) return "På god väg";
+    return "Bra att öva";
 };
 
 export default HokeiFlashcard;

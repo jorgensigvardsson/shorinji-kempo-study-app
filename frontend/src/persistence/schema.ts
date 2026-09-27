@@ -1,5 +1,6 @@
 import type { GradeName } from "../data";
 import type { Language } from "../i18n";
+import type { EmbuDraft } from "./embu-draft-schema";
 
 // Theme is per-device and no longer part of the document; see persistence/theme.ts.
 // Re-exported here because callers have always imported it from the schema.
@@ -45,6 +46,7 @@ export interface AppDataState {
   hokeiListSelection: string;
   quizStreakHighScore: number;
   knownFlashCards: Record<string, FlashCardKnownEntry>;
+  embuDraft: EmbuDraft;
   showKanjiOnHokeiCards: boolean;
   weeklyPlanCompletions: Record<string, WeeklyPlanCompletionEntry>;
   gradingFundamentalCompletions: Record<string, GradingCompletionEntry>;
@@ -67,6 +69,7 @@ export interface AppDataDocument {
 //     hokeiRanks, hokeiListSelection, quizStreakHighScore, knownFlashCards,
 //     showKanjiOnHokeiCards, and the three completion maps.
 // 2 — appDisplayName.
+// 3 — embuDraft.
 //
 // Deliberately not bumped for notesUpdatedAt. Bumping fires the compat gate, which
 // refuses writes from builds predating the compatibility header outright — and what
@@ -74,7 +77,7 @@ export interface AppDataDocument {
 // costs a conflict prompt; being locked out of sync costs everything. Whether any
 // such build is still syncing is answerable rather than a guess: the server logs
 // "outdated client wrote for %s: compat %d" for every one of them.
-export const APP_SCHEMA_VERSION = 2;
+export const APP_SCHEMA_VERSION = 3;
 
 // The highest schema this build can hold without losing anything — a different
 // question from which shape it writes, and the one that decides whether a write is
@@ -90,7 +93,7 @@ export const APP_SCHEMA_VERSION = 2;
 // Bump alongside APP_SCHEMA_VERSION, and only after checking the new schema really is
 // something older builds round-trip — additive fields are, renamed or restructured
 // ones are not.
-export const APP_SCHEMA_COMPAT_VERSION = 3;
+export const APP_SCHEMA_COMPAT_VERSION = 4;
 
 // What a request carrying neither header is taken to declare: the shape those builds
 // write, and the only shape they can hold. Builds before the compatibility header
@@ -130,8 +133,6 @@ export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(
 // document they were moved out of. Anything retired from AppDataState belongs here, or
 // it comes back the first time an old device syncs.
 //
-// embuDraft — the experimental Embu builder's draft, moved to its own localStorage key
-// so it stays out of the document that syncs to Cosmos. See TODO.md.
 // syncProvider — whether this device is signed in. Per-device state, and circular
 // where it was: the document only exists on the server once signed in. See
 // sync/provider.ts, which also adopts the old value so nobody is signed out by the move.
@@ -142,7 +143,9 @@ export const KNOWN_DATA_FIELDS: ReadonlySet<string> = new Set(
 // currentWeekAnchor — the app once tried to infer a dojo's current curriculum week
 // from a date chosen in Settings. Dojos do not follow one shared calendar, so the
 // weekly plan now opens at the beginning and lets the reader navigate directly.
-export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set(["embuDraft", "syncProvider", "theme", "currentWeekAnchor"]);
+export const RETIRED_DATA_FIELDS: ReadonlySet<string> = new Set([
+  "syncProvider", "theme", "currentWeekAnchor",
+]);
 
 // The fields of `data` this build has no schema for. They are never interpreted, only
 // preserved, so that a device running an older build cannot erase newer data simply by
@@ -218,6 +221,7 @@ export function createDefaultAppDataDocument(): AppDataDocument {
       notes: {},
       notesUpdatedAt: {},
       hokeiRanks: {},
+      embuDraft: { sequences: [] },
       hokeiListSelection: "own",
       quizStreakHighScore: 0,
       knownFlashCards: {},

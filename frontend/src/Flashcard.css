@@ -13,6 +13,57 @@
   width: min(100%, 56rem);
   margin: 0 auto;
   padding: 1rem var(--app-page-inline-gutter, 1rem) 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.hokei-flashcard-filter .training-choice-trigger {
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.hokei-flashcard-progress-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.hokei-flashcard-progress-trigger span:last-child {
+  color: var(--bs-secondary-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.hokei-flashcard-progress-list {
+  border-block: 1px solid var(--bs-border-color);
+}
+
+.hokei-flashcard-progress-row {
+  padding: 0.8rem 0.15rem;
+}
+
+.hokei-flashcard-progress-row + .hokei-flashcard-progress-row {
+  border-top: 1px solid var(--bs-border-color-translucent);
+}
+
+.hokei-flashcard-progress-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.hokei-flashcard-progress-line span {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  text-align: end;
+}
+
+.hokei-flashcard-progress-row .progress {
+  height: 0.35rem;
 }
 
 .flashcard-swipe-stage {

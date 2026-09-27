@@ -23,6 +23,7 @@ import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
 import { beginNavigation } from './navigation-pending';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
+import { isTechnicalAdmin } from './roles';
 import { setAppData, useAppData } from './persistence/use-app-data';
 import { NavigationMemoryProvider } from './navigation-memory';
 import { mainSection } from './navigation';
@@ -143,6 +144,9 @@ function App(props: Props) {
   const accountDisplayName = syncState.status === "local_only"
     ? undefined
     : getSyncManager().getBackendUserInfo()?.displayName;
+  const showFontPicker = isFontPickerEnabled
+    && (import.meta.env.DEV || isTechnicalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []));
+
   // Null means no app-specific choice has been made, so the account identity is the
   // prefill. An intentionally empty string stays empty and simply hides the greeting.
   const displayName = appDisplayName === null ? accountDisplayName : appDisplayName;
@@ -242,7 +246,7 @@ function App(props: Props) {
         <AppNavbar routes={routes} translator={translator} className="d-print-none" />
         <div className="app-route-content" style={{
           '--floating-stack-reserve': `${floatingReserve}px`,
-          '--training-controls-reserve': isFontPickerEnabled ? '4.75rem' : '0px',
+          '--training-controls-reserve': showFontPicker ? '4.75rem' : '0px',
         } as CSSProperties}>
           <TrainingViewSettingsContext.Provider value={{
             grade: displayGrade,
@@ -269,13 +273,13 @@ function App(props: Props) {
           showTrainingMode={false}
           trainingMode={trainingMode}
           onTrainingModeChange={setTrainingMode}
-          bodyFontPicker={isFontPickerEnabled
+          bodyFontPicker={showFontPicker
             ? { value: bodyFontFamily, onChange: f => bodyFontFamilyData.save(f), filter: bodyFontFilter, onFilterChange: setBodyFontFilter }
             : undefined}
-          headingFontPicker={isFontPickerEnabled
+          headingFontPicker={showFontPicker
             ? { value: headingFontFamily, onChange: f => headingFontFamilyData.save(f), filter: headingFontFilter, onFilterChange: setHeadingFontFilter }
             : undefined}
-          kanjiFontPicker={isFontPickerEnabled
+          kanjiFontPicker={showFontPicker
             ? { value: kanjiFontFamily, onChange: f => kanjiFontFamilyData.save(f), filter: kanjiFontFilter, onFilterChange: setKanjiFontFilter }
             : undefined}
         />

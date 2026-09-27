@@ -299,6 +299,8 @@ jobs:
           VITE_AUTH_URL:             ${{ vars.VITE_AUTH_URL }}
           VITE_API_URL:              ${{ vars.VITE_API_URL }}
           VITE_DEBUG:                ${{ vars.VITE_DEBUG || 'false' }}
+          VITE_ENVIRONMENT:          production
+          VITE_ADMIN_FONT_PICKER:    "false"
           # Identifies this build in feedback submissions; same SHA used to tag
           # the backend images built in the build-backend job above.
           VITE_APP_VERSION:          ${{ github.sha }}
@@ -309,6 +311,11 @@ jobs:
         run: |
           set -euo pipefail
           missing=()
+          if [ "$VITE_ENVIRONMENT" != "production" ] || [ "$VITE_ADMIN_FONT_PICKER" != "false" ]; then
+            echo "::error::Production must disable the experimental admin font picker."
+            exit 1
+          fi
+
           require() {
             local name="$1" value="$2"
             [ -n "$value" ] || missing+=("$name")
@@ -333,6 +340,8 @@ jobs:
           write_var VITE_DEBUG                 "$VITE_DEBUG"
           write_var VITE_APP_VERSION           "$VITE_APP_VERSION"
           write_var VITE_APPINSIGHTS_CONNECTION_STRING "$VITE_APPINSIGHTS_CONNECTION_STRING"
+          write_var VITE_ENVIRONMENT           "$VITE_ENVIRONMENT"
+          write_var VITE_ADMIN_FONT_PICKER     "$VITE_ADMIN_FONT_PICKER"
 
       - name: Build site
         run: |

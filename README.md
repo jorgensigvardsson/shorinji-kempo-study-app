@@ -10,7 +10,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Training** — choose between a grade-based weekly plan and free practice, with app-style back navigation that preserves your place
 - **Contextual training tools** — a discreet global grade selector and a Training mode that combines the focused Dojo presentation with keeping the screen awake
 - **Weekly progress** — mark a training week as completed and retain its completion date across synced devices
-- **Free practice** — focused areas for Kihon, Hokei, Tan'en/Sōtai, and Randori, with separate flows for building Embu and training Kumi-embu
+- **Free practice** — focused areas for Kihon, Hokei, Tan'en/Sōtai, and Randori, with a saved and synchronized Embu draft plus a separate Kumi-embu training flow
 - **Experimental Embu builder** — compose six sequences from one or more existing Hokei, with transitions and notes; drafts are intentionally local-only while the permanent data model is designed
 - **Technique Groups** — explore techniques organized by category under Theory
 - **Grading** — theoretical requirements under Theory and practical requirements under Training, with grouped fundamentals and per-grade completion progress for large theory areas and fundamentals synced across devices
@@ -139,12 +139,15 @@ With no SMTP relay configured the auth service logs the code to stdout instead o
 Pointing the dev server at the staging or production backend instead is not an option: their
 CORS allowed origin is an exact match against `FRONTEND_URL`, so `localhost:5173` is rejected.
 
-### Experimental font picker
+### Admin font picker
 
-Active with `VITE_DEBUG=true` locally, or automatically on staging (`VITE_ENVIRONMENT=staging`)
-so it can be tried without a local build — see `isFontPickerEnabled` in
-`frontend/src/google-fonts.ts`, the single flag every integration point checks. It never
-activates in production. When active, three font pickers appear in the floating toolbar
+Active with `VITE_DEBUG=true` only in the local Vite development server. A deployed build
+requires both `VITE_ENVIRONMENT=staging` and `VITE_ADMIN_FONT_PICKER=true`, and the
+controls are then visible only to the technical `admin` role. The production workflow
+hardcodes `VITE_ENVIRONMENT=production` and `VITE_ADMIN_FONT_PICKER=false`, and refuses
+to build if that safeguard changes. Thus `VITE_DEBUG` can never enable the picker in a
+production bundle. See `isFontPickerEnabled` in `frontend/src/google-fonts.ts`, the
+single flag every integration point checks. When active, three font pickers appear in the floating toolbar
 (bottom-left, normally only shown on grading/training-mode pages) — one for body text, one
 for headings, one for kanji/hiragana/katakana, changed independently — that swap the app's
 fonts live, per-device — useful for trying candidates without a rebuild. Each filters a
@@ -179,28 +182,10 @@ Fonts Developer API). The key is only used locally to regenerate the JSON file �
 written to disk, committed, or shipped in the app; loading a chosen font at runtime uses
 Google's public, key-free stylesheet endpoint.
 
-**This is temporary** — once one font is chosen, delete it:
-- Delete `frontend/src/google-fonts.ts` (+ `.test.ts`), `frontend/src/components/FontPicker.tsx`
-  (+ `.test.tsx`), `frontend/src/persistence/font-family.ts`,
-  `frontend/src/assets/google-fonts.json`, and `frontend/scripts/fetch-google-fonts.ts`.
-- Remove the `fonts:fetch` line from `frontend/package.json` scripts.
-- In `frontend/src/components/TrainingControls.tsx`/`.css`: remove the `bodyFontPicker`/
-  `headingFontPicker` props, the `FontPicker` import, the `{bodyFontPicker && (...)}`/
-  `{headingFontPicker && (...)}` blocks, and the `.training-controls-font`/`.font-picker*`
-  CSS rules.
-- In `frontend/src/App.tsx`: remove the `bodyFontFamilyData`/`headingFontFamilyData` props,
-  state, and effects, the `bodyFontFilter`/`headingFontFilter` state, the
-  `applyFontFamily`/`isFontPickerEnabled` import and usage, and drop `isFontPickerEnabled`
-  from the `--training-controls-reserve` calculation.
-- In `frontend/src/main.tsx`: remove the `bodyFontFamilyData`/`headingFontFamilyData` loads
-  and props.
-- Delete this README section.
-- Hardcode the chosen fonts: set `$font-family-base`/`$font-family-sans-serif` (body) and
-  `--app-display-font` (headings) in `frontend/src/styles/bootstrap-theme.scss`/`index.css`
-  (or add an `@font-face`/Google Fonts `<link>` if either is a web font) rather than relying
-  on any of the above. A self-hosted `@font-face` needs no CSP change; keeping the font on
-  Google's servers means production's `Content-Security-Policy` has to allow
-  `fonts.googleapis.com` (`style-src`) and `fonts.gstatic.com` (`font-src`) permanently.
+The picker is deliberately kept as a staging-only admin tool so future font experiments do
+not require rebuilding it. It must not be enabled in production; keep the production
+workflow guard, the environment checks in `google-fonts.ts`, and the technical-admin check
+in `App.tsx` together.
 
 ## Translation workflow
 

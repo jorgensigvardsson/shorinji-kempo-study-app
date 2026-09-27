@@ -1,6 +1,7 @@
 import { LocalStorageBackend, type PersistenceBackend } from "./backend";
 import { deepEqual } from "../utilities/deep-equal";
 import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, unknownDataFields, type AppDataDocument, type AppDataState } from "./schema";
+import { isEmbuDraft } from "./embu-draft-schema";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
 type UnregisterDataChangedCallback = () => void;
@@ -38,6 +39,7 @@ export class AppDataStore {
       hokeiListSelection: new Map<number, DataChangedCallback<"hokeiListSelection">>(),
       quizStreakHighScore: new Map<number, DataChangedCallback<"quizStreakHighScore">>(),
       knownFlashCards: new Map<number, DataChangedCallback<"knownFlashCards">>(),
+      embuDraft: new Map<number, DataChangedCallback<"embuDraft">>(),
       showKanjiOnHokeiCards: new Map<number, DataChangedCallback<"showKanjiOnHokeiCards">>(),
       weeklyPlanCompletions: new Map<number, DataChangedCallback<"weeklyPlanCompletions">>(),
       gradingFundamentalCompletions: new Map<number, DataChangedCallback<"gradingFundamentalCompletions">>(),
@@ -247,6 +249,7 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       hokeiListSelection: typeof input.data?.hokeiListSelection === "string" ? input.data.hokeiListSelection : fallback.data.hokeiListSelection,
       quizStreakHighScore: typeof input.data?.quizStreakHighScore === "number" ? input.data.quizStreakHighScore : fallback.data.quizStreakHighScore,
       knownFlashCards: isFlashCardKnownRecord(input.data?.knownFlashCards) ? input.data.knownFlashCards : fallback.data.knownFlashCards,
+      embuDraft: isEmbuDraft(input.data?.embuDraft) ? input.data.embuDraft : fallback.data.embuDraft,
       showKanjiOnHokeiCards: typeof input.data?.showKanjiOnHokeiCards === "boolean" ? input.data.showKanjiOnHokeiCards : fallback.data.showKanjiOnHokeiCards,
       weeklyPlanCompletions: isCompletionRecord(input.data?.weeklyPlanCompletions)
         ? input.data.weeklyPlanCompletions
