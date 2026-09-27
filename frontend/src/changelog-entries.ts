@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-27T15:55:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Hokei-flashkorten visar nu dina framsteg per grad och låter dig återställa alla Hokei-kort när du vill börja om.",
+        en: "Hokei flashcards now show your progress for each grade and let you reset all Hokei cards whenever you want to start over.",
+        tr: "Hokei bilgi kartları artık her derece için ilerlemenizi gösteriyor ve yeniden başlamak istediğinizde tüm Hokei kartlarını sıfırlamanıza izin veriyor.",
+        ja: "法形フラッシュカードで級・段ごとの進み具合を確認でき、最初からやり直したいときはすべての法形カードをリセットできるようになりました。",
+      },
+      {
+        emoji: "✨",
+        sv: "Dina embu-utkast sparas nu. När du är inloggad synkas de så att du kan fortsätta på en annan enhet.",
+        en: "Your Embu drafts are now saved. When you are signed in, they are synchronized so you can continue on another device.",
+        tr: "Embu taslaklarınız artık kaydediliyor. Oturum açtığınızda taslaklar eşitlenir, böylece başka bir cihazda devam edebilirsiniz.",
+        ja: "演武の下書きが保存されるようになりました。ログイン中は同期されるため、別の端末でも続きから編集できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-27T13:15:51.000Z",
     changes: [
       {

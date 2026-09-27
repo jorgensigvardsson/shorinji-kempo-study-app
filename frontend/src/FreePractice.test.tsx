@@ -5,7 +5,8 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GradeName, GradePlan } from "./data";
 import FreePractice from "./FreePractice";
-import { experimentalEmbuDraftStorageKey, type EmbuDraft } from "./persistence/experimental-embu-draft";
+import { experimentalEmbuDraftStorageKey } from "./persistence/experimental-embu-draft";
+import { getAppDataStore } from "./persistence/store";
 import { TrainingViewSettingsContext } from "./training-view-settings-context";
 import type { PracticeArea } from "./practice-area";
 
@@ -202,6 +203,7 @@ const KumiEmbuLinkHarness = () => (
 
 beforeEach(() => {
   localStorage.removeItem(experimentalEmbuDraftStorageKey);
+  getAppDataStore().set("embuDraft", { sequences: [] });
 });
 
 afterEach(() => {
@@ -406,8 +408,8 @@ describe("FreePractice", () => {
 
     expect(screen.queryByRole("button", { name: "Tillbaka" })).toBeNull();
     expect(screen.getByRole("button", { name: "Embu och kumi-embu" })).toBeTruthy();
-    expect(screen.getByText("Experimentell").querySelector("svg")).toBeTruthy();
-    expect(screen.getByText("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")).toBeTruthy();
+    expect(screen.queryByText("Experimentell")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Bygg embu" })).toBeTruthy();
     expect(document.querySelector(".embu-progress")).toBeNull();
     expect(screen.queryByRole("textbox", { name: "Anteckningar för hela embun" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Kumi-embu" })).toBeNull();
@@ -445,7 +447,7 @@ describe("FreePractice", () => {
     await user.type(search, "gyak");
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
 
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences).toHaveLength(6);
     expect(saved.sequences[0].hokeis.map(hokei => hokei.hokeiName)).toEqual(["shita uke geri", "gyaku gote"]);
     expect(saved.sequences[0].hokeis[0].comment).toBe("Byt sida lugnt\nArbeta med rytmen");
@@ -502,7 +504,7 @@ describe("FreePractice", () => {
     expect(screen.getByRole("button", { name: "Visa detaljer för sekvens 6" })).toBeTruthy();
     expect(document.querySelector(".embu-progress")).toBeNull();
     expect(screen.queryByRole("button", { name: "Nästa sekvens" })).toBeNull();
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences).toHaveLength(6);
   });
 
@@ -530,7 +532,7 @@ describe("FreePractice", () => {
     expect(secondSequence.querySelector(".embu-drop-indicator")).not.toBeNull();
 
     fireEvent.pointerUp(handle, { pointerId: 7, clientX: 20, clientY: 80 });
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences[0].hokeis).toHaveLength(0);
     expect(saved.sequences[1].hokeis.map(hokei => hokei.hokeiName)).toEqual(["gyaku gote"]);
     expect(document.querySelector(".embu-drag-preview")).toBeNull();
@@ -550,7 +552,7 @@ describe("FreePractice", () => {
     const menu = screen.getByRole("group", { name: "Flytta shita uke geri" });
     await user.click(within(menu).getByRole("button", { name: "Flytta shita uke geri till sekvens 4" }));
 
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences[0].hokeis).toHaveLength(0);
     expect(saved.sequences[3].hokeis.map(hokei => hokei.hokeiName)).toEqual(["shita uke geri"]);
   });

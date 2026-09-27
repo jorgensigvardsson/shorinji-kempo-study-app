@@ -40,7 +40,7 @@ describe("createDefaultAppDataDocument", () => {
     expect(data.hokeiListSelection).toBe("own");
     expect(data.gradingFundamentalCompletions).toEqual({});
     expect(data.gradingTheoryCompletions).toEqual({});
-    expect("embuDraft" in data).toBe(false);
+    expect(data.embuDraft).toEqual({ sequences: [] });
   });
 });
 
@@ -57,7 +57,7 @@ describe("unknownDataFields", () => {
 
   it("drops retired fields, which are unrecognised but deliberately unwanted", () => {
     const { data } = createDefaultAppDataDocument();
-    const withRetired = { ...data, embuDraft: { notes: "x", steps: [] }, currentWeekAnchor: { week: 3, anchorDate: "2026-09-01" }, futureField: 1 };
+    const withRetired = { ...data, currentWeekAnchor: { week: 3, anchorDate: "2026-09-01" }, futureField: 1 };
     expect(unknownDataFields(withRetired)).toEqual({ futureField: 1 });
   });
 

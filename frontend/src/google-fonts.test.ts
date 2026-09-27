@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { applyFontFamily, filterGoogleFonts, type GoogleFont } from "./google-fonts";
+import { applyFontFamily, filterGoogleFonts, shouldEnableFontPicker, type GoogleFont } from "./google-fonts";
 
 const fonts: GoogleFont[] = [
     { family: "Roboto", category: "sans-serif", subsets: ["latin", "latin-ext"] },
@@ -8,6 +8,25 @@ const fonts: GoogleFont[] = [
     { family: "Noto Sans JP", category: "sans-serif", subsets: ["japanese", "latin"] },
 ];
 
+describe("shouldEnableFontPicker", () => {
+    it("allows VITE_DEBUG only in the local development server", () => {
+        expect(shouldEnableFontPicker({ dev: true, debug: "true" })).toBe(true);
+    });
+
+    it("requires both the staging identity and its dedicated flag for a deployed build", () => {
+        expect(shouldEnableFontPicker({
+            dev: false,
+            environment: "staging",
+            adminFontPicker: "true",
+        })).toBe(true);
+    });
+
+    it("stays disabled in production even if debug and the admin flag are both true", () => {
+        expect(shouldEnableFontPicker({
+            dev: false, debug: "true", environment: "production", adminFontPicker: "true",
+        })).toBe(false);
+    });
+});
 describe("filterGoogleFonts", () => {
     it("returns everything when the filter is empty", () => {
         expect(filterGoogleFonts(fonts, { search: "", category: "", subset: "" })).toEqual(fonts);

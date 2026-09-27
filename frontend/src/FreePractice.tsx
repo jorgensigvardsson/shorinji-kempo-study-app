@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, ExclamationTriangle, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
@@ -858,17 +858,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
         <div className={`free-practice-content embu-detail-view${dojoMode || activeView === "practice" ? " dojo-readable-hokei" : ""}`}>
             {activeView === "builder" && (
             <section className="free-practice-section embu-builder">
-                <div className="embu-builder-heading">
-                    <h3 className="app-section-heading">{translator.translate("Bygg embu")}</h3>
-                    <span className="embu-experimental-label">
-                        <ExclamationTriangle aria-hidden="true" />
-                        {translator.translate("Experimentell")}
-                    </span>
-                </div>
-                <p className="embu-experimental-note">
-                    {translator.translate("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")}
-                </p>
-
+                <h3 className="app-section-heading">{translator.translate("Bygg embu")}</h3>
                 <ol className="embu-draft-sequences">
                     {draft.sequences.map((sequence, sequenceIndex) => {
                         const isExpanded = expandedSequenceId === sequence.id;
