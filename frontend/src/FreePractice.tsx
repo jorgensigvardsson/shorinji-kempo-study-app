@@ -143,7 +143,7 @@ const FreePractice = (props: Props) => {
                             )}
                         </div>
                         <TrainingPageControls
-                            showGrade={activeArea === "kihon" || activeArea === "embu"}
+                            showGrade={activeArea === "kihon" || activeArea === "randori" || activeArea === "embu"}
                             showDojo
                         />
                     </header>
@@ -173,7 +173,7 @@ const FreePractice = (props: Props) => {
             )}
             {visitedAreas.has("randori") && (
                 <div hidden={activeArea !== "randori"}>
-                    <RandoriArea allGradePlans={props.allGradePlans} dojoMode={dojoMode} />
+                    <RandoriArea myGrade={props.myGrade} allGradePlans={props.allGradePlans} dojoMode={dojoMode} />
                 </div>
             )}
             {visitedAreas.has("embu") && (
@@ -337,10 +337,12 @@ interface RandoriTheme {
     introducedAt: GradeName;
 }
 
-const RandoriArea = ({ allGradePlans, dojoMode }: Pick<Props, "allGradePlans" | "dojoMode">) => {
+const RandoriArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade" | "allGradePlans" | "dojoMode">) => {
     const translator = useContext(TranslatorContext);
     const { gohoThemes, juhoThemes, otherThemes, unrestrictedFrom } = useMemo(() => {
-        const entries = allGradePlans.flatMap(plan => plan.weeks.flatMap(week =>
+        const entries = allGradePlans
+            .filter(plan => compareGrades(plan.grade, myGrade) <= 0)
+            .flatMap(plan => plan.weeks.flatMap(week =>
             getStandardMoments(week)
                 .filter(moment => moment.content.includes("randori"))
                 .map(moment => ({ moment, grade: plan.grade, week: week.week }))));
@@ -363,7 +365,7 @@ const RandoriArea = ({ allGradePlans, dojoMode }: Pick<Props, "allGradePlans" | 
             otherThemes: uniqueThemes.filter(theme => theme.type !== "gōhō" && theme.type !== "jūhō"),
             unrestrictedFrom: unrestrictedEntry?.grade,
         };
-    }, [allGradePlans]);
+    }, [allGradePlans, myGrade]);
 
     return (
         <div className={`free-practice-content randori-practice-groups${dojoMode ? " is-dojo-mode" : ""}`}>

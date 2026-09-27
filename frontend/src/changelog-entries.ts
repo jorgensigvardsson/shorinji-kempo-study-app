@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-27T13:15:51.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Randori har fått en gradväljare. Välj grad för att se randoriträningen fram till och med den graden.",
+        en: "Randori now has a grade picker. Choose a grade to see the randori training up to and including that grade.",
+        tr: "Randori artık bir derece seçiciye sahip. Seçtiğiniz dereceye kadar olan randori çalışmalarını görmek için bir derece seçin.",
+        ja: "乱捕に級・段の選択機能を追加しました。選んだ級・段までの乱捕練習を確認できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-27T10:24:45.000Z",
     changes: [
       {
