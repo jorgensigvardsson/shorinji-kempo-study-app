@@ -143,7 +143,7 @@ const FreePractice = (props: Props) => {
                             )}
                         </div>
                         <TrainingPageControls
-                            showGrade={activeArea === "kihon" || activeArea === "randori" || activeArea === "embu"}
+                            showGrade={activeArea === "kihon" || activeArea === "tanen-sotai" || activeArea === "randori" || activeArea === "embu"}
                             showDojo
                         />
                     </header>
@@ -168,7 +168,7 @@ const FreePractice = (props: Props) => {
             )}
             {visitedAreas.has("tanen-sotai") && (
                 <div hidden={activeArea !== "tanen-sotai"}>
-                    <TanenSotaiArea dojoMode={dojoMode} />
+                    <TanenSotaiArea myGrade={props.myGrade} dojoMode={dojoMode} />
                 </div>
             )}
             {visitedAreas.has("randori") && (
@@ -264,10 +264,11 @@ const KihonTechniqueList = ({ title, items, selectedGrade, dojoMode }: KihonTech
     );
 };
 
-const TanenSotaiArea = ({ dojoMode }: { dojoMode: boolean }) => {
+const TanenSotaiArea = ({ myGrade, dojoMode }: Pick<Props, "myGrade" | "dojoMode">) => {
     const translator = useContext(TranslatorContext);
-    const tanen = tanenKihonHokei.filter(entry => !entry.hokei_name.includes("(sōtai)"));
-    const sotai = tanenKihonHokei.filter(entry => entry.hokei_name.includes("(sōtai)"));
+    const available = tanenKihonHokei.filter(entry => compareGrades(entry.introducedAt, myGrade) <= 0);
+    const tanen = available.filter(entry => !entry.hokei_name.includes("(sōtai)"));
+    const sotai = available.filter(entry => entry.hokei_name.includes("(sōtai)"));
 
     return (
         <div className={`free-practice-content free-practice-form-groups${dojoMode ? " is-dojo-mode" : ""}`}>
@@ -321,6 +322,11 @@ const PracticeFormGroup = ({ title, entries, dojoMode }: { title: string; entrie
                 {entries.map(entry => (
                     <li key={entry.hokei_name}>
                         <PracticeTerm value={entry.hokei_name} dojoMode={dojoMode} />
+                        {!dojoMode && (
+                            <span className="free-practice-item-grade">
+                                {gradeLabel(entry.introducedAt, translator, false)}
+                            </span>
+                        )}
                         {(entry.videos ?? []).map(video => (
                             <VideoLink key={video.url} video={video} className="mt-2" />
                         ))}

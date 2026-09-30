@@ -22,7 +22,7 @@ const gradePlan: GradePlan = { grade: "6 kyū", weeks: [] };
 function FeedbackPage({ pendingRequests = 0 }: { pendingRequests?: number }) {
   const translator = new TranslatorImplementation({}, "sv");
   const routes = getRoutes(
-    gradePlan, gradePlan, [gradePlan], translator, 1,
+    gradePlan, gradePlan, "minarai", [gradePlan], translator, 1,
     () => {}, () => {}, () => {}, false, undefined, pendingRequests,
   );
   return (

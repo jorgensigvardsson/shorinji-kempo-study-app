@@ -14,20 +14,18 @@ vi.mock("./sync/manager", () => ({
 import Settings from "./Settings";
 
 import { TranslatorImplementation } from "./i18n";
-import type { GradePlan } from "./data";
 import { getAppDataStore } from "./persistence/store";
 
-const plans = [{ grade: "6 kyū", weeks: [] }] as GradePlan[];
 const translator = new TranslatorImplementation({}, "sv");
+const onSetCurrentGrade = vi.fn();
 
 const renderSettings = () => render(
   <Settings
     translator={translator}
-    nextGrade={plans[0]}
-    allGradePlans={plans}
+    currentGrade="minarai"
     textSize={1.1}
     onSetLanguage={() => {}}
-    onSetGrade={() => {}}
+    onSetCurrentGrade={onSetCurrentGrade}
     onSetTextSize={() => {}}
   />
 );
@@ -185,6 +183,22 @@ describe("Settings — profile and structure", () => {
     getAppDataStore().set("appDisplayName", null);
     getBackendUserInfo.mockReset().mockReturnValue(account);
     refreshBackendUserInfo.mockReset().mockResolvedValue();
+    onSetCurrentGrade.mockReset();
+  });
+
+  it("offers every adult grade and saves the attained grade", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const grade = screen.getByLabelText("Min grad");
+    expect(grade.textContent).toContain("Minarai");
+
+    await user.click(grade);
+    const choices = screen.getAllByRole("button")
+      .filter(button => button.hasAttribute("data-rr-ui-dropdown-item"));
+    expect(choices).toHaveLength(16);
+    await user.click(choices.find(choice => /Nanadan/i.test(choice.textContent ?? ""))!);
+    expect(onSetCurrentGrade).toHaveBeenCalledWith("nanadan");
   });
 
   it("prefills the app name from the signed-in account", () => {

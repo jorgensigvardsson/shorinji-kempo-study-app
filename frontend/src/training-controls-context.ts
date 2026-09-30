@@ -17,7 +17,7 @@ export function getTrainingControlContext(pathname: string): TrainingControlCont
   if (view !== "free" || !area) return { showGrade: false, showTrainingMode: false };
 
   return {
-    showGrade: area === "kihon" || area === "hokei" || area === "randori" || area === "embu",
+    showGrade: area === "kihon" || area === "hokei" || area === "tanen-sotai" || area === "randori" || area === "embu",
     showTrainingMode: true,
   };
 }

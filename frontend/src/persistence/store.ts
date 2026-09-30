@@ -2,6 +2,7 @@ import { LocalStorageBackend, type PersistenceBackend } from "./backend";
 import { deepEqual } from "../utilities/deep-equal";
 import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, createDefaultAppDataDocument, isKenshiNumber, unknownDataFields, type AppDataDocument, type AppDataState } from "./schema";
 import { isEmbuDraft } from "./embu-draft-schema";
+import { isCurrentGrade, previousGrade } from "../data";
 
 type DataChangedCallback<TKey extends keyof AppDataState> = (data: AppDataState[TKey]) => void;
 type UnregisterDataChangedCallback = () => void;
@@ -30,6 +31,7 @@ export class AppDataStore {
     this.document = sanitizeDocument(backend.load(createDefaultAppDataDocument()));
     this.callbacks = {
       grade: new Map<number, DataChangedCallback<"grade">>(),
+      currentGrade: new Map<number, DataChangedCallback<"currentGrade">>(),
       language: new Map<number, DataChangedCallback<"language">>(),
       appDisplayName: new Map<number, DataChangedCallback<"appDisplayName">>(),
       kenshiNumber: new Map<number, DataChangedCallback<"kenshiNumber">>(),
@@ -236,6 +238,9 @@ function sanitizeDocument(input: AppDataDocument): AppDataDocument {
       // devices. Known fields are still validated below and override anything here.
       ...unknownDataFields(input.data),
       grade: input.data?.grade ?? fallback.data.grade,
+      currentGrade: isCurrentGrade(input.data?.currentGrade)
+        ? input.data.currentGrade
+        : previousGrade(input.data?.grade ?? fallback.data.grade),
       language: input.data?.language ?? fallback.data.language,
       appDisplayName: input.data?.appDisplayName === null
         ? null

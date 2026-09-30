@@ -28,6 +28,11 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
         [gradeGroups],
     );
     const [gradeSelection, setGradeSelection] = useState<GradeSelection>(myGrade);
+    const [lastMyGrade, setLastMyGrade] = useState(myGrade);
+    if (lastMyGrade !== myGrade) {
+        setLastMyGrade(myGrade);
+        setGradeSelection(myGrade);
+    }
     const selectedGrades = useMemo(() => new Set(availableGrades.filter(grade => {
         if (gradeSelection === "all") return true;
         if (gradeSelection === "up-to-own") return compareGrades(grade, myGrade) <= 0;

@@ -5,7 +5,7 @@ import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
 import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
-import { humanGradeName, type GradePlan, type GradeName } from "./data";
+import { currentGrades, humanGradeName, type CurrentGrade } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
@@ -28,16 +28,15 @@ const textSizeOptions = [
 
 interface Props {
     translator: Translator;
-    nextGrade: GradePlan;
-    allGradePlans: GradePlan[];
+    currentGrade: CurrentGrade;
     textSize: number;
     onSetLanguage: (lang: Language) => void;
-    onSetGrade: (grade: GradePlan) => void;
+    onSetCurrentGrade: (grade: CurrentGrade) => void;
     onSetTextSize: (textSize: number) => void;
 }
 
 const Settings = (props: Props) => {
-    const { translator, nextGrade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
+    const { translator, currentGrade, textSize, onSetLanguage, onSetCurrentGrade, onSetTextSize } = props;
     const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
     const [appDisplayName, setAppDisplayName] = useState<string | null>(() => store.get("appDisplayName"));
@@ -77,7 +76,7 @@ const Settings = (props: Props) => {
         { code: "ja", key: "Japanska", name: "日本語" },
     ];
 
-    const gradeLabel = (name: GradeName) => {
+    const gradeLabel = (name: CurrentGrade) => {
         const humanName = humanGradeName(name);
 
         if (!translator.isJapanese)
@@ -271,18 +270,18 @@ const Settings = (props: Props) => {
                         </Form.Group>
 
                         <Form.Group controlId="settingsLevel">
-                            <Form.Label>{translator.translate("Min nästa grad")}</Form.Label>
+                            <Form.Label>{translator.translate("Min grad")}</Form.Label>
                             <Dropdown className="settings-dropdown" onSelect={key => {
-                                const plan = allGradePlans.find(x => x.grade === key);
-                                if (plan) onSetGrade(plan);
+                                const grade = currentGrades.find(candidate => candidate === key);
+                                if (grade) onSetCurrentGrade(grade);
                             }}>
                                 <Dropdown.Toggle id="settingsLevel" variant="outline-secondary">
-                                    {gradeLabel(nextGrade.grade)}
+                                    {gradeLabel(currentGrade)}
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    {allGradePlans.map(plan => (
-                                        <Dropdown.Item key={plan.grade} eventKey={plan.grade} active={plan.grade === nextGrade.grade}>
-                                            {gradeLabel(plan.grade)}
+                                    {currentGrades.map(grade => (
+                                        <Dropdown.Item key={grade} eventKey={grade} active={grade === currentGrade}>
+                                            {gradeLabel(grade)}
                                         </Dropdown.Item>
                                     ))}
                                 </Dropdown.Menu>

@@ -156,6 +156,18 @@ it("opens directly at the user's grade and changes grade through the shared pick
     expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
 });
 
+it("returns to the new training grade when the profile grade changes", () => {
+    const { rerender } = render(
+        <HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />,
+    );
+
+    expect(screen.getByRole("button", { name: "Tränar inför 5 kyū" })).toBeDefined();
+
+    rerender(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="6 kyū" />);
+
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
+});
+
 it("uses the confirmed Kamoku classification for Kihon, Zeme and Hagai jime", () => {
     const ids = (kamokuhyo as GradePlan[]).flatMap(getAllHokeiMoments).map(moment => moment.id);
 

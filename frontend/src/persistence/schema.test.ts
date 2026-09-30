@@ -30,6 +30,7 @@ describe("createDefaultAppDataDocument", () => {
   it("returns expected default data fields", () => {
     const { data } = createDefaultAppDataDocument();
     expect(data.grade).toBe("shodan");
+    expect(data.currentGrade).toBe("1 kyū");
     expect(data.language).toBe("sv");
     expect(data.appDisplayName).toBeNull();
     expect(data.kenshiNumber).toBeUndefined();
