@@ -163,6 +163,9 @@ function App(props: Props) {
         ...document.data,
         currentGrade: grade,
         grade: defaultTrainingGrade(grade, gradePlans),
+        // Hokei remembers an explicit filter separately. Reset it to the profile
+        // default so changing attained grade takes effect there as well.
+        hokeiListSelection: "own",
       },
     });
   };
