@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-09-30T18:05:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Du kan nu ange din faktiska grad, från minarai till 9 dan. Träningsvyerna utgår automatiskt från graden du tränar mot.",
+        en: "You can now set your attained grade, from minarai through 9th dan. Training views automatically start from the grade you are training towards.",
+        tr: "Artık minarai'den 9. dan'a kadar gerçek derecenizi belirtebilirsiniz. Antrenman görünümleri, çalıştığınız bir sonraki dereceden otomatik olarak başlar.",
+        ja: "見習いから九段まで、現在の級・段を設定できるようになりました。練習画面では、次に目指す級・段が自動的に初期表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-27T16:42:00.000Z",
     changes: [
       {

@@ -8,6 +8,7 @@ function makeDoc(overrides: Partial<AppDataDocument> & { updatedAt: string }): A
     deviceId: "device-a",
     data: {
       grade: "shodan",
+      currentGrade: "1 kyū",
       language: "sv",
       appDisplayName: null,
       kenshiNumber: undefined,
@@ -49,6 +50,19 @@ const OLD = "2024-01-01T00:00:00.000Z";
 const NEW = "2024-06-01T00:00:00.000Z";
 
 describe("mergeDocuments — null base", () => {
+  it("migrates the same legacy training grade without inventing a conflict", () => {
+    const local = makeDoc({ updatedAt: OLD });
+    const remote = makeDoc({ updatedAt: NEW });
+    delete (local.data as Partial<AppDataDocument["data"]>).currentGrade;
+    delete (remote.data as Partial<AppDataDocument["data"]>).currentGrade;
+
+    const result = mergeDocuments(null, local, remote);
+
+    expect(result.document.data.grade).toBe("shodan");
+    expect(result.document.data.currentGrade).toBe("1 kyū");
+    expect(result.conflictDetected).toBe(false);
+  });
+
   it("keeps Embu drafts synchronized and detects edits on both devices", () => {
     const local = makeDoc({ updatedAt: OLD });
     const remote = makeDoc({ updatedAt: NEW });

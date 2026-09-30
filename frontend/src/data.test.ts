@@ -11,7 +11,10 @@ import {
   getStandardMoments,
   getAllHokeiMoments,
   getWeeksWithKihonShoho,
+  defaultTrainingGrade,
   findGradePlan,
+  nextGrade,
+  previousGrade,
   type HokeiMoment,
   type KihonMoment,
   type StandardMoment,
@@ -20,6 +23,33 @@ import {
   type ReviewPreparationWeek,
   type GradePlan,
 } from "./data";
+
+describe("personal and training grades", () => {
+  const plans: GradePlan[] = [
+    { grade: "6 kyū", weeks: [] },
+    { grade: "5 kyū", weeks: [] },
+    { grade: "shodan", weeks: [] },
+    { grade: "rokudan", weeks: [] },
+  ];
+
+  it("moves from an attained grade to the next curriculum grade", () => {
+    expect(nextGrade("minarai")).toBe("6 kyū");
+    expect(nextGrade("1 kyū")).toBe("shodan");
+    expect(previousGrade("6 kyū")).toBe("minarai");
+    expect(previousGrade("shodan")).toBe("1 kyū");
+  });
+
+  it("uses the next available plan as the default", () => {
+    expect(defaultTrainingGrade("minarai", plans)).toBe("6 kyū");
+    expect(defaultTrainingGrade("6 kyū", plans)).toBe("5 kyū");
+    expect(defaultTrainingGrade("1 kyū", plans)).toBe("shodan");
+  });
+
+  it("uses the highest shipped plan above the available curriculum", () => {
+    expect(defaultTrainingGrade("nanadan", plans)).toBe("rokudan");
+    expect(defaultTrainingGrade("kudan", plans)).toBe("rokudan");
+  });
+});
 
 const hokei: HokeiMoment = {
   id: "ippo",

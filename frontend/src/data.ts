@@ -1,18 +1,48 @@
 export type GradeName = "1 kyū" | "2 kyū" | "3 kyū" | "4 kyū" | "5 kyū" | "6 kyū" |
                         "shodan" | "nidan" | "sandan" | "yondan" | "godan" | "rokudan" | "nanadan" | "hachidan" | "kudan";
 
-export const humanGradeName = (ln: GradeName): string => {
-    return ln;
-}
+export type CurrentGrade = "minarai" | GradeName;
 
-const gradeProgression: GradeName[] = [
-    "6 kyū", "5 kyū", "4 kyū", "3 kyū", "2 kyū", "1 kyū",
+export const currentGrades: CurrentGrade[] = [
+    "minarai", "6 kyū", "5 kyū", "4 kyū", "3 kyū", "2 kyū", "1 kyū",
     "shodan", "nidan", "sandan", "yondan", "godan", "rokudan", "nanadan", "hachidan", "kudan",
 ];
 
-export function nextGrade(grade: GradeName): GradeName | undefined {
-    const idx = gradeProgression.indexOf(grade);
-    return idx >= 0 && idx < gradeProgression.length - 1 ? gradeProgression[idx + 1] : undefined;
+export const humanGradeName = (ln: CurrentGrade): string => {
+    return ln;
+}
+
+export function nextGrade(grade: CurrentGrade): GradeName | undefined {
+    const idx = currentGrades.indexOf(grade);
+    return idx >= 0 && idx < currentGrades.length - 1 ? currentGrades[idx + 1] as GradeName : undefined;
+}
+
+// Documents written before currentGrade existed stored the grade the reader was
+// training towards. Moving one step back reconstructs the attained grade without
+// changing that older field's meaning for devices that have not upgraded yet.
+export function previousGrade(grade: GradeName): CurrentGrade {
+    const idx = currentGrades.indexOf(grade);
+    return idx > 0 ? currentGrades[idx - 1] : "minarai";
+}
+
+export function isCurrentGrade(value: unknown): value is CurrentGrade {
+    return typeof value === "string" && currentGrades.includes(value as CurrentGrade);
+}
+
+// Pick the first curriculum grade above the attained grade. At nanadan and higher
+// there is no later plan in the app, so keep the highest plan that actually exists.
+export function defaultTrainingGrade(currentGrade: CurrentGrade, plans: GradePlan[]): GradeName {
+    const available = new Set(plans.map(plan => plan.grade));
+    const currentIndex = currentGrades.indexOf(currentGrade);
+    const nextAvailable = currentGrades
+        .slice(currentIndex + 1)
+        .find((grade): grade is GradeName => grade !== "minarai" && available.has(grade));
+    if (nextAvailable) return nextAvailable;
+
+    const highestAvailable = [...currentGrades].reverse()
+        .find((grade): grade is GradeName => grade !== "minarai" && available.has(grade));
+    if (!highestAvailable) throw new Error("At least one grade plan is required");
+    return highestAvailable;
 }
 
 export interface TanenKihonHokei {

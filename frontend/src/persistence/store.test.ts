@@ -20,12 +20,34 @@ describe("AppDataStore — initial state", () => {
   it("returns default grade when nothing is persisted", () => {
     const store = makeStore();
     expect(store.get("grade")).toBe("shodan");
+    expect(store.get("currentGrade")).toBe("1 kyū");
   });
 
   it("restores persisted state from the backend", () => {
     const doc = { ...createDefaultAppDataDocument(), data: { ...createDefaultAppDataDocument().data, grade: "nidan" as const } };
     const store = makeStore(doc);
     expect(store.get("grade")).toBe("nidan");
+  });
+
+  it("derives the attained grade from a legacy training grade", () => {
+    const current = createDefaultAppDataDocument();
+    const oldData = { ...current.data, grade: "shodan" as const } as Partial<AppDataDocument["data"]>;
+    delete oldData.currentGrade;
+
+    const store = makeStore({ ...current, data: oldData as AppDataDocument["data"] });
+
+    expect(store.get("grade")).toBe("shodan");
+    expect(store.get("currentGrade")).toBe("1 kyū");
+  });
+
+  it("migrates the first curriculum grade to minarai", () => {
+    const current = createDefaultAppDataDocument();
+    const oldData = { ...current.data, grade: "6 kyū" as const } as Partial<AppDataDocument["data"]>;
+    delete oldData.currentGrade;
+
+    const store = makeStore({ ...current, data: oldData as AppDataDocument["data"] });
+
+    expect(store.get("currentGrade")).toBe("minarai");
   });
 
   it("adds empty weekly-plan completions to older saved documents", () => {

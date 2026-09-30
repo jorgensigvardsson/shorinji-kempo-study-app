@@ -1,4 +1,4 @@
-import type { GradeName } from "../data";
+import type { CurrentGrade, GradeName } from "../data";
 import type { Language } from "../i18n";
 import type { EmbuDraft } from "./embu-draft-schema";
 
@@ -26,7 +26,10 @@ export interface GradingCompletionEntry {
 }
 
 export interface AppDataState {
+  // The curriculum grade shown by default. Kept separate from currentGrade so a
+  // nanadan can keep their real grade while using the highest material we ship.
   grade: GradeName;
+  currentGrade: CurrentGrade;
   language: Language;
   // Null means that the person has not chosen an app-specific name yet. The UI can
   // then prefill the account name without changing the identity held by the auth
@@ -70,6 +73,7 @@ export interface AppDataDocument {
 //     showKanjiOnHokeiCards, and the three completion maps.
 // 2 — appDisplayName.
 // 3 — embuDraft.
+// 4 — currentGrade.
 //
 // Deliberately not bumped for notesUpdatedAt. Bumping fires the compat gate, which
 // refuses writes from builds predating the compatibility header outright — and what
@@ -77,7 +81,7 @@ export interface AppDataDocument {
 // costs a conflict prompt; being locked out of sync costs everything. Whether any
 // such build is still syncing is answerable rather than a guess: the server logs
 // "outdated client wrote for %s: compat %d" for every one of them.
-export const APP_SCHEMA_VERSION = 3;
+export const APP_SCHEMA_VERSION = 4;
 
 // The highest schema this build can hold without losing anything — a different
 // question from which shape it writes, and the one that decides whether a write is
@@ -93,7 +97,7 @@ export const APP_SCHEMA_VERSION = 3;
 // Bump alongside APP_SCHEMA_VERSION, and only after checking the new schema really is
 // something older builds round-trip — additive fields are, renamed or restructured
 // ones are not.
-export const APP_SCHEMA_COMPAT_VERSION = 4;
+export const APP_SCHEMA_COMPAT_VERSION = 5;
 
 // What a request carrying neither header is taken to declare: the shape those builds
 // write, and the only shape they can hold. Builds before the compatibility header
@@ -214,7 +218,10 @@ export function createDefaultAppDataDocument(): AppDataDocument {
     updatedAt: new Date().toISOString(),
     deviceId: newDeviceId(),
     data: {
+      // Preserve the app's existing default curriculum. The matching attained grade
+      // is one step below it; minarai remains an explicit choice in Settings.
       grade: "shodan",
+      currentGrade: "1 kyū",
       language: "sv",
       appDisplayName: null,
       kenshiNumber: undefined,

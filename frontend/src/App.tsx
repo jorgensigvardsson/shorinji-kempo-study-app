@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
-import { findGradePlan, type GradePlan, type GradeName } from './data'
+import { defaultTrainingGrade, findGradePlan, type CurrentGrade, type GradePlan, type GradeName } from './data'
 import { TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, preloadPages, routeText, type Route } from './routes';
@@ -25,6 +25,7 @@ import { beginNavigation } from './navigation-pending';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
 import { isTechnicalAdmin } from './roles';
 import { setAppData, useAppData } from './persistence/use-app-data';
+import { getAppDataStore } from './persistence/store';
 import { NavigationMemoryProvider } from './navigation-memory';
 import { mainSection } from './navigation';
 import RouteScrollManager from './components/RouteScrollManager';
@@ -66,18 +67,20 @@ function App(props: Props) {
   // Clearing the language filter is still allowed, it's only the starting point.
   const [ kanjiFontFilter, setKanjiFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "japanese" });
   const textSizeKey = String(Math.round(textSize * 10));
-  // The user's own grade, as stored and synced.
+  // The grade whose curriculum is used as the default across training views.
   const profileGrade = useAppData("grade");
+  const currentGrade = useAppData("currentGrade");
   const appDisplayName = useAppData("appDisplayName");
   // The training controls can temporarily show another grade's material without
-  // touching the user's own grade. That override is session-only, and a real
-  // grade change — from Settings, or arriving over sync — clears it. Resetting
+  // touching the profile's default training grade. That override is session-only,
+  // and a real grade change — from Settings, or arriving over sync — clears it. Resetting
   // during render rather than in an effect avoids a frame showing the stale
   // override. See https://react.dev/learn/you-might-not-need-an-effect
   const [ gradeOverride, setGradeOverride ] = useState<GradeName | null>(null);
-  const [ lastProfileGrade, setLastProfileGrade ] = useState<GradeName>(profileGrade);
-  if (lastProfileGrade !== profileGrade) {
-    setLastProfileGrade(profileGrade);
+  const profileGradeKey = `${currentGrade}:${profileGrade}`;
+  const [ lastProfileGradeKey, setLastProfileGradeKey ] = useState(profileGradeKey);
+  if (lastProfileGradeKey !== profileGradeKey) {
+    setLastProfileGradeKey(profileGradeKey);
     setGradeOverride(null);
   }
   const displayGrade = gradeOverride ?? profileGrade;
@@ -150,14 +153,28 @@ function App(props: Props) {
   // Null means no app-specific choice has been made, so the account identity is the
   // prefill. An intentionally empty string stays empty and simply hides the greeting.
   const displayName = appDisplayName === null ? accountDisplayName : appDisplayName;
+  const setCurrentGrade = (grade: CurrentGrade) => {
+    const store = getAppDataStore();
+    const document = store.getDocument();
+    store.setDocument({
+      ...document,
+      updatedAt: new Date().toISOString(),
+      data: {
+        ...document.data,
+        currentGrade: grade,
+        grade: defaultTrainingGrade(grade, gradePlans),
+      },
+    });
+  };
   const routes = getRoutes(
     findGradePlan(gradePlans, displayGrade),
     findGradePlan(gradePlans, profileGrade),
+    currentGrade,
     gradePlans,
     translator,
     textSize,
     lang => setAppData("language", lang),
-    g => setAppData("grade", g.grade),
+    setCurrentGrade,
     size => textSizeData.save(size),
     trainingMode,
     displayName,
