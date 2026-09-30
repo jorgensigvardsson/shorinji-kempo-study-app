@@ -285,10 +285,16 @@ describe("FreePractice", () => {
   });
 
   it("groups all Tan'en and Sōtai forms by family without losing entries", async () => {
-    const user = userEvent.setup();
-    renderPractice(<FreePracticeHarness />);
-
-    await user.click(screen.getByRole("button", { name: /Tan'en och sōtai/i }));
+    renderPractice(
+      <FreePractice
+        myGrade="sandan"
+        allGradePlans={plans}
+        activeArea="tanen-sotai"
+        onAreaChange={() => undefined}
+        onBack={() => undefined}
+        dojoMode={false}
+      />,
+    );
 
     const tanenSection = screen.getByRole("heading", { name: "Tan'en" }).closest("section")!;
     const sotaiSection = screen.getByRole("heading", { name: "Sōtai" }).closest("section")!;
@@ -309,7 +315,7 @@ describe("FreePractice", () => {
   it("simplifies Tan'en and Sōtai and opts their content into larger Dojo text", () => {
     const { container } = renderPractice(
       <FreePractice
-        myGrade="2 kyū"
+        myGrade="sandan"
         allGradePlans={plans}
         activeArea="tanen-sotai"
         onAreaChange={() => undefined}
@@ -324,6 +330,22 @@ describe("FreePractice", () => {
     expect(screen.getByRole("heading", { name: "Tan'en" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Sōtai" })).toBeTruthy();
     expect(screen.getAllByRole("link", { name: /YouTube/ })).toHaveLength(16);
+  });
+
+  it("shows forms up to the selected grade and labels their introduction grade", async () => {
+    const user = userEvent.setup();
+    renderPractice(<FreePracticeHarness />);
+
+    await user.click(screen.getByRole("button", { name: /Tan'en och sōtai/i }));
+
+    expect(screen.getByText("tenchi ken dai sankei (tan'en)")).toBeTruthy();
+    expect(screen.queryByText("tenchi ken dai gokei (tan'en)")).toBeNull();
+    expect(screen.getAllByText("3 kyū").length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
+
+    expect(screen.getByText("tenchi ken dai gokei (tan'en)")).toBeTruthy();
+    expect(screen.getAllByText("1 kyū").length).toBeGreaterThan(0);
   });
 
   it("does not repeat the form name inside its video link", async () => {

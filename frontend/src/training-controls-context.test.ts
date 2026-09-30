@@ -14,7 +14,7 @@ describe("getTrainingControlContext", () => {
     ["/kamoku/free/hokei", true, true],
     ["/kamoku/free/embu", true, true],
     ["/kamoku/free/randori", true, true],
-    ["/kamoku/free/tanen-sotai", false, true],
+    ["/kamoku/free/tanen-sotai", true, true],
     // A path that merely starts with the same characters is not the training
     // section, and an unknown area falls back to the bare free-practice view.
     ["/kamokuhyo", false, false],

@@ -47,6 +47,7 @@ export function defaultTrainingGrade(currentGrade: CurrentGrade, plans: GradePla
 
 export interface TanenKihonHokei {
   hokei_name: string;
+  introducedAt: GradeName;
   videos?: Video[];
   _ja?: string;
 }

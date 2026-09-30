@@ -14,6 +14,13 @@ export const CHANGELOG: ChangelogEntry[] = [
         tr: "Artık minarai'den 9. dan'a kadar gerçek derecenizi belirtebilirsiniz. Antrenman görünümleri, çalıştığınız bir sonraki dereceden otomatik olarak başlar.",
         ja: "見習いから九段まで、現在の級・段を設定できるようになりました。練習画面では、次に目指す級・段が自動的に初期表示されます。",
       },
+      {
+        emoji: "🎯",
+        sv: "Tan'en och sōtai följer nu vald grad och visar vid vilken grad varje form introduceras.",
+        en: "Tan'en and sōtai now follow the selected grade and show when each form is introduced.",
+        tr: "Tan'en ve sōtai artık seçilen dereceyi izler ve her formun hangi derecede tanıtıldığını gösterir.",
+        ja: "単演と相対は選択した級・段に合わせて表示され、各形を学び始める級・段も確認できるようになりました。",
+      },
     ],
   },
   {
