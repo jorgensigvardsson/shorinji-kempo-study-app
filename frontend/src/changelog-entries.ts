@@ -9,10 +9,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       {
         emoji: "🥋",
-        sv: "Du kan nu ange din faktiska grad, från minarai till 9 dan. Träningsvyerna utgår automatiskt från graden du tränar mot.",
-        en: "You can now set your attained grade, from minarai through 9th dan. Training views automatically start from the grade you are training towards.",
-        tr: "Artık minarai'den 9. dan'a kadar gerçek derecenizi belirtebilirsiniz. Antrenman görünümleri, çalıştığınız bir sonraki dereceden otomatik olarak başlar.",
-        ja: "見習いから九段まで、現在の級・段を設定できるようになりました。練習画面では、次に目指す級・段が自動的に初期表示されます。",
+        sv: "Inställningen visar nu din faktiska grad, från minarai till 9 dan, och träningsvyerna utgår från graden du tränar mot. Ditt tidigare val har flyttats ett steg ned eftersom det avsåg nästa grad. Kontrollera gärna under Inställningar att Min grad stämmer.",
+        en: "Settings now shows your attained grade, from minarai through 9th dan, and training views start from the grade you are training towards. Your previous choice has been moved down one grade because it represented your next grade. Please check under Settings that My grade is correct.",
+        tr: "Ayarlar artık minarai'den 9. dan'a kadar gerçek derecenizi gösterir ve antrenman görünümleri çalıştığınız dereceyi temel alır. Önceki seçiminiz bir sonraki derecenizi temsil ettiği için bir derece aşağı taşındı. Lütfen Ayarlar bölümünde Derecem bilgisinin doğru olduğunu kontrol edin.",
+        ja: "設定画面で、見習いから九段までの現在の級・段を表示でき、練習画面では次に目指す級・段が初期表示されます。従来の選択は次に目指す級・段を表していたため、1段階下の現在級・段に変換されました。設定の「現在の級・段」が正しいかご確認ください。",
       },
       {
         emoji: "🎯",
