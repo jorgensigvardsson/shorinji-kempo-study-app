@@ -762,6 +762,16 @@ export class BackendSyncClient {
     await this.adminWrite("PUT", `${authUrl}/auth/admin/users/${encodeURIComponent(id)}/roles`, { roles });
   }
 
+  // Moves a member to another branch. The caller must cover both the branch they
+  // leave and the one they join; a destination they do not cover answers 404, as
+  // an unseen branch always does. Resolves to whether the member was emailed —
+  // the move stands either way, but an admin should know if they were not told.
+  async adminMoveUser(id: string, branchId: string): Promise<boolean> {
+    const { notified } = await this.adminWriteJSON<{ notified: boolean }>(
+      "PUT", `${authUrl}/auth/admin/users/${encodeURIComponent(id)}/branch`, { branchId });
+    return notified;
+  }
+
   // Force-logs-out a user by revoking all their refresh tokens. Their access token
   // remains valid until it expires (≤ 1 h), after which they can no longer refresh.
   async adminLogoutUser(id: string): Promise<void> {

@@ -8,12 +8,13 @@ const adminOrgTree = vi.fn();
 const adminSetRoles = vi.fn();
 const adminUpdateDisplayName = vi.fn();
 const adminLogoutUser = vi.fn();
+const adminMoveUser = vi.fn();
 let callerRoles: string[] = [];
 let callerEmail = "boss@example.org";
 
 vi.mock("./sync/manager", () => ({
   getSyncManager: () => ({
-    adminGetUser, adminOrgTree, adminSetRoles, adminUpdateDisplayName, adminLogoutUser,
+    adminGetUser, adminOrgTree, adminSetRoles, adminUpdateDisplayName, adminLogoutUser, adminMoveUser,
     getBackendUserInfo: () => ({ roles: callerRoles, email: callerEmail }),
   }),
 }));
@@ -49,6 +50,7 @@ describe("AdminUser", () => {
     for (const fn of [adminSetRoles, adminUpdateDisplayName, adminLogoutUser]) {
       fn.mockReset().mockResolvedValue(undefined);
     }
+    adminMoveUser.mockReset().mockResolvedValue(true);
   });
 
   // A branch id is not something to show anybody, so the tree is read alongside
@@ -174,5 +176,79 @@ describe("AdminUser", () => {
     adminGetUser.mockRejectedValue(new AdminRequestError(404));
     renderPage();
     expect(await screen.findByText("Den här användaren finns inte, eller så har du inte behörighet till den.")).toBeTruthy();
+  });
+
+  describe("moving to another branch", () => {
+    // Two federations and a branch directly under WSKO, so what is offered can
+    // be told apart from what is not.
+    const wideTree = {
+      federations: [
+        { id: "SE", name: "Svenska Shorinji Kempoförbundet", branches: [
+          { id: "b-karlstad", name: "Karlstad" }, { id: "b-goteborg", name: "Göteborg" }] },
+        { id: "NO", name: "Norges Shorinji Kempo Forbund", branches: [{ id: "b-oslo", name: "Oslo" }] },
+      ],
+      wskoBranches: [{ id: "b-tokyo", name: "Tokyo" }],
+    };
+    const offered = () =>
+      Array.from((screen.getByLabelText("Flytta till") as HTMLSelectElement).options)
+        .map(o => o.textContent)
+        .filter(name => name !== "Välj klubb");
+
+    beforeEach(() => {
+      adminOrgTree.mockResolvedValue(wideTree);
+    });
+
+    it("offers a WSKO admin every other branch", async () => {
+      callerRoles = ["wsko_admin"];
+      renderPage();
+      await screen.findByText("Ann Ask");
+      expect(offered()).toEqual(["Göteborg", "Oslo", "Tokyo"]);
+    });
+
+    // The server asks for authority over both ends, so the page offers nothing
+    // the server would turn down.
+    it("offers a federation admin only their own federation", async () => {
+      callerRoles = ["federation_admin:SE"];
+      renderPage();
+      await screen.findByText("Ann Ask");
+      expect(offered()).toEqual(["Göteborg"]);
+    });
+
+    it("offers a branch admin nothing to move to", async () => {
+      callerRoles = ["branch_admin:b-karlstad"];
+      renderPage();
+      await screen.findByText("Ann Ask");
+      expect(screen.queryByLabelText("Flytta till")).toBeNull();
+    });
+
+    // It emails the member, so it is not a thing to do on one click.
+    it("asks first, then moves the member and says they were told", async () => {
+      const testUser = userEvent.setup();
+      renderPage();
+      await screen.findByText("Ann Ask");
+
+      await testUser.selectOptions(screen.getByLabelText("Flytta till"), "b-goteborg");
+      await testUser.click(screen.getByRole("button", { name: "Flytta" }));
+      expect(adminMoveUser).not.toHaveBeenCalled();
+
+      await testUser.click(screen.getByRole("button", { name: "Ja, flytta" }));
+      await waitFor(() => expect(adminMoveUser).toHaveBeenCalledWith("u1", "b-goteborg"));
+      expect(await screen.findByText("Medlemmen har flyttats och har fått ett mejl om det.")).toBeTruthy();
+      expect(screen.getByRole("link", { name: "Göteborg" }).getAttribute("href"))
+        .toBe("/admin/branches/b-goteborg/members");
+    });
+
+    it("says so when the member could not be emailed", async () => {
+      adminMoveUser.mockResolvedValue(false);
+      const testUser = userEvent.setup();
+      renderPage();
+      await screen.findByText("Ann Ask");
+
+      await testUser.selectOptions(screen.getByLabelText("Flytta till"), "b-oslo");
+      await testUser.click(screen.getByRole("button", { name: "Flytta" }));
+      await testUser.click(screen.getByRole("button", { name: "Ja, flytta" }));
+
+      expect(await screen.findByText("Medlemmen har flyttats, men mejlet kunde inte skickas. Berätta gärna själv.")).toBeTruthy();
+    });
   });
 });

@@ -302,6 +302,10 @@ class SyncManager {
     await this.backendClient.adminSetRoles(id, roles);
   }
 
+  async adminMoveUser(id: string, branchId: string): Promise<boolean> {
+    return await this.backendClient.adminMoveUser(id, branchId);
+  }
+
   async adminLogoutUser(id: string): Promise<void> {
     await this.backendClient.adminLogoutUser(id);
   }

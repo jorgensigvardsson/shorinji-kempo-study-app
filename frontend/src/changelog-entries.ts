@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-10-03T13:20:22.000Z",
+    changes: [
+      {
+        emoji: "🔀",
+        sv: "Administratörer kan nu flytta en medlem till en annan klubb direkt från medlemmens sida. Förbundsadministratörer kan flytta mellan klubbar i det egna förbundet, och WSKO-administratörer mellan alla klubbar. Medlemmen och administratörerna i båda klubbarna får ett mejl om flytten.",
+        en: "Administrators can now move a member to another branch straight from the member's page. Federation administrators can move members between branches in their own federation, and WSKO administrators between any branches. The member and the administrators of both branches are emailed about the move.",
+        tr: "Yöneticiler artık bir üyeyi doğrudan üyenin sayfasından başka bir kulübe taşıyabiliyor. Federasyon yöneticileri kendi federasyonlarındaki kulüpler arasında, WSKO yöneticileri ise tüm kulüpler arasında taşıma yapabiliyor. Üyeye ve her iki kulübün yöneticilerine taşınmayla ilgili e-posta gönderiliyor.",
+        ja: "管理者は会員のページから、会員を別の支部へ直接移動できるようになりました。連盟の管理者は自分の連盟内の支部間で、WSKOの管理者はすべての支部間で移動できます。移動の際は、本人と両方の支部の管理者にメールでお知らせします。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-22T19:46:09.000Z",
     changes: [
       {

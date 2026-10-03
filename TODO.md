@@ -3,6 +3,10 @@
 Ideas and follow-up tasks to park without interrupting the current task.
 Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`.
 
+- [x] Admins ska kunna flytta på medlemmar
+- [ ] Defaulta till "upp till och med nästa grad"
+- [ ] Träning -> Embu -> Kumi-embu: texten säger "Bygg en egen embu eller träna en färdig sekvens". Borde vara en text som säger "Det här är din nästa graderingsembu".
+
 - [ ] Add comments for repetition-and other cards
 - [ ] Review the merged Training page on mobile and desktop
 - [ ] Consider a clearer navigation name than "Kamoku" for new users

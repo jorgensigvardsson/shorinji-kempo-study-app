@@ -363,6 +363,151 @@ func (h *Handler) announceTransferDecision(member *store.User, transfer *store.T
 	}
 }
 
+// adminMoveUser moves a member to another branch on an admin's say-so, with no
+// request from the member and nobody else to decide. It is the other way into
+// a branch from a transfer: somebody who registered with the wrong club, or an
+// instructor tidying up after a club has split, should not have to ask a member
+// to apply for where they already train.
+//
+// The caller must cover both ends — the branch the member leaves and the one
+// they join — and that is the whole rule. A federation admin covers every
+// branch in their federation and so moves members within it; a WSKO or global
+// admin covers everything and so moves anybody anywhere; a branch admin covers
+// one branch, both ends of which are the same, and so moves nobody.
+func (h *Handler) adminMoveUser(w http.ResponseWriter, r *http.Request) {
+	claims := h.requireAnyAdmin(w, r)
+	if claims == nil {
+		return
+	}
+
+	var req struct {
+		BranchID string `json:"branchId"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	destination := strings.TrimSpace(req.BranchID)
+
+	// The end they leave: a member the caller cannot see is one they cannot move.
+	member := h.adminFindVisibleUser(w, claims, r.PathValue("id"), "adminMoveUser")
+	if member == nil {
+		return
+	}
+	// The end they join. Not found rather than forbidden, for the reason every
+	// other branch lookup here gives: a 403 would confirm which ids are real.
+	if _, ok := h.orgs.Branch(destination); !ok || !h.covers(claims, authz.Branch(destination)) {
+		http.Error(w, "branch not found", http.StatusNotFound)
+		return
+	}
+	if member.BranchID == destination {
+		http.Error(w, "already a member of that branch", http.StatusConflict)
+		return
+	}
+
+	leaving := member.BranchID
+	member.BranchID = destination
+	if err := h.users.Save(member); err != nil {
+		log.Printf("adminMoveUser: move %s: %v", member.ID, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("admin %s moved %s from %q to %q", claims.Subject, member.ID, leaving, destination)
+
+	// A transfer the member had pending to the branch they have just been put in
+	// has been answered, by somebody other than the club it asked. One to some
+	// third branch is left alone: it is still the member's question, and the
+	// branch it asked can still say yes.
+	if pending, err := h.transfers.Get(member.ID); err != nil {
+		log.Printf("adminMoveUser: transfer lookup %s: %v", member.ID, err)
+	} else if pending.IsPending() && pending.ToBranchID == destination {
+		if err := h.transfers.Delete(member.ID); err != nil {
+			log.Printf("adminMoveUser: clear transfer %s: %v", member.ID, err)
+		}
+	}
+
+	// The move stands whether or not the mail goes out, but the admin is told
+	// which it was — as when they create an account — rather than left to assume
+	// the member knows.
+	notified := true
+	if err := h.mailer.SendMovedByAdmin(context.Background(), member.Email,
+		h.branchName(leaving), h.branchName(destination), member.Language); err != nil {
+		log.Printf("adminMoveUser: notify %s: %v", logsafe.Email(member.Email), err)
+		notified = false
+	}
+	h.announceMove(member, leaving, destination, claims.Email)
+	writeJSON(w, movedUserResponse{Notified: notified})
+}
+
+// announceMove tells the admins at both ends of a move made on an admin's
+// say-so: the branch losing a member, and the branch gaining one it never
+// decided to take. Best-effort, like every notice to admins — the move has
+// happened, and a relay that is down must not make it look otherwise.
+//
+// Only the branches' own admins are told. Unlike a join or transfer request,
+// nothing here waits on an answer, so there is no reason for adminsForBranch's
+// climb to the federation and WSKO: a branch with no admin of its own simply
+// has nobody to tell, and those further up have no use for the news.
+//
+// The admin who made the move is left out, and so is the member, should they
+// administer either branch: both already know, and each has had the one message
+// that is theirs.
+func (h *Handler) announceMove(member *store.User, leaving, destination, actor string) {
+	ctx := context.Background()
+	records, err := h.roles.ListAll()
+	if err != nil {
+		log.Printf("adminMoveUser: resolve branch admins: %v", err)
+		return
+	}
+	recipients := func(branchID string) []string {
+		var out []string
+		for _, rec := range records {
+			if rec.ID == "" || !containsRole(rec.Roles, authz.BranchAdmin(branchID)) {
+				continue
+			}
+			if !strings.EqualFold(rec.ID, actor) && !strings.EqualFold(rec.ID, member.Email) {
+				out = append(out, rec.ID)
+			}
+		}
+		sort.Strings(out) // deterministic, so a test can say what it expects
+		return out
+	}
+	from, to := h.branchName(leaving), h.branchName(destination)
+
+	// A member who belonged to no branch left nobody behind to tell.
+	if leaving != "" {
+		departure := email.DepartureNotice{
+			MemberName:     member.DisplayName,
+			MemberEmail:    member.Email,
+			FromBranchName: from,
+			ToBranchName:   to,
+			ByAdmin:        true,
+		}
+		for _, group := range h.groupByLanguage(recipients(leaving)) {
+			if err := h.mailer.SendTransferDeparture(ctx, group.addresses, group.language, departure); err != nil {
+				log.Printf("adminMoveUser: departure notice %v: %v", group.addresses, err)
+			}
+		}
+	}
+
+	arrival := email.ArrivalNotice{
+		MemberName:     member.DisplayName,
+		MemberEmail:    member.Email,
+		FromBranchName: from,
+		ToBranchName:   to,
+	}
+	for _, group := range h.groupByLanguage(recipients(destination)) {
+		if err := h.mailer.SendMemberArrival(ctx, group.addresses, group.language, arrival); err != nil {
+			log.Printf("adminMoveUser: arrival notice %v: %v", group.addresses, err)
+		}
+	}
+}
+
+// movedUserResponse says whether the member was told they have been moved.
+type movedUserResponse struct {
+	Notified bool `json:"notified"`
+}
+
 // branchName resolves a branch id for display, falling back to nothing rather
 // than to the id: an id in a sentence tells a reader less than no clause at all.
 func (h *Handler) branchName(id string) string {

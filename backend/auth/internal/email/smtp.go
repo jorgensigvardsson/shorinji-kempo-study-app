@@ -260,6 +260,38 @@ func (s *SMTPSender) SendTransferDecision(ctx context.Context, to, branchName, l
 	return s.sendTo(ctx, to, rendered)
 }
 
+// SendMemberArrival tells a branch an admin has moved a member into it. No
+// Reply-To, like the departure: nothing is being asked of them.
+func (s *SMTPSender) SendMemberArrival(ctx context.Context, to []string, lang string, n ArrivalNotice) error {
+	rcpts, err := parseRecipients(to, "arrival notice")
+	if err != nil {
+		return err
+	}
+	member, err := mail.ParseAddress(n.MemberEmail)
+	if err != nil {
+		return fmt.Errorf("smtp: invalid member address: %w", err)
+	}
+	n.MemberEmail = member.Address
+
+	rendered, err := renderMemberArrival(n, lang)
+	if err != nil {
+		return err
+	}
+	msg, err := s.message(rcpts, rendered)
+	if err != nil {
+		return err
+	}
+	return s.send(ctx, rcpts, msg)
+}
+
+func (s *SMTPSender) SendMovedByAdmin(ctx context.Context, to, fromBranchName, toBranchName, lang string) error {
+	rendered, err := renderMovedByAdmin(fromBranchName, toBranchName, lang)
+	if err != nil {
+		return err
+	}
+	return s.sendTo(ctx, to, rendered)
+}
+
 func (s *SMTPSender) SendJoinReceived(ctx context.Context, to, branchName, lang string) error {
 	rendered, err := renderJoinReceived(branchName, lang)
 	if err != nil {

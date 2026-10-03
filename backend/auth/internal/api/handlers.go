@@ -85,6 +85,7 @@ type Handler struct {
 	joinLimiter        *ratelimit.GlobalRateLimiter // global cap on join requests (protects admins' inboxes as much as the quota)
 	transferLimiter    *ratelimit.GlobalRateLimiter // the same, for members asking to move between branches
 	inviteLimiter      *ratelimit.GlobalRateLimiter // the same, for admins adding members by hand
+	moveLimiter        *ratelimit.GlobalRateLimiter // the same, for admins moving members between branches
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -143,8 +144,12 @@ func NewHandler(
 		// the flows above this one is behind an admin session: the cap is here to
 		// bound a mistake, not to hold off a stranger.
 		inviteLimiter: ratelimit.NewGlobal(0.2, 5),
-		pending:       make(map[string]pendingState),
-		emailCodes:      make(map[string]emailCode),
+		// Moving a member mails them too. Same reasoning and same rate as adding
+		// one: behind an admin session, so the cap bounds a mistake — but its own,
+		// so tidying up after a club split cannot hold up somebody adding members.
+		moveLimiter: ratelimit.NewGlobal(0.2, 5),
+		pending:     make(map[string]pendingState),
+		emailCodes:  make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -229,6 +234,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/admin/users/{id}", h.adminGetUser)
 	inner.HandleFunc("PATCH /auth/admin/users/{id}", h.adminUpdateUser)
 	inner.HandleFunc("PUT /auth/admin/users/{id}/roles", h.adminSetRoles)
+	inner.Handle("PUT /auth/admin/users/{id}/branch", h.moveLimiter.Middleware(http.HandlerFunc(h.adminMoveUser)))
 	inner.HandleFunc("POST /auth/admin/users/{id}/logout", h.adminLogoutUser)
 	inner.HandleFunc("GET /auth/admin/org", h.adminOrgTree)
 	inner.HandleFunc("POST /auth/admin/federations", h.createFederation)

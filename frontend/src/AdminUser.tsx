@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Button, Card, Form, Spinner } from "react-bootstrap";
+import { Alert, Button, Card, Form, Spinner } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
@@ -50,6 +50,13 @@ const AdminUser = () => {
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [loggedOut, setLoggedOut] = useState(false);
 
+  // A move is picked, then confirmed, since it emails the member. Once made, the
+  // page says whether that email got out — the one part an admin may have to
+  // finish by hand.
+  const [moveTo, setMoveTo] = useState("");
+  const [confirmMove, setConfirmMove] = useState(false);
+  const [moved, setMoved] = useState<{ notified: boolean } | null>(null);
+
   // Bumped to ask again, so a retry re-runs the effect rather than firing a
   // second request beside it.
   const [attempt, setAttempt] = useState(0);
@@ -69,6 +76,9 @@ const AdminUser = () => {
         setUser(fetchedUser);
         setTree(fetchedTree);
         setEditedName(null);
+        setMoveTo("");
+        setConfirmMove(false);
+        setMoved(null);
         setLoadError(false);
         setMissing(false);
       } catch (err) {
@@ -141,6 +151,29 @@ const AdminUser = () => {
 
   const isSelf = user.email.toLowerCase() === callerEmail.toLowerCase();
 
+  // Where this member could be moved: every branch the caller covers except the
+  // one they are in. The server asks for authority over both ends, and the end
+  // they leave is already covered — the caller could not see them otherwise. So
+  // a federation admin is offered their own federation's branches, a WSKO admin
+  // every branch, and a branch admin, whose one branch is both ends, nothing.
+  const coversDestination = (bid: string, fid?: string) =>
+    atWSKO
+    || administeredBranches(callerRoles).includes(bid)
+    || (fid !== undefined && administeredFederations(callerRoles).includes(fid));
+  const destinationGroups = [
+    ...(tree?.federations ?? []).map(f => ({
+      key: f.id,
+      label: f.name,
+      branches: f.branches.filter(b => b.id !== user.branchId && coversDestination(b.id, f.id)),
+    })),
+    {
+      key: "",
+      label: "WSKO",
+      branches: (tree?.wskoBranches ?? []).filter(b => b.id !== user.branchId && coversDestination(b.id)),
+    },
+  ].filter(g => g.branches.length > 0);
+  const moveTarget = destinationGroups.flatMap(g => g.branches).find(b => b.id === moveTo);
+
   // The roles on offer, narrowest first. Each is grantable exactly where the
   // server says it is — authority over the scope the role confers — with one
   // rule that does not follow from scope: the technical superuser is handed out
@@ -186,6 +219,30 @@ const AdminUser = () => {
       () => { setConfirmLogout(false); setLoggedOut(true); });
   };
 
+  const move = () => {
+    if (moveTarget === undefined) return;
+    // Not `act`: its 409 means a role, and a move has its own refusals to tell.
+    setBusy(true);
+    setError(null);
+    setMoved(null);
+    void (async () => {
+      try {
+        const notified = await getSyncManager().adminMoveUser(user.id, moveTarget.id);
+        setUser({ ...user, branchId: moveTarget.id });
+        setMoveTo("");
+        setConfirmMove(false);
+        setMoved({ notified });
+      } catch (err) {
+        const status = err instanceof AdminRequestError ? err.status : 0;
+        setError(status === 403 ? translator.translate("Du har inte behörighet att göra det.")
+          : status === 429 ? translator.translate("För många på kort tid. Vänta en stund och försök igen.")
+          : translator.translate("Ändringen kunde inte sparas. Försök igen."));
+      } finally {
+        setBusy(false);
+      }
+    })();
+  };
+
   const providerLabel = (p: string) => p === "email" ? translator.translate("E-post") : (providerDisplayName[p] ?? p);
   const nameValue = editedName ?? user.displayName;
   const signInMethods = Object.entries(user.linkedIdentities).filter(([provider]) => provider !== INVITE_PROVIDER);
@@ -201,6 +258,13 @@ const AdminUser = () => {
       </p>
 
       {error !== null && <p className="text-danger">{error}</p>}
+      {moved !== null && (
+        <Alert variant={moved.notified ? "success" : "warning"} dismissible onClose={() => setMoved(null)}>
+          {moved.notified
+            ? translator.translate("Medlemmen har flyttats och har fått ett mejl om det.")
+            : translator.translate("Medlemmen har flyttats, men mejlet kunde inte skickas. Berätta gärna själv.")}
+        </Alert>
+      )}
 
       <Card className="mb-3">
         <Card.Body className="d-flex flex-column gap-3">
@@ -246,6 +310,46 @@ const AdminUser = () => {
           </div>
         </Card.Body>
       </Card>
+
+      {destinationGroups.length > 0 && (
+        <Card className="mb-3">
+          <Card.Header>{translator.translate("Byt klubb")}</Card.Header>
+          <Card.Body>
+            {confirmMove && moveTarget !== undefined ? (
+              <div className="d-flex gap-2 align-items-center flex-wrap">
+                <span>{translator.translate("Flytta medlemmen till {0}? Medlemmen får ett mejl om flytten.", { params: [moveTarget.name] })}</span>
+                <Button size="sm" variant="primary" disabled={busy} onClick={move}>
+                  {busy ? <Spinner size="sm" /> : translator.translate("Ja, flytta")}
+                </Button>
+                <Button size="sm" variant="outline-secondary" disabled={busy} onClick={() => setConfirmMove(false)}>
+                  {translator.translate("Avbryt")}
+                </Button>
+              </div>
+            ) : (
+              <div className="d-flex gap-2" style={{ maxWidth: "28rem" }}>
+                <Form.Select
+                  size="sm"
+                  value={moveTo}
+                  disabled={busy}
+                  aria-label={translator.translate("Flytta till")}
+                  onChange={e => setMoveTo(e.target.value)}
+                >
+                  <option value="">{translator.translate("Välj klubb")}</option>
+                  {destinationGroups.map(g => (
+                    <optgroup key={g.key} label={g.label}>
+                      {g.branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    </optgroup>
+                  ))}
+                </Form.Select>
+                <Button size="sm" variant="outline-primary" disabled={busy || moveTarget === undefined}
+                        onClick={() => setConfirmMove(true)}>
+                  {translator.translate("Flytta")}
+                </Button>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      )}
 
       <Card className="mb-3">
         <Card.Header>{translator.translate("Behörigheter")}</Card.Header>

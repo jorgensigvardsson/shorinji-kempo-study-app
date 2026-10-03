@@ -122,3 +122,82 @@ func TestRenderJoinRequestNotice_EscapesTheApplicant(t *testing.T) {
 		t.Errorf("applicant input reached the HTML unescaped:\n%s", rendered.html)
 	}
 }
+
+// A member an admin has moved is told both ends of it — where they were and
+// where they are now — in their own language, and every language says so.
+func TestRenderMovedByAdmin_NamesBothBranches(t *testing.T) {
+	for lang := range transferTemplates {
+		msg, err := renderMovedByAdmin("Karlstad", "Göteborg", lang)
+		if err != nil {
+			t.Fatalf("render %s: %v", lang, err)
+		}
+		if !strings.Contains(msg.subject, "Göteborg") {
+			t.Errorf("%s subject = %q, want the new branch named", lang, msg.subject)
+		}
+		if !strings.Contains(msg.plain, "Karlstad") || !strings.Contains(msg.plain, "Göteborg") {
+			t.Errorf("%s body does not name both branches:\n%s", lang, msg.plain)
+		}
+		if strings.Contains(msg.plain, "%!") || strings.Contains(msg.subject, "%!") {
+			t.Errorf("%s copy has a formatting verb out of step with its arguments:\n%s\n%s", lang, msg.subject, msg.plain)
+		}
+	}
+}
+
+// Somebody admitted before branches existed belonged nowhere, and the message
+// says where they are now rather than leaving a hole where the old club was.
+func TestRenderMovedByAdmin_WithoutAnOldBranch(t *testing.T) {
+	for lang := range transferTemplates {
+		msg, err := renderMovedByAdmin("", "Göteborg", lang)
+		if err != nil {
+			t.Fatalf("render %s: %v", lang, err)
+		}
+		if !strings.Contains(msg.plain, "Göteborg") {
+			t.Errorf("%s body does not name the new branch:\n%s", lang, msg.plain)
+		}
+		if strings.Contains(msg.plain, "%!") {
+			t.Errorf("%s copy has a formatting verb out of step with its arguments:\n%s", lang, msg.plain)
+		}
+	}
+}
+
+// The branches at both ends of an admin's move are told, in every language,
+// and the one left behind hears that an administrator did it.
+func TestRenderAdminMoveNotices_NameEverybody(t *testing.T) {
+	for lang := range transferTemplates {
+		arrival, err := renderMemberArrival(ArrivalNotice{
+			MemberName: "Ann Ask", MemberEmail: "ann@example.org",
+			FromBranchName: "Karlstad", ToBranchName: "Göteborg",
+		}, lang)
+		if err != nil {
+			t.Fatalf("render arrival %s: %v", lang, err)
+		}
+		for _, want := range []string{"Ann Ask", "ann@example.org", "Karlstad", "Göteborg"} {
+			if !strings.Contains(arrival.plain, want) {
+				t.Errorf("%s arrival does not mention %q:\n%s", lang, want, arrival.plain)
+			}
+		}
+
+		notice := DepartureNotice{
+			MemberName: "Ann Ask", MemberEmail: "ann@example.org",
+			FromBranchName: "Karlstad", ToBranchName: "Göteborg",
+		}
+		asked, err := renderTransferDeparture(notice, lang)
+		if err != nil {
+			t.Fatalf("render departure %s: %v", lang, err)
+		}
+		notice.ByAdmin = true
+		moved, err := renderTransferDeparture(notice, lang)
+		if err != nil {
+			t.Fatalf("render departure %s: %v", lang, err)
+		}
+		if moved.plain == asked.plain {
+			t.Errorf("%s departure reads the same whether or not an admin moved them", lang)
+		}
+
+		for _, msg := range []message{arrival, moved} {
+			if strings.Contains(msg.plain, "%!") || strings.Contains(msg.subject, "%!") {
+				t.Errorf("%s copy has a formatting verb out of step with its arguments:\n%s\n%s", lang, msg.subject, msg.plain)
+			}
+		}
+	}
+}

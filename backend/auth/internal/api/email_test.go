@@ -53,6 +53,15 @@ type fakeSender struct {
 	approved             bool
 	joinErr              error
 
+	// A member moved by an admin. Its own error, since the handler reports a
+	// failed send back to the admin rather than swallowing it.
+	movedTo   string
+	movedFrom string
+	movedDest string
+	movedLang string
+	movedErr  error
+	arrivals  []sentArrival
+
 	// The message telling somebody an admin has made them an account. Recorded
 	// rather than sent, and its own error, since the handler reports a failed
 	// send back to the admin instead of swallowing it.
@@ -80,6 +89,12 @@ type sentDeparture struct {
 	to     []string
 	lang   string
 	notice email.DepartureNotice
+}
+
+type sentArrival struct {
+	to     []string
+	lang   string
+	notice email.ArrivalNotice
 }
 
 func (f *fakeSender) SendVerificationCode(_ context.Context, to, code, lang string, validFor time.Duration) error {
@@ -437,5 +452,15 @@ func (f *fakeSender) SendTransferDeparture(_ context.Context, to []string, lang 
 func (f *fakeSender) SendTransferDecision(_ context.Context, to, branchName, lang string, accepted bool) error {
 	f.transferDecisionTo, f.transferDecisionLang = to, lang
 	f.transferDecided, f.transferAccepted = true, accepted
+	return f.joinErr
+}
+
+func (f *fakeSender) SendMovedByAdmin(_ context.Context, to, fromBranchName, toBranchName, lang string) error {
+	f.movedTo, f.movedFrom, f.movedDest, f.movedLang = to, fromBranchName, toBranchName, lang
+	return f.movedErr
+}
+
+func (f *fakeSender) SendMemberArrival(_ context.Context, to []string, lang string, n email.ArrivalNotice) error {
+	f.arrivals = append(f.arrivals, sentArrival{to: to, lang: lang, notice: n})
 	return f.joinErr
 }
