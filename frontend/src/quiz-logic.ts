@@ -1,4 +1,4 @@
-import { getHokeiMoments, type GradeName, type GradePlan, type WordListEntry } from "./data";
+import { getHokeiMoments, isGradeName, type GradeName, type GradePlan, type WordListEntry } from "./data";
 import { quizMeaningEntryIds } from "./quiz-word-list-ids";
 import { compareGrades } from "./utilities/level";
 
@@ -24,6 +24,9 @@ export interface QuizPool {
 }
 
 export type QuizGradeSelection = "all" | "own" | "up-to-own" | GradeName;
+
+export const isQuizGradeSelection = (value: unknown): value is QuizGradeSelection =>
+  value === "all" || value === "own" || value === "up-to-own" || isGradeName(value);
 
 const FOOT_STANCE_DOMAIN = "foot_stance";
 const TAI_GAMAE = "tai gamae";

@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-10-03T13:30:16.000Z",
+    changes: [
+      {
+        emoji: "📌",
+        sv: "Quizen för fotställningar och handpositioner, och hokei-flashkorten, kommer nu ihåg vilka grader du valde senast på den här enheten.",
+        en: "The foot-stance and hand-position quizzes, and the hokei flashcards, now remember which grades you chose last time on this device.",
+        tr: "Ayak duruşu ve el pozisyonu testleri ile hokei bilgi kartları artık bu cihazda en son hangi dereceleri seçtiğinizi hatırlıyor.",
+        ja: "足の構えと手の位置のクイズ、法形のフラッシュカードは、この端末で前回選んだ級・段を覚えておくようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-10-03T13:20:22.000Z",
     changes: [
       {

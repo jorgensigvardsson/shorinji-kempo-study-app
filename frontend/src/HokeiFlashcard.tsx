@@ -2,7 +2,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Button, Form, ProgressBar } from "react-bootstrap";
 import FlashcardDeck, { type FlashcardDeckEntry } from "./components/FlashcardDeck";
 import { HokeiDojoDetails, HokeiNoteEditor } from "./components/HokeiCard";
-import { getAllHokeiMoments, type GradeName, type GradePlan, type HokeiMoment } from "./data";
+import { useBrowserState } from "./browser-state";
+import { getAllHokeiMoments, isGradeName, type GradeName, type GradePlan, type HokeiMoment } from "./data";
 import { TranslatorContext } from "./i18n";
 import { getAppDataStore } from "./persistence/store";
 import type { FlashCardKnownEntry } from "./persistence/schema";
@@ -14,12 +15,25 @@ interface Props {
     myGrade: GradeName;
 }
 
+const isGradeList = (value: unknown): value is GradeName[] =>
+    Array.isArray(value) && value.length <= 20 && value.every(isGradeName);
+
 const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
     const translator = useContext(TranslatorContext);
     const store = getAppDataStore();
     const gradeGroups = useMemo(() => hokeisByIntroducedGrade(allGradePlans, myGrade), [allGradePlans, myGrade]);
     const availableGrades = useMemo(() => gradeGroups.map(group => group.grade), [gradeGroups]);
-    const [selectedGrades, setSelectedGrades] = useState<Set<GradeName>>(() => new Set(availableGrades));
+    // The grades left out are what this device remembers, rather than those
+    // picked, so a grade that becomes available later — the next one, once it is
+    // somebody's own — starts out included, as every grade does the first time.
+    const [excludedGrades, setExcludedGrades] = useBrowserState<GradeName[]>(
+        "hokei-flashcard-excluded-grades", [], isGradeList, true);
+    const selectedGrades = useMemo(
+        () => new Set(availableGrades.filter(grade => !excludedGrades.includes(grade))),
+        [availableGrades, excludedGrades],
+    );
+    const setSelectedGrades = (selected: Set<GradeName>) =>
+        setExcludedGrades(availableGrades.filter(grade => !selected.has(grade)));
     const [hasStarted, setHasStarted] = useState(false);
     const [knownFlashCards, setKnownFlashCards] = useState<Record<string, FlashCardKnownEntry>>(
         () => store.get("knownFlashCards"),
@@ -80,12 +94,10 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
     }), [selectedHokeis, translator]);
 
     const toggleGrade = (grade: GradeName) => {
-        setSelectedGrades(previous => {
-            const next = new Set(previous);
-            if (next.has(grade)) next.delete(grade);
-            else next.add(grade);
-            return next;
-        });
+        const next = new Set(selectedGrades);
+        if (next.has(grade)) next.delete(grade);
+        else next.add(grade);
+        setSelectedGrades(next);
     };
 
     const allSelected = availableGrades.every(grade => selectedGrades.has(grade));

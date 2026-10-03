@@ -1,9 +1,10 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { Form } from "react-bootstrap";
 import kamokuhyo from "./assets/kamokuhyo.json";
 import type { GradeName, GradePlan } from "./data";
+import { useBrowserState } from "./browser-state";
 import { TranslatorContext } from "./i18n";
-import { buildFootStanceQuizPool, type QuizGradeSelection } from "./quiz-logic";
+import { buildFootStanceQuizPool, isQuizGradeSelection, type QuizGradeSelection } from "./quiz-logic";
 import QuizRunner from "./QuizRunner";
 import { gradeLabel } from "./strings";
 
@@ -15,16 +16,25 @@ interface FootStanceQuizProps {
 
 const FootStanceQuiz = ({ myGrade }: FootStanceQuizProps) => {
   const translator = useContext(TranslatorContext);
-  const [gradeSelection, setGradeSelection] = useState<QuizGradeSelection>("up-to-own");
-  const quizPool = useMemo(
-    () => buildFootStanceQuizPool(gradePlans, myGrade, gradeSelection),
-    [myGrade, gradeSelection],
-  );
+  // Remembered on this device, so coming back to the quiz finds it as it was left.
+  const [savedSelection, setGradeSelection] = useBrowserState<QuizGradeSelection>(
+    "quiz-grade:foot-stance", "up-to-own", isQuizGradeSelection, true);
   const availableGrades = useMemo(
     () => gradePlans
       .filter(plan => buildFootStanceQuizPool([plan], myGrade, "all").candidates.length > 0)
       .map(plan => plan.grade),
     [myGrade],
+  );
+  // A remembered grade that no longer has questions would leave the picker
+  // showing nothing, so it falls back to the default.
+  const gradeSelection: QuizGradeSelection =
+    savedSelection === "all" || savedSelection === "own" || savedSelection === "up-to-own"
+      || availableGrades.includes(savedSelection)
+      ? savedSelection
+      : "up-to-own";
+  const quizPool = useMemo(
+    () => buildFootStanceQuizPool(gradePlans, myGrade, gradeSelection),
+    [myGrade, gradeSelection],
   );
   const controls = (
     <div className="quiz-controls">

@@ -136,3 +136,27 @@ it("shows confidence per grade and lets the user practise selected grades", asyn
     await user.click(screen.getByRole("checkbox", { name: "Öva 5 kyū" }));
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "Nu kör vi" }).disabled).toBe(true);
 });
+
+it("remembers which grades were left out when the user comes back", async () => {
+    const user = userEvent.setup();
+    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    await user.click(screen.getByRole("checkbox", { name: "Öva 6 kyū" }));
+    first.unmount();
+
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 6 kyū" }).checked).toBe(false);
+    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 5 kyū" }).checked).toBe(true);
+});
+
+// What is remembered is what was left out, so a grade that only becomes
+// available later starts out included, as every grade does the first time.
+it("includes a newly available grade even after earlier choices", async () => {
+    const user = userEvent.setup();
+    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="6 kyū" />);
+    await user.click(screen.getByRole("checkbox", { name: "Öva 6 kyū" }));
+    first.unmount();
+
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 6 kyū" }).checked).toBe(false);
+    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 5 kyū" }).checked).toBe(true);
+});

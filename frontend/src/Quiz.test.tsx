@@ -47,6 +47,37 @@ describe("Quiz menu", () => {
   });
 });
 
+describe("Quiz grade selection", () => {
+  const selection = () => (screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value;
+
+  it("remembers the selection on this device when the user comes back", async () => {
+    const user = userEvent.setup();
+    const first = await renderQuiz();
+    await user.selectOptions(screen.getByRole("combobox", { name: "Teknikurval" }), "all");
+    first.unmount();
+
+    await renderQuiz();
+    expect(selection()).toBe("all");
+  });
+
+  it("remembers each quiz's selection separately", async () => {
+    const user = userEvent.setup();
+    const first = await renderQuiz();
+    await user.selectOptions(screen.getByRole("combobox", { name: "Teknikurval" }), "own");
+    first.unmount();
+
+    const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
+    render(<HandPositionQuiz myGrade="shodan" />);
+    expect(selection()).toBe("up-to-own");
+  });
+
+  it("falls back to the default when what was stored is not something it can show", async () => {
+    localStorage.setItem("navigation:preview:quiz-grade:foot-stance", JSON.stringify("tenth dan"));
+    await renderQuiz();
+    expect(selection()).toBe("up-to-own");
+  });
+});
+
 describe("Quiz streak", () => {
   it("starts with the foot-stance quiz and all techniques up to my grade", async () => {
     await renderQuiz();

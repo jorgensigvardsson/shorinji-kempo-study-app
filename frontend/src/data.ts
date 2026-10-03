@@ -10,6 +10,9 @@ const gradeProgression: GradeName[] = [
     "shodan", "nidan", "sandan", "yondan", "godan", "rokudan", "nanadan", "hachidan", "kudan",
 ];
 
+export const isGradeName = (value: unknown): value is GradeName =>
+    typeof value === "string" && (gradeProgression as string[]).includes(value);
+
 export function nextGrade(grade: GradeName): GradeName | undefined {
     const idx = gradeProgression.indexOf(grade);
     return idx >= 0 && idx < gradeProgression.length - 1 ? gradeProgression[idx + 1] : undefined;

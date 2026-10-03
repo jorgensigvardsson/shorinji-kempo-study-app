@@ -4,7 +4,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
 Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`.
 
 - [x] Admins ska kunna flytta på medlemmar
-- [ ] Defaulta till "upp till och med nästa grad"
+- [x] Gradväljarna i quizen (fotställningar, handpositioner) och hokei-flashkorten minns senaste valet på enheten
 - [ ] Träning -> Embu -> Kumi-embu: texten säger "Bygg en egen embu eller träna en färdig sekvens". Borde vara en text som säger "Det här är din nästa graderingsembu".
 
 - [ ] Add comments for repetition-and other cards
