@@ -5,7 +5,7 @@ import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
 import { APP_DISPLAY_NAME_MAX_LENGTH, canonicalKenshiNumber, formatKenshiNumber, isCompleteKenshiNumber, isKenshiNumber, normalizeKenshiNumber } from "./persistence/schema";
 import type { Language, Translator } from "./i18n";
-import { humanGradeName, type GradePlan, type GradeName } from "./data";
+import { currentGrades, humanGradeName, type CurrentGrade } from "./data";
 import { DefaultTextSize } from "./persistence/text-size";
 import { getSyncManager } from "./sync/manager";
 import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFromPush } from "./push";
@@ -28,16 +28,15 @@ const textSizeOptions = [
 
 interface Props {
     translator: Translator;
-    nextGrade: GradePlan;
-    allGradePlans: GradePlan[];
+    currentGrade: CurrentGrade;
     textSize: number;
     onSetLanguage: (lang: Language) => void;
-    onSetGrade: (grade: GradePlan) => void;
+    onSetCurrentGrade: (grade: CurrentGrade) => void;
     onSetTextSize: (textSize: number) => void;
 }
 
 const Settings = (props: Props) => {
-    const { translator, nextGrade, allGradePlans, textSize, onSetLanguage, onSetGrade, onSetTextSize } = props;
+    const { translator, currentGrade, textSize, onSetLanguage, onSetCurrentGrade, onSetTextSize } = props;
     const store = getAppDataStore();
     const { theme, setTheme } = useTheme();
     const [appDisplayName, setAppDisplayName] = useState<string | null>(() => store.get("appDisplayName"));
@@ -77,7 +76,7 @@ const Settings = (props: Props) => {
         { code: "ja", key: "Japanska", name: "日本語" },
     ];
 
-    const gradeLabel = (name: GradeName) => {
+    const gradeLabel = (name: CurrentGrade) => {
         const humanName = humanGradeName(name);
 
         if (!translator.isJapanese)
@@ -151,32 +150,48 @@ const Settings = (props: Props) => {
                     <div className="settings-form-grid settings-form-grid-three">
                         <Form.Group controlId="settingsTheme">
                             <Form.Label>{translator.translate("Tema")}</Form.Label>
-                            <Form.Select value={theme} onChange={e => setTheme(e.target.value as "light" | "dark" | "system")}>
-                                <option value="light">{translator.translate("Ljust")}</option>
-                                <option value="dark">{translator.translate("Mörkt")}</option>
-                                <option value="system">{translator.translate("System")}</option>
-                            </Form.Select>
+                            <Dropdown className="settings-dropdown" onSelect={key => {
+                                if (key === "light" || key === "dark" || key === "system") setTheme(key);
+                            }}>
+                                <Dropdown.Toggle id="settingsTheme" variant="outline-secondary">
+                                    {translator.translate(theme === "light" ? "Ljust" : theme === "dark" ? "Mörkt" : "System")}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {([ ["light", "Ljust"], ["dark", "Mörkt"], ["system", "System"] ] as const).map(([value, label]) => (
+                                        <Dropdown.Item key={value} eventKey={value} active={theme === value}>
+                                            {translator.translate(label)}
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </Form.Group>
 
                         <Form.Group controlId="settingsLanguage">
                             <Form.Label>{translator.translate("Språk")}</Form.Label>
-                            <Form.Select onChange={e => onSetLanguage(e.target.value as Language)} value={translator.currentLanguage}>
-                                {languages.map(language => (
-                                    <option value={language.code} key={language.code}>
-                                        {language.name} ({translator.translate(language.key)})
-                                    </option>
-                                ))}
-                            </Form.Select>
+                            <Dropdown className="settings-dropdown" onSelect={key => {
+                                if (languages.some(language => language.code === key)) onSetLanguage(key as Language);
+                            }}>
+                                <Dropdown.Toggle id="settingsLanguage" variant="outline-secondary">
+                                    {languages.find(language => language.code === translator.currentLanguage)?.name ?? "Svenska"}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {languages.map(language => (
+                                        <Dropdown.Item key={language.code} eventKey={language.code} active={language.code === translator.currentLanguage}>
+                                            {language.name} ({translator.translate(language.key)})
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </Form.Group>
 
                         <Form.Group controlId="textSize">
                             <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
                             {/* A native select hands its menu to the operating system on many
                                 phones, which ignores option font sizes. This HTML dropdown keeps
-                                the preview visible everywhere. The whole app is already zoomed to
-                                the current choice, so dividing by it makes each row land at the
-                                size it will actually have after it is selected. */}
-                            <Dropdown className="settings-text-size-dropdown" onSelect={key => {
+                                the preview visible everywhere. The root font already has the
+                                current choice, so dividing by it makes each row land at the size
+                                it will actually have after it is selected. */}
+                            <Dropdown className="settings-dropdown settings-text-size-dropdown" onSelect={key => {
                                 const selected = Number(key);
                                 if (Number.isFinite(selected)) onSetTextSize(selected);
                             }}>
@@ -255,15 +270,22 @@ const Settings = (props: Props) => {
                         </Form.Group>
 
                         <Form.Group controlId="settingsLevel">
-                            <Form.Label>{translator.translate("Min nästa grad")}</Form.Label>
-                            <Form.Select onChange={e => {
-                                const plan = allGradePlans.find(x => x.grade === e.target.value);
-                                if (plan) onSetGrade(plan);
-                            }} value={nextGrade.grade}>
-                                {allGradePlans.map((plan, index) => (
-                                    <option value={plan.grade} key={index}>{gradeLabel(plan.grade)}</option>
-                                ))}
-                            </Form.Select>
+                            <Form.Label>{translator.translate("Min grad")}</Form.Label>
+                            <Dropdown className="settings-dropdown" onSelect={key => {
+                                const grade = currentGrades.find(candidate => candidate === key);
+                                if (grade) onSetCurrentGrade(grade);
+                            }}>
+                                <Dropdown.Toggle id="settingsLevel" variant="outline-secondary">
+                                    {gradeLabel(currentGrade)}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {currentGrades.map(grade => (
+                                        <Dropdown.Item key={grade} eventKey={grade} active={grade === currentGrade}>
+                                            {gradeLabel(grade)}
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </Form.Group>
                     </div>
                 </section>

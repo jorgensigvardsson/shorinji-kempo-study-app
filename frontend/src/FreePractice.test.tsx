@@ -3,9 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { useState, type ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { GradePlan } from "./data";
+import type { GradeName, GradePlan } from "./data";
 import FreePractice from "./FreePractice";
-import { experimentalEmbuDraftStorageKey, type EmbuDraft } from "./persistence/experimental-embu-draft";
+import { experimentalEmbuDraftStorageKey } from "./persistence/experimental-embu-draft";
+import { getAppDataStore } from "./persistence/store";
+import { TrainingViewSettingsContext } from "./training-view-settings-context";
 import type { PracticeArea } from "./practice-area";
 
 const plans: GradePlan[] = [
@@ -89,6 +91,29 @@ const RandoriHarness = () => (
     dojoMode={false}
   />
 );
+
+const RandoriGradeHarness = () => {
+  const [grade, setGrade] = useState<GradeName>("5 kyū");
+
+  return (
+    <TrainingViewSettingsContext.Provider value={{
+      grade,
+      gradePlans: randoriPlans,
+      onGradeChange: setGrade,
+      dojoMode: false,
+      onDojoModeChange: () => undefined,
+    }}>
+      <FreePractice
+        myGrade={grade}
+        allGradePlans={randoriPlans}
+        activeArea="randori"
+        onAreaChange={() => undefined}
+        onBack={() => undefined}
+        dojoMode={false}
+      />
+    </TrainingViewSettingsContext.Provider>
+  );
+};
 
 const embuPlans: GradePlan[] = [{
   grade: "5 kyū",
@@ -178,6 +203,7 @@ const KumiEmbuLinkHarness = () => (
 
 beforeEach(() => {
   localStorage.removeItem(experimentalEmbuDraftStorageKey);
+  getAppDataStore().set("embuDraft", { sequences: [] });
 });
 
 afterEach(() => {
@@ -235,6 +261,7 @@ describe("FreePractice", () => {
     await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
     expect(screen.getByText("harai uke geri")).toBeTruthy();
     expect(screen.getByText("ren geri")).toBeTruthy();
+    expect(screen.getByText("furi zuki & kusshin uke")).toBeTruthy();
   });
 
   it("removes setup copy and enlarges the Kihon hierarchy in Dojo mode", () => {
@@ -258,10 +285,16 @@ describe("FreePractice", () => {
   });
 
   it("groups all Tan'en and Sōtai forms by family without losing entries", async () => {
-    const user = userEvent.setup();
-    renderPractice(<FreePracticeHarness />);
-
-    await user.click(screen.getByRole("button", { name: /Tan'en och sōtai/i }));
+    renderPractice(
+      <FreePractice
+        myGrade="sandan"
+        allGradePlans={plans}
+        activeArea="tanen-sotai"
+        onAreaChange={() => undefined}
+        onBack={() => undefined}
+        dojoMode={false}
+      />,
+    );
 
     const tanenSection = screen.getByRole("heading", { name: "Tan'en" }).closest("section")!;
     const sotaiSection = screen.getByRole("heading", { name: "Sōtai" }).closest("section")!;
@@ -282,7 +315,7 @@ describe("FreePractice", () => {
   it("simplifies Tan'en and Sōtai and opts their content into larger Dojo text", () => {
     const { container } = renderPractice(
       <FreePractice
-        myGrade="2 kyū"
+        myGrade="sandan"
         allGradePlans={plans}
         activeArea="tanen-sotai"
         onAreaChange={() => undefined}
@@ -299,6 +332,22 @@ describe("FreePractice", () => {
     expect(screen.getAllByRole("link", { name: /YouTube/ })).toHaveLength(16);
   });
 
+  it("shows forms up to the selected grade and labels their introduction grade", async () => {
+    const user = userEvent.setup();
+    renderPractice(<FreePracticeHarness />);
+
+    await user.click(screen.getByRole("button", { name: /Tan'en och sōtai/i }));
+
+    expect(screen.getByText("tenchi ken dai sankei (tan'en)")).toBeTruthy();
+    expect(screen.queryByText("tenchi ken dai gokei (tan'en)")).toBeNull();
+    expect(screen.getAllByText("3 kyū").length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole("button", { name: "Testa global grad 1 kyū" }));
+
+    expect(screen.getByText("tenchi ken dai gokei (tan'en)")).toBeTruthy();
+    expect(screen.getAllByText("1 kyū").length).toBeGreaterThan(0);
+  });
+
   it("does not repeat the form name inside its video link", async () => {
     const user = userEvent.setup();
     renderPractice(<FreePracticeHarness />);
@@ -313,7 +362,7 @@ describe("FreePractice", () => {
     expect(item.querySelector(".border")).toBeNull();
   });
 
-  it("shows the complete Randori progression with Gōhō before Jūhō and first grades", () => {
+  it("shows the Randori progression up to the selected grade with Gōhō before Jūhō", () => {
     renderPractice(<RandoriHarness />);
 
     const gohoHeading = screen.getByRole("heading", { name: "gōhō" });
@@ -322,21 +371,34 @@ describe("FreePractice", () => {
 
     const gohoSection = gohoHeading.closest("section")!;
     const gohoSteps = within(gohoSection).getAllByRole("listitem");
-    expect(gohoSteps).toHaveLength(2);
+    expect(gohoSteps).toHaveLength(1);
     expect(gohoSteps[0].textContent).toContain("grundläggande gōhō-steg");
     expect(gohoSteps[0].textContent).toContain("5 kyū");
-    expect(gohoSteps[1].textContent).toContain("avancerat gōhō-steg");
-    expect(gohoSteps[1].textContent).toContain("1 kyū");
 
     const juhoSection = juhoHeading.closest("section")!;
     expect(within(juhoSection).getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeNull();
+  });
+
+  it("updates the Randori progression when the shared grade picker changes", async () => {
+    const user = userEvent.setup();
+    renderPractice(<RandoriGradeHarness />);
+
+    expect(screen.queryByText("avancerat gōhō-steg")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Visar 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "1 kyū" }));
+    expect(screen.getByText("avancerat gōhō-steg")).toBeTruthy();
+    expect(screen.queryByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Visar 1 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Shodan" }));
     expect(screen.getByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeTruthy();
   });
 
   it("keeps Randori restrictions but removes grades and source context in Dojo mode", () => {
     const { container } = renderPractice(
       <FreePractice
-        myGrade="5 kyū"
+        myGrade="1 kyū"
         allGradePlans={randoriPlans}
         activeArea="randori"
         onAreaChange={() => undefined}
@@ -368,8 +430,8 @@ describe("FreePractice", () => {
 
     expect(screen.queryByRole("button", { name: "Tillbaka" })).toBeNull();
     expect(screen.getByRole("button", { name: "Embu och kumi-embu" })).toBeTruthy();
-    expect(screen.getByText("Experimentell").querySelector("svg")).toBeTruthy();
-    expect(screen.getByText("Det här är en prototyp. Utkastet sparas bara på den här enheten och kommer att försvinna när experimentfasen avslutas.")).toBeTruthy();
+    expect(screen.queryByText("Experimentell")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Bygg embu" })).toBeTruthy();
     expect(document.querySelector(".embu-progress")).toBeNull();
     expect(screen.queryByRole("textbox", { name: "Anteckningar för hela embun" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Kumi-embu" })).toBeNull();
@@ -407,7 +469,7 @@ describe("FreePractice", () => {
     await user.type(search, "gyak");
     await user.click(screen.getByRole("option", { name: /gyaku gote/i }));
 
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences).toHaveLength(6);
     expect(saved.sequences[0].hokeis.map(hokei => hokei.hokeiName)).toEqual(["shita uke geri", "gyaku gote"]);
     expect(saved.sequences[0].hokeis[0].comment).toBe("Byt sida lugnt\nArbeta med rytmen");
@@ -464,7 +526,7 @@ describe("FreePractice", () => {
     expect(screen.getByRole("button", { name: "Visa detaljer för sekvens 6" })).toBeTruthy();
     expect(document.querySelector(".embu-progress")).toBeNull();
     expect(screen.queryByRole("button", { name: "Nästa sekvens" })).toBeNull();
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences).toHaveLength(6);
   });
 
@@ -492,7 +554,7 @@ describe("FreePractice", () => {
     expect(secondSequence.querySelector(".embu-drop-indicator")).not.toBeNull();
 
     fireEvent.pointerUp(handle, { pointerId: 7, clientX: 20, clientY: 80 });
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences[0].hokeis).toHaveLength(0);
     expect(saved.sequences[1].hokeis.map(hokei => hokei.hokeiName)).toEqual(["gyaku gote"]);
     expect(document.querySelector(".embu-drag-preview")).toBeNull();
@@ -512,7 +574,7 @@ describe("FreePractice", () => {
     const menu = screen.getByRole("group", { name: "Flytta shita uke geri" });
     await user.click(within(menu).getByRole("button", { name: "Flytta shita uke geri till sekvens 4" }));
 
-    const saved = JSON.parse(localStorage.getItem(experimentalEmbuDraftStorageKey)!) as EmbuDraft;
+    const saved = getAppDataStore().get("embuDraft");
     expect(saved.sequences[0].hokeis).toHaveLength(0);
     expect(saved.sequences[3].hokeis.map(hokei => hokei.hokeiName)).toEqual(["shita uke geri"]);
   });
@@ -539,6 +601,24 @@ describe("FreePractice", () => {
     expect(screen.queryByText("kōgeki: migi ryote yubi")).toBeNull();
   });
 
+  it("does not substitute another grade's Kumi-embu when the selected grade has none", async () => {
+    const user = userEvent.setup();
+    renderPractice(
+      <FreePractice
+        myGrade="rokudan"
+        allGradePlans={[{ grade: "rokudan", weeks: [] }]}
+        activeArea="embu"
+        onAreaChange={() => undefined}
+        onBack={() => undefined}
+        dojoMode={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Träna kumi-embu" }));
+    expect(screen.getByText("Det finns ingen fast Kumi-embu för den valda graden.")).toBeTruthy();
+    expect(document.querySelector(".kumi-embu-sequence-list")).toBeNull();
+  });
+
   it("links both existing technique cards in a composite kumi-embu step", async () => {
     const user = userEvent.setup();
     renderPractice(<KumiEmbuLinkHarness />);
@@ -552,10 +632,12 @@ describe("FreePractice", () => {
     await user.click(keriTenSan);
     const card = document.querySelector<HTMLElement>(".hokei-card.is-expanded");
     expect(card).not.toBeNull();
+    expect(card?.closest("li")).toBe(keriTenSan.closest("li"));
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
 
     await user.click(card!.querySelector<HTMLElement>(".card-header")!);
     await waitFor(() => expect(document.querySelector(".hokei-card")).toBeNull());
+    expect(document.querySelector(".kumi-embu-technique-preview")).toBeNull();
   });
 
   it("presents Kumi-embu with larger, simplified content in Dojo mode", async () => {

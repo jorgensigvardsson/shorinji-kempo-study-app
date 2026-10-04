@@ -13,7 +13,8 @@
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "translations:export": "tsx scripts/translations-export.ts",
     "translations:import": "tsx scripts/translations-import.ts",
-    "fonts:fetch": "tsx scripts/fetch-google-fonts.ts"
+    "fonts:fetch": "tsx scripts/fetch-google-fonts.ts",
+    "test:layout": "playwright test"
   },
   "dependencies": {
     "@microsoft/applicationinsights-web": "^3.4.3",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.63.0",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",

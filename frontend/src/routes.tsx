@@ -1,6 +1,6 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
 import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
-import type { GradePlan } from "./data.ts";
+import type { CurrentGrade, GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
 import { isAnyAdmin } from "./roles.ts";
@@ -46,6 +46,7 @@ const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
 const WordQuiz = page(() => import("./WordQuiz.tsx"));
+const TechniqueGroupQuiz = page(() => import("./TechniqueGroupQuiz.tsx"));
 const FootStanceQuiz = page(() => import("./FootStanceQuiz.tsx"));
 const HandPositionQuiz = page(() => import("./HandPositionQuiz.tsx"));
 const GradingTest = page(() => import("./GradingTest.tsx"));
@@ -86,9 +87,9 @@ export const routeDescription = (route: Route) => {
     return typeof(route.startDescription) === "function" ? route.startDescription() : route.startDescription;
 }
 
-export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, allGradePlans: GradePlan[], translator: Translator,
+export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, currentGrade: CurrentGrade, allGradePlans: GradePlan[], translator: Translator,
                           textSize: number,
-                          setLanguage: (lang: Language) => void, setGrade: (grade: GradePlan) => void,
+                          setLanguage: (lang: Language) => void, setCurrentGrade: (grade: CurrentGrade) => void,
                           setTextSize: (size: number) => void, trainingMode: boolean, displayName?: string,
                           pendingRequests = 0): Route[] => {
     const routes: Route[] = [{
@@ -132,7 +133,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     }, {
         path: "/theory/grading",
-        element: <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} /></TheoryToolPage>,
+        element: <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TheoryToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -167,6 +168,13 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         element: <TheoryToolPage><WordQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Ordlistequiz"),
         icon: JournalText,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/quiz/technique-groups",
+        element: <TheoryToolPage><TechniqueGroupQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
+        menuText: translator.translate("Teknikgruppsquiz"),
+        icon: Collection,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
@@ -207,7 +215,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, all
         hideFromMenu: true,
     } satisfies Route] : []), {
         path: "/settings",
-        element: <Settings onSetLanguage={setLanguage} onSetGrade={setGrade} nextGrade={profileGradePlan} allGradePlans={allGradePlans} translator={translator}
+        element: <Settings onSetLanguage={setLanguage} currentGrade={currentGrade} onSetCurrentGrade={setCurrentGrade} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa appen, din profil och ditt konto."),

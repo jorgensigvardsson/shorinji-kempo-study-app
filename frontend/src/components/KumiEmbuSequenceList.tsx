@@ -1,14 +1,15 @@
-import { useContext } from "react";
-import type { HokeiMoment } from "../data";
+import { useContext, useEffect, useRef, useState } from "react";
+import type { GradeName, HokeiMoment } from "../data";
 import type { Item } from "../grading-exam-information";
 import { TranslatorContext } from "../i18n";
 import { normalizeString } from "../strings";
+import HokeiCard from "./HokeiCard";
 import "./KumiEmbuSequenceList.css";
 
 export interface KumiEmbuTechniqueLink {
     key: string;
     hokei: HokeiMoment;
-    onSelect: () => void;
+    grade: GradeName;
 }
 
 interface Props {
@@ -76,17 +77,32 @@ const resolveKumiEmbuTermParts = (
         }, new Map<string, KumiEmbuTechniqueLink>()).values()];
     };
 
-    return value.split(/(\s+(?:&|-)\s+)/).filter(Boolean).map((part, index) => ({
-        value: part,
-        separator: index % 2 === 1,
-        techniques: index % 2 === 1 ? [] : resolvePart(part),
-    }));
+    let precedingTechniques: KumiEmbuTechniqueLink[] = [];
+    let precedingSeparator = "";
+    return value.split(/(\s+(?:&|-)\s+)/).filter(Boolean).map((part, index) => {
+        if (index % 2 === 1) {
+            precedingSeparator = part.trim();
+            return { value: part, separator: true, techniques: [] };
+        }
+
+        const resolved = resolvePart(part);
+        // A named finish such as mae yubi gatame or kannuki gatame is often not a
+        // standalone hōkei. After a dash it belongs to the preceding hōkei, so
+        // opening that card is more useful than silently making the finish inert.
+        // An ampersand joins separate techniques and deliberately gets no fallback.
+        const techniques = resolved.length > 0
+            ? resolved
+            : precedingSeparator === "-" ? precedingTechniques : [];
+        if (resolved.length > 0) precedingTechniques = resolved;
+        return { value: part, separator: false, techniques };
+    });
 };
 
-const KumiEmbuTerm = ({ value, techniques, dojoMode }: {
+const KumiEmbuTerm = ({ value, techniques, dojoMode, onTechniqueSelect }: {
     value: string;
     techniques: KumiEmbuTechniqueLink[];
     dojoMode: boolean;
+    onTechniqueSelect: (technique: KumiEmbuTechniqueLink) => void;
 }) => {
     const translator = useContext(TranslatorContext);
     const parts = resolveKumiEmbuTermParts(value, techniques);
@@ -111,7 +127,7 @@ const KumiEmbuTerm = ({ value, techniques, dojoMode }: {
                                 type="button"
                                 className="kumi-embu-step-button"
                                 aria-label={translator.translate("Visa teknik {0}", { params: [part.value.trim()] })}
-                                onClick={part.techniques[0].onSelect}
+                                onClick={() => onTechniqueSelect(part.techniques[0])}
                             >
                                 {label}
                             </button>
@@ -130,19 +146,66 @@ const KumiEmbuTerm = ({ value, techniques, dojoMode }: {
 
 const KumiEmbuSequenceList = ({ items, techniques, dojoMode }: Props) => {
     const translator = useContext(TranslatorContext);
+    const [preview, setPreview] = useState<{
+        stepIndex: number;
+        technique: KumiEmbuTechniqueLink;
+        requestId: number;
+    } | null>(null);
+    const previewRequestId = useRef(0);
+    const previewRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!preview) return;
+        const scrollFrame = window.requestAnimationFrame(() => {
+            const previewElement = previewRef.current;
+            if (!previewElement) return;
+            const navbarBottom = document.querySelector<HTMLElement>(".navbar")?.getBoundingClientRect().bottom ?? 0;
+            const previewTop = previewElement.getBoundingClientRect().top;
+            if (previewTop < navbarBottom || previewTop >= window.innerHeight) {
+                previewElement.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+            }
+        });
+        return () => window.cancelAnimationFrame(scrollFrame);
+    }, [preview]);
+
+    const showTechnique = (stepIndex: number, technique: KumiEmbuTechniqueLink) => {
+        previewRequestId.current += 1;
+        setPreview({ stepIndex, technique, requestId: previewRequestId.current });
+    };
 
     return (
-        <ol className="kumi-embu-sequence-list">
+        <ol className={`kumi-embu-sequence-list${dojoMode ? " is-dojo-mode" : ""}`}>
             {items.map((step, index) => (
                 <li key={index}>
                     {step.term?.romaji && (
-                        <KumiEmbuTerm value={step.term.romaji} techniques={techniques} dojoMode={dojoMode} />
+                        <KumiEmbuTerm
+                            value={step.term.romaji}
+                            techniques={techniques}
+                            dojoMode={dojoMode}
+                            onTechniqueSelect={technique => showTechnique(index, technique)}
+                        />
                     )}
                     {step.annotations?.map((annotation, annotationIndex) => (
                         <div className="kumi-embu-step-note" key={annotationIndex}>
                             {translator.translate(annotation.text)}
                         </div>
                     ))}
+                    {preview?.stepIndex === index && (
+                        <div className="kumi-embu-technique-preview" ref={previewRef}>
+                            <HokeiCard
+                                key={`${preview.technique.key}-${preview.requestId}`}
+                                hokei={preview.technique.hokei}
+                                gradeName={preview.technique.grade}
+                                showNotes
+                                showRating
+                                dojoMode={dojoMode}
+                                kamokuLayout
+                                defaultOpen
+                                onCollapseExited={() => setPreview(current =>
+                                    current?.requestId === preview.requestId ? null : current)}
+                            />
+                        </div>
+                    )}
                 </li>
             ))}
         </ol>

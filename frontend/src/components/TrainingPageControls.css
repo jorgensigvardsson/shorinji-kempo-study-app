@@ -1,0 +1,121 @@
+.training-page-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.training-choice-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.15rem;
+  border: 0;
+  border-bottom: 2px solid var(--bs-warning-border-subtle);
+  background: transparent;
+  color: var(--bs-body-color);
+  font: inherit;
+  text-align: left;
+}
+
+.training-choice-trigger > span {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.training-choice-trigger > strong {
+  color: var(--bs-emphasis-color);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.training-choice-trigger > svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-left: 0.15rem;
+  color: #9a7610;
+}
+
+.training-choice-trigger:hover,
+.training-choice-trigger:focus-visible {
+  border-bottom-color: #9a7610;
+  color: var(--bs-emphasis-color);
+}
+
+[data-bs-theme="dark"] .training-choice-trigger > svg {
+  color: #f3d36c;
+}
+
+.training-choice-modal-header,
+.training-choice-modal-body {
+  width: min(100%, 42rem);
+  margin-inline: auto;
+}
+
+.training-choice-modal-header {
+  padding: 1.25rem max(1.25rem, env(safe-area-inset-right)) 1rem max(1.25rem, env(safe-area-inset-left));
+}
+
+.training-choice-modal-body {
+  padding: 0.5rem max(1.25rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+}
+
+.training-choice-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.training-choice-option {
+  display: flex;
+  min-height: 3.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.25rem;
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: transparent;
+  color: var(--bs-body-color);
+  font: inherit;
+  font-size: 1.1rem;
+  text-align: left;
+}
+
+.training-choice-option:hover,
+.training-choice-option:focus-visible {
+  background: var(--bs-tertiary-bg);
+}
+
+.training-choice-option.is-selected {
+  color: var(--bs-emphasis-color);
+  font-weight: 700;
+}
+
+.training-choice-option svg {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: #9a7610;
+}
+
+.training-dojo-toggle {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.training-dojo-toggle .form-check-input,
+.training-dojo-toggle .form-check-label {
+  cursor: pointer;
+}
+
+@media (max-width: 24rem) {
+  .training-page-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

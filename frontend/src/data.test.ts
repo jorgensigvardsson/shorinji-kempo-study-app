@@ -4,19 +4,52 @@ import {
   isKihonOnlyWeek,
   isRegularWeek,
   isHokeiMoment,
+  isKihonMoment,
   isStandardMoment,
   getHokeiMoments,
+  getKihonMoments,
   getStandardMoments,
   getAllHokeiMoments,
   getWeeksWithKihonShoho,
+  defaultTrainingGrade,
   findGradePlan,
+  nextGrade,
+  previousGrade,
   type HokeiMoment,
+  type KihonMoment,
   type StandardMoment,
   type RegularWeek,
   type KihonOnlyWeek,
   type ReviewPreparationWeek,
   type GradePlan,
 } from "./data";
+
+describe("personal and training grades", () => {
+  const plans: GradePlan[] = [
+    { grade: "6 kyū", weeks: [] },
+    { grade: "5 kyū", weeks: [] },
+    { grade: "shodan", weeks: [] },
+    { grade: "rokudan", weeks: [] },
+  ];
+
+  it("moves from an attained grade to the next curriculum grade", () => {
+    expect(nextGrade("minarai")).toBe("6 kyū");
+    expect(nextGrade("1 kyū")).toBe("shodan");
+    expect(previousGrade("6 kyū")).toBe("minarai");
+    expect(previousGrade("shodan")).toBe("1 kyū");
+  });
+
+  it("uses the next available plan as the default", () => {
+    expect(defaultTrainingGrade("minarai", plans)).toBe("6 kyū");
+    expect(defaultTrainingGrade("6 kyū", plans)).toBe("5 kyū");
+    expect(defaultTrainingGrade("1 kyū", plans)).toBe("shodan");
+  });
+
+  it("uses the highest shipped plan above the available curriculum", () => {
+    expect(defaultTrainingGrade("nanadan", plans)).toBe("rokudan");
+    expect(defaultTrainingGrade("kudan", plans)).toBe("rokudan");
+  });
+});
 
 const hokei: HokeiMoment = {
   id: "ippo",
@@ -30,6 +63,18 @@ const hokei: HokeiMoment = {
   kyohan_pages: [],
 };
 
+const kihon: KihonMoment = {
+  id: "kōbōgi (furi zuki & kusshin uke)",
+  type: "kihon_moment",
+  name: "kōbōgi (furi zuki & kusshin uke)",
+  ren_hanko: false,
+  variations: [],
+  technique_group: "niō ken",
+  foot_stance: ["tai gamae"],
+  roles: { attacker: {}, defender: {} },
+  kyohan_pages: [],
+};
+
 const standard: StandardMoment = {
   type: "standard_moment",
   content: ["randori"],
@@ -38,7 +83,7 @@ const standard: StandardMoment = {
 const regularWeek: RegularWeek = {
   week: 1,
   type: "regular_week",
-  moments: [hokei, standard],
+  moments: [hokei, kihon, standard],
 };
 
 const kihonWeek: KihonOnlyWeek = {
@@ -83,6 +128,12 @@ describe("type guards", () => {
   describe("isHokeiMoment", () => {
     it("returns true for a hokei_moment", () => expect(isHokeiMoment(hokei)).toBe(true));
     it("returns false for a standard_moment", () => expect(isHokeiMoment(standard)).toBe(false));
+    it("returns false for a kihon_moment", () => expect(isHokeiMoment(kihon)).toBe(false));
+  });
+
+  describe("isKihonMoment", () => {
+    it("returns true for a kihon_moment", () => expect(isKihonMoment(kihon)).toBe(true));
+    it("returns false for a hokei_moment", () => expect(isKihonMoment(hokei)).toBe(false));
   });
 
   describe("isStandardMoment", () => {
@@ -108,6 +159,13 @@ describe("getHokeiMoments", () => {
     const hokei2: HokeiMoment = { ...hokei, hokei_name: "nipo" };
     const week: RegularWeek = { ...regularWeek, moments: [hokei, standard, hokei2] };
     expect(getHokeiMoments(week)).toEqual([hokei, hokei2]);
+  });
+});
+
+describe("getKihonMoments", () => {
+  it("returns Kihon exercises without treating them as Hokei", () => {
+    expect(getKihonMoments(regularWeek)).toEqual([kihon]);
+    expect(getHokeiMoments(regularWeek)).toEqual([hokei]);
   });
 });
 

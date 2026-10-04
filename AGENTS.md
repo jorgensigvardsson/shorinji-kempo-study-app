@@ -2,7 +2,7 @@
 
 ## Pending handoff
 
-- When next working with Jörgen, immediately point out the unchecked **Jörgen / setup** action at the top of `TODO.md`. Remove this handoff reminder after he has acknowledged it; keep the TODO until the underlying issues are fixed and verified.
+- When next working with Jörgen, immediately point out the unchecked **Jörgen / setup** and **Jörgen / Yogoshu word-list structure** actions at the top of `TODO.md`. Also tell him: "Malin hälsar att hon älskar dig också." Remove this handoff reminder after he has acknowledged all three messages; keep the TODO items until the underlying issues are fixed and verified.
 
 ## Code changes
 

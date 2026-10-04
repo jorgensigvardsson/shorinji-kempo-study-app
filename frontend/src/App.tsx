@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
-import { findGradePlan, type GradePlan, type GradeName } from './data'
+import { defaultTrainingGrade, findGradePlan, type CurrentGrade, type GradePlan, type GradeName } from './data'
 import { TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
 import { Button, Container, Nav, Navbar, NavDropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { getRoutes, preloadPages, routeText, type Route } from './routes';
@@ -23,10 +23,14 @@ import SelectionWordLookup from './components/SelectionWordLookup';
 import { getTrainingControlContext } from './training-controls-context';
 import { beginNavigation } from './navigation-pending';
 import { applyFontFamily, isFontPickerEnabled, type FontFilter } from './google-fonts';
+import { isTechnicalAdmin } from './roles';
 import { setAppData, useAppData } from './persistence/use-app-data';
+import { getAppDataStore } from './persistence/store';
 import { NavigationMemoryProvider } from './navigation-memory';
 import { mainSection } from './navigation';
 import RouteScrollManager from './components/RouteScrollManager';
+import { applyTextSize } from './persistence/text-size';
+import { TrainingViewSettingsContext } from './training-view-settings-context';
 
 interface Props {
   gradePlans: GradePlan[];
@@ -49,7 +53,7 @@ function App(props: Props) {
   // happens to need the theme value. This also reacts to synced changes.
   useTheme();
   const language = useAppData("language");
-  const [ textZoom, setTextZoom ] = useState<number>(textSizeData.data);
+  const [ textSize, setTextSize ] = useState<number>(textSizeData.data);
   const [ bodyFontFamily, setBodyFontFamily ] = useState<string>(bodyFontFamilyData.data);
   const [ headingFontFamily, setHeadingFontFamily ] = useState<string>(headingFontFamilyData.data);
   const [ kanjiFontFamily, setKanjiFontFamily ] = useState<string>(kanjiFontFamilyData.data);
@@ -62,18 +66,21 @@ function App(props: Props) {
   // falls through it to the next face in the stack), which reads as a bug.
   // Clearing the language filter is still allowed, it's only the starting point.
   const [ kanjiFontFilter, setKanjiFontFilter ] = useState<FontFilter>({ search: "", category: "", subset: "japanese" });
-  // The user's own grade, as stored and synced.
+  const textSizeKey = String(Math.round(textSize * 10));
+  // The grade whose curriculum is used as the default across training views.
   const profileGrade = useAppData("grade");
+  const currentGrade = useAppData("currentGrade");
   const appDisplayName = useAppData("appDisplayName");
   // The training controls can temporarily show another grade's material without
-  // touching the user's own grade. That override is session-only, and a real
-  // grade change — from Settings, or arriving over sync — clears it. Resetting
+  // touching the profile's default training grade. That override is session-only,
+  // and a real grade change — from Settings, or arriving over sync — clears it. Resetting
   // during render rather than in an effect avoids a frame showing the stale
   // override. See https://react.dev/learn/you-might-not-need-an-effect
   const [ gradeOverride, setGradeOverride ] = useState<GradeName | null>(null);
-  const [ lastProfileGrade, setLastProfileGrade ] = useState<GradeName>(profileGrade);
-  if (lastProfileGrade !== profileGrade) {
-    setLastProfileGrade(profileGrade);
+  const profileGradeKey = `${currentGrade}:${profileGrade}`;
+  const [ lastProfileGradeKey, setLastProfileGradeKey ] = useState(profileGradeKey);
+  if (lastProfileGradeKey !== profileGradeKey) {
+    setLastProfileGradeKey(profileGradeKey);
     setGradeOverride(null);
   }
   const displayGrade = gradeOverride ?? profileGrade;
@@ -140,17 +147,37 @@ function App(props: Props) {
   const accountDisplayName = syncState.status === "local_only"
     ? undefined
     : getSyncManager().getBackendUserInfo()?.displayName;
+  const showFontPicker = isFontPickerEnabled
+    && (import.meta.env.DEV || isTechnicalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []));
+
   // Null means no app-specific choice has been made, so the account identity is the
   // prefill. An intentionally empty string stays empty and simply hides the greeting.
   const displayName = appDisplayName === null ? accountDisplayName : appDisplayName;
+  const setCurrentGrade = (grade: CurrentGrade) => {
+    const store = getAppDataStore();
+    const document = store.getDocument();
+    store.setDocument({
+      ...document,
+      updatedAt: new Date().toISOString(),
+      data: {
+        ...document.data,
+        currentGrade: grade,
+        grade: defaultTrainingGrade(grade, gradePlans),
+        // Hokei remembers an explicit filter separately. Reset it to the profile
+        // default so changing attained grade takes effect there as well.
+        hokeiListSelection: "own",
+      },
+    });
+  };
   const routes = getRoutes(
     findGradePlan(gradePlans, displayGrade),
     findGradePlan(gradePlans, profileGrade),
+    currentGrade,
     gradePlans,
     translator,
-    textZoom,
+    textSize,
     lang => setAppData("language", lang),
-    g => setAppData("grade", g.grade),
+    setCurrentGrade,
     size => textSizeData.save(size),
     trainingMode,
     displayName,
@@ -162,7 +189,8 @@ function App(props: Props) {
   // screen with nothing to show that anything is happening.
   useIdleTask(() => void preloadPages());
 
-  useEffect(() => textSizeData.registerListener(size => setTextZoom(size)), [textSizeData]);
+  useEffect(() => textSizeData.registerListener(size => setTextSize(size)), [textSizeData]);
+  useLayoutEffect(() => applyTextSize(textSize), [textSize]);
   useEffect(() => bodyFontFamilyData.registerListener(f => setBodyFontFamily(f)), [bodyFontFamilyData]);
   useEffect(() => headingFontFamilyData.registerListener(f => setHeadingFontFamily(f)), [headingFontFamilyData]);
   useEffect(() => kanjiFontFamilyData.registerListener(f => setKanjiFontFamily(f)), [kanjiFontFamilyData]);
@@ -218,7 +246,7 @@ function App(props: Props) {
   if (showSignIn) {
     return (
       <TranslatorContext.Provider value={translator}>
-        <div style={{ zoom: textZoom }}>
+        <div data-text-size={textSizeKey}>
           <LoginScreen />
         </div>
       </TranslatorContext.Provider>
@@ -229,23 +257,27 @@ function App(props: Props) {
     <TranslatorContext.Provider value={translator}>
       <NavigationMemoryProvider account={getSyncManager().getBackendUserInfo()?.id || 'preview'} grade={displayGrade} allGradePlans={gradePlans} onGradeChange={setGradeOverride}>
       <RouteScrollManager />
-      {/* --app-zoom-inverse is published for the few places that have to undo the zoom
-          rather than live inside it: anything sizing itself from a viewport length, or
-          from a measurement taken in screen pixels, would otherwise come out this much
-          too large. See components/HokeiCard.css. */}
-      <div className="app-shell" style={{ zoom: textZoom, '--app-zoom-inverse': 1 / textZoom } as CSSProperties}>
+      <div className="app-shell" data-text-size={textSizeKey}>
         {/* Only appears once a wait has gone on long enough to be worth mentioning:
             a navigation that would otherwise look like an ignored tap, or a sync
             slow enough to be one of the services starting up. */}
         {(navigationPending || syncPending) && <div className="app-navigation-pending d-print-none" role="status"
                                                     aria-label={translator.translate("Laddar…")} />}
-        <AppNavbar routes={routes} translator={translator} textZoom={textZoom} className="d-print-none" />
+        <AppNavbar routes={routes} translator={translator} className="d-print-none" />
         <div className="app-route-content" style={{
           '--floating-stack-reserve': `${floatingReserve}px`,
-          '--training-controls-reserve': controlContext.showGrade || controlContext.showTrainingMode || isFontPickerEnabled ? '4.75rem' : '0px',
+          '--training-controls-reserve': showFontPicker ? '4.75rem' : '0px',
         } as CSSProperties}>
-          <RouteContent routes={routes} translator={translator} />
-          <Outlet />
+          <TrainingViewSettingsContext.Provider value={{
+            grade: displayGrade,
+            gradePlans,
+            onGradeChange: setGradeOverride,
+            dojoMode: trainingMode,
+            onDojoModeChange: setTrainingMode,
+          }}>
+            <RouteContent routes={routes} translator={translator} />
+            <Outlet />
+          </TrainingViewSettingsContext.Provider>
         </div>
         {/* Bottom-right floating stack for transient toasts. Its full height is
             reserved at the bottom of the page (--floating-stack-reserve) so
@@ -257,17 +289,17 @@ function App(props: Props) {
           grade={displayGrade}
           gradePlans={gradePlans}
           onGradeChange={setGradeOverride}
-          showGrade={controlContext.showGrade}
-          showTrainingMode={controlContext.showTrainingMode}
+          showGrade={false}
+          showTrainingMode={false}
           trainingMode={trainingMode}
           onTrainingModeChange={setTrainingMode}
-          bodyFontPicker={isFontPickerEnabled
+          bodyFontPicker={showFontPicker
             ? { value: bodyFontFamily, onChange: f => bodyFontFamilyData.save(f), filter: bodyFontFilter, onFilterChange: setBodyFontFilter }
             : undefined}
-          headingFontPicker={isFontPickerEnabled
+          headingFontPicker={showFontPicker
             ? { value: headingFontFamily, onChange: f => headingFontFamilyData.save(f), filter: headingFontFilter, onFilterChange: setHeadingFontFilter }
             : undefined}
-          kanjiFontPicker={isFontPickerEnabled
+          kanjiFontPicker={showFontPicker
             ? { value: kanjiFontFamily, onChange: f => kanjiFontFamilyData.save(f), filter: kanjiFontFilter, onFilterChange: setKanjiFontFilter }
             : undefined}
         />
@@ -281,12 +313,11 @@ function App(props: Props) {
 interface NavbarProps {
   routes: Route[];
   translator: Translator;
-  textZoom: number;
   className?: string;
 }
 
 const AppNavbar = (props: NavbarProps) => {
-  const { routes, className, translator, textZoom } = props;
+  const { routes, className, translator } = props;
   const [show, setShow] = useState(false);
   const location = useLocation();
   const visibleMenuRoutes = routes.filter(route => !route.hideFromMenu);
@@ -305,7 +336,7 @@ const AppNavbar = (props: NavbarProps) => {
           <span className="app-navbar-title">{translator.translate("Shorinji Kempo")}</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" aria-label={translator.translate("Mer")} onClick={() => setShow(true)} />
-        <Navbar.Offcanvas id="basic-navbar-nav" placement="end" style={{ zoom: textZoom }}
+        <Navbar.Offcanvas id="basic-navbar-nav" placement="end"
           show={show} onHide={() => setShow(false)}>
           <Offcanvas.Header closeButton>
             <Offcanvas.Title className="app-offcanvas-title">

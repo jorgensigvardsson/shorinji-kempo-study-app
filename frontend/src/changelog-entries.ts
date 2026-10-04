@@ -5,18 +5,6 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-10-03T13:30:16.000Z",
-    changes: [
-      {
-        emoji: "📌",
-        sv: "Quizen för fotställningar och handpositioner, och hokei-flashkorten, kommer nu ihåg vilka grader du valde senast på den här enheten.",
-        en: "The foot-stance and hand-position quizzes, and the hokei flashcards, now remember which grades you chose last time on this device.",
-        tr: "Ayak duruşu ve el pozisyonu testleri ile hokei bilgi kartları artık bu cihazda en son hangi dereceleri seçtiğinizi hatırlıyor.",
-        ja: "足の構えと手の位置のクイズ、法形のフラッシュカードは、この端末で前回選んだ級・段を覚えておくようになりました。",
-      },
-    ],
-  },
-  {
     timestamp: "2026-10-03T13:20:22.000Z",
     changes: [
       {
@@ -25,6 +13,136 @@ export const CHANGELOG: ChangelogEntry[] = [
         en: "Administrators can now move a member to another branch straight from the member's page. Federation administrators can move members between branches in their own federation, and WSKO administrators between any branches. The member and the administrators of both branches are emailed about the move.",
         tr: "Yöneticiler artık bir üyeyi doğrudan üyenin sayfasından başka bir kulübe taşıyabiliyor. Federasyon yöneticileri kendi federasyonlarındaki kulüpler arasında, WSKO yöneticileri ise tüm kulüpler arasında taşıma yapabiliyor. Üyeye ve her iki kulübün yöneticilerine taşınmayla ilgili e-posta gönderiliyor.",
         ja: "管理者は会員のページから、会員を別の支部へ直接移動できるようになりました。連盟の管理者は自分の連盟内の支部間で、WSKOの管理者はすべての支部間で移動できます。移動の際は、本人と両方の支部の管理者にメールでお知らせします。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-09-30T18:05:00.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Inställningen visar nu din faktiska grad, från minarai till 9 dan, och träningsvyerna utgår från graden du tränar mot. Ditt tidigare val har flyttats ett steg ned eftersom det avsåg nästa grad. Kontrollera gärna under Inställningar att Min grad stämmer.",
+        en: "Settings now shows your attained grade, from minarai through 9th dan, and training views start from the grade you are training towards. Your previous choice has been moved down one grade because it represented your next grade. Please check under Settings that My grade is correct.",
+        tr: "Ayarlar artık minarai'den 9. dan'a kadar gerçek derecenizi gösterir ve antrenman görünümleri çalıştığınız dereceyi temel alır. Önceki seçiminiz bir sonraki derecenizi temsil ettiği için bir derece aşağı taşındı. Lütfen Ayarlar bölümünde Derecem bilgisinin doğru olduğunu kontrol edin.",
+        ja: "設定画面で、見習いから九段までの現在の級・段を表示でき、練習画面では次に目指す級・段が初期表示されます。従来の選択は次に目指す級・段を表していたため、1段階下の現在級・段に変換されました。設定の「現在の級・段」が正しいかご確認ください。",
+      },
+      {
+        emoji: "🎯",
+        sv: "Tan'en och sōtai följer nu vald grad och visar vid vilken grad varje form introduceras.",
+        en: "Tan'en and sōtai now follow the selected grade and show when each form is introduced.",
+        tr: "Tan'en ve sōtai artık seçilen dereceyi izler ve her formun hangi derecede tanıtıldığını gösterir.",
+        ja: "単演と相対は選択した級・段に合わせて表示され、各形を学び始める級・段も確認できるようになりました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-09-27T16:42:00.000Z",
+    changes: [
+      {
+        emoji: "🎯",
+        sv: "Ny quiz om teknikgrupper tillagd.",
+        en: "A new quiz about technique groups has been added.",
+        tr: "Teknik grupları hakkında yeni bir quiz eklendi.",
+        ja: "技術グループの新しいクイズを追加しました。",
+      },
+      {
+        emoji: "🎚️",
+        sv: "Gradvalen har fått samma tydliga utseende i hela appens träningsvyer. Det är nu enklare att välja vilken grad eller vilka nivåer du vill se och träna på.",
+        en: "Grade selection now has the same clear design throughout the app's training views. It is now easier to choose which grade or levels you want to view and practise.",
+        tr: "Derece seçimi artık uygulamanın tüm antrenman görünümlerinde aynı anlaşılır tasarıma sahip. Görmek ve çalışmak istediğiniz dereceyi veya seviyeleri seçmek artık daha kolay.",
+        ja: "アプリ内のすべての練習画面で、級・段の選択を同じ分かりやすいデザインに統一しました。表示・練習したい級や段を簡単に選べます。",
+      },
+      {
+        emoji: "🥋",
+        sv: "Hokei-flashkorten visar nu dina framsteg per grad och låter dig återställa alla Hokei-kort när du vill börja om.",
+        en: "Hokei flashcards now show your progress for each grade and let you reset all Hokei cards whenever you want to start over.",
+        tr: "Hokei bilgi kartları artık her derece için ilerlemenizi gösteriyor ve yeniden başlamak istediğinizde tüm Hokei kartlarını sıfırlamanıza izin veriyor.",
+        ja: "法形フラッシュカードで級・段ごとの進み具合を確認でき、最初からやり直したいときはすべての法形カードをリセットできるようになりました。",
+      },
+      {
+        emoji: "✨",
+        sv: "Embu-byggaren är nu en permanent del av appen. Dina utkast sparas automatiskt och synkas mellan dina enheter när du är inloggad.",
+        en: "The Embu builder is now a permanent part of the app. Your drafts are saved automatically and synchronized across your devices when you are signed in.",
+        tr: "Embu oluşturucu artık uygulamanın kalıcı bir parçası. Taslaklarınız otomatik olarak kaydedilir ve oturum açtığınızda cihazlarınız arasında eşitlenir.",
+        ja: "演武作成機能がアプリの正式な機能になりました。下書きは自動で保存され、ログイン中は端末間で同期されます。",
+      },
+      {
+        emoji: "👥",
+        sv: "Kumi-embu visar teknikkort direkt vid rätt sekvens. Korten fungerar bättre på telefoner och du tappar inte platsen när de öppnas eller stängs.",
+        en: "Kumi-embu now shows technique cards directly beside the correct sequence. The cards work better on phones, and opening or closing one no longer makes you lose your place.",
+        tr: "Kumi-embu artık teknik kartlarını doğru dizinin yanında gösteriyor. Kartlar telefonlarda daha iyi çalışıyor ve açılıp kapandıklarında bulunduğunuz yeri kaybetmiyorsunuz.",
+        ja: "組演武で、技のカードを該当する構成のすぐ近くに表示するようにしました。スマートフォンでも使いやすくなり、カードを開閉しても見ていた位置を見失いません。",
+      },
+      {
+        emoji: "🔠",
+        sv: "Textstorlekarna fungerar nu bättre på telefoner. Menyer, kort och ordlista håller sig inom skärmen även med större text.",
+        en: "Text sizes now work better on phones. Menus, cards and the word list stay within the screen even with larger text.",
+        tr: "Metin boyutları artık telefonlarda daha iyi çalışıyor. Daha büyük metin kullanıldığında bile menüler, kartlar ve sözlük ekranın içinde kalıyor.",
+        ja: "スマートフォンで文字サイズがより適切に機能するようになりました。文字を大きくしても、メニュー、カード、用語集が画面内に収まります。",
+      },
+      {
+        emoji: "👣",
+        sv: "Grunder och ordlista har kompletterats med fler fotförflyttningar. Kōbōgi-övningen visas nu korrekt som Kihon i stället för Hokei.",
+        en: "Fundamentals and the word list now include more footwork. The Kōbōgi exercise is now correctly shown as Kihon instead of Hokei.",
+        tr: "Temel bilgiler ve sözlüğe daha fazla ayak hareketi eklendi. Kōbōgi çalışması artık Hokei yerine doğru şekilde Kihon olarak gösteriliyor.",
+        ja: "基本項目と用語集に足運びを追加しました。Kōbōgiの練習は、法形ではなく基本として正しく表示されるようになりました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-09-27T13:15:51.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Randori har fått en gradväljare. Välj grad för att se randoriträningen fram till och med den graden.",
+        en: "Randori now has a grade picker. Choose a grade to see the randori training up to and including that grade.",
+        tr: "Randori artık bir derece seçiciye sahip. Seçtiğiniz dereceye kadar olan randori çalışmalarını görmek için bir derece seçin.",
+        ja: "乱捕に級・段の選択機能を追加しました。選んだ級・段までの乱捕練習を確認できます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-09-27T10:24:45.000Z",
+    changes: [
+      {
+        emoji: "🔠",
+        sv: "Textstorlekarna fungerar nu bättre på telefoner. Menyer, kort och ordlista håller sig inom skärmen även med större text.",
+        en: "Text sizes now work better on phones. Menus, cards and the word list stay within the screen even with larger text.",
+        tr: "Metin boyutları artık telefonlarda daha iyi çalışıyor. Daha büyük metin kullanıldığında bile menüler, kartlar ve sözlük ekranın içinde kalıyor.",
+        ja: "スマートフォンで文字サイズがより適切に機能するようになりました。文字を大きくしても、メニュー、カード、用語集が画面内に収まります。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-09-26T15:36:06.000Z",
+    changes: [
+      {
+        emoji: "🎯",
+        sv: "Ny quiz om teknikgrupper tillagd.",
+        en: "A new quiz about technique groups has been added.",
+        tr: "Teknik grupları hakkında yeni bir quiz eklendi.",
+        ja: "技術グループの新しいクイズを追加しました。",
+      },
+      {
+        emoji: "🥋",
+        sv: "Kumi-embu visar teknikkort direkt vid rätt sekvens. Korten fungerar bättre på telefoner och du tappar inte platsen när de öppnas eller stängs.",
+        en: "Kumi-embu now shows technique cards directly beside the correct sequence. The cards work better on phones, and opening or closing one no longer makes you lose your place.",
+        tr: "Kumi-embu artık teknik kartlarını doğru dizinin yanında gösteriyor. Kartlar telefonlarda daha iyi çalışıyor ve açılıp kapandıklarında bulunduğunuz yeri kaybetmiyorsunuz.",
+        ja: "組演武で、技のカードを該当する構成のすぐ近くに表示するようにしました。スマートフォンでも使いやすくなり、カードを開閉しても見ていた位置を見失いません。",
+      },
+      {
+        emoji: "✨",
+        sv: "Träningssidorna har fått tydligare veckonavigering och smidigare val för grad och Dojo-läge.",
+        en: "Training pages now have clearer week navigation and easier choices for grade and Dojo mode.",
+        tr: "Antrenman sayfalarında artık haftalar arasında daha anlaşılır gezinme ile kademe ve Dojo modu için daha kolay seçimler var.",
+        ja: "練習画面の週移動を分かりやすくし、級・段と道場モードも選びやすくしました。",
+      },
+      {
+        emoji: "👣",
+        sv: "Grunder och ordlista har kompletterats med namngivna fotförflyttningar, och en övning som låg under Hokei visas nu korrekt som Kihon.",
+        en: "Fundamentals and the word list now include named footwork, and an exercise previously listed under Hokei is now correctly shown as Kihon.",
+        tr: "Temel bilgiler ve sözlük, adlandırılmış ayak hareketleriyle tamamlandı; daha önce Hokei altında listelenen bir çalışma artık doğru şekilde Kihon olarak gösteriliyor.",
+        ja: "基本項目と用語集に名称のある足運びを追加し、これまで法形に分類されていた練習を正しく基本として表示するようにしました。",
       },
     ],
   },

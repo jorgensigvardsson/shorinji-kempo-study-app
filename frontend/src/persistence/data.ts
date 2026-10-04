@@ -87,6 +87,8 @@ function persistentNameToAppDataKey(name: string): keyof AppDataState | null {
             return "hokeiListSelection";
         case "quizStreakHighScore":
             return "quizStreakHighScore";
+        case "experimental-embu-draft":
+            return "embuDraft";
         default:
             return null;
     }

@@ -67,6 +67,7 @@ export const koboTechniques: KihonPracticeItem[] = [
     { name: "jōdan zuki & uchi age uke", introducedAt: "4 kyū" },
     { name: "furi zuki & soto oshi uke", introducedAt: "3 kyū" },
     { name: "furi zuki & uchi oshi uke", introducedAt: "3 kyū" },
+    { name: "furi zuki & kusshin uke", introducedAt: "2 kyū" },
     { name: "mawashi geri & uchi harai uke", introducedAt: "1 kyū" },
 ];
 

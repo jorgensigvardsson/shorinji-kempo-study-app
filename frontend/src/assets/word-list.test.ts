@@ -77,4 +77,22 @@ describe("word list ids", () => {
       .map(entry => `${entry.id}: ${entry.romaji}`);
     expect(reused, `ids reused from below the baseline's highest (${highestKnown}): ${reused.join(", ")}`).toHaveLength(0);
   });
+
+  it("includes the complete named footwork vocabulary", () => {
+    expect(
+      entries
+        .filter(entry => entry.id >= 539 && entry.id <= 547)
+        .map(entry => [entry.id, entry.romaji]),
+    ).toEqual([
+      [539, "ushiro chidori ashi"],
+      [540, "jun sagari"],
+      [541, "hiraki sagari"],
+      [542, "mae chidori ashi"],
+      [543, "sashikomi ashi"],
+      [544, "sashikae ashi"],
+      [545, "kani ashi"],
+      [546, "kumo ashi"],
+      [547, "jūji ashi"],
+    ]);
+  });
 });

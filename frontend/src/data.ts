@@ -1,25 +1,53 @@
 export type GradeName = "1 kyū" | "2 kyū" | "3 kyū" | "4 kyū" | "5 kyū" | "6 kyū" |
                         "shodan" | "nidan" | "sandan" | "yondan" | "godan" | "rokudan" | "nanadan" | "hachidan" | "kudan";
 
-export const humanGradeName = (ln: GradeName): string => {
-    return ln;
-}
+export type CurrentGrade = "minarai" | GradeName;
 
-const gradeProgression: GradeName[] = [
-    "6 kyū", "5 kyū", "4 kyū", "3 kyū", "2 kyū", "1 kyū",
+export const currentGrades: CurrentGrade[] = [
+    "minarai", "6 kyū", "5 kyū", "4 kyū", "3 kyū", "2 kyū", "1 kyū",
     "shodan", "nidan", "sandan", "yondan", "godan", "rokudan", "nanadan", "hachidan", "kudan",
 ];
 
-export const isGradeName = (value: unknown): value is GradeName =>
-    typeof value === "string" && (gradeProgression as string[]).includes(value);
+export const humanGradeName = (ln: CurrentGrade): string => {
+    return ln;
+}
 
-export function nextGrade(grade: GradeName): GradeName | undefined {
-    const idx = gradeProgression.indexOf(grade);
-    return idx >= 0 && idx < gradeProgression.length - 1 ? gradeProgression[idx + 1] : undefined;
+export function nextGrade(grade: CurrentGrade): GradeName | undefined {
+    const idx = currentGrades.indexOf(grade);
+    return idx >= 0 && idx < currentGrades.length - 1 ? currentGrades[idx + 1] as GradeName : undefined;
+}
+
+// Documents written before currentGrade existed stored the grade the reader was
+// training towards. Moving one step back reconstructs the attained grade without
+// changing that older field's meaning for devices that have not upgraded yet.
+export function previousGrade(grade: GradeName): CurrentGrade {
+    const idx = currentGrades.indexOf(grade);
+    return idx > 0 ? currentGrades[idx - 1] : "minarai";
+}
+
+export function isCurrentGrade(value: unknown): value is CurrentGrade {
+    return typeof value === "string" && currentGrades.includes(value as CurrentGrade);
+}
+
+// Pick the first curriculum grade above the attained grade. At nanadan and higher
+// there is no later plan in the app, so keep the highest plan that actually exists.
+export function defaultTrainingGrade(currentGrade: CurrentGrade, plans: GradePlan[]): GradeName {
+    const available = new Set(plans.map(plan => plan.grade));
+    const currentIndex = currentGrades.indexOf(currentGrade);
+    const nextAvailable = currentGrades
+        .slice(currentIndex + 1)
+        .find((grade): grade is GradeName => grade !== "minarai" && available.has(grade));
+    if (nextAvailable) return nextAvailable;
+
+    const highestAvailable = [...currentGrades].reverse()
+        .find((grade): grade is GradeName => grade !== "minarai" && available.has(grade));
+    if (!highestAvailable) throw new Error("At least one grade plan is required");
+    return highestAvailable;
 }
 
 export interface TanenKihonHokei {
   hokei_name: string;
+  introducedAt: GradeName;
   videos?: Video[];
   _ja?: string;
 }
@@ -107,8 +135,9 @@ export interface GodanHokeiMoment {
 }
 
 /**
- * A kyūsho-attack ("zeme") drill — not a defensive hōkei but a drill in
- * exploiting a specific vital point. Used from godan onwards.
+ * A kyūsho-attack ("zeme") using pressure points. Sensei confirmed these are
+ * correctly classified as hōkei within rakan appō, even though they are attacks
+ * rather than defensive hōkei. Used from godan onwards.
  */
 export interface KyushoZemeWeek {
   week: number;
@@ -128,7 +157,7 @@ export interface ReviewPreparationWeek {
   content: string[];
 }
 
-export type Moment = HokeiMoment | StandardMoment;
+export type Moment = HokeiMoment | KihonMoment | StandardMoment;
 
 /**
  * A link to a demonstration video. `label` distinguishes multiple videos for
@@ -148,6 +177,22 @@ export interface HokeiMoment {
   id: string;
   type: "hokei_moment";
   hokei_name: string;
+  ren_hanko: boolean;
+  variations: string[];
+  technique_group: string;
+  foot_stance: string[];
+  roles: Roles;
+  references?: string[];
+  kyohan_pages: number[];
+  videos?: Video[];
+}
+
+export interface KihonMoment {
+  // This record used to be a HokeiMoment, so its stable id may already own notes
+  // and ratings. The Kihon classification changes where it is shown, not its identity.
+  id: string;
+  type: "kihon_moment";
+  name: string;
   ren_hanko: boolean;
   variations: string[];
   technique_group: string;
@@ -208,7 +253,11 @@ export function isStandardMoment(moment: Moment): moment is StandardMoment {
 }
 
 export function isHokeiMoment(moment: Moment): moment is HokeiMoment {
-  return "hokei_name" in moment;
+  return moment.type === "hokei_moment";
+}
+
+export function isKihonMoment(moment: Moment): moment is KihonMoment {
+  return moment.type === "kihon_moment";
 }
 
 /**
@@ -235,6 +284,9 @@ export function adaptYondanMoment(m: YondanHokeiMoment): HokeiMoment {
 }
 
 export function adaptGodanMoment(m: GodanHokeiMoment): HokeiMoment {
+  // hagai jime to shuhō is a boundary case rather than a strict Kyōhan hōkei,
+  // but Sensei confirmed that Kamoku intentionally lists it with the hōkei. Do
+  // not infer classification from its missing technique group or filter it out.
   return {
     id: m.hokei_name,
     type: "hokei_moment",
@@ -262,12 +314,25 @@ export function adaptKyushoZeme(z: KyushoZeme): HokeiMoment {
   };
 }
 
+export function adaptKihonMoment(m: KihonMoment): HokeiMoment {
+  return {
+    ...m,
+    type: "hokei_moment",
+    hokei_name: m.name,
+  };
+}
+
 export function getHokeiMoments(week: Week): HokeiMoment[] {
   if (isYondanWeek(week)) return week.moment ? [adaptYondanMoment(week.moment)] : [];
   if (isGodanWeek(week)) return [adaptGodanMoment(week.moment)];
   if (isKyushoZemeWeek(week)) return [adaptKyushoZeme(week.zeme)];
   if (!("moments" in week)) return [];
   return week.moments.filter(isHokeiMoment);
+}
+
+export function getKihonMoments(week: Week): KihonMoment[] {
+  if (!("moments" in week)) return [];
+  return week.moments.filter(isKihonMoment);
 }
 
 export function getStandardMoments(week: Week): StandardMoment[] {

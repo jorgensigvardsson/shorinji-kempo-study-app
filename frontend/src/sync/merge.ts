@@ -1,5 +1,6 @@
 import { createDefaultAppDataDocument, unknownDataFields, type AppDataDocument, type AppDataState, type FlashCardKnownEntry, type HokeiRankEntry } from "../persistence/schema";
 import { deepEqual } from "../utilities/deep-equal";
+import { isCurrentGrade, previousGrade } from "../data";
 
 export interface MergeResult {
   document: AppDataDocument;
@@ -10,7 +11,10 @@ export type ConflictPreference = "local" | "remote";
 
 function withDefaultData(doc: AppDataDocument): AppDataDocument {
   const { data: defaults } = createDefaultAppDataDocument();
-  return { ...doc, data: { ...defaults, ...doc.data } };
+  const currentGrade = isCurrentGrade(doc.data.currentGrade)
+    ? doc.data.currentGrade
+    : previousGrade(doc.data.grade ?? defaults.grade);
+  return { ...doc, data: { ...defaults, ...doc.data, currentGrade } };
 }
 
 export function mergeDocuments(
@@ -111,6 +115,7 @@ export function mergeDocuments(
     // is dropping them. Known fields below override anything of the same name.
     ...mergeUnknownFields(local, remote),
     grade: mergeScalar("grade"),
+    currentGrade: mergeScalar("currentGrade"),
     language: mergeScalar("language"),
     appDisplayName: mergeScalar("appDisplayName"),
     kenshiNumber: mergeScalar("kenshiNumber"),
@@ -121,6 +126,7 @@ export function mergeDocuments(
     // A high score has an obvious winner, so it never disagrees.
     quizStreakHighScore: Math.max(local.data.quizStreakHighScore, remote.data.quizStreakHighScore),
     knownFlashCards: knownFlashCards.merged,
+    embuDraft: mergeScalar("embuDraft"),
     showKanjiOnHokeiCards: mergeScalar("showKanjiOnHokeiCards"),
     weeklyPlanCompletions: weeklyPlanCompletions.merged,
     gradingFundamentalCompletions: gradingFundamentalCompletions.merged,

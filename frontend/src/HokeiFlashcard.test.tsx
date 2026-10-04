@@ -1,8 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it } from "vitest";
-import type { GradePlan, HokeiMoment } from "./data";
+import { getAllHokeiMoments, type GradePlan, type HokeiMoment } from "./data";
 import HokeiFlashcard from "./HokeiFlashcard";
+import kamokuhyo from "./assets/kamokuhyo.json";
 import { TranslatorContext, TranslatorImplementation } from "./i18n";
 import { getAppDataStore } from "./persistence/store";
 
@@ -53,8 +54,6 @@ it("shows a hokei name on the front and details with editable notes on the back"
         </TranslatorContext.Provider>,
     );
 
-    expect(screen.queryByRole("heading", { name: "逆小手" })).toBeNull();
-    await user.click(screen.getByRole("button", { name: "Nu kör vi" }));
     expect(screen.getByRole("heading", { name: "逆小手" })).toBeDefined();
     expect(container.querySelector(".flashcard-hokei-romaji")?.textContent).toBe("gyaku gote");
     expect(screen.queryByText("Hokei")).toBeNull();
@@ -81,10 +80,8 @@ it("shows a hokei name on the front and details with editable notes on the back"
 
 
 it("uses horizontal swipes instead of action buttons during hokei practice", async () => {
-    const user = userEvent.setup();
     render(<HokeiFlashcard allGradePlans={[plan]} myGrade="6 kyū" />);
 
-    await user.click(screen.getByRole("button", { name: "Nu kör vi" }));
     expect(screen.queryByRole("button", { name: "Kan det" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Nästa kort" })).toBeNull();
     expect(screen.getByText("← Öva igen")).toBeDefined();
@@ -110,53 +107,71 @@ it("keeps learned word cards when restarting the hokei deck", async () => {
     });
     render(<HokeiFlashcard allGradePlans={[plan]} myGrade="6 kyū" />);
 
-    await user.click(screen.getByRole("button", { name: "Nu kör vi" }));
     await user.click(screen.getByRole("button", { name: "Börja om" }));
 
     expect(getAppDataStore().get("knownFlashCards")["1"].known).toBe(true);
     expect(getAppDataStore().get("knownFlashCards")["hokei:gyaku gote"].known).toBe(false);
 });
-
-it("shows confidence per grade and lets the user practise selected grades", async () => {
+it("shows progress per grade and can reset every Hokei card without resetting word cards", async () => {
     const user = userEvent.setup();
     getAppDataStore().set("knownFlashCards", {
-        "hokei:uchi uke zuki": { known: true, updatedAt: "2026-09-11T10:00:00.000Z" },
+        "1": { known: true, updatedAt: "2026-09-11T10:00:00.000Z" },
+        "hokei:gyaku gote": { known: true, updatedAt: "2026-09-11T10:00:00.000Z" },
     });
     render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
 
-    expect(screen.getByText("0/1 · Bra att öva")).toBeDefined();
-    expect(screen.getByText("1/1 · Trygg")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Framsteg 0/1" }));
+    const rows = screen.getAllByRole("listitem");
+    expect(rows[0].textContent).toContain("6 kyū1/1 · Trygg");
+    expect(rows[1].textContent).toContain("5 kyū0/1 · Bra att öva");
+
+    await user.click(screen.getByRole("button", { name: "Återställ alla Hokei-kort" }));
+    expect(screen.getByRole("heading", { name: "Återställa alla Hokei-kort?" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Återställ" }));
+
+    const progress = getAppDataStore().get("knownFlashCards");
+    expect(progress["1"].known).toBe(true);
+    expect(progress["hokei:gyaku gote"].known).toBe(false);
+    expect(progress["hokei:uchi uke zuki"].known).toBe(false);
+    expect(screen.getAllByRole("listitem")[0].textContent).toContain("0/1 · Bra att öva");
+});
+
+it("opens directly at the user's grade and changes grade through the shared picker", async () => {
+    const user = userEvent.setup();
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+
     expect(screen.queryByRole("heading", { name: /Gyaku gote/i })).toBeNull();
+    expect(screen.getByRole("heading", { name: /Uchi uke zuki/i })).toBeDefined();
 
-    await user.click(screen.getByRole("checkbox", { name: "Öva 6 kyū" }));
-    await user.click(screen.getByRole("button", { name: "Nu kör vi" }));
-    expect(screen.getByRole("heading", { name: /Alla kort klara/i })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
+    expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Alla" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Alla till och med egna" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "6 kyū" }));
 
-    await user.click(screen.getByRole("button", { name: "Ändra grader" }));
-    await user.click(screen.getByRole("checkbox", { name: "Öva 5 kyū" }));
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Nu kör vi" }).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Gyaku gote/i })).toBeDefined();
+    expect(screen.queryByRole("heading", { name: /Uchi uke zuki/i })).toBeNull();
+    expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
 });
 
-it("remembers which grades were left out when the user comes back", async () => {
-    const user = userEvent.setup();
-    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
-    await user.click(screen.getByRole("checkbox", { name: "Öva 6 kyū" }));
-    first.unmount();
+it("returns to the new training grade when the profile grade changes", () => {
+    const { rerender } = render(
+        <HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />,
+    );
 
-    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
-    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 6 kyū" }).checked).toBe(false);
-    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 5 kyū" }).checked).toBe(true);
+    expect(screen.getByRole("button", { name: "Tränar inför 5 kyū" })).toBeDefined();
+
+    rerender(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="6 kyū" />);
+
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
 });
 
-// What is remembered is what was left out, so a grade that only becomes
-// available later starts out included, as every grade does the first time.
-it("includes a newly available grade even after earlier choices", async () => {
-    const user = userEvent.setup();
-    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="6 kyū" />);
-    await user.click(screen.getByRole("checkbox", { name: "Öva 6 kyū" }));
-    first.unmount();
+it("uses the confirmed Kamoku classification for Kihon, Zeme and Hagai jime", () => {
+    const ids = (kamokuhyo as GradePlan[]).flatMap(getAllHokeiMoments).map(moment => moment.id);
 
-    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
-    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 6 kyū" }).checked).toBe(false);
-    expect(screen.getByRole<HTMLInputElement>("checkbox", { name: "Öva 5 kyū" }).checked).toBe(true);
+    expect(ids).not.toContain("kōbōgi (furi zuki & kusshin uke)");
+    expect(ids).toContain("jitsugetsu zeme");
+    expect(ids).toContain("hagai jime to shuhō");
 });

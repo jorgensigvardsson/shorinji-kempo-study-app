@@ -761,33 +761,6 @@
   font-size: clamp(1.55rem, 4vw, 1.95rem);
 }
 
-.embu-kumi-example.is-dojo-mode .kumi-embu-sequence-list > li {
-  grid-template-columns: 2.6rem minmax(0, 1fr);
-  column-gap: 0.75rem;
-  padding-block: 1.1rem;
-}
-
-.embu-kumi-example.is-dojo-mode .kumi-embu-sequence-list > li::before {
-  font-family: var(--app-display-font);
-  font-size: clamp(1.35rem, 4vw, 1.65rem);
-}
-
-.embu-kumi-example.is-dojo-mode .kumi-embu-term {
-  font-size: clamp(1.35rem, 4vw, 1.7rem);
-  line-height: 1.4;
-}
-
-.embu-kumi-example.is-dojo-mode .kumi-embu-step-button {
-  padding-block: 0.15rem;
-  font-weight: 600;
-}
-
-.embu-kumi-example.is-dojo-mode .kumi-embu-step-note {
-  margin-top: 0.5rem;
-  font-size: clamp(1.1rem, 3vw, 1.3rem);
-  line-height: 1.45;
-}
-
 .embu-kumi-example.is-dojo-mode > div[class*="mt-3"] a {
   min-height: 2.75rem;
   padding-block: 0.35rem;

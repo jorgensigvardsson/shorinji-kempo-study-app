@@ -18,24 +18,11 @@ body.card-focus-active::before {
   display: none;
 }
 
-/* The focused card lives inside the app's `zoom` wrapper, so every length here is in
-   layout pixels and paints multiplied by the text size — 1.1 by default, so this is
-   not an edge case. Two kinds of value do not survive that and both are avoided:
-
-   - Viewport lengths (100dvh, 100vw) resolve against the real viewport, so using one
-     as a height inside the wrapper produces a box taller than the screen. It still
-     scrolls, but the end of its scroll range sits below the fold and the page itself
-     cannot move, because .card-focus-active pins it. That is a card that cannot be
-     read to the end. --app-zoom-inverse converts such a length back to layout pixels.
-   - --card-focus-top is measured with getBoundingClientRect, which is already scaled,
-     so it needs the same conversion before being used in here. The body backdrop
-     below uses it raw, because that element sits outside the wrapper.
-
-   The horizontal centring needs no conversion at all now it is expressed as anchored
-   edges and a max-width rather than a slice of 100vw — the same reasoning as the
-   floating toast stack in App.css. */
+/* Root font scaling keeps viewport lengths and getBoundingClientRect measurements in
+   the same coordinate space. Anchored edges keep the focused card centred without
+   deriving its width from the viewport. */
 .focus-card.is-expanded {
-  --focus-top: calc(var(--card-focus-top, 0px) * var(--app-zoom-inverse, 1));
+  --focus-top: var(--card-focus-top, 0px);
 
   position: fixed;
   z-index: 1030;
@@ -43,7 +30,7 @@ body.card-focus-active::before {
   right: 1rem;
   left: 1rem;
   max-width: 60rem;
-  max-height: calc((100dvh - var(--card-focus-top, 0px)) * var(--app-zoom-inverse, 1) - 1.5rem);
+  max-height: calc(100dvh - var(--card-focus-top, 0px) - 1.5rem);
   margin-block: 0 !important;
   margin-inline: auto !important;
   overflow-y: auto;
@@ -78,7 +65,7 @@ body.card-focus-active::before {
     top: calc(var(--focus-top) + 0.35rem);
     right: 0.35rem;
     left: 0.35rem;
-    max-height: calc((100dvh - var(--card-focus-top, 0px)) * var(--app-zoom-inverse, 1) - 0.7rem);
+    max-height: calc(100dvh - var(--card-focus-top, 0px) - 0.7rem);
   }
 }
 
@@ -240,6 +227,13 @@ body.card-focus-active::before {
 .kamoku-card-value {
   display: inline;
   min-width: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+.kamoku-card-mobile-label {
+  display: none;
 }
 
 .kamoku-card-value-japanese {
@@ -305,10 +299,32 @@ body.card-focus-active::before {
     grid-column: auto;
   }
 
-  .kamoku-card-column-headings,
+  .kamoku-card-column-headings {
+    display: none;
+  }
+
   .kamoku-card-role-row {
-    grid-template-columns: 1.5rem minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 0.45rem;
+    grid-template-columns: 1.5rem minmax(0, 1fr);
+    gap: 0.25rem 0.45rem;
+  }
+
+  .kamoku-card-role-icon {
+    grid-row: 1 / span 2;
+  }
+
+  .kamoku-card-role-stance,
+  .kamoku-card-role-action {
+    grid-column: 2;
+  }
+
+  .kamoku-card-mobile-label {
+    display: block;
+    margin-bottom: 0.05rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 }
 

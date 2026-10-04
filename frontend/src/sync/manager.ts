@@ -1,5 +1,6 @@
 import { getAppDataStore } from "../persistence/store";
 import type { AppDataDocument } from "../persistence/schema";
+import { migrateExperimentalEmbuDraft, prepareExperimentalEmbuDraftMigration } from "../persistence/experimental-embu-draft";
 import { mergeDocuments } from "./merge";
 import { deepEqual } from "../utilities/deep-equal";
 import { BackendSyncClient, type BackendUserInfo } from "./backend";
@@ -661,9 +662,11 @@ class SyncManager {
       this.syncAccountId = accountId;
       return true;
     }
+    prepareExperimentalEmbuDraftMigration();
 
     const binding = this.store.bindToAccount(accountKey);
     this.syncAccountKey = accountKey;
+    migrateExperimentalEmbuDraft();
     this.syncAccountId = accountId;
 
     const scopedKey = this.baseStorageKey(accountKey);

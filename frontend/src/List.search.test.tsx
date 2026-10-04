@@ -21,3 +21,15 @@ it("dismisses the mobile keyboard when Enter submits a technique search", async 
   expect(search.value).toBe("gyaku");
   expect(document.activeElement).not.toBe(search);
 });
+
+it("shows the current grade as the default Hokei choice without an own-grade menu item", async () => {
+  const user = userEvent.setup();
+  render(<List grade={plan} allGradePlans={[plan]} />);
+
+  await user.click(screen.getByRole("button", { name: "Visar 6 kyū" }));
+
+  expect(screen.getByRole("dialog")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "6 kyū" })).toBeTruthy();
+  expect(screen.queryByText("Teknikurval")).toBeNull();
+  expect(screen.queryByText("Endast egna")).toBeNull();
+});

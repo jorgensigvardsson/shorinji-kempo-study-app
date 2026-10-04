@@ -38,65 +38,53 @@ afterEach(() => {
 });
 
 describe("Quiz menu", () => {
-  it("offers word-list, foot-stance, and hand-position quizzes", () => {
+  it("offers word-list, technique-group, foot-stance, and hand-position quizzes", () => {
     render(<MemoryRouter><Quiz /></MemoryRouter>);
 
     expect(screen.getByRole("button", { name: /Ordlista/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Teknikgrupper/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Fotställningar/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Handpositioner/i })).toBeTruthy();
   });
 });
 
-describe("Quiz grade selection", () => {
-  const selection = () => (screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value;
-
-  it("remembers the selection on this device when the user comes back", async () => {
-    const user = userEvent.setup();
-    const first = await renderQuiz();
-    await user.selectOptions(screen.getByRole("combobox", { name: "Teknikurval" }), "all");
-    first.unmount();
-
-    await renderQuiz();
-    expect(selection()).toBe("all");
-  });
-
-  it("remembers each quiz's selection separately", async () => {
-    const user = userEvent.setup();
-    const first = await renderQuiz();
-    await user.selectOptions(screen.getByRole("combobox", { name: "Teknikurval" }), "own");
-    first.unmount();
-
-    const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
-    render(<HandPositionQuiz myGrade="shodan" />);
-    expect(selection()).toBe("up-to-own");
-  });
-
-  it("falls back to the default when what was stored is not something it can show", async () => {
-    localStorage.setItem("navigation:preview:quiz-grade:foot-stance", JSON.stringify("tenth dan"));
-    await renderQuiz();
-    expect(selection()).toBe("up-to-own");
-  });
-});
-
 describe("Quiz streak", () => {
-  it("starts with the foot-stance quiz and all techniques up to my grade", async () => {
+  it("starts the foot-stance quiz at the grade selected in settings", async () => {
     await renderQuiz();
 
     expect(screen.getByRole("heading", { name: "Fotställningsquiz" })).toBeTruthy();
-    expect((screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value).toBe("up-to-own");
+    expect(screen.getByRole("button", { name: "Tränar inför Shodan" })).toBeTruthy();
   });
 
-  it("starts the hand-position quiz with all techniques up to my grade", async () => {
+  it("starts the hand-position quiz at the grade selected in settings", async () => {
     const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
     render(<HandPositionQuiz myGrade="shodan" />);
 
     expect(screen.getByRole("heading", { name: "Handpositionsquiz" })).toBeTruthy();
-    expect((screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value).toBe("up-to-own");
+    expect(screen.getByRole("button", { name: "Tränar inför Shodan" })).toBeTruthy();
+  });
+
+  it("starts the technique-group quiz at the grade selected in settings", async () => {
+    const { default: TechniqueGroupQuiz } = await import("./TechniqueGroupQuiz");
+    render(<TechniqueGroupQuiz myGrade="shodan" />);
+
+    expect(screen.getByRole("heading", { name: "Teknikgruppsquiz" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tränar inför Shodan" })).toBeTruthy();
+  });
+
+  it("shows the configured grade even when that grade has no technique-group questions", async () => {
+    const { default: TechniqueGroupQuiz } = await import("./TechniqueGroupQuiz");
+    render(<TechniqueGroupQuiz myGrade="rokudan" />);
+
+    expect(screen.getByRole("button", { name: "Tränar inför Rokudan" })).toBeTruthy();
   });
 
   it("keeps the technique selection after several questions", async () => {
     const user = userEvent.setup();
     await renderQuiz();
+
+    await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
+    await user.click(screen.getByRole("button", { name: "Alla till och med egna" }));
 
     for (let questionNumber = 0; questionNumber < 3; questionNumber += 1) {
       await user.click(screen.getByLabelText("Rätt alternativ"));
@@ -104,7 +92,7 @@ describe("Quiz streak", () => {
       await user.click(screen.getByRole("button", { name: "Nästa fråga" }));
     }
 
-    expect((screen.getByRole("combobox", { name: "Teknikurval" }) as HTMLSelectElement).value).toBe("up-to-own");
+    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med egna" })).toBeTruthy();
   });
 
   it("picks up the streak stored on this device", async () => {

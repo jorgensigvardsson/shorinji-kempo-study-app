@@ -44,7 +44,7 @@ const WordList = () => {
                             value={filterText} onChange={e => setFilterText(e.target.value)}
                             name="filter"/>
 
-                <div className="d-flex align-items-center gap-2 mt-3">
+                <div className="d-flex flex-wrap align-items-center gap-2 mt-3">
                     <span className="wordlist-sort-label">{translator.translate("Sortera")}:</span>
                     <ButtonGroup size="sm">
                         <Button variant={sortKey === "kanji" ? "primary" : "outline-secondary"} onClick={() => setSortKey("kanji")}>
@@ -138,12 +138,15 @@ const createWordListRow = (entry: WordListEntry, translator: Translator) => {
             meanings.push(<span key={index++}>{translator.translate(meaning)}</span>);
         }
     }
+    const kanjiLabel = translator.translate("Kanji");
+    const romajiLabel = translator.translate("Romaji");
+    const meaningLabel = translator.translate("Betydelse");
 
     return (
         <tr key={entry.id}>
-            <td className="top-align-cell">{entry.kanji}</td>
-            <td className="top-align-cell">{entry.romaji}</td>
-            <td className="top-align-cell">{meanings}</td>
+            <td className="top-align-cell" data-label={kanjiLabel}>{entry.kanji}</td>
+            <td className="top-align-cell" data-label={romajiLabel}>{entry.romaji}</td>
+            <td className="top-align-cell" data-label={meaningLabel}>{meanings}</td>
         </tr>
     );
 }

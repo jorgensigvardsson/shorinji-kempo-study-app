@@ -15,6 +15,7 @@ const Harness = () => {
       <button onClick={() => setTrainingMode(true)}>slå på</button>
       <button onClick={() => navigate("/kamoku/free")}>till fri träning</button>
       <button onClick={() => navigate("/training/grading")}>till gradering</button>
+      <button onClick={() => navigate("/theory/grading")}>till teorigradering</button>
       <button onClick={() => navigate("/settings")}>till inställningar</button>
     </>
   );
@@ -62,6 +63,17 @@ describe("useTrainingMode", () => {
     await user.click(screen.getByText("slå på"));
 
     await user.click(screen.getByText("till gradering"));
+    await settle();
+
+    expect(mode()).toBe("on");
+  });
+
+  it("stays on when the same grading tool is opened from theory", async () => {
+    const user = userEvent.setup();
+    renderAt("/kamoku");
+    await user.click(screen.getByText("slå på"));
+
+    await user.click(screen.getByText("till teorigradering"));
     await settle();
 
     expect(mode()).toBe("on");
