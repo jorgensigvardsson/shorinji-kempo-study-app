@@ -1,7 +1,8 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { FocusChoicePicker } from "./components/TrainingPageControls";
 import kamokuhyo from "./assets/kamokuhyo.json";
 import type { GradeName, GradePlan } from "./data";
+import { useRememberedGradeSelection } from "./grade-selection-memory";
 import { TranslatorContext } from "./i18n";
 import { buildHandPositionQuizPool, type QuizGradeSelection } from "./quiz-logic";
 import QuizRunner from "./QuizRunner";
@@ -15,11 +16,6 @@ interface HandPositionQuizProps {
 
 const HandPositionQuiz = ({ myGrade }: HandPositionQuizProps) => {
   const translator = useContext(TranslatorContext);
-  const [gradeSelection, setGradeSelection] = useState<QuizGradeSelection>(myGrade);
-  const quizPool = useMemo(
-    () => buildHandPositionQuizPool(gradePlans, myGrade, gradeSelection),
-    [myGrade, gradeSelection],
-  );
   const availableGrades = useMemo(
     () => gradePlans
       .filter(plan => plan.grade === myGrade || buildHandPositionQuizPool([plan], myGrade, "all").candidates.length > 0)
@@ -34,6 +30,13 @@ const HandPositionQuiz = ({ myGrade }: HandPositionQuizProps) => {
       label: gradeLabel(grade, translator, false),
     })),
   ];
+  // Remembered on this device, so coming back finds the quiz as it was left.
+  const [gradeSelection, setGradeSelection] = useRememberedGradeSelection<QuizGradeSelection>(
+    "hand-position-quiz", myGrade, gradeChoices.map(choice => choice.value));
+  const quizPool = useMemo(
+    () => buildHandPositionQuizPool(gradePlans, myGrade, gradeSelection),
+    [myGrade, gradeSelection],
+  );
   const controls = (
     <div className="quiz-controls">
       <FocusChoicePicker

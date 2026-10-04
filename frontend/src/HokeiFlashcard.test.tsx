@@ -175,3 +175,27 @@ it("uses the confirmed Kamoku classification for Kihon, Zeme and Hagai jime", ()
     expect(ids).toContain("jitsugetsu zeme");
     expect(ids).toContain("hagai jime to shuhō");
 });
+
+it("remembers the chosen grade on this device when the user comes back", async () => {
+    const user = userEvent.setup();
+    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "6 kyū" }));
+    first.unmount();
+
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Gyaku gote/i })).toBeDefined();
+});
+
+it("does not carry a remembered grade over to a new training grade", async () => {
+    const user = userEvent.setup();
+    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Alla" }));
+    first.unmount();
+
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="6 kyū" />);
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
+    expect(screen.queryByRole("heading", { name: /Uchi uke zuki/i })).toBeNull();
+});
