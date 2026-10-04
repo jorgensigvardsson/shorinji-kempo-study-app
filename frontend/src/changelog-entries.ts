@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-10-04T06:40:49.000Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Gradväljaren visar nu vilken grad du har och vilken du tränar inför, och valet \"Alla till och med …\" säger vilken grad det gäller.",
+        en: "The grade picker now shows which grade you hold and which you are training towards, and the \"Everything up to and including …\" choice names the grade it means.",
+        tr: "Derece seçici artık hangi dereceye sahip olduğunuzu ve hangi derece için çalıştığınızı gösteriyor; \"… dahil tümü\" seçeneği de hangi dereceyi kastettiğini belirtiyor.",
+        ja: "級・段の選択画面に、現在の級・段と次に目指す級・段が表示されるようになりました。「…までのすべて」の選択肢にも、対象の級・段が表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-10-04T06:24:47.000Z",
     changes: [
       {

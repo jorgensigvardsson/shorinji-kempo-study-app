@@ -84,7 +84,7 @@ describe("Quiz streak", () => {
     await renderQuiz();
 
     await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
-    await user.click(screen.getByRole("button", { name: "Alla till och med egna" }));
+    await user.click(screen.getByRole("button", { name: "Alla till och med Shodan" }));
 
     for (let questionNumber = 0; questionNumber < 3; questionNumber += 1) {
       await user.click(screen.getByLabelText("Rätt alternativ"));
@@ -92,7 +92,7 @@ describe("Quiz streak", () => {
       await user.click(screen.getByRole("button", { name: "Nästa fråga" }));
     }
 
-    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med egna" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med Shodan" })).toBeTruthy();
   });
 
   it("picks up the streak stored on this device", async () => {
@@ -151,18 +151,18 @@ describe("Remembered grade selection", () => {
     const user = userEvent.setup();
     const first = await renderQuiz();
     await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
-    await user.click(screen.getByRole("button", { name: "Alla till och med egna" }));
+    await user.click(screen.getByRole("button", { name: "Alla till och med Shodan" }));
     first.unmount();
 
     await renderQuiz();
-    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med egna" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med Shodan" })).toBeTruthy();
   });
 
   it("keeps each quiz's choice to itself", async () => {
     const user = userEvent.setup();
     const first = await renderQuiz();
     await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
-    await user.click(screen.getByRole("button", { name: "Alla" }));
+    await user.click(screen.getByRole("button", { name: "Alla grader" }));
     first.unmount();
 
     const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
@@ -176,7 +176,7 @@ describe("Remembered grade selection", () => {
     const user = userEvent.setup();
     const first = await renderQuiz();
     await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
-    await user.click(screen.getByRole("button", { name: "Alla" }));
+    await user.click(screen.getByRole("button", { name: "Alla grader" }));
     first.unmount();
 
     const { default: FootStanceQuiz } = await import("./FootStanceQuiz");

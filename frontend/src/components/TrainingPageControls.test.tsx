@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GradePlan } from "../data";
 import { TrainingViewSettingsContext, type TrainingViewSettings } from "../training-view-settings-context";
+import { getAppDataStore } from "../persistence/store";
 import TrainingPageControls, { FocusChoicePicker } from "./TrainingPageControls";
 
 const plans = [
@@ -85,5 +86,25 @@ describe("TrainingPageControls", () => {
     expect(screen.getByRole("button", { name: "Alla" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Alla till och med egna" })).toBeTruthy();
     expect(screen.queryByText("Endast egna")).toBeNull();
+  });
+
+  // Choosing among fifteen grades, the reader can see where they stand.
+  it("says which grade the reader holds and trains towards, when asked to", async () => {
+    getAppDataStore().set("currentGrade", "nidan");
+    getAppDataStore().set("grade", "sandan");
+    const user = userEvent.setup();
+    const choices = [{ value: "nidan", label: "Nidan" }, { value: "sandan", label: "Sandan" }];
+    const { unmount } = render(
+      <FocusChoicePicker title="Välj vad som visas" value="sandan" onChange={vi.fn()} choices={choices} showOwnGrade />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Visar Sandan" }));
+    expect(screen.getByText("Du är Nidan · tränar inför Sandan")).toBeTruthy();
+    unmount();
+
+    // A picker that is not about grades says nothing of the sort.
+    render(<FocusChoicePicker title="Välj" value="sandan" onChange={vi.fn()} choices={choices} />);
+    await user.click(screen.getByRole("button", { name: "Visar Sandan" }));
+    expect(screen.queryByText(/Du är/)).toBeNull();
   });
 });

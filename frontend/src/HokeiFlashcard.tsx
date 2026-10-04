@@ -29,8 +29,10 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
         [gradeGroups],
     );
     const gradeChoices = [
-        { value: "all", label: translator.translate("Alla") },
-        { value: "up-to-own", label: translator.translate("Alla till och med egna") },
+        { value: "all", label: translator.translate("Alla grader") },
+        // Named rather than "own": whether that meant the grade held or the one
+        // trained towards was anybody's guess, and it is the latter.
+        { value: "up-to-own", label: translator.translate("Alla till och med {0}", { params: [gradeLabel(myGrade, translator, false)] }) },
         ...availableGrades.map(grade => ({
             value: grade,
             label: gradeLabel(grade, translator, false),
@@ -109,6 +111,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
         <div className="hokei-flashcard-view">
             <div className="hokei-flashcard-filter">
                 <FocusChoicePicker
+                  showOwnGrade
                     title={translator.translate("Välj vad du vill träna")}
                     leadText={translator.translate("Tränar inför")}
                     value={gradeSelection}

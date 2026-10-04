@@ -1,4 +1,4 @@
-import { humanGradeName, type GradeName } from "./data";
+import { humanGradeName, type CurrentGrade } from "./data";
 import type { Translator } from "./i18n";
 
 export const matchesString = (hayStack: string, needle: string) => {
@@ -44,7 +44,7 @@ const normalizeCharacterCode = (charCode: number) => {
     return charCode;
 }
 
-export const gradeLabel = (grade: GradeName, translator: Translator, showKanji: boolean = true) => {
+export const gradeLabel = (grade: CurrentGrade, translator: Translator, showKanji: boolean = true) => {
     const humanName = humanGradeName(grade);
 
     if (!translator.isJapanese) {

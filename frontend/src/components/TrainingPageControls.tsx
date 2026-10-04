@@ -5,6 +5,7 @@ import type { GradeName } from "../data";
 import { TranslatorContext } from "../i18n";
 import { gradeLabel } from "../strings";
 import { TrainingViewSettingsContext } from "../training-view-settings-context";
+import { useAppData } from "../persistence/use-app-data";
 import "./TrainingPageControls.css";
 
 const DOJO_MODE_EXPLANATION_KEY = "dojo-mode-activation-intro-seen";
@@ -14,12 +15,30 @@ interface FocusChoice {
   label: string;
 }
 
-export const FocusChoicePicker = ({ title, value, onChange, choices, leadText, className = "" }: {
+// One quiet line under a grade picker's title, so the reader choosing among
+// fifteen grades can see where they stand: the grade they hold and the one they
+// are training towards, both as set under Settings.
+const OwnGradeSummary = () => {
+  const translator = useContext(TranslatorContext);
+  const currentGrade = useAppData("currentGrade");
+  const trainingGrade = useAppData("grade");
+  return (
+    <p className="training-choice-modal-subtitle">
+      {translator.translate("Du är {0} · tränar inför {1}", {
+        params: [gradeLabel(currentGrade, translator, false), gradeLabel(trainingGrade, translator, false)],
+      })}
+    </p>
+  );
+};
+
+export const FocusChoicePicker = ({ title, value, onChange, choices, leadText, showOwnGrade = false, className = "" }: {
   title: string;
   value: string;
   onChange: (value: string) => void;
   choices: FocusChoice[];
   leadText?: string;
+  // Grade pickers turn this on; the picker itself does not know what it lists.
+  showOwnGrade?: boolean;
   className?: string;
 }) => {
   const translator = useContext(TranslatorContext);
@@ -46,7 +65,10 @@ export const FocusChoicePicker = ({ title, value, onChange, choices, leadText, c
       </button>
       <Modal show={open} onHide={() => setOpen(false)} fullscreen aria-labelledby={titleId}>
         <Modal.Header closeButton className="training-choice-modal-header">
-          <Modal.Title as="h2" id={titleId}>{title}</Modal.Title>
+          <div>
+            <Modal.Title as="h2" id={titleId}>{title}</Modal.Title>
+            {showOwnGrade && <OwnGradeSummary />}
+          </div>
         </Modal.Header>
         <Modal.Body className="training-choice-modal-body">
           <div className="training-choice-list">
@@ -138,6 +160,7 @@ const TrainingPageControls = ({ showGrade = false, showDojo = false, className =
       {showGrade && (
         <FocusChoicePicker
           title={translator.translate("Välj grad")}
+          showOwnGrade
           value={settings.grade}
           choices={gradeChoices}
           onChange={value => settings.onGradeChange(value as GradeName)}
