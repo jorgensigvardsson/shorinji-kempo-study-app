@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import CollapsibleCard from "./CollapsibleCard";
-import { humanGradeName, type HokeiMoment, type GradeName } from "../data";
+import { beltOf, humanGradeName, type HokeiMoment, type GradeName } from "../data";
 import { useTheme } from "../hooks";
 import { TranslatorContext, type Translator } from "../i18n";
 import { cardHead, type HeadOptions } from "../utilities/CardUtilities";
@@ -174,7 +174,7 @@ const KamokuCardHeader = ({ hokei, gradeName, rank, showRating, showKanji }: Kam
             </div>
             {(gradeName || hokei.variations.length > 0 || hokei.technique_group || hokei.kyohan_pages.length > 0) && (
                 <div className="kamoku-card-metadata">
-                    {gradeName && <span className="kamoku-card-level-tag">{humanGradeName(gradeName)}</span>}
+                    {gradeName && <span className="kamoku-card-level-tag" data-belt={beltOf(gradeName)}>{humanGradeName(gradeName)}</span>}
                     {hokei.variations.map(variation => <span key={variation}>{translator.translate(variation)}</span>)}
                     {hokei.technique_group && <span>{translator.translate(hokei.technique_group)}</span>}
                     {hokei.kyohan_pages.length > 0 && <span className="kamoku-card-kyohan">{translator.translate("Kyohan")} {hokei.kyohan_pages.map(page => translator.translate(page)).join(", ")}</span>}

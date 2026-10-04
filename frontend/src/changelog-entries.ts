@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-10-04T06:48:17.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Gradmärket på hokei-korten har fått bältets färg igen: grönt för 6–4 kyū, brunt för 3–1 kyū och svart för dan-grader. Färgerna är dämpade och anpassade till både mörkt och ljust tema.",
+        en: "The grade tag on hokei cards wears the belt colour again: green for 6–4 kyū, brown for 3–1 kyū and black for dan grades. The colours are muted and suited to both the dark and the light theme.",
+        tr: "Hokei kartlarındaki derece etiketi yeniden kuşak rengini taşıyor: 6–4 kyū için yeşil, 3–1 kyū için kahverengi ve dan dereceleri için siyah. Renkler yumuşatıldı ve hem koyu hem açık temaya uyumlu.",
+        ja: "法形カードの級・段の表示が、再び帯の色で表示されるようになりました。6〜4級は緑、3〜1級は茶、段位は黒です。色は控えめに調整され、ダークテーマとライトテーマの両方になじみます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-10-04T06:40:49.000Z",
     changes: [
       {

@@ -11,6 +11,7 @@ import {
   getStandardMoments,
   getAllHokeiMoments,
   getWeeksWithKihonShoho,
+  beltOf,
   defaultTrainingGrade,
   findGradePlan,
   nextGrade,
@@ -22,7 +23,16 @@ import {
   type KihonOnlyWeek,
   type ReviewPreparationWeek,
   type GradePlan,
+  type GradeName,
 } from "./data";
+
+describe("belts", () => {
+  it("dresses each grade in the belt it is trained in", () => {
+    expect((["6 kyū", "5 kyū", "4 kyū"] as GradeName[]).map(beltOf)).toEqual(["green", "green", "green"]);
+    expect((["3 kyū", "2 kyū", "1 kyū"] as GradeName[]).map(beltOf)).toEqual(["brown", "brown", "brown"]);
+    expect((["shodan", "sandan", "kudan"] as GradeName[]).map(beltOf)).toEqual(["black", "black", "black"]);
+  });
+});
 
 describe("personal and training grades", () => {
   const plans: GradePlan[] = [
