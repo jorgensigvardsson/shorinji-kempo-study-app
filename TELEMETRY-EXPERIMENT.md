@@ -18,8 +18,12 @@ app did not explicitly produce. Three events, from `frontend/src/telemetry.ts`:
 | `updated` | device comes back on a different build | one per deploy per device |
 | `exception` | uncaught error, unhandled rejection, or render crash | one per distinct problem per hour, max 3, carrying a `count` |
 
-Custom dimensions: `uid` (hash of the user id), `ver`, `mode` (`standalone` or
-`browser`), plus `from`/`to` on updates and `where`/`count` on exceptions.
+Custom dimensions: `uid` (hash of the user id), `branch` (the account's branch id,
+absent for an account without one), `ver`, `mode` (`standalone` or `browser`), plus
+`from`/`to` on updates and `where`/`count` on exceptions.
+
+The `user_Id` column carries the same value as `uid`, so the portal's Users and
+Usage blades count people. It is empty where `uid` is absent.
 
 `client_Browser`, `client_OS` and geography are derived by Azure at ingestion from
 the request's own headers — they are not sent by the app, and cost nothing.
@@ -79,6 +83,18 @@ customEvents
             sessions = count()
   by bin(timestamp, 1d)
 | render timechart
+```
+
+**Active people per branch.** `branch` is the branch's id rather than its name, so
+a rename does not split one branch's history in two; look the names up in the
+admin pages:
+
+```kql
+customEvents
+| where name == "usage" and timestamp > ago(30d)
+| summarize people = dcount(tostring(customDimensions.uid))
+  by branch = tostring(customDimensions.branch)
+| order by people desc
 ```
 
 **Installed app or browser tab:**

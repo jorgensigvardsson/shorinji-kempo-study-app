@@ -194,7 +194,7 @@ To send a language section to an external translator who doesn't use git:
 ```bash
 npm run translations:export -- ja   # exports translation-exports/ja.json + baseline
 # send ja.json to translator, receive it back
-npm run translations:import -- ja   # three-way merges into translations.json
+npm run translations:import -- ja   # three-way merges into translations.ja.json
 ```
 
 `translation-exports/` is gitignored. The baseline snapshot is kept alongside the working copy so that concurrent changes on your side are preserved during the merge. Conflicts are marked inline as `<<<CONFLICT OURS: … | THEIRS: …>>>` for manual resolution.

@@ -80,6 +80,9 @@ const PrivacyPolicy = () => {
         {translator.translate("Det enda som identifierar dig är ett kodat värde som räknas fram ur ditt konto-id. Värdet är detsamma på alla dina enheter, så att en person räknas som en person och inte som tre — men det går inte att räkna tillbaka till vem du är.")}
       </p>
       <p>
+        {translator.translate("Statistiken innehåller också vilken klubb ditt konto hör till, så att vi kan se hur appen används i varje klubb.")}
+      </p>
+      <p>
         {translator.translate("Utöver det registreras vilken sorts webbläsare och vilket operativsystem du använder, och vilken version av appen din enhet kör. Versionen är med för att vi ska kunna se att en uppdatering faktiskt nått ut.")}
       </p>
       <p>

@@ -7,6 +7,7 @@ const ConnectionString = "InstrumentationKey=00000000-0000-0000-0000-00000000000
 
 const TestUserId = "9f8e7d6c-1234-4abc-9def-000000000001";
 const TestEmail = "member@example.org";
+const TestBranchId = "3c2b1a09-8765-4def-8abc-0000000000b1";
 
 type TrackedEvent = { name: string; properties: Record<string, unknown> };
 type TrackedException = { exception: Error; properties: Record<string, unknown> };
@@ -19,7 +20,7 @@ const tracked: { events: TrackedEvent[]; exceptions: TrackedException[]; initial
 };
 
 let loadCalls = 0;
-let userInfo: { id: string; email: string } | null = null;
+let userInfo: { id: string; email: string; branchId?: string } | null = null;
 let syncListeners: Array<() => void> = [];
 
 // Runs an item past every registered initializer, the way the SDK does before
@@ -98,7 +99,7 @@ beforeEach(() => {
     tracked.initializers = [];
     loadCalls = 0;
     syncListeners = [];
-    userInfo = { id: TestUserId, email: TestEmail };
+    userInfo = { id: TestUserId, email: TestEmail, branchId: TestBranchId };
     Object.defineProperty(window, "matchMedia", {
         configurable: true,
         value: () => ({ matches: false }),
@@ -123,6 +124,19 @@ describe("usage events", () => {
         expect(event.properties.ver).toBe("b61a547");
         expect(event.properties.mode).toBe("browser");
         expect(event.properties.uid).toMatch(/^[0-9a-f]{16}$/);
+        expect(event.properties.branch).toBe(TestBranchId);
+    });
+
+    // An account admitted before branches existed has none. Sending an empty value
+    // would leave every query to filter it out.
+    it("leaves the branch out for an account without one", async () => {
+        userInfo = { id: TestUserId, email: TestEmail, branchId: "" };
+        const { recordUsage } = await loadTelemetry();
+
+        recordUsage();
+        await settle(1);
+
+        expect(tracked.events[0].properties).not.toHaveProperty("branch");
     });
 
     it("recognises an app installed to a home screen", async () => {
@@ -257,6 +271,7 @@ describe("update events", () => {
         expect(updated).toBeDefined();
         expect(updated!.properties.from).toBe("87981b4");
         expect(updated!.properties.to).toBe("b61a547");
+        expect(updated!.properties.branch).toBe(TestBranchId);
     });
 
     // A device that has never been here has not updated; it has arrived.
@@ -311,6 +326,7 @@ describe("exceptions", () => {
         expect(tracked.exceptions).toHaveLength(1);
         expect(tracked.exceptions[0].properties.where).toBe("render");
         expect(tracked.exceptions[0].properties.count).toBe(1);
+        expect(tracked.exceptions[0].properties.branch).toBe(TestBranchId);
     });
 
     // A render loop throws thousands of times a second. Reporting each would be
@@ -427,6 +443,20 @@ describe("the allow-list", () => {
         expect(tags["ai.location.ip"]).toBe("0.0.0.0");
         expect(tags["ai.user.id"]).toBe("");
         expect(tags["ai.session.id"]).toBe("");
+    });
+
+    // The SDK's own user id is random per load and counts nothing. Replacing it with
+    // the pseudonym is what makes the portal's Users and Usage blades count people.
+    it("puts the pseudonym in the user id the portal counts by", async () => {
+        const { recordUsage } = await loadTelemetry();
+        recordUsage();
+        await settle(1);
+
+        const uid = tracked.events[0].properties.uid;
+        const tags: Record<string, unknown> = { "ai.user.id": "4AqGxUs2eT6o1tdN6FDT" };
+        admit({ name: "usage", properties: { __explicit: true, uid } }, "EventData", tags);
+
+        expect(tags["ai.user.id"]).toBe(uid);
     });
 });
 

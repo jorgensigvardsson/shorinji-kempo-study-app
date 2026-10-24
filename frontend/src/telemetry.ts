@@ -18,6 +18,8 @@ import { getSyncManager } from "./sync/manager";
 // What is never sent: no user id, no email, no display name, no raw user agent, no
 // page or route. The only identifier is a hash of the user id — see usageId, which
 // explains why a hash suffices here and would not if the input were an address.
+// The branch the account belongs to is sent as it is: a branch is an organization,
+// not a person, and has no identity to protect.
 //
 // Nothing is bundled unless it is switched on. VITE_APPINSIGHTS_CONNECTION_STRING
 // is a build-time constant, so where it is absent the guard in getClient folds to a
@@ -129,13 +131,15 @@ function getClient(): ApplicationInsights | null {
       //
       //   ai.user.id         a random value per page load, because cookies and
       //   ai.session.id      storage are disabled and nothing can persist. Harmless,
-      //                      and meaningless: the pseudonym in the properties is the
-      //                      identifier that actually counts people.
+      //                      and meaningless. The user id is replaced with the
+      //                      pseudonym from the properties, which is what lets the
+      //                      portal's Users and Usage blades count people; with
+      //                      nobody signed in it is blanked like the session.
       const tags = item.tags as Record<string, unknown> | undefined;
       if (tags) {
         tags["ai.operation.name"] = "";
         tags["ai.location.ip"] = "0.0.0.0";
-        tags["ai.user.id"] = "";
+        tags["ai.user.id"] = typeof properties.uid === "string" ? properties.uid : "";
         tags["ai.session.id"] = "";
       }
       return true;
@@ -208,6 +212,13 @@ function dueForUsageEvent(): boolean {
   return true;
 }
 
+// The branch the account belongs to, as a property to spread into an event — or
+// nothing, for an account admitted before branches existed, rather than an empty
+// value that every query would have to filter out.
+function branchOf(info: { branchId?: string } | null | undefined): Record<string, string> {
+  return info?.branchId ? { branch: info.branchId } : {};
+}
+
 // Sends an item, tagged so the allow-list above lets it through.
 function send(fn: (properties: Record<string, unknown>) => void): void {
   fn({ [Marker]: true });
@@ -222,8 +233,8 @@ function lastSeenVersion(): string | null {
 // Records that the app is being used, and separately that it has changed build.
 //
 //   "usage"   — at most once an hour per device. Answers how many people use the
-//               app and how often. Three properties: who (as a hash), which build,
-//               and installed or not.
+//               app and how often. Four properties: who (as a hash), which branch,
+//               which build, and installed or not.
 //
 //   "updated" — only when this device comes back running a different build than it
 //               left on, so its volume is one per deploy per device rather than
@@ -239,8 +250,10 @@ export function recordUsage(): void {
   const ai = getClient();
   if (!ai) return;
 
-  const userId = getSyncManager().getBackendUserInfo()?.id;
+  const info = getSyncManager().getBackendUserInfo();
+  const userId = info?.id;
   if (!userId) return; // Signed out: nobody to count, and nothing worth counting.
+  const branch = branchOf(info);
 
   const previous = lastSeenVersion();
   writeStored(LastVersionKey, appVersion);
@@ -258,13 +271,13 @@ export function recordUsage(): void {
       if (upgradedFrom) {
         send(properties => ai.trackEvent({
           name: "updated",
-          properties: { ...properties, uid, from: upgradedFrom, to: appVersion, mode },
+          properties: { ...properties, uid, ...branch, from: upgradedFrom, to: appVersion, mode },
         }));
       }
       if (due) {
         send(properties => ai.trackEvent({
           name: "usage",
-          properties: { ...properties, uid, ver: appVersion, mode },
+          properties: { ...properties, uid, ...branch, ver: appVersion, mode },
         }));
       }
     })
@@ -331,7 +344,8 @@ export function recordException(error: unknown, context: string): void {
     }
     writeStored(ExceptionStateKey, JSON.stringify(pruned));
 
-    const userId = getSyncManager().getBackendUserInfo()?.id;
+    const info = getSyncManager().getBackendUserInfo();
+    const userId = info?.id;
     const report = (uid: string | null) => {
       // A synthetic error, so message and stack are bounded before the SDK
       // serializes them. The real one may carry a great deal of both.
@@ -343,7 +357,7 @@ export function recordException(error: unknown, context: string): void {
         severityLevel: SeverityLevel.Error,
         properties: {
           ...properties, where: context, count, ver: appVersion, mode: displayMode(),
-          ...(uid ? { uid } : {}),
+          ...(uid ? { uid } : {}), ...branchOf(info),
         },
       }));
     };
