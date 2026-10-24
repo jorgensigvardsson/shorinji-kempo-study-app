@@ -220,6 +220,9 @@ module authApp 'modules/auth-app.bicep' = {
     smtpFrom: smtpFrom
     smtpTls: smtpTls
     feedbackEmail: feedbackEmail
+    // No appInsightsResourceId: the usage statistics page is production's alone.
+    // Left out, the auth app gets no managed identity and no read access to
+    // telemetry, and GET /auth/admin/usage answers that it is not configured.
   }
   dependsOn: [
     cosmosDatabaseModule

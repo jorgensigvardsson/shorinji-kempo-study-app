@@ -21,6 +21,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/usage"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/csrf"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
@@ -86,6 +87,8 @@ type Handler struct {
 	transferLimiter    *ratelimit.GlobalRateLimiter // the same, for members asking to move between branches
 	inviteLimiter      *ratelimit.GlobalRateLimiter // the same, for admins adding members by hand
 	moveLimiter        *ratelimit.GlobalRateLimiter // the same, for admins moving members between branches
+	usage              usage.Source                 // telemetry read back for the usage page; nil where it is not configured
+	usageLimiter       *ratelimit.GlobalRateLimiter // global cap on telemetry queries (protects the Log Analytics API quota)
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -106,6 +109,7 @@ func NewHandler(
 	cookieDomain string,
 	limiter *ratelimit.IPRateLimiter,
 	feedbackRecipients []string,
+	usageSource usage.Source,
 ) *Handler {
 	h := &Handler{
 		providers:     providers,
@@ -148,8 +152,13 @@ func NewHandler(
 		// one: behind an admin session, so the cap bounds a mistake — but its own,
 		// so tidying up after a club split cannot hold up somebody adding members.
 		moveLimiter: ratelimit.NewGlobal(0.2, 5),
-		pending:     make(map[string]pendingState),
-		emailCodes:  make(map[string]emailCode),
+		usage:       usageSource,
+		// Queries are free, but Azure throttles them per identity, and only one
+		// person can reach this. The cache answers most asks; this bounds the rest
+		// to something no page of clicking will reach.
+		usageLimiter: ratelimit.NewGlobal(1, 10),
+		pending:      make(map[string]pendingState),
+		emailCodes:   make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -249,6 +258,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/admin/transfers", h.adminListTransfers)
 	inner.HandleFunc("POST /auth/admin/transfers/{id}/accept", h.adminAcceptTransfer)
 	inner.HandleFunc("POST /auth/admin/transfers/{id}/reject", h.adminRejectTransfer)
+	// Usage statistics (see usage.go). Each one that misses the cache is a query
+	// against Azure, so it carries a global cap on top of the per-IP one.
+	inner.Handle("GET /auth/admin/usage", h.usageLimiter.Middleware(http.HandlerFunc(h.adminUsage)))
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 

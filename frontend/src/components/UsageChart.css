@@ -1,0 +1,121 @@
+/* The usage chart's palette. These are the validated categorical slots, checked
+   against this app's own surfaces (Bootstrap's #ffffff and #212529): every
+   adjacent pair clears the colour-vision-deficiency and normal-vision floors in
+   both modes. Three light steps sit below 3:1 against white, which is why the
+   page always carries the numbers as a table too.
+
+   The dark column is its own set of steps, not an automatic flip. Text never
+   wears these colours; it stays in Bootstrap's body and secondary ink.
+
+   The legend and the table sit outside the chart but use the same swatches, so
+   they carry the same properties. */
+.usage-chart,
+.usage-legend,
+.usage-table {
+  --usage-series-1: #2a78d6;
+  --usage-series-2: #eb6834;
+  --usage-series-3: #1baf7a;
+  --usage-series-4: #eda100;
+  --usage-series-5: #e87ba4;
+  --usage-series-6: #008300;
+  --usage-series-7: #6250d6;
+  --usage-other: #898781;
+  --usage-grid: #e1e0d9;
+  --usage-baseline: #c3c2b7;
+}
+
+[data-bs-theme="dark"] .usage-chart,
+[data-bs-theme="dark"] .usage-legend,
+[data-bs-theme="dark"] .usage-table {
+  --usage-series-1: #3987e5;
+  --usage-series-2: #d95926;
+  --usage-series-3: #199e70;
+  --usage-series-4: #c98500;
+  --usage-series-5: #d55181;
+  --usage-series-6: #008300;
+  --usage-series-7: #9085e9;
+  --usage-other: #898781;
+  --usage-grid: #2c2c2a;
+  --usage-baseline: #383835;
+}
+
+.usage-chart {
+  position: relative;
+}
+
+.usage-chart svg {
+  display: block;
+  overflow: visible;
+}
+
+.usage-chart-grid {
+  stroke: var(--usage-grid);
+  stroke-width: 1;
+}
+
+.usage-chart-baseline {
+  stroke: var(--usage-baseline);
+  stroke-width: 1;
+}
+
+.usage-chart-tick {
+  fill: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-chart-hit {
+  fill: transparent;
+  cursor: default;
+}
+
+.usage-chart-dimmed {
+  opacity: 0.45;
+}
+
+.usage-chart-tooltip {
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -100%);
+  min-width: 160px;
+  max-width: 240px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.375rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+  font-size: 0.8rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.usage-chart-tooltip-title {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.usage-chart-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.usage-chart-tooltip-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-chart-swatch {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 2px;
+  margin-right: 0.35rem;
+  vertical-align: baseline;
+}
+
+.usage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-size: 0.85rem;
+}

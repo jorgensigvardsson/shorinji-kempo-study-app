@@ -22,6 +22,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Accounts** — sign in with an email code (or Google/Microsoft, when the address belongs to one); an account is required to use the app, and study data syncs automatically to the backend across devices
 - **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
 - **In-app feedback** — send feedback straight from the menu; the backend emails it to the maintainer, no mail client required
+- **Usage statistics** — a page for the technical admin showing how many people use the app per day or week, overall or grouped by branch or federation, read from Application Insights through the auth service (no credentials in the browser). Locally it shows invented data, marked as such
 - **Multilingual** — Swedish (default/fallback), English, Turkish, Japanese
 
 ## Tech stack
@@ -110,6 +111,11 @@ empty and refuses to run while `COSMOS_*` is set, so it can only ever touch a lo
 directory — never staging or production. Restart the auth service afterwards; it reads the
 organization tree once at startup. Then sign in as the admin — with no SMTP relay the
 verification code is printed to the auth log.
+
+The usage statistics page has no telemetry to read locally, so the compose stack sets
+`USAGE_DEMO=true` and the auth service invents members for every branch in the local
+organization. Add branches on the Organisation page and they show up in the statistics
+straight away. The demo is refused whenever `COSMOS_*` is set.
 
 ### Driving the stack from a phone
 
@@ -301,6 +307,8 @@ Optional repository variables (with sensible defaults):
 - `SMTP_PORT` (default `587`) and `SMTP_TLS` (default `starttls`) — use `465`/`implicit` for SMTPS. `starttls` refuses to deliver over an unencrypted connection rather than falling back to one.
 - `FEEDBACK_EMAIL` — comma-separated recipient(s) for in-app feedback submissions (`POST /auth/feedback`, sent via the same SMTP relay); leave unset to disable the feedback form
 - `VITE_DEBUG` (default `false`)
+
+The usage statistics page is production's alone, and needs no secret or variable. The production auth container app has a system-assigned managed identity, and the deployment grants it Monitoring Reader on the Application Insights component alone ([`app-insights-reader.bicep`](infrastructure/modules/app-insights-reader.bicep)). That grant is a role assignment, so the deploy principal must be allowed to create one — production's has Role Based Access Control Administrator on its resource group. Right after the first deploy the page may answer "could not read" for a few minutes while the assignment propagates. Staging deploys without it: no identity, no grant, and the page says statistics are not switched on.
 
 `VITE_APP_VERSION` is not something you set — the workflow writes it automatically as the deployed commit SHA (the same one used to tag the backend images), so it's not listed above. It's included with feedback submissions purely as triage context.
 

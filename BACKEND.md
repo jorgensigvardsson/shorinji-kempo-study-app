@@ -417,12 +417,24 @@ corporate domain at the appropriate provider.
 | POST | `/auth/admin/transfers/{id}/accept` | Move the member: `{id}` is their user id. The branch they leave is read fresh, so an admin who moved them meanwhile is the one told |
 | POST | `/auth/admin/transfers/{id}/reject` | Refuse, keeping the decision for 90 days |
 | POST | `/auth/admin/push-audience` | Resolve a push audience (a list of `{kind, id}` organizational scopes) into `{all:true}` or `{userIds:[...]}`; called by the persistence service on behalf of a signed-in sender, authorized the same way as everything else in this table |
+| GET | `/auth/admin/usage?days=N&bin=day\|week` | Usage statistics for the usage page: distinct people per day or week, overall and per branch id, plus window totals and the names of the branches mentioned. **Technical `admin` only** — the one endpoint here that checks the role itself rather than a scope (see below). `days` is 1–90, `bin` is `day` or `week`; anything else is 400. 503 where it is not configured, 502 when Azure refuses or fails. Read from Application Insights with the container's managed identity and cached for ten minutes; globally rate-limited on top of the per-IP limit |
 
 The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
 every one of them asks whether the caller **covers the scope the action touches** rather than
 merely whether they are an admin. A user outside the caller's scope is reported as 404 rather
 than 403: the listing already hides them, and a 403 would confirm that an account exists in a
 branch the caller has no business knowing about.
+
+The exception is `GET /auth/admin/usage`. Telemetry is a fact about the software, not the
+organization, so it sits with broadcasts and force-logout as a technical power: a WSKO admin covers
+every branch and still does not see it. The query text is fixed in
+`backend/auth/internal/usage`; the caller chooses a window and a bucket size and nothing reaches
+KQL. It queries the Application Insights **component** rather than the workspace behind it, so the
+auth service's identity — granted Monitoring Reader on that component alone
+(`infrastructure/modules/app-insights-reader.bicep`) — reads the app's telemetry and never the
+containers' logs. The response carries counts only; the pseudonyms they are counted over stay in
+Azure. It is switched on in production only: staging passes no component to the auth app, which
+then gets no managed identity at all and answers 503.
 
 Listing is a full scan for a global or WSKO admin and a `branchId` query otherwise, so it stays
 affordable as branches grow. Setting roles writes the `roles` store, so the change takes effect
@@ -908,3 +920,8 @@ az monitor log-analytics query \
 with `air` hot-reload for the Go services. Stores default to file-based unless Cosmos
 environment variables are supplied; dev-only VAPID keys and a dev broadcast token are baked
 into the compose file.
+
+There is no telemetry to read locally, so compose sets `USAGE_DEMO=true` and the usage page is
+served invented members of whatever branches the local organization holds
+(`backend/auth/internal/usage/demo.go`), marked as invented on the page. It is refused whenever
+Cosmos is configured, so it can never stand in for real numbers.

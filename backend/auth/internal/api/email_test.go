@@ -155,6 +155,7 @@ func newTestHandler(t *testing.T, sender *fakeSender) *Handler {
 		"",
 		ratelimit.New(1000, 1000),
 		defaultFeedbackRecipients,
+		nil, // usage statistics: tests that need them set h.usage
 	)
 }
 

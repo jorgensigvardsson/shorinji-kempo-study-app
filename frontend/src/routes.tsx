@@ -1,9 +1,9 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
-import { Award, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
+import { Award, BarChartLine, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
 import type { CurrentGrade, GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
-import { isAnyAdmin } from "./roles.ts";
+import { isAnyAdmin, isTechnicalAdmin } from "./roles.ts";
 import Start from "./Start.tsx";
 import { TheoryToolPage, TrainingToolPage } from "./components/ToolPage.tsx";
 
@@ -42,6 +42,7 @@ const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
 const MyBranch = page(() => import("./MyBranch.tsx"));
 const AdminBranchMembers = page(() => import("./AdminBranchMembers.tsx"));
 const AdminUser = page(() => import("./AdminUser.tsx"));
+const AdminUsage = page(() => import("./AdminUsage.tsx"));
 const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
@@ -280,6 +281,16 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         element: <Broadcast />,
         menuText: translator.translate("Skicka notis"),
         icon: Megaphone,
+        hideOnStartPage: true,
+    } satisfies Route] : []),
+    // The technical admin alone, as the server also insists: usage is a fact
+    // about the software rather than the organization, so covering every branch
+    // is not the same as being allowed to see it.
+    ...(isTechnicalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
+        path: "/admin/usage",
+        element: <AdminUsage />,
+        menuText: translator.translate("Användningsstatistik"),
+        icon: BarChartLine,
         hideOnStartPage: true,
     } satisfies Route] : []), {
         path: "/changelog",

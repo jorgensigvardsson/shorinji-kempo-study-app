@@ -12,12 +12,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/api"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/email"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/org"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/usage"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/envutil"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/ratelimit"
@@ -65,6 +67,10 @@ func main() {
 
 	// ── Feedback ──────────────────────────────────────────────────────────────
 	feedbackEmail := flag.String("feedback-email", envutil.String("FEEDBACK_EMAIL", ""), "comma-separated recipient(s) for POST /auth/feedback (empty disables the endpoint)")
+
+	// ── Usage statistics ──────────────────────────────────────────────────────
+	appInsightsResourceID := flag.String("appinsights-resource-id", envutil.String("APPINSIGHTS_RESOURCE_ID", ""), "Azure resource id of the Application Insights component to read usage from (empty disables GET /auth/admin/usage)")
+	usageDemo             := flag.Bool("usage-demo", envutil.String("USAGE_DEMO", "") == "true", "serve invented usage statistics, for looking at the usage page on a development machine (refused alongside Cosmos)")
 
 	// ── Rate limiting ─────────────────────────────────────────────────────────
 	// The ceiling is per IP, which is per household rather than per person: a
@@ -245,8 +251,41 @@ func main() {
 		log.Printf("feedback endpoint enabled (recipients: %s)", strings.Join(feedbackRecipients, ", "))
 	}
 
+	// Read with whatever identity the environment provides: the container's
+	// managed identity in Azure, an `az login` on a developer's machine. There is
+	// no credential to configure, which is the point — see the usage package.
+	//
+	// An explicit nil when switched off, not a nil *usage.Cached: the handler
+	// tests the interface, and an interface holding a nil pointer is not nil.
+	var usageSource usage.Source
+	if *appInsightsResourceID != "" {
+		credential, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Fatalf("usage statistics: credential: %v", err)
+		}
+		usageSource = usage.NewCached(usage.NewClient(*appInsightsResourceID, credential), 10*time.Minute)
+		log.Println("usage statistics enabled")
+	} else if *usageDemo && *cosmosEndpoint != "" {
+		// Cosmos is how this service tells real data from a developer's files, so
+		// it is also how invented statistics are kept from ever standing in for
+		// real ones. Refused rather than fatal: a development stack pointed at
+		// Cosmos should still start.
+		log.Println("usage statistics disabled: USAGE_DEMO is refused while Cosmos is configured")
+	} else if *usageDemo {
+		usageSource = usage.NewDemo(func() []string {
+			var ids []string
+			for _, b := range orgTree.Branches() {
+				ids = append(ids, b.ID)
+			}
+			return ids
+		})
+		log.Println("usage statistics: serving INVENTED data (USAGE_DEMO)")
+	} else {
+		log.Println("usage statistics disabled (set APPINSIGHTS_RESOURCE_ID to enable)")
+	}
+
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, joinStore, transferStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, joinStore, transferStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients, usageSource).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

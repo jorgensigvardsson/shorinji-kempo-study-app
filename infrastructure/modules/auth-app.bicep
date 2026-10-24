@@ -83,14 +83,25 @@ param smtpTls string = 'starttls'
 @description('Comma-separated recipient(s) for POST /auth/feedback. Empty disables the endpoint.')
 param feedbackEmail string = ''
 
+@description('Resource ID of the Application Insights component the usage page reads from. Empty disables GET /auth/admin/usage, and with it the managed identity.')
+param appInsightsResourceId string = ''
+
+var readsUsage = !empty(appInsightsResourceId)
+
 resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
   location: location
-  // Stated explicitly so a deploy detaches the managed identity this app used to
-  // carry for ACS. Mail now goes out over SMTP with a password, and Cosmos is
-  // reached with an account key, so nothing here needs an Entra identity.
+  // The one thing this identity is for is reading usage telemetry back out of
+  // Application Insights, which takes an Entra identity and accepts no key. Mail
+  // goes out over SMTP with a password and Cosmos is reached with an account key,
+  // so neither uses it. What it may read is granted in app-insights-reader.bicep,
+  // scoped to that one component.
+  //
+  // Where the usage page is switched off — staging — there is nothing for an
+  // identity to do, so there is none: 'None' stated explicitly, so a deploy also
+  // detaches one left behind.
   identity: {
-    type: 'None'
+    type: readsUsage ? 'SystemAssigned' : 'None'
   }
   properties: {
     environmentId: environmentId
@@ -165,6 +176,7 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'SMTP_FROM',                     value: smtpFrom }
             { name: 'SMTP_TLS',                      value: smtpTls }
             { name: 'FEEDBACK_EMAIL',                value: feedbackEmail }
+            { name: 'APPINSIGHTS_RESOURCE_ID',       value: appInsightsResourceId }
           ]
         }
       ]
@@ -173,3 +185,6 @@ resource authApp 'Microsoft.App/containerApps@2023-05-01' = {
 }
 
 output fqdn string = authApp.properties.configuration.ingress.fqdn
+// Empty where there is no identity; only main.bicep, which switches usage on,
+// reads it.
+output principalId string = readsUsage ? authApp.identity.principalId : ''

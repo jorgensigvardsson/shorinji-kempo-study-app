@@ -217,6 +217,18 @@ module authApp 'modules/auth-app.bicep' = {
     smtpFrom: smtpFrom
     smtpTls: smtpTls
     feedbackEmail: feedbackEmail
+    appInsightsResourceId: appInsights.outputs.resourceId
+  }
+}
+
+// The auth service reads usage telemetry back for the technical admin's usage
+// page, with its own managed identity and no credential anywhere.
+module authReadsTelemetry 'modules/app-insights-reader.bicep' = {
+  name: 'auth-reads-telemetry'
+  params: {
+    componentName: '${namePrefix}-insights'
+    // Waiting on authApp is also waiting on appInsights, whose id it is handed.
+    principalId: authApp.outputs.principalId
   }
 }
 

@@ -169,6 +169,32 @@ export interface AdminBranchMembers {
   members: AdminUser[];
 }
 
+// Usage statistics, from GET /auth/admin/usage (technical admin only). Counts of
+// distinct people, never who they were. Branch keys are ids; the empty key is
+// usage that named no branch, and an id missing from `branches` is a branch that
+// has since been deleted.
+export type UsageBin = "day" | "week";
+
+export interface UsageBucket {
+  start: string;
+  people: number;
+  byBranch: Record<string, number>;
+}
+
+export interface UsageReport {
+  from: string;
+  to: string;
+  bin: UsageBin;
+  buckets: UsageBucket[];
+  // Distinct over the whole window, which is not the sum of the buckets: somebody
+  // active on three days is one person in the month and three in its days.
+  people: number;
+  byBranch: Record<string, number>;
+  branches: PublicBranch[];
+  // Invented by the development backend (USAGE_DEMO); never set in production.
+  demo?: boolean;
+}
+
 // A member's own transfer request, from GET /auth/transfer. A refused one comes
 // back too, until it expires: being told no is part of what somebody is entitled
 // to see about themselves.
@@ -350,6 +376,12 @@ export class BackendSyncClient {
   // branch where it is, while passing "" moves it to WSKO.
   async adminUpdateBranch(id: string, changes: { name?: string; federationId?: string }): Promise<void> {
     await this.adminWrite("PATCH", `${authUrl}/auth/admin/branches/${encodeURIComponent(id)}`, changes);
+  }
+
+  async adminUsage(days: number, bin: UsageBin): Promise<UsageReport> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/usage?days=${days}&bin=${bin}`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as UsageReport;
   }
 
   async adminBranchMembers(branchId: string): Promise<AdminBranchMembers> {

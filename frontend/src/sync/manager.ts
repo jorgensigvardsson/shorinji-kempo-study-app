@@ -3,7 +3,7 @@ import type { AppDataDocument } from "../persistence/schema";
 import { migrateExperimentalEmbuDraft, prepareExperimentalEmbuDraftMigration } from "../persistence/experimental-embu-draft";
 import { mergeDocuments } from "./merge";
 import { deepEqual } from "../utilities/deep-equal";
-import { BackendSyncClient, type BackendUserInfo } from "./backend";
+import { BackendSyncClient, type BackendUserInfo, type UsageBin } from "./backend";
 import { AuthExpiredError, ClientOutdatedError, DocumentChangedError, DocumentTooLargeError, type SyncResult, type SyncState } from "./types";
 import { getSyncProvider, setSyncProvider, subscribeSyncProvider } from "./provider";
 
@@ -225,6 +225,10 @@ class SyncManager {
 
   async adminOrgTree() {
     return await this.backendClient.adminOrgTree();
+  }
+
+  async adminUsage(days: number, bin: UsageBin) {
+    return await this.backendClient.adminUsage(days, bin);
   }
 
   async adminCreateFederation(id: string, name: string) {
