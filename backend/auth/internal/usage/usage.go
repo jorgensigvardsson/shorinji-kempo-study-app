@@ -122,21 +122,31 @@ const allBranches = "*"
 //
 // dcount at accuracy 4 is exact at this population's size; the HyperLogLog it is
 // built on only starts estimating far beyond any membership this app will have.
-const queryTemplate = `let usage = AppEvents
-| where Name == "usage"
-| extend uid = tostring(Properties.uid), branch = tostring(Properties.branch)
+//
+// Two things here are the way they are because production said so, and neither
+// can be caught by a test that does not talk to Azure:
+//
+//   - The table is customEvents, with name, customDimensions and timestamp. A
+//     query addressed to the component, as this one is, sees the classic
+//     Application Insights schema. The workspace's own names for the same rows —
+//     AppEvents, Name, Properties, TimeGenerated — do not resolve there.
+//   - The row marker is "part", not "kind": kind is a KQL keyword (union
+//     kind=…) and fails to parse as a column name.
+const queryTemplate = `let usage = customEvents
+| where name == "usage"
+| extend uid = tostring(customDimensions.uid), branch = tostring(customDimensions.branch)
 | where isnotempty(uid);
 let bucketed = usage | extend bucket = %s;
 union
-  (bucketed | summarize people = dcount(uid, 4) by bucket, branch | extend kind = "bucket"),
-  (bucketed | summarize people = dcount(uid, 4) by bucket | extend kind = "bucket", branch = "*"),
-  (usage | summarize people = dcount(uid, 4) by branch | extend kind = "window", bucket = datetime(null)),
-  (usage | summarize people = dcount(uid, 4) | extend kind = "window", branch = "*", bucket = datetime(null))
-| project kind, bucket, branch, people`
+  (bucketed | summarize people = dcount(uid, 4) by bucket, branch | extend part = "bucket"),
+  (bucketed | summarize people = dcount(uid, 4) by bucket | extend part = "bucket", branch = "*"),
+  (usage | summarize people = dcount(uid, 4) by branch | extend part = "window", bucket = datetime(null)),
+  (usage | summarize people = dcount(uid, 4) | extend part = "window", branch = "*", bucket = datetime(null))
+| project part, bucket, branch, people`
 
 var bucketExpressions = map[Bin]string{
-	BinDay:  "startofday(TimeGenerated)",
-	BinWeek: "startofweek(TimeGenerated - 1d) + 1d",
+	BinDay:  "startofday(timestamp)",
+	BinWeek: "startofweek(timestamp - 1d) + 1d",
 }
 
 // Client queries one Application Insights resource through the Log Analytics API.
@@ -231,7 +241,28 @@ func (c *Client) Usage(ctx context.Context, q Query) (*Report, error) {
 		return nil, err
 	}
 	report.From, report.To, report.Bin = from, to, q.Bin
+	report.Buckets = fillGaps(report.Buckets, from, to, q.Bin)
 	return report, nil
+}
+
+// fillGaps gives every day or week in the window a bucket. A day nobody used the
+// app produces no row at all, and a chart drawn from only the rows that exist
+// would close up around it — the quiet day would not show as zero, it would not
+// show, and the days either side would sit together as though adjacent.
+func fillGaps(buckets []Bucket, from, to time.Time, bin Bin) []Bucket {
+	byStart := make(map[time.Time]Bucket, len(buckets))
+	for _, b := range buckets {
+		byStart[b.Start] = b
+	}
+	out := []Bucket{}
+	for start := from; start.Before(to); start = next(start, bin) {
+		b, ok := byStart[start]
+		if !ok {
+			b = Bucket{Start: start, ByBranch: map[string]int{}}
+		}
+		out = append(out, b)
+	}
+	return out
 }
 
 // queryResponse is the part of the Log Analytics response this reads: tables of
@@ -258,7 +289,7 @@ func (r queryResponse) report() (*Report, error) {
 	for i, c := range table.Columns {
 		col[c.Name] = i
 	}
-	for _, name := range []string{"kind", "bucket", "branch", "people"} {
+	for _, name := range []string{"part", "bucket", "branch", "people"} {
 		if _, ok := col[name]; !ok {
 			return nil, fmt.Errorf("usage: response has no %q column", name)
 		}
@@ -269,7 +300,7 @@ func (r queryResponse) report() (*Report, error) {
 		if len(row) != len(table.Columns) {
 			return nil, fmt.Errorf("usage: row has %d values for %d columns", len(row), len(table.Columns))
 		}
-		kind, _ := row[col["kind"]].(string)
+		part, _ := row[col["part"]].(string)
 		branch, _ := row[col["branch"]].(string)
 		// JSON numbers decode as float64; the counts are whole numbers.
 		peopleValue, ok := row[col["people"]].(float64)
@@ -278,7 +309,7 @@ func (r queryResponse) report() (*Report, error) {
 		}
 		people := int(peopleValue)
 
-		switch kind {
+		switch part {
 		case "window":
 			if branch == allBranches {
 				report.People = people
@@ -303,7 +334,7 @@ func (r queryResponse) report() (*Report, error) {
 				b.ByBranch[branch] = people
 			}
 		default:
-			return nil, fmt.Errorf("usage: unknown row kind %q", kind)
+			return nil, fmt.Errorf("usage: unknown row part %q", part)
 		}
 	}
 

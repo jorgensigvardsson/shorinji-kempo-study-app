@@ -44,7 +44,7 @@ func serve(t *testing.T, status int, rows [][]any) (*Client, *http.Request, *map
 			"tables": []any{map[string]any{
 				"name": "PrimaryResult",
 				"columns": []any{
-					map[string]string{"name": "kind", "type": "string"},
+					map[string]string{"name": "part", "type": "string"},
 					map[string]string{"name": "bucket", "type": "datetime"},
 					map[string]string{"name": "branch", "type": "string"},
 					map[string]string{"name": "people", "type": "long"},
@@ -127,17 +127,31 @@ func TestUsageFoldsRowsIntoBucketsAndTotals(t *testing.T) {
 	if got := (*body)["timespan"]; got != "2026-10-18T00:00:00Z/2026-10-24T15:30:00Z" {
 		t.Errorf("timespan = %q", got)
 	}
-	if !strings.Contains((*body)["query"], "startofday(TimeGenerated)") {
+	if !strings.Contains((*body)["query"], "startofday(timestamp)") {
 		t.Errorf("daily query does not bucket by day:\n%s", (*body)["query"])
 	}
+	// Both found the hard way in production; see queryTemplate.
+	if !strings.HasPrefix((*body)["query"], "let usage = customEvents") || strings.Contains((*body)["query"], "AppEvents") {
+		t.Errorf("a component-scoped query must read the classic customEvents table:\n%s", (*body)["query"])
+	}
+	if strings.Contains((*body)["query"], "extend kind") {
+		t.Errorf("kind is a KQL keyword and does not parse as a column name:\n%s", (*body)["query"])
+	}
 
-	if len(report.Buckets) != 2 {
-		t.Fatalf("got %d buckets, want 2", len(report.Buckets))
+	// Seven days asked for, two with rows: the other five are there, empty, so
+	// the chart shows them as quiet rather than closing up around them.
+	if len(report.Buckets) != 7 {
+		t.Fatalf("got %d buckets, want one per day of the window", len(report.Buckets))
 	}
-	first, second := report.Buckets[0], report.Buckets[1]
-	if !first.Start.Before(second.Start) {
-		t.Errorf("buckets out of order: %v then %v", first.Start, second.Start)
+	for i, b := range report.Buckets {
+		if want := time.Date(2026, 10, 18+i, 0, 0, 0, 0, time.UTC); !b.Start.Equal(want) {
+			t.Errorf("bucket %d starts %v, want %v", i, b.Start, want)
+		}
 	}
+	if b := report.Buckets[0]; b.People != 0 || b.ByBranch == nil {
+		t.Errorf("a quiet day = %+v, want zero people and an empty branch map", b)
+	}
+	second := report.Buckets[5]
 	if second.People != 4 || second.ByBranch["b1"] != 3 || second.ByBranch[""] != 1 {
 		t.Errorf("second bucket = %+v", second)
 	}
