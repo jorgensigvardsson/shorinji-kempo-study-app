@@ -241,6 +241,7 @@ func (h *Handler) adminAcceptTransfer(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("admin %s accepted the transfer of %s from %q to %q",
 		claims.Subject, member.ID, leaving, transfer.ToBranchID)
+	h.record(store.HistoryEntry{Type: store.HistoryTransfer, From: leaving, To: transfer.ToBranchID, Via: store.ViaRequest})
 
 	// Their token still says the old branch for up to an hour. Nothing in the app
 	// turns on it that a member could not do anyway, so it is left to expire
@@ -413,6 +414,7 @@ func (h *Handler) adminMoveUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("admin %s moved %s from %q to %q", claims.Subject, member.ID, leaving, destination)
+	h.record(store.HistoryEntry{Type: store.HistoryTransfer, From: leaving, To: destination, Via: store.ViaAdmin})
 
 	// A transfer the member had pending to the branch they have just been put in
 	// has been answered, by somebody other than the club it asked. One to some

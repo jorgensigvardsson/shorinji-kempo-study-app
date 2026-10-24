@@ -46,6 +46,7 @@ func main() {
 	cosmosOrgsContainer     := flag.String("cosmos-orgs-container",         envutil.String("COSMOS_ORGS_CONTAINER",         "organizations"),  "Cosmos container for the organization tree")
 	cosmosJoinContainer     := flag.String("cosmos-join-requests-container", envutil.String("COSMOS_JOIN_REQUESTS_CONTAINER", "joinrequests"),   "Cosmos container for pending join requests")
 	cosmosTransfersContainer := flag.String("cosmos-transfers-container",   envutil.String("COSMOS_TRANSFERS_CONTAINER",     "transfers"),      "Cosmos container for pending branch transfers")
+	cosmosHistoryContainer  := flag.String("cosmos-history-container",      envutil.String("COSMOS_HISTORY_CONTAINER",      "usage_history"),  "Cosmos container for the anonymous usage history")
 
 	// ── OIDC Providers ────────────────────────────────────────────────────────
 	googleClientID        := flag.String("google-client-id",        envutil.String("GOOGLE_CLIENT_ID",        ""),                                   "Google OAuth client ID")
@@ -72,6 +73,9 @@ func main() {
 	appInsightsResourceID := flag.String("appinsights-resource-id", envutil.String("APPINSIGHTS_RESOURCE_ID", ""), "Azure resource id of the Application Insights component to read usage from (empty disables GET /auth/admin/usage)")
 	usageDemo             := flag.Bool("usage-demo", envutil.String("USAGE_DEMO", "") == "true", "serve invented usage statistics, for looking at the usage page on a development machine (refused alongside Cosmos)")
 
+	// ── One-off jobs ──────────────────────────────────────────────────────────
+	job := flag.String("job", envutil.String("SERVICE_JOB", ""), "run a one-off job to completion instead of serving: usage-snapshot")
+
 	// ── Rate limiting ─────────────────────────────────────────────────────────
 	// The ceiling is per IP, which is per household rather than per person: a
 	// family shares one public address, and so does everybody behind a mobile
@@ -90,6 +94,25 @@ func main() {
 	rateLimitBurst := flag.Float64("rate-limit-burst", envutil.Float64("RATE_LIMIT_BURST", 20.0), "rate limit burst size")
 
 	flag.Parse()
+
+	// A job needs none of what follows — no signing key, no providers, no mail —
+	// and in its container could not load some of it, so it takes its own short
+	// path and the process ends with it.
+	if *job != "" {
+		runJob(*job, jobConfig{
+			dataDir:               *dataDir,
+			cosmosEndpoint:        *cosmosEndpoint,
+			cosmosKey:             *cosmosKey,
+			cosmosDatabase:        *cosmosDatabase,
+			usersContainer:        *cosmosUsersContainer,
+			identityContainer:     *cosmosIdentityContainer,
+			orgsContainer:         *cosmosOrgsContainer,
+			historyContainer:      *cosmosHistoryContainer,
+			appInsightsResourceID: *appInsightsResourceID,
+			usageDemo:             *usageDemo,
+		})
+		return
+	}
 
 	// ── Signing key ───────────────────────────────────────────────────────────
 	var signingKey *rsa.PrivateKey
@@ -129,9 +152,10 @@ func main() {
 	var orgStore       store.OrgStore
 	var joinStore      store.JoinRequestStore
 	var transferStore  store.TransferStore
+	var historyStore   store.HistoryStore
 
 	if *cosmosEndpoint != "" && *cosmosKey != "" {
-		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer, *cosmosOrgsContainer, *cosmosJoinContainer, *cosmosTransfersContainer); err != nil {
+		if err := store.ProvisionCosmos(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosUsersContainer, *cosmosIdentityContainer, *cosmosTokensContainer, *cosmosRolesContainer, *cosmosOrgsContainer, *cosmosJoinContainer, *cosmosTransfersContainer, *cosmosHistoryContainer); err != nil {
 			log.Fatalf("cosmos provisioning: %v", err)
 		}
 
@@ -166,6 +190,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("init Cosmos transfer store: %v", err)
 		}
+
+		historyStore, err = store.NewCosmosHistoryStore(*cosmosEndpoint, *cosmosKey, *cosmosDatabase, *cosmosHistoryContainer)
+		if err != nil {
+			log.Fatalf("init Cosmos history store: %v", err)
+		}
 		log.Printf("using Cosmos DB stores (endpoint: %s, database: %s)", *cosmosEndpoint, *cosmosDatabase)
 	} else {
 		userStore     = store.NewFileUserStore(*dataDir)
@@ -174,6 +203,7 @@ func main() {
 		orgStore      = store.NewFileOrgStore(*dataDir)
 		joinStore     = store.NewFileJoinRequestStore(*dataDir)
 		transferStore = store.NewFileTransferStore(*dataDir)
+		historyStore  = store.NewFileHistoryStore(*dataDir)
 		log.Printf("using file-based stores (data-dir: %s)", *dataDir)
 	}
 
@@ -284,8 +314,16 @@ func main() {
 		log.Println("usage statistics disabled (set APPINSIGHTS_RESOURCE_ID to enable)")
 	}
 
+	// The usage history is recorded wherever usage statistics are switched on —
+	// production, and a demo stack — and nowhere else. Staging records nothing,
+	// so its traffic never mixes into anybody's long view.
+	if usageSource == nil {
+		historyStore = nil
+		log.Println("usage history disabled (it follows usage statistics)")
+	}
+
 	mux := http.NewServeMux()
-	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, joinStore, transferStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients, usageSource).Register(mux)
+	api.NewHandler(providers, domains, userStore, refreshStore, roleStore, orgTree, joinStore, transferStore, tokenManager, mailer, *frontendURL, *cookieDomain, limiter, feedbackRecipients, usageSource, historyStore).Register(mux)
 
 	srv := &http.Server{
 		Addr:              *addr,

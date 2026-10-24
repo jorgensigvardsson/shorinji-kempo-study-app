@@ -195,6 +195,41 @@ export interface UsageReport {
   demo?: boolean;
 }
 
+// The long view, from GET /auth/admin/usage/history (technical admin only):
+// anonymous events and weekly snapshots, append-only. Nothing in an entry says
+// who; branch fields are ids. `recordedAt` is the cursor for asking what is new.
+export type HistoryEntryType = "account_created" | "account_deleted" | "transfer" | "application" | "week";
+
+export interface HistoryWeek {
+  start: string; // Monday 00:00 UTC
+  people: number; // distinct, over the whole week
+  byBranch: Record<string, number>;
+  hours: number; // usage events, at most one an hour per device
+  byMode: Record<string, number>;
+  byVersion: Record<string, number>;
+  members: Record<string, number>; // accounts per branch when the week was stored
+}
+
+export interface HistoryEntry {
+  id: string;
+  type: HistoryEntryType;
+  at: string;
+  recordedAt: string;
+  branch?: string;
+  via?: "applied" | "admin" | "request";
+  lifetime?: string;
+  from?: string;
+  to?: string;
+  outcome?: "submitted" | "approved" | "declined" | "withdrawn";
+  week?: HistoryWeek;
+}
+
+export interface UsageHistoryPage {
+  items: HistoryEntry[];
+  // Every branch, named now. Not cached with the entries: a branch can be renamed.
+  branches: PublicBranch[];
+}
+
 // A member's own transfer request, from GET /auth/transfer. A refused one comes
 // back too, until it expires: being told no is part of what somebody is entitled
 // to see about themselves.
@@ -382,6 +417,13 @@ export class BackendSyncClient {
     const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/usage?days=${days}&bin=${bin}`);
     if (!resp.ok) throw new AdminRequestError(resp.status);
     return await resp.json() as UsageReport;
+  }
+
+  async adminUsageHistory(since?: string): Promise<UsageHistoryPage> {
+    const query = since ? `?since=${encodeURIComponent(since)}` : "";
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/usage/history${query}`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as UsageHistoryPage;
   }
 
   async adminBranchMembers(branchId: string): Promise<AdminBranchMembers> {

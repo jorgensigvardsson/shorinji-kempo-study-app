@@ -89,6 +89,7 @@ type Handler struct {
 	moveLimiter        *ratelimit.GlobalRateLimiter // the same, for admins moving members between branches
 	usage              usage.Source                 // telemetry read back for the usage page; nil where it is not configured
 	usageLimiter       *ratelimit.GlobalRateLimiter // global cap on telemetry queries (protects the Log Analytics API quota)
+	history            store.HistoryStore           // anonymous usage history; nil where it is switched off
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -110,6 +111,7 @@ func NewHandler(
 	limiter *ratelimit.IPRateLimiter,
 	feedbackRecipients []string,
 	usageSource usage.Source,
+	history store.HistoryStore,
 ) *Handler {
 	h := &Handler{
 		providers:     providers,
@@ -157,6 +159,7 @@ func NewHandler(
 		// person can reach this. The cache answers most asks; this bounds the rest
 		// to something no page of clicking will reach.
 		usageLimiter: ratelimit.NewGlobal(1, 10),
+		history:      history,
 		pending:      make(map[string]pendingState),
 		emailCodes:   make(map[string]emailCode),
 	}
@@ -261,6 +264,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	// Usage statistics (see usage.go). Each one that misses the cache is a query
 	// against Azure, so it carries a global cap on top of the per-IP one.
 	inner.Handle("GET /auth/admin/usage", h.usageLimiter.Middleware(http.HandlerFunc(h.adminUsage)))
+	// The long view (see history.go): a read of our own container, so the per-IP
+	// limit is enough.
+	inner.HandleFunc("GET /auth/admin/usage/history", h.adminUsageHistory)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
@@ -862,6 +868,13 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+	// Read first, for the history: the branch they left and how long they stayed
+	// are gone with the record. A failed read costs those details, not the
+	// deletion.
+	user, err := h.users.FindByID(claims.Subject)
+	if err != nil {
+		log.Printf("deleteAccount lookup %s: %v", claims.Subject, err)
+	}
 	if err := h.refreshTokens.DeleteByUserID(claims.Subject); err != nil {
 		log.Printf("deleteAccount refresh tokens %s: %v", claims.Subject, err)
 	}
@@ -870,6 +883,11 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	deleted := store.HistoryEntry{Type: store.HistoryAccountDeleted, Lifetime: "unknown"}
+	if user != nil {
+		deleted.Branch, deleted.Lifetime = user.BranchID, lifetimeBucket(user.CreatedAt, time.Now())
+	}
+	h.record(deleted)
 	h.clearTokenCookies(w)
 	w.WriteHeader(http.StatusNoContent)
 }

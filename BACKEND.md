@@ -418,6 +418,7 @@ corporate domain at the appropriate provider.
 | POST | `/auth/admin/transfers/{id}/reject` | Refuse, keeping the decision for 90 days |
 | POST | `/auth/admin/push-audience` | Resolve a push audience (a list of `{kind, id}` organizational scopes) into `{all:true}` or `{userIds:[...]}`; called by the persistence service on behalf of a signed-in sender, authorized the same way as everything else in this table |
 | GET | `/auth/admin/usage?days=N&bin=day\|week` | Usage statistics for the usage page: distinct people per day or week, overall and per branch id, plus window totals and the names of the branches mentioned. **Technical `admin` only** — the one endpoint here that checks the role itself rather than a scope (see below). `days` is 1–90, `bin` is `day` or `week`; anything else is 400. 503 where it is not configured, 502 when Azure refuses or fails. Read from Application Insights with the container's managed identity and cached for ten minutes; globally rate-limited on top of the per-IP limit |
+| GET | `/auth/admin/usage/history?since=<RFC 3339>` | The long view: every usage-history entry recorded at or after `since` (all of them when absent), plus every branch's current name. **Technical `admin` only**, 503 where history is switched off. The cursor is inclusive; the page drops repeats by id. Entries are anonymous and never change, so the page caches them and asks only for newer ones |
 
 The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
 every one of them asks whether the caller **covers the scope the action touches** rather than
@@ -435,6 +436,27 @@ auth service's identity — granted Monitoring Reader on that component alone
 containers' logs. The response carries counts only; the pseudonyms they are counted over stay in
 Azure. It is switched on in production only: staging passes no component to the auth app, which
 then gets no managed identity at all and answers 503.
+
+**Usage history** (`backend/auth/internal/store/history.go`) is what outlives telemetry's 30 days.
+It is an append-only `usage_history` Cosmos container, partitioned by `/type`, holding two kinds
+of entry, neither of which identifies anybody — no user id, no address, no pseudonym, only what
+happened, in which branch, and when:
+
+- **Events**, recorded by the auth service as they happen: `account_created` (applied or added by
+  an admin), `account_deleted` (with how long the account existed, in coarse buckets),
+  `transfer` (from, to, requested or moved by an admin) and `application` (submitted, approved,
+  declined, withdrawn). Best-effort: a failed write is logged, and never undoes the thing it
+  describes.
+- **Weekly snapshots**, written by the `usage-snapshot` Container Apps job
+  (`infrastructure/modules/usage-snapshot-job.bicep`, Mondays 07:00 UTC). It is the auth image run
+  with `--job=usage-snapshot`. Each run stores every finished Monday-to-Sunday week not yet
+  stored — distinct people overall and per branch, active hours, installed vs browser, builds, and
+  members per branch — reading where it got to from the newest stored week. A week's id is
+  deterministic (`week:2026-10-19`), so overlapping runs cannot store it twice. A week older than
+  telemetry's retention can no longer be counted whole and is logged as lost instead.
+
+Like the usage page, history is production-only: where usage statistics are off, nothing is
+recorded and the endpoint answers 503.
 
 Listing is a full scan for a global or WSKO admin and a `branchId` query otherwise, so it stays
 affordable as branches grow. Setting roles writes the `roles` store, so the change takes effect
@@ -925,3 +947,9 @@ There is no telemetry to read locally, so compose sets `USAGE_DEMO=true` and the
 served invented members of whatever branches the local organization holds
 (`backend/auth/internal/usage/demo.go`), marked as invented on the page. It is refused whenever
 Cosmos is configured, so it can never stand in for real numbers.
+
+The long view needs history, which locally nothing has had time to write. `cmd/usageseed` invents
+a year of it — weekly snapshots and the membership events behind them — for the local
+organization's branches: `go run ./cmd/usageseed --data-dir ../../devdata/auth --apply` from
+`backend/auth`. The snapshot job itself can be run against the demo too:
+`docker compose exec auth go run . --job=usage-snapshot`.

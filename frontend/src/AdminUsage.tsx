@@ -6,6 +6,9 @@ import { AdminRequestError, type UsageBin, type UsageReport } from "./sync/backe
 import { assignColorSlots, buildUsageSeries, type UsageGroup, type UsageGrouping } from "./usageSeries";
 import Loading from "./components/Loading";
 import UsageChart from "./components/UsageChart";
+import RefreshState from "./components/RefreshState";
+import AdminUsageHistory from "./AdminUsageHistory";
+import { cachedLiveUsage, rememberLiveUsage } from "./usageHistory";
 
 // The label for branches that belong to no federation. WSKO is the root of the
 // organization rather than a record with a name, so the label is the frontend's
@@ -32,21 +35,34 @@ const AdminUsage = () => {
   const [report, setReport] = useState<UsageReport | null>(null);
   const [error, setError] = useState<"unconfigured" | "failed" | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [view, setView] = useState<"live" | "history">("live");
 
   // Palette slots per group, kept for as long as the page is open, so a branch
   // keeps its color when the period or grouping changes what else is on screen.
   const colorMemory = useRef(new Map<string, number>());
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  // The last answer for this period and bucket size is drawn at once, and the
+  // fresh one replaces it when it arrives — a cold auth container takes seconds
+  // to answer, and a page that is blank meanwhile looks broken. Nothing cached
+  // for this choice means the loading state, never another choice's numbers.
   useEffect(() => {
     let live = true;
     setError(null);
+    setReport(cachedLiveUsage(days, bin));
+    setRefreshing(true);
     void (async () => {
       try {
         const fetched = await getSyncManager().adminUsage(days, bin);
-        if (live) setReport(fetched);
+        if (!live) return;
+        setReport(fetched);
+        rememberLiveUsage(days, bin, fetched);
       } catch (err) {
         if (!live) return;
         setError(err instanceof AdminRequestError && err.status === 503 ? "unconfigured" : "failed");
+      } finally {
+        if (live) setRefreshing(false);
       }
     })();
     return () => { live = false; };
@@ -84,14 +100,32 @@ const AdminUsage = () => {
     return shortDate.formatRange(from, to);
   };
 
+  // The two views: the last 30 days read live from telemetry, and the weeks the
+  // snapshot job has kept since. Telemetry forgets after 30 days; the history
+  // does not.
   const header = (
     <>
       <h1 className="h4">{translator.translate("Användningsstatistik")}</h1>
       <p className="text-body-secondary small">
         {translator.translate("Hur många som har använt appen. Det räknas i personer: samma person på flera enheter räknas en gång.")}
       </p>
+      {report?.demo === true && (
+        <p><Badge bg="warning" text="dark">{translator.translate("Påhittade siffror från utvecklingsmiljön")}</Badge></p>
+      )}
+      <ButtonGroup className="mb-3">
+        {(["live", "history"] as const).map(value => (
+          <ToggleButton key={value} id={`usage-view-${value}`} type="radio" name="usage-view" variant="outline-primary"
+                        value={value} checked={view === value} onChange={() => setView(value)}>
+            {value === "live" ? translator.translate("Senaste 30 dagarna") : translator.translate("Över tid")}
+          </ToggleButton>
+        ))}
+      </ButtonGroup>
     </>
   );
+
+  if (view === "history") {
+    return <div>{header}<AdminUsageHistory /></div>;
+  }
 
   if (error === "unconfigured") {
     return (
@@ -101,7 +135,9 @@ const AdminUsage = () => {
       </div>
     );
   }
-  if (error === "failed") {
+  // A failure with nothing to show is the whole page; a failure behind cached
+  // numbers is a line above them (below), and the numbers stay.
+  if (error === "failed" && report === null) {
     return (
       <div>
         {header}
@@ -122,9 +158,6 @@ const AdminUsage = () => {
   return (
     <div>
       {header}
-      {report.demo === true && (
-        <p><Badge bg="warning" text="dark">{translator.translate("Påhittade siffror från utvecklingsmiljön")}</Badge></p>
-      )}
 
       {/* Every control in one row above the chart, so what the chart shows is
           read in one place. */}
@@ -149,6 +182,7 @@ const AdminUsage = () => {
           <option value="branch">{translator.translate("Per klubb")}</option>
           <option value="federation">{translator.translate("Per förbund")}</option>
         </Form.Select>
+        <RefreshState refreshing={refreshing} failed={error === "failed"} onRetry={() => setAttempt(n => n + 1)} />
       </div>
 
       <div className="d-flex flex-wrap gap-2 mb-3">

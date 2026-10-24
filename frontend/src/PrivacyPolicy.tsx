@@ -91,6 +91,12 @@ const PrivacyPolicy = () => {
       <p>
         {translator.translate("Statistiken sparas i 30 dagar och raderas sedan automatiskt. Den används för att förstå hur appen används och för att hitta fel — aldrig för att följa vad en enskild person gör.")}
       </p>
+      {/* The usage history (backend/auth/internal/store/history.go) is kept for
+          good, which is only promisable because it holds nothing about anybody:
+          no id, no pseudonym, only counts per week and per branch. */}
+      <p>
+        {translator.translate("Veckovisa summor sparas längre: hur många som använde appen varje vecka och i varje klubb, och hur många konton som skapades, flyttades och avslutades. Det är bara antal. De innehåller ingenting som pekar ut någon och kan inte kopplas till dig.")}
+      </p>
 
       <p>{translator.translate("Personuppgiftsansvarig: Jörgen Sigvardsson, jorgen.sigvardsson@gmail.com")}</p>
     </div>

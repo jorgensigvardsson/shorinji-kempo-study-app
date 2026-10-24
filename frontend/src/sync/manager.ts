@@ -231,6 +231,10 @@ class SyncManager {
     return await this.backendClient.adminUsage(days, bin);
   }
 
+  async adminUsageHistory(since?: string) {
+    return await this.backendClient.adminUsageHistory(since);
+  }
+
   async adminCreateFederation(id: string, name: string) {
     return await this.backendClient.adminCreateFederation(id, name);
   }

@@ -153,6 +153,7 @@ func (h *Handler) joinRequest(w http.ResponseWriter, r *http.Request) {
 	// The ticket is spent: it bought exactly one request.
 	h.clearJoinTicket(w)
 	log.Printf("join request from %s for branch %s (%s)", logsafe.Email(request.Email), branch.ID, branch.Name)
+	h.record(store.HistoryEntry{Type: store.HistoryApplication, Branch: branch.ID, Outcome: store.ApplicationSubmitted})
 
 	h.announceJoinRequest(request, branch.Name)
 	w.WriteHeader(http.StatusNoContent)
@@ -273,6 +274,7 @@ func (h *Handler) joinWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("join request from %s withdrawn", logsafe.Email(ticket.Email))
+	h.record(store.HistoryEntry{Type: store.HistoryApplication, Branch: existing.BranchID, Outcome: store.ApplicationWithdrawn})
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -384,6 +386,8 @@ func (h *Handler) adminApproveRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("admin %s approved %s into branch %s (user %s)", claims.Subject, logsafe.Email(request.Email), request.BranchID, user.ID)
+	h.record(store.HistoryEntry{Type: store.HistoryApplication, Branch: request.BranchID, Outcome: store.ApplicationApproved})
+	h.record(store.HistoryEntry{Type: store.HistoryAccountCreated, Branch: request.BranchID, Via: store.ViaApplied})
 	h.mailDecision(request, true)
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -413,6 +417,7 @@ func (h *Handler) adminDenyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("admin %s declined %s for branch %s", claims.Subject, logsafe.Email(request.Email), request.BranchID)
+	h.record(store.HistoryEntry{Type: store.HistoryApplication, Branch: request.BranchID, Outcome: store.ApplicationDeclined})
 	h.mailDecision(request, false)
 	w.WriteHeader(http.StatusNoContent)
 }

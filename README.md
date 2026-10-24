@@ -22,7 +22,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Accounts** — sign in with an email code (or Google/Microsoft, when the address belongs to one); an account is required to use the app, and study data syncs automatically to the backend across devices
 - **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
 - **In-app feedback** — send feedback straight from the menu; the backend emails it to the maintainer, no mail client required
-- **Usage statistics** — a page for the technical admin showing how many people use the app per day or week, overall or grouped by branch or federation, read from Application Insights through the auth service (no credentials in the browser). Locally it shows invented data, marked as such
+- **Usage statistics** — a page for the technical admin showing how many people use the app per day or week, overall or grouped by branch or federation, read from Application Insights through the auth service (no credentials in the browser). An "over time" view adds the weeks before that: a weekly job keeps anonymous totals in Cosmos, alongside events for accounts created, deleted and moved and for membership applications. Locally it shows invented data, marked as such
 - **Multilingual** — Swedish (default/fallback), English, Turkish, Japanese
 
 ## Tech stack
@@ -116,6 +116,16 @@ The usage statistics page has no telemetry to read locally, so the compose stack
 `USAGE_DEMO=true` and the auth service invents members for every branch in the local
 organization. Add branches on the Organisation page and they show up in the statistics
 straight away. The demo is refused whenever `COSMOS_*` is set.
+
+The page's "over time" view reads the usage history, which production accumulates week by
+week. Locally, invent a year of it for the branches you have:
+
+```bash
+cd backend/auth && go run ./cmd/usageseed --data-dir ../../devdata/auth --apply
+```
+
+It refuses to run while `COSMOS_*` is set, and running it again adds only weeks that have
+finished since.
 
 ### Driving the stack from a phone
 
@@ -308,7 +318,7 @@ Optional repository variables (with sensible defaults):
 - `FEEDBACK_EMAIL` — comma-separated recipient(s) for in-app feedback submissions (`POST /auth/feedback`, sent via the same SMTP relay); leave unset to disable the feedback form
 - `VITE_DEBUG` (default `false`)
 
-The usage statistics page is production's alone, and needs no secret or variable. The production auth container app has a system-assigned managed identity, and the deployment grants it Monitoring Reader on the Application Insights component alone ([`app-insights-reader.bicep`](infrastructure/modules/app-insights-reader.bicep)). That grant is a role assignment, so the deploy principal must be allowed to create one — production's has Role Based Access Control Administrator on its resource group. Right after the first deploy the page may answer "could not read" for a few minutes while the assignment propagates. Staging deploys without it: no identity, no grant, and the page says statistics are not switched on.
+The usage statistics page is production's alone, and needs no secret or variable. The production auth container app has a system-assigned managed identity, and the deployment grants it Monitoring Reader on the Application Insights component alone ([`app-insights-reader.bicep`](infrastructure/modules/app-insights-reader.bicep)). That grant is a role assignment, so the deploy principal must be allowed to create one — production's has Role Based Access Control Administrator on its resource group. Right after the first deploy the page may answer "could not read" for a few minutes while the assignment propagates. Staging deploys without it: no identity, no grant, and the page says statistics are not switched on. The weekly `usage-snapshot` Container Apps job is production-only too, and gets the same read-only grant for its own identity.
 
 `VITE_APP_VERSION` is not something you set — the workflow writes it automatically as the deployed commit SHA (the same one used to tag the backend images), so it's not listed above. It's included with feedback submissions purely as triage context.
 

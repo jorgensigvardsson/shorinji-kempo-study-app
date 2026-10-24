@@ -1,11 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const adminUsage = vi.fn();
+const adminUsageHistory = vi.fn();
 
 vi.mock("./sync/manager", () => ({
-  getSyncManager: () => ({ adminUsage }),
+  getSyncManager: () => ({ adminUsage, adminUsageHistory }),
 }));
 
 import AdminUsage from "./AdminUsage";
@@ -29,6 +30,7 @@ const report: UsageReport = {
 
 describe("AdminUsage", () => {
   beforeEach(() => {
+    localStorage.clear(); // the live view caches its last answer
     adminUsage.mockReset().mockResolvedValue(report);
   });
 
@@ -76,6 +78,63 @@ describe("AdminUsage", () => {
     expect(screen.getAllByText("WSKO").length).toBeGreaterThan(0);
 
     expect(adminUsage).toHaveBeenCalledTimes(1);
+  });
+
+  // A cold auth container takes seconds; the last answer stands in meanwhile.
+  it("draws the last answer at once and refreshes it behind a spinner", async () => {
+    render(<AdminUsage />);
+    await screen.findByRole("img", { name: "Aktiva personer per dag" });
+    cleanup();
+
+    let answer: (r: UsageReport) => void = () => {};
+    adminUsage.mockReturnValue(new Promise<UsageReport>(resolve => { answer = resolve; }));
+    render(<AdminUsage />);
+
+    // Straight from the cache, before the server has said anything.
+    expect(screen.getByRole("img", { name: "Aktiva personer per dag" })).toBeTruthy();
+    expect(tile("Aktiva personer")).toBe("5");
+    expect(screen.getByText("Uppdaterar…")).toBeTruthy();
+
+    answer({ ...report, people: 9 });
+    await waitFor(() => expect(tile("Aktiva personer")).toBe("9"));
+    expect(screen.queryByText("Uppdaterar…")).toBeNull();
+  });
+
+  it("keeps the cached numbers when the refresh fails, and says so", async () => {
+    render(<AdminUsage />);
+    await screen.findByRole("img", { name: "Aktiva personer per dag" });
+    cleanup();
+
+    adminUsage.mockRejectedValue(new AdminRequestError(502));
+    render(<AdminUsage />);
+    expect(await screen.findByText("Kunde inte uppdatera. Siffrorna är de senast hämtade.")).toBeTruthy();
+    expect(tile("Aktiva personer")).toBe("5");
+  });
+
+  // Another period's numbers would be wrong numbers, not old ones.
+  it("never stands one period's numbers in for another's", async () => {
+    const user = userEvent.setup();
+    render(<AdminUsage />);
+    await screen.findByRole("img", { name: "Aktiva personer per dag" });
+
+    adminUsage.mockReturnValue(new Promise(() => {}));
+    await user.selectOptions(screen.getByLabelText("Period"), "7");
+    expect(screen.queryByRole("img", { name: "Aktiva personer per dag" })).toBeNull();
+  });
+
+  it("switches to the long view and back", async () => {
+    adminUsageHistory.mockReset().mockResolvedValue({ items: [], branches: [] });
+    localStorage.clear();
+    const user = userEvent.setup();
+    render(<AdminUsage />);
+    await screen.findByRole("img", { name: "Aktiva personer per dag" });
+
+    await user.click(screen.getByLabelText("Över tid"));
+    expect(await screen.findByText("Ingen historik ännu. Varje vecka sparas när den är slut.")).toBeTruthy();
+    expect(adminUsageHistory).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByLabelText("Senaste 30 dagarna"));
+    expect(await screen.findByRole("img", { name: "Aktiva personer per dag" })).toBeTruthy();
   });
 
   it("says when the numbers are invented", async () => {

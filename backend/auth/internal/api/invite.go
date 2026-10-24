@@ -149,6 +149,7 @@ func (h *Handler) adminCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("admin %s created user %s in branch %s", claims.Subject, user.ID, branch.ID)
+	h.record(store.HistoryEntry{Type: store.HistoryAccountCreated, Branch: branch.ID, Via: store.ViaAdmin})
 
 	notified := true
 	if err := h.mailer.SendAccountCreated(context.Background(), user.Email, branch.Name, user.Language); err != nil {

@@ -5,18 +5,6 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-10-24T14:48:35.000Z",
-    changes: [
-      {
-        emoji: "📊",
-        sv: "Appens tekniska administratör har fått en sida med användningsstatistik: hur många som använder appen per dag eller vecka, totalt och per klubb eller förbund. Sidan visar bara antal — aldrig vem som har använt appen.",
-        en: "The app's technical administrator has a new usage statistics page: how many people use the app per day or week, in total and per branch or federation. The page shows numbers only — never who used the app.",
-        tr: "Uygulamanın teknik yöneticisi için yeni bir kullanım istatistikleri sayfası var: uygulamayı günlük veya haftalık olarak kaç kişinin kullandığı, toplamda ve kulübe ya da federasyona göre. Sayfa yalnızca sayıları gösterir — uygulamayı kimin kullandığını asla göstermez.",
-        ja: "アプリの技術管理者向けに、利用統計のページが追加されました。アプリを使った人数を日ごと・週ごとに、全体および支部・連盟ごとに表示します。表示されるのは人数のみで、誰が使ったかは表示されません。",
-      },
-    ],
-  },
-  {
     timestamp: "2026-10-04T06:48:17.000Z",
     changes: [
       {

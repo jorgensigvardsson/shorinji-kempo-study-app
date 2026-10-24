@@ -60,7 +60,7 @@ func (d *Demo) Usage(_ context.Context, q Query) (*Report, error) {
 			inBranch := map[string]bool{}
 			for day := start; day.Before(end) && day.Before(to); day = day.AddDate(0, 0, 1) {
 				for m := 0; m < members; m++ {
-					if !demoActive(branch, m, day, from) {
+					if !demoActive(branch, m, day) {
 						continue
 					}
 					person := fmt.Sprintf("%s/%d", branch, m)
@@ -104,27 +104,139 @@ func demoMembers(branch string) int {
 	return 6 + int(demoHash(branch, "size")%25)
 }
 
-// demoActive decides whether one member opened the app on one day. Each member
-// has an engagement of their own — some open it most days, some barely at all —
-// and members join over the window rather than all being there from its first
-// day, so the chart has a slope to it as well as a weekly rhythm.
-func demoActive(branch string, member int, day, windowStart time.Time) bool {
-	who := fmt.Sprintf("%s/%d", branch, member)
-	engagement := 0.15 + 0.85*demoUnit(who, "engagement")
+// demoEpoch is where the invented membership starts. Half the members are there
+// from the beginning; the other half join over the following fourteen months, so
+// a year of history has growth in it and the last 30 days look settled.
+var demoEpoch = time.Date(2025, 9, 1, 0, 0, 0, 0, time.UTC)
 
-	// A third of the members arrive at some point during the window.
-	if demoUnit(who, "late") < 0.33 {
-		joined := windowStart.AddDate(0, 0, int(demoUnit(who, "joined")*60))
-		if day.Before(joined) {
-			return false
+// DemoEpoch is exported for the history seeder, which starts there too.
+func DemoEpoch() time.Time { return demoEpoch }
+
+func demoJoined(who string) time.Time {
+	if demoUnit(who, "late") < 0.5 {
+		return demoEpoch.AddDate(0, 0, int(demoUnit(who, "joined")*420))
+	}
+	return demoEpoch
+}
+
+// demoLeft is when a member deleted their account, or the zero time for the nine
+// in ten who never do. Leavers go somewhere between a fortnight and a year after
+// joining, which gives the history's deletions a spread of lifetimes.
+func demoLeft(who string) time.Time {
+	if demoUnit(who, "leaves") >= 0.1 {
+		return time.Time{}
+	}
+	return demoJoined(who).AddDate(0, 0, 14+int(demoUnit(who, "stayed")*350))
+}
+
+// demoMember reports whether somebody had an account at a moment.
+func demoMember(who string, at time.Time) bool {
+	left := demoLeft(who)
+	return !at.Before(demoJoined(who)) && (left.IsZero() || at.Before(left))
+}
+
+// DemoPerson is one invented member, for the history seeder: when they arrived,
+// how, and when they left if they did.
+type DemoPerson struct {
+	Branch   string
+	Joined   time.Time
+	Left     time.Time // zero if they never left
+	ViaAdmin bool      // added by an admin rather than approved from an application
+}
+
+// People lists every invented member, the founding ones included.
+func (d *Demo) People() []DemoPerson {
+	var out []DemoPerson
+	for _, branch := range append(d.Branches(), "") {
+		for m := 0; m < demoMembers(branch); m++ {
+			who := fmt.Sprintf("%s/%d", branch, m)
+			out = append(out, DemoPerson{
+				Branch:   branch,
+				Joined:   demoJoined(who),
+				Left:     demoLeft(who),
+				ViaAdmin: demoUnit(who, "via") < 0.3,
+			})
 		}
 	}
+	return out
+}
+
+// demoActive decides whether one member opened the app on one day. Each member
+// has an engagement of their own — some open it most days, some barely at all —
+// and nobody uses the app before they have joined or after they have left.
+func demoActive(branch string, member int, day time.Time) bool {
+	who := fmt.Sprintf("%s/%d", branch, member)
+	if !demoMember(who, day) {
+		return false
+	}
+	engagement := 0.15 + 0.85*demoUnit(who, "engagement")
 	if branch == "" {
 		engagement *= 0.5 // the branchless are the least active, as old accounts are
 	}
 
 	p := engagement * demoWeekday[day.Weekday()]
 	return demoUnit(who, day.Format("2006-01-02")) < p
+}
+
+// WeekStats invents one week the way Usage invents a window, from the same
+// people, so a stored week and the live page agree about it. Unlike the real
+// thing it can answer for any week at all, which is what lets the seeder lay down
+// a year of history in one go.
+func (d *Demo) WeekStats(_ context.Context, start, end time.Time) (*WeekStats, error) {
+	stats := &WeekStats{ByBranch: map[string]int{}, ByMode: map[string]int{}, ByVersion: map[string]int{}}
+	seen := map[string]bool{}
+	for _, branch := range append(d.Branches(), "") {
+		inBranch := 0
+		for m := 0; m < demoMembers(branch); m++ {
+			who := fmt.Sprintf("%s/%d", branch, m)
+			active, lastDay := false, time.Time{}
+			for day := start; day.Before(end); day = day.AddDate(0, 0, 1) {
+				if demoActive(branch, m, day) {
+					active, lastDay = true, day
+					stats.Hours += 1 + int(demoUnit(who, day.Format("2006-01-02"), "hours")*3)
+				}
+			}
+			if !active {
+				continue
+			}
+			inBranch++
+			seen[who] = true
+			mode := "browser"
+			if demoUnit(who, "mode") < 0.6 {
+				mode = "standalone"
+			}
+			stats.ByMode[mode]++
+			stats.ByVersion[demoVersion(who, lastDay)]++
+		}
+		if inBranch > 0 {
+			stats.ByBranch[branch] = inBranch
+		}
+	}
+	stats.People = len(seen)
+	return stats, nil
+}
+
+// demoVersion is the build a member's device ran on a day: a release every two
+// weeks, which each device picks up somewhere within the following twelve days.
+func demoVersion(who string, day time.Time) string {
+	lag := time.Duration(demoUnit(who, "lag")*12*24) * time.Hour
+	n := int(day.Add(-lag).Sub(demoEpoch).Hours()/24) / 14
+	return fmt.Sprintf("demo%03d", max(n, 0))
+}
+
+// Members counts the invented accounts each branch had at a moment: those who
+// had joined by then and not yet left. The seeder's deletion events are these
+// same leavers, so the history's counts and its events agree.
+func (d *Demo) Members(at time.Time) map[string]int {
+	out := map[string]int{}
+	for _, branch := range append(d.Branches(), "") {
+		for m := 0; m < demoMembers(branch); m++ {
+			if demoMember(fmt.Sprintf("%s/%d", branch, m), at) {
+				out[branch]++
+			}
+		}
+	}
+	return out
 }
 
 // demoUnit maps its inputs to a number in [0, 1), the same one every time.

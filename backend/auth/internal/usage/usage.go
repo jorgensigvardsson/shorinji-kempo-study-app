@@ -194,16 +194,31 @@ func (c *Client) Usage(ctx context.Context, q Query) (*Report, error) {
 	}
 	from, to := Window(q, c.now())
 
+	// An explicit interval rather than a duration, so the window starts on the
+	// boundary Window chose rather than exactly N days before the request.
+	result, err := c.run(ctx, fmt.Sprintf(queryTemplate, bucketExpressions[q.Bin]), from, to)
+	if err != nil {
+		return nil, err
+	}
+	report, err := result.report()
+	if err != nil {
+		return nil, err
+	}
+	report.From, report.To, report.Bin = from, to, q.Bin
+	report.Buckets = fillGaps(report.Buckets, from, to, q.Bin)
+	return report, nil
+}
+
+// run sends one query, over the interval [from, to], and returns Azure's tables.
+func (c *Client) run(ctx context.Context, query string, from, to time.Time) (*queryResponse, error) {
 	token, err := c.credential.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{tokenScope}})
 	if err != nil {
 		return nil, fmt.Errorf("usage: token: %w", err)
 	}
 
 	body, err := json.Marshal(map[string]string{
-		"query": fmt.Sprintf(queryTemplate, bucketExpressions[q.Bin]),
-		// An explicit interval rather than a duration, so the window starts on the
-		// boundary Window chose rather than exactly N days before the request.
-		"timespan": from.Format(time.RFC3339) + "/" + to.Format(time.RFC3339),
+		"query":    query,
+		"timespan": from.UTC().Format(time.RFC3339) + "/" + to.UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("usage: encode query: %w", err)
@@ -236,13 +251,7 @@ func (c *Client) Usage(ctx context.Context, q Query) (*Report, error) {
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 4<<20)).Decode(&result); err != nil {
 		return nil, fmt.Errorf("usage: decode response: %w", err)
 	}
-	report, err := result.report()
-	if err != nil {
-		return nil, err
-	}
-	report.From, report.To, report.Bin = from, to, q.Bin
-	report.Buckets = fillGaps(report.Buckets, from, to, q.Bin)
-	return report, nil
+	return &result, nil
 }
 
 // fillGaps gives every day or week in the window a bucket. A day nobody used the
