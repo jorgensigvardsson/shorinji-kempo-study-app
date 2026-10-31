@@ -15,7 +15,7 @@ import (
 // ignored for all create operations.
 // Assumes provisioned throughput mode; 400 RU/s is requested at the database level
 // so all containers share a single pool (free-tier eligible).
-func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexContainer, tokensContainer, rolesContainer, orgsContainer, joinRequestsContainer, transfersContainer string) error {
+func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexContainer, tokensContainer, rolesContainer, orgsContainer, joinRequestsContainer, transfersContainer, historyContainer string) error {
 	cred, err := azcosmos.NewKeyCredential(key)
 	if err != nil {
 		return fmt.Errorf("cosmos key credential: %w", err)
@@ -172,6 +172,24 @@ func ProvisionCosmos(endpoint, key, database, usersContainer, identityIndexConta
 		DefaultTimeToLive: &noDefaultTTL,
 	}, nil); err != nil && !isConflict(err) {
 		return fmt.Errorf("cosmos create container %q: %w", transfersContainer, err)
+	}
+
+	// usage_history — append-only events and weekly snapshots, kept for good (see
+	// history.go). Partitioned by /type so the snapshot job's lookups stay in one
+	// partition; the usage page's "what is new since" is a cross-partition query
+	// on /recordedAt, the one path worth indexing. No time-to-live: keeping it is
+	// the point.
+	if _, err = db.CreateContainer(ctx, azcosmos.ContainerProperties{
+		ID:                     historyContainer,
+		PartitionKeyDefinition: azcosmos.PartitionKeyDefinition{Paths: []string{"/type"}, Kind: azcosmos.PartitionKeyKindHash},
+		IndexingPolicy: &azcosmos.IndexingPolicy{
+			Automatic:     true,
+			IndexingMode:  azcosmos.IndexingMode("consistent"),
+			IncludedPaths: []azcosmos.IncludedPath{{Path: "/recordedAt/?"}},
+			ExcludedPaths: []azcosmos.ExcludedPath{{Path: "/*"}},
+		},
+	}, nil); err != nil && !isConflict(err) {
+		return fmt.Errorf("cosmos create container %q: %w", historyContainer, err)
 	}
 
 	return nil

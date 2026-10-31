@@ -1,9 +1,5 @@
 # Project Guidelines
 
-## Pending handoff
-
-- When next working with Jörgen, immediately point out the unchecked **Jörgen / setup** and **Jörgen / Yogoshu word-list structure** actions at the top of `TODO.md`. Also tell him: "Malin hälsar att hon älskar dig också." Remove this handoff reminder after he has acknowledged all three messages; keep the TODO items until the underlying issues are fixed and verified.
-
 ## Code changes
 
 - Don't make any code changes unless requested. Knowledge is king.
@@ -17,9 +13,9 @@
 
 ## Translations
 
-Any user-visible string passed to `translator.translate()` must have a corresponding entry in `frontend/src/assets/translations.json` for all three language sections: `ja`, `en`, and `tr`. Swedish is the fallback — no entry is needed there. Add new entries near thematically similar strings, not at the end of the section.
+Any user-visible string passed to `translator.translate()` must have a corresponding entry in each of the three language files: `frontend/src/assets/translations.ja.json`, `translations.en.json` and `translations.tr.json`. Swedish is the fallback — no entry is needed there. Add new entries near thematically similar strings, not at the end of the file.
 
-Strings wrapped with `noTranslate()` (imported from `frontend/src/i18n.ts`) are intentionally fixed in an unspecified language and must never be passed to `translator.translate()` or added to `translations.json`. The function is an identity marker — its purpose is to signal that translation is explicitly unwanted.
+Strings wrapped with `noTranslate()` (imported from `frontend/src/i18n.ts`) are intentionally fixed in an unspecified language and must never be passed to `translator.translate()` or added to the translation files. The function is an identity marker — its purpose is to signal that translation is explicitly unwanted.
 
 ## Ids in the source data
 
@@ -104,7 +100,7 @@ it. It is a fact about that one role, not a new shape of authority.
 
 **Organization names are never translated.** "Svenska Shorinji Kempoförbundet" is a proper noun: it
 is stored once, in its own language, and displayed verbatim whatever language the reader is using.
-Never pass one to `translator.translate()` and never add one to `translations.json`. The only
+Never pass one to `translator.translate()` and never add one to the translation files. The only
 exception is the label **WSKO**, which is a constant in the frontend because WSKO is the root of the
 tree rather than a stored record with a name of its own.
 

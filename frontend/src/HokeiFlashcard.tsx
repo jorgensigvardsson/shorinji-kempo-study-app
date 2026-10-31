@@ -3,6 +3,7 @@ import { Button, Modal, ProgressBar } from "react-bootstrap";
 import FlashcardDeck, { type FlashcardDeckEntry } from "./components/FlashcardDeck";
 import { HokeiDojoDetails, HokeiNoteEditor } from "./components/HokeiCard";
 import { getAllHokeiMoments, type GradeName, type GradePlan, type HokeiMoment } from "./data";
+import { useRememberedGradeSelection } from "./grade-selection-memory";
 import { TranslatorContext, type Translator } from "./i18n";
 import { gradeLabel } from "./strings";
 import { compareGrades } from "./utilities/level";
@@ -27,25 +28,25 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
         () => gradeGroups.flatMap(group => group.hokeis),
         [gradeGroups],
     );
-    const [gradeSelection, setGradeSelection] = useState<GradeSelection>(myGrade);
-    const [lastMyGrade, setLastMyGrade] = useState(myGrade);
-    if (lastMyGrade !== myGrade) {
-        setLastMyGrade(myGrade);
-        setGradeSelection(myGrade);
-    }
-    const selectedGrades = useMemo(() => new Set(availableGrades.filter(grade => {
-        if (gradeSelection === "all") return true;
-        if (gradeSelection === "up-to-own") return compareGrades(grade, myGrade) <= 0;
-        return grade === gradeSelection;
-    })), [availableGrades, gradeSelection, myGrade]);
     const gradeChoices = [
-        { value: "all", label: translator.translate("Alla") },
-        { value: "up-to-own", label: translator.translate("Alla till och med egna") },
+        { value: "all", label: translator.translate("Alla grader") },
+        // Named rather than "own": whether that meant the grade held or the one
+        // trained towards was anybody's guess, and it is the latter.
+        { value: "up-to-own", label: translator.translate("Alla till och med {0}", { params: [gradeLabel(myGrade, translator, false)] }) },
         ...availableGrades.map(grade => ({
             value: grade,
             label: gradeLabel(grade, translator, false),
         })),
     ];
+    // Remembered on this device. A choice made for an earlier training grade is
+    // not carried over, so moving on still starts the deck from the new grade.
+    const [gradeSelection, setGradeSelection] = useRememberedGradeSelection<GradeSelection>(
+        "hokei-flashcards", myGrade, gradeChoices.map(choice => choice.value));
+    const selectedGrades = useMemo(() => new Set(availableGrades.filter(grade => {
+        if (gradeSelection === "all") return true;
+        if (gradeSelection === "up-to-own") return compareGrades(grade, myGrade) <= 0;
+        return grade === gradeSelection;
+    })), [availableGrades, gradeSelection, myGrade]);
 
     const selectedHokeis = useMemo(
         () => gradeGroups
@@ -110,6 +111,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
         <div className="hokei-flashcard-view">
             <div className="hokei-flashcard-filter">
                 <FocusChoicePicker
+                  showOwnGrade
                     title={translator.translate("Välj vad du vill träna")}
                     leadText={translator.translate("Tränar inför")}
                     value={gradeSelection}

@@ -21,6 +21,7 @@ import (
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/provider"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/token"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/usage"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/cors"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/csrf"
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/shared/logsafe"
@@ -85,6 +86,10 @@ type Handler struct {
 	joinLimiter        *ratelimit.GlobalRateLimiter // global cap on join requests (protects admins' inboxes as much as the quota)
 	transferLimiter    *ratelimit.GlobalRateLimiter // the same, for members asking to move between branches
 	inviteLimiter      *ratelimit.GlobalRateLimiter // the same, for admins adding members by hand
+	moveLimiter        *ratelimit.GlobalRateLimiter // the same, for admins moving members between branches
+	usage              usage.Source                 // telemetry read back for the usage page; nil where it is not configured
+	usageLimiter       *ratelimit.GlobalRateLimiter // global cap on telemetry queries (protects the Log Analytics API quota)
+	history            store.HistoryStore           // anonymous usage history; nil where it is switched off
 	mu                 sync.Mutex
 	pending            map[string]pendingState
 	emailCodes         map[string]emailCode // lowercased email → pending code
@@ -105,6 +110,8 @@ func NewHandler(
 	cookieDomain string,
 	limiter *ratelimit.IPRateLimiter,
 	feedbackRecipients []string,
+	usageSource usage.Source,
+	history store.HistoryStore,
 ) *Handler {
 	h := &Handler{
 		providers:     providers,
@@ -143,8 +150,18 @@ func NewHandler(
 		// the flows above this one is behind an admin session: the cap is here to
 		// bound a mistake, not to hold off a stranger.
 		inviteLimiter: ratelimit.NewGlobal(0.2, 5),
-		pending:       make(map[string]pendingState),
-		emailCodes:      make(map[string]emailCode),
+		// Moving a member mails them too. Same reasoning and same rate as adding
+		// one: behind an admin session, so the cap bounds a mistake — but its own,
+		// so tidying up after a club split cannot hold up somebody adding members.
+		moveLimiter: ratelimit.NewGlobal(0.2, 5),
+		usage:       usageSource,
+		// Queries are free, but Azure throttles them per identity, and only one
+		// person can reach this. The cache answers most asks; this bounds the rest
+		// to something no page of clicking will reach.
+		usageLimiter: ratelimit.NewGlobal(1, 10),
+		history:      history,
+		pending:      make(map[string]pendingState),
+		emailCodes:   make(map[string]emailCode),
 	}
 	go h.sweepExpiredStates()
 	return h
@@ -229,6 +246,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/admin/users/{id}", h.adminGetUser)
 	inner.HandleFunc("PATCH /auth/admin/users/{id}", h.adminUpdateUser)
 	inner.HandleFunc("PUT /auth/admin/users/{id}/roles", h.adminSetRoles)
+	inner.Handle("PUT /auth/admin/users/{id}/branch", h.moveLimiter.Middleware(http.HandlerFunc(h.adminMoveUser)))
 	inner.HandleFunc("POST /auth/admin/users/{id}/logout", h.adminLogoutUser)
 	inner.HandleFunc("GET /auth/admin/org", h.adminOrgTree)
 	inner.HandleFunc("POST /auth/admin/federations", h.createFederation)
@@ -243,6 +261,12 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	inner.HandleFunc("GET /auth/admin/transfers", h.adminListTransfers)
 	inner.HandleFunc("POST /auth/admin/transfers/{id}/accept", h.adminAcceptTransfer)
 	inner.HandleFunc("POST /auth/admin/transfers/{id}/reject", h.adminRejectTransfer)
+	// Usage statistics (see usage.go). Each one that misses the cache is a query
+	// against Azure, so it carries a global cap on top of the per-IP one.
+	inner.Handle("GET /auth/admin/usage", h.usageLimiter.Middleware(http.HandlerFunc(h.adminUsage)))
+	// The long view (see history.go): a read of our own container, so the per-IP
+	// limit is enough.
+	inner.HandleFunc("GET /auth/admin/usage/history", h.adminUsageHistory)
 	mux.Handle("/", secureheaders.Middleware(cors.Middleware(h.frontendURL, csrf.Middleware(h.frontendURL, h.limiter.Middleware(inner)))))
 }
 
@@ -844,6 +868,13 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+	// Read first, for the history: the branch they left and how long they stayed
+	// are gone with the record. A failed read costs those details, not the
+	// deletion.
+	user, err := h.users.FindByID(claims.Subject)
+	if err != nil {
+		log.Printf("deleteAccount lookup %s: %v", claims.Subject, err)
+	}
 	if err := h.refreshTokens.DeleteByUserID(claims.Subject); err != nil {
 		log.Printf("deleteAccount refresh tokens %s: %v", claims.Subject, err)
 	}
@@ -852,6 +883,11 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	deleted := store.HistoryEntry{Type: store.HistoryAccountDeleted, Lifetime: "unknown"}
+	if user != nil {
+		deleted.Branch, deleted.Lifetime = user.BranchID, lifetimeBucket(user.CreatedAt, time.Now())
+	}
+	h.record(deleted)
 	h.clearTokenCookies(w)
 	w.WriteHeader(http.StatusNoContent)
 }

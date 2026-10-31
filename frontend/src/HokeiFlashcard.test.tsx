@@ -146,8 +146,8 @@ it("opens directly at the user's grade and changes grade through the shared pick
 
     await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
     expect(screen.getByRole("button", { name: "Framsteg 0/1" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Alla" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Alla till och med egna" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Alla grader" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Alla till och med 5 kyū" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "6 kyū" }));
 
     expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
@@ -174,4 +174,28 @@ it("uses the confirmed Kamoku classification for Kihon, Zeme and Hagai jime", ()
     expect(ids).not.toContain("kōbōgi (furi zuki & kusshin uke)");
     expect(ids).toContain("jitsugetsu zeme");
     expect(ids).toContain("hagai jime to shuhō");
+});
+
+it("remembers the chosen grade on this device when the user comes back", async () => {
+    const user = userEvent.setup();
+    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "6 kyū" }));
+    first.unmount();
+
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Gyaku gote/i })).toBeDefined();
+});
+
+it("does not carry a remembered grade over to a new training grade", async () => {
+    const user = userEvent.setup();
+    const first = render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="5 kyū" />);
+    await user.click(screen.getByRole("button", { name: "Tränar inför 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Alla grader" }));
+    first.unmount();
+
+    render(<HokeiFlashcard allGradePlans={[plan, plan5Kyu]} myGrade="6 kyū" />);
+    expect(screen.getByRole("button", { name: "Tränar inför 6 kyū" })).toBeDefined();
+    expect(screen.queryByRole("heading", { name: /Uchi uke zuki/i })).toBeNull();
 });

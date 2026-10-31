@@ -46,6 +46,11 @@ type UserStore interface {
 	// must not be swept up by a caller whose own scope failed to resolve. Given
 	// no usable ids it returns nothing without troubling the store.
 	ListByBranches(branchIDs []string) ([]*User, error)
+	// CountByBranches answers how many users belong to each of the named
+	// branches. Empty ids are ignored as in ListByBranches, and a branch with
+	// nobody in it is simply absent from the map rather than present as zero.
+	// It reads branch ids only, never the user records themselves.
+	CountByBranches(branchIDs []string) (map[string]int, error)
 	Save(user *User) error
 	Delete(id string) error
 }

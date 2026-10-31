@@ -58,6 +58,12 @@
   padding: 1.25rem max(1.25rem, env(safe-area-inset-right)) 1rem max(1.25rem, env(safe-area-inset-left));
 }
 
+.training-choice-modal-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+}
+
 .training-choice-modal-body {
   padding: 0.5rem max(1.25rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
 }

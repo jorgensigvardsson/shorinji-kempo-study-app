@@ -146,6 +146,8 @@ export interface JoinContext {
 export interface AdminOrgBranch {
   id: string;
   name: string;
+  // Absent when the server could not count them — not the same as zero.
+  memberCount?: number;
 }
 
 export interface AdminOrgFederation {
@@ -167,6 +169,67 @@ export interface AdminBranchMembers {
   name: string;
   federationId?: string;
   members: AdminUser[];
+}
+
+// Usage statistics, from GET /auth/admin/usage (technical admin only). Counts of
+// distinct people, never who they were. Branch keys are ids; the empty key is
+// usage that named no branch, and an id missing from `branches` is a branch that
+// has since been deleted.
+export type UsageBin = "day" | "week";
+
+export interface UsageBucket {
+  start: string;
+  people: number;
+  byBranch: Record<string, number>;
+}
+
+export interface UsageReport {
+  from: string;
+  to: string;
+  bin: UsageBin;
+  buckets: UsageBucket[];
+  // Distinct over the whole window, which is not the sum of the buckets: somebody
+  // active on three days is one person in the month and three in its days.
+  people: number;
+  byBranch: Record<string, number>;
+  branches: PublicBranch[];
+  // Invented by the development backend (USAGE_DEMO); never set in production.
+  demo?: boolean;
+}
+
+// The long view, from GET /auth/admin/usage/history (technical admin only):
+// anonymous events and weekly snapshots, append-only. Nothing in an entry says
+// who; branch fields are ids. `recordedAt` is the cursor for asking what is new.
+export type HistoryEntryType = "account_created" | "account_deleted" | "transfer" | "application" | "week";
+
+export interface HistoryWeek {
+  start: string; // Monday 00:00 UTC
+  people: number; // distinct, over the whole week
+  byBranch: Record<string, number>;
+  hours: number; // usage events, at most one an hour per device
+  byMode: Record<string, number>;
+  byVersion: Record<string, number>;
+  members: Record<string, number>; // accounts per branch when the week was stored
+}
+
+export interface HistoryEntry {
+  id: string;
+  type: HistoryEntryType;
+  at: string;
+  recordedAt: string;
+  branch?: string;
+  via?: "applied" | "admin" | "request";
+  lifetime?: string;
+  from?: string;
+  to?: string;
+  outcome?: "submitted" | "approved" | "declined" | "withdrawn";
+  week?: HistoryWeek;
+}
+
+export interface UsageHistoryPage {
+  items: HistoryEntry[];
+  // Every branch, named now. Not cached with the entries: a branch can be renamed.
+  branches: PublicBranch[];
 }
 
 // A member's own transfer request, from GET /auth/transfer. A refused one comes
@@ -350,6 +413,19 @@ export class BackendSyncClient {
   // branch where it is, while passing "" moves it to WSKO.
   async adminUpdateBranch(id: string, changes: { name?: string; federationId?: string }): Promise<void> {
     await this.adminWrite("PATCH", `${authUrl}/auth/admin/branches/${encodeURIComponent(id)}`, changes);
+  }
+
+  async adminUsage(days: number, bin: UsageBin): Promise<UsageReport> {
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/usage?days=${days}&bin=${bin}`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as UsageReport;
+  }
+
+  async adminUsageHistory(since?: string): Promise<UsageHistoryPage> {
+    const query = since ? `?since=${encodeURIComponent(since)}` : "";
+    const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/usage/history${query}`);
+    if (!resp.ok) throw new AdminRequestError(resp.status);
+    return await resp.json() as UsageHistoryPage;
   }
 
   async adminBranchMembers(branchId: string): Promise<AdminBranchMembers> {
@@ -760,6 +836,16 @@ export class BackendSyncClient {
   // happened rather than "something went wrong".
   async adminSetRoles(id: string, roles: string[]): Promise<void> {
     await this.adminWrite("PUT", `${authUrl}/auth/admin/users/${encodeURIComponent(id)}/roles`, { roles });
+  }
+
+  // Moves a member to another branch. The caller must cover both the branch they
+  // leave and the one they join; a destination they do not cover answers 404, as
+  // an unseen branch always does. Resolves to whether the member was emailed —
+  // the move stands either way, but an admin should know if they were not told.
+  async adminMoveUser(id: string, branchId: string): Promise<boolean> {
+    const { notified } = await this.adminWriteJSON<{ notified: boolean }>(
+      "PUT", `${authUrl}/auth/admin/users/${encodeURIComponent(id)}/branch`, { branchId });
+    return notified;
   }
 
   // Force-logs-out a user by revoking all their refresh tokens. Their access token

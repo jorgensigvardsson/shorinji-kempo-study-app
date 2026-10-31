@@ -100,6 +100,14 @@ describe("AdminOrganizationTree", () => {
     expect(screen.getByText("Tokyo Honbu")).toBeTruthy();
   });
 
+  it("shows a branch's member count on its node", async () => {
+    renderTree({
+      sections: [{ federationId: "SE", title: "Svenska Shorinji Kempoförbundet", branches: [{ ...karlstad, memberCount: 7 }] }],
+    });
+    const node = (await screen.findByText("Karlstad")).closest(".card") as HTMLElement;
+    expect(within(node).getByTestId("member-count").textContent).toBe("7");
+  });
+
   // A federation node is both a target (the edge down from WSKO) and a
   // source (the edges down to its own branches) — it needs a handle of each
   // kind, or xyflow drops the edge that needs the missing one, silently and

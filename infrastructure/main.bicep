@@ -217,6 +217,43 @@ module authApp 'modules/auth-app.bicep' = {
     smtpFrom: smtpFrom
     smtpTls: smtpTls
     feedbackEmail: feedbackEmail
+    appInsightsResourceId: appInsights.outputs.resourceId
+  }
+}
+
+// The auth service reads usage telemetry back for the technical admin's usage
+// page, with its own managed identity and no credential anywhere.
+module authReadsTelemetry 'modules/app-insights-reader.bicep' = {
+  name: 'auth-reads-telemetry'
+  params: {
+    componentName: '${namePrefix}-insights'
+    // Waiting on authApp is also waiting on appInsights, whose id it is handed.
+    principalId: authApp.outputs.principalId
+  }
+}
+
+// Once a week, the finished weeks of usage are copied out of Application
+// Insights — which forgets after 30 days — into the usage_history container,
+// where they are kept. Production only, like the usage page it feeds.
+module usageSnapshotJob 'modules/usage-snapshot-job.bicep' = {
+  name: 'usage-snapshot-job'
+  params: {
+    name: '${namePrefix}-usage-snapshot'
+    location: location
+    environmentId: containerEnv.outputs.environmentId
+    image: authImage
+    cosmosEndpoint: cosmos.outputs.endpoint
+    cosmosKey: cosmosAccountRef.listKeys().primaryMasterKey
+    cosmosDatabase: cosmosDatabase
+    appInsightsResourceId: appInsights.outputs.resourceId
+  }
+}
+
+module usageSnapshotReadsTelemetry 'modules/app-insights-reader.bicep' = {
+  name: 'usage-snapshot-reads-telemetry'
+  params: {
+    componentName: '${namePrefix}-insights'
+    principalId: usageSnapshotJob.outputs.principalId
   }
 }
 

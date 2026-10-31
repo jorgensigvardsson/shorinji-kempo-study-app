@@ -5,6 +5,66 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-10-31T20:49:49.000Z",
+    changes: [
+      {
+        emoji: "👥",
+        sv: "Organisationssidan visar nu hur många medlemmar varje klubb har, direkt bredvid klubbens namn.",
+        en: "The organisation page now shows how many members each branch has, right next to the branch's name.",
+        tr: "Organizasyon sayfası artık her kulübün kaç üyesi olduğunu, kulübün adının hemen yanında gösteriyor.",
+        ja: "組織ページで、各支部の名前の横に会員数が表示されるようになりました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-10-04T06:48:17.000Z",
+    changes: [
+      {
+        emoji: "🥋",
+        sv: "Gradmärket på hokei-korten har fått bältets färg igen: grönt för 6–4 kyū, brunt för 3–1 kyū och svart för dan-grader. Färgerna är dämpade och anpassade till både mörkt och ljust tema.",
+        en: "The grade tag on hokei cards wears the belt colour again: green for 6–4 kyū, brown for 3–1 kyū and black for dan grades. The colours are muted and suited to both the dark and the light theme.",
+        tr: "Hokei kartlarındaki derece etiketi yeniden kuşak rengini taşıyor: 6–4 kyū için yeşil, 3–1 kyū için kahverengi ve dan dereceleri için siyah. Renkler yumuşatıldı ve hem koyu hem açık temaya uyumlu.",
+        ja: "法形カードの級・段の表示が、再び帯の色で表示されるようになりました。6〜4級は緑、3〜1級は茶、段位は黒です。色は控えめに調整され、ダークテーマとライトテーマの両方になじみます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-10-04T06:40:49.000Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Gradväljaren visar nu vilken grad du har och vilken du tränar inför, och valet \"Alla till och med …\" säger vilken grad det gäller.",
+        en: "The grade picker now shows which grade you hold and which you are training towards, and the \"Everything up to and including …\" choice names the grade it means.",
+        tr: "Derece seçici artık hangi dereceye sahip olduğunuzu ve hangi derece için çalıştığınızı gösteriyor; \"… dahil tümü\" seçeneği de hangi dereceyi kastettiğini belirtiyor.",
+        ja: "級・段の選択画面に、現在の級・段と次に目指す級・段が表示されるようになりました。「…までのすべて」の選択肢にも、対象の級・段が表示されます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-10-04T06:24:47.000Z",
+    changes: [
+      {
+        emoji: "📌",
+        sv: "Quizen för fotställningar och handpositioner, och hokei-flashkorten, kommer nu ihåg vilken grad du valde senast på den här enheten. När du börjar träna mot en ny grad utgår de från den igen.",
+        en: "The foot-stance and hand-position quizzes, and the hokei flashcards, now remember which grade you chose last time on this device. When you start training towards a new grade, they start from that grade again.",
+        tr: "Ayak duruşu ve el pozisyonu testleri ile hokei bilgi kartları artık bu cihazda en son hangi dereceyi seçtiğinizi hatırlıyor. Yeni bir dereceye çalışmaya başladığınızda yeniden o dereceden başlarlar.",
+        ja: "足の構えと手の位置のクイズ、法形のフラッシュカードは、この端末で前回選んだ級・段を覚えておくようになりました。次の級・段を目指し始めると、その級・段から表示されます。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-10-03T13:20:22.000Z",
+    changes: [
+      {
+        emoji: "🔀",
+        sv: "Administratörer kan nu flytta en medlem till en annan klubb direkt från medlemmens sida. Förbundsadministratörer kan flytta mellan klubbar i det egna förbundet, och WSKO-administratörer mellan alla klubbar. Medlemmen och administratörerna i båda klubbarna får ett mejl om flytten.",
+        en: "Administrators can now move a member to another branch straight from the member's page. Federation administrators can move members between branches in their own federation, and WSKO administrators between any branches. The member and the administrators of both branches are emailed about the move.",
+        tr: "Yöneticiler artık bir üyeyi doğrudan üyenin sayfasından başka bir kulübe taşıyabiliyor. Federasyon yöneticileri kendi federasyonlarındaki kulüpler arasında, WSKO yöneticileri ise tüm kulüpler arasında taşıma yapabiliyor. Üyeye ve her iki kulübün yöneticilerine taşınmayla ilgili e-posta gönderiliyor.",
+        ja: "管理者は会員のページから、会員を別の支部へ直接移動できるようになりました。連盟の管理者は自分の連盟内の支部間で、WSKOの管理者はすべての支部間で移動できます。移動の際は、本人と両方の支部の管理者にメールでお知らせします。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-09-30T18:05:00.000Z",
     changes: [
       {

@@ -84,7 +84,7 @@ describe("Quiz streak", () => {
     await renderQuiz();
 
     await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
-    await user.click(screen.getByRole("button", { name: "Alla till och med egna" }));
+    await user.click(screen.getByRole("button", { name: "Alla till och med Shodan" }));
 
     for (let questionNumber = 0; questionNumber < 3; questionNumber += 1) {
       await user.click(screen.getByLabelText("Rätt alternativ"));
@@ -92,7 +92,7 @@ describe("Quiz streak", () => {
       await user.click(screen.getByRole("button", { name: "Nästa fråga" }));
     }
 
-    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med egna" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med Shodan" })).toBeTruthy();
   });
 
   it("picks up the streak stored on this device", async () => {
@@ -143,5 +143,44 @@ describe("Quiz streak", () => {
 
     expect(streakValue()).toBe("0");
     expect(localStorage.getItem("quizStreakCurrent")).toBe("0");
+  });
+});
+
+describe("Remembered grade selection", () => {
+  it("remembers the choice on this device when the user comes back", async () => {
+    const user = userEvent.setup();
+    const first = await renderQuiz();
+    await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
+    await user.click(screen.getByRole("button", { name: "Alla till och med Shodan" }));
+    first.unmount();
+
+    await renderQuiz();
+    expect(screen.getByRole("button", { name: "Tränar inför Alla till och med Shodan" })).toBeTruthy();
+  });
+
+  it("keeps each quiz's choice to itself", async () => {
+    const user = userEvent.setup();
+    const first = await renderQuiz();
+    await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
+    await user.click(screen.getByRole("button", { name: "Alla grader" }));
+    first.unmount();
+
+    const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
+    render(<HandPositionQuiz myGrade="shodan" />);
+    expect(screen.getByRole("button", { name: "Tränar inför Shodan" })).toBeTruthy();
+  });
+
+  // A choice made while training for one grade does not follow the reader to
+  // the next: once they have moved on, the quiz starts from their new grade.
+  it("starts from the new training grade once the reader has moved on", async () => {
+    const user = userEvent.setup();
+    const first = await renderQuiz();
+    await user.click(screen.getByRole("button", { name: "Tränar inför Shodan" }));
+    await user.click(screen.getByRole("button", { name: "Alla grader" }));
+    first.unmount();
+
+    const { default: FootStanceQuiz } = await import("./FootStanceQuiz");
+    render(<FootStanceQuiz myGrade="nidan" />);
+    expect(screen.getByRole("button", { name: "Tränar inför Nidan" })).toBeTruthy();
   });
 });

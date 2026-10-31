@@ -8,6 +8,7 @@ import { AdminRequestError, type AdminOrgBranch, type AdminOrgTree } from "./syn
 import { administeredBranches, administeredFederations, coversEverything } from "./roles";
 import Loading from "./components/Loading";
 import FederationFlag from "./components/FederationFlag";
+import MemberCount from "./components/MemberCount";
 
 // Loaded only when somebody actually opens the tree view, not with the rest of
 // this page. @xyflow/react is the single heaviest dependency in the app, and
@@ -369,7 +370,10 @@ const AdminOrganization = () => {
                   ? renameControls()
                   : (
                     <>
-                      <Link to={`/admin/branches/${encodeURIComponent(branch.id)}/members`}>{branch.name}</Link>
+                      <span>
+                        <Link to={`/admin/branches/${encodeURIComponent(branch.id)}/members`}>{branch.name}</Link>
+                        <MemberCount count={branch.memberCount} className="ms-2" />
+                      </span>
                       <div className="d-flex gap-2 align-items-center">
                         {coversBranch(branch, section.federationId) && (
                           <Button size="sm" variant="outline-secondary" disabled={busy}

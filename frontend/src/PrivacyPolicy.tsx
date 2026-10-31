@@ -80,6 +80,9 @@ const PrivacyPolicy = () => {
         {translator.translate("Det enda som identifierar dig är ett kodat värde som räknas fram ur ditt konto-id. Värdet är detsamma på alla dina enheter, så att en person räknas som en person och inte som tre — men det går inte att räkna tillbaka till vem du är.")}
       </p>
       <p>
+        {translator.translate("Statistiken innehåller också vilken klubb ditt konto hör till, så att vi kan se hur appen används i varje klubb.")}
+      </p>
+      <p>
         {translator.translate("Utöver det registreras vilken sorts webbläsare och vilket operativsystem du använder, och vilken version av appen din enhet kör. Versionen är med för att vi ska kunna se att en uppdatering faktiskt nått ut.")}
       </p>
       <p>
@@ -87,6 +90,12 @@ const PrivacyPolicy = () => {
       </p>
       <p>
         {translator.translate("Statistiken sparas i 30 dagar och raderas sedan automatiskt. Den används för att förstå hur appen används och för att hitta fel — aldrig för att följa vad en enskild person gör.")}
+      </p>
+      {/* The usage history (backend/auth/internal/store/history.go) is kept for
+          good, which is only promisable because it holds nothing about anybody:
+          no id, no pseudonym, only counts per week and per branch. */}
+      <p>
+        {translator.translate("Veckovisa summor sparas längre: hur många som använde appen varje vecka och i varje klubb, och hur många konton som skapades, flyttades och avslutades. Det är bara antal. De innehåller ingenting som pekar ut någon och kan inte kopplas till dig.")}
       </p>
 
       <p>{translator.translate("Personuppgiftsansvarig: Jörgen Sigvardsson, jorgen.sigvardsson@gmail.com")}</p>

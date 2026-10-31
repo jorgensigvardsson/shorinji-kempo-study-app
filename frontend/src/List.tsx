@@ -27,8 +27,10 @@ const List = (props: Props) => {
     const translator = useContext(TranslatorContext);
     const visibleSelection = selection === "own" ? grade.grade : selection;
     const selectionChoices = [
-        { value: "all", label: translator.translate("Alla") },
-        { value: "up-to-own", label: translator.translate("Alla till och med egna") },
+        { value: "all", label: translator.translate("Alla grader") },
+        // Named rather than "own": whether that meant the grade held or the one
+        // trained towards was anybody's guess, and it is the latter.
+        { value: "up-to-own", label: translator.translate("Alla till och med {0}", { params: [gradeLabel(grade.grade, translator, false)] }) },
         ...allGradePlans.map(plan => ({
             value: plan.grade,
             label: gradeLabel(plan.grade, translator, false),
@@ -70,6 +72,7 @@ const List = (props: Props) => {
             <div className="training-list-controls training-view-controls mb-4 is-single">
                 <div className="training-list-filters">
                     <FocusChoicePicker
+                      showOwnGrade
                       title={translator.translate("Välj vad som visas")}
                       value={visibleSelection}
                       choices={selectionChoices}

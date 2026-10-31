@@ -51,6 +51,14 @@ type Sender interface {
 
 	// SendTransferDecision tells a member what the receiving branch decided.
 	SendTransferDecision(ctx context.Context, to, branchName, lang string, accepted bool) error
+
+	// SendMovedByAdmin tells a member that an admin has moved them to another
+	// branch. fromBranchName is empty when they belonged to no branch we can name.
+	SendMovedByAdmin(ctx context.Context, to, fromBranchName, toBranchName, lang string) error
+
+	// SendMemberArrival tells a branch that an admin has moved a member into it.
+	// The branch they left is told with SendTransferDeparture.
+	SendMemberArrival(ctx context.Context, to []string, lang string, notice ArrivalNotice) error
 }
 
 // FeedbackSubmission is one in-app feedback submission, along with the context
@@ -382,6 +390,17 @@ func (LogSender) SendTransferDecision(_ context.Context, to, branchName, lang st
 		outcome = "accepted"
 	}
 	log.Printf("[email:dev] transfer %s, to %s (%s), branch %q", outcome, to, lang, branchName)
+	return nil
+}
+
+func (LogSender) SendMemberArrival(_ context.Context, to []string, lang string, n ArrivalNotice) error {
+	log.Printf("[email:dev] member arrived: %s <%s> moved from %q to %q, telling %v (%s)",
+		n.MemberName, n.MemberEmail, n.FromBranchName, n.ToBranchName, to, lang)
+	return nil
+}
+
+func (LogSender) SendMovedByAdmin(_ context.Context, to, fromBranchName, toBranchName, lang string) error {
+	log.Printf("[email:dev] moved by an admin, to %s (%s): %q → %q", to, lang, fromBranchName, toBranchName)
 	return nil
 }
 

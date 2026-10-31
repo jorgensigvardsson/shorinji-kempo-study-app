@@ -336,6 +336,33 @@ body.card-focus-active::before {
   font-weight: 600;
 }
 
+/* The grade tag wears the colour of the belt that grade is trained in. Each
+   colour is mixed into the page surface rather than laid on at full strength, so
+   it reads as a tint of the card in either scheme rather than a patch of paint. */
+.kamoku-card-level-tag[data-belt="green"] { --belt: #3f8f4e; }
+.kamoku-card-level-tag[data-belt="brown"] { --belt: #8f5d34; }
+
+.kamoku-card-level-tag[data-belt="green"],
+.kamoku-card-level-tag[data-belt="brown"] {
+  background: color-mix(in srgb, var(--belt) 24%, var(--bs-body-bg));
+  color: color-mix(in srgb, var(--belt) 45%, var(--bs-body-color));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--belt) 35%, transparent);
+}
+
+/* Black cannot be tinted the same way: blended into a dark surface it vanishes,
+   and at full strength on a light one it shouts. So it is a softened charcoal on
+   light, and a pocket darker than the card — edged so it holds its shape — on dark. */
+.kamoku-card-level-tag[data-belt="black"] {
+  background: color-mix(in srgb, #000 62%, var(--bs-body-bg));
+  color: color-mix(in srgb, var(--bs-body-bg) 90%, var(--bs-body-color));
+}
+
+[data-bs-theme="dark"] .kamoku-card-level-tag[data-belt="black"] {
+  background: color-mix(in srgb, #000 55%, var(--bs-body-bg));
+  color: var(--bs-body-color);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bs-body-color) 18%, transparent);
+}
+
 .kamoku-card-level-tag::before {
   display: none !important;
 }

@@ -91,3 +91,33 @@ func TestFileUserStore_ListByBranches(t *testing.T) {
 		t.Fatalf("List = %d users, %v; want the 5 that were saved", len(all), err)
 	}
 }
+
+func TestFileUserStore_CountByBranches(t *testing.T) {
+	s := NewFileUserStore(t.TempDir())
+	for _, u := range []*User{
+		{ID: "u1", Email: "u1@example.com", BranchID: "karlstad"},
+		{ID: "u2", Email: "u2@example.com", BranchID: "karlstad"},
+		{ID: "u3", Email: "u3@example.com", BranchID: "goteborg"},
+		{ID: "u4", Email: "u4@example.com", BranchID: "oslo"},
+		{ID: "u5", Email: "u5@example.com"}, // no branch at all
+	} {
+		if err := s.Save(u); err != nil {
+			t.Fatalf("Save %s: %v", u.ID, err)
+		}
+	}
+
+	counts, err := s.CountByBranches([]string{"karlstad", "goteborg", "nowhere", ""})
+	if err != nil {
+		t.Fatalf("CountByBranches: %v", err)
+	}
+	// Oslo was not asked about, an empty branch has nobody, and the branchless
+	// user is never counted under the empty id.
+	want := map[string]int{"karlstad": 2, "goteborg": 1}
+	if !reflect.DeepEqual(counts, want) {
+		t.Errorf("counts = %v, want %v", counts, want)
+	}
+
+	if counts, err := s.CountByBranches(nil); err != nil || len(counts) != 0 {
+		t.Errorf("no branches asked for = %v, %v; want nothing", counts, err)
+	}
+}

@@ -401,8 +401,9 @@ corporate domain at the appropriate provider.
 | GET | `/auth/admin/users/{id}` | One user, so a page addressed by URL stands up without having arrived from the listing |
 | PATCH | `/auth/admin/users/{id}` | Update a user's display name; 409 for OIDC users (their name comes from the provider) |
 | PUT | `/auth/admin/users/{id}/roles` | Replace a user's roles — body `{roles: [...]}`; 403 for a grant beyond the caller's authority, 409 on removing your own `admin`/`wsko_admin` |
+| PUT | `/auth/admin/users/{id}/branch` | Move a member to another branch on an admin's say-so — body `{branchId}`. Authority over **both** ends: a federation admin moves within their federation, a WSKO or global admin anywhere, a branch admin nowhere. 404 for a destination the caller does not cover, 409 for the branch they are already in. A pending transfer to that same branch is settled by it. Answers `{notified}`: the member is emailed, and the admin told if that failed. The branch admins at both ends are told too — the one left behind that an administrator moved them, the one joined that it has a new member — leaving out the admin who made the move and the member themselves. Branch admins only: unlike a request, nothing waits on an answer, so a branch with no admin of its own has nobody to tell and the news does not climb to the federation or WSKO |
 | POST | `/auth/admin/users/{id}/logout` | Force-logout a user: revoke all their refresh tokens. Their access token stays valid until it expires (≤ 1 h) |
-| GET | `/auth/admin/org` | The organization tree as the caller may see it. Branches in no federation come back as their own group, headed WSKO |
+| GET | `/auth/admin/org` | The organization tree as the caller may see it. Branches in no federation come back as their own group, headed WSKO. Each branch carries `memberCount`; it is left out, not zeroed, when the users store could not be counted, and the tree is served regardless |
 | POST | `/auth/admin/federations` | Create a federation — body `{id, name}`, id an alpha-2 country code. WSKO authority |
 | PATCH | `/auth/admin/federations/{id}` | Rename a federation |
 | POST | `/auth/admin/branches` | Create a branch — body `{name, federationId?}`. An omitted `federationId` means WSKO-attached, and needs WSKO authority |
@@ -416,12 +417,46 @@ corporate domain at the appropriate provider.
 | POST | `/auth/admin/transfers/{id}/accept` | Move the member: `{id}` is their user id. The branch they leave is read fresh, so an admin who moved them meanwhile is the one told |
 | POST | `/auth/admin/transfers/{id}/reject` | Refuse, keeping the decision for 90 days |
 | POST | `/auth/admin/push-audience` | Resolve a push audience (a list of `{kind, id}` organizational scopes) into `{all:true}` or `{userIds:[...]}`; called by the persistence service on behalf of a signed-in sender, authorized the same way as everything else in this table |
+| GET | `/auth/admin/usage?days=N&bin=day\|week` | Usage statistics for the usage page: distinct people per day or week, overall and per branch id, plus window totals and the names of the branches mentioned. **Technical `admin` only** — the one endpoint here that checks the role itself rather than a scope (see below). `days` is 1–90, `bin` is `day` or `week`; anything else is 400. 503 where it is not configured, 502 when Azure refuses or fails. Read from Application Insights with the container's managed identity and cached for ten minutes; globally rate-limited on top of the per-IP limit |
+| GET | `/auth/admin/usage/history?since=<RFC 3339>` | The long view: every usage-history entry recorded at or after `since` (all of them when absent), plus every branch's current name. **Technical `admin` only**, 503 where history is switched off. The cursor is inclusive; the page drops repeats by id. Entries are anonymous and never change, so the page caches them and asks only for newer ones |
 
 The `/auth/admin/*` endpoints back the admin pages. Authorization is enforced per handler, and
 every one of them asks whether the caller **covers the scope the action touches** rather than
 merely whether they are an admin. A user outside the caller's scope is reported as 404 rather
 than 403: the listing already hides them, and a 403 would confirm that an account exists in a
 branch the caller has no business knowing about.
+
+The exception is `GET /auth/admin/usage`. Telemetry is a fact about the software, not the
+organization, so it sits with broadcasts and force-logout as a technical power: a WSKO admin covers
+every branch and still does not see it. The query text is fixed in
+`backend/auth/internal/usage`; the caller chooses a window and a bucket size and nothing reaches
+KQL. It queries the Application Insights **component** rather than the workspace behind it, so the
+auth service's identity — granted Monitoring Reader on that component alone
+(`infrastructure/modules/app-insights-reader.bicep`) — reads the app's telemetry and never the
+containers' logs. The response carries counts only; the pseudonyms they are counted over stay in
+Azure. It is switched on in production only: staging passes no component to the auth app, which
+then gets no managed identity at all and answers 503.
+
+**Usage history** (`backend/auth/internal/store/history.go`) is what outlives telemetry's 30 days.
+It is an append-only `usage_history` Cosmos container, partitioned by `/type`, holding two kinds
+of entry, neither of which identifies anybody — no user id, no address, no pseudonym, only what
+happened, in which branch, and when:
+
+- **Events**, recorded by the auth service as they happen: `account_created` (applied or added by
+  an admin), `account_deleted` (with how long the account existed, in coarse buckets),
+  `transfer` (from, to, requested or moved by an admin) and `application` (submitted, approved,
+  declined, withdrawn). Best-effort: a failed write is logged, and never undoes the thing it
+  describes.
+- **Weekly snapshots**, written by the `usage-snapshot` Container Apps job
+  (`infrastructure/modules/usage-snapshot-job.bicep`, Mondays 07:00 UTC). It is the auth image run
+  with `--job=usage-snapshot`. Each run stores every finished Monday-to-Sunday week not yet
+  stored — distinct people overall and per branch, active hours, installed vs browser, builds, and
+  members per branch — reading where it got to from the newest stored week. A week's id is
+  deterministic (`week:2026-10-19`), so overlapping runs cannot store it twice. A week older than
+  telemetry's retention can no longer be counted whole and is logged as lost instead.
+
+Like the usage page, history is production-only: where usage statistics are off, nothing is
+recorded and the endpoint answers 503.
 
 Listing is a full scan for a global or WSKO admin and a `branchId` query otherwise, so it stays
 affordable as branches grow. Setting roles writes the `roles` store, so the change takes effect
@@ -907,3 +942,14 @@ az monitor log-analytics query \
 with `air` hot-reload for the Go services. Stores default to file-based unless Cosmos
 environment variables are supplied; dev-only VAPID keys and a dev broadcast token are baked
 into the compose file.
+
+There is no telemetry to read locally, so compose sets `USAGE_DEMO=true` and the usage page is
+served invented members of whatever branches the local organization holds
+(`backend/auth/internal/usage/demo.go`), marked as invented on the page. It is refused whenever
+Cosmos is configured, so it can never stand in for real numbers.
+
+The long view needs history, which locally nothing has had time to write. `cmd/usageseed` invents
+a year of it — weekly snapshots and the membership events behind them — for the local
+organization's branches: `go run ./cmd/usageseed --data-dir ../../devdata/auth --apply` from
+`backend/auth`. The snapshot job itself can be run against the demo too:
+`docker compose exec auth go run . --job=usage-snapshot`.

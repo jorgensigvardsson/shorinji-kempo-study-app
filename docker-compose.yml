@@ -126,6 +126,10 @@ services:
       # fetch twice and the production budget trips on an ordinary page load.
       RATE_LIMIT_RPS: "20"
       RATE_LIMIT_BURST: "60"
+      # There is no telemetry to read locally, so the usage page is served
+      # invented members of whatever branches exist here — see
+      # backend/auth/internal/usage/demo.go. Ignored if Cosmos is set above.
+      USAGE_DEMO: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8081/healthz"]
       interval: 5s

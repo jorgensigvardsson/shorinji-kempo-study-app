@@ -12,6 +12,18 @@ export const humanGradeName = (ln: CurrentGrade): string => {
     return ln;
 }
 
+export type Belt = "green" | "brown" | "black";
+
+// The belt a grade is trained in: green through the first three kyū, brown
+// through the last three, black for every dan.
+export function beltOf(grade: GradeName): Belt {
+    switch (grade) {
+        case "6 kyū": case "5 kyū": case "4 kyū": return "green";
+        case "3 kyū": case "2 kyū": case "1 kyū": return "brown";
+        default: return "black";
+    }
+}
+
 export function nextGrade(grade: CurrentGrade): GradeName | undefined {
     const idx = currentGrades.indexOf(grade);
     return idx >= 0 && idx < currentGrades.length - 1 ? currentGrades[idx + 1] as GradeName : undefined;

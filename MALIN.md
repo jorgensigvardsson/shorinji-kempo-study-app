@@ -30,6 +30,7 @@ Starting 2026-08-31
 - It is normal for `main` and a feature branch to both gain commits. This is not a mistake. Before release, bring the latest `main` into the feature branch and test the combined result. Prefer a normal merge for a branch that has already been pushed, shared, or deployed to staging; do not rewrite its published history with a rebase.
 - Before switching branches or combining work, check both local and GitHub branch state. Pay special attention to local-only commits and uncommitted files, and explain them before taking action.
 - Use the repository's release path explicitly and explain each boundary: feature branch → `deploy-staging` for staging; feature branch → `main` once accepted; updated `main` → `deploy` to start production. Merging into `main` alone does not deploy production.
+- Never ever merge and push to either `deploy-staging` or `deploy` directly from the local repository. Always push the source branch to origin, and then do the merge/push to `deploy-staging` or `deploy` from the origin's branch. This ensures that what is deployed can always be recovered/pulled to other repositories.
 - When Malin says she wants to start, continue, stage, merge, or release some work, translate that intention into the safe Git sequence and offer to carry it out. Do not make her memorize the commands.
 
 ## Describing Malin's changes

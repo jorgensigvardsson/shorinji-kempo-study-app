@@ -2,11 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/authz"
+	"github.com/jorgensigvardsson/shorinji-kempo-study-app/backend/auth/internal/store"
 )
 
 // The branch picker has to work before anybody has an account, so it is the one
@@ -105,6 +107,68 @@ func TestAdminOrgTree_ShowsOnlyWhatTheCallerCovers(t *testing.T) {
 			t.Errorf("wskoBranches = %+v, want tokyo", got.WSKOBranches)
 		}
 	})
+}
+
+func TestAdminOrgTree_CountsMembers(t *testing.T) {
+	h := newTestHandler(t, &fakeSender{})
+	seedOrganization(t, h)
+
+	counts := func(got orgTreeResponse) map[string]int {
+		out := map[string]int{}
+		branches := append([]orgBranch{}, got.WSKOBranches...)
+		for _, f := range got.Federations {
+			branches = append(branches, f.Branches...)
+		}
+		for _, b := range branches {
+			if b.MemberCount == nil {
+				t.Fatalf("branch %s has no member count", b.ID)
+			}
+			out[b.ID] = *b.MemberCount
+		}
+		return out
+	}
+
+	t.Run("every branch the caller sees carries its count", func(t *testing.T) {
+		got := counts(orgTreeAs(t, h, []string{authz.RoleAdmin}))
+		want := map[string]int{"karlstad": 2, "goteborg": 1, "oslo": 1, "tokyo": 1}
+		if len(got) != len(want) {
+			t.Fatalf("counts = %v, want %v", got, want)
+		}
+		for id, n := range want {
+			if got[id] != n {
+				t.Errorf("%s = %d, want %d", id, got[id], n)
+			}
+		}
+	})
+
+	t.Run("an empty branch says zero rather than nothing", func(t *testing.T) {
+		if err := h.orgs.Save(&store.OrgNode{ID: "malmo", Type: store.NodeBranch, Name: "Malmö", FederationID: "SE"}); err != nil {
+			t.Fatalf("save malmo: %v", err)
+		}
+		got := counts(orgTreeAs(t, h, []string{authz.FederationAdmin("SE")}))
+		if n, ok := got["malmo"]; !ok || n != 0 {
+			t.Errorf("malmo = %d (present %v), want 0", n, ok)
+		}
+	})
+
+	t.Run("a failed count leaves the tree standing, without numbers", func(t *testing.T) {
+		h.users = failingCounts{h.users}
+		got := orgTreeAs(t, h, []string{authz.RoleAdmin})
+		if len(got.Federations) != 2 {
+			t.Fatalf("federations = %d, want 2", len(got.Federations))
+		}
+		for _, b := range got.Federations[0].Branches {
+			if b.MemberCount != nil {
+				t.Errorf("%s has count %d, want none", b.ID, *b.MemberCount)
+			}
+		}
+	})
+}
+
+type failingCounts struct{ store.UserStore }
+
+func (failingCounts) CountByBranches([]string) (map[string]int, error) {
+	return nil, errors.New("store unavailable")
 }
 
 func TestCreateFederation(t *testing.T) {
