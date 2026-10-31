@@ -263,3 +263,45 @@ func (s *CosmosUserStore) ListByBranches(branchIDs []string) ([]*User, error) {
 	}
 	return users, nil
 }
+
+// CountByBranches counts members per branch with the same predicate as
+// ListByBranches, but projects the branch id alone, so no user record leaves
+// the database. The counting happens here rather than in a GROUP BY: the Go SDK
+// does not run cross-partition aggregates, and the users container is
+// partitioned by user id.
+func (s *CosmosUserStore) CountByBranches(branchIDs []string) (map[string]int, error) {
+	ids := make([]string, 0, len(branchIDs))
+	for _, id := range branchIDs {
+		if id != "" {
+			ids = append(ids, id)
+		}
+	}
+	counts := map[string]int{}
+	if len(ids) == 0 {
+		return counts, nil
+	}
+
+	ctx := context.Background()
+	opts := &azcosmos.QueryOptions{
+		QueryParameters: []azcosmos.QueryParameter{{Name: "@branchIds", Value: ids}},
+	}
+	pager := s.users.NewQueryItemsPager(
+		"SELECT VALUE c.branchId FROM c WHERE ARRAY_CONTAINS(@branchIds, c.branchId)",
+		azcosmos.NewPartitionKey(), opts)
+
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("cosmos count users by branch: %w", err)
+		}
+		for _, raw := range page.Items {
+			var branchID string
+			if err := json.Unmarshal(raw, &branchID); err != nil {
+				log.Printf("warning: cosmos count users by branch: unmarshal item: %v", err)
+				continue
+			}
+			counts[branchID]++
+		}
+	}
+	return counts, nil
+}

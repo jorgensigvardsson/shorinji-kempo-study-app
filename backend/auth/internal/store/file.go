@@ -180,3 +180,16 @@ func (s *FileUserStore) ListByBranches(branchIDs []string) ([]*User, error) {
 	}
 	return users, nil
 }
+
+// CountByBranches tallies the same in-memory filter ListByBranches applies.
+func (s *FileUserStore) CountByBranches(branchIDs []string) (map[string]int, error) {
+	users, err := s.ListByBranches(branchIDs)
+	if err != nil {
+		return nil, err
+	}
+	counts := map[string]int{}
+	for _, u := range users {
+		counts[u.BranchID]++
+	}
+	return counts, nil
+}

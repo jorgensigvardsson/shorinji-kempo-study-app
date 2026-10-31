@@ -10,6 +10,7 @@ import { useTheme } from "./hooks";
 import type { Translator } from "./i18n";
 import type { AdminOrgBranch } from "./sync/backend";
 import FederationFlag from "./components/FederationFlag";
+import MemberCount from "./components/MemberCount";
 
 // WSKO is the root of the organization rather than a record with a name, so it
 // has no id on the wire. React Flow node ids must be non-empty strings, so it
@@ -205,7 +206,10 @@ const BranchNode = ({ data }: NodeProps<BranchFlowNode>) => (
     <div className="card-body">
       {data.isEditing ? data.renameControls : (
         <>
-          <Link to={`/admin/branches/${encodeURIComponent(data.branch.id)}/members`}>{data.branch.name}</Link>
+          <div>
+            <Link to={`/admin/branches/${encodeURIComponent(data.branch.id)}/members`}>{data.branch.name}</Link>
+            <MemberCount count={data.branch.memberCount} className="ms-2" />
+          </div>
           <div className="d-flex gap-2 mt-2 flex-wrap">
             {data.canRename && (
               <Button size="sm" variant="outline-secondary" disabled={data.busy} onClick={data.onStartRename}>

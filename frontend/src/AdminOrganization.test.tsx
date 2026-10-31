@@ -74,6 +74,27 @@ describe("AdminOrganization", () => {
     expect(cardFor("WSKO").getByText("Tokyo Honbu")).toBeTruthy();
   });
 
+  it("shows each branch's member count beside its name, zero included", async () => {
+    adminOrgTree.mockResolvedValue({
+      federations: [
+        { id: "SE", name: "Svenska Shorinji Kempoförbundet", branches: [{ id: "b-karlstad", name: "Karlstad", memberCount: 12 }] },
+      ],
+      wskoBranches: [{ id: "b-tokyo", name: "Tokyo Honbu", memberCount: 0 }],
+    });
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+    expect(cardFor("Svenska Shorinji Kempoförbundet").getByTestId("member-count").textContent).toBe("12");
+    expect(cardFor("WSKO").getByTestId("member-count").textContent).toBe("0");
+  });
+
+  // The server leaves the count out when it could not read it; showing 0 then
+  // would say the branch is empty when nobody knows.
+  it("shows no count where the server sent none", async () => {
+    render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
+    await screen.findByText("Karlstad");
+    expect(screen.queryByTestId("member-count")).toBeNull();
+  });
+
   it("defaults to the list view", async () => {
     render(<MemoryRouter><AdminOrganization /></MemoryRouter>);
     await screen.findByText("Karlstad");

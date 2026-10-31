@@ -14,9 +14,13 @@ import (
 
 // orgBranch is a branch as the admin tree renders it — the federation is implied
 // by where it sits, so it is not repeated on every node.
+//
+// MemberCount is absent, rather than zero, when the count could not be read:
+// "nobody trains here" and "we don't know" must not look the same.
 type orgBranch struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	MemberCount *int   `json:"memberCount,omitempty"`
 }
 
 type orgFederation struct {
@@ -90,6 +94,12 @@ func (h *Handler) adminOrgTree(w http.ResponseWriter, r *http.Request) {
 		branchesByFederation[b.FederationID] = append(branchesByFederation[b.FederationID], orgBranch{ID: b.ID, Name: b.Name})
 	}
 
+	groups := [][]orgBranch{wskoBranches}
+	for _, branches := range branchesByFederation {
+		groups = append(groups, branches)
+	}
+	h.fillMemberCounts(groups...)
+
 	federations := []orgFederation{}
 	for _, f := range h.orgs.Federations() {
 		branches := branchesByFederation[f.ID]
@@ -103,6 +113,33 @@ func (h *Handler) adminOrgTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, orgTreeResponse{Federations: federations, WSKOBranches: wskoBranches})
+}
+
+// fillMemberCounts writes each branch's member count in place. Only branches
+// already in the caller's tree are asked about, so the count can never reveal
+// anything about a branch the caller does not cover. A failure leaves the counts
+// out and the tree intact: the tree is the page, the numbers are a garnish.
+func (h *Handler) fillMemberCounts(groups ...[]orgBranch) {
+	var ids []string
+	for _, branches := range groups {
+		for _, b := range branches {
+			ids = append(ids, b.ID)
+		}
+	}
+	if len(ids) == 0 {
+		return
+	}
+	counts, err := h.users.CountByBranches(ids)
+	if err != nil {
+		log.Printf("adminOrgTree: counting members: %v", err)
+		return
+	}
+	for _, branches := range groups {
+		for i := range branches {
+			n := counts[branches[i].ID]
+			branches[i].MemberCount = &n
+		}
+	}
 }
 
 // createFederation adds a national federation. Creating one is a WSKO-level act:

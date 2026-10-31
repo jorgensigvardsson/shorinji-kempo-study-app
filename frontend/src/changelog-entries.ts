@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-10-31T20:49:49.000Z",
+    changes: [
+      {
+        emoji: "👥",
+        sv: "Organisationssidan visar nu hur många medlemmar varje klubb har, direkt bredvid klubbens namn.",
+        en: "The organisation page now shows how many members each branch has, right next to the branch's name.",
+        tr: "Organizasyon sayfası artık her kulübün kaç üyesi olduğunu, kulübün adının hemen yanında gösteriyor.",
+        ja: "組織ページで、各支部の名前の横に会員数が表示されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-10-04T06:48:17.000Z",
     changes: [
       {

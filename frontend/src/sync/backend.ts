@@ -146,6 +146,8 @@ export interface JoinContext {
 export interface AdminOrgBranch {
   id: string;
   name: string;
+  // Absent when the server could not count them — not the same as zero.
+  memberCount?: number;
 }
 
 export interface AdminOrgFederation {
