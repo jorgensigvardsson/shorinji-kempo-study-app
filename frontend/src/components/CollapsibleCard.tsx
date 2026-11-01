@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, Collapse } from "react-bootstrap";
-import { ChevronDown, ChevronUp } from "react-bootstrap-icons";
+import DisclosureChevron from "./DisclosureChevron";
 
 let focusedCardCount = 0;
 let focusedCardHistoryId = 0;
@@ -117,7 +117,7 @@ const CollapsibleCard = (props: Props) => {
                     <div>{header}</div>
                     {canCollapse && (
                         <div className="collapsible-card-chevron">
-                            {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                            <DisclosureChevron expanded={open} />
                         </div>
                     )}
                 </div>

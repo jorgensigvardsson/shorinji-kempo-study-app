@@ -366,3 +366,47 @@ body.card-focus-active::before {
 .kamoku-card-level-tag::before {
   display: none !important;
 }
+
+/* The Hokei browser is a catalogue, not a grid of standalone widgets. Keep
+   the rich card structure when a technique opens, but let the closed state
+   share the quiet row language used by the other free-practice lists. */
+.hokei-browse-list:not(.is-dojo) .hokei-browse-item + .hokei-browse-item {
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
+}
+
+.hokei-browse-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hokei-browse-card .card-header {
+  padding: 0.95rem 0.25rem;
+}
+
+.hokei-browse-card .kamoku-card-name {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.hokei-browse-card.is-expanded .kamoku-card-name::after,
+.hokei-browse-card.is-expanded .card-head-title::after {
+  display: none;
+}
+
+.hokei-browse-card > .collapse,
+.hokei-browse-card > .collapsing {
+  margin: 0 0.25rem 0.65rem;
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--bs-tertiary-bg) 72%, transparent);
+}
+
+.hokei-browse-card .card-body {
+  padding: 1rem 1rem 1.15rem;
+}
+
+.hokei-browse-card .card-footer {
+  padding: 0 1rem 0.9rem;
+  border-top: 0 !important;
+}

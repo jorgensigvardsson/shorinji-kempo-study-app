@@ -1,0 +1,17 @@
+.app-disclosure-chevron {
+  flex: 0 0 auto;
+  width: 0.9rem;
+  height: 0.9rem;
+  transform: rotate(0deg);
+  transition: transform 140ms ease;
+}
+
+.app-disclosure-chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-disclosure-chevron {
+    transition: none;
+  }
+}

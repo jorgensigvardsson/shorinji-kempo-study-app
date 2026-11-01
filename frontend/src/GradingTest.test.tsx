@@ -211,7 +211,7 @@ describe("GradingTest subject split", () => {
     expect(screen.queryByText("Teoretiskt provämne")).toBeNull();
   });
 
-  it("opens a technical category without duplicating or dropping its details", async () => {
+  it("expands a technical category in place without dropping its details", async () => {
     const user = userEvent.setup();
     renderGrading("technical");
 
@@ -222,7 +222,7 @@ describe("GradingTest subject split", () => {
     await user.click(screen.getByRole("button", { name: /Tekniskt provämne/ }));
 
     expect(screen.getByText("Tekniska ämnen")).toBeTruthy();
-    expect(screen.queryByText("Andra teknikområdet")).toBeNull();
+    expect(screen.getByText("Andra teknikområdet")).toBeTruthy();
     expect(screen.getByText("Övergripande beskrivning")).toBeTruthy();
     expect(screen.getByText(/Viktig anmärkning/)).toBeTruthy();
     expect(screen.getByText("Demonstration")).toBeTruthy();
@@ -233,10 +233,11 @@ describe("GradingTest subject split", () => {
     expect(screen.getByText("Valbara tekniker")).toBeTruthy();
     expect(screen.getByText("uchi uke")).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: "App back" }));
+    await user.click(screen.getByRole("button", { name: /Tekniskt provämne/ }));
 
     expect(screen.getByText("Andra teknikområdet")).toBeTruthy();
     expect(screen.queryByText("Övergripande beskrivning")).toBeNull();
+    expect(screen.getByTestId("location").textContent).toBe("/training/grading");
   });
 
   it("builds the technical category menu from the selected grade", () => {
@@ -245,8 +246,8 @@ describe("GradingTest subject split", () => {
     expect(screen.getByRole("button", { name: /Grunder/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Utvalda tekniker/ })).toBeTruthy();
     const embuButton = screen.getByRole("button", { name: /Graderings-kumi embu/ });
-    expect(embuButton.classList.contains("app-grid-card")).toBe(true);
-    expect(embuButton.closest(".start-grid")).not.toBeNull();
+    expect(embuButton.classList.contains("grading-outline-trigger")).toBe(true);
+    expect(embuButton.closest(".grading-technical-outline")).not.toBeNull();
     expect(screen.getByRole("button", { name: /Tillämpning/ })).toBeTruthy();
     expect(screen.queryByText("Tekniskt provämne")).toBeNull();
   });
@@ -257,7 +258,7 @@ describe("GradingTest subject split", () => {
 
     await user.click(screen.getByRole("button", { name: /Graderings-kumi embu/ }));
 
-    expect(screen.getByRole("heading", { name: "Graderings-kumi embu" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Graderings-kumi embu/ }).getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText("Växla shusha mellan sekvenserna")).toBeTruthy();
     expect(screen.getByText("Lugn övergång")).toBeTruthy();
     expect(container.querySelector(".kumi-embu-sequence-list")).toBeTruthy();
@@ -273,21 +274,17 @@ describe("GradingTest subject split", () => {
     expect(preview?.querySelector(".kamoku-card-name")?.textContent).toBe("Gyaku gote");
   });
 
-  it("treats an opened technical category as exactly one back step", async () => {
+  it("keeps an opened technical category on the same history step", async () => {
     const user = userEvent.setup();
     renderGrading("technical", "3 kyū");
 
     await user.click(screen.getByRole("button", { name: /Grunder/ }));
 
     expect(screen.getByTestId("location").textContent).toContain("gradingCategory=");
-    expect(screen.queryByRole("button", { name: /Utvalda tekniker/ })).toBeNull();
-
-    await user.click(screen.getByRole("button", { name: "App back" }));
-
-    expect(screen.getByTestId("location").textContent).toBe("/training/grading");
     expect(screen.getByRole("button", { name: /Utvalda tekniker/ })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "App back" }));
+
     expect(screen.getByTestId("location").textContent).toBe("/training");
   });
 

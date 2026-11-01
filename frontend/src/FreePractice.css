@@ -88,11 +88,10 @@
 
 .free-practice-item-list > li {
   padding: 0.9rem 0.25rem;
-  border-bottom: 1px solid var(--bs-border-color);
 }
 
-.free-practice-item-list > li:first-child {
-  border-top: 1px solid var(--bs-border-color);
+.free-practice-item-list > li + li {
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
 }
 
 .free-practice-item-list strong {
@@ -266,13 +265,15 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 1px solid var(--bs-border-color);
 }
 
 .embu-sequence {
   position: relative;
-  border-top: 1px solid var(--bs-border-color);
   transition: background-color 120ms ease;
+}
+
+.embu-sequence + .embu-sequence {
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
 }
 
 .embu-sequence.is-drop-target {
@@ -679,11 +680,10 @@
 
 .embu-practice-hokeis > li {
   padding-block: 0.9rem 1.15rem;
-  border-bottom: 1px solid var(--bs-border-color);
 }
 
-.embu-practice-hokeis > li:first-child {
-  border-top: 1px solid var(--bs-border-color);
+.embu-practice-hokeis > li + li {
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
 }
 
 .embu-practice-technique {

@@ -149,12 +149,12 @@ describe("Training", () => {
 });
 
 describe("TrainingToolPage", () => {
-  it("uses one context-aware back button inside a grading category", async () => {
+  it("keeps the training back button while a grading category is expanded", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter
         initialEntries={[
-          "/training/grading",
+          "/kamoku",
           "/training/grading?gradingCategory=3+ky%C5%AB%7C0%7C0",
         ]}
         initialIndex={1}
@@ -165,11 +165,11 @@ describe("TrainingToolPage", () => {
     );
 
     expect(screen.getAllByRole("button", { name: "Tillbaka" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Träning" }).getAttribute("href")).toBe("/kamoku");
 
     await user.click(screen.getByRole("button", { name: "Tillbaka" }));
 
-    expect(screen.getByTestId("location").textContent).toBe("/training/grading");
+    expect(screen.getByTestId("location").textContent).toBe("/kamoku");
     expect(screen.getAllByRole("button", { name: "Tillbaka" })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Träning" }).getAttribute("href")).toBe("/kamoku");
   });
 });

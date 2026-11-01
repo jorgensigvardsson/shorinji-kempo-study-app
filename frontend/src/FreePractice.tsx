@@ -1,12 +1,13 @@
 import { Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, Collection, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import HokeiCard from "./components/HokeiCard";
 import InlineNoteEditor from "./components/InlineNoteEditor";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
+import DisclosureChevron from "./components/DisclosureChevron";
 import VideoLink from "./components/VideoLink";
 import TrainingPageControls from "./components/TrainingPageControls";
 import List from "./List";
@@ -886,7 +887,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                             onClick={() => toggleSequenceDetails(sequence.id)}
                                         >
                                             <span>{sequenceIndex + 1}.</span>
-                                            {isExpanded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
+                                            <DisclosureChevron expanded={isExpanded} />
                                         </button>
                                     ) : (
                                         <span className="embu-sequence-number">

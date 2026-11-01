@@ -10,12 +10,11 @@
   grid-template-columns: 2rem minmax(0, 1fr);
   column-gap: 0.5rem;
   padding: 0.9rem 0.25rem;
-  border-bottom: 1px solid var(--bs-border-color);
   counter-increment: kumi-embu-sequence;
 }
 
-.kumi-embu-sequence-list > li:first-child {
-  border-top: 1px solid var(--bs-border-color);
+.kumi-embu-sequence-list > li + li {
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
 }
 
 .kumi-embu-sequence-list > li::before {

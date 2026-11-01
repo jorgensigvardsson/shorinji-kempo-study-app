@@ -1,0 +1,24 @@
+.app-completion-mark {
+  display: grid;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1.5px solid var(--bs-secondary-color);
+  border-radius: 50%;
+  color: var(--bs-body-bg);
+  opacity: 0.72;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+.app-completion-mark.is-complete {
+  border-color: var(--bs-primary);
+  background: var(--bs-primary);
+  opacity: 1;
+}
+
+.app-completion-mark svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  stroke-width: 3;
+}

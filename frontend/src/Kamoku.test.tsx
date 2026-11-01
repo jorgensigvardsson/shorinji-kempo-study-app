@@ -176,7 +176,9 @@ describe("Kamoku weekly plan", () => {
 
   it("marks a grade week as practised and opens a stable editable completion panel", async () => {
     const user = userEvent.setup();
-    render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} />);
+    const { container } = render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} />);
+
+    expect(container.querySelector(".app-completion-mark.is-complete")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Markera som tränad" }));
 
@@ -184,6 +186,7 @@ describe("Kamoku weekly plan", () => {
     expect(Number.isNaN(Date.parse(stored.completedAt))).toBe(false);
     const completed = screen.getByRole("button", { name: "Visa när vecka 1 klarmarkerades" });
     expect(screen.getByText("Tränad")).toBeTruthy();
+    expect(container.querySelector(".app-completion-mark.is-complete")).not.toBeNull();
 
     await user.hover(completed);
     expect((await screen.findByRole("dialog")).textContent).toContain("Klarmarkerad");
