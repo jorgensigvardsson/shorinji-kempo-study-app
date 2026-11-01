@@ -47,9 +47,15 @@ describe("CollapsibleCard", () => {
     selection.removeAllRanges();
   });
 
-  it("shows a chevron by default", () => {
+  it("uses the shared disclosure chevron and turns it when expanded", () => {
     const { container } = render(<CollapsibleCard header="H">body</CollapsibleCard>);
-    expect(container.querySelector(".collapsible-card-chevron")).not.toBeNull();
+    const chevron = container.querySelector(".app-disclosure-chevron");
+    expect(chevron).not.toBeNull();
+    expect(chevron?.classList.contains("is-expanded")).toBe(false);
+
+    fireEvent.click(screen.getByText("H"));
+
+    expect(chevron?.classList.contains("is-expanded")).toBe(true);
   });
 
   it("hides the chevron when showCollapse is false", () => {

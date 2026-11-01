@@ -223,7 +223,7 @@ export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKan
     const renderRole = (role: HokeiMoment["roles"]["attacker"], Icon: typeof PersonFill, label: string) => (
         <div className="kamoku-card-role-row">
             <Icon className="kamoku-card-role-icon" aria-label={translator.translate(label)} />
-            {renderValue(role.stance, "Stans", "kamoku-card-role-stance")}
+            {renderValue(role.stance, "Kamae", "kamoku-card-role-stance")}
             {renderValue(role.action, "Utförande", "kamoku-card-role-action", label === "(F)" && hokei.ren_hanko
                 ? <i> ({translator.translate("ren hankō")})</i>
                 : undefined)}
@@ -233,7 +233,7 @@ export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKan
     return (
         <div className="kamoku-card-sequence">
             <div className="kamoku-card-stage kamoku-card-foot-stage">
-                <div className="kamoku-card-stage-label">{translator.translate("Uppställning")}</div>
+                <div className="kamoku-card-stage-label">{translator.translate("Fotposition")}</div>
                 <div className="kamoku-card-foot-stances">
                     {hokei.foot_stance?.map(stance => (
                         <div className="kamoku-card-foot-stance" key={stance}>
@@ -246,7 +246,7 @@ export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKan
             <div className="kamoku-card-technique-table">
                 <div className="kamoku-card-column-headings" aria-hidden="true">
                     <span />
-                    <span>{translator.translate("Stans")}</span>
+                    <span>{translator.translate("Kamae")}</span>
                     <span>{translator.translate("Utförande")}</span>
                 </div>
                 <div className="kamoku-card-role-rows">
@@ -272,7 +272,7 @@ export const HokeiDojoDetails = ({ hokei }: { hokei: HokeiMoment }) => {
     return (
         <div className="dojo-card-body">
             {hokei.foot_stance && hokei.foot_stance.length > 0 && (
-                <div className="dojo-foot-images" aria-label={translator.translate("Uppställning")}>
+                <div className="dojo-foot-images" aria-label={translator.translate("Fotposition")}>
                     {hokei.foot_stance.map(stance => (
                         <img key={stance} className="stance-icon" src={`/${stance.toLowerCase().replace(/\s+/g, '_')}${effectiveTheme.effectiveTheme === "dark" ? "_dark" : ""}.png`} alt="" />
                     ))}
@@ -354,7 +354,7 @@ const FootStancesElement = ({ hokei, showKanji }: FootStancesElementProps) => {
             <thead>
                 <tr>
                     <th colSpan={2}>
-                        {translator.translate("Uppställning")}
+                        {translator.translate("Fotposition")}
                     </th>
                 </tr>
             </thead>
@@ -391,7 +391,7 @@ const renderStances = (translator: Translator, hokei: HokeiMoment, showKanji: bo
             <thead>
                 <tr>
                     <th colSpan={2}>
-                        {translator.translate("Stans")}
+                        {translator.translate("Kamae")}
                     </th>
                 </tr>
             </thead>

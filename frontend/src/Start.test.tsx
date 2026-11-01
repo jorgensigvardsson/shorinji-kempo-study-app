@@ -37,4 +37,19 @@ describe("Start", () => {
 
     expect(screen.getByLabelText("Gasshō").textContent).toBe("Gasshō");
   });
+
+  it("keeps personal shortcuts visible without repeating the standard navigation", () => {
+    render(
+      <MemoryRouter>
+        <Start routes={[]} />
+      </MemoryRouter>,
+    );
+
+    expect(document.querySelector(".start-grid")).toBeNull();
+    expect(screen.getByRole("link", { name: "Veckans träning" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Hokei" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Träna gradering" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^Träning/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Teori/ })).toBeNull();
+  });
 });

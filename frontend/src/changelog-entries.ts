@@ -5,6 +5,44 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-01T19:02:46.000Z",
+    changes: [
+      {
+        emoji: "📋",
+        sv: "Graderingssidan visar nu alla tekniska delar som utfällbara avsnitt på samma sida, så att du kan överblicka kraven utan att hoppa mellan undersidor.",
+        en: "The grading page now shows every technical section as expandable content on one page, so you can review the requirements without moving between separate pages.",
+        tr: "Sınav sayfası artık tüm teknik bölümleri aynı sayfada açılıp kapanabilir biçimde gösteriyor; böylece ayrı sayfalar arasında geçiş yapmadan gereklilikleri gözden geçirebilirsiniz.",
+        ja: "審査ページでは、すべての技術項目を1つのページで展開して確認できるようになり、別々のページを行き来せずに審査内容を見渡せます。",
+      },
+      {
+        emoji: "✨",
+        sv: "Flera tränings- och studiesidor har fått ett lugnare och mer enhetligt gränssnitt med tydligare utfällningar, statusmarkeringar, listor och fotpositionsillustrationer.",
+        en: "Several training and study pages now have a calmer, more consistent interface with clearer expandable sections, status markers, lists and foot-position illustrations.",
+        tr: "Birçok antrenman ve çalışma sayfası; daha anlaşılır açılır bölümler, durum işaretleri, listeler ve ayak konumu çizimleriyle daha sakin ve tutarlı bir arayüze kavuştu.",
+        ja: "複数の練習・学習ページを、より落ち着いた統一感のあるデザインに整え、展開項目、進捗表示、一覧、足位の図を分かりやすくしました。",
+      },
+    ],
+  },
+  {
+    timestamp: "2026-11-01T14:21:27.000Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Träningssidan har fått en lugnare start: veckans träning och gradering ligger nu tillsammans med Kihon, Hokei, tan'en och sōtai, Randori och Embu på samma sida.",
+        en: "The Training page now has a calmer start: this week's practice and grading now sit alongside Kihon, Hokei, tan'en and sōtai, Randori and Embu on the same page.",
+        tr: "Antrenman sayfasının başlangıcı sadeleştirildi: Bu haftanın antrenmanı ve sınav artık Kihon, Hokei, tan'en ve sōtai, Randori ve Embu ile aynı sayfada yer alıyor.",
+        ja: "練習ページがよりすっきりしました。今週の練習と昇級・昇段審査が、基本・法形・単演と相対・乱捕り・演武と同じページに並びます。",
+      },
+      {
+        emoji: "🥋",
+        sv: "Hokei använder nu de tydligare rubrikerna Fotposition, Kamae och Utförande. Graderingens fasta par-embu heter nu Graderings-kumi embu.",
+        en: "Hokei now uses the clearer headings Foot position, Kamae and Execution. The set pair embu for grading is now called Grading kumi embu.",
+        tr: "Hokei artık daha açık olan Ayak pozisyonu, Kamae ve İcra başlıklarını kullanıyor. Sınav için belirlenmiş eşli embu artık Sınav kumi embusu olarak adlandırılıyor.",
+        ja: "法形では「足位・構え・動作」という、より分かりやすい見出しを使うようになりました。審査で行う規定の組演武は「昇級・昇段審査の組演武」と表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-10-31T20:49:49.000Z",
     changes: [
       {

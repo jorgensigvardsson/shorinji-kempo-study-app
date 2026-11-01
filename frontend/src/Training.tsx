@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
-import { ArrowLeft, Award, Book, Collection } from "react-bootstrap-icons";
+import { ArrowLeft, Award, Book } from "react-bootstrap-icons";
 import Kamoku from "./Kamoku";
-import FreePractice from "./FreePractice";
+import FreePractice, { practiceAreaDefinitions } from "./FreePractice";
 import type { PracticeArea } from "./practice-area";
 import { parseTrainingPath, trainingPath, type TrainingView } from "./training-routes";
 import type { GradePlan, GradeName } from "./data";
@@ -23,7 +23,8 @@ const Training = (props: Props) => {
     const location = useLocation();
     const dojoMode = props.dojoMode ?? false;
     const { view, area: activePracticeArea } = parseTrainingPath(location.pathname);
-    const goBack = useAppBack(view === "landing" ? "/" : activePracticeArea ? "/kamoku/free" : "/kamoku");
+    const showOverview = view === "landing" || (view === "free" && activePracticeArea === null);
+    const goBack = useAppBack(showOverview ? "/" : "/kamoku");
     // A view stays mounted once seen, so its scroll position, filters, and open
     // cards survive switching away and back. Recording it from the URL rather
     // than from the click that got here also covers arriving by deep link or by
@@ -41,20 +42,13 @@ const Training = (props: Props) => {
 
     const selectPracticeArea = (area: PracticeArea | null) => goTo("free", area);
 
-    const choices: GridItem[] = [
+    const plannedChoices: GridItem[] = [
         {
             key: "weekly-practice",
             title: translator.translate("Veckans träning"),
             subtitle: translator.translate("Följ veckoplanen för din grad."),
             icon: <Book />,
             onSelect: () => goTo("plan"),
-        },
-        {
-            key: "free-practice",
-            title: translator.translate("Fri träning"),
-            subtitle: translator.translate("Välj själv vad du vill träna."),
-            icon: <Collection />,
-            onSelect: () => goTo("free"),
         },
         {
             key: "grading",
@@ -66,9 +60,18 @@ const Training = (props: Props) => {
         },
     ];
 
+    const chooseYourOwnItems: GridItem[] = practiceAreaDefinitions.map(area => ({
+        key: area.key,
+        title: translator.translate(area.key === "embu" ? "Embu" : area.title),
+        subtitle: translator.translate(area.description),
+        icon: area.icon,
+        onSelect: () => selectPracticeArea(area.key),
+        navigatesTo: trainingPath("free", area.key),
+    }));
+
     return (
         <div className="training-page">
-            <section hidden={view !== "landing"}>
+            <section hidden={!showOverview}>
                 <button type="button" className="training-back" onClick={goBack}>
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate("Tillbaka")}</span>
@@ -77,17 +80,24 @@ const Training = (props: Props) => {
                     <h1 className="app-page-heading">{translator.translate("Träning")}</h1>
                     <p className="app-intro-copy">{translator.translate("Hur vill du träna idag?")}</p>
                 </header>
-                <Grid items={choices} className="training-choice-grid" />
+                <div className="training-choice-section">
+                    <h2 className="app-eyebrow-heading">{translator.translate("Följ din plan")}</h2>
+                    <Grid items={plannedChoices} className="training-choice-grid" />
+                </div>
+                <div className="training-choice-section">
+                    <h2 className="app-eyebrow-heading">{translator.translate("Välj vad du vill träna")}</h2>
+                    <Grid items={chooseYourOwnItems} className="training-choice-grid" />
+                </div>
             </section>
 
-            {view !== "landing" && (view === "plan" || activePracticeArea === null) && (
+            {!showOverview && (view === "plan" || activePracticeArea === null) && (
                 <button type="button" className="training-back" onClick={goBack}>
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate("Tillbaka")}</span>
                 </button>
             )}
 
-            <main className="training-view-content" hidden={view === "landing"}>
+            <main className="training-view-content" hidden={showOverview}>
                 {visitedViews.has("plan") && (
                     <div hidden={view !== "plan"}>
                         <Kamoku {...props} dojoMode={dojoMode} />

@@ -50,10 +50,7 @@ const Start = (props: Props) => {
             <header className="start-intro">
                 <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
             </header>
-            <Link to="/search" className="start-search" onClick={() => beginNavigation("/search")}>
-                <Search aria-hidden="true" />
-                <span>{translator.translate("Sök funktion, teknik eller ord")}</span>
-            </Link>
+            {items.length > 0 && <Grid items={items} className="start-grid" />}
             {latestActivity && <button type="button" className="start-resume" onClick={() => memory.resume(latest)}>
                 <ClockHistory size={20} aria-hidden="true" />
                 <span>
@@ -79,7 +76,10 @@ const Start = (props: Props) => {
                 </div>
                 {memory.pins.length === 0 && <p className="navigation-caption">{translator.translate("Stjärnmarkera funktioner i Sök för att lägga till genvägar.")}</p>}
             </section>
-            <Grid items={items} className="start-grid" />
+            <Link to="/search" className="start-search" onClick={() => beginNavigation("/search")}>
+                <Search aria-hidden="true" />
+                <span>{translator.translate("Sök funktion, teknik eller ord")}</span>
+            </Link>
         </div>
     );
 };

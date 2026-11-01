@@ -1,9 +1,8 @@
 import { useContext, useMemo, useState } from "react";
 import { Badge } from "react-bootstrap";
-import { Award, Book, Check2, ChevronDown, ChevronUp, Collection, ListUl, People } from "react-bootstrap-icons";
+import { Check2 } from "react-bootstrap-icons";
 import { useSearchParams } from "react-router-dom";
 import CollapsibleCard from "./components/CollapsibleCard";
-import Grid, { type GridItem } from "./components/Grid";
 import { noTranslate, TranslatorContext, type Translator } from "./i18n";
 import { getAllHokeiMoments, isHokeiMoment, type GradeName, type GradePlan, type HokeiMoment, type TanenKihonHokei, type Video } from "./data";
 import HokeiCard from "./components/HokeiCard";
@@ -20,6 +19,8 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
 import { gradingManuals, type Item, type Numbering, type TechniqueGroup } from "./grading-exam-information";
 import "./GradingTest.css";
 import TrainingPageControls from "./components/TrainingPageControls";
+import CompletionMark from "./components/CompletionMark";
+import DisclosureChevron from "./components/DisclosureChevron";
 
 interface GradingTestProps {
     grade: GradeName | undefined;
@@ -57,7 +58,7 @@ interface ItemDisplay {
 const categoryTitles: Record<string, string> = {
     "kiso kamoku": "Grunder",
     "chūshutsu kamoku": "Utvalda tekniker",
-    "kumi embu": "Kumi-embu",
+    "kumi embu": "Graderings-kumi embu",
     "un'yōhō": "Tillämpning",
     "gōhō un'yōhō": "Tillämpning hårda tekniker",
     "jūhō un'yōhō": "Tillämpning mjuka tekniker",
@@ -133,23 +134,6 @@ function itemSummary(item: Item, translator: Translator, showKanji: boolean) {
         title: sentenceCase(display.primary),
         subtitle: subtitleParts.length > 0 ? sentenceCase(subtitleParts.join(" · ")) : undefined,
     };
-}
-
-function categoryIcon(romaji: string | undefined) {
-    switch (romaji) {
-        case "kiso kamoku":
-        case "gijutsu I":
-            return <Book />;
-        case "chūshutsu kamoku":
-        case "gijutsu II":
-            return <Collection />;
-        case "kumi embu":
-            return <People />;
-        case "hōkei kamoku":
-            return <ListUl />;
-        default:
-            return <Award />;
-    }
 }
 
 interface FundamentalGroupDefinition {
@@ -293,7 +277,7 @@ const GradingCompletionProgress = ({ completed, total, translator }: { completed
         })}
     >
         <span aria-hidden="true">{completed}/{total}</span>
-        <Check2 aria-hidden="true" />
+        {completed === total && total > 0 && <Check2 aria-hidden="true" />}
     </span>
 );
 
@@ -350,85 +334,17 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         .map((section, sectionIndex) => ({ section, sectionIndex }))
         .filter(({ section }) => section.term?.romaji === subjectTerm);
 
-    const selectedSection = activeSelection ? manual.sections[activeSelection.sectionIndex] : undefined;
-    const selectedItem = selectedSection && activeSelection
-        ? selectedSection.items[activeSelection.itemIndex]
-        : undefined;
-
-    const openTechnicalCategory = (sectionIndex: number, itemIndex: number) => {
+    const toggleTechnicalCategory = (sectionIndex: number, itemIndex: number) => {
         if (!selectedGrade) return;
         const nextParams = new URLSearchParams(searchParams);
-        nextParams.set("gradingCategory", `${selectedGrade}|${sectionIndex}|${itemIndex}`);
-        setSearchParams(nextParams);
+        const alreadyExpanded = activeSelection?.sectionIndex === sectionIndex
+            && activeSelection.itemIndex === itemIndex;
+        if (alreadyExpanded) nextParams.delete("gradingCategory");
+        else nextParams.set("gradingCategory", `${selectedGrade}|${sectionIndex}|${itemIndex}`);
+        // An open category is part of this page, not another navigation step. Replacing
+        // the URL keeps old direct links useful without making Back close an accordion.
+        setSearchParams(nextParams, { replace: true });
     };
-
-    if (subject === "technical" && activeSelection && selectedSection && selectedItem) {
-        const { display, title, subtitle } = itemSummary(selectedItem, translator, showKanji);
-        const isFundamentals = selectedItem.term?.romaji === "kiso kamoku";
-        const isKumiEmbu = selectedItem.term?.romaji === "kumi embu";
-        const fundamentalItems = selectedItem.items ?? [];
-        const completedFundamentalCount = isFundamentals
-            ? fundamentalItems.filter(fundamentalItem => {
-                const key = gradingCompletionKey(activeSelection.grade, fundamentalItem);
-                return key && gradingFundamentalCompletions[key];
-              }).length
-            : 0;
-        return (
-            <div className={`grading-test-page grading-category-page grading-detail-enter${dojoMode ? " is-dojo-mode" : ""}`}>
-                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
-                <header className="grading-category-header">
-                    <div className="grading-category-heading">
-                        <div className="text-muted small mb-1">{sentenceCase(translator.translate(selectedSection.title))}</div>
-                        <div className="grading-category-title-line">
-                            <h2 className="app-view-heading">{title}</h2>
-                            {isFundamentals && (
-                                <GradingCompletionProgress
-                                    completed={completedFundamentalCount}
-                                    total={fundamentalItems.length}
-                                    translator={translator}
-                                />
-                            )}
-                        </div>
-                        {!isKumiEmbu && subtitle && <div className="text-muted small mt-1">{subtitle}</div>}
-                        {display.gloss && <div className="text-muted small mt-1">({display.gloss})</div>}
-                        {isFundamentals && selectedItem.points != null && (
-                            <div className="grading-category-summary mt-2">
-                                <span>{selectedItem.points}{translator.translate("p")}</span>
-                            </div>
-                        )}
-                    </div>
-                    {!isFundamentals && selectedItem.points != null && <Badge bg="secondary">{selectedItem.points}{translator.translate("p")}</Badge>}
-                </header>
-
-                {isFundamentals ? (
-                    <FundamentalsDetail
-                        item={selectedItem}
-                        grade={activeSelection.grade}
-                        translator={translator}
-                        showKanji={showKanji}
-                        completions={gradingFundamentalCompletions}
-                        expandedKey={expandedFundamental}
-                        onExpandedChange={setExpandedFundamental}
-                    />
-                ) : isKumiEmbu ? (
-                    <KumiEmbuDetail
-                        item={selectedItem}
-                        techniques={kumiEmbuTechniques}
-                        dojoMode={dojoMode}
-                    />
-                ) : (
-                    <ItemDetail
-                        item={selectedItem}
-                        translator={translator}
-                        showKanji={showKanji}
-                        hokeiMap={hokeiMap}
-                        dojoMode={dojoMode}
-                        showGloss={false}
-                    />
-                )}
-            </div>
-        );
-    }
 
     return (
         <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
@@ -446,20 +362,6 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                             return key && gradingTheoryCompletions[key];
                           }).length
                         : 0;
-                    const categoryItems: GridItem[] = section.items.map((item, itemIndex) => {
-                        const summary = itemSummary(item, translator, showKanji);
-                        return {
-                            key: `category-${sectionIndex}-${itemIndex}`,
-                            title: summary.title,
-                            subtitle: summary.subtitle,
-                            badge: item.points != null ? <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge> : undefined,
-                            icon: categoryIcon(item.term?.romaji),
-                            onSelect: selectedGrade
-                                ? () => openTechnicalCategory(sectionIndex, itemIndex)
-                                : undefined,
-                        };
-                    });
-
                     return (
                         <section className="grading-section" key={`section-${sectionIndex}`}>
                             <header className="grading-section-heading">
@@ -479,7 +381,94 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                             </header>
 
                             {subject === "technical" ? (
-                                <Grid items={categoryItems} className="start-grid" />
+                                <div className="grading-outline grading-technical-outline">
+                                    {section.items.map((item, itemIndex) => {
+                                        const { display, title, subtitle } = itemSummary(item, translator, showKanji);
+                                        const expanded = activeSelection?.sectionIndex === sectionIndex
+                                            && activeSelection.itemIndex === itemIndex;
+                                        const detailsId = `grading-item-${subject}-${sectionIndex}-${itemIndex}`;
+                                        const isFundamentals = item.term?.romaji === "kiso kamoku";
+                                        const isKumiEmbu = item.term?.romaji === "kumi embu";
+                                        const fundamentalItems = item.items ?? [];
+                                        const completedFundamentalCount = selectedGrade && isFundamentals
+                                            ? fundamentalItems.filter(fundamentalItem => {
+                                                const key = gradingCompletionKey(selectedGrade, fundamentalItem);
+                                                return key && gradingFundamentalCompletions[key];
+                                              }).length
+                                            : 0;
+                                        const rowContent = (
+                                            <>
+                                                <span className="grading-outline-copy">
+                                                    <span className="grading-outline-title">{title}</span>
+                                                    {subtitle && <span className="grading-outline-subtitle">{subtitle}</span>}
+                                                </span>
+                                                <span className="grading-outline-meta">
+                                                    {item.points != null && <span>{item.points}{translator.translate("p")}</span>}
+                                                    {isFundamentals && (
+                                                        <GradingCompletionProgress
+                                                            completed={completedFundamentalCount}
+                                                            total={fundamentalItems.length}
+                                                            translator={translator}
+                                                        />
+                                                    )}
+                                                    <DisclosureChevron expanded={expanded} />
+                                                </span>
+                                            </>
+                                        );
+
+                                        return (
+                                            <article className={`grading-outline-item grading-category-item${expanded ? " is-expanded" : ""}`} key={`item-${sectionIndex}-${itemIndex}`}>
+                                                <div className="grading-outline-row grading-outline-row-without-completion">
+                                                    {selectedGrade ? (
+                                                        <button
+                                                            type="button"
+                                                            className="grading-outline-trigger"
+                                                            aria-expanded={expanded}
+                                                            aria-controls={detailsId}
+                                                            onClick={() => toggleTechnicalCategory(sectionIndex, itemIndex)}
+                                                        >
+                                                            {rowContent}
+                                                        </button>
+                                                    ) : (
+                                                        <div className="grading-outline-summary">{rowContent}</div>
+                                                    )}
+                                                </div>
+
+                                                {expanded && selectedGrade && (
+                                                    <div id={detailsId} className="grading-outline-detail grading-category-detail grading-detail-enter">
+                                                        {display.gloss && <div className="text-muted small mb-2">({display.gloss})</div>}
+                                                        {isFundamentals ? (
+                                                            <FundamentalsDetail
+                                                                item={item}
+                                                                grade={selectedGrade}
+                                                                translator={translator}
+                                                                showKanji={showKanji}
+                                                                completions={gradingFundamentalCompletions}
+                                                                expandedKey={expandedFundamental}
+                                                                onExpandedChange={setExpandedFundamental}
+                                                            />
+                                                        ) : isKumiEmbu ? (
+                                                            <KumiEmbuDetail
+                                                                item={item}
+                                                                techniques={kumiEmbuTechniques}
+                                                                dojoMode={dojoMode}
+                                                            />
+                                                        ) : (
+                                                            <ItemDetail
+                                                                item={item}
+                                                                translator={translator}
+                                                                showKanji={showKanji}
+                                                                hokeiMap={hokeiMap}
+                                                                dojoMode={dojoMode}
+                                                                showGloss={false}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </article>
+                                        );
+                                    })}
+                                </div>
                             ) : (
                                 <div className="grading-outline">
                                     {section.items.map((item, itemIndex) => {
@@ -500,7 +489,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                                 </span>
                                                 <span className="grading-outline-meta">
                                                     {item.points != null && <Badge bg="secondary">{item.points}{translator.translate("p")}</Badge>}
-                                                    {expandable && (expanded ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />)}
+                                                    {expandable && <DisclosureChevron expanded={expanded} />}
                                                 </span>
                                             </>
                                         );
@@ -519,9 +508,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                                                 })}
                                                                 onChange={event => setGradingTheoryCompletion(completionKey, event.currentTarget.checked)}
                                                             />
-                                                            <span className="grading-completion-circle" aria-hidden="true">
-                                                                {completed && <Check2 />}
-                                                            </span>
+                                                            <CompletionMark completed={completed} className="grading-completion-circle" />
                                                         </label>
                                                     )}
                                                     {expandable && selectedGrade ? (
@@ -660,7 +647,7 @@ const FundamentalsDetail = ({ item, grade, translator, showKanji, completions, e
                                     </span>
                                     <span className="grading-fundamental-meta">
                                         {fundamentalItem.points != null && <span>{fundamentalItem.points}{translator.translate("p")}</span>}
-                                        {expandable && (expanded ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />)}
+                                        {expandable && <DisclosureChevron expanded={expanded} />}
                                     </span>
                                 </>
                             );
@@ -679,9 +666,7 @@ const FundamentalsDetail = ({ item, grade, translator, showKanji, completions, e
                                                     })}
                                                     onChange={event => setGradingFundamentalCompletion(completionKey, event.currentTarget.checked)}
                                                 />
-                                                <span className="grading-completion-circle" aria-hidden="true">
-                                                    {completed && <Check2 />}
-                                                </span>
+                                                <CompletionMark completed={completed} className="grading-completion-circle" />
                                             </label>
                                         )}
                                         {expandable ? (
@@ -888,7 +873,7 @@ const TechniqueGroups = ({ groups, translator, showKanji, parentTerm, structured
                         {translator.translate(group.context?.text ?? structuredTechniqueGroupLabel(parentTerm, groupIndex, displayGroups.length)!)}
                     </div>
                 )}
-                <ul className={structured ? "grading-technique-list" : "mb-0"}>
+                <ul className={`grading-technique-list${structured ? "" : " grading-technique-list-compact"}`}>
                     {group.techniques.map((tech, techniqueIndex) => {
                         const techKanji = translator.japanese(tech.romaji);
                         const hasKanji = techKanji !== tech.romaji;

@@ -1,5 +1,5 @@
 import { useContext, type ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { TranslatorContext } from "../i18n";
 import BackButton from "./BackButton";
 import "./ToolPage.css";
@@ -37,15 +37,10 @@ export const TheoryToolPage = ({ children }: { children: ReactNode }) => {
 
 export const TrainingToolPage = ({ children }: { children: ReactNode }) => {
     const translator = useContext(TranslatorContext);
-    const location = useLocation();
-    // The grading tool is reached from two places; when it was opened on a category
-    // the back link goes to the grading overview rather than out to Träning.
-    const isGradingCategory = location.pathname === "/training/grading"
-        && new URLSearchParams(location.search).has("gradingCategory");
 
     return (
         <ToolPage className="training-page" backClassName="training-back"
-                  label={translator.translate(isGradingCategory ? "Gradering" : "Träning")} parent={isGradingCategory ? "/training/grading" : "/kamoku"}>
+                  label={translator.translate("Träning")} parent="/kamoku">
             {children}
         </ToolPage>
     );

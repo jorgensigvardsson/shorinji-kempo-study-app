@@ -64,15 +64,29 @@ describe("Training route registration", () => {
 });
 
 describe("Training", () => {
-  it("opens with weekly, free-practice, and grading choices", () => {
+  it("opens with planned and self-chosen training on one page", () => {
     renderTraining();
 
     expect(screen.getByRole("heading", { name: "Träning" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Följ din plan" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Välj vad du vill träna" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Veckans träning/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Fri träning/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Gradering/i })).toBeTruthy();
-    expect(screen.queryByText("Alla tekniker")).toBeNull();
+    expect(screen.getByRole("button", { name: /^Gradering\b/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Kihon/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Hokei/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Tan'en och sōtai/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Randori/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Embu/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Fri träning/i })).toBeNull();
     expect(screen.queryByTestId("weekly-plan")).toBeNull();
+  });
+
+  it("uses the combined overview at the old free-practice URL", () => {
+    renderTraining("/kamoku/free");
+
+    expect(screen.getByRole("heading", { name: "Träning" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Veckans träning/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Randori/i })).toBeTruthy();
   });
 
   it("returns from Training to the training-and-theory start page", async () => {
@@ -83,7 +97,7 @@ describe("Training", () => {
     expect(screen.getByTestId("location").textContent).toBe("/");
   });
 
-  it("opens the weekly plan and returns to the two training choices", async () => {
+  it("opens the weekly plan and returns to all training choices", async () => {
     const user = userEvent.setup();
     renderTraining("/kamoku?source=start");
 
@@ -96,13 +110,10 @@ describe("Training", () => {
     expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start");
   });
 
-  it("opens free practice and keeps the selected area in the URL", async () => {
+  it("opens a chosen practice area directly and keeps it in the URL", async () => {
     vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     const user = userEvent.setup();
     renderTraining("/kamoku?source=start");
-
-    await user.click(screen.getByRole("button", { name: /Fri träning/i }));
-    expect(screen.getByRole("heading", { name: "Fri träning" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /Randori/i }));
     expect(screen.getByTestId("location").textContent).toBe("/kamoku/free/randori?source=start");
@@ -114,12 +125,8 @@ describe("Training", () => {
     const user = userEvent.setup();
     renderTraining("/kamoku?source=start", true);
 
-    await user.click(screen.getByRole("button", { name: /Fri träning/i }));
     await user.click(screen.getByRole("button", { name: /Randori/i }));
     expect(screen.getByTestId("location").textContent).toBe("/kamoku/free/randori?source=start");
-
-    await user.click(screen.getByRole("button", { name: "Browser back" }));
-    expect(screen.getByTestId("location").textContent).toBe("/kamoku/free?source=start");
 
     await user.click(screen.getByRole("button", { name: "Browser back" }));
     expect(screen.getByTestId("location").textContent).toBe("/kamoku?source=start");
@@ -136,19 +143,18 @@ describe("Training", () => {
     expect(screen.getByTestId("weekly-plan").getAttribute("data-dojo-mode")).toBe("true");
 
     await user.click(screen.getByRole("button", { name: "Tillbaka" }));
-    await user.click(screen.getByRole("button", { name: /Fri träning/i }));
     await user.click(screen.getByRole("button", { name: /^Hokei/i }));
     expect(screen.getByTestId("all-hokei").getAttribute("data-dojo-mode")).toBe("true");
   });
 });
 
 describe("TrainingToolPage", () => {
-  it("uses one context-aware back button inside a grading category", async () => {
+  it("keeps the training back button while a grading category is expanded", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter
         initialEntries={[
-          "/training/grading",
+          "/kamoku",
           "/training/grading?gradingCategory=3+ky%C5%AB%7C0%7C0",
         ]}
         initialIndex={1}
@@ -159,11 +165,11 @@ describe("TrainingToolPage", () => {
     );
 
     expect(screen.getAllByRole("button", { name: "Tillbaka" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Träning" }).getAttribute("href")).toBe("/kamoku");
 
     await user.click(screen.getByRole("button", { name: "Tillbaka" }));
 
-    expect(screen.getByTestId("location").textContent).toBe("/training/grading");
+    expect(screen.getByTestId("location").textContent).toBe("/kamoku");
     expect(screen.getAllByRole("button", { name: "Tillbaka" })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Träning" }).getAttribute("href")).toBe("/kamoku");
   });
 });

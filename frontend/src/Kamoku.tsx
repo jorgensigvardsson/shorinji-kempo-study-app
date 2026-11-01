@@ -3,6 +3,7 @@ import { TranslatorContext, type Translator } from "./i18n";
 import { type GradePlan, type GradeName, type StandardMoment, type HokeiMoment, type HokeiRef, type TanenKihonHokei, type Week, isHokeiRef, isHokeiMoment, isKihonMoment, isYondanWeek, isGodanWeek, isKyushoZemeWeek, adaptYondanMoment, adaptGodanMoment, adaptKyushoZeme, adaptKihonMoment } from "./data";
 import HokeiCard from "./components/HokeiCard";
 import VideoLink from "./components/VideoLink";
+import CompletionMark from "./components/CompletionMark";
 import tanenKihonHokeiData from "./assets/tanen_kihon_hokei.json";
 import { findTanenMatches, tanenMatchesToVideos } from "./utilities/TanenUtils";
 
@@ -11,7 +12,7 @@ const tanenKihonHokeiMap = new Map<string, TanenKihonHokei>(
 );
 import { getAppDataStore } from "./persistence/store";
 import type { WeeklyPlanCompletionEntry } from "./persistence/schema";
-import { ArrowCounterclockwise, ArrowLeft, ArrowRight, Check2, Circle } from "react-bootstrap-icons";
+import { ArrowCounterclockwise, ArrowLeft, ArrowRight } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
 import TrainingPageControls from "./components/TrainingPageControls";
 import "./Kamoku.css";
@@ -196,7 +197,7 @@ const WeekCompletionControl = ({ completion, grade, week, translator, onMark, on
     if (!completion) {
         return (
             <button type="button" className="kamoku-week-completion" onClick={onMark}>
-                <Circle aria-hidden="true" />
+                <CompletionMark completed={false} />
                 <span>{translator.translate("Markera som tränad")}</span>
             </button>
         );
@@ -235,7 +236,7 @@ const WeekCompletionControl = ({ completion, grade, week, translator, onMark, on
                 aria-controls={detailsId}
                 onClick={() => setDetailsMode(current => current === "pinned" ? "closed" : "pinned")}
             >
-                <Check2 aria-hidden="true" />
+                <CompletionMark completed />
                 <span>{translator.translate("Tränad")}</span>
             </button>
             {detailsAreOpen && (

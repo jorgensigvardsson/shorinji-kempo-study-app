@@ -1,12 +1,13 @@
 import { Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Form } from "react-bootstrap";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, ChevronDown, ChevronRight, Collection, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Book, CardHeading, Collection, GripVertical, ListUl, Pencil, People, PlayCircle, Plus, Search, Trash, X } from "react-bootstrap-icons";
 import type { GradeName, GradePlan, HokeiMoment, TanenKihonHokei } from "./data";
 import { findGradePlan, getHokeiMoments, getStandardMoments } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import HokeiCard from "./components/HokeiCard";
 import InlineNoteEditor from "./components/InlineNoteEditor";
 import KumiEmbuSequenceList, { type KumiEmbuTechniqueLink } from "./components/KumiEmbuSequenceList";
+import DisclosureChevron from "./components/DisclosureChevron";
 import VideoLink from "./components/VideoLink";
 import TrainingPageControls from "./components/TrainingPageControls";
 import List from "./List";
@@ -42,19 +43,19 @@ interface Props {
     dojoMode: boolean;
 }
 
-interface AreaDefinition {
+export interface PracticeAreaDefinition {
     key: PracticeArea;
     title: string;
     description: string;
     icon: ReactNode;
 }
 
-const areaDefinitions: AreaDefinition[] = [
+export const practiceAreaDefinitions: PracticeAreaDefinition[] = [
     { key: "kihon", title: "Kihon", description: "Grundträning och återkommande övningar.", icon: <Book /> },
     { key: "hokei", title: "Hokei", description: "Sök och välj tekniker att träna.", icon: <ListUl /> },
     { key: "tanen-sotai", title: "Tan'en och sōtai", description: "Träna befintliga former med videostöd.", icon: <Collection /> },
     { key: "randori", title: "Randori", description: "Välj bland randori-teman från kamoku.", icon: <People /> },
-    { key: "embu", title: "Embu och kumi-embu", description: "Bygg en egen embu eller träna en färdig sekvens.", icon: <CardHeading /> },
+    { key: "embu", title: "Embu", description: "Bygg en egen embu eller träna en graderings-kumi embu.", icon: <CardHeading /> },
 ];
 
 const tanenKihonHokei = tanenKihonHokeiData as TanenKihonHokei[];
@@ -105,7 +106,7 @@ const FreePractice = (props: Props) => {
         onBack();
     };
 
-    const items: GridItem[] = areaDefinitions.map(area => ({
+    const items: GridItem[] = practiceAreaDefinitions.map(area => ({
         key: area.key,
         title: translator.translate(area.title),
         subtitle: translator.translate(area.description),
@@ -113,7 +114,7 @@ const FreePractice = (props: Props) => {
         onSelect: () => selectArea(area.key),
     }));
     const activeDefinition = activeArea
-        ? areaDefinitions.find(area => area.key === activeArea) ?? null
+        ? practiceAreaDefinitions.find(area => area.key === activeArea) ?? null
         : null;
 
     return (
@@ -129,7 +130,7 @@ const FreePractice = (props: Props) => {
                 <button type="button" className="free-practice-back" onClick={returnToOverview}>
                     <ArrowLeft aria-hidden="true" />
                     <span>{translator.translate(activeArea === "embu" && activeEmbuView !== null
-                        ? "Embu och kumi-embu"
+                        ? "Embu"
                         : "Tillbaka")}</span>
                 </button>
                 {activeDefinition && (
@@ -839,7 +840,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
             },
             {
                 key: "practice-kumi-embu",
-                title: translator.translate("Träna kumi-embu"),
+                title: translator.translate("Graderings-kumi embu"),
                 icon: <People />,
                 onSelect: () => selectView("kumi"),
             },
@@ -886,7 +887,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                                             onClick={() => toggleSequenceDetails(sequence.id)}
                                         >
                                             <span>{sequenceIndex + 1}.</span>
-                                            {isExpanded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
+                                            <DisclosureChevron expanded={isExpanded} />
                                         </button>
                                     ) : (
                                         <span className="embu-sequence-number">
@@ -1148,7 +1149,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
             {activeView === "kumi" && (
                 <section className={`free-practice-section embu-kumi-example${dojoMode ? " is-dojo-mode" : ""}`}>
                     <div className="free-practice-section-heading">
-                        <h3 className="app-section-heading">{translator.translate("Kumi-embu")}</h3>
+                        <h3 className="app-section-heading">{translator.translate("Graderings-kumi embu")}</h3>
                     </div>
                     {selected ? (
                         <>
@@ -1162,7 +1163,7 @@ const EmbuArea = ({ myGrade, allGradePlans, dojoMode, activeView, onViewChange }
                             ))}
                         </>
                     ) : (
-                        <p className="text-muted mb-0">{translator.translate("Det finns ingen fast Kumi-embu för den valda graden.")}</p>
+                        <p className="text-muted mb-0">{translator.translate("Det finns ingen graderings-kumi embu för den valda graden.")}</p>
                     )}
                 </section>
             )}

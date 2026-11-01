@@ -27,13 +27,8 @@
   gap: 0.65rem;
 }
 
-.grading-outline {
-  border-top: 1px solid var(--bs-border-color);
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
 .grading-outline-item + .grading-outline-item {
-  border-top: 1px solid var(--bs-border-color);
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
 }
 
 .grading-outline-row {
@@ -41,6 +36,10 @@
   grid-template-columns: 2.45rem minmax(0, 1fr);
   align-items: stretch;
   transition: background-color 120ms ease;
+}
+
+.grading-outline-row-without-completion {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .grading-outline-row:hover,
@@ -98,39 +97,22 @@
   align-items: center;
   gap: 0.65rem;
   color: var(--bs-secondary-color);
+  white-space: nowrap;
 }
 
 .grading-outline-detail {
   padding: 0.4rem 0.25rem 1.1rem 2.45rem;
 }
 
-.grading-category-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1.25rem;
-}
-
-.grading-category-heading {
-  min-width: 0;
-}
-
-.grading-category-title-line {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+.grading-category-detail {
+  padding: 0.65rem 0.35rem 1.5rem;
 }
 
 .grading-completion-progress {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.22rem 0.5rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: 999px;
-  background: var(--bs-tertiary-bg);
+  padding: 0;
   color: var(--bs-secondary-color);
   font-family: var(--app-body-font-stack);
   font-size: 0.82rem;
@@ -144,21 +126,11 @@
 }
 
 .grading-completion-progress.is-complete {
-  border-color: var(--bs-primary);
-  background: var(--bs-primary);
-  color: var(--bs-body-bg);
+  color: var(--bs-primary);
 }
 
 .grading-completion-progress.is-complete svg {
   color: inherit;
-}
-
-.grading-category-summary {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  color: var(--bs-secondary-color);
-  font-size: 0.875rem;
 }
 
 .grading-kumi-embu {
@@ -187,13 +159,8 @@
   color: var(--bs-secondary-color);
 }
 
-.grading-fundamental-list {
-  border-top: 1px solid var(--bs-border-color);
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
 .grading-fundamental-item + .grading-fundamental-item {
-  border-top: 1px solid var(--bs-border-color);
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
 }
 
 .grading-fundamental-row {
@@ -249,17 +216,6 @@
   pointer-events: none;
 }
 
-.grading-completion-circle {
-  display: grid;
-  width: 1.15rem;
-  height: 1.15rem;
-  place-items: center;
-  border: 1.5px solid var(--bs-secondary-color);
-  border-radius: 50%;
-  opacity: 0.72;
-  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease, opacity 120ms ease;
-}
-
 .grading-completion-control:hover .grading-completion-circle,
 .grading-completion-input:focus-visible + .grading-completion-circle,
 .grading-outline-item.is-expanded .grading-completion-circle,
@@ -271,19 +227,6 @@
 .grading-completion-input:focus-visible + .grading-completion-circle {
   outline: 2px solid var(--bs-primary);
   outline-offset: 3px;
-}
-
-.grading-completion-input:checked + .grading-completion-circle {
-  border-color: var(--bs-primary);
-  background: var(--bs-primary);
-  color: var(--bs-body-bg);
-  opacity: 1;
-}
-
-.grading-completion-circle svg {
-  width: 0.8rem;
-  height: 0.8rem;
-  stroke-width: 3;
 }
 
 .grading-fundamental-copy {
@@ -322,12 +265,9 @@
 
 .grading-fundamental-note {
   margin-bottom: 0.75rem;
-  padding: 0.65rem 0.8rem;
-  border-left: 2px solid var(--bs-primary);
-  background: var(--bs-tertiary-bg);
   color: var(--bs-secondary-color);
-  font-size: 0.875rem;
-  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .grading-technique-group + .grading-technique-group {
@@ -355,7 +295,7 @@
 .grading-technique-list li {
   position: relative;
   min-width: 0;
-  padding-left: 0.8rem;
+  padding-left: 1rem;
   overflow-wrap: normal;
   word-break: normal;
   line-height: 1.45;
@@ -363,13 +303,16 @@
 
 .grading-technique-list li::before {
   position: absolute;
-  top: 0.66em;
+  top: 0.72em;
   left: 0;
-  width: 0.25rem;
-  height: 0.25rem;
-  border-radius: 50%;
+  width: 0.35rem;
+  height: 1px;
   background: var(--bs-primary);
   content: "";
+}
+
+.grading-technique-list-compact {
+  grid-template-columns: 1fr;
 }
 
 .grading-fundamental-subitems {

@@ -95,10 +95,13 @@
   font-weight: 600;
 }
 
-.kamoku-week-completion svg {
-  width: 1rem;
-  height: 1rem;
-  color: #9a7610;
+.kamoku-week-completion .app-completion-mark {
+  border-color: #9a7610;
+  color: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .kamoku-week-completion .app-completion-mark {
+  border-color: #f3d36c;
 }
 
 .kamoku-week-completion:hover,
@@ -114,8 +117,10 @@
   color: var(--bs-success-text-emphasis);
 }
 
-.kamoku-week-completion.is-complete svg {
-  color: var(--bs-success-text-emphasis);
+.kamoku-week-completion.is-complete .app-completion-mark {
+  border-color: var(--bs-success-text-emphasis);
+  background: var(--bs-success-text-emphasis);
+  color: var(--bs-success-bg-subtle);
 }
 
 [data-bs-theme="dark"] .kamoku-week-completion:not(.is-complete) svg {

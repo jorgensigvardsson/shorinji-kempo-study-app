@@ -326,7 +326,7 @@ export const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): Q
         if (attackerStance) {
           candidates.push({
             id: `kamoku.attacker_stance.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vilken stans har angriparen i "{0}"?`,
+            question: `Vilken kamae har angriparen i "{0}"?`,
             questionArgs: [hokeiName],
             correctAnswer: attackerStance,
             domain: "kamoku.attacker_stance",
@@ -346,7 +346,7 @@ export const buildKamokuCandidates = (plans: GradePlan[], myGrade: GradeName): Q
         if (defenderStance) {
           candidates.push({
             id: `kamoku.defender_stance.${plan.grade}.${week.week}.${hokeiName}`,
-            question: `Vilken stans har försvararen i "{0}"?`,
+            question: `Vilken kamae har försvararen i "{0}"?`,
             questionArgs: [hokeiName],
             correctAnswer: defenderStance,
             domain: "kamoku.defender_stance",

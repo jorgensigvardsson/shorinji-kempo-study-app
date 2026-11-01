@@ -1,5 +1,3 @@
-import { Badge, Button } from "react-bootstrap";
-import { XLg } from "react-bootstrap-icons";
 import { useContext, useMemo } from "react";
 import { TranslatorContext } from "./i18n";
 import { type HokeiMoment, type GradePlan, type GradeName, getHokeiMoments } from "./data";
@@ -58,18 +56,16 @@ const Groups = (props: Props) => {
 
     if (selectedGroup) {
         return (
-            <div className="groups-detail-enter">
-                <div className="groups-detail-head m-2">
+            <div className="groups-detail">
+                <button type="button" className="groups-back" onClick={() => setSelectedGroupKey(null)}>
+                    <span>{translator.translate("Teknikgrupper")}</span>
+                </button>
+                <div className="groups-detail-head">
                     <div>
-                        <h2 className="groups-detail-title mb-1">{selectedGroup.translated}</h2>
+                        <h2 className="app-view-heading groups-detail-title">{selectedGroup.translated}</h2>
                         {!translator.isJapanese && <div className="groups-detail-subtitle">{selectedGroup.japanese}</div>}
                     </div>
-                    <div className="d-flex align-items-center gap-2">
-                        <Badge className="groups-count-badge">{selectedGroup.hokeis.length}</Badge>
-                        <Button variant="link" className="text-body p-0" onClick={() => setSelectedGroupKey(null)} aria-label={translator.translate("Stäng")}>
-                            <XLg size={18} />
-                        </Button>
-                    </div>
+                    <span className="groups-count">{selectedGroup.hokeis.length}</span>
                 </div>
                 <div>
                     {selectedGroup.hokeis.map(h => (
@@ -89,7 +85,7 @@ const Groups = (props: Props) => {
         return {
             key: group.key,
             title: group.translated,
-            badge: <Badge className="groups-count-badge">{group.hokeis.length}</Badge>,
+            badge: <span className="groups-count">{group.hokeis.length}</span>,
             subtitle: !translator.isJapanese ? group.japanese : undefined,
             preview: (
                 <>
@@ -103,7 +99,7 @@ const Groups = (props: Props) => {
         };
     });
 
-    return <Grid items={items} className="gap-3 mt-2"/>;
+    return <Grid items={items} className="groups-grid"/>;
 }
 
 export default Groups;
