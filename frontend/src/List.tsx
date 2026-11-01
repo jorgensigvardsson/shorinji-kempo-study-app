@@ -135,23 +135,10 @@ interface HokeiAndGrade {
     momentIndex: number;
 }
 const renderHokeis = (hokeis: HokeiAndGrade[], dojoMode: boolean) => {
-    return (
-        <div className={`hokei-browse-list${dojoMode ? " is-dojo" : ""}`} role="list">
-            {hokeis.map(h => (
-                <div className="hokei-browse-item" role="listitem" key={`${h.grade}.${h.week}.${h.momentIndex}`}>
-                    <HokeiCard
-                        hokei={h.moment}
-                        gradeName={h.grade}
-                        className={dojoMode ? "mt-2" : "hokei-browse-card"}
-                        showNotes
-                        showRating
-                        dojoMode={dojoMode}
-                        kamokuLayout
-                    />
-                </div>
-            ))}
-        </div>
-    );
+    return hokeis.map(h => (
+        <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-2"
+                        showNotes showRating dojoMode={dojoMode} kamokuLayout/>
+    ))
 }
 
 export default List;

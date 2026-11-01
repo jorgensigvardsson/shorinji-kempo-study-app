@@ -224,7 +224,7 @@ export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKan
         <div className="kamoku-card-role-row">
             <Icon className="kamoku-card-role-icon" aria-label={translator.translate(label)} />
             {renderValue(role.stance, "Kamae", "kamoku-card-role-stance")}
-            {renderValue(role.action, "Teknik", "kamoku-card-role-action", label === "(F)" && hokei.ren_hanko
+            {renderValue(role.action, "Utförande", "kamoku-card-role-action", label === "(F)" && hokei.ren_hanko
                 ? <i> ({translator.translate("ren hankō")})</i>
                 : undefined)}
         </div>
@@ -247,7 +247,7 @@ export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKan
                 <div className="kamoku-card-column-headings" aria-hidden="true">
                     <span />
                     <span>{translator.translate("Kamae")}</span>
-                    <span>{translator.translate("Teknik")}</span>
+                    <span>{translator.translate("Utförande")}</span>
                 </div>
                 <div className="kamoku-card-role-rows">
                     {renderRole(hokei.roles.attacker, PersonFill, "(A)")}
@@ -434,7 +434,7 @@ const renderActions = (translator: Translator, hokei: HokeiMoment, showKanji: bo
             <thead>
                 <tr>
                     <th colSpan={2}>
-                        {translator.translate("Teknik")}
+                        {translator.translate("Utförande")}
                     </th>
                 </tr>
             </thead>

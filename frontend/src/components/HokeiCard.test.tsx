@@ -88,7 +88,7 @@ describe("HokeiCard training layouts", () => {
     expect(content).toContain("Kyohan 123");
     expect(content).toContain("Fotposition");
     expect(content).toContain("Kamae");
-    expect(content).toContain("Teknik");
+    expect(content).toContain("Utförande");
     expect(content).not.toContain("Stans");
     expect(content).toContain("hidari mae chūdan gamae");
     expect(content).toContain("Remember the angle");

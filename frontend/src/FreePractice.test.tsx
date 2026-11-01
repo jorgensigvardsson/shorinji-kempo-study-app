@@ -236,27 +236,7 @@ describe("FreePractice", () => {
     const areaHeader = screen.getByRole("heading", { name: "Hokei" }).closest("header")!;
     expect(within(areaHeader).queryByText("Sök och välj tekniker att träna.")).toBeNull();
     expect(container.querySelector(".free-practice-hokei.dojo-readable-hokei")).not.toBeNull();
-    expect(container.querySelector(".hokei-browse-list.is-dojo")).not.toBeNull();
     expect(container.querySelectorAll(".free-practice-hokei .dojo-card")).toHaveLength(2);
-    expect(container.querySelector(".hokei-browse-card")).toBeNull();
-  });
-
-  it("presents the normal Hokei overview as one calm list while preserving expandable details", () => {
-    const { container } = renderPractice(
-      <FreePractice
-        myGrade="5 kyū"
-        allGradePlans={embuPlans}
-        activeArea="hokei"
-        onAreaChange={() => undefined}
-        onBack={() => undefined}
-        dojoMode={false}
-      />,
-    );
-
-    expect(container.querySelector(".hokei-browse-list:not(.is-dojo)")).not.toBeNull();
-    expect(container.querySelectorAll(".hokei-browse-item")).toHaveLength(2);
-    expect(container.querySelectorAll(".hokei-browse-card")).toHaveLength(2);
-    expect(container.querySelector(".hokei-browse-card.mt-2")).toBeNull();
   });
 
   it("shows the proposed Kihon lists up to the selected grade", async () => {

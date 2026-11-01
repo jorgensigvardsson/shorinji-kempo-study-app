@@ -20,7 +20,7 @@ const FlashcardMenu = () => {
         {
             key: "hokei-flashcards",
             title: translator.translate("Hokei"),
-            subtitle: translator.translate("Träna fotposition, kamae och teknik med dina egna anteckningar."),
+            subtitle: translator.translate("Träna fotposition, kamae och utförande med dina egna anteckningar."),
             icon: <People />,
             onSelect: () => navigate("/flashcard/hokei"),
             navigatesTo: "/flashcard/hokei",
