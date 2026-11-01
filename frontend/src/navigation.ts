@@ -23,7 +23,7 @@ export const activities: Activity[] = [
     { path: "/kamoku/free/hokei", title: "Hokei", section: "Träning", icon: Collection },
     { path: "/kamoku/free/tanen-sotai", title: "Tan'en och sōtai", section: "Träning", icon: Collection },
     { path: "/kamoku/free/randori", title: "Randori", section: "Träning", icon: People },
-    { path: "/kamoku/free/embu", title: "Embu och kumi-embu", section: "Träning", icon: CardHeading },
+    { path: "/kamoku/free/embu", title: "Embu", section: "Träning", icon: CardHeading },
     { path: "/training/grading", title: "Träna gradering", section: "Träning", icon: Award },
     { path: "/theory/grading", title: "Teori gradering", section: "Teori", icon: Award },
     { path: "/theory/groups", title: "Teknikgrupper", section: "Teori", icon: Collection },

@@ -98,7 +98,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         matchPath: "/kamoku/*",
         element: <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode}/>,
         menuText: translator.translate("Träning"),
-        startDescription: translator.translate("Välj mellan veckans träning och fri träning."),
+        startDescription: translator.translate("Följ din plan eller välj vad du vill träna."),
         icon: Book,
         showInMainMenu: true,
         hideOnStartPage: true,

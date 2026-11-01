@@ -244,7 +244,7 @@ describe("GradingTest subject split", () => {
 
     expect(screen.getByRole("button", { name: /Grunder/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Utvalda tekniker/ })).toBeTruthy();
-    const embuButton = screen.getByRole("button", { name: /Kumi-embu/ });
+    const embuButton = screen.getByRole("button", { name: /Graderings-kumi embu/ });
     expect(embuButton.classList.contains("app-grid-card")).toBe(true);
     expect(embuButton.closest(".start-grid")).not.toBeNull();
     expect(screen.getByRole("button", { name: /Tillämpning/ })).toBeTruthy();
@@ -255,9 +255,9 @@ describe("GradingTest subject split", () => {
     const user = userEvent.setup();
     const { container } = renderGrading("technical", "3 kyū");
 
-    await user.click(screen.getByRole("button", { name: /Kumi-embu/ }));
+    await user.click(screen.getByRole("button", { name: /Graderings-kumi embu/ }));
 
-    expect(screen.getByRole("heading", { name: "Kumi-embu" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Graderings-kumi embu" })).toBeTruthy();
     expect(screen.getByText("Växla shusha mellan sekvenserna")).toBeTruthy();
     expect(screen.getByText("Lugn övergång")).toBeTruthy();
     expect(container.querySelector(".kumi-embu-sequence-list")).toBeTruthy();

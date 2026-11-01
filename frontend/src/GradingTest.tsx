@@ -57,7 +57,7 @@ interface ItemDisplay {
 const categoryTitles: Record<string, string> = {
     "kiso kamoku": "Grunder",
     "chūshutsu kamoku": "Utvalda tekniker",
-    "kumi embu": "Kumi-embu",
+    "kumi embu": "Graderings-kumi embu",
     "un'yōhō": "Tillämpning",
     "gōhō un'yōhō": "Tillämpning hårda tekniker",
     "jūhō un'yōhō": "Tillämpning mjuka tekniker",

@@ -86,6 +86,10 @@ describe("HokeiCard training layouts", () => {
     expect(content).toContain("katate");
     expect(content).toContain("jūhō");
     expect(content).toContain("Kyohan 123");
+    expect(content).toContain("Fotposition");
+    expect(content).toContain("Kamae");
+    expect(content).toContain("Teknik");
+    expect(content).not.toContain("Stans");
     expect(content).toContain("hidari mae chūdan gamae");
     expect(content).toContain("Remember the angle");
     expect(screen.getByRole("group", { name: "Självskattning" })).toBeTruthy();
