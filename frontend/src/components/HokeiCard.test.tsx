@@ -85,7 +85,8 @@ describe("HokeiCard training layouts", () => {
     const content = container.textContent ?? "";
     expect(content).toContain("katate");
     expect(content).toContain("jūhō");
-    expect(content).toContain("Kyohan 123");
+    expect(content).toContain("Kyohan");
+    expect(content).toContain("123");
     expect(content).toContain("Fotposition");
     expect(content).toContain("Kamae");
     expect(content).toContain("Utförande");
@@ -100,6 +101,35 @@ describe("HokeiCard training layouts", () => {
     expect(roleRows[0].textContent).toContain("jōdan zuki");
     expect(roleRows[1].textContent).toContain("hidari mae chūdan gamae");
     expect(roleRows[1].textContent).toContain("gyaku gote");
+  });
+
+  it("keeps the closed overview brief and moves references and assessment into the expanded content", () => {
+    const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
+    const { container } = render(
+      <HokeiCard hokei={hokei} gradeName="6 kyū" showRating kamokuLayout />,
+    );
+
+    const header = container.querySelector(".card-header")!;
+    const body = container.querySelector(".card-body")!;
+    expect(header.textContent).toContain("6 kyū");
+    expect(header.textContent).toContain("katate");
+    expect(header.textContent).toContain("jūhō");
+    expect(header.textContent).not.toContain("Kyohan");
+    expect(header.querySelector(".self-assessment")).toBeNull();
+    expect(body.textContent).toContain("Kyohan");
+    expect(body.textContent).toContain("123");
+    expect(body.querySelector(".self-assessment")).not.toBeNull();
+  });
+
+  it("can omit a technique group that is already clear from the surrounding view", () => {
+    const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
+    const { container } = render(
+      <HokeiCard hokei={hokei} gradeName="6 kyū" kamokuLayout hideTechniqueGroup />,
+    );
+
+    expect(container.querySelector(".card-header")?.textContent).not.toContain("jūhō");
   });
 
   it("keeps only practice-essential header information in dojo mode and shows saved notes compactly", () => {

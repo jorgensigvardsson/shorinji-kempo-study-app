@@ -137,6 +137,31 @@ body.card-focus-active::before {
   color: var(--bs-secondary-color);
 }
 
+.kamoku-card-expanded-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 1.5rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+}
+
+.kamoku-card-reference,
+.kamoku-card-assessment {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kamoku-card-reference strong {
+  color: var(--bs-body-color);
+  font-weight: 600;
+}
+
 .kamoku-full-card .card-body {
   padding: 1.15rem 1.25rem 1.35rem;
 }
@@ -365,4 +390,57 @@ body.card-focus-active::before {
 
 .kamoku-card-level-tag::before {
   display: none !important;
+}
+
+/* The Hokei browser is a catalogue, not a grid of standalone widgets. Keep
+   the rich card structure when a technique opens, but let the closed state
+   share the quiet row language used by the other free-practice lists. */
+.hokei-browse-list:not(.is-dojo) .hokei-browse-item + .hokei-browse-item {
+  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
+}
+
+.hokei-browse-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 160ms ease;
+}
+
+.hokei-browse-card.is-expanded {
+  background: color-mix(in srgb, var(--bs-primary) 5%, transparent);
+}
+
+.hokei-browse-card .card-header {
+  padding: 1.15rem 0.25rem;
+}
+
+.hokei-browse-card .kamoku-card-name {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.hokei-browse-card > .collapse,
+.hokei-browse-card > .collapsing {
+  margin: 0 0.25rem 0.85rem;
+  background: transparent;
+}
+
+.hokei-browse-card .card-body {
+  padding: 0.35rem 0.75rem 1.15rem;
+}
+
+.hokei-browse-card .card-footer {
+  padding: 0 0.75rem 0.9rem;
+  border-top: 0 !important;
+}
+
+.hokei-browse-card .kamoku-card-expanded-meta {
+  padding-bottom: 0.2rem;
+  border-bottom: 0;
+}
+
+.hokei-browse-card .kamoku-card-technique-table {
+  padding-top: 0;
+  border-top: 0;
 }

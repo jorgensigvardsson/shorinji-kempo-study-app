@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-01T19:42:51.000Z",
+    changes: [
+      {
+        emoji: "🧪",
+        sv: "Teknikgrupper och Hokei-listor provar en förenklad kortöversikt där fler detaljer visas först när en teknik öppnas.",
+        en: "Technique groups and Hokei lists are trying a simplified card overview where more details appear only after a technique is opened.",
+        tr: "Teknik grupları ve Hokei listelerinde, daha fazla ayrıntının yalnızca teknik açıldığında gösterildiği sadeleştirilmiş bir kart görünümü deneniyor.",
+        ja: "技術グループと法形一覧で、技を開いたときに詳しい情報を表示する、簡潔なカード表示を試しています。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-01T19:02:46.000Z",
     changes: [
       {
