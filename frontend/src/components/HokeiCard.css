@@ -56,7 +56,7 @@ body.card-focus-active::before {
   height: 0.2rem;
   margin-top: 0.55rem;
   border-radius: 999px;
-  background: var(--bs-primary);
+  background: var(--hokei-accent);
   content: "";
 }
 
@@ -69,37 +69,153 @@ body.card-focus-active::before {
   }
 }
 
-.kamoku-full-card {
-  border-color: var(--bs-border-color);
-  border-radius: 0.65rem;
-  box-shadow: var(--app-card-shadow);
+.hokei-card.kamoku-full-card {
+  border: 0;
+  border-block: 1px solid var(--hokei-boundary);
+  border-inline-start: 3px solid transparent;
+  border-radius: 0;
+  margin-block: 0.75rem;
+  padding-inline: 0.75rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hokei-card.kamoku-full-card.is-expanded {
+  border-inline-start-color: var(--hokei-accent);
+  background: var(--hokei-expanded-bg);
+}
+
+.hokei-card.kamoku-full-card + .hokei-card.kamoku-full-card,
+.hokei-browse-item + .hokei-browse-item > .hokei-card.kamoku-full-card {
+  border-top: 0;
 }
 
 .hokei-card {
+  --hokei-accent: #dfbe5a;
+  --hokei-divider: color-mix(in srgb, var(--bs-body-color) 16%, transparent);
+  --hokei-boundary: color-mix(in srgb, var(--bs-body-color) 30%, transparent);
+  --hokei-expanded-bg: color-mix(in srgb, var(--bs-primary) 5%, transparent);
+  --hokei-note-color: var(--bs-secondary-color);
+  --hokei-action-color: var(--bs-primary);
+  --hokei-action-hover: var(--bs-primary);
+  /* Footprint artwork is #1a1a1a, inverted by the existing dark-mode rule. */
+  --hokei-symbol-color: #1a1a1a;
+
   container-name: hokei-card;
   container-type: inline-size;
 }
 
+[data-bs-theme="dark"] .hokei-card {
+  --hokei-accent: #b9a77a;
+  --hokei-divider: color-mix(in srgb, var(--bs-body-color) 22%, transparent);
+  --hokei-boundary: color-mix(in srgb, var(--bs-body-color) 36%, transparent);
+  --hokei-symbol-color: #e5e5e5;
+  --hokei-expanded-bg: color-mix(in srgb, var(--bs-body-color) 4%, transparent);
+  --hokei-action-color: var(--bs-secondary-color);
+  --hokei-action-hover: #d0bf91;
+}
+
 .kamoku-full-card.mt-2 {
-  margin-top: 1rem !important;
+  margin-top: 0.75rem !important;
 }
 
 .kamoku-full-card .card-header {
-  padding: 1.15rem 1.25rem 1rem;
+  padding: 1.15rem 0.25rem 1rem;
   background: transparent;
 }
 
 .kamoku-card-header-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
 
 .kamoku-card-name-row {
+  position: relative;
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.kamoku-full-card .kamoku-card-name {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.kamoku-full-card.is-expanded .kamoku-card-name::after {
+  position: absolute;
+  bottom: -0.45rem;
+  margin-top: 0;
+}
+
+.kamoku-full-card.is-expanded .kamoku-card-name-row {
+  row-gap: 0.8rem;
+}
+
+.kamoku-card-subtitle-row {
+  display: block;
+  max-width: 100%;
+  font-size: 1.02rem;
+  line-height: 1.3;
+}
+
+.kamoku-card-japanese-ending > .self-assessment,
+.kamoku-card-metadata > .self-assessment {
+  position: static;
+  flex: 0 0 auto;
+}
+
+.kamoku-card-japanese-ending {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.kamoku-card-japanese-ending > .self-assessment {
+  margin-inline-start: 0.5rem;
+}
+
+.kamoku-card-metadata > .self-assessment {
+  margin-inline-start: 0.75rem;
+}
+
+.kamoku-card-subtitle-row > .kamoku-card-japanese {
+  display: inline;
+  margin-top: 0;
+}
+
+.kamoku-full-card .self-assessment-trigger {
+  flex-direction: row;
+  min-height: calc(1.02rem * 1.3);
+  padding: 0.2rem 0.25rem;
+}
+
+.kamoku-full-card .self-assessment-menu {
+  max-width: 100%;
+  min-width: min(11rem, 100%);
+}
+
+.kamoku-full-card .collapsible-card-header {
+  align-items: center;
+}
+
+.kamoku-full-card .collapsible-card-chevron {
+  align-self: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  width: 2rem;
+}
+
+.kamoku-full-card.collapses-on-content-click.is-expanded {
+  cursor: pointer;
+}
+
+.kamoku-full-card .inline-note {
+  cursor: auto;
 }
 
 .kamoku-card-name {
@@ -108,10 +224,16 @@ body.card-focus-active::before {
   line-height: 1.2;
 }
 
-.kamoku-card-japanese,
+.kamoku-card-japanese {
+  margin-top: 0.18rem;
+  color: color-mix(in srgb, var(--bs-body-color) 78%, var(--bs-body-bg));
+  font-size: 1.02rem;
+  line-height: 1.3;
+}
+
 .kamoku-card-value-japanese {
-  color: color-mix(in srgb, var(--bs-body-color) 55%, var(--bs-body-bg));
-  font-size: 0.82em;
+  color: color-mix(in srgb, var(--bs-body-color) 68%, var(--bs-body-bg));
+  font-size: 0.9em;
 }
 
 .kamoku-card-metadata {
@@ -127,7 +249,7 @@ body.card-focus-active::before {
   color: var(--bs-secondary-color);
 }
 
-.kamoku-card-metadata > span:not(:first-child)::before {
+.kamoku-card-metadata > span:not(.self-assessment):not(:first-child)::before {
   margin: 0 0.5rem;
   color: var(--bs-tertiary-color);
   content: "·";
@@ -137,38 +259,14 @@ body.card-focus-active::before {
   color: var(--bs-secondary-color);
 }
 
-.kamoku-card-expanded-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem 1.5rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--bs-border-color);
-  color: var(--bs-secondary-color);
-  font-size: 0.85rem;
-}
-
-.kamoku-card-reference,
-.kamoku-card-assessment {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.kamoku-card-reference strong {
-  color: var(--bs-body-color);
-  font-weight: 600;
-}
-
 .kamoku-full-card .card-body {
-  padding: 1.15rem 1.25rem 1.35rem;
+  padding: 0.9rem 1.25rem 1rem;
 }
 
 .kamoku-full-card .card-footer {
-  padding: 0.75rem 1.25rem 0.9rem;
-  border-top: 1px solid var(--bs-border-color) !important;
+  margin-inline: 1.25rem;
+  padding: 0.8rem 0 0.9rem;
+  border-top: 1px solid var(--hokei-divider) !important;
   background: transparent;
 }
 
@@ -179,36 +277,18 @@ body.card-focus-active::before {
 }
 
 .kamoku-card-stage {
-  display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: start;
+  display: block;
+}
+
+.kamoku-card-foot-stage {
+  padding: 0 0 0.85rem;
+  border-bottom: 1px solid var(--hokei-divider);
 }
 
 .kamoku-card-technique-table {
-  margin-top: 1.35rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--bs-border-color);
-}
-
-.kamoku-card-column-headings {
-  display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr) minmax(0, 1.35fr);
-  gap: 0.85rem;
-  margin-bottom: 0.65rem;
-  color: var(--bs-secondary-color);
-  font-size: 0.75rem;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.kamoku-card-stage-label {
-  color: var(--bs-secondary-color);
-  font-size: 0.8rem;
-  font-weight: 650;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .kamoku-card-foot-stances {
@@ -232,21 +312,70 @@ body.card-focus-active::before {
 .kamoku-card-role-rows {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0;
 }
 
 .kamoku-card-role-row {
   display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr) minmax(0, 1.35fr);
-  gap: 0.85rem;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 1.25rem;
   align-items: start;
   min-width: 0;
+  padding: 0.9rem 0;
   line-height: 1.4;
 }
 
-.kamoku-card-role-icon {
-  margin-top: 0.15rem;
+.kamoku-card-role-row + .kamoku-card-role-row {
+  border-top: 1px solid var(--hokei-divider);
+}
+
+.dojo-card .dojo-card-body {
+  gap: 0;
+}
+
+.dojo-card .dojo-foot-images {
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--hokei-divider);
+}
+
+.dojo-card .dojo-roles {
+  gap: 0;
+}
+
+.dojo-card .kamoku-card-role-row {
+  font-size: 1.05rem;
+}
+
+.dojo-card .kamoku-card-role-values > :only-child {
+  grid-column: 1 / -1;
+}
+
+.dojo-readable-hokei .dojo-card .kamoku-card-role-row {
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  line-height: 1.4;
+}
+
+.kamoku-card-role-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.kamoku-card-role-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  color: var(--hokei-symbol-color);
+}
+
+.kamoku-card-role-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 0.85rem;
+  min-width: 0;
 }
 
 .kamoku-card-value {
@@ -255,10 +384,6 @@ body.card-focus-active::before {
   overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
-}
-
-.kamoku-card-mobile-label {
-  display: none;
 }
 
 .kamoku-card-value-japanese {
@@ -272,84 +397,150 @@ body.card-focus-active::before {
 }
 
 .kamoku-card-footer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.5rem 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 0.4rem;
 }
 
 .hokei-inline-note {
   max-width: 100%;
   padding-block: 0.35rem;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.hokei-inline-note .inline-note-pencil {
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -0.35rem 0;
+  color: inherit;
+}
+
+.hokei-inline-note .inline-note-pencil svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.hokei-inline-note .inline-note-empty-label {
+  color: inherit;
+}
+
+.hokei-inline-note:not(.is-editing):is(:hover, :focus-within) {
+  border-left-color: var(--hokei-action-hover, var(--bs-primary));
+  color: var(--hokei-action-hover, var(--bs-primary));
 }
 
 .kamoku-card-footer-actions .hokei-inline-note {
-  flex: 1 1 0;
   min-width: 0;
+  padding-block: 0;
 }
 
-.kamoku-card-footer-actions .hokei-inline-note.is-editing {
-  flex-basis: 100%;
+.kamoku-card-footer-actions .hokei-inline-note:not(.is-editing) {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: 0.25rem;
+}
+
+.kamoku-card-footer-actions .hokei-inline-note.has-note {
+  padding-inline-start: 0;
+  border-left: 0;
+  color: var(--hokei-note-color);
+}
+
+.kamoku-card-footer-actions .hokei-inline-note.has-note:is(:hover, :focus-within) {
+  color: var(--hokei-action-hover);
+}
+
+.kamoku-card-footer-actions .inline-note-pencil {
+  margin: 0;
+}
+
+.kamoku-card-footer-actions .hokei-inline-note.has-note .inline-note-pencil {
+  color: inherit;
+}
+
+.kamoku-card-footer-actions .inline-note-text,
+.kamoku-card-footer-actions .inline-note-empty-label {
+  padding-block: 0.45rem;
+  text-align: start;
+}
+
+.kamoku-card-footer-actions .inline-note-empty-label {
+  justify-self: start;
 }
 
 .kamoku-card-footer-actions .kamoku-video-link {
-  flex: 0 0 auto;
   min-width: 0;
-  padding: 0.35rem 0;
   font-size: 0.9rem;
 }
 
+.kamoku-card-footer-actions .kamoku-video-link > div {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.kamoku-card-footer-actions .kamoku-video-link > div > div {
+  padding-inline-start: 2.5rem;
+}
+
+.kamoku-card-footer-actions .kamoku-video-link a {
+  display: grid !important;
+  grid-template-columns: 2.25rem auto;
+  column-gap: 0.25rem;
+  min-height: 2.25rem;
+  color: var(--hokei-action-color) !important;
+  font-weight: 400;
+}
+
+.kamoku-card-footer-actions .kamoku-video-link a svg {
+  justify-self: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0 !important;
+}
+
+.kamoku-card-footer-actions .kamoku-video-link a:is(:hover, :focus-visible) {
+  color: var(--hokei-action-hover) !important;
+}
+
 @container hokei-card (max-width: 30rem) {
-  .kamoku-card-footer-actions .hokei-inline-note {
-    width: auto;
-    flex: 1 1 12rem;
-  }
-
-  .kamoku-card-footer-actions .kamoku-video-link {
-    width: auto;
-    flex: 0 0 auto;
-  }
-
-  .kamoku-card-stage {
-    grid-template-columns: 1fr;
-    gap: 0.45rem;
-  }
-
-  .kamoku-card-stage-label {
-    grid-column: auto;
-  }
-
-  .kamoku-card-stage > .kamoku-card-foot-stances,
-  .kamoku-card-stage > .kamoku-card-role-rows {
-    grid-column: auto;
-  }
-
-  .kamoku-card-column-headings {
-    display: none;
+  .kamoku-full-card .self-assessment-current-label {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    text-align: left;
+    line-height: 1.2;
   }
 
   .kamoku-card-role-row {
-    grid-template-columns: 1.5rem minmax(0, 1fr);
-    gap: 0.25rem 0.45rem;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
   }
 
-  .kamoku-card-role-icon {
-    grid-row: 1 / span 2;
+  .kamoku-card-role-values {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 0.65rem;
   }
 
-  .kamoku-card-role-stance,
-  .kamoku-card-role-action {
-    grid-column: 2;
+  .dojo-readable-hokei .dojo-card .kamoku-card-role-row {
+    font-size: 1.2rem;
   }
 
-  .kamoku-card-mobile-label {
-    display: block;
-    margin-bottom: 0.05rem;
-    color: var(--bs-secondary-color);
-    font-size: 0.68rem;
-    font-weight: 650;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+  .dojo-card .kamoku-card-role-values {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+  }
+}
+
+@container hokei-card (max-width: 22rem) {
+  .kamoku-full-card .collapsible-card-header {
+    gap: 0.3rem;
+  }
+
+  .kamoku-full-card .collapsible-card-chevron {
+    width: 1.25rem;
+  }
+
+  .kamoku-full-card .self-assessment-trigger {
+    padding-inline: 0;
   }
 }
 
@@ -390,57 +581,4 @@ body.card-focus-active::before {
 
 .kamoku-card-level-tag::before {
   display: none !important;
-}
-
-/* The Hokei browser is a catalogue, not a grid of standalone widgets. Keep
-   the rich card structure when a technique opens, but let the closed state
-   share the quiet row language used by the other free-practice lists. */
-.hokei-browse-list:not(.is-dojo) .hokei-browse-item + .hokei-browse-item {
-  border-top: 1px solid color-mix(in srgb, var(--bs-border-color) 72%, transparent);
-}
-
-.hokei-browse-card {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  transition: background-color 160ms ease;
-}
-
-.hokei-browse-card.is-expanded {
-  background: color-mix(in srgb, var(--bs-primary) 5%, transparent);
-}
-
-.hokei-browse-card .card-header {
-  padding: 1.15rem 0.25rem;
-}
-
-.hokei-browse-card .kamoku-card-name {
-  font-size: 1.08rem;
-  font-weight: 600;
-}
-
-.hokei-browse-card > .collapse,
-.hokei-browse-card > .collapsing {
-  margin: 0 0.25rem 0.85rem;
-  background: transparent;
-}
-
-.hokei-browse-card .card-body {
-  padding: 0.35rem 0.75rem 1.15rem;
-}
-
-.hokei-browse-card .card-footer {
-  padding: 0 0.75rem 0.9rem;
-  border-top: 0 !important;
-}
-
-.hokei-browse-card .kamoku-card-expanded-meta {
-  padding-bottom: 0.2rem;
-  border-bottom: 0;
-}
-
-.hokei-browse-card .kamoku-card-technique-table {
-  padding-top: 0;
-  border-top: 0;
 }

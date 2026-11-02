@@ -45,16 +45,7 @@ describe("the inline hokei card's responsive layout", () => {
       /\.hokei-card\s*{[^}]*container-name:\s*hokei-card;[^}]*container-type:\s*inline-size;/s
     );
     expect(css).toMatch(
-      /@container hokei-card \(max-width:\s*30rem\)\s*{[\s\S]*?\.kamoku-card-stage\s*{/
-    );
-  });
-
-  it("keeps the compact video action beside a note until space runs out", () => {
-    expect(css).toMatch(
-      /\.kamoku-card-footer-actions \.kamoku-video-link\s*{[^}]*flex:\s*0 0 auto;/s
-    );
-    expect(css).not.toMatch(
-      /\.kamoku-card-footer-actions \.hokei-inline-note\.has-note\s*{[^}]*flex-basis:\s*100%/s
+      /@container hokei-card \(max-width:\s*30rem\)\s*{[\s\S]*?\.kamoku-card-role-row\s*{/
     );
   });
 });

@@ -5,13 +5,12 @@ import type { GradePlan, HokeiMoment } from "./data";
 import Groups from "./Groups";
 
 vi.mock("./components/HokeiCard", () => ({
-  default: ({ hokei, className, showNotes, showRating, kamokuLayout, hideTechniqueGroup }: {
+  default: ({ hokei, className, showNotes, showRating, kamokuLayout }: {
     hokei: HokeiMoment;
     className?: string;
     showNotes?: boolean;
     showRating?: boolean;
     kamokuLayout?: boolean;
-    hideTechniqueGroup?: boolean;
   }) => (
     <div
       className={className}
@@ -19,7 +18,6 @@ vi.mock("./components/HokeiCard", () => ({
       data-notes={String(showNotes)}
       data-rating={String(showRating)}
       data-kamoku-layout={String(kamokuLayout)}
-      data-hide-technique-group={String(hideTechniqueGroup)}
     >
       {hokei.hokei_name}
     </div>
@@ -68,7 +66,6 @@ it("uses calm group rows and reuses the expandable Hokei browse layout inside a 
     expect(card.getAttribute("data-notes")).toBe("true");
     expect(card.getAttribute("data-rating")).toBe("true");
     expect(card.getAttribute("data-kamoku-layout")).toBe("true");
-    expect(card.getAttribute("data-hide-technique-group")).toBe("true");
   }
 
   await user.click(screen.getByRole("button", { name: "Teknikgrupper" }));

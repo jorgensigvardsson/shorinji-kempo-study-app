@@ -71,7 +71,7 @@ const Groups = (props: Props) => {
                     {selectedGroup.hokeis.map(h => (
                         <div key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`} className="hokei-browse-item" role="listitem">
                             <HokeiCard hokei={h.moment} gradeName={h.grade} className="hokei-browse-card"
-                                        showNotes showRating kamokuLayout hideTechniqueGroup />
+                                        showNotes showRating kamokuLayout />
                         </div>
                     ))}
                 </div>

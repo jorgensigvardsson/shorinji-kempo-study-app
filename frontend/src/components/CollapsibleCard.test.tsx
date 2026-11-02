@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { createPortal } from "react-dom";
 import CollapsibleCard from "./CollapsibleCard";
 
 describe("CollapsibleCard", () => {
@@ -30,6 +31,70 @@ describe("CollapsibleCard", () => {
     fireEvent.click(header);
     fireEvent.click(header);
     expect(container.querySelector(".card")?.classList.contains("is-collapsed")).toBe(true);
+  });
+
+  it("closes from a content click only when opted in", () => {
+    const { container } = render(<>
+      <CollapsibleCard header="Standard" defaultOpen>Standard content</CollapsibleCard>
+      <CollapsibleCard header="Technique" defaultOpen collapseOnContentClick>Technique content</CollapsibleCard>
+    </>);
+
+    fireEvent.click(screen.getByText("Standard content"));
+    expect(container.querySelectorAll(".card.is-expanded")).toHaveLength(2);
+
+    fireEvent.click(screen.getByText("Technique content"));
+    expect(screen.getByRole("button", { name: "Technique" }).getAttribute("aria-expanded")).toBe("false");
+    expect(screen.getByRole("button", { name: "Standard" }).getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("keeps controls and notes usable without collapsing the surrounding content", () => {
+    const { container } = render(
+      <CollapsibleCard header="Technique" defaultOpen collapseOnContentClick
+        footer={<div className="inline-note">Saved note</div>}>
+        <button type="button">Edit</button>
+        <a href="#video">Video</a>
+        <input aria-label="Note input" />
+      </CollapsibleCard>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("link", { name: "Video" }));
+    fireEvent.click(screen.getByRole("textbox", { name: "Note input" }));
+    fireEvent.click(screen.getByText("Saved note"));
+
+    expect(container.querySelector(".card.is-expanded")).not.toBeNull();
+  });
+
+  it("keeps a technique open while text in its content is selected", () => {
+    const { container } = render(
+      <CollapsibleCard header="Technique" defaultOpen collapseOnContentClick>
+        <span>Selectable detail</span>
+      </CollapsibleCard>
+    );
+    const detail = screen.getByText("Selectable detail");
+    const range = document.createRange();
+    range.selectNodeContents(detail);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    try {
+      fireEvent.click(detail);
+      expect(container.querySelector(".card.is-expanded")).not.toBeNull();
+    } finally {
+      selection.removeAllRanges();
+    }
+  });
+
+  it("does not close from a click in a dialog rendered outside the card", () => {
+    const { container } = render(
+      <CollapsibleCard header="Technique" defaultOpen collapseOnContentClick>
+        {createPortal(<span>Video dialog content</span>, document.body)}
+      </CollapsibleCard>
+    );
+
+    fireEvent.click(screen.getByText("Video dialog content"));
+
+    expect(container.querySelector(".card.is-expanded")).not.toBeNull();
   });
 
   it("does not expand when a user has selected text in the header", () => {

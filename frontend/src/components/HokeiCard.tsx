@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import { beltOf, humanGradeName, type HokeiMoment, type GradeName } from "../data";
 import { useTheme } from "../hooks";
@@ -20,6 +20,10 @@ const assessmentLabels: Record<HokeiRankValue, string> = {
     3: "Sitter",
 };
 
+// Keep the final word (and any closing punctuation) with its assessment when
+// the Japanese subtitle wraps. Latin fallback text keeps whole words too.
+const japaneseWordSegmenter = new Intl.Segmenter("ja", { granularity: "word" });
+
 interface HokeiCardProps {
     hokei: HokeiMoment;
     // Personal marks are opt-in per card: a card used purely to illustrate a
@@ -31,19 +35,23 @@ interface HokeiCardProps {
     compact?: boolean;
     dojoMode?: boolean;
     kamokuLayout?: boolean;
-    hideTechniqueGroup?: boolean;
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
     onCollapseExited?: () => void;
 }
 
 const HokeiCard = (props: HokeiCardProps) => {
-    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, hideTechniqueGroup = false, defaultOpen, onOpenChange, onCollapseExited } = props;
+    const { hokei, className, showNotes = false, showRating = false, gradeName, compact, dojoMode = false, kamokuLayout = false, defaultOpen, onOpenChange, onCollapseExited } = props;
     const translator = useContext(TranslatorContext);
     const note = useHokeiNote(hokei.id);
     const rank = useHokeiRank(hokei.id);
     const hasNotes = showNotes && !!note;
     const showKanji = !dojoMode;
+    const [open, setOpen] = useState(defaultOpen ?? false);
+    const handleOpenChange = useCallback((nextOpen: boolean) => {
+        setOpen(nextOpen);
+        onOpenChange?.(nextOpen);
+    }, [onOpenChange]);
 
     const videos = hokei.videos ?? [];
     const footer = (showNotes || videos.length > 0) ? (
@@ -66,12 +74,13 @@ const HokeiCard = (props: HokeiCardProps) => {
         return (
             <CollapsibleCard
                 header={<DojoCardHeader hokei={hokei} />}
-                footer={footer}
+                footer={kamokuFooter}
                 defaultOpen={defaultOpen}
+                collapseOnContentClick
                 onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
-                className={`app-grid-card hokei-card dojo-card ${className ?? ""}`.trim()}
+                className={`app-grid-card hokei-card kamoku-full-card dojo-card ${className ?? ""}`.trim()}
             >
-                <HokeiDojoDetails hokei={hokei} />
+                <HokeiDojoDetails hokei={hokei} namedRoles />
             </CollapsibleCard>
         );
     }
@@ -79,13 +88,15 @@ const HokeiCard = (props: HokeiCardProps) => {
     if (kamokuLayout) {
         return (
             <CollapsibleCard
-                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} showKanji={showKanji} hideTechniqueGroup={hideTechniqueGroup} />}
+                header={<KamokuCardHeader hokei={hokei} gradeName={gradeName} rank={rank}
+                                          showRating={showRating} showKanji={showKanji} open={open} />}
                 footer={kamokuFooter}
                 defaultOpen={defaultOpen}
-                onOpenChange={onOpenChange} onCollapseExited={onCollapseExited}
+                collapseOnContentClick
+                onOpenChange={handleOpenChange} onCollapseExited={onCollapseExited}
                 className={`app-grid-card hokei-card kamoku-full-card ${className ?? ""}`.trim()}
             >
-                <KamokuCardDetails hokei={hokei} rank={rank} showRating={showRating} showKanji={showKanji} />
+                <HokeiDetails hokei={hokei} showKanji={showKanji} />
             </CollapsibleCard>
         );
     }
@@ -152,65 +163,55 @@ const HokeiCard = (props: HokeiCardProps) => {
 interface KamokuCardHeaderProps {
     hokei: HokeiMoment;
     gradeName?: GradeName;
+    rank: HokeiRankValue | null;
+    showRating: boolean;
     showKanji: boolean;
-    hideTechniqueGroup: boolean;
+    open: boolean;
 }
 
-const KamokuCardHeader = ({ hokei, gradeName, showKanji, hideTechniqueGroup }: KamokuCardHeaderProps) => {
+const KamokuCardHeader = ({ hokei, gradeName, rank, showRating, showKanji, open }: KamokuCardHeaderProps) => {
     const translator = useContext(TranslatorContext);
     const name = translator.isJapanese ? translator.japanese(hokei.hokei_name) : translator.translate(hokei.hokei_name, { capitalize: true });
     const japaneseName = !translator.isJapanese && showKanji ? translator.japanese(hokei.hokei_name) : null;
+    const assessment = showRating ? (
+        <StarRating value={rank} onChange={value => setHokeiRank(hokei.id, value)}
+                    groupLabel={translator.translate("Självskattning")} emptyLabel={translator.translate("Ej bedömd")}
+                    getLabel={value => translator.translate(assessmentLabels[value])} showLabel />
+    ) : null;
+    const japaneseEndingIndex = japaneseName && assessment
+        ? [...japaneseWordSegmenter.segment(japaneseName)].reverse().find(part => part.isWordLike)?.index ?? 0
+        : 0;
 
     return (
         <div className="kamoku-card-header-content">
             <div className="kamoku-card-name-row">
-                <div>
-                    <div className="kamoku-card-name">{name}</div>
-                    {japaneseName && <div className="kamoku-card-japanese">{japaneseName}</div>}
-                </div>
+                <div className="kamoku-card-name">{name}</div>
+                {japaneseName && (
+                    <div className="kamoku-card-subtitle-row">
+                        <span className="kamoku-card-japanese">
+                            {assessment ? <>
+                                {japaneseName.slice(0, japaneseEndingIndex)}
+                                <span className="kamoku-card-japanese-ending">
+                                    {japaneseName.slice(japaneseEndingIndex)}
+                                    {assessment}
+                                </span>
+                            </> : japaneseName}
+                        </span>
+                    </div>
+                )}
             </div>
-            {(gradeName || hokei.variations.length > 0 || (!hideTechniqueGroup && hokei.technique_group)) && (
+            {(gradeName || hokei.variations.length > 0 || (!japaneseName && showRating) || (open && (hokei.technique_group || hokei.kyohan_pages.length > 0))) && (
                 <div className="kamoku-card-metadata">
                     {gradeName && <span className="kamoku-card-level-tag" data-belt={beltOf(gradeName)}>{humanGradeName(gradeName)}</span>}
                     {hokei.variations.map(variation => <span key={variation}>{translator.translate(variation)}</span>)}
-                    {!hideTechniqueGroup && hokei.technique_group && <span>{translator.translate(hokei.technique_group)}</span>}
+                    {open && hokei.technique_group && <span>{translator.translate(hokei.technique_group)}</span>}
+                    {open && hokei.kyohan_pages.length > 0 && (
+                        <span className="kamoku-card-kyohan">{translator.translate("Kyohan")} {hokei.kyohan_pages.map(page => translator.translate(page)).join(", ")}</span>
+                    )}
+                    {!japaneseName && assessment}
                 </div>
             )}
         </div>
-    );
-};
-
-const KamokuCardDetails = ({ hokei, rank, showRating, showKanji }: {
-    hokei: HokeiMoment;
-    rank: HokeiRankValue | null;
-    showRating: boolean;
-    showKanji: boolean;
-}) => {
-    const translator = useContext(TranslatorContext);
-    const showDetailsMeta = hokei.kyohan_pages.length > 0 || showRating;
-
-    return (
-        <>
-            {showDetailsMeta && (
-                <div className="kamoku-card-expanded-meta">
-                    {hokei.kyohan_pages.length > 0 && (
-                        <div className="kamoku-card-reference">
-                            <span>{translator.translate("Kyohan")}</span>
-                            <strong>{hokei.kyohan_pages.map(page => translator.translate(page)).join(", ")}</strong>
-                        </div>
-                    )}
-                    {showRating && (
-                        <div className="kamoku-card-assessment">
-                            <span>{translator.translate("Självskattning")}</span>
-                            <StarRating value={rank} onChange={value => setHokeiRank(hokei.id, value)}
-                                        groupLabel={translator.translate("Självskattning")} emptyLabel={translator.translate("Ej bedömd")}
-                                        getLabel={value => translator.translate(assessmentLabels[value])} />
-                        </div>
-                    )}
-                </div>
-            )}
-            <HokeiDetails hokei={hokei} showKanji={showKanji} />
-        </>
     );
 };
 
@@ -238,60 +239,71 @@ const DojoCardHeader = ({ hokei }: { hokei: HokeiMoment }) => {
 export const HokeiDetails = ({ hokei, showKanji }: { hokei: HokeiMoment; showKanji: boolean }) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
-    const renderValue = (value?: string, columnLabel?: string, className = "", suffix?: React.ReactNode) => value ? (
+    const renderValue = (value?: string, className = "", suffix?: React.ReactNode) => value ? (
         <span className={`kamoku-card-value ${className}`.trim()}>
-            {columnLabel && <span className="kamoku-card-mobile-label">{translator.translate(columnLabel)}</span>}
             <span>{translator.translate(value)}{suffix}</span>
             {!translator.isJapanese && showKanji && <span className="kamoku-card-value-japanese">{translator.japanese(value)}</span>}
         </span>
     ) : (
         <span className={`kamoku-card-value kamoku-card-empty ${className}`.trim()}>
-            {columnLabel && <span className="kamoku-card-mobile-label">{translator.translate(columnLabel)}</span>}
             <span>-</span>
         </span>
     );
-    const renderRole = (role: HokeiMoment["roles"]["attacker"], Icon: typeof PersonFill, label: string) => (
+    const renderRole = (role: HokeiMoment["roles"]["attacker"], Icon: typeof PersonFill, label: string, isDefender = false) => (
         <div className="kamoku-card-role-row">
-            <Icon className="kamoku-card-role-icon" aria-label={translator.translate(label)} />
-            {renderValue(role.stance, "Kamae", "kamoku-card-role-stance")}
-            {renderValue(role.action, "Utförande", "kamoku-card-role-action", label === "(F)" && hokei.ren_hanko
-                ? <i> ({translator.translate("ren hankō")})</i>
-                : undefined)}
+            <div className="kamoku-card-role-heading">
+                <Icon className="kamoku-card-role-icon" aria-hidden="true" />
+                <span>{translator.translate(label)}</span>
+            </div>
+            <div className="kamoku-card-role-values">
+                {renderValue(role.stance, "kamoku-card-role-stance")}
+                {renderValue(role.action, "kamoku-card-role-action", isDefender && hokei.ren_hanko
+                    ? <i> ({translator.translate("ren hankō")})</i>
+                    : undefined)}
+            </div>
         </div>
     );
 
     return (
         <div className="kamoku-card-sequence">
-            <div className="kamoku-card-stage kamoku-card-foot-stage">
-                <div className="kamoku-card-stage-label">{translator.translate("Fotposition")}</div>
-                <div className="kamoku-card-foot-stances">
-                    {hokei.foot_stance?.map(stance => (
-                        <div className="kamoku-card-foot-stance" key={stance}>
-                            <img className="stance-icon" src={`/${stance.toLowerCase().replace(/\s+/g, '_')}${effectiveTheme.effectiveTheme === "dark" ? "_dark" : ""}.png`} alt="" />
-                            <span>{renderValue(stance)}</span>
-                        </div>
-                    ))}
+            {hokei.foot_stance && hokei.foot_stance.length > 0 && (
+                <div className="kamoku-card-stage kamoku-card-foot-stage">
+                    <div className="kamoku-card-foot-stances">
+                        {hokei.foot_stance.map(stance => (
+                            <div className="kamoku-card-foot-stance" key={stance}>
+                                <img className="stance-icon" src={`/${stance.toLowerCase().replace(/\s+/g, '_')}${effectiveTheme.effectiveTheme === "dark" ? "_dark" : ""}.png`} alt="" />
+                                <span>{renderValue(stance)}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
             <div className="kamoku-card-technique-table">
-                <div className="kamoku-card-column-headings" aria-hidden="true">
-                    <span />
-                    <span>{translator.translate("Kamae")}</span>
-                    <span>{translator.translate("Utförande")}</span>
-                </div>
                 <div className="kamoku-card-role-rows">
-                    {renderRole(hokei.roles.attacker, PersonFill, "(A)")}
-                    {renderRole(hokei.roles.defender, ShieldFill, "(F)")}
+                    {renderRole(hokei.roles.attacker, PersonFill, "Angripare")}
+                    {renderRole(hokei.roles.defender, ShieldFill, "Försvarare", true)}
                 </div>
             </div>
         </div>
     );
 };
 
-export const HokeiDojoDetails = ({ hokei }: { hokei: HokeiMoment }) => {
+export const HokeiDojoDetails = ({ hokei, namedRoles = false }: { hokei: HokeiMoment; namedRoles?: boolean }) => {
     const translator = useContext(TranslatorContext);
     const effectiveTheme = useTheme();
-    const renderRole = (label: string, role: HokeiMoment["roles"]["attacker"]) => (
+    const renderRole = (label: string, role: HokeiMoment["roles"]["attacker"]) => namedRoles ? (
+        <div className="kamoku-card-role-row">
+            <div className="kamoku-card-role-heading">
+                {label === "(A)" ? <PersonFill className="kamoku-card-role-icon" aria-hidden="true" />
+                                   : <ShieldFill className="kamoku-card-role-icon" aria-hidden="true" />}
+                <span>{translator.translate(label === "(A)" ? "Angripare" : "Försvarare")}</span>
+            </div>
+            <div className="kamoku-card-role-values">
+                {role.stance && <div>{translator.translate(role.stance)}</div>}
+                {role.action && <div>{translator.translate(role.action)}{label === "(F)" && hokei.ren_hanko && <i> ({translator.translate("ren hankō")})</i>}</div>}
+            </div>
+        </div>
+    ) : (
         <div className="dojo-role">
             <strong>{translator.translate(label)}</strong>
             {role.stance && <div className="dojo-role-stance">{translator.translate(role.stance)}</div>}

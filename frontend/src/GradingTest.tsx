@@ -827,7 +827,7 @@ const SubItemCard = ({ item, translator, showKanji, showEmojiNumbers, showHokeiC
             {hokeis.length > 0 && (
                 <div className="d-flex flex-column gap-2 mt-2">
                     {hokeis.map(h => (
-                        <HokeiCard key={h.hokei_name} hokei={h} compact showNotes showRating dojoMode={dojoMode} />
+                        <HokeiCard key={h.hokei_name} hokei={h} kamokuLayout showNotes showRating dojoMode={dojoMode} />
                     ))}
                 </div>
             )}
