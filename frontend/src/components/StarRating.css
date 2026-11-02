@@ -17,8 +17,11 @@
 }
 
 .self-assessment-trigger {
+  min-height: 2.25rem;
+  justify-content: center;
   padding: 0.45rem;
   border-radius: 0.35rem;
+  line-height: 1;
 }
 
 .self-assessment-trigger:hover {
@@ -41,9 +44,17 @@
 }
 
 .self-assessment-progress {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.28rem;
+  line-height: 1;
+}
+
+.self-assessment-current-label {
+  color: var(--bs-body-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .self-assessment-progress .self-assessment-dot {

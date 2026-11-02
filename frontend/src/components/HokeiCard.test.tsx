@@ -30,6 +30,7 @@ const hokei: HokeiMoment = {
     defender: { stance: "hidari mae chūdan gamae", action: "gyaku gote" },
   },
   kyohan_pages: [123],
+  videos: [{ url: "https://www.youtube.com/watch?v=test" }],
 };
 
 const makeStore = (withNotes = true, note = "Remember the angle") => {
@@ -67,9 +68,12 @@ describe("HokeiCard training layouts", () => {
     expect(card.classList.contains("focus-card")).toBe(false);
     expect(document.body.classList.contains("card-focus-active")).toBe(false);
     expect(header.getAttribute("aria-expanded")).toBe("true");
+
+    await user.click(container.querySelector<HTMLElement>(".kamoku-card-role-action")!);
+    expect(card.classList.contains("is-collapsed")).toBe(true);
   });
 
-  it("keeps variations, technique metadata, stance names, notes, and ratings in the calm layout", () => {
+  it("keeps variations, role details, references, notes, videos, and ratings in the calm layout", () => {
     const store = makeStore();
     vi.mocked(getAppDataStore).mockReturnValue(store);
     const { container } = render(
@@ -79,16 +83,21 @@ describe("HokeiCard training layouts", () => {
         showNotes
         showRating
         kamokuLayout
+        defaultOpen
       />,
     );
 
     const content = container.textContent ?? "";
     expect(content).toContain("katate");
     expect(content).toContain("jūhō");
-    expect(content).toContain("Kyohan 123");
-    expect(content).toContain("Fotposition");
-    expect(content).toContain("Kamae");
-    expect(content).toContain("Utförande");
+    expect(content).toContain("Kyohan");
+    expect(content).toContain("123");
+    expect(content).toContain("Angripare");
+    expect(content).toContain("Försvarare");
+    expect(content).toContain("YouTube");
+    expect(content).not.toContain("Fotposition");
+    expect(content).not.toContain("Kamae");
+    expect(content).not.toContain("Utförande");
     expect(content).not.toContain("Stans");
     expect(content).toContain("hidari mae chūdan gamae");
     expect(content).toContain("Remember the angle");
@@ -102,7 +111,39 @@ describe("HokeiCard training layouts", () => {
     expect(roleRows[1].textContent).toContain("gyaku gote");
   });
 
-  it("keeps only practice-essential header information in dojo mode and shows saved notes compactly", () => {
+  it("keeps the grade visible and shows the group and reference only when opened", async () => {
+    const user = userEvent.setup();
+    const store = makeStore();
+    vi.mocked(getAppDataStore).mockReturnValue(store);
+    const { container } = render(
+      <HokeiCard hokei={hokei} gradeName="6 kyū" showRating kamokuLayout />,
+    );
+
+    const header = container.querySelector<HTMLElement>(".card-header")!;
+    const body = container.querySelector(".card-body")!;
+    expect(header.textContent).toContain("6 kyū");
+    expect(header.textContent).toContain("katate");
+    expect(header.textContent).not.toContain("jūhō");
+    expect(header.textContent).toContain("Övar");
+    expect(header.textContent).not.toContain("Kyohan");
+    expect(header.querySelector(".self-assessment")).not.toBeNull();
+    expect(body.querySelector(".self-assessment")).toBeNull();
+    expect(container.querySelector(".card-footer")?.textContent ?? "").not.toContain("Kyohan");
+
+    await user.click(header);
+    const metadata = header.querySelector(".kamoku-card-metadata")!;
+    expect(metadata.textContent).toContain("6 kyū");
+    expect(metadata.textContent).toContain("jūhō");
+    expect(metadata.textContent).toContain("Kyohan 123");
+
+    await user.click(header);
+    expect(header.textContent).toContain("6 kyū");
+    expect(header.textContent).not.toContain("jūhō");
+    expect(header.textContent).not.toContain("Kyohan");
+  });
+
+  it("keeps dojo content simple, names the roles and protects notes from content-click collapse", async () => {
+    const user = userEvent.setup();
     const store = makeStore();
     vi.mocked(getAppDataStore).mockReturnValue(store);
     const translator = new TranslatorImplementation({ ja: { "gyaku gote": "逆小手" } }, "sv");
@@ -111,9 +152,10 @@ describe("HokeiCard training layouts", () => {
         <HokeiCard
           hokei={hokei}
           gradeName="6 kyū"
-        showNotes
-        showRating
+          showNotes
+          showRating
           dojoMode
+          defaultOpen
         />
       </TranslatorContext.Provider>,
     );
@@ -121,6 +163,8 @@ describe("HokeiCard training layouts", () => {
     const content = container.textContent ?? "";
     expect(content).toContain("katate");
     expect(content).toContain("jōdan zuki");
+    expect(content).toContain("Angripare");
+    expect(content).toContain("Försvarare");
     expect(content).not.toContain("jūhō");
     expect(content).not.toContain("Kyohan 123");
     expect(content).not.toContain("6 kyū");
@@ -128,6 +172,11 @@ describe("HokeiCard training layouts", () => {
     expect(screen.queryByRole("group", { name: "Självskattning" })).toBeNull();
     expect(container.querySelector(".hokei-inline-note.has-note")).not.toBeNull();
     expect(screen.queryByRole("textbox", { name: "Anteckningar för gyaku gote" })).toBeNull();
+
+    await user.click(screen.getByText("Remember the angle"));
+    expect(container.querySelector(".dojo-card.is-expanded")).not.toBeNull();
+    await user.click(container.querySelector<HTMLElement>(".dojo-foot-images")!);
+    expect(container.querySelector(".dojo-card.is-collapsed")).not.toBeNull();
   });
 
   it("shows kanji in the standard view even when the legacy preference was off", () => {
@@ -216,6 +265,6 @@ describe("HokeiCard training layouts", () => {
 
     const link = container.querySelector(".kamoku-video-link")!;
     expect(link.className).toBe("kamoku-video-link");
-    expect(screen.getByRole("link", { name: /YouTube/ })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "YouTube" })).toBeTruthy();
   });
 });

@@ -47,7 +47,7 @@ const plan: GradePlan = {
 
 beforeEach(() => localStorage.clear());
 
-it("keeps the calm group overview and uses the established cards inside a group", async () => {
+it("uses calm group rows and reuses the expandable Hokei browse layout inside a group", async () => {
   const user = userEvent.setup();
   const { container } = render(<Groups allGradePlans={[plan]} />);
 
@@ -59,12 +59,13 @@ it("keeps the calm group overview and uses the established cards inside a group"
 
   expect(screen.getByRole("button", { name: "Teknikgrupper" })).toBeTruthy();
   expect(container.querySelector(".groups-back svg")).toBeNull();
-  expect(screen.getAllByTestId("group-hokei")).toHaveLength(2);
+  expect(container.querySelector(".hokei-browse-list")).not.toBeNull();
+  expect(container.querySelectorAll(".hokei-browse-item")).toHaveLength(2);
   for (const card of screen.getAllByTestId("group-hokei")) {
-    expect(card.classList.contains("m-1")).toBe(true);
+    expect(card.classList.contains("hokei-browse-card")).toBe(true);
     expect(card.getAttribute("data-notes")).toBe("true");
     expect(card.getAttribute("data-rating")).toBe("true");
-    expect(card.getAttribute("data-kamoku-layout")).toBe("undefined");
+    expect(card.getAttribute("data-kamoku-layout")).toBe("true");
   }
 
   await user.click(screen.getByRole("button", { name: "Teknikgrupper" }));

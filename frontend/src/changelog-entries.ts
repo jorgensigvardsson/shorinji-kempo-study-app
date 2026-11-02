@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-02T18:10:13.000Z",
+    changes: [
+      {
+        emoji: "🧪",
+        sv: "Hokei har fått ett luftigare och enhetligt upplägg i listor, veckoplan, gradering och Embu, även i Dojoläget. Tydligare avgränsningar och roller, större kanji med självskattning i standardläget och en tydligare redigeringsknapp för anteckningar. Öppna tekniker markeras och kan fällas ihop genom ett klick i teknikytan.",
+        en: "Hokei now has a more spacious, consistent layout in lists, weekly plans, grading and Embu, including Dojo mode. Technique boundaries and roles are clearer, standard mode has larger kanji with self-assessment, and notes have a clearer edit button. Open techniques are highlighted and can be closed by clicking their content.",
+        tr: "Hokei; listeler, haftalık plan, sınav ve Embu'da, Dojo modu dahil daha ferah ve tutarlı bir düzene kavuştu. Teknik sınırları ve roller daha belirgin, standart modda kanji ve öz değerlendirme daha okunaklı, notların düzenleme düğmesi daha açık. Açık teknikler vurgulanıyor ve teknik içeriğine tıklayarak kapatılabiliyor.",
+        ja: "法形一覧、週間計画、審査、演武で、道場モードを含め、ゆとりのある統一したレイアウトになりました。技の区切りと役割を明確にし、標準モードでは漢字と自己評価を見やすく、メモの編集ボタンも分かりやすくしました。開いた技は強調表示され、技の内容をクリックして閉じられます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-01T19:02:46.000Z",
     changes: [
       {

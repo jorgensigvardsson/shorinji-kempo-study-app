@@ -67,11 +67,11 @@ const Groups = (props: Props) => {
                     </div>
                     <span className="groups-count">{selectedGroup.hokeis.length}</span>
                 </div>
-                <div>
+                <div className="hokei-browse-list" role="list">
                     {selectedGroup.hokeis.map(h => (
-                        <div key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`} className="mb-3">
-                            <HokeiCard hokei={h.moment} gradeName={h.grade} className="m-1"
-                                        showNotes showRating />
+                        <div key={`${h.grade}.${h.week}.${h.momentIndex}.${h.moment.hokei_name}`} className="hokei-browse-item" role="listitem">
+                            <HokeiCard hokei={h.moment} gradeName={h.grade} className="hokei-browse-card"
+                                        showNotes showRating kamokuLayout />
                         </div>
                     ))}
                 </div>

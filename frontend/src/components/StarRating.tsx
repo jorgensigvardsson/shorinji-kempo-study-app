@@ -8,13 +8,14 @@ interface Props {
   groupLabel: string;
   emptyLabel: string;
   getLabel: (value: HokeiRankValue) => string;
+  showLabel?: boolean;
 }
 
 const ASSESSMENT_VALUES: Array<HokeiRankValue | null> = [null, 1, 2, 3];
 
-const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel }: Props) => {
+const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel, showLabel = false }: Props) => {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLSpanElement>(null);
   const currentLabel = value === null ? emptyLabel : getLabel(value);
   const stopHeaderToggle = (event: SyntheticEvent) => {
     event.preventDefault();
@@ -39,7 +40,7 @@ const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel }: Props
   }, [open]);
 
   return (
-    <div className="self-assessment" role="group" aria-label={groupLabel} ref={rootRef}>
+    <span className="self-assessment" role="group" aria-label={groupLabel} ref={rootRef}>
       <button
         type="button"
         className="self-assessment-trigger"
@@ -60,9 +61,10 @@ const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel }: Props
             />
           ))}
         </span>
+        {showLabel && value !== null && <span className="self-assessment-current-label">{currentLabel}</span>}
       </button>
       {open && (
-        <div className="self-assessment-menu" role="radiogroup" aria-label={groupLabel}>
+        <span className="self-assessment-menu" role="radiogroup" aria-label={groupLabel}>
           {ASSESSMENT_VALUES.map(assessmentValue => {
             const label = assessmentValue === null ? emptyLabel : getLabel(assessmentValue);
             return (
@@ -84,9 +86,9 @@ const StarRating = ({ value, onChange, groupLabel, emptyLabel, getLabel }: Props
           </button>
             );
           })}
-        </div>
+        </span>
       )}
-    </div>
+    </span>
   );
 };
 

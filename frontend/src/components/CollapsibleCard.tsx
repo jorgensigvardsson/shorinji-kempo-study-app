@@ -14,12 +14,13 @@ interface Props extends React.PropsWithChildren {
     inlineChevron?: boolean;
     defaultOpen?: boolean;
     focusOnOpen?: boolean;
+    collapseOnContentClick?: boolean;
     onOpenChange?: (open: boolean) => void;
     onCollapseExited?: () => void;
 }
 
 const CollapsibleCard = (props: Props) => {
-    const { className, header, footer, showCollapse, inlineChevron, defaultOpen = false, focusOnOpen = false, onOpenChange, onCollapseExited, children } = props;
+    const { className, header, footer, showCollapse, inlineChevron, defaultOpen = false, focusOnOpen = false, collapseOnContentClick = false, onOpenChange, onCollapseExited, children } = props;
     const [open, setOpen] = useState(defaultOpen);
     const cardRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
@@ -81,26 +82,34 @@ const CollapsibleCard = (props: Props) => {
     if (canCollapse)
         style = {...style, cursor: "pointer"};
 
-    const cardClassName = `${className ?? ""} ${focusOnOpen ? "focus-card" : ""} ${open ? "is-expanded" : "is-collapsed"}`.trim();
+    const cardClassName = `${className ?? ""} ${focusOnOpen ? "focus-card" : ""} ${collapseOnContentClick && canCollapse ? "collapses-on-content-click" : ""} ${open ? "is-expanded" : "is-collapsed"}`.trim();
     const toggleOpen = () => {
         if (!canCollapse) return;
         if (open && focusOnOpen) closeFocusedCard();
         else setOpen(value => !value);
     };
-    const headerContainsSelection = () => {
+    const containsSelection = (element: HTMLElement | null) => {
         const selection = window.getSelection();
-        if (!selection || selection.isCollapsed || !headerRef.current) return false;
-        return (selection.anchorNode && headerRef.current.contains(selection.anchorNode))
-            || (selection.focusNode && headerRef.current.contains(selection.focusNode));
+        if (!selection || selection.isCollapsed || !element) return false;
+        return (selection.anchorNode && element.contains(selection.anchorNode))
+            || (selection.focusNode && element.contains(selection.focusNode));
     };
 
     return (
-        <Card ref={cardRef} className={cardClassName}>
+        <Card ref={cardRef} className={cardClassName} onClick={event => {
+            if (!collapseOnContentClick || !canCollapse || !open || event.defaultPrevented) return;
+            const target = event.target;
+            if (!(target instanceof Element) || !cardRef.current?.contains(target)) return;
+            // Header clicks are handled below. Keep controls, notes and selected
+            // text usable when the surrounding technique is also a close target.
+            if (target.closest('.card-header, a, button, input, textarea, select, label, summary, [role="button"], [role="radio"], [contenteditable]:not([contenteditable="false"]), .inline-note')) return;
+            if (!containsSelection(cardRef.current)) toggleOpen();
+        }}>
             <Card.Header
                 ref={headerRef}
                 className="border-bottom-0"
                 onClick={() => {
-                    if (!headerContainsSelection()) toggleOpen();
+                    if (!containsSelection(headerRef.current)) toggleOpen();
                 }}
                 onKeyDown={event => {
                     if (event.target === event.currentTarget && canCollapse && (event.key === "Enter" || event.key === " ")) {
