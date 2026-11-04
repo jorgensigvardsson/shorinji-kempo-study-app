@@ -1,13 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const adminBranchMembers = vi.fn();
 const adminCreateUser = vi.fn();
+const adminUpdateBranch = vi.fn();
+const adminOrgTree = vi.fn();
+const adminUpdateDisplayName = vi.fn();
+let roles: string[] = [];
 
 vi.mock("./sync/manager", () => ({
-  getSyncManager: () => ({ adminBranchMembers, adminCreateUser }),
+  getSyncManager: () => ({
+    adminBranchMembers, adminCreateUser, adminUpdateBranch, adminOrgTree, adminUpdateDisplayName,
+    getBackendUserInfo: () => ({ roles }),
+  }),
 }));
 
 import AdminBranchMembers from "./AdminBranchMembers";
@@ -31,10 +38,27 @@ const renderAt = (id = "b-karlstad") =>
       </Routes>
     </MemoryRouter>);
 
+// The pencil on the branch heading, as distinct from the ones beside each
+// member: they share a label, since each renames what it sits beside.
+const branchPencil = async () => {
+  const heading = await screen.findByRole("heading", { level: 1 });
+  return within(heading.parentElement as HTMLElement).getByRole("button", { name: "Byt namn" });
+};
+
 describe("AdminBranchMembers", () => {
   beforeEach(() => {
+    roles = [];
     adminBranchMembers.mockReset().mockResolvedValue(branch);
     adminCreateUser.mockReset().mockResolvedValue({ user: member("u3", "Cia Ceder"), notified: true });
+    adminUpdateBranch.mockReset().mockResolvedValue(undefined);
+    adminUpdateDisplayName.mockReset().mockResolvedValue(undefined);
+    adminOrgTree.mockReset().mockResolvedValue({
+      federations: [
+        { id: "SE", name: "Svenska Shorinji Kempoförbundet", branches: [{ id: "b-karlstad", name: "Karlstad" }] },
+        { id: "NO", name: "Norges Shorinji Kempo Forbund", branches: [] },
+      ],
+      wskoBranches: [],
+    });
   });
 
   it("names the branch and lists its members by name", async () => {
@@ -80,6 +104,161 @@ describe("AdminBranchMembers", () => {
     adminBranchMembers.mockResolvedValue({ ...branch, members: [] });
     renderAt();
     expect(await screen.findByText("Klubben har inga medlemmar ännu.")).toBeTruthy();
+  });
+
+  // Renaming a branch and moving it to another federation used to sit beside
+  // every branch on the organization overview; they live here now, on the
+  // page about that branch.
+  describe("changing the branch itself", () => {
+    it("renames the branch and shows the name the server has", async () => {
+      roles = ["branch_admin:b-karlstad"];
+      const user = userEvent.setup();
+      renderAt();
+
+      await user.click(await branchPencil());
+      const field = screen.getByLabelText("Namn");
+      expect((field as HTMLInputElement).value).toBe("Karlstad");
+      adminBranchMembers.mockResolvedValue({ ...branch, name: "Karlstads Shorinji Kempo" });
+      await user.clear(field);
+      await user.type(field, "Karlstads Shorinji Kempo");
+      await user.click(screen.getByRole("button", { name: "Spara" }));
+
+      expect(adminUpdateBranch).toHaveBeenCalledWith("b-karlstad", { name: "Karlstads Shorinji Kempo" });
+      expect(await screen.findByRole("heading", { name: "Karlstads Shorinji Kempo" })).toBeTruthy();
+    });
+
+    // Covered through the federation as well as directly.
+    it("lets the federation's admin rename it too", async () => {
+      roles = ["federation_admin:SE"];
+      renderAt();
+      expect(await branchPencil()).toBeTruthy();
+    });
+
+    it("offers no changes to someone who covers neither the branch nor its federation", async () => {
+      roles = ["federation_admin:NO", "branch_admin:b-elsewhere"];
+      renderAt();
+      await screen.findByText("Karlstad");
+      expect(screen.queryByRole("button", { name: "Byt namn" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Byt förbund" })).toBeNull();
+    });
+
+    // A move needs authority over both where the branch is and where it is
+    // going, which nobody short of WSKO has for every destination.
+    it("offers a move only to someone covering WSKO", async () => {
+      roles = ["federation_admin:SE"];
+      renderAt();
+      await screen.findByText("Karlstad");
+      expect(screen.queryByRole("button", { name: "Byt förbund" })).toBeNull();
+    });
+
+    // Moving a branch out of a federation and up to WSKO is a real destination,
+    // so the empty federation id is sent deliberately rather than omitted.
+    it("moves the branch to WSKO once the move is confirmed", async () => {
+      roles = ["wsko_admin"];
+      const user = userEvent.setup();
+      renderAt();
+
+      await user.click(await screen.findByRole("button", { name: "Byt förbund" }));
+      await user.selectOptions(await screen.findByLabelText("Flytta till"), "");
+      await user.click(screen.getByRole("button", { name: "Flytta klubben" }));
+
+      expect(adminUpdateBranch).toHaveBeenCalledWith("b-karlstad", { federationId: "" });
+      await waitFor(() => expect(screen.queryByRole("button", { name: "Flytta klubben" })).toBeNull());
+    });
+
+    // The dialog is the whole point: opening it must not move anything, and
+    // neither must confirming a destination nobody altered.
+    it("moves nothing until a different federation is chosen", async () => {
+      roles = ["wsko_admin"];
+      const user = userEvent.setup();
+      renderAt();
+
+      await user.click(await screen.findByRole("button", { name: "Byt förbund" }));
+      await screen.findByLabelText("Flytta till");
+      expect((screen.getByRole("button", { name: "Flytta klubben" }) as HTMLButtonElement).disabled).toBe(true);
+
+      await user.click(screen.getByRole("button", { name: "Avbryt" }));
+      expect(adminUpdateBranch).not.toHaveBeenCalled();
+    });
+
+    it("says so plainly when the server refuses", async () => {
+      roles = ["branch_admin:b-karlstad"];
+      adminUpdateBranch.mockRejectedValue(new AdminRequestError(403));
+      const user = userEvent.setup();
+      renderAt();
+
+      await user.click(await branchPencil());
+      await user.type(screen.getByLabelText("Namn"), " Shibu");
+      await user.click(screen.getByRole("button", { name: "Spara" }));
+
+      expect(await screen.findByText("Du har inte behörighet att göra det.")).toBeTruthy();
+    });
+  });
+
+  // For the member who registered under an online handle: an admin of the
+  // branch gives them their real name from the list, without opening them.
+  describe("renaming a member", () => {
+    it("renames the member and shows the name the server has", async () => {
+      roles = ["branch_admin:b-karlstad"];
+      const user = userEvent.setup();
+      renderAt();
+      await screen.findByText("Bo Berg");
+
+      // The branch heading has a pencil too; the members' come after it.
+      const pencils = screen.getAllByRole("button", { name: "Byt namn" });
+      expect(pencils).toHaveLength(3);
+      await user.click(pencils[2]); // Bo Berg, second in the sorted list
+      const field = screen.getByLabelText("Namn");
+      expect((field as HTMLInputElement).value).toBe("Bo Berg");
+
+      adminBranchMembers.mockResolvedValue({
+        ...branch, members: [member("u2", "Bo Björk"), member("u1", "Ann Ask", ["branch_admin:b-karlstad"])],
+      });
+      await user.clear(field);
+      await user.type(field, "Bo Björk");
+      await user.click(screen.getByRole("button", { name: "Spara" }));
+
+      expect(adminUpdateDisplayName).toHaveBeenCalledWith("u2", "Bo Björk");
+      expect(await screen.findByRole("link", { name: "Bo Björk" })).toBeTruthy();
+      expect(screen.queryByLabelText("Namn")).toBeNull();
+    });
+
+    // The provider would put its own name back at the next sign-in.
+    it("offers no pencil for a member whose name comes from Google or Microsoft", async () => {
+      roles = ["branch_admin:b-karlstad"];
+      adminBranchMembers.mockResolvedValue({ ...branch, members: [{ ...member("u2", "Bo Berg"), oidc: true }] });
+      renderAt();
+      await screen.findByText("Bo Berg");
+      // The branch heading keeps its pencil; the member gets none.
+      expect(screen.getAllByRole("button", { name: "Byt namn" })).toHaveLength(1);
+    });
+
+    it("will not save an empty name or an unchanged one", async () => {
+      roles = ["branch_admin:b-karlstad"];
+      const user = userEvent.setup();
+      renderAt();
+      await screen.findByText("Bo Berg");
+      await user.click(screen.getAllByRole("button", { name: "Byt namn" })[1]);
+
+      const save = screen.getByRole("button", { name: "Spara" });
+      expect(save.hasAttribute("disabled")).toBe(true);
+      await user.clear(screen.getByLabelText("Namn"));
+      expect(save.hasAttribute("disabled")).toBe(true);
+      expect(adminUpdateDisplayName).not.toHaveBeenCalled();
+    });
+
+    it("says so plainly when the server refuses", async () => {
+      roles = ["branch_admin:b-karlstad"];
+      adminUpdateDisplayName.mockRejectedValue(new AdminRequestError(403));
+      const user = userEvent.setup();
+      renderAt();
+      await screen.findByText("Bo Berg");
+      await user.click(screen.getAllByRole("button", { name: "Byt namn" })[1]);
+      await user.type(screen.getByLabelText("Namn"), "son");
+      await user.click(screen.getByRole("button", { name: "Spara" }));
+
+      expect(await screen.findByText("Du har inte behörighet att göra det.")).toBeTruthy();
+    });
   });
 
   describe("adding a member by hand", () => {

@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-04T13:29:54.000Z",
+    changes: [
+      {
+        emoji: "🏯",
+        sv: "Alla kan nu se organisationen under Mer → Organisation: varje förbund och klubb, som lista eller träd. Klicka på ett förbund eller på WSKO för att se klubbarna där.",
+        en: "Everyone can now see the organization under More → Organization: every federation and branch, as a list or a tree. Click a federation or WSKO to see the branches there.",
+        tr: "Artık herkes organizasyonu Daha fazla → Organizasyon altında görebilir: tüm federasyonlar ve kulüpler, liste ya da ağaç olarak. Oradaki kulüpleri görmek için bir federasyona veya WSKO'ya tıklayın.",
+        ja: "「その他」→「組織」から、誰でも組織全体を見られるようになりました。すべての連盟と支部を一覧または樹形図で表示します。連盟またはWSKOをクリックすると、その支部が表示されます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-02T18:10:13.000Z",
     changes: [
       {

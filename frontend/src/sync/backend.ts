@@ -819,14 +819,15 @@ export class BackendSyncClient {
   }
 
   // Updates a user's display name (only permitted for non-OIDC users; the backend
-  // returns 409 otherwise).
+  // returns 409 otherwise). The status comes through so a page can say which
+  // refusal it was.
   async adminUpdateDisplayName(id: string, displayName: string): Promise<void> {
     const resp = await this.fetchWithRefresh(`${authUrl}/auth/admin/users/${encodeURIComponent(id)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ displayName }),
     });
-    if (!resp.ok) throw new Error(`PATCH /auth/admin/users/${id}: ${resp.status}`);
+    if (!resp.ok) throw await adminRequestError(resp);
   }
 
   // Replaces a user's roles with the given set. The backend checks only the

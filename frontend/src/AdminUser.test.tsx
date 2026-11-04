@@ -143,19 +143,23 @@ describe("AdminUser", () => {
     renderPage();
     await screen.findByText("Ann Ask");
 
+    await testUser.click(screen.getByRole("button", { name: "Byt namn" }));
     const field = screen.getByLabelText("Namn");
+    expect((field as HTMLInputElement).value).toBe("Ann Ask");
     await testUser.clear(field);
     await testUser.type(field, "Ann Ask-Berg");
     await testUser.click(screen.getByRole("button", { name: "Spara" }));
 
     await waitFor(() => expect(adminUpdateDisplayName).toHaveBeenCalledWith("u1", "Ann Ask-Berg"));
+    expect(await screen.findByRole("heading", { name: "Ann Ask-Berg" })).toBeTruthy();
   });
 
+  // The provider owns the name and would put its own back at the next sign-in.
   it("leaves an OIDC name alone", async () => {
     adminGetUser.mockResolvedValue({ ...user, oidc: true });
     renderPage();
     await screen.findByRole("heading", { name: "Ann Ask" });
-    expect(screen.queryByRole("button", { name: "Spara" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Byt namn" })).toBeNull();
   });
 
   // Ending somebody's sessions everywhere is not a thing to do on one click.

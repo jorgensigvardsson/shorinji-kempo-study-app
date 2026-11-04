@@ -39,6 +39,8 @@ const Settings = page(() => import("./Settings.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
 const AdminRequests = page(() => import("./AdminRequests.tsx"));
 const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
+const AdminFederation = page(() => import("./AdminFederation.tsx"));
+const AdminWSKO = page(() => import("./AdminWSKO.tsx"));
 const MyBranch = page(() => import("./MyBranch.tsx"));
 const AdminBranchMembers = page(() => import("./AdminBranchMembers.tsx"));
 const AdminUser = page(() => import("./AdminUser.tsx"));
@@ -233,18 +235,40 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         icon: GeoAlt,
         hideOnStartPage: true,
     } satisfies Route] : []),
-    // Two gates, not one. The organizational pages are for anybody holding a
-    // scoped role — a branch admin sees their branch and nothing else, because
-    // that is all the server returns them. Broadcasting stays on `admin` alone:
-    // it is a technical power rather than an organizational one, and the
-    // persistence service checks for exactly that role.
-    ...(isAnyAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
+    // The shape of the organization is open to everybody — every federation and
+    // branch, as public as the club picker at registration, which reads the same
+    // list. What the pages offer to change, and whether a branch's members can
+    // be opened, is decided inside them on the reader's roles (and again by the
+    // server). The paths keep their /admin prefix from when only admins had them:
+    // they are linked and bookmarked as such.
+    {
         path: "/admin/organization",
         element: <AdminOrganization />,
         menuText: translator.translate("Organisation"),
         icon: Diagram3,
         hideOnStartPage: true,
-    } satisfies Route, {
+    }, {
+        // Reached from the organization rather than from the menu.
+        path: "/admin/federations/:id",
+        element: <AdminFederation />,
+        menuText: translator.translate("Förbund"),
+        icon: Diagram3,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/admin/wsko",
+        element: <AdminWSKO />,
+        menuText: "WSKO",
+        icon: Diagram3,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    },
+    // The admin pages proper are for anybody holding a scoped role — a branch
+    // admin sees their branch and nothing else, because that is all the server
+    // returns them. Broadcasting stays on `admin` alone: it is a technical power
+    // rather than an organizational one, and the persistence service checks for
+    // exactly that role.
+    ...(isAnyAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []) ? [{
         path: "/admin/requests",
         element: <AdminRequests />,
         // The count rides in the menu text: a request nobody notices is a

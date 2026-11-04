@@ -392,7 +392,7 @@ corporate domain at the appropriate provider.
 | DELETE | `/auth/account` | Delete refresh tokens and the user record (JWT required) |
 | POST | `/auth/link?email={e}` | Link an additional provider to the current account (JWT required) |
 | DELETE | `/auth/link/{provider}` | Unlink a provider (JWT required; 409 if it is the last one) |
-| GET | `/auth/org/branches` | **Unauthenticated.** Every branch with its federation's name, for the branch picker somebody registering chooses from. No personal data of any kind |
+| GET | `/auth/org/branches` | **Unauthenticated.** Every branch with its federation's name, for the branch picker somebody registering chooses from and for the public organization pages (`/admin/organization`, `/admin/federations/:id`, `/admin/wsko`). No personal data of any kind |
 | GET | `/auth/join/context` | What is known about somebody who has proved an address and has no account, authorized by the join ticket rather than a session. Carries their pending request, if they already have one |
 | POST | `/auth/join/request` | Apply to a branch — body `{branchId, note?}`. Carries a global cap on top of the per-IP one: an admin's inbox is as much a quota as the relay is |
 | POST | `/auth/join/withdraw` | Take back a pending application |
