@@ -7,6 +7,9 @@ import { AdminRequestError, type AdminOrgTree, type AdminUser as User } from "./
 import { ROLE_ADMIN, ROLE_WSKO_ADMIN, administeredBranches, administeredFederations, branchAdmin, coversEverything, federationAdmin } from "./roles";
 import Loading from "./components/Loading";
 import FederationFlag from "./components/FederationFlag";
+import RenamePencil from "./components/RenamePencil";
+import { memberNameRefusal } from "./adminOrgRefusal";
+import InlineNameEditor from "./components/InlineNameEditor";
 
 // Display names for the OIDC providers; "email" is translated inline.
 const providerDisplayName: Record<string, string> = {
@@ -46,7 +49,7 @@ const AdminUser = () => {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const [editedName, setEditedName] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [loggedOut, setLoggedOut] = useState(false);
 
@@ -75,7 +78,7 @@ const AdminUser = () => {
         if (!current) return;
         setUser(fetchedUser);
         setTree(fetchedTree);
-        setEditedName(null);
+        setRenaming(false);
         setMoveTo("");
         setConfirmMove(false);
         setMoved(null);
@@ -205,12 +208,21 @@ const AdminUser = () => {
       () => setUser({ ...user, roles: next }));
   };
 
-  const saveName = () => {
-    const name = (editedName ?? user.displayName).trim();
-    if (name === user.displayName) return;
-    void act(
-      () => getSyncManager().adminUpdateDisplayName(user.id, name),
-      () => { setUser({ ...user, displayName: name }); setEditedName(null); });
+  const saveName = (name: string) => {
+    // Not `act`: its 409 means a role, and a name has its own 409 to tell.
+    setBusy(true);
+    setError(null);
+    void (async () => {
+      try {
+        await getSyncManager().adminUpdateDisplayName(user.id, name);
+        setUser({ ...user, displayName: name });
+        setRenaming(false);
+      } catch (err) {
+        setError(memberNameRefusal(err, translator));
+      } finally {
+        setBusy(false);
+      }
+    })();
   };
 
   const forceLogout = () => {
@@ -244,12 +256,28 @@ const AdminUser = () => {
   };
 
   const providerLabel = (p: string) => p === "email" ? translator.translate("E-post") : (providerDisplayName[p] ?? p);
-  const nameValue = editedName ?? user.displayName;
   const signInMethods = Object.entries(user.linkedIdentities).filter(([provider]) => provider !== INVITE_PROVIDER);
 
   return (
     <div>
-      <h1 className="h4">{user.displayName || user.email}</h1>
+      {renaming ? (
+        <div className="mb-2">
+          <InlineNameEditor translator={translator} initial={user.displayName} busy={busy}
+                            onSave={saveName} onCancel={() => setRenaming(false)} />
+        </div>
+      ) : (
+        <div className="d-flex align-items-center gap-1 mb-2">
+          {/* An OIDC member's name comes from Google or Microsoft, which would
+              put its own back at the next sign-in — so it gets no pencil, and the
+              heading says why for anyone who wonders. */}
+          <h1 className="h4 mb-0" title={user.oidc ? translator.translate("Namnet hanteras av inloggningsleverantören.") : undefined}>
+            {user.displayName || user.email}
+          </h1>
+          {!user.oidc && (
+            <RenamePencil translator={translator} disabled={busy} onClick={() => { setRenaming(true); setError(null); }} />
+          )}
+        </div>
+      )}
       <p className="text-secondary">
         {branch !== undefined
           ? <Link to={`/admin/branches/${encodeURIComponent(branch.id)}/members`}>{branch.name}</Link>
@@ -268,31 +296,6 @@ const AdminUser = () => {
 
       <Card className="mb-3">
         <Card.Body className="d-flex flex-column gap-3">
-          <div>
-            <Form.Label className="small text-body-secondary mb-1">{translator.translate("Namn")}</Form.Label>
-            {user.oidc ? (
-              <div title={translator.translate("Namnet hanteras av inloggningsleverantören.")}>
-                {user.displayName || "—"}
-              </div>
-            ) : (
-              <div className="d-flex gap-2" style={{ maxWidth: "28rem" }}>
-                <Form.Control
-                  size="sm"
-                  value={nameValue}
-                  disabled={busy}
-                  aria-label={translator.translate("Namn")}
-                  onChange={e => setEditedName(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") saveName(); }}
-                />
-                <Button size="sm" variant="outline-primary"
-                        disabled={busy || nameValue.trim() === user.displayName}
-                        onClick={saveName}>
-                  {translator.translate("Spara")}
-                </Button>
-              </div>
-            )}
-          </div>
-
           <div>
             <div className="small text-body-secondary">{translator.translate("E-post")}</div>
             <a href={`mailto:${user.email}`} className="text-break">{user.email}</a>
