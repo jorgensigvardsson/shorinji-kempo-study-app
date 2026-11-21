@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-21T16:07:37.000Z",
+    changes: [
+      {
+        emoji: "📋",
+        sv: "Gradering samlar nu teori och träning på samma sida. Växla mellan delarna med flikarna under gradvalet, oavsett vilken ingång du använder.",
+        en: "Grading now brings theory and training together on one page. Switch between them using the tabs below the grade picker, whichever section you open it from.",
+        tr: "Derecelendirme sayfası artık teori ve antrenmanı bir araya getiriyor. Hangi bölümden açarsanız açın, derece seçiminin altındaki sekmelerle ikisi arasında geçiş yapabilirsiniz.",
+        ja: "昇級・昇段審査の理論と練習を同じページで確認できるようになりました。どちらの入口から開いても、級・段の選択欄の下にあるタブで切り替えられます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-04T13:29:54.000Z",
     changes: [
       {

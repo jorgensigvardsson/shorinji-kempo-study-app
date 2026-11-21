@@ -172,10 +172,12 @@ beforeEach(() => {
   getAppDataStore().set("gradingTheoryCompletions", {});
 });
 
-describe("GradingTest subject split", () => {
+describe("GradingTest subject tabs", () => {
   it("shows only theoretical subjects under Theory", () => {
     renderGrading("theory");
 
+    expect(screen.getByRole("tab", { name: "Teori", selected: true })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Träning", selected: false })).toBeTruthy();
     expect(screen.getByText("Teoretiskt provämne")).toBeTruthy();
     expect(screen.getByText("Skriftligt prov")).toBeTruthy();
     expect(screen.getByText("Muntligt prov")).toBeTruthy();
@@ -207,8 +209,69 @@ describe("GradingTest subject split", () => {
   it("shows only technical subjects under Training", () => {
     renderGrading("technical");
 
+    expect(screen.getByRole("tab", { name: "Träning", selected: true })).toBeTruthy();
     expect(screen.getByText("Tekniskt provämne")).toBeTruthy();
     expect(screen.queryByText("Teoretiskt provämne")).toBeNull();
+  });
+
+  it("keeps completion and opened details when switching between theory and training", async () => {
+    const user = userEvent.setup();
+    renderGrading("theory");
+
+    await user.click(screen.getByRole("checkbox", { name: "Klarmarkera Teoretiskt provämne" }));
+    await user.click(screen.getByRole("button", { name: "Teoretiskt provämne" }));
+    await user.click(screen.getByRole("tab", { name: "Träning" }));
+
+    expect(screen.getByRole("tab", { name: "Träning", selected: true })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /Tekniskt provämne/ }));
+    await user.click(screen.getByRole("button", { name: /Teknisk underdel/ }));
+    expect(screen.getByText("Beskrivning av underdel")).toBeTruthy();
+
+    await user.click(screen.getByRole("tab", { name: "Teori" }));
+
+    expect(screen.getByRole("button", { name: "Teoretiskt provämne", expanded: true })).toBeTruthy();
+    expect((screen.getByRole("checkbox", { name: "Ta bort klarmarkering för Teoretiskt provämne" }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByLabelText("1 av 3 delar klarmarkerade")).toBeTruthy();
+    expect(getAppDataStore().get("gradingTheoryCompletions")).toEqual({
+      "6 kyū|item-0": { completedAt: expect.any(String) },
+    });
+
+    await user.click(screen.getByRole("tab", { name: "Träning" }));
+
+    expect(screen.getByRole("button", { name: /Tekniskt provämne/, expanded: true })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Teknisk underdel/, expanded: true })).toBeTruthy();
+    expect(screen.getByText("Beskrivning av underdel")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "App back" }));
+    expect(screen.getByTestId("location").textContent).toBe("/training");
+  });
+
+  it("switches subjects with the arrow keys", async () => {
+    const user = userEvent.setup();
+    renderGrading("theory");
+
+    screen.getByRole("tab", { name: "Teori" }).focus();
+    await user.keyboard("{ArrowRight}");
+
+    expect(screen.getByRole("tab", { name: "Träning", selected: true })).toBe(document.activeElement);
+    expect(screen.getByRole("button", { name: /Tekniskt provämne/ })).toBeTruthy();
+  });
+
+  it("keeps the active tab while the displayed grade changes", async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderGrading("theory");
+    await user.click(screen.getByRole("tab", { name: "Träning" }));
+
+    rerender(
+      <MemoryRouter initialEntries={["/training", "/training/grading"]} initialIndex={1}>
+        <HistoryProbe />
+        <GradingTest subject="theory" grade="3 kyū" allGradePlans={plans} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("tab", { name: "Träning", selected: true })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Grunder/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Tekniskt provämne/ })).toBeNull();
   });
 
   it("expands a technical category in place without dropping its details", async () => {

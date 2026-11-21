@@ -13,7 +13,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Free practice** — focused areas for Kihon, Hokei, Tan'en/Sōtai, and Randori, with a saved and synchronized Embu draft plus a separate Kumi-embu training flow
 - **Experimental Embu builder** — compose six sequences from one or more existing Hokei, with transitions and notes; drafts are intentionally local-only while the permanent data model is designed
 - **Technique Groups** — explore techniques organized by category under Theory
-- **Grading** — theoretical requirements under Theory and practical requirements under Training, with grouped fundamentals and per-grade completion progress for large theory areas and fundamentals synced across devices
+- **Grading** — shared Theory and Training tabs below the grade picker, accessible from both areas with the corresponding tab selected initially; grouped fundamentals and per-grade completion progress for large theory areas and fundamentals synced across devices
 - **Theory** — a shared entrance for technique groups, grading information, the word list, quiz, and flashcards
 - **Word List** — searchable dictionary of kanji, romaji, and technique terminology, with compact in-place lookup from selected or long-pressed text
 - **Quiz** — choose between the existing word-list quiz and grade-filtered foot-stance or hand-position questions, all with a streak counter and synced all-time high score

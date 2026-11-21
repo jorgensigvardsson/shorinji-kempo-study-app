@@ -86,6 +86,8 @@ Starting 2026-08-31
 ## Frontend direction
 
 - Prioritize clarity, ease of navigation, breathing room, and a lightweight feel.
+- Keep navigation, terminology, controls, and visual patterns consistent throughout the app so users recognize them from screen to screen.
+- Reuse existing interface elements and introduce as few new ones as possible. Whenever proposing or introducing a new type of interface element, explicitly tell Malin that it is new and explain why it is needed.
 - Avoid adding more boxes, shadows, tight spacing, or dense card layouts without a clear reason.
 - Review one screen at a time and scope visual experiments to that screen unless a global change is explicitly approved.
 - Preserve existing notes, ratings, filters, search behavior, study flows, and expandable technique details.

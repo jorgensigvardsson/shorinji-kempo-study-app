@@ -1,5 +1,5 @@
-import { useContext, useMemo, useState } from "react";
-import { Badge } from "react-bootstrap";
+import { useContext, useId, useMemo, useState } from "react";
+import { Badge, Tab, Tabs } from "react-bootstrap";
 import { Check2 } from "react-bootstrap-icons";
 import { useSearchParams } from "react-router-dom";
 import CollapsibleCard from "./components/CollapsibleCard";
@@ -283,6 +283,7 @@ const GradingCompletionProgress = ({ completed, total, translator }: { completed
 
 const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: GradingTestProps) => {
     const translator = useContext(TranslatorContext);
+    const tabsId = useId();
     const [searchParams, setSearchParams] = useSearchParams();
     const showKanji = !dojoMode;
     const gradingFundamentalCompletions = useAppData("gradingFundamentalCompletions");
@@ -298,9 +299,6 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         && /^\d+$/.test(categoryItem ?? "")
         ? { grade: selectedGrade, sectionIndex: Number(categorySection), itemIndex: Number(categoryItem) }
         : null;
-    const activeSelection = subject === "technical"
-        ? categorySelection
-        : selection?.grade === selectedGrade ? selection : null;
 
     const hokeiMap = useMemo(() => {
         const map = new Map<string, HokeiMoment>();
@@ -329,16 +327,15 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         );
     }
 
-    const subjectTerm = subject === "theory" ? "gakka kamoku" : "gijutsu kamoku";
     const sections = manual.sections
         .map((section, sectionIndex) => ({ section, sectionIndex }))
-        .filter(({ section }) => section.term?.romaji === subjectTerm);
+        .filter(({ section }) => section.term?.romaji === "gakka kamoku" || section.term?.romaji === "gijutsu kamoku");
 
     const toggleTechnicalCategory = (sectionIndex: number, itemIndex: number) => {
         if (!selectedGrade) return;
         const nextParams = new URLSearchParams(searchParams);
-        const alreadyExpanded = activeSelection?.sectionIndex === sectionIndex
-            && activeSelection.itemIndex === itemIndex;
+        const alreadyExpanded = categorySelection?.sectionIndex === sectionIndex
+            && categorySelection.itemIndex === itemIndex;
         if (alreadyExpanded) nextParams.delete("gradingCategory");
         else nextParams.set("gradingCategory", `${selectedGrade}|${sectionIndex}|${itemIndex}`);
         // An open category is part of this page, not another navigation step. Replacing
@@ -354,20 +351,26 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                 {manual.term && !translator.isJapanese && <div className="text-muted small mt-1">{sentenceCase(manual.term.romaji)}</div>}
             </header>
 
-            <div className="grading-sections">
+            <Tabs id={tabsId} defaultActiveKey={subject} mountOnEnter transition={false}
+                  variant="underline" className="grading-subject-tabs" aria-label={translator.translate("Gradering")}>
                 {sections.map(({ section, sectionIndex }) => {
-                    const completedTheoryItemCount = subject === "theory" && selectedGrade
+                    const sectionSubject = section.term?.romaji === "gakka kamoku" ? "theory" : "technical";
+                    const activeSelection = sectionSubject === "technical"
+                        ? categorySelection
+                        : selection?.grade === selectedGrade ? selection : null;
+                    const completedTheoryItemCount = sectionSubject === "theory" && selectedGrade
                         ? section.items.filter(item => {
                             const key = gradingCompletionKey(selectedGrade, item);
                             return key && gradingTheoryCompletions[key];
                           }).length
                         : 0;
                     return (
-                        <section className="grading-section" key={`section-${sectionIndex}`}>
+                        <Tab eventKey={sectionSubject} key={`section-${sectionIndex}`} className="grading-section"
+                             title={translator.translate(sectionSubject === "theory" ? "Teori" : "Träning")}>
                             <header className="grading-section-heading">
                                 <div className="grading-section-title-line">
                                     <h3 className="app-section-heading">{sentenceCase(translator.translate(section.title))}</h3>
-                                    {subject === "theory" && (
+                                    {sectionSubject === "theory" && (
                                         <GradingCompletionProgress
                                             completed={completedTheoryItemCount}
                                             total={section.items.length}
@@ -380,13 +383,13 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                 )}
                             </header>
 
-                            {subject === "technical" ? (
+                            {sectionSubject === "technical" ? (
                                 <div className="grading-outline grading-technical-outline">
                                     {section.items.map((item, itemIndex) => {
                                         const { display, title, subtitle } = itemSummary(item, translator, showKanji);
                                         const expanded = activeSelection?.sectionIndex === sectionIndex
                                             && activeSelection.itemIndex === itemIndex;
-                                        const detailsId = `grading-item-${subject}-${sectionIndex}-${itemIndex}`;
+                                        const detailsId = `grading-item-${sectionSubject}-${sectionIndex}-${itemIndex}`;
                                         const isFundamentals = item.term?.romaji === "kiso kamoku";
                                         const isKumiEmbu = item.term?.romaji === "kumi embu";
                                         const fundamentalItems = item.items ?? [];
@@ -476,7 +479,7 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                         const expandable = hasExpandableContent(item);
                                         const expanded = activeSelection?.sectionIndex === sectionIndex
                                             && activeSelection.itemIndex === itemIndex;
-                                        const detailsId = `grading-item-${subject}-${sectionIndex}-${itemIndex}`;
+                                        const detailsId = `grading-item-${sectionSubject}-${sectionIndex}-${itemIndex}`;
                                         const completionKey = selectedGrade
                                             ? gradingCompletionKey(selectedGrade, item)
                                             : undefined;
@@ -542,10 +545,10 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
                                     })}
                                 </div>
                             )}
-                        </section>
+                        </Tab>
                     );
                 })}
-            </div>
+            </Tabs>
         </div>
     );
 };
