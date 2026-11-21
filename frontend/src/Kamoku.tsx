@@ -84,7 +84,12 @@ const Kamoku = (props: Props) => {
             <header className="kamoku-page-header">
                 <h1 className="app-page-heading">{translator.translate("Veckoplan")}</h1>
                 <TrainingPageControls showGrade showDojo className="kamoku-page-controls" />
-                {!dojoMode && <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>}
+                {!dojoMode && <>
+                    <p className="app-intro-copy">
+                        {translator.translate("Följ veckoplanen i Kamokuhyō och markera veckan som tränad när du är klar.")}
+                    </p>
+                    <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>
+                </>}
             </header>
             <div className="kamoku-controls training-view-controls mb-4">
                 <div className="kamoku-week-navigation">

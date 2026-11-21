@@ -31,6 +31,7 @@ Starting 2026-08-31
 - Before switching branches or combining work, check both local and GitHub branch state. Pay special attention to local-only commits and uncommitted files, and explain them before taking action.
 - Use the repository's release path explicitly and explain each boundary. For Malin, accepted work must first be merged into `main` and `main` pushed to origin. Only then sync `deploy-staging` with `main` and push `deploy-staging` to origin for staging, or sync `deploy` with `main` and push `deploy` to origin for production. Merging into `main` alone does not deploy anything.
 - Deploy only by merging into the trusted `deploy-staging` or `deploy` branch and pushing that branch to origin. Never try to deploy directly from a feature branch or with a manual workflow run from another branch; Azure trusts only the two deploy branches.
+- After pushing `deploy-staging` or `deploy` to start a release, share the link to its GitHub Actions run and end the release step. Malin follows the run herself; do not monitor or poll its progress, wait for it to finish, or perform post-deployment checks unless she explicitly asks.
 - When Malin says she wants to start, continue, stage, merge, or release some work, translate that intention into the safe Git sequence and offer to carry it out. Do not make her memorize the commands.
 
 ## Describing Malin's changes

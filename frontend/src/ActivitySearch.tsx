@@ -65,7 +65,7 @@ export default function ActivitySearch({ allGradePlans }: { allGradePlans: Grade
         {count === 0 && <p>{translator.translate(query.trim() ? "Prova ett annat sökord." : "Skriv ett ord för att söka.")}</p>}
         {showFunctions && functions.length > 0 && <section aria-labelledby="search-functions-heading">
             <h2 id="search-functions-heading" className="app-eyebrow-heading">{translator.translate("Funktioner")}</h2>
-            <p className="navigation-caption">{translator.translate("Stjärnmarkera funktioner i Sök för att lägga till genvägar.")}</p>
+            <p className="navigation-caption">{translator.translate("Stjärnmarkera funktioner i Sök för att lägga till genvägar på startsidan.")}</p>
             <ul className="search-results">
                 {functions.map(({ activity }) => <li key={activity.path}>
                     <Link to={activity.path} onClick={() => beginNavigation(activity.path)}>

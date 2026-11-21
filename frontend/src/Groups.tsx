@@ -99,7 +99,15 @@ const Groups = (props: Props) => {
         };
     });
 
-    return <Grid items={items} className="groups-grid"/>;
+    return (
+        <div>
+            <header className="mb-4">
+                <h1 className="app-page-heading groups-page-heading">{translator.translate("Teknikgrupper")}</h1>
+                <p className="app-intro-copy">{translator.translate("Välj en teknikgrupp för att se teknikerna som ingår.")}</p>
+            </header>
+            <Grid items={items} className="groups-grid"/>
+        </div>
+    );
 }
 
 export default Groups;

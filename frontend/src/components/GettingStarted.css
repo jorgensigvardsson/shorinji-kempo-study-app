@@ -1,0 +1,38 @@
+.getting-started {
+    position: relative;
+    margin-bottom: 1.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--bs-warning-bg-subtle) 55%, var(--bs-body-bg));
+}
+
+.getting-started > h2 {
+    padding-right: 2rem;
+}
+
+.getting-started > p {
+    max-width: 38rem;
+    margin: 0.65rem 0 1rem;
+}
+
+.getting-started .getting-started-close {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+}
+
+.getting-started-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    max-width: 100%;
+    white-space: normal;
+}
+
+.getting-started-link > svg {
+    flex-shrink: 0;
+}

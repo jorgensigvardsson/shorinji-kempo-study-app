@@ -47,12 +47,13 @@ export interface PracticeAreaDefinition {
     key: PracticeArea;
     title: string;
     description: string;
+    intro?: string;
     icon: ReactNode;
 }
 
 export const practiceAreaDefinitions: PracticeAreaDefinition[] = [
     { key: "kihon", title: "Kihon", description: "Grundträning och återkommande övningar.", icon: <Book /> },
-    { key: "hokei", title: "Hokei", description: "Sök och välj tekniker att träna.", icon: <ListUl /> },
+    { key: "hokei", title: "Hokei", description: "Sök och välj tekniker att träna.", intro: "Välj tekniker från Kamokuhyō för den grad du vill träna. Öppna en teknik för detaljer, anteckningar och självskattning.", icon: <ListUl /> },
     { key: "tanen-sotai", title: "Tan'en och sōtai", description: "Träna befintliga former med videostöd.", icon: <Collection /> },
     { key: "randori", title: "Randori", description: "Välj bland randori-teman från kamoku.", icon: <People /> },
     { key: "embu", title: "Embu", description: "Bygg en egen embu eller träna en graderings-kumi embu.", icon: <CardHeading /> },
@@ -140,7 +141,7 @@ const FreePractice = (props: Props) => {
                                 {translator.translate(activeArea === "embu" ? "Embu" : activeDefinition.title)}
                             </h1>
                             {!(dojoMode && activeArea !== null) && (
-                                <p className="app-intro-copy">{translator.translate(activeDefinition.description)}</p>
+                                <p className="app-intro-copy">{translator.translate(activeDefinition.intro ?? activeDefinition.description)}</p>
                             )}
                         </div>
                         <TrainingPageControls

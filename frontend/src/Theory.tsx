@@ -61,7 +61,10 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
             <BackButton fallback="/" />
             <header className="theory-page-header">
                 <h1 className="app-page-heading">{translator.translate("Teori")}</h1>
-                <p className="app-intro-copy">{translator.translate("Vad vill du studera idag?")}</p>
+                <p className="app-intro-copy">
+                    {translator.translate("Studera teknikgrupper och teoretiska graderingskrav.")}
+                    {showLanguageTools && <> {translator.translate("Öva vidare med ordlista, quiz och flashkort.")}</>}
+                </p>
             </header>
             <Grid items={items} className="theory-choice-grid" />
         </div>

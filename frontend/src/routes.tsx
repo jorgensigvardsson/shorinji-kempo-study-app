@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
-import { Award, BarChartLine, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
+import { Award, BarChartLine, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionCircle, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
 import type { CurrentGrade, GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
@@ -36,6 +36,7 @@ export const preloadPages = (): Promise<unknown[]> => Promise.all(pageLoaders.ma
 
 const Training = page(() => import("./Training.tsx"));
 const Settings = page(() => import("./Settings.tsx"));
+const Help = page(() => import("./Help.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
 const AdminRequests = page(() => import("./AdminRequests.tsx"));
 const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
@@ -217,6 +218,12 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideOnStartPage: true,
         hideFromMenu: true,
     } satisfies Route] : []), {
+        path: "/help",
+        element: <Help />,
+        menuText: translator.translate("Hjälp"),
+        icon: QuestionCircle,
+        hideOnStartPage: true,
+    }, {
         path: "/settings",
         element: <Settings onSetLanguage={setLanguage} currentGrade={currentGrade} onSetCurrentGrade={setCurrentGrade} translator={translator}
                                    textSize={textSize} onSetTextSize={setTextSize} />,

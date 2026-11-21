@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-21T18:38:55.000Z",
+    changes: [
+      {
+        emoji: "👋",
+        sv: "Kom igång-guiden hjälper dig att hitta i appen och finns alltid under Mer → Hjälp. Välkomstrutan på startsidan kan stängas när du är redo.",
+        en: "The getting started guide helps you find your way around the app and is always available under More → Help. Dismiss the welcome on the start page when you are ready.",
+        tr: "Başlangıç rehberi uygulamada yolunuzu bulmanıza yardımcı olur ve her zaman Daha fazla → Yardım altında bulunur. Hazır olduğunuzda ana sayfadaki karşılama kutusunu kapatabilirsiniz.",
+        ja: "アプリの使い方を案内するガイドを追加しました。「その他」→「ヘルプ」からいつでも開けます。ホーム画面の案内は、準備ができたら閉じられます。",
+      },
+      {
+        emoji: "✨",
+        sv: "Små förbättringar av hjälptexter på studie- och träningssidor.",
+        en: "Small improvements to help text across study and training screens.",
+        tr: "Çalışma ve antrenman sayfalarındaki yardım metinlerinde küçük iyileştirmeler.",
+        ja: "学習・練習画面の説明文を少し改善しました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-21T16:07:37.000Z",
     changes: [
       {

@@ -144,9 +144,10 @@ function App(props: Props) {
       // this time, not that anything the user did failed.
     });
   }, [syncState.status]);
-  const accountDisplayName = syncState.status === "local_only"
-    ? undefined
-    : getSyncManager().getBackendUserInfo()?.displayName;
+  const accountInfo = syncState.status === "local_only"
+    ? null
+    : getSyncManager().getBackendUserInfo();
+  const accountDisplayName = accountInfo?.displayName;
   const showFontPicker = isFontPickerEnabled
     && (import.meta.env.DEV || isTechnicalAdmin(getSyncManager().getBackendUserInfo()?.roles ?? []));
 
@@ -255,7 +256,7 @@ function App(props: Props) {
 
   return (
     <TranslatorContext.Provider value={translator}>
-      <NavigationMemoryProvider account={getSyncManager().getBackendUserInfo()?.id || 'preview'} grade={displayGrade} allGradePlans={gradePlans} onGradeChange={setGradeOverride}>
+      <NavigationMemoryProvider account={accountInfo?.id || 'preview'} grade={displayGrade} allGradePlans={gradePlans} onGradeChange={setGradeOverride}>
       <RouteScrollManager />
       <div className="app-shell" data-text-size={textSizeKey}>
         {/* Only appears once a wait has gone on long enough to be worth mentioning:

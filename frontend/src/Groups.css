@@ -64,3 +64,9 @@
   background: var(--bs-tertiary-bg);
   box-shadow: none;
 }
+
+@media (max-width: 22rem) {
+  .groups-page-heading {
+    font-size: 1.8rem;
+  }
+}

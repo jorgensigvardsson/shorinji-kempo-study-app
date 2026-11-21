@@ -78,7 +78,7 @@ const Training = (props: Props) => {
                 </button>
                 <header className="training-page-header training-landing-header">
                     <h1 className="app-page-heading">{translator.translate("Träning")}</h1>
-                    <p className="app-intro-copy">{translator.translate("Hur vill du träna idag?")}</p>
+                    <p className="app-intro-copy">{translator.translate("Träna i dojon med veckoplanen i Kamokuhyō, välj tekniker under Hokei eller förbered din gradering.")}</p>
                 </header>
                 <div className="training-choice-section">
                     <h2 className="app-eyebrow-heading">{translator.translate("Följ din plan")}</h2>

@@ -39,6 +39,10 @@ const WordList = () => {
 
     return (
         <div>
+            <header className="mb-4">
+                <h1 className="app-page-heading">{translator.translate("Ordlista")}</h1>
+                <p className="app-intro-copy">{translator.translate("Sök på kanji, romaji eller betydelse. Välj hur orden ska sorteras.")}</p>
+            </header>
             <div className="mb-3">
                 <Form.Control type="search" aria-label={translator.translate("Sök i ordlistan")} placeholder={translator.translate("Filtrera...")}
                             value={filterText} onChange={e => setFilterText(e.target.value)}

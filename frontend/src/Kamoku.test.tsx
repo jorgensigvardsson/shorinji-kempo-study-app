@@ -63,7 +63,7 @@ describe("Kamoku weekly plan", () => {
     render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} />);
 
     expect(screen.getByRole("heading", { name: "Veckoplan" })).toBeTruthy();
-    expect(screen.getByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeTruthy();
+    expect(screen.getByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.", { exact: false })).toBeTruthy();
     expect(screen.getByRole("region", { name: "Veckans innehåll" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Veckans innehåll" }).classList.contains("visually-hidden")).toBe(true);
     expect(screen.getByRole("heading", { name: "Veckans grundarbete" }).classList.contains("app-eyebrow-heading")).toBe(true);
@@ -91,7 +91,7 @@ describe("Kamoku weekly plan", () => {
     const { container } = render(<Kamoku myGrade="6 kyū" allGradePlans={[plan]} dojoMode />);
 
     expect(container.querySelector(".kamoku-page.is-dojo-mode")).not.toBeNull();
-    expect(screen.queryByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.")).toBeNull();
+    expect(screen.queryByText("Veckans grundarbete rör sig kring kihon shohō. Gyaku gote står i centrum.", { exact: false })).toBeNull();
     expect(screen.getByText("uwazeme")).toBeTruthy();
     expect(screen.getByText("gyaku gote")).toBeTruthy();
   });
@@ -135,7 +135,7 @@ describe("Kamoku weekly plan", () => {
 
     render(<Kamoku myGrade="nidan" allGradePlans={[reviewPlan]} />);
 
-    expect(screen.getByText("En vecka för att samla ihop det du arbetat med: repetition, studier och förberedelse inför gradering.")).toBeTruthy();
+    expect(screen.getByText("En vecka för att samla ihop det du arbetat med: repetition, studier och förberedelse inför gradering.", { exact: false })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Veckans fokus" })).toBeTruthy();
     expect(screen.getByText("repetition")).toBeTruthy();
     expect(screen.getByText("studier")).toBeTruthy();

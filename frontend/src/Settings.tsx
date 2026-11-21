@@ -139,7 +139,7 @@ const Settings = (props: Props) => {
         <main className="settings-page">
             <header className="settings-page-header">
                 <h1 className="app-page-heading">{translator.translate("Inställningar")}</h1>
-                <p className="app-intro-copy">{translator.translate("Här samlar du hur appen ser ut, vem du är och hur ditt konto fungerar.")}</p>
+                <p className="app-intro-copy">{translator.translate("Välj namn och grad under Om mig. Här ändrar du också språk, textstorlek och utseende.")}</p>
             </header>
 
             <div className="settings-sections">
@@ -275,7 +275,7 @@ const Settings = (props: Props) => {
                                 const grade = currentGrades.find(candidate => candidate === key);
                                 if (grade) onSetCurrentGrade(grade);
                             }}>
-                                <Dropdown.Toggle id="settingsLevel" variant="outline-secondary">
+                                <Dropdown.Toggle id="settingsLevel" variant="outline-secondary" aria-describedby="settings-grade-help">
                                     {gradeLabel(currentGrade)}
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
@@ -286,6 +286,9 @@ const Settings = (props: Props) => {
                                     ))}
                                 </Dropdown.Menu>
                             </Dropdown>
+                            <p id="settings-grade-help" className="settings-help-text">
+                                {translator.translate("Välj graden du har idag. Appen visar innehållet inför din nästa gradering.")}
+                            </p>
                         </Form.Group>
                     </div>
                 </section>

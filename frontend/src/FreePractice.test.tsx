@@ -234,7 +234,7 @@ describe("FreePractice", () => {
     );
 
     const areaHeader = screen.getByRole("heading", { name: "Hokei" }).closest("header")!;
-    expect(within(areaHeader).queryByText("Sök och välj tekniker att träna.")).toBeNull();
+    expect(within(areaHeader).queryByText("Välj tekniker från Kamokuhyō för den grad du vill träna. Öppna en teknik för detaljer, anteckningar och självskattning.")).toBeNull();
     expect(container.querySelector(".free-practice-hokei.dojo-readable-hokei")).not.toBeNull();
     expect(container.querySelectorAll(".free-practice-hokei .dojo-card")).toHaveLength(2);
   });

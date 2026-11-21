@@ -1,0 +1,57 @@
+.help-page {
+    max-width: 48rem;
+    margin-inline: auto;
+}
+
+.help-header {
+    padding: 0.5rem 0.25rem 2rem;
+}
+
+.help-header > .app-eyebrow-heading {
+    margin-bottom: 0.65rem;
+}
+
+.help-topic.card {
+    border: 0;
+    border-top: 1px solid var(--bs-border-color);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.help-topic > .card-header {
+    padding: 1.1rem 0.25rem;
+    border-radius: 0;
+    background: transparent;
+}
+
+.help-topic > .card-header:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -2px;
+}
+
+.help-topic .card-body {
+    padding: 0 0.25rem 1.4rem;
+}
+
+.help-topic .card-body > p {
+    margin: 0 0 0.85rem;
+    line-height: 1.6;
+}
+
+.help-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+}
+
+.help-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+}
+
+.help-link > svg {
+    flex-shrink: 0;
+}

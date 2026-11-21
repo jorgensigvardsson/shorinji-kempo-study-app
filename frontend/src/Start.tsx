@@ -2,6 +2,7 @@ import { useContext, type ComponentType } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ClockHistory, Search } from "react-bootstrap-icons";
 import Grid, { type GridItem } from "./components/Grid";
+import GettingStarted from "./components/GettingStarted";
 import { TranslatorContext } from "./i18n";
 import { NavigationMemory } from "./navigation-memory-context";
 import { activityForUrl, activityLabel } from "./navigation";
@@ -50,6 +51,7 @@ const Start = (props: Props) => {
             <header className="start-intro">
                 <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
             </header>
+            <GettingStarted />
             {items.length > 0 && <Grid items={items} className="start-grid" />}
             {latestActivity && <button type="button" className="start-resume" onClick={() => memory.resume(latest)}>
                 <ClockHistory size={20} aria-hidden="true" />
