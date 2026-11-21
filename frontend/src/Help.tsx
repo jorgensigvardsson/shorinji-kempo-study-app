@@ -40,6 +40,12 @@ export default function Help() {
             <HelpLink to="/settings">{translator.translate("Inställningar")}</HelpLink>
         </HelpSection>
 
+        <HelpSection title={translator.translate("Nyheter via pushnotiser")}>
+            <p>{translator.translate("Slå gärna på pushnotiser för att få veta när appen uppdateras. Öppna Inställningar → Notiser och välj Aktivera notiser.")}</p>
+            <p>{translator.translate("Aktivera notiser på varje enhet där du vill få dem.")}</p>
+            <HelpLink to="/settings">{translator.translate("Inställningar för notiser")}</HelpLink>
+        </HelpSection>
+
         <HelpSection title={translator.translate("Hokei – din teknikträning")}>
             <p>{translator.translate("Hokei är appens samling av tekniker att träna. Du hittar den under Träning → Hokei.")}</p>
             <p>{translator.translate("Teknikinnehållet i Hokei och veckoplanen kommer från Kamokuhyō, Shorinji Kempos kursplan. Appen hjälper dig att hitta och arbeta med det innehållet.")}</p>

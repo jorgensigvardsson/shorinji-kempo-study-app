@@ -5,6 +5,7 @@ import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { BrowserStateScope } from "../browser-state";
 import Start from "../Start";
 import Help from "../Help";
+import { getAppDataStore } from "../persistence/store";
 
 function AppPages({ account = "one" }: { account?: string }) {
     return <BrowserStateScope.Provider value={account}>
@@ -44,6 +45,32 @@ describe("Getting started", () => {
         await user.click(screen.getByRole("button", { name: "Tillbaka" }));
 
         expect(screen.getByRole("complementary", { name: "Kom igång med appen" })).toBeTruthy();
+    });
+
+    it("also welcomes existing accounts with study data and a previously dismissed notification prompt", () => {
+        const store = getAppDataStore();
+        const original = store.getDocument();
+        try {
+            store.setDocument({ ...original, data: {
+                ...original.data,
+                currentGrade: "3 kyū",
+                grade: "2 kyū",
+                notes: { "tsuki nuki [soto]": "Min sparade anteckning" },
+                quizStreakHighScore: 12,
+            } });
+            const saved = store.getDocument();
+            localStorage.setItem("notifications-prompt-dismissed", "true");
+            localStorage.setItem("lastSeenVersion", "2026-11-04T13:29:54.000Z");
+
+            renderApp("existing-account");
+
+            const welcome = screen.getByRole("complementary", { name: "Kom igång med appen" });
+            expect(welcome.textContent).toContain("Aktivera gärna pushnotiser för nyheter om appen.");
+            expect(store.getDocument()).toEqual(saved);
+            expect(localStorage.getItem("notifications-prompt-dismissed")).toBe("true");
+        } finally {
+            store.setDocument(original);
+        }
     });
 
     it("explains where Help remains and remembers dismissal after remounting", async () => {

@@ -36,6 +36,17 @@ describe("Help", () => {
         expect(screen.getByRole("link", { name: "Hokei" }).getAttribute("href")).toBe("/kamoku/free/hokei");
     });
 
+    it("explains voluntary notification setup through the existing Settings page", async () => {
+        const user = userEvent.setup();
+        renderHelp();
+
+        await user.click(screen.getByRole("button", { name: "Nyheter via pushnotiser" }));
+
+        expect(screen.getByText(/Öppna Inställningar → Notiser och välj Aktivera notiser/)).toBeTruthy();
+        expect(screen.getByText("Aktivera notiser på varje enhet där du vill få dem.")).toBeTruthy();
+        expect(screen.getByRole("link", { name: "Inställningar för notiser" }).getAttribute("href")).toBe("/settings");
+    });
+
     it("presents quiz and flashcards separately from training and Dojo mode", () => {
         renderHelp();
 

@@ -27,7 +27,7 @@ export default function GettingStarted() {
                     onClick={() => { setDismissed(true); setShowNotice(true); }}
                 />
                 <h2 id={titleId} className="app-section-heading">{translator.translate("Kom igång med appen")}</h2>
-                <p>{translator.translate("Börja med namn och grad. Hitta din teknikträning och lär känna Dojo-läget.")}</p>
+                <p>{translator.translate("Börja med namn och grad. Hitta din teknikträning och lär känna Dojo-läget. Aktivera gärna pushnotiser för nyheter om appen.")}</p>
                 <Link to="/help" className="btn btn-primary getting-started-link" onClick={() => beginNavigation("/help")}>
                     {translator.translate("Öppna guiden")}<ArrowRight aria-hidden="true" />
                 </Link>

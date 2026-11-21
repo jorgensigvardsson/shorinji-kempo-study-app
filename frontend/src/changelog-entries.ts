@@ -9,10 +9,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       {
         emoji: "👋",
-        sv: "Kom igång-guiden hjälper dig att hitta i appen och finns alltid under Mer → Hjälp. Välkomstrutan på startsidan kan stängas när du är redo.",
-        en: "The getting started guide helps you find your way around the app and is always available under More → Help. Dismiss the welcome on the start page when you are ready.",
-        tr: "Başlangıç rehberi uygulamada yolunuzu bulmanıza yardımcı olur ve her zaman Daha fazla → Yardım altında bulunur. Hazır olduğunuzda ana sayfadaki karşılama kutusunu kapatabilirsiniz.",
-        ja: "アプリの使い方を案内するガイドを追加しました。「その他」→「ヘルプ」からいつでも開けます。ホーム画面の案内は、準備ができたら閉じられます。",
+        sv: "Kom igång-guiden hjälper både nya och befintliga användare att hitta i appen och tipsar om pushnotiser för appens nyheter. Den finns på startsidan och alltid under Mer → Hjälp.",
+        en: "The getting started guide helps both new and existing users find their way around the app and suggests push notifications for app updates. Find it on the start page and always under More → Help.",
+        tr: "Başlangıç rehberi hem yeni hem de mevcut kullanıcıların uygulamada yolunu bulmasına yardımcı olur ve uygulama yenilikleri için anlık bildirimleri önerir. Ana sayfadan ve her zaman Daha fazla → Yardım bölümünden açabilirsiniz.",
+        ja: "新規・既存のユーザー向けに、アプリの使い方と更新情報を受け取るプッシュ通知を案内するガイドを追加しました。ホーム画面と「その他」→「ヘルプ」から開けます。",
       },
       {
         emoji: "✨",

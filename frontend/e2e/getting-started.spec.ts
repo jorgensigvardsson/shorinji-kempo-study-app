@@ -49,6 +49,7 @@ for (const view of views) {
             await expect(page.getByLabel("Gasshō, Guideprov", { exact: true })).toBeVisible();
             const welcome = page.getByRole("complementary", { name: "Kom igång med appen" });
             await expect(welcome).toBeVisible();
+            await expect(welcome).toContainText("Aktivera gärna pushnotiser för nyheter om appen.");
             expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
             await page.getByRole("link", { name: "Öppna guiden", exact: true }).click();
@@ -87,6 +88,13 @@ for (const view of views) {
                 await expect(page.locator(".help-page").getByRole("link", { name: title, exact: true })).toBeVisible();
             }
             expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+            const notificationsTopic = page.getByRole("button", { name: "Nyheter via pushnotiser", exact: true });
+            await notificationsTopic.evaluate(element => element.scrollIntoView({ block: "center", behavior: "instant" }));
+            await notificationsTopic.click();
+            const settingsLink = page.getByRole("link", { name: "Inställningar för notiser", exact: true });
+            await settingsLink.evaluate(element => element.scrollIntoView({ block: "center", behavior: "instant" }));
+            await settingsLink.click();
+            await expect(page.getByRole("heading", { level: 1, name: "Inställningar", exact: true })).toBeVisible();
             expect(errors).toEqual([]);
         });
     });
