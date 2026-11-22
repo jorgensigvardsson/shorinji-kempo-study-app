@@ -1,5 +1,5 @@
 .settings-page {
-  width: min(100%, 58rem);
+  width: min(100%, 48rem);
   margin: 0 auto;
   padding: 0.5rem 0 2rem;
 }
@@ -10,15 +10,20 @@
 
 .settings-sections {
   display: grid;
-  gap: 1rem;
+  gap: 0;
 }
 
 .settings-section {
-  padding: clamp(1rem, 3vw, 1.4rem);
-  border: 1px solid var(--app-card-border);
-  border-radius: 0.9rem;
-  background: var(--bs-body-bg);
-  box-shadow: var(--app-card-shadow);
+  min-width: 0;
+  padding: 1.5rem 0.25rem;
+}
+
+.settings-section:first-child {
+  padding-top: 0;
+}
+
+.settings-section + .settings-section {
+  border-top: 1px solid var(--bs-border-color);
 }
 
 .settings-section-header {
@@ -36,12 +41,26 @@
 .settings-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.8rem 1.25rem;
   align-items: start;
+}
+
+.settings-section .form-label {
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .settings-form-grid-three {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-notifications {
+  margin-top: 1rem;
+}
+
+.settings-form-grid > * {
+  min-width: 0;
 }
 
 .settings-field-wide {
@@ -75,7 +94,7 @@
 
 .settings-account {
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .settings-account-identity {
@@ -83,9 +102,11 @@
   flex-wrap: wrap;
   gap: 0.35rem 0.75rem;
   align-items: baseline;
-  padding: 0.8rem 1rem;
-  border-radius: 0.65rem;
-  background: var(--bs-tertiary-bg);
+  margin-bottom: 1rem;
+}
+
+.settings-account-identity strong {
+  overflow-wrap: anywhere;
 }
 
 .settings-account-identity span,
@@ -101,7 +122,7 @@
 
 .settings-subheading {
   margin: 0;
-  font-family: var(--app-display-font);
+  font-family: var(--bs-body-font-family);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -118,9 +139,21 @@
   align-items: center;
   justify-content: space-between;
   min-height: 2.25rem;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: 0.55rem;
+  padding-block: 0.35rem;
+}
+
+.settings-disclosure-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.settings-link-details {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.5rem;
 }
 
 .settings-link-form {
@@ -131,12 +164,59 @@
 }
 
 .settings-link-input {
-  flex: 1 1 14rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.settings-disclosure.card {
+  border: 0;
+  border-top: 1px solid var(--bs-border-color);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.settings-disclosure > .card-header {
+  padding: 0.85rem 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.settings-disclosure > .card-header:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: -2px;
+}
+
+.settings-disclosure .card-body {
+  padding: 0 0 1rem;
+}
+
+.settings-disclosure .card-body > .btn {
+  margin-top: 0.75rem;
+}
+
+.settings-account-logout {
+  margin-top: 1rem;
 }
 
 .settings-danger-zone {
+  margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--bs-border-color);
+}
+
+.settings-footer {
+  margin-inline: 0.25rem;
+}
+
+.settings-installation .settings-help-text {
+  margin-block: 0.5rem 0.85rem;
+}
+
+.settings-version {
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
 }
 
 @media (max-width: 720px) {

@@ -1,13 +1,20 @@
-import { lazy, Suspense, useContext, useEffect, useState } from "react";
-import { Button, Card } from "react-bootstrap";
-import { Diagram3, ListUl } from "react-bootstrap-icons";
+import { lazy, Suspense, useContext, useEffect, useMemo, useState } from "react";
+import { Button } from "react-bootstrap";
+import { ArrowRight, Diagram3, ListUl } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 import { TranslatorContext } from "./i18n";
-import type { AdminOrgBranch, AdminOrgTree } from "./sync/backend";
+import type { AdminOrgBranch, AdminOrgTree, PublicBranch } from "./sync/backend";
 import { loadOrganization, orgAuthority } from "./organization";
+import { getSyncManager } from "./sync/manager";
+import { useSyncState } from "./hooks";
+import MyBranch from "./MyBranch";
 import Loading from "./components/Loading";
+import BackButton from "./components/BackButton";
+import CollapsibleCard from "./components/CollapsibleCard";
 import FederationTitle from "./components/FederationTitle";
 import BranchList from "./components/BranchList";
+import "./components/ToolPage.css";
+import "./Clubs.css";
 
 // Loaded only when somebody actually opens the tree view, not with the rest of
 // this page. @xyflow/react is the single heaviest dependency in the app, and
@@ -40,13 +47,13 @@ export interface Section {
   branches: AdminOrgBranch[];
 }
 
-// The organization, as anyone may see it: every federation and every branch.
-// Nothing here changes anything. Each federation, and WSKO, is a link to a page
-// of its own, which is where renaming and adding happen for those allowed to;
-// each branch is a link to its members for those who administer it. A page of
-// the whole with a button per thing on it was mostly buttons.
-const AdminOrganization = () => {
+// One public organization load supplies both the member's own branch and the
+// directory. Only MyBranch asks for the member's private transfer status.
+const Clubs = () => {
   const translator = useContext(TranslatorContext);
+  const syncState = useSyncState();
+  const info = syncState.status === "local_only" ? null : getSyncManager().getBackendUserInfo();
+  const accountKey = `${info?.id ?? ""}:${info?.branchId ?? ""}:${info?.roles.join(",") ?? ""}`;
   const { coversBranch } = orgAuthority();
 
   const [tree, setTree] = useState<AdminOrgTree | null>(null);
@@ -78,7 +85,14 @@ const AdminOrganization = () => {
       }
     })();
     return () => { current = false; };
-  }, [attempt]);
+  }, [attempt, accountKey]);
+
+  const branches = useMemo<PublicBranch[]>(() => tree === null ? [] : [
+    ...tree.federations.flatMap(f => f.branches.map(branch => ({
+      id: branch.id, name: branch.name, federationId: f.id, federationName: f.name,
+    }))),
+    ...tree.wskoBranches.map(branch => ({ id: branch.id, name: branch.name })),
+  ], [tree]);
 
   if (loadError) {
     return (
@@ -107,35 +121,48 @@ const AdminOrganization = () => {
   const canOpenBranch = (branch: AdminOrgBranch, federationId: string) => coversBranch(branch.id, federationId);
 
   return (
-    <div>
-      <p className="text-secondary">
+    <div className="clubs-page">
+      <BackButton fallback="/" />
+      <header className="clubs-header">
+        <h1 className="app-page-heading">{translator.translate("Klubbar och förbund")}</h1>
+      </header>
+
+      {info !== null && <MyBranch key={`${info.id}:${info.branchId}`} branches={branches}
+        canManage={branches.some(branch => branch.id === info.branchId && coversBranch(branch.id, branch.federationId ?? ""))} />}
+
+      <section className="clubs-directory" aria-labelledby="all-clubs-heading">
+      <h2 id="all-clubs-heading" className="app-section-heading">{translator.translate("Alla klubbar och förbund")}</h2>
+      <p className="clubs-directory-intro text-body-secondary">
         {translator.translate("Förbund och klubbar. En klubb hör antingen till ett förbund eller direkt till WSKO.")}
       </p>
+      {sections.some(section => section.branches.some(branch => branch.memberCount !== undefined)) &&
+        <p className="small text-body-secondary">{translator.translate("Antalen visar registrerade användare i appen.")}</p>}
 
       {/* The tree's own chunk, not a service: a wait for it is the app fetching its
           own code, and has nothing to do with anything starting up. */}
       {view === "tree" && (
         <Suspense fallback={<Loading fromService={false} className="p-3" />}>
-          <AdminOrganizationTree sections={sections} canOpenBranch={canOpenBranch} />
+          <AdminOrganizationTree sections={sections} canOpenBranch={canOpenBranch} currentBranchId={info?.branchId}
+                                 currentBranchLabel={translator.translate("Din klubb")} />
         </Suspense>
       )}
 
       {view === "list" && sections.map(section => (
-        <Card key={section.federationId === "" ? "wsko" : section.federationId} className="mb-3">
-          <Card.Header className="fw-semibold">
+        <CollapsibleCard key={section.federationId === "" ? "wsko" : section.federationId}
+                         className="clubs-disclosure" inlineChevron header={
+          <h3 className="app-section-heading">
             {section.federationId === ""
-              ? <Link to="/admin/wsko">WSKO</Link>
-              : (
-                <Link to={`/admin/federations/${encodeURIComponent(section.federationId)}`}>
-                  <FederationTitle id={section.federationId} name={section.title} />
-                </Link>
-              )}
-          </Card.Header>
-          <Card.Body>
+              ? "WSKO"
+              : <FederationTitle id={section.federationId} name={section.title} />}
+          </h3>
+        }>
             <BranchList translator={translator} branches={section.branches}
-                        canOpen={b => canOpenBranch(b, section.federationId)} />
-          </Card.Body>
-        </Card>
+                        canOpen={b => canOpenBranch(b, section.federationId)} currentBranchId={info?.branchId} />
+            <Link className="clubs-federation-link" to={section.federationId === "" ? "/admin/wsko" : `/admin/federations/${encodeURIComponent(section.federationId)}`}>
+              {translator.translate(section.federationId === "" ? "Visa WSKO" : "Visa förbundet")}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+        </CollapsibleCard>
       ))}
 
       {/* Under the organization rather than above it, right-aligned with its
@@ -150,8 +177,9 @@ const AdminOrganization = () => {
           <Diagram3 className="me-1" />{translator.translate("Träd")}
         </Button>
       </div>
+      </section>
     </div>
   );
 };
 
-export default AdminOrganization;
+export default Clubs;

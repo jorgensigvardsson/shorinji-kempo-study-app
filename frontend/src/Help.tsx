@@ -32,7 +32,7 @@ export default function Help() {
             <p className="app-intro-copy">{translator.translate("Börja med det du behöver nu. Du kan alltid återvända via Hjälp i menyn Mer.")}</p>
         </header>
 
-        <HelpSection title={translator.translate("Namn, grad och inställningar")} defaultOpen>
+        <HelpSection title={translator.translate("Namn, grad och inställningar")}>
             <p>{translator.translate("Öppna Inställningar via menyn Mer. Där väljer du ditt namn i appen och anger din nuvarande grad under Min grad.")}</p>
             <p>{translator.translate("Gradinställningen hjälper appen att välja relevanta tekniker och den veckoplan som finns i Kamokuhyō för din nästa gradering. Du kan tillfälligt visa en annan grad i träningsvyerna.")}</p>
             <p>{translator.translate("Namn och grad sparas på ditt konto och synkas mellan dina enheter när du använder samma konto och har internetanslutning.")}</p>

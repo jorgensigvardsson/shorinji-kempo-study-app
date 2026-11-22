@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import './App.css'
 import { defaultTrainingGrade, findGradePlan, type CurrentGrade, type GradePlan, type GradeName } from './data'
 import { TranslatorContext, TranslatorImplementation, type Translator } from './i18n';
@@ -324,6 +324,14 @@ const AppNavbar = (props: NavbarProps) => {
   const visibleMenuRoutes = routes.filter(route => !route.hideFromMenu);
   const mainMenuRoutes = visibleMenuRoutes.filter(route => route.showInMainMenu);
   const dropdownRoutes = visibleMenuRoutes.filter(route => !route.showInMainMenu);
+  const menuGroups = [
+    { key: "personal", title: translator.translate("Mig och min klubb") },
+    { key: "help", title: translator.translate("Hjälp och appen") },
+    { key: "admin", title: translator.translate("Administration") },
+  ].map(group => ({
+    ...group,
+    routes: dropdownRoutes.filter(route => (route.menuGroup ?? "help") === group.key),
+  })).filter(group => group.routes.length > 0);
   const isDropdownActive = dropdownRoutes.some(route => route.path && location.pathname === route.path);
   const mobileMainRoutes = mainMenuRoutes.filter(route => route.path && route.path !== "/search");
   const mobileSection = mainSection(location.pathname);
@@ -347,17 +355,20 @@ const AppNavbar = (props: NavbarProps) => {
           </Offcanvas.Header>
           <Offcanvas.Body>
             <Nav className="me-auto d-lg-none" variant="pills">
-              {visibleMenuRoutes.map((route, index) => route.href ? (
-                <Nav.Link className="menu-item" key={index} href={route.href} onClick={() => setShow(false)}>
-                  {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
-                  {routeText(route)}
-                </Nav.Link>
-              ) : (
-                <Nav.Link className="menu-item" as={NavLink} key={index} to={route.path!} onClick={() => { beginNavigation(route.path!); setShow(false); }}>
-                  {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
-                  {routeText(route)}
-                </Nav.Link>
-              ))}
+              {menuGroups.map(group => <div key={group.key} className="menu-section">
+                <h2 className="menu-section-heading">{group.title}</h2>
+                {group.routes.map(route => route.href ? (
+                  <Nav.Link className="menu-item" key={route.href} href={route.href} onClick={() => setShow(false)}>
+                    {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                    {routeText(route)}
+                  </Nav.Link>
+                ) : (
+                  <Nav.Link className="menu-item" as={NavLink} key={route.path} to={route.path!} onClick={() => { beginNavigation(route.path!); setShow(false); }}>
+                    {route.icon && <span className="menu-route-icon"><route.icon size={20} /></span>}
+                    {routeText(route)}
+                  </Nav.Link>
+                ))}
+              </div>)}
             </Nav>
             <Nav className="me-auto d-none d-lg-flex menu-main-nav" variant="pills">
               {mainMenuRoutes.map((route, index) => route.href ? (
@@ -380,17 +391,21 @@ const AppNavbar = (props: NavbarProps) => {
                   active={isDropdownActive}
                   className="menu-more-dropdown"
                 >
-                  {dropdownRoutes.map((route, index) => route.href ? (
-                    <NavDropdown.Item key={index} href={route.href} className="menu-dropdown-item">
-                      {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
-                      {routeText(route)}
-                    </NavDropdown.Item>
-                  ) : (
-                    <NavDropdown.Item as={NavLink} key={index} to={route.path!} className="menu-dropdown-item" onClick={() => beginNavigation(route.path!)}>
-                      {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
-                      {routeText(route)}
-                    </NavDropdown.Item>
-                  ))}
+                  {menuGroups.map((group, index) => <Fragment key={group.key}>
+                    {index > 0 && <NavDropdown.Divider />}
+                    <NavDropdown.Header as="h2" className="menu-section-heading">{group.title}</NavDropdown.Header>
+                    {group.routes.map(route => route.href ? (
+                      <NavDropdown.Item key={route.href} href={route.href} className="menu-dropdown-item">
+                        {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
+                        {routeText(route)}
+                      </NavDropdown.Item>
+                    ) : (
+                      <NavDropdown.Item as={NavLink} key={route.path} to={route.path!} className="menu-dropdown-item" onClick={() => beginNavigation(route.path!)}>
+                        {route.icon && <span className="menu-dropdown-icon menu-route-icon"><route.icon size={16} /></span>}
+                        {routeText(route)}
+                      </NavDropdown.Item>
+                    ))}
+                  </Fragment>)}
                 </NavDropdown>
               )}
             </Nav>

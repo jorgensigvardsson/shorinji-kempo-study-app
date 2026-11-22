@@ -7,7 +7,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "./hooks";
 import type { AdminOrgBranch } from "./sync/backend";
-import type { Section } from "./AdminOrganization";
+import type { Section } from "./Clubs";
 import FederationTitle from "./components/FederationTitle";
 import MemberCount from "./components/MemberCount";
 
@@ -50,6 +50,7 @@ interface GroupNodeData extends Record<string, unknown> {
 interface BranchNodeData extends Record<string, unknown> {
   branch: AdminOrgBranch;
   canOpen: boolean;
+  currentBranchLabel?: string;
 }
 
 // The type string, not just the component name, has to avoid "group": xyflow
@@ -90,6 +91,7 @@ const BranchNode = ({ data }: NodeProps<BranchFlowNode>) => (
         ? <Link to={`/admin/branches/${encodeURIComponent(data.branch.id)}/members`}>{data.branch.name}</Link>
         : data.branch.name}
       <MemberCount count={data.branch.memberCount} className="ms-2" />
+      {data.currentBranchLabel && <div className="small text-body-secondary">{data.currentBranchLabel}</div>}
     </div>
   </div>
 );
@@ -99,18 +101,18 @@ const BranchNode = ({ data }: NodeProps<BranchFlowNode>) => (
 // remount every node).
 const nodeTypes: NodeTypes = { orgUnit: GroupNode, branch: BranchNode };
 
-// No translator: every label drawn here is an organization name, which is never
-// translated.
 interface Props {
   sections: Section[];
   canOpenBranch: (branch: AdminOrgBranch, federationId: string) => boolean;
+  currentBranchId?: string;
+  currentBranchLabel?: string;
 }
 
 // The organization as a diagram: WSKO at the top, the federations beneath it,
 // their branches beneath them, pannable and zoomable rather than scrolled.
 // Like the list view it is a picture, not a control panel — every node is a
 // link to the page where that thing is changed.
-const AdminOrganizationTree = ({ sections, canOpenBranch }: Props) => {
+const AdminOrganizationTree = ({ sections, canOpenBranch, currentBranchId, currentBranchLabel }: Props) => {
   const { effectiveTheme } = useTheme();
 
   const { nodes, edges } = useMemo(() => {
@@ -129,7 +131,7 @@ const AdminOrganizationTree = ({ sections, canOpenBranch }: Props) => {
         measured: BRANCH_NODE_SIZE,
         draggable: false,
         deletable: false,
-        data: { branch, canOpen: canOpenBranch(branch, federationId) } satisfies BranchNodeData,
+        data: { branch, canOpen: canOpenBranch(branch, federationId), currentBranchLabel: branch.id === currentBranchId ? currentBranchLabel : undefined } satisfies BranchNodeData,
       });
       flowEdges.push({ id: `${parentId}->${branch.id}`, source: parentId, target: branch.id });
     };
@@ -177,7 +179,7 @@ const AdminOrganizationTree = ({ sections, canOpenBranch }: Props) => {
     });
 
     return { nodes: [...groupNodes, ...branchNodes], edges: flowEdges };
-  }, [sections, canOpenBranch]);
+  }, [sections, canOpenBranch, currentBranchId, currentBranchLabel]);
 
   return (
     <div style={{ height: "70vh", minHeight: "24rem" }} className="border rounded mb-3">

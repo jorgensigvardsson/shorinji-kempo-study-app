@@ -1,8 +1,8 @@
-import { ChevronRight } from "react-bootstrap-icons";
+import { ChevronDown } from "react-bootstrap-icons";
 import "./DisclosureChevron.css";
 
 const DisclosureChevron = ({ expanded, className = "" }: { expanded: boolean; className?: string }) => (
-    <ChevronRight
+    <ChevronDown
         className={`app-disclosure-chevron${expanded ? " is-expanded" : ""}${className ? ` ${className}` : ""}`}
         aria-hidden="true"
     />

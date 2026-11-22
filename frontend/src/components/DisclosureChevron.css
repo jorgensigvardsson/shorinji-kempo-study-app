@@ -7,7 +7,7 @@
 }
 
 .app-disclosure-chevron.is-expanded {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
 @media (prefers-reduced-motion: reduce) {

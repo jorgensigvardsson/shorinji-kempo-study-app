@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-22T15:56:59.000Z",
+    changes: [
+      {
+        emoji: "🧭",
+        sv: "Mer-menyn har blivit tydligare. Min klubb och Organisation samlas nu i Klubbar och förbund, med din egen klubb först och enklare vägar till klubbbyte och administration.",
+        en: "The More menu is easier to navigate. My branch and Organization are now combined in Branches and federations, with your own branch first and clearer access to branch transfers and administration.",
+        tr: "Daha fazla menüsü daha anlaşılır hale geldi. Kulübüm ve Organizasyon artık Kulüpler ve federasyonlar altında bir arada; kendi kulübünüz en üstte, kulüp değişikliği ve yönetime ulaşmak daha kolay.",
+        ja: "「その他」メニューを整理しました。「所属支部」と「組織」を「支部と連盟」にまとめ、自分の支部を最初に表示します。支部の変更申請や管理にも進みやすくなりました。",
+      },
+      {
+        emoji: "⚙️",
+        sv: "Inställningarna är tydligare grupperade, med konto och inloggning under Dina uppgifter och synlig hjälp för att installera om appen.",
+        en: "Settings are grouped more clearly, with account and sign-in options under Your data and directly visible help for reinstalling the app.",
+        tr: "Ayarlar daha anlaşılır biçimde gruplandı. Hesap ve giriş seçenekleri Verileriniz altında toplandı; uygulamayı yeniden yükleme yardımı doğrudan görünür durumda.",
+        ja: "設定の項目を分かりやすく整理しました。アカウントとログインの設定は「自分のデータ」にまとめ、アプリの再インストールの案内は常に表示します。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-21T18:38:55.000Z",
     changes: [
       {

@@ -1,5 +1,6 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from "react";
-import { Award, BarChartLine, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, GeoAlt, type Icon, QuestionCircle, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
+import { Navigate } from "react-router-dom";
+import { Award, BarChartLine, Book, Collection, Diagram3, Envelope, FileEarmarkText, Gear, HandIndex, House, JournalText, CardHeading, Megaphone, Newspaper, People, PersonPlus, type Icon, QuestionCircle, QuestionSquare, Search, ShieldCheck } from "react-bootstrap-icons";
 import type { CurrentGrade, GradePlan } from "./data.ts";
 import { getSyncManager } from "./sync/manager.ts";
 import type { Language, Translator } from "./i18n.ts";
@@ -39,10 +40,9 @@ const Settings = page(() => import("./Settings.tsx"));
 const Help = page(() => import("./Help.tsx"));
 const Broadcast = page(() => import("./Broadcast.tsx"));
 const AdminRequests = page(() => import("./AdminRequests.tsx"));
-const AdminOrganization = page(() => import("./AdminOrganization.tsx"));
+const Clubs = page(() => import("./Clubs.tsx"));
 const AdminFederation = page(() => import("./AdminFederation.tsx"));
 const AdminWSKO = page(() => import("./AdminWSKO.tsx"));
-const MyBranch = page(() => import("./MyBranch.tsx"));
 const AdminBranchMembers = page(() => import("./AdminBranchMembers.tsx"));
 const AdminUser = page(() => import("./AdminUser.tsx"));
 const AdminUsage = page(() => import("./AdminUsage.tsx"));
@@ -76,6 +76,7 @@ export interface Route {
     startDescription?: string | (() => string);
     icon: Icon;
     showInMainMenu?: boolean;
+    menuGroup?: "personal" | "help" | "admin";
     hideOnStartPage?: boolean;
     hideFromMenu?: boolean;
 }
@@ -222,6 +223,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         element: <Help />,
         menuText: translator.translate("Hjälp"),
         icon: QuestionCircle,
+        menuGroup: "help",
         hideOnStartPage: true,
     }, {
         path: "/settings",
@@ -230,29 +232,30 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         menuText: translator.translate("Inställningar"),
         startDescription: translator.translate("Anpassa appen, din profil och ditt konto."),
         icon: Gear,
+        menuGroup: "personal",
         hideOnStartPage: true,
     },
-    // A member's own place in the organization, and the one thing they can do
-    // about it: ask another branch to take them in. Only for accounts — there is
-    // nothing to show somebody using the app without one.
-    ...(getSyncManager().getBackendUserInfo() !== null ? [{
-        path: "/branch",
-        element: <MyBranch />,
-        menuText: translator.translate("Min klubb"),
-        icon: GeoAlt,
-        hideOnStartPage: true,
-    } satisfies Route] : []),
-    // The shape of the organization is open to everybody — every federation and
-    // branch, as public as the club picker at registration, which reads the same
-    // list. What the pages offer to change, and whether a branch's members can
-    // be opened, is decided inside them on the reader's roles (and again by the
-    // server). The paths keep their /admin prefix from when only admins had them:
-    // they are linked and bookmarked as such.
+    // Keep both old entry points working for bookmarks and existing links.
     {
+        path: "/branch",
+        element: <Navigate to="/clubs" replace />,
+        menuText: translator.translate("Min klubb"),
+        icon: Diagram3,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
         path: "/admin/organization",
-        element: <AdminOrganization />,
+        element: <Navigate to="/clubs" replace />,
         menuText: translator.translate("Organisation"),
         icon: Diagram3,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/clubs",
+        element: <Clubs />,
+        menuText: translator.translate("Klubbar och förbund"),
+        icon: Diagram3,
+        menuGroup: "personal",
         hideOnStartPage: true,
     }, {
         // Reached from the organization rather than from the menu.
@@ -285,6 +288,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
             ? `${translator.translate("Ansökningar")} (${pendingRequests})`
             : translator.translate("Ansökningar"),
         icon: PersonPlus,
+        menuGroup: "admin",
         hideOnStartPage: true,
     } satisfies Route, {
         // Reached from the organization rather than from the menu: a branch is
@@ -312,6 +316,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         element: <Broadcast />,
         menuText: translator.translate("Skicka notis"),
         icon: Megaphone,
+        menuGroup: "admin",
         hideOnStartPage: true,
     } satisfies Route] : []),
     // The technical admin alone, as the server also insists: usage is a fact
@@ -322,12 +327,14 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         element: <AdminUsage />,
         menuText: translator.translate("Användningsstatistik"),
         icon: BarChartLine,
+        menuGroup: "admin",
         hideOnStartPage: true,
     } satisfies Route] : []), {
         path: "/changelog",
         element: <Changelog />,
         menuText: translator.translate("Nyheter"),
         icon: Newspaper,
+        menuGroup: "help",
         hideOnStartPage: true,
     }, {
         path: "/terms-of-service",
@@ -335,6 +342,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         menuText: translator.translate("Användarvillkor"),
         startDescription: translator.translate("Läs villkoren för hur appen används."),
         icon: FileEarmarkText,
+        menuGroup: "help",
         hideOnStartPage: true
     }, {
         path: "/privacy-policy",
@@ -342,12 +350,14 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         menuText: translator.translate("Integritetspolicy"),
         startDescription: translator.translate("Se hur appen hanterar dina uppgifter."),
         icon: ShieldCheck,
+        menuGroup: "help",
         hideOnStartPage: true
     }, {
         path: "/feedback",
         element: <Feedback />,
         menuText: translator.translate("Skicka feedback"),
         icon: Envelope,
+        menuGroup: "help",
         hideOnStartPage: true
     }];
 

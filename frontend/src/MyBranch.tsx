@@ -1,10 +1,13 @@
-import { useContext, useEffect, useState } from "react";
-import { Button, Card, Form, Spinner } from "react-bootstrap";
+import { useContext, useEffect, useId, useState } from "react";
+import { Button, Collapse, Form, Spinner } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "react-bootstrap-icons";
 import { TranslatorContext } from "./i18n";
 import { getSyncManager } from "./sync/manager";
 import { AdminRequestError, type MyTransfer, type PublicBranch } from "./sync/backend";
 import Loading from "./components/Loading";
 import FederationFlag from "./components/FederationFlag";
+import DisclosureChevron from "./components/DisclosureChevron";
 
 // The label for branches that belong to no federation. WSKO is the root of the
 // organization rather than a record with a name, so the heading is the
@@ -19,16 +22,18 @@ const maxNote = 500;
 // They ask for themselves. There is no handshake with the club they are leaving,
 // which is both the truth — the kenshi is the one who moved — and the only
 // arrangement that cannot strand somebody whose old club never answers.
-const MyBranch = () => {
+const MyBranch = ({ branches, canManage = false }: { branches: PublicBranch[]; canManage?: boolean }) => {
   const translator = useContext(TranslatorContext);
   const info = getSyncManager().getBackendUserInfo();
 
-  const [branches, setBranches] = useState<PublicBranch[] | null>(null);
   const [transfer, setTransfer] = useState<MyTransfer | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const transferFormId = useId();
 
   const [destination, setDestination] = useState("");
   const [note, setNote] = useState("");
@@ -37,13 +42,10 @@ const MyBranch = () => {
     let live = true;
     void (async () => {
       try {
-        const [fetchedBranches, fetchedTransfer] = await Promise.all([
-          getSyncManager().listBranches(),
-          getSyncManager().myTransfer(),
-        ]);
+        const fetchedTransfer = await getSyncManager().myTransfer();
         if (!live) return;
-        setBranches(fetchedBranches);
         setTransfer(fetchedTransfer);
+        setLoaded(true);
         setLoadError(false);
       } catch {
         if (live) setLoadError(true);
@@ -52,7 +54,11 @@ const MyBranch = () => {
     return () => { live = false; };
   }, [attempt]);
 
-  const reload = () => setAttempt(n => n + 1);
+  const reload = () => {
+    setLoaded(false);
+    setLoadError(false);
+    setAttempt(n => n + 1);
+  };
 
   const ask = async () => {
     if (destination === "") return;
@@ -60,6 +66,7 @@ const MyBranch = () => {
     setError(null);
     try {
       await getSyncManager().requestTransfer(destination, note.trim());
+      setTransferOpen(false);
       setDestination("");
       setNote("");
       reload();
@@ -81,6 +88,7 @@ const MyBranch = () => {
     setError(null);
     try {
       await getSyncManager().withdrawTransfer();
+      setTransferOpen(false);
       setTransfer(null);
     } catch {
       setError(translator.translate("Ansökan kunde inte tas tillbaka. Försök igen."));
@@ -88,19 +96,6 @@ const MyBranch = () => {
       setBusy(false);
     }
   };
-
-  if (loadError) {
-    return (
-      <div>
-        <p className="text-danger">{translator.translate("Kunde inte hämta klubbarna.")}</p>
-        <Button variant="outline-secondary" onClick={reload}>{translator.translate("Försök igen")}</Button>
-      </div>
-    );
-  }
-
-  if (branches === null) {
-    return <Loading />;
-  }
 
   const current = branches.find(b => b.id === info?.branchId);
 
@@ -116,29 +111,42 @@ const MyBranch = () => {
     a === WSKO ? 1 : b === WSKO ? -1 : a.localeCompare(b));
 
   return (
-    <div>
-      <h1 className="h4">{translator.translate("Min klubb")}</h1>
-
-      <Card className="mb-3">
-        <Card.Body>
-          <div className="small text-body-secondary">{translator.translate("Du tränar i")}</div>
-          <div className="fs-5">
+    <section className="clubs-own-section" aria-labelledby="my-club-heading">
+      <header className="clubs-own-summary">
+          <h2 id="my-club-heading" className="app-eyebrow-heading">{translator.translate("Min klubb")}</h2>
+          <p className="clubs-own-name">
             {current?.name ?? <span className="text-body-secondary">{translator.translate("Ingen klubb")}</span>}
-          </div>
-          {current?.federationName !== undefined && current.federationName !== "" && (
-            <div className="text-body-secondary">
-              {current.federationId !== undefined && <FederationFlag federationId={current.federationId} className="me-1" />}
-              {current.federationName}
-            </div>
+          </p>
+          {current && (
+            <p className="clubs-own-federation text-body-secondary">
+              {current.federationId && <FederationFlag federationId={current.federationId} className="me-1" />}
+              {current.federationName ?? WSKO}
+            </p>
           )}
-        </Card.Body>
-      </Card>
+      </header>
+
+      <div className="clubs-own-actions d-flex flex-wrap gap-2">
+        {canManage && current && <Link className="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
+                                      to={`/admin/branches/${encodeURIComponent(current.id)}/members`}>
+          {translator.translate("Administrera klubben")}<ArrowRight aria-hidden="true" />
+        </Link>}
+        {loaded && !loadError && transfer === null &&
+          <Button variant="outline-secondary" className="d-inline-flex align-items-center gap-2"
+                  aria-expanded={transferOpen} aria-controls={transferFormId}
+                  onClick={() => setTransferOpen(open => !open)}>
+            {translator.translate("Byt klubb")}<DisclosureChevron expanded={transferOpen} />
+          </Button>}
+      </div>
 
       {error !== null && <p className="text-danger">{error}</p>}
 
-      {transfer !== null ? (
-        <Card>
-          <Card.Body className="d-flex flex-column gap-2">
+      {loadError ? (
+        <div role="alert">
+          <p className="text-danger">{translator.translate("Kunde inte hämta ditt klubbbyte.")}</p>
+          <Button variant="outline-secondary" onClick={reload}>{translator.translate("Försök igen")}</Button>
+        </div>
+      ) : !loaded ? <Loading /> : transfer !== null ? (
+          <div className="clubs-transfer-status d-flex flex-column gap-2" role="status">
             {transfer.status === "pending" ? (
               <>
                 <div>
@@ -168,13 +176,12 @@ const MyBranch = () => {
                 </div>
               </>
             )}
-          </Card.Body>
-        </Card>
+          </div>
       ) : (
-        <Card>
-          <Card.Body className="d-flex flex-column gap-3">
+        <Collapse in={transferOpen}>
+          <div id={transferFormId} className="clubs-transfer">
+          <div className="clubs-transfer-form d-flex flex-column gap-3">
             <div>
-              <Form.Label className="mb-1">{translator.translate("Byt klubb")}</Form.Label>
               <div className="text-body-secondary small mb-2">
                 {translator.translate("Har du flyttat? Ansök hos den klubb du vill träna i — deras administratörer avgör.")}
               </div>
@@ -214,10 +221,11 @@ const MyBranch = () => {
                 {busy ? <Spinner size="sm" /> : translator.translate("Skicka ansökan")}
               </Button>
             </div>
-          </Card.Body>
-        </Card>
+          </div>
+          </div>
+        </Collapse>
       )}
-    </div>
+    </section>
   );
 };
 

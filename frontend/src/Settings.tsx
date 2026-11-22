@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Button, Dropdown, Form } from "react-bootstrap";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { Button, Collapse, Dropdown, Form } from "react-bootstrap";
 import "./Settings.css";
 import { useTheme } from "./hooks";
 import { getAppDataStore } from "./persistence/store";
@@ -12,6 +12,8 @@ import { getCurrentSubscription, isPushSupported, subscribeToPush, unsubscribeFr
 import { ensureAllTranslations } from "./translations";
 import { ArrowRepeat, Download, Upload } from "react-bootstrap-icons";
 import Loading from "./components/Loading";
+import CollapsibleCard from "./components/CollapsibleCard";
+import DisclosureChevron from "./components/DisclosureChevron";
 import { resetAppInstallation } from "./app-update";
 
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
@@ -143,78 +145,6 @@ const Settings = (props: Props) => {
             </header>
 
             <div className="settings-sections">
-                <section className="settings-section" aria-labelledby="settings-appearance-heading">
-                    <div className="settings-section-header">
-                        <h2 id="settings-appearance-heading" className="app-section-heading">{translator.translate("Utseende")}</h2>
-                    </div>
-                    <div className="settings-form-grid settings-form-grid-three">
-                        <Form.Group controlId="settingsTheme">
-                            <Form.Label>{translator.translate("Tema")}</Form.Label>
-                            <Dropdown className="settings-dropdown" onSelect={key => {
-                                if (key === "light" || key === "dark" || key === "system") setTheme(key);
-                            }}>
-                                <Dropdown.Toggle id="settingsTheme" variant="outline-secondary">
-                                    {translator.translate(theme === "light" ? "Ljust" : theme === "dark" ? "Mörkt" : "System")}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    {([ ["light", "Ljust"], ["dark", "Mörkt"], ["system", "System"] ] as const).map(([value, label]) => (
-                                        <Dropdown.Item key={value} eventKey={value} active={theme === value}>
-                                            {translator.translate(label)}
-                                        </Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Form.Group>
-
-                        <Form.Group controlId="settingsLanguage">
-                            <Form.Label>{translator.translate("Språk")}</Form.Label>
-                            <Dropdown className="settings-dropdown" onSelect={key => {
-                                if (languages.some(language => language.code === key)) onSetLanguage(key as Language);
-                            }}>
-                                <Dropdown.Toggle id="settingsLanguage" variant="outline-secondary">
-                                    {languages.find(language => language.code === translator.currentLanguage)?.name ?? "Svenska"}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    {languages.map(language => (
-                                        <Dropdown.Item key={language.code} eventKey={language.code} active={language.code === translator.currentLanguage}>
-                                            {language.name} ({translator.translate(language.key)})
-                                        </Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Form.Group>
-
-                        <Form.Group controlId="textSize">
-                            <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
-                            {/* A native select hands its menu to the operating system on many
-                                phones, which ignores option font sizes. This HTML dropdown keeps
-                                the preview visible everywhere. The root font already has the
-                                current choice, so dividing by it makes each row land at the size
-                                it will actually have after it is selected. */}
-                            <Dropdown className="settings-dropdown settings-text-size-dropdown" onSelect={key => {
-                                const selected = Number(key);
-                                if (Number.isFinite(selected)) onSetTextSize(selected);
-                            }}>
-                                <Dropdown.Toggle id="textSize" variant="outline-secondary">
-                                    {translator.translate(textSizeOptions.find(option => option.value === textSize)?.label ?? "Medium")}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    {textSizeOptions.map(option => (
-                                        <Dropdown.Item
-                                            key={option.value}
-                                            eventKey={String(option.value)}
-                                            active={option.value === textSize}
-                                            style={{ fontSize: `${option.value / textSize}rem` }}
-                                        >
-                                            {translator.translate(option.label)}
-                                        </Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Form.Group>
-                    </div>
-                </section>
-
                 <section className="settings-section" aria-labelledby="settings-profile-heading">
                     <div className="settings-section-header">
                         <h2 id="settings-profile-heading" className="app-section-heading">{translator.translate("Om mig")}</h2>
@@ -293,47 +223,111 @@ const Settings = (props: Props) => {
                     </div>
                 </section>
 
-                <section className="settings-section" aria-labelledby="settings-notifications-heading">
+                <section className="settings-section" aria-labelledby="settings-appearance-heading">
                     <div className="settings-section-header">
-                        <h2 id="settings-notifications-heading" className="app-section-heading">{translator.translate("Notiser")}</h2>
+                        <h2 id="settings-appearance-heading" className="app-section-heading">{translator.translate("Anpassa appen")}</h2>
                     </div>
-                    <Form.Group>
-                        <Form.Label>{translator.translate("Uppdateringsnotiser")}</Form.Label>
+                    <div className="settings-form-grid settings-form-grid-three">
+                        <Form.Group controlId="settingsTheme">
+                            <Form.Label>{translator.translate("Tema")}</Form.Label>
+                            <Dropdown className="settings-dropdown" onSelect={key => {
+                                if (key === "light" || key === "dark" || key === "system") setTheme(key);
+                            }}>
+                                <Dropdown.Toggle id="settingsTheme" variant="outline-secondary">
+                                    {translator.translate(theme === "light" ? "Ljust" : theme === "dark" ? "Mörkt" : "System")}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {([ ["light", "Ljust"], ["dark", "Mörkt"], ["system", "System"] ] as const).map(([value, label]) => (
+                                        <Dropdown.Item key={value} eventKey={value} active={theme === value}>
+                                            {translator.translate(label)}
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </Form.Group>
+
+                        <Form.Group controlId="settingsLanguage">
+                            <Form.Label>{translator.translate("Språk")}</Form.Label>
+                            <Dropdown className="settings-dropdown" onSelect={key => {
+                                if (languages.some(language => language.code === key)) onSetLanguage(key as Language);
+                            }}>
+                                <Dropdown.Toggle id="settingsLanguage" variant="outline-secondary">
+                                    {languages.find(language => language.code === translator.currentLanguage)?.name ?? "Svenska"}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {languages.map(language => (
+                                        <Dropdown.Item key={language.code} eventKey={language.code} active={language.code === translator.currentLanguage}>
+                                            {language.name} ({translator.translate(language.key)})
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </Form.Group>
+
+                        <Form.Group controlId="textSize">
+                            <Form.Label>{translator.translate("Textstorlek")}</Form.Label>
+                            {/* A native select hands its menu to the operating system on many
+                                phones, which ignores option font sizes. This HTML dropdown keeps
+                                the preview visible everywhere. The root font already has the
+                                current choice, so dividing by it makes each row land at the size
+                                it will actually have after it is selected. */}
+                            <Dropdown className="settings-dropdown settings-text-size-dropdown" onSelect={key => {
+                                const selected = Number(key);
+                                if (Number.isFinite(selected)) onSetTextSize(selected);
+                            }}>
+                                <Dropdown.Toggle id="textSize" variant="outline-secondary">
+                                    {translator.translate(textSizeOptions.find(option => option.value === textSize)?.label ?? "Medium")}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {textSizeOptions.map(option => (
+                                        <Dropdown.Item
+                                            key={option.value}
+                                            eventKey={String(option.value)}
+                                            active={option.value === textSize}
+                                            style={{ fontSize: `${option.value / textSize}rem` }}
+                                        >
+                                            {translator.translate(option.label)}
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </Form.Group>
+                    </div>
+                    <Form.Group className="settings-notifications">
+                        <Form.Label id="settings-notifications-heading">{translator.translate("Notiser")}</Form.Label>
                         <NotificationPermissionControl translator={translator} />
                     </Form.Group>
                 </section>
 
-                <section className="settings-section" aria-labelledby="settings-account-heading">
-                    <div className="settings-section-header">
-                        <h2 id="settings-account-heading" className="app-section-heading">{translator.translate("Konto och inloggning")}</h2>
-                    </div>
-                    <AccountStatus translator={translator} onAccountDisplayNameChange={setAccountDisplayName} />
-                </section>
-
-                <section className="settings-section" aria-labelledby="settings-backup-heading">
-                    <div className="settings-section-header">
-                        <h2 id="settings-backup-heading" className="app-section-heading">{translator.translate("Säkerhetskopia")}</h2>
-                        <p>{translator.translate("Ladda ner en återläsningsbar kopia av dina inställningar och studiedata.")}</p>
-                    </div>
-                    <div className="d-flex gap-2 flex-wrap">
-                        <Button variant="outline-secondary" size="sm" onClick={exportData}>
-                            <Download className="me-2" />
-                            {translator.translate("Ladda ner")}
-                        </Button>
-                        <Button variant="outline-secondary" size="sm" onClick={importData}>
-                            <Upload className="me-2" />
-                            {translator.translate("Importera")}
-                        </Button>
-                    </div>
-                </section>
-
+                <AccountSettings translator={translator} onAccountDisplayNameChange={setAccountDisplayName}
+                    backupControls={
+                        <CollapsibleCard className="settings-disclosure" inlineChevron header={
+                            <h3 id="settings-backup-heading" className="settings-subheading">{translator.translate("Säkerhetskopiera och återställ")}</h3>
+                        }>
+                            <p className="settings-help-text">{translator.translate("Ladda ner en återläsningsbar kopia av dina inställningar och studiedata.")}</p>
+                            <div className="d-flex gap-2 flex-wrap mt-3">
+                                <Button variant="outline-secondary" size="sm" onClick={exportData}>
+                                    <Download className="me-2" />{translator.translate("Ladda ner säkerhetskopia")}
+                                </Button>
+                                <Button variant="outline-secondary" size="sm" onClick={importData}>
+                                    <Upload className="me-2" />{translator.translate("Läs in säkerhetskopia")}
+                                </Button>
+                            </div>
+                        </CollapsibleCard>
+                    } />
                 <section className="settings-section" aria-labelledby="settings-app-heading">
                     <div className="settings-section-header">
-                        <h2 id="settings-app-heading" className="app-section-heading">{translator.translate("Om appen")}</h2>
+                        <h2 id="settings-app-heading" className="app-section-heading">{translator.translate("Felsökning")}</h2>
                     </div>
-                    <AppInstallation translator={translator} />
+                    <div className="settings-installation">
+                        <h3 className="settings-subheading">{translator.translate("Installera om appen")}</h3>
+                        <AppInstallation translator={translator} />
+                    </div>
                 </section>
             </div>
+            <footer className="settings-footer">
+                <p className="settings-version">{translator.translate("Version")} <code>{appVersion.slice(0, 7)}</code></p>
+            </footer>
         </main>
     );
 }
@@ -363,11 +357,6 @@ const AppInstallation = (props: { translator: Translator }) => {
                     <ArrowRepeat className="me-2" />
                     {working ? translator.translate("Installerar om…") : translator.translate("Installera om appen")}
                 </Button>
-                {/* Not decoration: the first useful question about a device that is
-                    behaving oddly is which build it is actually running. */}
-                <small className="settings-help-text">
-                    {translator.translate("Version")} <code>{appVersion.slice(0, 7)}</code>
-                </small>
             </div>
         </>
     );
@@ -378,13 +367,17 @@ const providerDisplayName: Record<string, string> = {
     "microsoft": "Microsoft",
 };
 
-const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChange: (name: string) => void }) => {
-    const { translator, onAccountDisplayNameChange } = props;
+const AccountSettings = (props: { translator: Translator; onAccountDisplayNameChange: (name: string) => void; backupControls: ReactNode }) => {
+    const { translator, onAccountDisplayNameChange, backupControls } = props;
     const [userInfo, setUserInfo] = useState(() => getSyncManager().getBackendUserInfo());
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [dataError, setDataError] = useState<string | null>(null);
+    const [showLinkForm, setShowLinkForm] = useState(() =>
+        Boolean(sessionStorage.getItem("link_success") || sessionStorage.getItem("link_error")));
+    const linkFormId = useId();
     const [linkEmail, setLinkEmail] = useState("");
     const [linkError, setLinkError] = useState<string | null>(null);
     const [linkSuccess, setLinkSuccess] = useState(false);
@@ -420,6 +413,7 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
         sessionStorage.removeItem("link_success");
         sessionStorage.removeItem("link_error");
         if (success) {
+            setShowLinkForm(true);
             const refreshed = getSyncManager().getBackendUserInfo();
             setUserInfo(refreshed);
             onAccountDisplayNameChange(refreshed?.displayName ?? "");
@@ -429,6 +423,7 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
             return () => clearTimeout(t);
         }
         if (err === "already_linked") {
+            setShowLinkForm(true);
             setLinkError(translator.translate("Den här identiteten är redan kopplad till ett konto."));
         }
     }, [onAccountDisplayNameChange, translator]);
@@ -441,11 +436,11 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
 
     const handleExport = async () => {
         setExporting(true);
-        setError(null);
+        setDataError(null);
         try {
             await getSyncManager().exportAccount();
         } catch {
-            setError(translator.translate("Export misslyckades. Försök igen."));
+            setDataError(translator.translate("Export misslyckades. Försök igen."));
         } finally {
             setExporting(false);
         }
@@ -453,11 +448,11 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
 
     const handleDeleteConfirm = async () => {
         setDeleting(true);
-        setError(null);
+        setDataError(null);
         try {
             await getSyncManager().deleteAccount();
         } catch {
-            setError(translator.translate("Raderingen misslyckades. Försök igen."));
+            setDataError(translator.translate("Raderingen misslyckades. Försök igen."));
             setDeleting(false);
             setConfirmDelete(false);
         }
@@ -508,15 +503,15 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
 
     const canUnlink = (userInfo?.providers.length ?? 0) > 1;
 
-    // Nothing has arrived and nothing is cached: every control below is about an
-    // account this panel cannot describe yet, so the wait is all there is to show.
-    if (userInfo === null && !refreshFailed) {
-        return <Loading />;
-    }
+    const waitingForAccount = userInfo === null && !refreshFailed;
 
     return (
-        <div className="settings-account">
-            {userInfo === null && (
+        <section className="settings-section" aria-labelledby="settings-data-heading">
+            <div className="settings-section-header">
+                <h2 id="settings-data-heading" className="app-section-heading">{translator.translate("Dina uppgifter")}</h2>
+            </div>
+            {waitingForAccount && <Loading />}
+            {!waitingForAccount && userInfo === null && (
                 <Form.Text className="d-block mt-1 mb-2 text-danger">
                     {translator.translate("Kunde inte hämta kontouppgifterna.")}
                 </Form.Text>
@@ -528,8 +523,12 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
                 </div>
             )}
 
+            {!waitingForAccount && <CollapsibleCard className="settings-disclosure" inlineChevron defaultOpen={showLinkForm} header={
+                <h3 id="settings-account-heading" className="settings-subheading">{translator.translate("Konto och inloggning")}</h3>
+            }>
+            <div className="settings-account">
             <div className="settings-account-block">
-                <h3 className="settings-subheading">{translator.translate("Inloggningssätt")}</h3>
+                <h4 className="settings-subheading">{translator.translate("Inloggningssätt")}</h4>
                 <p className="settings-help-text">
                     {translator.translate("Ett inloggningssätt är ett sätt att öppna samma konto. Tar du bort ett finns kontot och dina studiedata kvar.")}
                 </p>
@@ -555,7 +554,14 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
             </div>
 
             <div className="settings-account-block">
-                <h3 className="settings-subheading">{translator.translate("Lägg till inloggningssätt")}</h3>
+                <Button variant="outline-secondary" size="sm" className="settings-disclosure-toggle"
+                        aria-expanded={showLinkForm} aria-controls={linkFormId}
+                        onClick={() => setShowLinkForm(open => !open)}>
+                    {translator.translate("Lägg till inloggningssätt")}<DisclosureChevron expanded={showLinkForm} />
+                </Button>
+                <Collapse in={showLinkForm}>
+                    <div id={linkFormId}>
+                        <div className="settings-link-details">
                 <p className="settings-help-text">{translator.translate("Lägg till en annan e-postadress som du kan använda för samma konto.")}</p>
                 <Form as="form" onSubmit={(e) => handleLink(e)} className="settings-link-form">
                     <div className="settings-link-input">
@@ -577,6 +583,9 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
                         {translator.translate("Lägg till")}
                     </Button>
                 </Form>
+                        </div>
+                    </div>
+                </Collapse>
             </div>
 
             {error && (
@@ -586,25 +595,31 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
                 <Form.Text className="d-block mt-1 mb-2 text-success">{othersMessage}</Form.Text>
             )}
             <div className="settings-account-block">
-                <h3 className="settings-subheading">{translator.translate("Sessioner")}</h3>
                 <div className="d-flex gap-2 flex-wrap">
-                    <Button variant="outline-secondary" size="sm" onClick={handleLogout}>
-                        {translator.translate("Logga ut")}
-                    </Button>
                     <Button variant="outline-secondary" size="sm" onClick={() => { void handleLogoutOthers(); }} disabled={loggingOutOthers}>
                         {loggingOutOthers ? translator.translate("Loggar ut…") : translator.translate("Logga ut på alla andra enheter")}
                     </Button>
                 </div>
             </div>
 
-            <div className="settings-account-block">
-                <h3 className="settings-subheading">{translator.translate("Fullständig kontokopia")}</h3>
+            </div>
+            </CollapsibleCard>}
+            {backupControls}
+            {!waitingForAccount && <>
+                <CollapsibleCard className="settings-disclosure" inlineChevron header={
+                    <h3 className="settings-subheading">{translator.translate("Ladda ner kontouppgifter")}</h3>
+                }>
                 <p className="settings-help-text">{translator.translate("Ladda ner kontouppgifter och studiedata tillsammans. Den här filen är till för insyn, inte för återläsning i appen.")}</p>
                 <Button variant="outline-secondary" size="sm" onClick={() => { void handleExport(); }} disabled={exporting}>
                     {exporting ? translator.translate("Exporterar...") : translator.translate("Ladda ner kontokopia")}
                 </Button>
-            </div>
-
+                </CollapsibleCard>
+                {dataError && <p className="text-danger" role="alert">{dataError}</p>}
+                <div className="settings-account-logout">
+                    <Button variant="outline-secondary" size="sm" onClick={handleLogout}>
+                        {translator.translate("Logga ut")}
+                    </Button>
+                </div>
             <div className="settings-danger-zone">
                 {!confirmDelete ? (
                     <Button variant="outline-danger" size="sm" onClick={() => setConfirmDelete(true)}>
@@ -627,7 +642,8 @@ const AccountStatus = (props: { translator: Translator; onAccountDisplayNameChan
                     </div>
                 )}
             </div>
-        </div>
+            </>}
+        </section>
     );
 }
 

@@ -21,6 +21,7 @@ A Progressive Web App (PWA) for Shorinji Kempo practitioners to study techniques
 - **Flashcards** — choose between terminology cards and grade-based Hokei cards whose backs show stance, execution, and synced personal notes (non-Japanese interface languages)
 - **Technique lists** — a shared open layout in Hokei lists, technique groups, weekly plans, grading and Embu previews. Each technique starts with a divider; consecutive techniques share their boundary. Standard mode has larger kanji with self-assessment beside the final Japanese word, while Dojo shares the same visual layout with named roles and practice-focused content. Expanded techniques have a subtle background and muted gold side marker; clicking the technique content closes them while controls, notes, dialogs and text selection remain independent. The grade stays visible in standard mode, with technique group and Kyohan references beside it when opened. Notes and videos use aligned icon/text columns at the bottom, with larger edit controls and a shared note/pencil hover highlight
 - **Accounts** — sign in with an email code (or Google/Microsoft, when the address belongs to one); an account is required to use the app, and study data syncs automatically to the backend across devices
+- **Settings** — sections for profile, app preferences, personal data and troubleshooting. Fields retain labels above their controls. Under personal data, account/sign-in, restorable backups and account exports expand on request; the signed-in address and sign-out button stay visible. Reinstallation instructions remain directly visible. Backup and account export retain their separate purposes; deleting an account still requires confirmation
 - **Organization** — every federation and branch, as a list or a tree, open to every member; each federation and WSKO has a page of its own. Admins rename federations, branches and members (pencil beside the name), add branches and federations, and open the members of the branches they cover — all on the page of the thing being changed rather than on the overview
 - **Push notifications** — opt-in Web Push (e.g. new-version announcements) delivered even when the app is closed
 - **In-app feedback** — send feedback straight from the menu; the backend emails it to the maintainer, no mail client required
@@ -116,7 +117,7 @@ verification code is printed to the auth log.
 
 The usage statistics page has no telemetry to read locally, so the compose stack sets
 `USAGE_DEMO=true` and the auth service invents members for every branch in the local
-organization. Add branches on the Organisation page and they show up in the statistics
+organization. Add branches through the federation links on the *Klubbar och förbund* page and they show up in the statistics
 straight away. The demo is refused whenever `COSMOS_*` is set.
 
 The page's "over time" view reads the usage history, which production accumulates week by
@@ -224,7 +225,7 @@ Notifications use the standard [Web Push Protocol](https://web.dev/articles/push
 **Pieces:**
 - The service worker (`frontend/src/sw.ts`) handles the `push` and `notificationclick` events.
 - The persistence service (`backend/persistence`) serves `GET /push/public-key`, stores subscriptions via `POST /push/subscribe` / `POST /push/unsubscribe`, and broadcasts via `POST /push/broadcast`. Subscribing requires a signed-in session, so every subscription is tied to a user; unsubscribing does not, so a device can always drop its own endpoint. Dead subscriptions (HTTP 404/410) are pruned automatically.
-- Settings → *Uppdateringsnotiser* lets the user opt in/out. On iOS the app must be added to the Home Screen first (Apple only allows Web Push for installed PWAs).
+- Settings → *Anpassa appen → Notiser* lets the user opt in/out. On iOS the app must be added to the Home Screen first (Apple only allows Web Push for installed PWAs).
 
 **Generate VAPID keys once** (stable forever — rotating them invalidates every existing subscription):
 ```bash
@@ -282,7 +283,14 @@ It chooses its store the way the services do, so the same command migrates Cosmo
 Two ways, and they run in opposite directions:
 
 - **They apply.** Somebody proves an email address, picks a club, and its admins get a mail asking them to decide. *Ansökningar* in the menu is where that decision is made.
-- **An admin adds them.** *Organisation → the club → Lägg till medlem* takes a name and an address and makes the account there and then. This is the one for the people an instructor already trains: nobody registers, nobody waits.
+- **An admin adds them.** *Klubbar och förbund → the club → Lägg till medlem* takes a name and an address and makes the account there and then. This is the one for the people an instructor already trains: nobody registers, nobody waits.
+
+*Mer → Klubbar och förbund* (`/clubs`) brings the member's own branch and the organization
+directory together. The member's branch appears first, with branch transfers available on
+demand and pending requests always visible. Below it, federation rows expand to show their
+branches; the list/tree preference and existing scoped administration links are preserved.
+Member counts identify registered app users. The former `/branch` and `/admin/organization`
+entry points redirect to `/clubs` so existing links continue to work.
 
 Somebody added this way is always emailed that it happened, in the adding admin's language, with the branch named and a line saying they can sign in and delete the account if it was a mistake. The account sits waiting for its address until they first sign in — by code or through Google/Microsoft, whichever their domain uses — and that sign-in claims it. The page says whether the mail actually got out, because the account exists either way and only the admin can put that right. See [`BACKEND.md`](BACKEND.md) for the mechanism.
 

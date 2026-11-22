@@ -4,6 +4,7 @@ Ideas and follow-up tasks to park without interrupting the current task.
 Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`.
 
 - [x] Admins ska kunna flytta på medlemmar
+- [ ] Gör vägen till en persons behörigheter tydligare för administratörer. Förslag: en synlig ”Behörigheter →”-länk vid personen i medlemslistan som öppnar personsidan direkt vid behörighetsavsnittet. Behåll befintliga behörighetsregler.
 - [ ] Defaulta till "upp till och med nästa grad"
 - [ ] Träning -> Embu -> Kumi-embu: texten säger "Bygg en egen embu eller träna en färdig sekvens". Borde vara en text som säger "Det här är din nästa graderingsembu".
 

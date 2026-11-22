@@ -71,12 +71,23 @@ for (const view of views) {
 
             if (view.width < 992) {
                 await page.locator(".app-bottom-nav").getByRole("button", { name: "Mer", exact: true }).click();
-                await page.locator(".offcanvas.show").getByRole("link", { name: "Hjälp", exact: true }).click();
+                const menu = page.locator(".offcanvas.show");
+                await expect(menu.getByRole("heading", { name: "Mig och min klubb", exact: true })).toBeVisible();
+                await expect(menu.getByRole("heading", { name: "Hjälp och appen", exact: true })).toBeVisible();
+                await expect(menu.getByRole("heading", { name: "Administration", exact: true })).toHaveCount(0);
+                for (const name of ["Start", "Träning", "Teori", "Sök"]) {
+                    await expect(menu.getByRole("link", { name, exact: true })).toHaveCount(0);
+                }
+                await menu.getByRole("link", { name: "Hjälp", exact: true }).click();
             } else {
                 await page.locator("#desktop-more-menu").click();
                 await page.locator(".dropdown-menu.show").getByRole("link", { name: "Hjälp", exact: true }).click();
             }
             await expect(page.getByRole("heading", { level: 1, name: "Kom igång med appen" })).toBeVisible();
+            const settingsTopic = page.getByRole("button", { name: "Namn, grad och inställningar", exact: true });
+            await expect(settingsTopic).toHaveAttribute("aria-expanded", "false");
+            await expect(page.getByText(/^Gradinställningen hjälper appen/)).toBeHidden();
+            await settingsTopic.click();
             await expect(page.getByText(/^Gradinställningen hjälper appen/)).toBeVisible();
             await page.getByRole("button", { name: "Hokei – din teknikträning", exact: true }).click();
             await expect(page.getByText(/^Teknikinnehållet i Hokei och veckoplanen kommer från Kamokuhyō/)).toBeVisible();

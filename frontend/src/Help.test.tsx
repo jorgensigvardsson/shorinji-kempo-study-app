@@ -24,6 +24,9 @@ describe("Help", () => {
         const user = userEvent.setup();
         renderHelp();
 
+        expect(screen.getByRole("button", { name: "Namn, grad och inställningar", expanded: false })).toBeTruthy();
+        await user.click(screen.getByRole("button", { name: "Namn, grad och inställningar" }));
+
         expect(screen.getByRole("button", { name: "Namn, grad och inställningar", expanded: true })).toBeTruthy();
         expect(screen.getByText(/Gradinställningen hjälper appen att välja relevanta tekniker/)).toBeTruthy();
         expect(screen.getByRole("link", { name: "Inställningar" }).getAttribute("href")).toBe("/settings");

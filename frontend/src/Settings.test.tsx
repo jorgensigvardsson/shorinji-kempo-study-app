@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -6,9 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // interest in — and which the ones at the bottom are entirely about.
 const getBackendUserInfo = vi.fn<() => { email: string; displayName: string; providers: string[]; roles: string[] } | null>(() => null);
 const refreshBackendUserInfo = vi.fn<() => Promise<void>>(() => Promise.resolve());
+const beginLinkAuthorization = vi.fn();
+const exportAccount = vi.fn();
+const deleteAccount = vi.fn();
+const logoutOtherDevices = vi.fn();
 
 vi.mock("./sync/manager", () => ({
-  getSyncManager: () => ({ getBackendUserInfo, refreshBackendUserInfo }),
+  getSyncManager: () => ({ getBackendUserInfo, refreshBackendUserInfo, beginLinkAuthorization, exportAccount, deleteAccount, logoutOtherDevices }),
 }));
 
 import Settings from "./Settings";
@@ -244,10 +248,87 @@ describe("Settings — profile and structure", () => {
   it("groups settings under clear section headings", () => {
     renderSettings();
 
-    for (const heading of ["Utseende", "Om mig", "Notiser", "Konto och inloggning", "Säkerhetskopia"]) {
-      expect(screen.getByRole("heading", { name: heading })).toBeDefined();
-    }
+    expect(screen.getAllByRole("heading", { level: 2 }).map(heading => heading.textContent))
+      .toEqual(["Om mig", "Anpassa appen", "Dina uppgifter", "Felsökning"]);
+    expect(screen.getByRole("button", { name: "Konto och inloggning", expanded: false })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Sessioner" })).toBeNull();
+    expect(screen.getByRole("heading", { name: "Installera om appen" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Installera om appen" })).toBeTruthy();
     expect(screen.queryByText("Dina personliga uppgifter och vad du tränar mot.")).toBeNull();
+  });
+});
+
+describe("Settings — account and data actions", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    getBackendUserInfo.mockReturnValue({ email: "kenshi@example.org", displayName: "", providers: ["email"], roles: [] });
+    refreshBackendUserInfo.mockResolvedValue();
+    beginLinkAuthorization.mockReset();
+    exportAccount.mockReset().mockResolvedValue(undefined);
+    deleteAccount.mockReset().mockResolvedValue(undefined);
+    logoutOtherDevices.mockReset().mockResolvedValue(undefined);
+  });
+
+  it("opens the sign-in form on request and links the supplied email", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    await user.click(screen.getByRole("button", { name: "Konto och inloggning", expanded: false }));
+    await user.click(screen.getByRole("button", { name: "Lägg till inloggningssätt", expanded: false }));
+    expect(screen.getByRole("button", { name: "Lägg till inloggningssätt", expanded: true })).toBeTruthy();
+    await user.type(screen.getByLabelText("E-postadress"), "another@example.org");
+    await user.click(screen.getByRole("button", { name: "Lägg till" }));
+    expect(beginLinkAuthorization).toHaveBeenCalledWith("another@example.org");
+  });
+
+  it("shows the account and sign-in form when returning from a successful link", async () => {
+    sessionStorage.setItem("link_success", "1");
+    renderSettings();
+    expect(screen.getByRole("button", { name: "Konto och inloggning", expanded: true })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Lägg till inloggningssätt", expanded: true })).toBeTruthy();
+    expect(await screen.findByText("Konto länkat!")).toBeTruthy();
+  });
+
+  it("keeps account export distinct from a restorable backup", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const data = screen.getByRole("region", { name: "Dina uppgifter" });
+    await user.click(within(data).getByRole("button", { name: "Ladda ner kontouppgifter", expanded: false }));
+    expect(within(data).getByText(/Den här filen är till för insyn, inte för återläsning/)).toBeTruthy();
+    await user.click(within(data).getByRole("button", { name: "Ladda ner kontokopia" }));
+    expect(exportAccount).toHaveBeenCalledOnce();
+  });
+
+  it("still requires confirmation before deleting the account and supports cancellation", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const data = screen.getByRole("region", { name: "Dina uppgifter" });
+    await user.click(within(data).getByRole("button", { name: "Radera konto" }));
+    expect(deleteAccount).not.toHaveBeenCalled();
+    await user.click(within(data).getByRole("button", { name: "Avbryt" }));
+    expect(deleteAccount).not.toHaveBeenCalled();
+    await user.click(within(data).getByRole("button", { name: "Radera konto" }));
+    await user.click(within(data).getByRole("button", { name: "Ja, radera mitt konto" }));
+    expect(deleteAccount).toHaveBeenCalledOnce();
+  });
+
+  it("keeps failed data actions and their explanation together", async () => {
+    exportAccount.mockRejectedValue(new Error("offline"));
+    const user = userEvent.setup();
+    renderSettings();
+    const data = screen.getByRole("region", { name: "Dina uppgifter" });
+    await user.click(within(data).getByRole("button", { name: "Ladda ner kontouppgifter" }));
+    await user.click(within(data).getByRole("button", { name: "Ladda ner kontokopia" }));
+    expect(await within(data).findByRole("alert")).toHaveProperty("textContent", "Export misslyckades. Försök igen.");
+  });
+
+  it("still signs out other devices from the account section", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const account = screen.getByRole("region", { name: "Dina uppgifter" });
+    await user.click(within(account).getByRole("button", { name: "Konto och inloggning" }));
+    await user.click(within(account).getByRole("button", { name: "Logga ut på alla andra enheter" }));
+    expect(logoutOtherDevices).toHaveBeenCalledOnce();
+    expect(await within(account).findByText("Du har loggats ut på alla andra enheter.")).toBeTruthy();
   });
 });
 
@@ -290,6 +371,7 @@ describe("Settings — the account panel while the auth service answers", () => 
     await act(async () => { answer(); await vi.advanceTimersByTimeAsync(0); });
 
     expect(screen.getByText("kenshi@example.org")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Konto och inloggning" }));
     expect(screen.getByText("Ditt enda inloggningssätt")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Ta bort inloggningssätt" })).toBeNull();
     expect(screen.queryByText("Laddar…")).toBeNull();
@@ -303,6 +385,7 @@ describe("Settings — the account panel while the auth service answers", () => 
 
     await act(async () => { await vi.advanceTimersByTimeAsync(0); });
 
+    fireEvent.click(screen.getByRole("button", { name: "Konto och inloggning" }));
     expect(screen.getAllByRole("button", { name: "Ta bort inloggningssätt" })).toHaveLength(2);
     expect(screen.getByText(/kontot och dina studiedata kvar/)).toBeDefined();
   });
