@@ -92,8 +92,8 @@ const AdminRequests = () => {
   const moving = transfers ?? [];
 
   return (
-    <div className="p-3">
-      <h1 className="h4 mb-3">{translator.translate("Ansökningar")}</h1>
+    <div className="app-content-page admin-requests-page">
+      <h1 className="app-page-heading mb-3">{translator.translate("Ansökningar")}</h1>
 
       {error !== null && <p className="text-danger">{error}</p>}
 

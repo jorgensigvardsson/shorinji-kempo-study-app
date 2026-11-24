@@ -116,7 +116,7 @@ const AdminFederation = () => {
   }
 
   return (
-    <div>
+    <div className="app-content-page organization-detail-page">
       {renaming ? (
         <div className="mb-3">
           <InlineNameEditor translator={translator} initial={federation.name} busy={busy}
@@ -124,7 +124,7 @@ const AdminFederation = () => {
         </div>
       ) : (
         <div className="d-flex align-items-center gap-1 mb-3">
-          <h1 className="h4 mb-0"><FederationTitle id={federation.id} name={federation.name} /></h1>
+          <h1 className="app-page-heading mb-0"><FederationTitle id={federation.id} name={federation.name} /></h1>
           {covers && (
             <RenamePencil translator={translator} disabled={busy}
                           onClick={() => { setRenaming(true); setError(null); }} />

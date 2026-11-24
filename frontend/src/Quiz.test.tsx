@@ -43,8 +43,8 @@ describe("Quiz menu", () => {
 
     expect(screen.getByRole("button", { name: /Ordlista/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Teknikgrupper/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Fotställningar/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Handpositioner/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Fotposition/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Kamae/i })).toBeTruthy();
   });
 });
 
@@ -52,7 +52,7 @@ describe("Quiz streak", () => {
   it("starts the foot-stance quiz at the grade selected in settings", async () => {
     await renderQuiz();
 
-    expect(screen.getByRole("heading", { name: "Fotställningsquiz" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Fotposition" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Tränar inför Shodan" })).toBeTruthy();
   });
 
@@ -60,7 +60,7 @@ describe("Quiz streak", () => {
     const { default: HandPositionQuiz } = await import("./HandPositionQuiz");
     render(<HandPositionQuiz myGrade="shodan" />);
 
-    expect(screen.getByRole("heading", { name: "Handpositionsquiz" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Kamae" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Tränar inför Shodan" })).toBeTruthy();
   });
 

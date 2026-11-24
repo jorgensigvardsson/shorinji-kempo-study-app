@@ -188,7 +188,8 @@ const Broadcast = () => {
     }
 
     return (
-        <div>
+        <div className="app-content-page broadcast-page">
+            <h1 className="app-page-heading">{translator.translate("Skicka notis")}</h1>
             {noPicker ? (
                 <p className="text-secondary">
                     {translator.translate("Notisen skickas till alla i {0} som har aktiverat notiser.",

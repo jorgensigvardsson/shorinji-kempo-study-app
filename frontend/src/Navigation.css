@@ -12,25 +12,6 @@
     font-weight: 600;
 }
 
-.start-resume {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    margin-bottom: 1.5rem;
-    color: var(--bs-body-color);
-    text-align: left;
-    border: 0;
-    border-radius: 0.55rem;
-    background: color-mix(in srgb, var(--bs-warning-bg-subtle) 55%, transparent);
-}
-
-.start-resume > span { flex: 1; min-width: 0; }
-.start-resume > svg { flex-shrink: 0; color: var(--bs-warning-text-emphasis); }
-.start-resume strong, .start-resume-label, .start-resume .navigation-caption { display: block; }
-.start-resume-label { font-size: 0.8rem; margin-bottom: 0.1rem; }
-.start-resume strong { font-family: var(--app-display-font); font-size: 1.1rem; }
 .navigation-caption { color: var(--bs-secondary-color); font-size: 0.85rem; }
 .navigation-section-heading {
     display: flex;

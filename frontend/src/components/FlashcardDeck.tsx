@@ -5,6 +5,7 @@ import { TranslatorContext, type Translator } from "../i18n";
 import { getAppDataStore } from "../persistence/store";
 import type { FlashCardKnownEntry } from "../persistence/schema";
 import "../Flashcard.css";
+import "./StudySession.css";
 
 export interface FlashcardDeckEntry {
     id: string;
@@ -200,7 +201,10 @@ const FlashcardDeck = ({
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         if (!swipeOnly || isInteractiveTarget(event.target)) return;
-        if (event.key === "ArrowRight") {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (!isFlying) setShowBack(value => !value);
+        } else if (event.key === "ArrowRight") {
             event.preventDefault();
             markCurrentKnown();
         } else if (event.key === "ArrowLeft") {
@@ -270,7 +274,7 @@ const FlashcardDeck = ({
     if (cards.length === 0) {
         return (
             <div className="flashcard-page">
-                <Card className="flashcard-card shadow-sm">
+                <Card className="flashcard-card">
                     <Card.Body className="flashcard-body">
                         <h2 className="flashcard-meaning text-center mb-0">{translator.translate("Inga flashkort tillgängliga")}</h2>
                     </Card.Body>
@@ -282,7 +286,7 @@ const FlashcardDeck = ({
     if (availableCards.length === 0 || currentCard === null) {
         return (
             <div className="flashcard-page">
-                <Card className="flashcard-card shadow-sm">
+                <Card className="flashcard-card">
                     <Card.Body className="flashcard-body">
                         <div className="flashcard-main">
                             <h2 className="flashcard-meaning text-center mb-0">{translator.translate("Alla kort klara!")}</h2>
@@ -313,6 +317,7 @@ const FlashcardDeck = ({
                     role={swipeOnly ? "group" : undefined}
                     tabIndex={swipeOnly ? 0 : undefined}
                     aria-label={swipeOnly ? translator.translate("Svep vänster för att öva igen eller höger om du kan det.") : undefined}
+                    aria-description={swipeOnly ? translator.translate("Enter eller mellanslag vänder kortet. Pil vänster visar nästa kort och pil höger markerar det som känt.") : undefined}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
@@ -323,6 +328,7 @@ const FlashcardDeck = ({
                         <div className="flashcard-inner">
                             <FlashcardFace
                                 side="front"
+                                hidden={showBack}
                                 sideLabel={hideFaceLabels ? undefined : translator.translate("Framsida")}
                                 indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
                                 hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända")}
@@ -331,6 +337,7 @@ const FlashcardDeck = ({
                             </FlashcardFace>
                             <FlashcardFace
                                 side="back"
+                                hidden={!showBack}
                                 sideLabel={hideFaceLabels ? undefined : translator.translate("Baksida")}
                                 indexLabel={hideIndexLabel ? undefined : currentCard.indexLabel}
                                 hint={hideFlipHints ? undefined : translator.translate("Tryck för att vända tillbaka")}
@@ -373,6 +380,7 @@ const FlashcardDeck = ({
 
 const FlashcardFace = ({
     side,
+    hidden,
     sideLabel,
     indexLabel,
     hint,
@@ -380,14 +388,15 @@ const FlashcardFace = ({
     children,
 }: {
     side: "front" | "back";
+    hidden: boolean;
     sideLabel?: string;
     indexLabel?: ReactNode;
     hint?: string;
     interactive?: boolean;
     children: ReactNode;
 }) => (
-    <div className={`flashcard-face flashcard-${side}`}>
-        <Card className="flashcard-card shadow-sm">
+    <div className={`flashcard-face flashcard-${side}`} aria-hidden={hidden} inert={hidden}>
+        <Card className="flashcard-card">
             <Card.Body className="flashcard-body">
                 {(indexLabel || sideLabel) && (
                     <div className="flashcard-meta">

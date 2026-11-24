@@ -127,7 +127,7 @@ export const buildFootStanceQuizPool = (
         seen.add(dedupeKey);
         candidates.push({
           id: `foot_stance.${moment.id}`,
-          question: `Vilken fotställning används i "{0}"?`,
+          question: `Vilken fotposition används i "{0}"?`,
           questionArgs: [techniqueLabel],
           correctAnswer,
           domain: FOOT_STANCE_DOMAIN,
@@ -167,8 +167,8 @@ export const buildHandPositionQuizPool = (
   }
 
   const roles = [
-    { key: "attacker", question: "Vilken handposition har angriparen i \"{0}\"?" },
-    { key: "defender", question: "Vilken handposition har försvararen i \"{0}\"?" },
+    { key: "attacker", question: "Vilken kamae har angriparen i \"{0}\"?" },
+    { key: "defender", question: "Vilken kamae har försvararen i \"{0}\"?" },
   ] as const;
 
   for (const plan of plans) {

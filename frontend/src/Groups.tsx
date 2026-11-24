@@ -62,7 +62,7 @@ const Groups = (props: Props) => {
                 </button>
                 <div className="groups-detail-head">
                     <div>
-                        <h2 className="app-view-heading groups-detail-title">{selectedGroup.translated}</h2>
+                        <h1 className="app-page-heading groups-detail-title">{selectedGroup.translated}</h1>
                         {!translator.isJapanese && <div className="groups-detail-subtitle">{selectedGroup.japanese}</div>}
                     </div>
                     <span className="groups-count">{selectedGroup.hokeis.length}</span>

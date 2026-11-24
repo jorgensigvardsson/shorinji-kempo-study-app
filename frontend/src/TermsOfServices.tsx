@@ -5,8 +5,8 @@ const TermsOfServices = () => {
   const translator = useContext(TranslatorContext);
 
   return (
-    <div>
-      <h2>{translator.translate("Användarvillkor")}</h2>
+    <div className="app-prose-page">
+      <h1 className="app-page-heading">{translator.translate("Användarvillkor")}</h1>
       <p>
         {translator.translate("Den här appen finns för att stödja träning och studier i Shorinji Kempo. Alla som tränar Shorinji Kempo är välkomna att använda den.")}
       </p>

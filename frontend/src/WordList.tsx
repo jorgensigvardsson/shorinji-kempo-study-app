@@ -50,14 +50,14 @@ const WordList = () => {
 
                 <div className="d-flex flex-wrap align-items-center gap-2 mt-3">
                     <span className="wordlist-sort-label">{translator.translate("Sortera")}:</span>
-                    <ButtonGroup size="sm">
-                        <Button variant={sortKey === "kanji" ? "primary" : "outline-secondary"} onClick={() => setSortKey("kanji")}>
+                    <ButtonGroup size="sm" className="wordlist-sort-options" aria-label={translator.translate("Sortera")}>
+                        <Button aria-pressed={sortKey === "kanji"} variant={sortKey === "kanji" ? "primary" : "outline-secondary"} onClick={() => setSortKey("kanji")}>
                             {translator.translate("Kanji")}
                         </Button>
-                        <Button variant={sortKey === "romaji" ? "primary" : "outline-secondary"} onClick={() => setSortKey("romaji")}>
+                        <Button aria-pressed={sortKey === "romaji"} variant={sortKey === "romaji" ? "primary" : "outline-secondary"} onClick={() => setSortKey("romaji")}>
                             {translator.translate("Romaji")}
                         </Button>
-                        <Button variant={sortKey === "meaning" ? "primary" : "outline-secondary"} onClick={() => setSortKey("meaning")}>
+                        <Button aria-pressed={sortKey === "meaning"} variant={sortKey === "meaning" ? "primary" : "outline-secondary"} onClick={() => setSortKey("meaning")}>
                             {translator.translate("Betydelse")}
                         </Button>
                     </ButtonGroup>
@@ -72,7 +72,7 @@ const WordList = () => {
             )}
 
             {filteredEntries.length > 0 && (
-                <div className="wordlist-table-wrapper app-grid-card mt-2">
+                <div className="wordlist-table-wrapper mt-2">
                     <table className="table table-sm mb-0 wordlist-table">
                         <thead>
                             <tr>

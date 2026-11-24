@@ -7,6 +7,10 @@ Structural weaknesses in code that already works live in `TODO-TechnicalDebt.md`
 - [ ] Gör vägen till en persons behörigheter tydligare för administratörer. Förslag: en synlig ”Behörigheter →”-länk vid personen i medlemslistan som öppnar personsidan direkt vid behörighetsavsnittet. Behåll befintliga behörighetsregler.
 - [ ] Defaulta till "upp till och med nästa grad"
 - [ ] Träning -> Embu -> Kumi-embu: texten säger "Bygg en egen embu eller träna en färdig sekvens". Borde vara en text som säger "Det här är din nästa graderingsembu".
+- [ ] Lägg till i Kom igång-guiden att man kan trycka länge på ett ord för att slå upp det i ordlistan.
+- [x] I designgenomgångens slutpass: gemensam hovringsmarkering och synligt tangentbordsfokus för klickbara rubrikrader, bland annat på Hokei, i veckoplanen, Hjälp, Inställningar och klubbkatalogen. Genomfört och kontrollerat den 24 november; markeringen följer den klickbara ytan.
+- [ ] Prova fysiskt bakåtsvep på en riktig mobil efter navigeringsgenomgången, bland annat Start → Hokei, Sök → teknik och Teori → Flashkort. De vanliga tillbakavägarna är redan kontrollerade.
+- [ ] Se över hur kanji och romaji visas, särskilt på graderingssidorna: den extra källrubriken under gradvalet och japanska benämningar under exempelvis ”Hemarbete att lämna in”. Malin upplever att kanji försvinner i Dojo-läget medan romaji står kvar, vilket behöver granskas som en helhet. Utred separata val i Inställningar: ”Dölj kanji” och ”Dölj romaji”, deras samspel med Dojo-läget och hur de ska fungera när japanska är gränssnittsspråk. Bevara källtexter och teknikdata.
 
 - [ ] **Jörgen / Yogoshu word-list structure:** Decide whether and how the app should preserve the source document's vocabulary hierarchy before Malin or Codex changes the word-list data.
   - Sensei wants the word list grouped under the headings used in Yogoshu, for example the main groups `tai gamae`, `sokui hō`, `umpo hō`, `tai sabaki`, `kōgi`, `bōgi`, and `shuhō`, with nested groups such as `fujinhō`, `byakuren hachi jin`, and `giwa kyū jin`.

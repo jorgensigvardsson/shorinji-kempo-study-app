@@ -77,6 +77,10 @@
   margin-inline: 0.25rem;
 }
 
+.clubs-directory > .app-section-heading {
+  color: var(--bs-primary);
+}
+
 .clubs-directory-intro {
   margin-block: 0.6rem 1.25rem;
 }

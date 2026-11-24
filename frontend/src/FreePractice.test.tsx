@@ -239,17 +239,17 @@ describe("FreePractice", () => {
     expect(container.querySelectorAll(".free-practice-hokei .dojo-card")).toHaveLength(2);
   });
 
-  it("shows the proposed Kihon lists up to the selected grade", async () => {
+  it("shows the Kihon lists up to the selected grade", async () => {
     const user = userEvent.setup();
     renderPractice(<FreePracticeHarness />);
 
     await user.click(screen.getByRole("button", { name: /Kihon/i }));
 
-    expect(screen.getByText("Den här sidan är fortfarande under utformning och kan ändras när som helst.")).toBeTruthy();
+    expect(screen.queryByText("Den här sidan är fortfarande under utformning och kan ändras när som helst.")).toBeNull();
     expect(screen.queryByText(/Sensei/)).toBeNull();
     expect(screen.getByRole("heading", { name: "Kaisoku dachi / Byakuren chūdan gamae" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Hidari/migi mae" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Uke och kontring" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Uke och hangeki" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Kōbōgi och idō kōbōgi" })).toBeTruthy();
     expect(screen.getByText("furiko zuki")).toBeTruthy();
     expect(screen.getByText("sashikae sokutō geri")).toBeTruthy();
@@ -385,12 +385,12 @@ describe("FreePractice", () => {
     renderPractice(<RandoriGradeHarness />);
 
     expect(screen.queryByText("avancerat gōhō-steg")).toBeNull();
-    await user.click(screen.getByRole("button", { name: "Visar 5 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Visar till och med 5 kyū" }));
     await user.click(screen.getByRole("button", { name: "1 kyū" }));
     expect(screen.getByText("avancerat gōhō-steg")).toBeTruthy();
     expect(screen.queryByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeNull();
 
-    await user.click(screen.getByRole("button", { name: "Visar 1 kyū" }));
+    await user.click(screen.getByRole("button", { name: "Visar till och med 1 kyū" }));
     await user.click(screen.getByRole("button", { name: "Shodan" }));
     expect(screen.getByText("Från Shodan anger Kamokuhyo randori utan ett mer detaljerat delsteg.")).toBeTruthy();
   });

@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import { TranslatorContext } from "./i18n";
 import "./Quiz.css";
+import "./components/StudySession.css";
 import { drawQuestion, type QuizPool, type QuizQuestion } from "./quiz-logic";
 import { load } from "./persistence/data";
 
@@ -87,17 +88,17 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
   };
 
   const header = (
-    <>
+    <header className="quiz-session-header">
       <h1 className="app-page-heading quiz-page-heading">{title}</h1>
       {controls}
-    </>
+    </header>
   );
 
   if (!quizCard) {
     return (
-      <div className="quiz-page">
+      <div className="quiz-page study-session">
         {header}
-        <Card className="quiz-card shadow-sm">
+        <Card className="quiz-card">
           <Card.Body className="quiz-body">
             <div className="quiz-main quiz-answer-main">
               <div>
@@ -130,17 +131,17 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
     quizCard.alternatives[quizCard.correctAnswer];
 
   return (
-    <div className="quiz-page">
+    <div className="quiz-page study-session">
       {header}
       <div className={`quiz-scene ${showBack ? "is-flipped" : ""}`}>
         <div className="quiz-inner">
-          <div className="quiz-face quiz-front">
-            <Card className="quiz-card shadow-sm">
+          <div className="quiz-face quiz-front" aria-hidden={showBack} inert={showBack}>
+            <Card className="quiz-card">
               <Card.Body className="quiz-body">
                 <div className="quiz-main">
-                  <h1 className="quiz-title">
+                  <h2 className="quiz-title">
                     {translator.translate(quizCard.question, { params: quizCard.questionArgs })}
-                  </h1>
+                  </h2>
                   <div className="quiz-alternatives">{alternatives}</div>
                 </div>
                 <div className="quiz-streak-footer">
@@ -151,8 +152,8 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
             </Card>
           </div>
 
-          <div className="quiz-face quiz-back">
-            <Card className="quiz-card shadow-sm">
+          <div className="quiz-face quiz-back" aria-hidden={!showBack} inert={!showBack}>
+            <Card className="quiz-card">
               <Card.Body className="quiz-body">
                 <div className="quiz-main quiz-answer-main">
                   <div className="mb-3">
@@ -199,7 +200,7 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
 
       {!showBack && (
         <div className="quiz-actions">
-          <Button variant="danger" onClick={showAnswer}>
+          <Button variant="outline-secondary" onClick={showAnswer}>
             {translator.translate("Visa svar")}
           </Button>
           <Button

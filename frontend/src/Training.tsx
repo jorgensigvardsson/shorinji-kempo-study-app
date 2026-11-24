@@ -10,11 +10,13 @@ import type { GradePlan, GradeName } from "./data";
 import Grid, { type GridItem } from "./components/Grid";
 import "./Training.css";
 import { useAppBack } from "./use-app-back";
+import OverviewContext from "./components/OverviewContext";
 
 interface Props {
     myGrade: GradeName;
     allGradePlans: GradePlan[];
     dojoMode?: boolean;
+    displayName?: string;
 }
 
 const Training = (props: Props) => {
@@ -46,7 +48,7 @@ const Training = (props: Props) => {
         {
             key: "weekly-practice",
             title: translator.translate("Veckans träning"),
-            subtitle: translator.translate("Följ veckoplanen för din grad."),
+            subtitle: translator.translate("Följ veckoplanen från Kamokuhyō för din grad."),
             icon: <Book />,
             onSelect: () => goTo("plan"),
         },
@@ -72,10 +74,12 @@ const Training = (props: Props) => {
     return (
         <div className="training-page">
             <section hidden={!showOverview}>
-                <button type="button" className="training-back" onClick={goBack}>
-                    <ArrowLeft aria-hidden="true" />
-                    <span>{translator.translate("Tillbaka")}</span>
-                </button>
+                <OverviewContext displayName={props.displayName}>
+                    <button type="button" className="training-back d-none d-lg-inline-flex" onClick={goBack}>
+                        <ArrowLeft aria-hidden="true" />
+                        <span>{translator.translate("Tillbaka")}</span>
+                    </button>
+                </OverviewContext>
                 <header className="training-page-header training-landing-header">
                     <h1 className="app-page-heading">{translator.translate("Träning")}</h1>
                     <p className="app-intro-copy">{translator.translate("Träna i dojon med veckoplanen i Kamokuhyō, välj tekniker under Hokei eller förbered din gradering.")}</p>

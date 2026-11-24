@@ -117,6 +117,8 @@ const FreePractice = (props: Props) => {
     const activeDefinition = activeArea
         ? practiceAreaDefinitions.find(area => area.key === activeArea) ?? null
         : null;
+    const hasAlignedHeader = activeArea !== null;
+    const showsUpToGrade = activeArea === "kihon" || activeArea === "tanen-sotai" || activeArea === "randori";
 
     return (
         <>
@@ -135,19 +137,20 @@ const FreePractice = (props: Props) => {
                         : "Tillbaka")}</span>
                 </button>
                 {activeDefinition && (
-                    <header className="free-practice-area-header">
+                    <header className={`free-practice-area-header${activeArea === "hokei" ? " free-practice-hokei-header" : ""}${activeArea === "kihon" ? " free-practice-kihon-header" : ""}${activeArea === "tanen-sotai" ? " free-practice-forms-header" : ""}${activeArea === "randori" ? " free-practice-randori-header" : ""}${activeArea === "embu" ? " free-practice-embu-header" : ""}`}>
                         <div>
-                            <h1 className="app-view-heading" ref={areaHeadingRef} tabIndex={-1}>
+                            <h1 className={hasAlignedHeader ? "app-page-heading" : "app-view-heading"} ref={areaHeadingRef} tabIndex={-1}>
                                 {translator.translate(activeArea === "embu" ? "Embu" : activeDefinition.title)}
                             </h1>
                             {!(dojoMode && activeArea !== null) && (
                                 <p className="app-intro-copy">{translator.translate(activeDefinition.intro ?? activeDefinition.description)}</p>
                             )}
                         </div>
-                        <TrainingPageControls
+                        {activeArea !== "hokei" && <TrainingPageControls
                             showGrade={activeArea === "kihon" || activeArea === "tanen-sotai" || activeArea === "randori" || activeArea === "embu"}
                             showDojo
-                        />
+                            gradeLeadText={showsUpToGrade ? translator.translate("Visar till och med") : undefined}
+                        />}
                     </header>
                 )}
 
@@ -202,13 +205,9 @@ const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
 
     return (
         <div className={`free-practice-content kihon-practice-proposal${dojoMode ? " is-dojo-mode" : ""}`}>
-            {!dojoMode && (
-                <p className="kihon-design-note">
-                    {translator.translate("Den här sidan är fortfarande under utformning och kan ändras när som helst.")}
-                </p>
-            )}
             <section className="free-practice-section kihon-practice-group">
                 <h3 className="app-section-heading">{translator.translate("Kaisoku dachi / Byakuren chūdan gamae")}</h3>
+                <p className="kihon-group-description">{translator.translate("Angrepp och försvar med fötterna bredvid varandra.")}</p>
                 <div className="kihon-practice-columns">
                     <KihonTechniqueList title={translator.translate("Angrepp")} items={kaisokuAttacks} selectedGrade={selectedGrade} dojoMode={dojoMode} />
                     <KihonTechniqueList title={translator.translate("Försvar")} items={kaisokuDefences} selectedGrade={selectedGrade} dojoMode={dojoMode} />
@@ -217,19 +216,22 @@ const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
 
             <section className="free-practice-section kihon-practice-group">
                 <h3 className="app-section-heading">{translator.translate("Hidari/migi mae")}</h3>
+                <p className="kihon-group-description">{translator.translate("Övningar med vänster eller höger fot främst.")}</p>
                 <KihonTechniqueList items={hidariMigiMaeTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
             </section>
 
             <section className="free-practice-section kihon-practice-group">
-                <h3 className="app-section-heading">{translator.translate("Uke och kontring")}</h3>
+                <h3 className="app-section-heading">{translator.translate("Uke och hangeki")}</h3>
+                <p className="kihon-group-description">{translator.translate("Blockeringar med efterföljande slag eller spark.")}</p>
                 <KihonTechniqueList items={ukeCounterTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
             </section>
 
             <section className="free-practice-section kihon-practice-group">
                 <h3 className="app-section-heading">{translator.translate("Kōbōgi och idō kōbōgi")}</h3>
+                <p className="kihon-group-description">{translator.translate("Övningar som kombinerar angrepp och försvar.")}</p>
                 <div className="kihon-practice-columns">
-                    <KihonTechniqueList title="Kōbōgi" items={koboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
-                    <KihonTechniqueList title="Idō kōbōgi" items={idoKoboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
+                    <KihonTechniqueList title="Kōbōgi" description="Angrepp och försvar på stället." items={koboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
+                    <KihonTechniqueList title="Idō kōbōgi" description="Angrepp och försvar under förflyttning." items={idoKoboTechniques} selectedGrade={selectedGrade} dojoMode={dojoMode} />
                 </div>
             </section>
         </div>
@@ -238,18 +240,20 @@ const KihonArea = ({ myGrade, dojoMode }: KihonAreaProps) => {
 
 interface KihonTechniqueListProps {
     title?: string;
+    description?: string;
     items: KihonPracticeItem[];
     selectedGrade: GradeName;
     dojoMode: boolean;
 }
 
-const KihonTechniqueList = ({ title, items, selectedGrade, dojoMode }: KihonTechniqueListProps) => {
+const KihonTechniqueList = ({ title, description, items, selectedGrade, dojoMode }: KihonTechniqueListProps) => {
     const translator = useContext(TranslatorContext);
     const visibleItems = items.filter(item => compareGrades(item.introducedAt, selectedGrade) <= 0);
 
     return (
         <section className="kihon-technique-list">
             {title && <h4>{translator.translate(title)}</h4>}
+            {description && <p className="kihon-list-description">{translator.translate(description)}</p>}
             <ul className="free-practice-item-list">
                 {visibleItems.map(item => (
                     <li key={`${item.introducedAt}.${item.name}`}>
@@ -274,8 +278,8 @@ const TanenSotaiArea = ({ myGrade, dojoMode }: Pick<Props, "myGrade" | "dojoMode
 
     return (
         <div className={`free-practice-content free-practice-form-groups${dojoMode ? " is-dojo-mode" : ""}`}>
-            <PracticeFormMode title={translator.translate("Tan'en")} entries={tanen} dojoMode={dojoMode} />
-            <PracticeFormMode title={translator.translate("Sōtai")} entries={sotai} dojoMode={dojoMode} />
+            <PracticeFormMode title={translator.translate("Tan'en")} description={translator.translate("Former som tränas på egen hand.")} entries={tanen} dojoMode={dojoMode} />
+            <PracticeFormMode title={translator.translate("Sōtai")} description={translator.translate("Former som tränas tillsammans med en partner.")} entries={sotai} dojoMode={dojoMode} />
         </div>
     );
 };
@@ -290,6 +294,7 @@ const groupPracticeForms = (entries: TanenKihonHokei[]): PracticeFormFamily[] =>
         { title: "Tenchi ken", prefix: "tenchi ken" },
         { title: "Giwa ken", prefix: "giwa ken" },
         { title: "Ryūō ken", prefix: "ryūō ken" },
+        { title: "Byakuren ken", prefix: "byakuren ken" },
     ];
     const groups = definitions.map(definition => ({
         title: definition.title,
@@ -303,9 +308,10 @@ const groupPracticeForms = (entries: TanenKihonHokei[]): PracticeFormFamily[] =>
         : groups;
 };
 
-const PracticeFormMode = ({ title, entries, dojoMode }: { title: string; entries: TanenKihonHokei[]; dojoMode: boolean }) => (
+const PracticeFormMode = ({ title, description, entries, dojoMode }: { title: string; description: string; entries: TanenKihonHokei[]; dojoMode: boolean }) => (
     <section className="free-practice-section practice-form-mode">
         <h3 className="app-section-heading">{title}</h3>
+        <p className="practice-form-description">{description}</p>
         <div className="practice-form-family-list">
             {groupPracticeForms(entries).map(group => (
                 <PracticeFormGroup key={group.title} title={group.title} entries={group.entries} dojoMode={dojoMode} />
@@ -319,18 +325,20 @@ const PracticeFormGroup = ({ title, entries, dojoMode }: { title: string; entrie
 
     return (
         <section className="practice-form-family">
-            <h4>{translator.translate(title)}</h4>
+            <h4>{translator.translate(title, { capitalize: true })}</h4>
             <ul className="free-practice-item-list">
                 {entries.map(entry => (
                     <li key={entry.hokei_name}>
-                        <PracticeTerm value={entry.hokei_name} dojoMode={dojoMode} />
-                        {!dojoMode && (
-                            <span className="free-practice-item-grade">
-                                {gradeLabel(entry.introducedAt, translator, false)}
-                            </span>
-                        )}
+                        <div className="practice-form-entry-heading">
+                            <PracticeTerm value={entry.hokei_name} dojoMode={dojoMode} />
+                            {!dojoMode && (
+                                <span className="free-practice-item-grade">
+                                    {gradeLabel(entry.introducedAt, translator, false)}
+                                </span>
+                            )}
+                        </div>
                         {(entry.videos ?? []).map(video => (
-                            <VideoLink key={video.url} video={video} className="mt-2" />
+                            <VideoLink key={video.url} video={video} className="practice-form-video" />
                         ))}
                     </li>
                 ))}
@@ -377,10 +385,15 @@ const RandoriArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade"
 
     return (
         <div className={`free-practice-content randori-practice-groups${dojoMode ? " is-dojo-mode" : ""}`}>
-            <RandoriThemeGroup title="gōhō" themes={gohoThemes} dojoMode={dojoMode} />
-            <RandoriThemeGroup title="jūhō" themes={juhoThemes} dojoMode={dojoMode} />
+            <RandoriThemeGroup title="gōhō" description={translator.translate("Angrepp och försvar med slag och sparkar.")} themes={gohoThemes} dojoMode={dojoMode} />
+            <RandoriThemeGroup title="jūhō" description={translator.translate("Angrepp och försvar vid grepp, med bland annat frigöringar.")} themes={juhoThemes} dojoMode={dojoMode} />
             {otherThemes.length > 0 && (
                 <RandoriThemeGroup title={translator.translate("Övrigt")} themes={otherThemes} dojoMode={dojoMode} />
+            )}
+            {gohoThemes.length === 0 && juhoThemes.length === 0 && otherThemes.length === 0 && !unrestrictedFrom && (
+                <p className="free-practice-source-note">
+                    {translator.translate("Det finns inga särskilda randoriteman för det här gradurvalet i Kamokuhyō.")}
+                </p>
             )}
             {unrestrictedFrom && !dojoMode && (
                 <p className="free-practice-source-note">
@@ -393,13 +406,14 @@ const RandoriArea = ({ myGrade, allGradePlans, dojoMode }: Pick<Props, "myGrade"
     );
 };
 
-const RandoriThemeGroup = ({ title, themes, dojoMode }: { title: string; themes: RandoriTheme[]; dojoMode: boolean }) => {
+const RandoriThemeGroup = ({ title, description, themes, dojoMode }: { title: string; description?: string; themes: RandoriTheme[]; dojoMode: boolean }) => {
     const translator = useContext(TranslatorContext);
     if (themes.length === 0) return null;
 
     return (
         <section className="free-practice-section randori-theme-group">
             <h3 className="app-section-heading"><PracticeTerm value={title} dojoMode={dojoMode} /></h3>
+            {description && <p className="randori-group-description">{description}</p>}
             <ul className="free-practice-item-list randori-theme-list">
                 {themes.map(theme => (
                     <li key={`${theme.type}|${theme.restriction}`}>

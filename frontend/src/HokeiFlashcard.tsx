@@ -68,7 +68,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
             indexLabel: translator.translate("Hokei"),
             front: (
                 <div className="flashcard-hokei-front">
-                    <h1 className="flashcard-hokei-name">{kanjiName}</h1>
+                    <h2 className="flashcard-hokei-name">{kanjiName}</h2>
                     {kanjiName !== romajiName && (
                         <p className="flashcard-hokei-romaji">{romajiName}</p>
                     )}
@@ -108,7 +108,11 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
     };
 
     return (
-        <div className="hokei-flashcard-view">
+        <div className="hokei-flashcard-view study-session">
+            <header className="study-page-header">
+                <h1 className="app-page-heading">{translator.translate("Flashkort")}: {translator.translate("Hokei")}</h1>
+                <p className="app-intro-copy">{translator.translate("Träna fotposition, kamae och utförande med dina egna anteckningar.")}</p>
+            </header>
             <div className="hokei-flashcard-filter">
                 <FocusChoicePicker
                   showOwnGrade

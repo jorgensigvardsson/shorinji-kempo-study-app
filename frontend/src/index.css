@@ -70,6 +70,7 @@ h3,
   font-size: clamp(2rem, 5vw, 2.75rem);
   font-weight: 650;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .app-view-heading {

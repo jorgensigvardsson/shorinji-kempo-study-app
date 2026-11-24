@@ -25,6 +25,7 @@
 }
 
 .login-screen-title {
+  font-family: var(--app-display-font);
   font-size: 1.5rem;
   font-weight: 600;
 }
@@ -50,4 +51,13 @@
   color: var(--bs-body-color);
   font-weight: 600;
   text-decoration: none;
+}
+
+.login-screen-lang-btn:hover {
+  color: var(--bs-emphasis-color);
+}
+
+.login-screen-lang-btn:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }

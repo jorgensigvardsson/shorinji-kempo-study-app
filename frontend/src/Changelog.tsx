@@ -31,7 +31,8 @@ const Changelog = () => {
   const groups = groupByDate();
 
   return (
-    <div>
+    <div className="app-content-page">
+      <h1 className="app-page-heading">{translator.translate("Nyheter")}</h1>
       {groups.map(({ date, changes }) => (
         <div key={date} className="mb-4">
           <p className="text-secondary mb-2 small">

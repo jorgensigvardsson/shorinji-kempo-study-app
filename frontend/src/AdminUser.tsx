@@ -259,7 +259,7 @@ const AdminUser = () => {
   const signInMethods = Object.entries(user.linkedIdentities).filter(([provider]) => provider !== INVITE_PROVIDER);
 
   return (
-    <div>
+    <div className="app-content-page organization-detail-page">
       {renaming ? (
         <div className="mb-2">
           <InlineNameEditor translator={translator} initial={user.displayName} busy={busy}
@@ -270,7 +270,7 @@ const AdminUser = () => {
           {/* An OIDC member's name comes from Google or Microsoft, which would
               put its own back at the next sign-in — so it gets no pencil, and the
               heading says why for anyone who wonders. */}
-          <h1 className="h4 mb-0" title={user.oidc ? translator.translate("Namnet hanteras av inloggningsleverantören.") : undefined}>
+          <h1 className="app-page-heading mb-0" title={user.oidc ? translator.translate("Namnet hanteras av inloggningsleverantören.") : undefined}>
             {user.displayName || user.email}
           </h1>
           {!user.oidc && (

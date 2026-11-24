@@ -5,6 +5,39 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-24T07:14:24.000Z",
+    changes: [
+      {
+        emoji: "✨",
+        sv: "Små gränssnittsförbättringar på tränings- och studiesidor, i menyer och formulär.",
+        en: "Small interface improvements across training and study pages, menus and forms.",
+        tr: "Antrenman ve çalışma sayfaları, menüler ve formlarda küçük arayüz iyileştirmeleri.",
+        ja: "練習・学習画面、メニュー、フォームの表示を少し改善しました。",
+      },
+      {
+        emoji: "🔎",
+        sv: "Quiz och flashkort ryms på mobilskärmen med kontrollerna kvar i bild. Långa texter och anteckningar kan rullas inne i kortet. Klickbara rubriker har tydligare markering för mus och tangentbord, och flashkort kan vändas med Enter eller mellanslag.",
+        en: "Quizzes and flashcards fit the mobile screen with controls kept in view. Long texts and notes can be scrolled inside the card. Clickable headings have clearer mouse and keyboard highlighting, and flashcards can be flipped with Enter or Space.",
+        tr: "Quizler ve bilgi kartları, kontroller görünür kalacak şekilde mobil ekrana sığıyor. Uzun metinler ve notlar kartın içinde kaydırılabiliyor. Tıklanabilir başlıklarda fare ve klavye vurguları daha belirgin; bilgi kartları Enter veya Boşluk ile çevrilebiliyor.",
+        ja: "クイズとフラッシュカードが操作ボタンを表示したままスマートフォンの画面に収まるようになりました。長い文章やメモはカード内でスクロールできます。クリックできる見出しのマウス・キーボード操作時の表示も明確にし、フラッシュカードをEnterキーやスペースキーでも裏返せるようにしました。",
+      },
+      {
+        emoji: "⭐",
+        sv: "Välj dina genvägar på en egen sida via Anpassa på startsidan. Sök visar träffar när du skriver och används för att hitta funktioner, tekniker och ord.",
+        en: "Choose your shortcuts on a dedicated page through Customize on the start page. Search shows results as you type to help you find features, techniques and words.",
+        tr: "Ana sayfadaki Özelleştir bağlantısıyla açılan ayrı sayfada kısayollarınızı seçin. Arama, yazmaya başladığınızda özellikleri, teknikleri ve kelimeleri bulmanıza yardımcı olacak sonuçları gösterir.",
+        ja: "ホーム画面の「カスタマイズ」から専用ページを開いてショートカットを選べるようになりました。検索画面では、入力すると機能・技・用語の検索結果が表示されます。",
+      },
+      {
+        emoji: "📅",
+        sv: "Veckoplanen har fått lugnare kontroller. Tryck på veckan för att välja en annan direkt, eller använd pilarna för att stega. Tränad-markeringen använder samma cirkel som graderingskraven.",
+        en: "The weekly plan has simpler controls. Tap the week to choose another directly, or use the arrows to step between weeks. The practised marker uses the same circle as the grading requirements.",
+        tr: "Haftalık planın kontrolleri sadeleştirildi. Başka bir haftayı doğrudan seçmek için haftaya dokunun veya oklarla haftalar arasında geçin. Çalışıldı işareti, derece sınavı gereklilikleriyle aynı daireyi kullanır.",
+        ja: "週間計画の操作をシンプルにしました。週をタップして直接選ぶか、矢印で前後の週に移動できます。練習済みのマークは審査要件と同じ丸印を使います。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-22T15:56:59.000Z",
     changes: [
       {

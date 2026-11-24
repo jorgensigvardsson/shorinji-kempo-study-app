@@ -347,8 +347,8 @@ const GradingTest = ({ grade, allGradePlans, subject, dojoMode = false }: Gradin
         <div className={`grading-test-page${dojoMode ? " is-dojo-mode" : ""}`}>
             <header className="grading-page-header">
                 <h2 className="app-view-heading">{translator.translate(manual.title)}</h2>
-                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
                 {manual.term && !translator.isJapanese && <div className="text-muted small mt-1">{sentenceCase(manual.term.romaji)}</div>}
+                <TrainingPageControls showGrade showDojo className="grading-page-controls" />
             </header>
 
             <Tabs id={tabsId} defaultActiveKey={subject} mountOnEnter transition={false}

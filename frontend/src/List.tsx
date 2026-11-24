@@ -7,7 +7,7 @@ import { compareGrades, compareGradeThenWeek } from "./utilities/level";
 import { gradeLabel, matchesString } from "./strings";
 import { load } from "./persistence/data";
 import { isText, useBrowserState } from "./browser-state";
-import { FocusChoicePicker } from "./components/TrainingPageControls";
+import TrainingPageControls, { FocusChoicePicker } from "./components/TrainingPageControls";
 
 interface Props {
     grade: GradePlan;
@@ -71,22 +71,26 @@ const List = (props: Props) => {
         <>
             <div className="training-list-controls training-view-controls mb-4 is-single">
                 <div className="training-list-filters">
-                    <FocusChoicePicker
-                      showOwnGrade
-                      title={translator.translate("Välj vad som visas")}
-                      value={visibleSelection}
-                      choices={selectionChoices}
-                      className="hokei-selection-control"
-                      onChange={value => {
-                        const newSelection = value as Selection;
-                        selectionData.save(newSelection);
-                        setSelection(newSelection);
-                      }}
-                    />
+                    <div className="training-page-controls hokei-list-settings">
+                        <FocusChoicePicker
+                            showOwnGrade
+                            title={translator.translate("Välj vad som visas")}
+                            value={visibleSelection}
+                            choices={selectionChoices}
+                            className="hokei-selection-control"
+                            onChange={value => {
+                                const newSelection = value as Selection;
+                                selectionData.save(newSelection);
+                                setSelection(newSelection);
+                            }}
+                        />
+                        <TrainingPageControls showDojo />
+                    </div>
                     <Form.Control
                         type="search"
                         enterKeyHint="search"
-                        placeholder={translator.translate("Sök...")}
+                        placeholder={translator.translate("Sök bland tekniker")}
+                        aria-label={translator.translate("Sök bland tekniker")}
                         className="mt-3"
                         value={filterText}
                         onChange={e => setFilterText(e.target.value)}
@@ -99,7 +103,9 @@ const List = (props: Props) => {
                     />
                 </div>
             </div>
-            {renderHokeis(filteredHokeis, dojoMode)}
+            <div className="hokei-list">
+                {renderHokeis(filteredHokeis, dojoMode)}
+            </div>
         </>
     )
 }
@@ -136,7 +142,7 @@ interface HokeiAndGrade {
 }
 const renderHokeis = (hokeis: HokeiAndGrade[], dojoMode: boolean) => {
     return hokeis.map(h => (
-        <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade} className="mt-2"
+        <HokeiCard key={`${h.grade}.${h.week}.${h.momentIndex}`} hokei={h.moment} gradeName={h.grade}
                         showNotes showRating dojoMode={dojoMode} kamokuLayout/>
     ))
 }

@@ -63,6 +63,7 @@ const Changelog = page(() => import("./Changelog.tsx"));
 const Theory = page(() => import("./Theory.tsx"));
 const Feedback = page(() => import("./Feedback.tsx"));
 const ActivitySearch = page(() => import("./ActivitySearch.tsx"));
+const ShortcutSettings = page(() => import("./ShortcutSettings.tsx"));
 const Technique = page(() => import("./Technique.tsx"));
 
 export interface Route {
@@ -100,7 +101,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
     const routes: Route[] = [{
         path: "/kamoku",
         matchPath: "/kamoku/*",
-        element: <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode}/>,
+        element: <Training myGrade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} displayName={displayName}/>,
         menuText: translator.translate("Träning"),
         startDescription: translator.translate("Följ din plan eller välj vad du vill träna."),
         icon: Book,
@@ -108,7 +109,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideOnStartPage: true,
     }, {
         path: "/theory",
-        element: <Theory showLanguageTools={!translator.isJapanese} />,
+        element: <Theory showLanguageTools={!translator.isJapanese} displayName={displayName} />,
         menuText: translator.translate("Teori"),
         startDescription: translator.translate("Studera ord och begrepp i lugn takt."),
         icon: JournalText,
@@ -121,6 +122,13 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         icon: Search,
         showInMainMenu: true,
         hideOnStartPage: true,
+    }, {
+        path: "/shortcuts",
+        element: <ShortcutSettings />,
+        menuText: translator.translate("Anpassa genvägar"),
+        icon: House,
+        hideOnStartPage: true,
+        hideFromMenu: true,
     }, {
         path: "/technique/:id",
         element: <Technique allGradePlans={allGradePlans} />,
@@ -138,7 +146,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideFromMenu: true,
     }, {
         path: "/theory/grading",
-        element: <TheoryToolPage><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TheoryToolPage>,
+        element: <TheoryToolPage showParentLink={false}><GradingTest subject="theory" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TheoryToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -146,7 +154,7 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideFromMenu: true,
     }, {
         path: "/training/grading",
-        element: <TrainingToolPage><GradingTest subject="technical" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TrainingToolPage>,
+        element: <TrainingToolPage showParentLink={false}><GradingTest subject="technical" grade={gradePlan.grade} allGradePlans={allGradePlans} dojoMode={trainingMode} /></TrainingToolPage>,
         menuText: translator.translate("Gradering"),
         startDescription: translator.translate("Se krav inför nästa gradering."),
         icon: Award,
@@ -185,14 +193,14 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
     }, {
         path: "/quiz/foot-stance",
         element: <TheoryToolPage><FootStanceQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
-        menuText: translator.translate("Fotställningsquiz"),
+        menuText: translator.translate("Fotposition"),
         icon: QuestionSquare,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
         path: "/quiz/hand-position",
         element: <TheoryToolPage><HandPositionQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
-        menuText: translator.translate("Handpositionsquiz"),
+        menuText: translator.translate("Kamae"),
         icon: HandIndex,
         hideOnStartPage: true,
         hideFromMenu: true,

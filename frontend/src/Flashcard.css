@@ -2,7 +2,11 @@
   width: 100%;
   max-width: 56rem;
   margin: 0 auto;
-  padding: 1rem var(--app-page-inline-gutter, 1rem);
+  padding: 0.5rem 0.25rem 2rem;
+}
+
+.study-page-header {
+  padding: 0.5rem 0.25rem 1.5rem;
 }
 
 .hokei-flashcard-view {
@@ -12,7 +16,7 @@
 .hokei-flashcard-filter {
   width: min(100%, 56rem);
   margin: 0 auto;
-  padding: 1rem var(--app-page-inline-gutter, 1rem) 0.25rem;
+  padding: 0 0.25rem 1rem;
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
@@ -122,9 +126,11 @@
 
 .flashcard-scene {
   perspective: 1000px;
+  overflow: clip;
 }
 
 .flashcard-inner {
+  display: grid;
   position: relative;
   width: 100%;
   transition: transform 0.6s ease;
@@ -132,9 +138,7 @@
 }
 
 .flashcard-inner::before {
-  content: "";
-  display: block;
-  min-height: 32rem;
+  display: none;
 }
 
 .flashcard-scene.is-flipped .flashcard-inner {
@@ -142,8 +146,9 @@
 }
 
 .flashcard-face {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  grid-area: 1 / 1;
+  min-width: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -154,9 +159,10 @@
 
 .flashcard-card {
   height: 100%;
-  border-radius: 2rem;
+  min-height: 26rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--bs-border-color);
-  background: linear-gradient(180deg, var(--bs-body-bg) 0%, var(--bs-secondary-bg) 100%);
+  background: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
 
@@ -195,8 +201,10 @@
 
 .flashcard-main {
   flex: 1;
+  min-width: 0;
   min-height: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   place-content: center;
   text-align: center;
   gap: 0.75rem;
@@ -218,15 +226,21 @@
 
 .flashcard-meaning {
   margin: 0;
-  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-family: var(--bs-body-font-family);
+  font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.45;
   color: var(--bs-emphasis-color);
+  overflow-wrap: anywhere;
 }
 
 .flashcard-example {
   margin: 0;
-  color: var(--bs-body-color);
-  font-size: 1.2rem;
+  color: var(--bs-secondary-color);
+  font-size: 1rem;
+  line-height: 1.55;
   max-width: 40rem;
+  overflow-wrap: anywhere;
 }
 
 .flashcard-main-interactive {
@@ -235,6 +249,7 @@
   overflow-y: auto;
   user-select: text;
   touch-action: pan-y;
+  max-height: 28rem;
 }
 
 .flashcard-hokei-front {
@@ -341,10 +356,6 @@
 }
 
 @media (max-width: 768px) {
-  .flashcard-inner::before {
-    min-height: 26rem;
-  }
-
   .flashcard-body {
     padding: 1rem var(--app-card-inline-gutter, 1rem);
   }
@@ -376,5 +387,86 @@
 
   .flashcard-swipe-guide {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .study-session > .flashcard-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding-block: 0;
+  }
+
+  .study-session .flashcard-swipe-stage {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .study-session .flashcard-drag-wrapper,
+  .study-session .flashcard-scene,
+  .study-session .flashcard-inner,
+  .study-session .flashcard-face {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .study-session .flashcard-inner {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .study-session .flashcard-card {
+    min-height: 0;
+  }
+
+  .study-session .flashcard-body {
+    min-height: 0;
+    gap: 0.5rem;
+    padding: 0.75rem var(--app-card-inline-gutter, 1rem);
+  }
+
+  .study-session .flashcard-meta,
+  .study-session .flashcard-hint,
+  .study-session .flashcard-actions,
+  .study-session .flashcard-swipe-guide {
+    flex-shrink: 0;
+  }
+
+  .study-session .flashcard-main {
+    align-content: safe center;
+    justify-content: stretch;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    overflow-wrap: anywhere;
+  }
+
+  .study-session .flashcard-main-interactive {
+    align-content: start;
+  }
+
+  .study-session .flashcard-hokei-back {
+    gap: 1rem;
+    padding-block: 0.25rem;
+  }
+
+  .study-session .flashcard-swipe-guide {
+    margin-top: 0;
+    padding-block: 0.5rem;
+  }
+
+  .study-session .flashcard-actions {
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 991.98px) and (max-height: 700px) {
+  .study-session .flashcard-swipe-guide {
+    gap: 0.5rem;
+    padding-inline: 0;
+    font-size: 0.8rem;
   }
 }

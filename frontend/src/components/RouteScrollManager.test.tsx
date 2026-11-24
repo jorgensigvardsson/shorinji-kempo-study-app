@@ -12,9 +12,10 @@ const NavigationHarness = () => {
     <>
       <output data-testid="location">{location.pathname}</output>
       <button type="button" onClick={() => navigate("/second")}>Open second page</button>
-      <button type="button" onClick={() => navigate("/first", { state: { resumeActivity: true } })}>Resume first page</button>
+      <button type="button" onClick={() => navigate("/first")}>Open first page</button>
       <button type="button" onClick={() => navigate(`${location.pathname}?q=gyaku`, { replace: true })}>Change filter</button>
       <button type="button" onClick={() => navigate(-1)}>Back</button>
+      <button type="button" onClick={() => navigate(1)}>Forward</button>
     </>
   );
 };
@@ -24,7 +25,7 @@ afterEach(() => {
 });
 
 describe("RouteScrollManager", () => {
-  it("restores the last position when resuming from the start page", async () => {
+  it("starts a fresh visit at the top even when that page was visited earlier", async () => {
     let scrollY = 0;
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     vi.spyOn(window, "scrollY", "get").mockImplementation(() => scrollY);
@@ -34,8 +35,8 @@ describe("RouteScrollManager", () => {
     window.dispatchEvent(new Event("scroll"));
     await user.click(screen.getByRole("button", { name: "Open second page" }));
     scrollY = 0;
-    await user.click(screen.getByRole("button", { name: "Resume first page" }));
-    expect(scrollTo).toHaveBeenLastCalledWith({ top: 640, behavior: "instant" });
+    await user.click(screen.getByRole("button", { name: "Open first page" }));
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "instant" });
   });
 
   it("does not jump to the top while editing search parameters", async () => {
@@ -49,7 +50,7 @@ describe("RouteScrollManager", () => {
     expect(scrollTo).toHaveBeenLastCalledWith({ top: 120, behavior: "instant" });
   });
 
-  it("starts a new page at the top and restores the previous page on Back", async () => {
+  it("starts a new page at the top and restores positions on Back and Forward", async () => {
     let scrollY = 0;
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     vi.spyOn(window, "scrollY", "get").mockImplementation(() => scrollY);
@@ -71,5 +72,10 @@ describe("RouteScrollManager", () => {
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByTestId("location").textContent).toBe("/first");
     expect(scrollTo).toHaveBeenLastCalledWith({ top: 320, behavior: "instant" });
+
+    scrollY = 320;
+    await user.click(screen.getByRole("button", { name: "Forward" }));
+    expect(screen.getByTestId("location").textContent).toBe("/second");
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 540, behavior: "instant" });
   });
 });

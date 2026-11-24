@@ -54,7 +54,7 @@ const HandPositionQuiz = ({ myGrade }: HandPositionQuizProps) => {
 
   return (
     <QuizRunner
-      title={translator.translate("Handpositionsquiz")}
+      title={translator.translate("Kamae")}
       quizPool={quizPool}
       controls={controls}
     />

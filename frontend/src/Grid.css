@@ -81,17 +81,6 @@
   padding: 1rem;
 }
 
-.start-context {
-  display: flex;
-  align-items: center;
-  margin: 0.65rem 0 0.5rem;
-  padding: 0.35rem 0;
-  color: var(--bs-secondary-color);
-  font-family: var(--bs-body-font-family);
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 .start-intro {
   padding: 0.5rem 0.25rem 1.25rem;
 }

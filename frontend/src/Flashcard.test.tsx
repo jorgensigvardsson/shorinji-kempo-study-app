@@ -14,6 +14,24 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
+it("lets keyboard users turn the card and exposes only the current face", async () => {
+    const user = userEvent.setup();
+    render(<Flashcard />);
+    const frontName = screen.getByRole("heading", { level: 2 }).textContent!;
+    const deck = screen.getByRole("group", {
+        name: "Svep vänster för att öva igen eller höger om du kan det.",
+    });
+
+    await user.tab();
+    expect(document.activeElement).toBe(deck);
+    await user.keyboard("{Enter}");
+    expect(screen.queryByRole("heading", { name: frontName })).toBeNull();
+    expect(screen.getByRole("heading", { level: 2 })).toBeTruthy();
+
+    await user.keyboard(" ");
+    expect(screen.getByRole("heading", { name: frontName })).toBeTruthy();
+});
+
 it("keeps word cards flippable and stores their historical numeric id", async () => {
     const user = userEvent.setup();
     const { container } = render(<Flashcard />);
@@ -25,7 +43,7 @@ it("keeps word cards flippable and stores their historical numeric id", async ()
     expect(screen.queryByText("Baksida")).toBeNull();
     expect(screen.queryByText("Tryck för att vända")).toBeNull();
     expect(screen.queryByText("Tryck för att vända tillbaka")).toBeNull();
-    await user.click(screen.getByRole("heading", { level: 1 }));
+    await user.click(screen.getByRole("heading", { level: 2 }));
     expect(container.querySelector(".flashcard-scene")?.classList.contains("is-flipped")).toBe(true);
 
     expect(screen.queryByRole("button", { name: "Kan det" })).toBeNull();
@@ -68,7 +86,7 @@ it("keeps swipe feedback stationary and mounts the next card on its front", asyn
         name: "Svep vänster för att öva igen eller höger om du kan det.",
     });
 
-    await user.click(screen.getByRole("heading", { level: 1 }));
+    await user.click(screen.getByRole("heading", { level: 2 }));
     const flippedScene = container.querySelector(".flashcard-scene");
     expect(flippedScene?.classList.contains("is-flipped")).toBe(true);
 

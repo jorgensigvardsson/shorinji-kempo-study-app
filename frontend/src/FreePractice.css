@@ -25,6 +25,36 @@
   box-shadow: none;
 }
 
+.embu-choice-grid {
+  max-width: 42rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.embu-choice-grid .app-grid-card {
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.embu-choice-grid .card-body {
+  padding: 0.95rem 0.25rem 1rem;
+}
+
+.embu-choice-grid .app-grid-title {
+  font-family: var(--bs-body-font-family);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.embu-choice-grid .app-grid-card-interactive:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
 .free-practice-back {
   display: inline-flex;
   align-items: center;
@@ -49,6 +79,57 @@
   gap: 1.5rem;
   margin-bottom: 1.75rem;
   padding: 0 0.25rem;
+}
+
+.free-practice-hokei-header {
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.free-practice-kihon-header,
+.free-practice-forms-header,
+.free-practice-randori-header,
+.free-practice-embu-header {
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.free-practice-kihon-header .training-page-controls,
+.free-practice-forms-header .training-page-controls,
+.free-practice-randori-header .training-page-controls,
+.free-practice-embu-header .training-page-controls {
+  margin-top: 1.5rem;
+}
+
+.free-practice-kihon-header .training-choice-trigger,
+.free-practice-forms-header .training-choice-trigger,
+.free-practice-randori-header .training-choice-trigger,
+.free-practice-embu-header .training-choice-trigger {
+  flex-wrap: wrap;
+}
+
+.free-practice-hokei .training-list-controls {
+  padding: 0 0.25rem;
+}
+
+.free-practice-hokei .hokei-list-settings {
+  width: 100%;
+}
+
+.free-practice-hokei .hokei-card.kamoku-full-card.is-collapsed {
+  margin-block: 0;
+}
+
+.free-practice-hokei .hokei-list > .hokei-card:first-child {
+  border-top: 0;
+}
+
+.free-practice-hokei .kamoku-full-card.is-collapsed .card-header {
+  padding-block: 0.65rem;
+}
+
+.free-practice-hokei .kamoku-full-card.is-collapsed .kamoku-card-header-content {
+  gap: 0.35rem;
 }
 
 .free-practice-content {
@@ -133,6 +214,11 @@
 
 .embu-builder-heading h3 {
   margin: 0;
+  color: var(--bs-primary);
+}
+
+.embu-builder > .app-section-heading {
+  color: var(--bs-primary);
 }
 
 .embu-experimental-label {
@@ -180,6 +266,16 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.embu-kumi-example > .free-practice-section-heading h3 {
+  color: var(--bs-primary);
+}
+
+.embu-detail-view button:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }
 
 .embu-text-button {
@@ -785,15 +881,26 @@
   gap: 2.5rem;
 }
 
-.kihon-design-note {
+.kihon-group-description,
+.kihon-list-description {
   max-width: 42rem;
   margin: 0;
   color: var(--bs-secondary-color);
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
 .kihon-practice-group > h3 {
-  margin-bottom: 1.15rem;
+  margin-bottom: 0.35rem;
+  color: var(--bs-primary);
+}
+
+.kihon-group-description {
+  margin-bottom: 1rem;
+}
+
+.kihon-list-description {
+  margin-bottom: 0.65rem;
 }
 
 .kihon-practice-columns {
@@ -807,10 +914,12 @@
 }
 
 .kihon-technique-list > h4 {
-  margin: 0 0 0.65rem;
-  color: var(--bs-secondary-color);
-  font-size: 0.95rem;
-  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--bs-emphasis-color);
+  font-family: var(--bs-body-font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .kihon-technique-list .free-practice-item-list > li {
@@ -856,7 +965,16 @@
 }
 
 .practice-form-mode > h3 {
-  margin-bottom: 1.35rem;
+  margin-bottom: 0.35rem;
+  color: var(--bs-primary);
+}
+
+.practice-form-description {
+  max-width: 42rem;
+  margin: 0 0 1.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .practice-form-family-list {
@@ -867,9 +985,27 @@
 
 .practice-form-family > h4 {
   margin: 0 0 0.65rem;
-  color: var(--bs-secondary-color);
-  font-size: 1rem;
-  font-weight: 600;
+  color: var(--bs-emphasis-color);
+  font-family: var(--bs-body-font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.practice-form-entry-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.practice-form-entry-heading .free-practice-term {
+  min-width: 0;
+}
+
+.practice-form-video {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 }
 
 /* Tan'en and Sōtai are followed while moving, so their Dojo mode prioritises
@@ -916,7 +1052,16 @@
 }
 
 .randori-theme-group > h3 {
-  margin-bottom: 1.15rem;
+  margin-bottom: 0.35rem;
+  color: var(--bs-primary);
+}
+
+.randori-group-description {
+  max-width: 42rem;
+  margin: 0 0 1rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 /* In Dojo mode the restriction is the instruction. Grades and source context

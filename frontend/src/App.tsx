@@ -256,7 +256,7 @@ function App(props: Props) {
 
   return (
     <TranslatorContext.Provider value={translator}>
-      <NavigationMemoryProvider account={accountInfo?.id || 'preview'} grade={displayGrade} allGradePlans={gradePlans} onGradeChange={setGradeOverride}>
+      <NavigationMemoryProvider account={accountInfo?.id || 'preview'}>
       <RouteScrollManager />
       <div className="app-shell" data-text-size={textSizeKey}>
         {/* Only appears once a wait has gone on long enough to be worth mentioning:
@@ -336,9 +336,10 @@ const AppNavbar = (props: NavbarProps) => {
   const mobileMainRoutes = mainMenuRoutes.filter(route => route.path && route.path !== "/search");
   const mobileSection = mainSection(location.pathname);
   const isMobileMoreActive = !["/", "/kamoku", "/theory", "/search"].includes(mobileSection);
+  const isOverview = ["/", "/kamoku", "/kamoku/free", "/theory"].includes(location.pathname);
 
   return (
-    <><Navbar expand="lg" className={`app-top-navbar ${location.pathname === "/" ? "app-top-navbar-home" : ""} bg-body-tertiary ${className}`} sticky="top">
+    <><Navbar expand="lg" className={`app-top-navbar ${location.pathname === "/" ? "app-top-navbar-home" : ""} ${isOverview ? "app-top-navbar-overview" : ""} bg-body-tertiary ${className}`} sticky="top">
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="app-navbar-brand" onClick={() => beginNavigation("/")}>
           <img src="/shorinjikempo.svg" className="logo" />

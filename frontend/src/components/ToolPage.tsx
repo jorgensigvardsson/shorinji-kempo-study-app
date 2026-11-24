@@ -12,35 +12,40 @@ import "./ToolPage.css";
 
 // The two areas name their wrapper and back button differently, and the names are
 // load-bearing for the stylesheets, so they are spelled out rather than derived.
-const ToolPage = ({ className, backClassName, label, parent, children }:
-    { className: string; backClassName: string; label: string; parent: string; children: ReactNode }) => {
+interface ToolPageProps {
+    children: ReactNode;
+    showParentLink?: boolean;
+}
+
+const ToolPage = ({ className, backClassName, label, parent, children, showParentLink = true }:
+    ToolPageProps & { className: string; backClassName: string; label: string; parent: string }) => {
 
     return (
         <div className={className}>
             <div className="navigation-section-heading">
                 <BackButton className={backClassName} fallback={parent} />
-                <Link to={parent} className="navigation-caption">{label}</Link>
+                {showParentLink && <Link to={parent} className="navigation-caption">{label}</Link>}
             </div>
             {children}
         </div>
     );
 };
 
-export const TheoryToolPage = ({ children }: { children: ReactNode }) => {
+export const TheoryToolPage = ({ children, showParentLink }: ToolPageProps) => {
     const translator = useContext(TranslatorContext);
     return (
-        <ToolPage className="theory-tool-page" backClassName="theory-back" label={translator.translate("Teori")} parent="/theory">
+        <ToolPage className="theory-tool-page" backClassName="theory-back" label={translator.translate("Teori")} parent="/theory" showParentLink={showParentLink}>
             {children}
         </ToolPage>
     );
 };
 
-export const TrainingToolPage = ({ children }: { children: ReactNode }) => {
+export const TrainingToolPage = ({ children, showParentLink }: ToolPageProps) => {
     const translator = useContext(TranslatorContext);
 
     return (
         <ToolPage className="training-page" backClassName="training-back"
-                  label={translator.translate("Träning")} parent="/kamoku">
+                  label={translator.translate("Träning")} parent="/kamoku" showParentLink={showParentLink}>
             {children}
         </ToolPage>
     );

@@ -54,7 +54,7 @@ const FootStanceQuiz = ({ myGrade }: FootStanceQuizProps) => {
 
   return (
     <QuizRunner
-      title={translator.translate("Fotställningsquiz")}
+      title={translator.translate("Fotposition")}
       quizPool={quizPool}
       controls={controls}
     />

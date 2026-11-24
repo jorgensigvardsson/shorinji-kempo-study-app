@@ -35,7 +35,7 @@ const Flashcard = () => {
             indexLabel: `#${card.id}`,
             front: (
                 <>
-                    <h1 className="flashcard-kanji">{kanji}</h1>
+                    <h2 className="flashcard-kanji">{kanji}</h2>
                     <p className="flashcard-romaji">{card.romaji}</p>
                 </>
             ),
@@ -54,7 +54,13 @@ const Flashcard = () => {
         };
     }), [translator]);
 
-    return <FlashcardDeck cards={cards} swipeOnly hideFaceLabels hideFlipHints />;
+    return <div className="flashcard-view study-session">
+        <header className="study-page-header">
+            <h1 className="app-page-heading">{translator.translate("Flashkort")}: {translator.translate("Ordlista")}</h1>
+            <p className="app-intro-copy">{translator.translate("Öva ord och betydelser.")}</p>
+        </header>
+        <FlashcardDeck cards={cards} swipeOnly hideFaceLabels hideFlipHints />
+    </div>;
 };
 
 export default Flashcard;

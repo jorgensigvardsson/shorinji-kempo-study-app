@@ -1,13 +1,13 @@
 import { useContext, type ComponentType } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ClockHistory, Search } from "react-bootstrap-icons";
+import { Search } from "react-bootstrap-icons";
 import Grid, { type GridItem } from "./components/Grid";
 import GettingStarted from "./components/GettingStarted";
+import OverviewContext from "./components/OverviewContext";
 import { TranslatorContext } from "./i18n";
 import { NavigationMemory } from "./navigation-memory-context";
-import { activityForUrl, activityLabel } from "./navigation";
+import { activityForUrl } from "./navigation";
 import { beginNavigation } from "./navigation-pending";
-import { getTrainingControlContext } from "./training-controls-context";
 import "./Navigation.css";
 
 interface StartRouteCard {
@@ -27,12 +27,6 @@ const Start = (props: Props) => {
     const navigate = useNavigate();
     const translator = useContext(TranslatorContext);
     const memory = useContext(NavigationMemory);
-    const latest = memory.recent[0];
-    const latestActivity = latest && memory.describe(latest.url);
-    const trimmedDisplayName = displayName?.trim();
-    const greeting = trimmedDisplayName
-        ? `${translator.translate("Gasshō")}, ${trimmedDisplayName}`
-        : translator.translate("Gasshō");
 
     const items: GridItem[] = routes.map((route) => ({
         key: route.path,
@@ -45,27 +39,16 @@ const Start = (props: Props) => {
 
     return (
         <div className="start-screen">
-            <div className="start-context" aria-label={greeting}>
-                {greeting}
-            </div>
+            <OverviewContext displayName={displayName} greetingVisible />
             <header className="start-intro">
                 <h1 className="app-page-heading">{translator.translate("Vad vill du göra idag?")}</h1>
             </header>
             <GettingStarted />
             {items.length > 0 && <Grid items={items} className="start-grid" />}
-            {latestActivity && <button type="button" className="start-resume" onClick={() => memory.resume(latest)}>
-                <ClockHistory size={20} aria-hidden="true" />
-                <span>
-                    <span className="start-resume-label">{translator.translate("Fortsätt där du slutade")}</span>
-                    <strong>{activityLabel(latestActivity, translator)}</strong>
-                    <span className="navigation-caption">{translator.translate(latestActivity.section)}{getTrainingControlContext(latestActivity.path).showGrade && ` · ${translator.translate(latest.grade)}`}</span>
-                </span>
-                <ArrowRight aria-hidden="true" />
-            </button>}
             <section className="start-shortcuts" aria-labelledby="shortcuts-heading">
                 <div className="navigation-section-heading">
                     <h2 id="shortcuts-heading" className="app-eyebrow-heading">{translator.translate("Mina genvägar")}</h2>
-                    <Link to="/search" onClick={() => beginNavigation("/search")}>{translator.translate("Anpassa")}</Link>
+                    <Link to="/shortcuts" onClick={() => beginNavigation("/shortcuts")}>{translator.translate("Anpassa")}</Link>
                 </div>
                 <div className="shortcut-grid">
                     {memory.pins.map(path => {
@@ -76,7 +59,7 @@ const Start = (props: Props) => {
                         </Link>;
                     })}
                 </div>
-                {memory.pins.length === 0 && <p className="navigation-caption">{translator.translate("Stjärnmarkera funktioner i Sök för att lägga till genvägar.")}</p>}
+                {memory.pins.length === 0 && <p className="navigation-caption">{translator.translate("Tryck på Anpassa och stjärnmarkera de funktioner du vill ha här.")}</p>}
             </section>
             <Link to="/search" className="start-search" onClick={() => beginNavigation("/search")}>
                 <Search aria-hidden="true" />

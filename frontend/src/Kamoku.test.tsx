@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GradePlan, HokeiMoment, KihonMoment } from "./data";
@@ -170,8 +170,7 @@ describe("Kamoku weekly plan", () => {
     expect(controls?.querySelector("#dojo-mode")).toBeNull();
     expect(controls?.querySelector(".kamoku-week-navigation")).not.toBeNull();
     expect(controls?.querySelector(".kamoku-week-completion-row")).not.toBeNull();
-    expect(screen.getByText("Vecka 1")).toBeTruthy();
-    expect(screen.getByText("av 1")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Vecka 1 av 1" })).toBeTruthy();
   });
 
   it("marks a grade week as practised and opens a stable editable completion panel", async () => {
@@ -198,5 +197,31 @@ describe("Kamoku weekly plan", () => {
     await user.click(screen.getByRole("button", { name: "Ta bort klarmarkering" }));
     expect(getAppDataStore().get("weeklyPlanCompletions")).toEqual({});
     expect(screen.getByRole("button", { name: "Markera som tränad" })).toBeTruthy();
+  });
+
+  it("selects a week directly and keeps its completion when stepping between weeks", async () => {
+    localStorage.removeItem("navigation:preview:week:6 kyū");
+    const twoWeeks: GradePlan = {
+      ...plan,
+      weeks: [plan.weeks[0], { week: 2, type: "regular_week", moments: [kihon] }],
+    };
+    const user = userEvent.setup();
+    render(<Kamoku myGrade="6 kyū" allGradePlans={[twoWeeks]} />);
+
+    await user.click(screen.getByRole("button", { name: "Vecka 1 av 2" }));
+    expect(screen.getByRole("heading", { name: "Välj vecka" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Vecka 2 av 2" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.getByRole("button", { name: "Vecka 2 av 2" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Kihon" })).toBeTruthy();
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Nästa vecka" }).disabled).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Markera som tränad" }));
+    expect(getAppDataStore().get("weeklyPlanCompletions")["6 kyū|2"]).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Föregående vecka" }));
+    expect(screen.getByRole("button", { name: "Vecka 1 av 2" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Markera som tränad" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Nästa vecka" }));
+    expect(screen.getByRole("button", { name: "Visa när vecka 2 klarmarkerades" })).toBeTruthy();
   });
 });

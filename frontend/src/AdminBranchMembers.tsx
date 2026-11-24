@@ -266,7 +266,7 @@ const AdminBranchMembers = () => {
   const canMove = authority.atWSKO;
 
   return (
-    <div>
+    <div className="app-content-page organization-detail-page">
       {renaming ? (
         <div className="mb-2">
           <InlineNameEditor translator={translator} initial={branch.name} busy={orgBusy}
@@ -274,7 +274,7 @@ const AdminBranchMembers = () => {
         </div>
       ) : (
         <div className="d-flex align-items-center gap-1 mb-2">
-          <h1 className="h4 mb-0">{branch.name}</h1>
+          <h1 className="app-page-heading mb-0">{branch.name}</h1>
           {canRename && <RenamePencil translator={translator} disabled={orgBusy} onClick={startRename} />}
         </div>
       )}

@@ -6,14 +6,33 @@
    identical Träning rules they used to be duplicated with. */
 
 .theory-choice-grid {
-  gap: 0.75rem 1.5rem;
+  max-width: 42rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
 }
 
 .theory-choice-grid .app-grid-card {
-  border-radius: 0.5rem;
+  border: 0;
   border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.theory-choice-grid .card-body {
+  padding: 0.95rem 0.25rem 1rem;
+}
+
+.theory-choice-grid .app-grid-title {
+  font-family: var(--bs-body-font-family);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.theory-choice-grid .app-grid-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .theory-choice-grid .app-grid-card-interactive:hover,
@@ -21,6 +40,11 @@
   transform: none;
   background: var(--bs-tertiary-bg);
   box-shadow: none;
+}
+
+.theory-choice-grid .app-grid-card-interactive:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }
 
 @media (max-width: 35rem) {

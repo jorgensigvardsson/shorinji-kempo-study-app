@@ -12,6 +12,119 @@
   margin-right: auto;
 }
 
+.app-content-page,
+.app-prose-page {
+  min-width: 0;
+  padding: 0.5rem 0.25rem 2rem;
+}
+
+.app-content-header {
+  margin-bottom: 1.5rem;
+}
+
+.app-content-page > .app-page-heading,
+.app-prose-page > .app-page-heading {
+  margin-bottom: 1.5rem;
+}
+
+.app-prose-page {
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.app-prose-page > h3 {
+  margin: 1.75rem 0 0.65rem;
+  color: var(--bs-primary);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.technique-page > .app-page-heading {
+  margin: 0.5rem 0.25rem 1.5rem;
+}
+
+.organization-detail-page .card,
+.admin-requests-page .card,
+.broadcast-page > .card {
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.organization-detail-page .card-body,
+.admin-requests-page .card-body,
+.broadcast-page > .card > .card-body {
+  padding: 1rem 0.25rem 1.25rem;
+}
+
+.organization-detail-page .card-header {
+  padding: 0.75rem 0.25rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+.organization-detail-page h2 {
+  margin-top: 1.5rem;
+  color: var(--bs-primary);
+  font-family: var(--bs-body-font-family);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.organization-detail-page a,
+.admin-requests-page .card-body {
+  overflow-wrap: anywhere;
+}
+
+.organization-detail-page .d-flex > .app-page-heading,
+.organization-detail-page .d-flex > .form-select {
+  min-width: 0;
+}
+
+.usage-page .badge {
+  max-width: 100%;
+  white-space: normal;
+  text-align: start;
+  line-height: 1.5;
+}
+
+.usage-page .card {
+  border: 0;
+  border-inline-start: 2px solid var(--bs-border-color);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.usage-page .btn-group {
+  flex-wrap: wrap;
+}
+
+.usage-page .btn-group > .btn {
+  flex: 1 1 auto;
+}
+
+.settings-section-header > .app-section-heading {
+  color: var(--bs-primary);
+}
+
+.app-route-content :where(a, summary):focus-visible,
+.search-results a:focus-visible,
+.shortcut-link:focus-visible,
+.start-search:focus-visible,
+.groups-back:focus-visible,
+.free-practice-back:focus-visible,
+.training-back:focus-visible,
+.theory-back:focus-visible,
+.navigation-caption:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
 /* Larger text needs more of the phone width for content. Individual pages consume
    --app-page-inline-gutter for their second, inner gutter; pages without one still
    benefit from the shell gutter. */
@@ -71,11 +184,9 @@
   line-height: 1.1;
 }
 
-/* On phones the persistent bottom navigation owns the primary destinations and
-   opens this navbar's offcanvas. Keep the offcanvas available while collapsing
-   the otherwise duplicated top row to zero height everywhere except Home, where
-   the original brand remains without its hamburger. Bootstrap restores the
-   unchanged desktop navbar at its existing lg breakpoint. */
+/* Home, Training and Theory share the visible brand row on phones so their
+   headings align. Tool pages collapse this row to keep the available height for
+   their content. The desktop navbar remains visible on every page. */
 @media (max-width: 991.98px) {
   .app-top-navbar {
     min-height: 0;
@@ -91,13 +202,14 @@
     display: none;
   }
 
-  .app-top-navbar.app-top-navbar-home {
+  .app-top-navbar.app-top-navbar-overview {
     padding: var(--bs-navbar-padding-y) var(--bs-navbar-padding-x);
   }
 
-  .app-top-navbar.app-top-navbar-home .app-navbar-brand {
+  .app-top-navbar.app-top-navbar-overview .app-navbar-brand {
     display: inline-flex;
   }
+
 }
 
 .app-offcanvas-title {
@@ -222,21 +334,6 @@
   color: #f8f4ec;
 }
 
-.menu-more-dropdown > .nav-link.active,
-.menu-more-dropdown > .nav-link:focus,
-.menu-more-dropdown > .nav-link:hover,
-.menu-more-dropdown.show > .nav-link {
-  color: #101318;
-  background-color: #9ca4b0;
-}
-
-.menu-dropdown-item.active,
-.menu-dropdown-item.active:focus,
-.menu-dropdown-item.active:hover {
-  color: #101318;
-  background-color: #9ca4b0;
-}
-
 [data-bs-theme="dark"] .menu-item.active,
 [data-bs-theme="dark"] .menu-item.active:focus,
 [data-bs-theme="dark"] .menu-item.active:hover {
@@ -244,24 +341,38 @@
   background-color: var(--bs-component-active-bg);
 }
 
-[data-bs-theme="dark"] .menu-more-dropdown > .nav-link.active,
-[data-bs-theme="dark"] .menu-more-dropdown > .nav-link:focus,
-[data-bs-theme="dark"] .menu-more-dropdown > .nav-link:hover,
-[data-bs-theme="dark"] .menu-more-dropdown.show > .nav-link {
-  color: var(--bs-component-active-color);
-  background-color: var(--bs-component-active-bg);
-}
-
-[data-bs-theme="dark"] .menu-dropdown-item.active,
-[data-bs-theme="dark"] .menu-dropdown-item.active:focus,
-[data-bs-theme="dark"] .menu-dropdown-item.active:hover {
-  color: var(--bs-component-active-color);
-  background-color: var(--bs-component-active-bg);
-}
-
-[data-bs-theme="dark"] .menu-item.active .menu-route-icon,
-[data-bs-theme="dark"] .menu-dropdown-item.active .menu-route-icon {
+[data-bs-theme="dark"] .menu-item.active .menu-route-icon {
   color: inherit;
+}
+
+/* More uses the same theme gold on desktop and mobile. Hover stays neutral;
+   the selected page and an open menu keep their gold surface. */
+.menu-more-dropdown > .nav-link:hover,
+.menu-dropdown-item:hover,
+.menu-dropdown-item:focus,
+.offcanvas-body .nav-pills .nav-link.menu-item:hover {
+  color: var(--bs-body-color);
+  background-color: var(--bs-secondary-bg);
+}
+
+.menu-more-dropdown > .nav-link.active,
+.menu-more-dropdown.show > .nav-link,
+.menu-dropdown-item.active,
+.offcanvas-body .nav-pills .nav-link.menu-item.active {
+  color: var(--bs-primary-text-emphasis);
+  background-color: var(--bs-primary-bg-subtle);
+}
+
+.menu-dropdown-item.active .menu-route-icon,
+.offcanvas-body .nav-pills .nav-link.menu-item.active .menu-route-icon {
+  color: var(--bs-primary);
+}
+
+.menu-more-dropdown > .nav-link:focus-visible,
+.menu-dropdown-item:focus-visible,
+.offcanvas-body .nav-pills .nav-link.menu-item:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: -2px;
 }
 
 .app-update-toast-container {

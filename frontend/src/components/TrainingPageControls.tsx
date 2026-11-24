@@ -31,12 +31,13 @@ const OwnGradeSummary = () => {
   );
 };
 
-export const FocusChoicePicker = ({ title, value, onChange, choices, leadText, showOwnGrade = false, className = "" }: {
+export const FocusChoicePicker = ({ title, value, onChange, choices, leadText, selectedLabel, showOwnGrade = false, className = "" }: {
   title: string;
   value: string;
   onChange: (value: string) => void;
   choices: FocusChoice[];
   leadText?: string;
+  selectedLabel?: string;
   // Grade pickers turn this on; the picker itself does not know what it lists.
   showOwnGrade?: boolean;
   className?: string;
@@ -59,8 +60,8 @@ export const FocusChoicePicker = ({ title, value, onChange, choices, leadText, s
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
       >
-        <span>{leadText ?? translator.translate("Visar")}</span>
-        <strong>{selected?.label}</strong>
+        {leadText !== "" && <span>{leadText ?? translator.translate("Visar")}</span>}
+        <strong>{selectedLabel ?? selected?.label}</strong>
         <ChevronRight aria-hidden="true" />
       </button>
       <Modal show={open} onHide={() => setOpen(false)} fullscreen aria-labelledby={titleId}>
@@ -141,9 +142,10 @@ const DojoModeToggle = ({ active, onChange }: { active: boolean; onChange: (acti
   );
 };
 
-const TrainingPageControls = ({ showGrade = false, showDojo = false, className = "" }: {
+const TrainingPageControls = ({ showGrade = false, showDojo = false, gradeLeadText, className = "" }: {
   showGrade?: boolean;
   showDojo?: boolean;
+  gradeLeadText?: string;
   className?: string;
 }) => {
   const translator = useContext(TranslatorContext);
@@ -160,6 +162,7 @@ const TrainingPageControls = ({ showGrade = false, showDojo = false, className =
       {showGrade && (
         <FocusChoicePicker
           title={translator.translate("Välj grad")}
+          leadText={gradeLeadText}
           showOwnGrade
           value={settings.grade}
           choices={gradeChoices}

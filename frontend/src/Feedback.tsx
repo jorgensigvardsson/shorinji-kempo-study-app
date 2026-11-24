@@ -37,10 +37,13 @@ const Feedback = () => {
     };
 
     return (
-        <div>
-            <p className="text-secondary">
-                {translator.translate("Berätta vad du tycker om appen, eller rapportera ett problem. Meddelandet skickas till den som utvecklar appen.")}
-            </p>
+        <div className="app-content-page">
+            <header className="app-content-header">
+                <h1 className="app-page-heading">{translator.translate("Feedback")}</h1>
+                <p className="app-intro-copy">
+                    {translator.translate("Berätta vad du tycker om appen, eller rapportera ett problem. Meddelandet skickas till den som utvecklar appen.")}
+                </p>
+            </header>
             <Form as="form" onSubmit={(e) => { void submit(e); }} style={{ maxWidth: "32rem" }}>
                 <Form.Group className="mb-3" controlId="feedbackMessage">
                     <Form.Label>{translator.translate("Din feedback")}</Form.Label>

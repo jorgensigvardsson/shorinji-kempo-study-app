@@ -90,8 +90,8 @@ const AdminWSKO = () => {
   }
 
   return (
-    <div>
-      <h1 className="h4 mb-3">WSKO</h1>
+    <div className="app-content-page organization-detail-page">
+      <h1 className="app-page-heading mb-3">WSKO</h1>
       {error !== null && <p className="text-danger">{error}</p>}
 
       <h2 className="h6 text-body-secondary">{translator.translate("Förbunden")}</h2>

@@ -43,6 +43,8 @@
 }
 
 .groups-grid {
+  max-width: 42rem;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0 1.5rem;
 }
 
@@ -55,7 +57,20 @@
 }
 
 .groups-grid .card-body {
-  padding: 1rem 0.25rem;
+  padding: 0.95rem 0.25rem 1rem;
+}
+
+.groups-grid .app-grid-title {
+  font-family: var(--bs-body-font-family);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.groups-grid .app-grid-subtitle,
+.groups-grid .app-grid-preview {
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .groups-grid .app-grid-card-interactive:hover,
@@ -63,10 +78,4 @@
   transform: none;
   background: var(--bs-tertiary-bg);
   box-shadow: none;
-}
-
-@media (max-width: 22rem) {
-  .groups-page-heading {
-    font-size: 1.8rem;
-  }
 }

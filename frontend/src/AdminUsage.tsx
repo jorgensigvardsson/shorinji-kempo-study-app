@@ -105,7 +105,7 @@ const AdminUsage = () => {
   // does not.
   const header = (
     <>
-      <h1 className="h4">{translator.translate("Användningsstatistik")}</h1>
+      <h1 className="app-page-heading mb-3">{translator.translate("Användningsstatistik")}</h1>
       <p className="text-body-secondary small">
         {translator.translate("Hur många som har använt appen. Det räknas i personer: samma person på flera enheter räknas en gång.")}
       </p>
@@ -124,12 +124,12 @@ const AdminUsage = () => {
   );
 
   if (view === "history") {
-    return <div>{header}<AdminUsageHistory /></div>;
+    return <div className="app-content-page usage-page">{header}<AdminUsageHistory /></div>;
   }
 
   if (error === "unconfigured") {
     return (
-      <div>
+      <div className="app-content-page usage-page">
         {header}
         <p>{translator.translate("Användningsstatistiken är inte påslagen i den här miljön.")}</p>
       </div>
@@ -139,7 +139,7 @@ const AdminUsage = () => {
   // numbers is a line above them (below), and the numbers stay.
   if (error === "failed" && report === null) {
     return (
-      <div>
+      <div className="app-content-page usage-page">
         {header}
         <p className="text-danger">{translator.translate("Kunde inte hämta användningsstatistiken.")}</p>
         <Button variant="outline-secondary" onClick={() => setAttempt(n => n + 1)}>{translator.translate("Försök igen")}</Button>
@@ -147,7 +147,7 @@ const AdminUsage = () => {
     );
   }
   if (report === null || series === null) {
-    return <div>{header}<Loading /></div>;
+    return <div className="app-content-page usage-page">{header}<Loading /></div>;
   }
 
   const perBucket = series.columns.map(c => c.people);
@@ -156,7 +156,7 @@ const AdminUsage = () => {
   const grouped = grouping !== "none";
 
   return (
-    <div>
+    <div className="app-content-page usage-page">
       {header}
 
       {/* Every control in one row above the chart, so what the chart shows is

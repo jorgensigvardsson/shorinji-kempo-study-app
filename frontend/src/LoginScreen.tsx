@@ -288,7 +288,7 @@ export function LoginScreen() {
           <Modal.Title>{translator.translate("Integritetspolicy")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <PrivacyPolicy />
+          <PrivacyPolicy embedded />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowPrivacy(false)}>

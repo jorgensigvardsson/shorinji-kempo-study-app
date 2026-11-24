@@ -62,7 +62,7 @@ export default function Help() {
 
         {!translator.isJapanese && <>
             <HelpSection title={translator.translate("Quiz")}>
-                <p>{translator.translate("Quiz är studiehjälp med frågor om ord, teknikgrupper, fotställningar och handpositioner. Repetera och se vad du vill öva mer på under Teori → Quiz.")}</p>
+                <p>{translator.translate("Quiz är studiehjälp med frågor om ord, teknikgrupper, fotposition och kamae. Repetera och se vad du vill öva mer på under Teori → Quiz.")}</p>
                 <HelpLink to="/quiz">{translator.translate("Quiz")}</HelpLink>
             </HelpSection>
 

@@ -1,53 +1,69 @@
 .kamoku-page-header {
-  padding: 0.5rem 0.25rem 1.35rem;
+  padding: 0.5rem 0.25rem 1.5rem;
 }
 
 .kamoku-page-controls {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .kamoku-controls {
-  margin-bottom: 2.5rem !important;
-  padding: 0.5rem 0 1rem;
+  max-width: 42rem;
+  margin: 0 0.25rem 2rem;
+  padding: 0;
+}
+
+.kamoku-week-intro {
+  margin: 0 0.25rem 1.5rem;
 }
 
 .kamoku-week-navigation {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  grid-template-areas:
-    "previous position next"
-    "completion completion completion";
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: 1rem;
-  row-gap: 0.85rem;
-  margin-top: 0;
+  gap: 0.65rem 1rem;
+}
+
+.kamoku-week-picker {
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.kamoku-week-picker > strong {
+  min-width: 0;
+}
+
+.kamoku-week-picker > svg {
+  flex-shrink: 0;
+}
+
+.kamoku-week-steps {
+  display: flex;
+  gap: 0.25rem;
 }
 
 .kamoku-week-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  width: fit-content;
-  padding: 0.45rem 0;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.35rem;
   border: 0;
   background: transparent;
   color: var(--bs-secondary-color);
   font: inherit;
 }
 
-.kamoku-week-button-previous {
-  grid-area: previous;
-  justify-self: start;
-}
-
-.kamoku-week-button-next {
-  grid-area: next;
-  justify-self: end;
-}
-
 .kamoku-week-button:hover:not(:disabled),
 .kamoku-week-button:focus-visible:not(:disabled) {
-  color: var(--bs-emphasis-color);
+  color: var(--bs-primary);
+}
+
+.kamoku-week-button:focus-visible,
+.kamoku-week-completion:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }
 
 .kamoku-week-button:disabled {
@@ -55,22 +71,10 @@
   cursor: not-allowed;
 }
 
-.kamoku-week-position {
-  grid-area: position;
-  display: block;
-  color: var(--bs-emphasis-color);
-  font-family: var(--app-display-font);
-  font-size: 1.3rem;
-  font-weight: 500;
-  line-height: 1.1;
-  text-align: center;
-  white-space: nowrap;
-}
-
 .kamoku-week-completion-row {
-  grid-area: completion;
+  grid-column: 1 / -1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -84,54 +88,26 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  min-height: 2.4rem;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: 999px;
-  background: var(--bs-tertiary-bg);
+  min-height: 2.75rem;
+  padding: 0.35rem 0.15rem;
+  border: 0;
+  background: transparent;
   color: var(--bs-body-color);
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.kamoku-week-completion .app-completion-mark {
-  border-color: #9a7610;
-  color: var(--bs-tertiary-bg);
-}
-
-[data-bs-theme="dark"] .kamoku-week-completion .app-completion-mark {
-  border-color: #f3d36c;
-}
-
-.kamoku-week-completion:hover,
-.kamoku-week-completion:focus-visible {
-  border-color: var(--bs-warning-border-subtle);
-  background: var(--bs-secondary-bg);
-  color: var(--bs-emphasis-color);
-}
-
-.kamoku-week-completion.is-complete {
-  border-color: var(--bs-success-border-subtle);
-  background: var(--bs-success-bg-subtle);
-  color: var(--bs-success-text-emphasis);
-}
-
-.kamoku-week-completion.is-complete .app-completion-mark {
-  border-color: var(--bs-success-text-emphasis);
-  background: var(--bs-success-text-emphasis);
-  color: var(--bs-success-bg-subtle);
-}
-
-[data-bs-theme="dark"] .kamoku-week-completion:not(.is-complete) svg {
-  color: #f3d36c;
+.kamoku-week-completion:hover .app-completion-mark,
+.kamoku-week-completion:focus-visible .app-completion-mark {
+  border-color: var(--bs-primary);
+  opacity: 1;
 }
 
 .kamoku-week-completion-details {
   position: absolute;
   z-index: 1080;
   top: calc(100% + 0.45rem);
-  left: 50%;
+  left: 0;
   display: flex;
   width: max-content;
   max-width: min(20rem, calc(100vw - 1.5rem));
@@ -139,7 +115,6 @@
   align-items: flex-start;
   gap: 0.55rem;
   padding: 0.7rem 0.8rem;
-  translate: -50% 0;
   border: 1px solid var(--bs-border-color);
   border-radius: 0.55rem;
   background: var(--bs-body-bg);
@@ -167,14 +142,6 @@
   text-underline-offset: 0.2em;
 }
 
-.kamoku-week-total {
-  margin-left: 0.2rem;
-  color: var(--bs-secondary-color);
-  font-family: var(--bs-body-font-family);
-  font-size: 0.72em;
-  font-weight: 400;
-}
-
 .kamoku-week-focus {
   margin: 0 0.25rem 3rem;
 }
@@ -183,7 +150,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
   gap: 2rem 3rem;
-  margin-top: 1.25rem;
+  margin-top: 0;
 }
 
 .kamoku-focus-group h3 {
@@ -243,15 +210,12 @@
 
 .kamoku-section-title {
   margin: 0 0.25rem 1rem;
-  color: var(--bs-secondary-color);
+  color: var(--bs-primary);
 }
 
 /* Dojo mode is meant to be readable with the phone lying beside the training
-   area. Keep controls compact, but make the current week and practice content
+   area. Keep controls compact, but make the practice content
    substantially larger without changing the normal weekly plan. */
-.kamoku-page.is-dojo-mode .kamoku-week-position {
-  font-size: clamp(1.45rem, 4vw, 1.8rem);
-}
 
 .kamoku-page.is-dojo-mode .kamoku-focus-group h3,
 .kamoku-page.is-dojo-mode .kamoku-section-title {
@@ -271,28 +235,6 @@
 
   .kamoku-page-header p {
     font-size: 1rem;
-  }
-
-  .kamoku-controls {
-    padding-top: 1rem;
-  }
-
-  .kamoku-week-navigation {
-    column-gap: 0.65rem;
-    row-gap: 0.75rem;
-  }
-
-  .kamoku-week-button {
-    gap: 0.35rem;
-    font-size: 0.95rem;
-  }
-
-  .kamoku-week-position {
-    font-size: 1.15rem;
-  }
-
-  .kamoku-page.is-dojo-mode .kamoku-week-position {
-    font-size: 1.45rem;
   }
 
   .kamoku-week-focus {

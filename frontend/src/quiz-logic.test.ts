@@ -452,12 +452,12 @@ describe("buildHandPositionQuizPool", () => {
     expect(pool.candidates).toEqual([
       expect.objectContaining({
         id: "hand_position.attacker.gyaku gote",
-        question: "Vilken handposition har angriparen i \"{0}\"?",
+        question: "Vilken kamae har angriparen i \"{0}\"?",
         correctAnswer: "chūdan gamae",
       }),
       expect.objectContaining({
         id: "hand_position.defender.gyaku gote",
-        question: "Vilken handposition har försvararen i \"{0}\"?",
+        question: "Vilken kamae har försvararen i \"{0}\"?",
         correctAnswer: "ichiji gamae",
       }),
     ]);

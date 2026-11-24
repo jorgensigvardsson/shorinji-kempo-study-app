@@ -5,12 +5,14 @@ import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 import "./Theory.css";
 import BackButton from "./components/BackButton";
+import OverviewContext from "./components/OverviewContext";
 
 interface TheoryProps {
     showLanguageTools: boolean;
+    displayName?: string;
 }
 
-const Theory = ({ showLanguageTools }: TheoryProps) => {
+const Theory = ({ showLanguageTools, displayName }: TheoryProps) => {
     const translator = useContext(TranslatorContext);
     const navigate = useNavigate();
     const items: GridItem[] = [
@@ -58,7 +60,9 @@ const Theory = ({ showLanguageTools }: TheoryProps) => {
 
     return (
         <div className="theory-page">
-            <BackButton fallback="/" />
+            <OverviewContext displayName={displayName}>
+                <BackButton fallback="/" className="theory-back d-none d-lg-inline-flex" />
+            </OverviewContext>
             <header className="theory-page-header">
                 <h1 className="app-page-heading">{translator.translate("Teori")}</h1>
                 <p className="app-intro-copy">

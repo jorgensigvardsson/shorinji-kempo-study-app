@@ -1,12 +1,13 @@
 import { useContext } from "react";
 import { TranslatorContext } from "./i18n";
 
-const PrivacyPolicy = () => {
+const PrivacyPolicy = ({ embedded = false }: { embedded?: boolean }) => {
   const translator = useContext(TranslatorContext);
+  const Heading = embedded ? "h2" : "h1";
 
   return (
-    <div>
-      <h2>{translator.translate("Integritetspolicy")}</h2>
+    <div className="app-prose-page">
+      <Heading className={embedded ? "app-view-heading" : "app-page-heading"}>{translator.translate("Integritetspolicy")}</Heading>
       <p>
         {translator.translate("Appen kräver ett konto, och kontot hör till en klubb. Dina studiedata sparas på din enhet och synkas med vår server så att du kommer åt dem från alla dina enheter.")}
       </p>

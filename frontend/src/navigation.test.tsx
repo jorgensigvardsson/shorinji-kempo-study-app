@@ -1,18 +1,19 @@
-import { useContext, useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { Link, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { NavigationMemoryProvider } from "./navigation-memory";
-import { NavigationMemory } from "./navigation-memory-context";
 import { BrowserStateScope, isText, useBrowserState } from "./browser-state";
 import { activities, mainSection } from "./navigation";
 import { searchScore, techniqueCatalogue } from "./activity-search";
 import ActivitySearch from "./ActivitySearch";
+import ShortcutSettings from "./ShortcutSettings";
 import Start from "./Start";
 import Technique from "./Technique";
 import BackButton from "./components/BackButton";
-import type { GradeName, GradePlan, HokeiMoment } from "./data";
+import RouteContent from "./components/RouteContent";
+import { getRoutes } from "./routes";
+import type { GradePlan, HokeiMoment } from "./data";
 import { TranslatorContext, TranslatorImplementation } from "./i18n";
 import en from "./assets/translations.en.json";
 import ja from "./assets/translations.ja.json";
@@ -35,35 +36,39 @@ beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 afterEach(() => { vi.restoreAllMocks(); window.history.replaceState(null, ""); });
 
 function Probe() {
-    const memory = useContext(NavigationMemory);
     const location = useLocation();
     return <>
         <output data-testid="url">{location.pathname}{location.search}</output>
-        <output data-testid="recent">{JSON.stringify(memory.recent)}</output>
         <Link to="/">Home</Link><Link to="/settings">Settings</Link>
     </>;
 }
 
 function Harness({ account = "one" }: { account?: string }) {
-    const [grade, setGrade] = useState<GradeName>("6 kyū");
-    return <NavigationMemoryProvider account={account} grade={grade} allGradePlans={plans} onGradeChange={setGrade}>
+    return <NavigationMemoryProvider account={account}>
         <Probe />
         <Routes>
             <Route path="/" element={<Start routes={[]} />} />
             <Route path="/search" element={<ActivitySearch allGradePlans={plans} />} />
+            <Route path="/shortcuts" element={<ShortcutSettings />} />
             <Route path="/technique/:id" element={<Technique allGradePlans={plans} />} />
             <Route path="*" element={<div>Activity</div>} />
         </Routes>
     </NavigationMemoryProvider>;
 }
 
-describe("navigation shortcuts and resume", () => {
-    it("pins a feature from search and keeps it on this account's start page after remounting", async () => {
+describe("navigation shortcuts", () => {
+    it("pins a feature through Customize and keeps it on this account's start page after remounting", async () => {
         const user = userEvent.setup();
-        const { unmount } = render(<MemoryRouter initialEntries={["/search"]}><Harness /></MemoryRouter>);
+        const { unmount } = render(<MemoryRouter><Harness /></MemoryRouter>);
+        await user.click(screen.getByRole("link", { name: "Anpassa" }));
+        expect(screen.getByRole("heading", { level: 1, name: "Anpassa genvägar" })).toBeTruthy();
+        expect(screen.queryByRole("searchbox")).toBeNull();
+        expect(screen.queryByRole("group", { name: /Filtrera sökresultat/ })).toBeNull();
         await user.click(screen.getByRole("button", { name: "Lägg till genväg till Flashkort ordlista" }));
-        await user.click(screen.getByRole("link", { name: "Home" }));
+        expect(screen.getByRole("button", { name: "Ta bort genväg till Flashkort ordlista" }).getAttribute("aria-pressed")).toBe("true");
+        await user.click(screen.getByRole("button", { name: "Tillbaka" }));
         expect(screen.getByRole("link", { name: "Flashkort ordlista" }).getAttribute("href")).toBe("/flashcard/words");
+        expect(localStorage.getItem("navigation:one:recent")).toBeNull();
         unmount();
         const restored = render(<MemoryRouter><Harness /></MemoryRouter>);
         expect(screen.getByRole("link", { name: "Flashkort ordlista" })).toBeTruthy();
@@ -72,33 +77,108 @@ describe("navigation shortcuts and resume", () => {
         expect(screen.queryByRole("link", { name: "Flashkort ordlista" })).toBeNull();
     });
 
-    it("resumes a grading category and does not replace it with the home or settings page", async () => {
+    it("connects the separate customization page to Start without adding a menu entry", async () => {
+        const translator = new TranslatorImplementation({ en, ja, tr }, "sv");
+        const routes = getRoutes(plans[0], plans[0], "minarai", plans, translator, 1, () => {}, () => {}, () => {}, false);
+        const shortcuts = routes.find(route => route.path === "/shortcuts");
+        expect(shortcuts?.element).toBeTruthy();
+        expect(shortcuts?.hideFromMenu).toBe(true);
+        expect(shortcuts?.hideOnStartPage).toBe(true);
+        expect(mainSection("/shortcuts")).toBe("/");
+        const user = userEvent.setup();
+        render(<MemoryRouter><NavigationMemoryProvider account="one">
+            <RouteContent routes={routes} translator={translator} />
+        </NavigationMemoryProvider></MemoryRouter>);
+        await user.click(screen.getByRole("link", { name: "Anpassa" }));
+        expect(await screen.findByRole("heading", { name: "Anpassa genvägar" })).toBeTruthy();
+        await user.click(screen.getByRole("link", { name: "Start" }));
+        expect(screen.getByRole("heading", { name: "Vad vill du göra idag?" })).toBeTruthy();
+    });
+
+    it("keeps an intentionally empty shortcut selection after returning home and remounting", async () => {
+        const user = userEvent.setup();
+        const { unmount } = render(<MemoryRouter><Harness /></MemoryRouter>);
+        await user.click(screen.getByRole("link", { name: "Anpassa" }));
+        for (const title of ["Veckans träning", "Hokei", "Träna gradering"]) {
+            await user.click(screen.getByRole("button", { name: `Ta bort genväg till ${title}` }));
+        }
+        await user.click(screen.getByRole("link", { name: "Start" }));
+        expect(screen.getByText("Tryck på Anpassa och stjärnmarkera de funktioner du vill ha här.")).toBeTruthy();
+        expect(localStorage.getItem("navigation:one:pins")).toBe("[]");
+        unmount();
+        render(<MemoryRouter><Harness /></MemoryRouter>);
+        expect(within(screen.getByRole("region", { name: "Mina genvägar" })).getAllByRole("link")).toHaveLength(1);
+        expect(screen.getByText("Tryck på Anpassa och stjärnmarkera de funktioner du vill ha här.")).toBeTruthy();
+    });
+
+    it("keeps the existing language restrictions on shortcut choices", () => {
+        render(<TranslatorContext.Provider value={new TranslatorImplementation({ en, ja, tr }, "ja")}>
+            <MemoryRouter><NavigationMemoryProvider account="one"><ShortcutSettings /></NavigationMemoryProvider></MemoryRouter>
+        </TranslatorContext.Provider>);
+        expect(screen.getByRole("heading", { name: ja["Anpassa genvägar"] })).toBeTruthy();
+        expect(screen.getByRole("button", { name: new RegExp(ja["Veckans träning"]) })).toBeTruthy();
+        expect(screen.queryByRole("link", { name: /用語のフラッシュカード/ })).toBeNull();
+        expect(screen.queryByRole("button", { name: /用語のフラッシュカード/ })).toBeNull();
+    });
+
+    it("returns home without a resume button or recording recent activities", async () => {
         const user = userEvent.setup();
         const url = "/training/grading?gradingCategory=6+ky%C5%AB%7C0%7C1";
         render(<MemoryRouter initialEntries={[url]}><Harness /></MemoryRouter>);
         await user.click(screen.getByRole("link", { name: "Settings" }));
         await user.click(screen.getByRole("link", { name: "Home" }));
-        await user.click(screen.getByRole("button", { name: /Fortsätt där du slutade/ }));
-        expect(screen.getByTestId("url").textContent).toBe(url);
-        expect(JSON.parse(screen.getByTestId("recent").textContent!)).toEqual([{ url, grade: "6 kyū" }]);
+        expect(screen.getByTestId("url").textContent).toBe("/");
+        expect(screen.queryByRole("button", { name: /Fortsätt där du slutade/ })).toBeNull();
+        expect(screen.getByRole("region", { name: "Mina genvägar" })).toBeTruthy();
+        expect(localStorage.getItem("navigation:one:recent")).toBeNull();
     });
 
-    it("ignores damaged storage and restores a saved grade without changing the profile", async () => {
+    it("ignores old recent activities and falls back to default shortcuts when their storage is damaged", async () => {
         localStorage.setItem("navigation:one:pins", "not json");
-        localStorage.setItem("navigation:one:recent", JSON.stringify([{ url: "/kamoku/plan", grade: "3 kyū" }]));
+        const oldRecent = JSON.stringify([{ url: "/kamoku/plan", grade: "3 kyū" }]);
+        localStorage.setItem("navigation:one:recent", oldRecent);
         const user = userEvent.setup();
         render(<MemoryRouter><Harness /></MemoryRouter>);
         expect(screen.getByRole("link", { name: "Veckans träning" })).toBeTruthy();
-        await user.click(screen.getByRole("button", { name: /Fortsätt där du slutade/ }));
-        expect(JSON.parse(screen.getByTestId("recent").textContent!)[0].grade).toBe("3 kyū");
+        expect(screen.queryByRole("button", { name: /Fortsätt där du slutade/ })).toBeNull();
+        await user.click(screen.getByRole("link", { name: "Hokei" }));
+        await user.click(screen.getByRole("link", { name: "Home" }));
+        expect(screen.queryByRole("button", { name: /Fortsätt där du slutade/ })).toBeNull();
+        expect(localStorage.getItem("navigation:one:recent")).toBe(oldRecent);
     });
 });
 
 describe("app search", () => {
+    it.each(["all", "functions", "techniques", "words"])("waits for a search term with the %s filter", kind => {
+        render(<MemoryRouter initialEntries={[`/search?kind=${kind}&q=+++`]}><ActivitySearch allGradePlans={plans} /></MemoryRouter>);
+        expect(screen.getByText("Skriv ett ord för att söka.")).toBeTruthy();
+        expect(screen.queryByRole("region")).toBeNull();
+        expect(screen.queryByRole("status")).toBeNull();
+        expect(screen.queryByRole("button", { name: /genväg till/ })).toBeNull();
+    });
+
+    it("finds functions without shortcut controls and hides the results again when cleared", async () => {
+        const user = userEvent.setup();
+        render(<MemoryRouter initialEntries={["/search"]}><Harness /></MemoryRouter>);
+        const field = screen.getByRole("searchbox");
+        await user.type(field, "flashkort");
+        expect(screen.getByRole("region", { name: "Funktioner" })).toBeTruthy();
+        expect(screen.queryByRole("button", { name: /genväg till/ })).toBeNull();
+        const flashcards = screen.getByRole("link", { name: /Flashkort hokei/ });
+        expect(flashcards.getAttribute("href")).toBe("/flashcard/hokei");
+        await user.clear(field);
+        expect(screen.queryByRole("region")).toBeNull();
+        expect(screen.getByText("Skriv ett ord för att söka.")).toBeTruthy();
+        await user.type(field, "flashkort");
+        await user.click(screen.getByRole("link", { name: /Flashkort hokei/ }));
+        expect(screen.getByTestId("url").textContent).toBe("/flashcard/hokei");
+        expect(localStorage.getItem("navigation:one:pins")).toBeNull();
+    });
+
     it("searches unaccented romaji and keeps variations distinct through a deep link", async () => {
         const user = userEvent.setup();
         render(<MemoryRouter initialEntries={["/search?q=ryuo"]}><Harness /></MemoryRouter>);
-        const results = screen.getByRole("region", { name: /Tekniker/ });
+        const results = screen.getByRole("region", { name: /Hokei/ });
         expect(within(results).getAllByRole("link")).toHaveLength(2);
         await user.click(within(results).getByRole("link", { name: /Tsuki nuki \(soto\)/ }));
         const card = screen.getByTestId("technique-card");
@@ -108,14 +188,11 @@ describe("app search", () => {
         expect(card.getAttribute("data-open")).toBe("true");
         await user.click(screen.getByRole("button", { name: "Tillbaka" }));
         expect(screen.getByRole<HTMLInputElement>("searchbox").value).toBe("ryuo");
-        await user.click(screen.getByRole("link", { name: "Home" }));
-        await user.click(screen.getByRole("button", { name: /Fortsätt där du slutade.*tsuki nuki \(soto\)/ }));
-        expect(screen.getByTestId("technique-card").getAttribute("data-id")).toBe("tsuki nuki [soto]");
     });
 
     it("finds functions by their translated name and hides language tools in Japanese", () => {
         render(<TranslatorContext.Provider value={new TranslatorImplementation({ en, ja }, "ja")}>
-            <MemoryRouter initialEntries={["/search"]}><ActivitySearch allGradePlans={plans} /></MemoryRouter>
+            <MemoryRouter initialEntries={["/search?q=実技"]}><ActivitySearch allGradePlans={plans} /></MemoryRouter>
         </TranslatorContext.Provider>);
         expect(screen.getByRole("link", { name: /実技の昇格考試/ })).toBeTruthy();
         expect(screen.queryByRole("link", { name: /用語のフラッシュカード/ })).toBeNull();

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, Collapse } from "react-bootstrap";
 import DisclosureChevron from "./DisclosureChevron";
+import "./CollapsibleCard.css";
 
 let focusedCardCount = 0;
 let focusedCardHistoryId = 0;
@@ -82,7 +83,7 @@ const CollapsibleCard = (props: Props) => {
     if (canCollapse)
         style = {...style, cursor: "pointer"};
 
-    const cardClassName = `${className ?? ""} ${focusOnOpen ? "focus-card" : ""} ${collapseOnContentClick && canCollapse ? "collapses-on-content-click" : ""} ${open ? "is-expanded" : "is-collapsed"}`.trim();
+    const cardClassName = `app-disclosure ${className ?? ""} ${focusOnOpen ? "focus-card" : ""} ${collapseOnContentClick && canCollapse ? "collapses-on-content-click" : ""} ${open ? "is-expanded" : "is-collapsed"}`.trim();
     const toggleOpen = () => {
         if (!canCollapse) return;
         if (open && focusOnOpen) closeFocusedCard();

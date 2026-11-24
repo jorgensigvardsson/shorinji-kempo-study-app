@@ -14,7 +14,7 @@ import { getAppDataStore } from "./persistence/store";
 import type { WeeklyPlanCompletionEntry } from "./persistence/schema";
 import { ArrowCounterclockwise, ArrowLeft, ArrowRight } from "react-bootstrap-icons";
 import { hokeiReferenceLabel, localizeSourceTerm, standardMomentLabel, weekIntroduction } from "./weekly-copy";
-import TrainingPageControls from "./components/TrainingPageControls";
+import TrainingPageControls, { FocusChoicePicker } from "./components/TrainingPageControls";
 import "./Kamoku.css";
 import { isIndex, useBrowserState } from "./browser-state";
 
@@ -83,40 +83,47 @@ const Kamoku = (props: Props) => {
         <div className={`kamoku-page${dojoMode ? " is-dojo-mode dojo-readable-hokei" : ""}`}>
             <header className="kamoku-page-header">
                 <h1 className="app-page-heading">{translator.translate("Veckoplan")}</h1>
+                {!dojoMode && <p className="app-intro-copy">
+                    {translator.translate("Följ veckoplanen i Kamokuhyō och markera veckan som tränad när du är klar.")}
+                </p>}
                 <TrainingPageControls showGrade showDojo className="kamoku-page-controls" />
-                {!dojoMode && <>
-                    <p className="app-intro-copy">
-                        {translator.translate("Följ veckoplanen i Kamokuhyō och markera veckan som tränad när du är klar.")}
-                    </p>
-                    <p className="app-intro-copy">{weekIntroduction(selectedWeekData, translator)}</p>
-                </>}
             </header>
-            <div className="kamoku-controls training-view-controls mb-4">
+            <div className="kamoku-controls training-view-controls">
                 <div className="kamoku-week-navigation">
-                    <button
-                        type="button"
-                        className="kamoku-week-button kamoku-week-button-previous"
-                        aria-label={translator.translate("Föregående vecka")}
-                        disabled={visibleWeekIndex === 0}
-                        onClick={() => setSelectedWeek(visibleWeekIndex - 1)}
-                    >
-                        <ArrowLeft aria-hidden="true" />
-                        <span>{translator.translate("Föregående")}</span>
-                    </button>
-                    <span className="kamoku-week-position">
-                        <span>{translator.translate("Vecka")} {selectedWeekNumber}</span>
-                        <span className="kamoku-week-total"> {translator.translate("av")} {grade.weeks.length}</span>
-                    </span>
-                    <button
-                        type="button"
-                        className="kamoku-week-button kamoku-week-button-next"
-                        aria-label={translator.translate("Nästa vecka")}
-                        disabled={visibleWeekIndex === grade.weeks.length - 1}
-                        onClick={() => setSelectedWeek(visibleWeekIndex + 1)}
-                    >
-                        <span>{translator.translate("Nästa")}</span>
-                        <ArrowRight aria-hidden="true" />
-                    </button>
+                    <FocusChoicePicker
+                        title={translator.translate("Välj vecka")}
+                        leadText={translator.translate("Vecka")}
+                        selectedLabel={translator.translate("{0} av {1}", { params: [String(selectedWeekNumber), String(grade.weeks.length)] })}
+                        value={String(visibleWeekIndex)}
+                        choices={grade.weeks.map((week, index) => ({
+                            value: String(index),
+                            label: translator.translate("Vecka {0} av {1}", { params: [String(week.week), String(grade.weeks.length)] }),
+                        }))}
+                        onChange={value => setSelectedWeek(Number(value))}
+                        className="kamoku-week-picker"
+                    />
+                    <div className="kamoku-week-steps">
+                        <button
+                            type="button"
+                            className="kamoku-week-button"
+                            aria-label={translator.translate("Föregående vecka")}
+                            title={translator.translate("Föregående vecka")}
+                            disabled={visibleWeekIndex === 0}
+                            onClick={() => setSelectedWeek(visibleWeekIndex - 1)}
+                        >
+                            <ArrowLeft aria-hidden="true" />
+                        </button>
+                        <button
+                            type="button"
+                            className="kamoku-week-button"
+                            aria-label={translator.translate("Nästa vecka")}
+                            title={translator.translate("Nästa vecka")}
+                            disabled={visibleWeekIndex === grade.weeks.length - 1}
+                            onClick={() => setSelectedWeek(visibleWeekIndex + 1)}
+                        >
+                            <ArrowRight aria-hidden="true" />
+                        </button>
+                    </div>
                     <div className="kamoku-week-completion-row">
                         <WeekCompletionControl
                             key={completionKey}
@@ -130,6 +137,7 @@ const Kamoku = (props: Props) => {
                     </div>
                 </div>
             </div>
+            {!dojoMode && <p className="app-intro-copy kamoku-week-intro">{weekIntroduction(selectedWeekData, translator)}</p>}
             <WeeklyFocus week={selectedWeekData} translator={translator} dojoMode={dojoMode} />
             {basicReferences.length > 0 && (
                 <ReferencedTechniqueSection

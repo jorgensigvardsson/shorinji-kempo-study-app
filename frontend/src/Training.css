@@ -15,7 +15,12 @@
 }
 
 .training-choice-grid {
-  gap: 0.75rem 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.training-choice-section {
+  max-width: 42rem;
 }
 
 .training-choice-section + .training-choice-section {
@@ -23,14 +28,35 @@
 }
 
 .training-choice-section > .app-eyebrow-heading {
-  margin: 0 0 0.75rem 0.25rem;
+  margin: 0 0 0.5rem 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .training-choice-grid .app-grid-card {
-  border-radius: 0.5rem;
+  border: 0;
   border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.training-choice-grid .card-body {
+  padding: 0.95rem 0.25rem 1rem;
+}
+
+.training-choice-grid .app-grid-title {
+  font-family: var(--bs-body-font-family);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.training-choice-grid .app-grid-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .training-choice-grid .app-grid-card-interactive:hover,
@@ -38,6 +64,11 @@
   transform: none;
   background: var(--bs-tertiary-bg);
   box-shadow: none;
+}
+
+.training-choice-grid .app-grid-card-interactive:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }
 
 /* .training-back lives in components/ToolPage.css, alongside the identical Teori

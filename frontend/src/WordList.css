@@ -8,6 +8,37 @@
   font-size: 0.9rem;
 }
 
+.wordlist-sort-options {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.wordlist-sort-options > .btn {
+  margin: 0 !important;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0 !important;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  box-shadow: none;
+}
+
+.wordlist-sort-options > .btn[aria-pressed="true"] {
+  border-bottom-color: var(--bs-warning);
+  color: var(--bs-warning-text-emphasis);
+}
+
+.wordlist-sort-options > .btn:hover {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+}
+
+.wordlist-sort-options > .btn:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
 .wordlist-table-wrapper {
   overflow-x: auto;
   margin-top: 1rem;
@@ -63,7 +94,7 @@
 .wordlist-table tbody tr:hover {
   background: color-mix(in srgb, var(--bs-primary-bg-subtle) 35%, transparent 65%);
 }
-@container (max-width: 19rem) {
+@container (max-width: 38rem) {
   .wordlist-table {
     display: block;
     width: 100%;
@@ -80,13 +111,15 @@
     white-space: nowrap;
   }
 
-  .wordlist-table tbody,
-  .wordlist-table tr {
+  .wordlist-table tbody {
     display: block;
   }
 
   .wordlist-table tr {
-    padding: 0.45rem 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    column-gap: 1rem;
+    padding: 0.65rem 0.25rem;
     border-bottom: 1px solid var(--bs-border-color);
   }
 
@@ -98,21 +131,32 @@
   .wordlist-table td:first-child,
   .wordlist-table td:nth-child(2),
   .wordlist-table td:last-child {
-    display: grid;
-    width: 100%;
-    grid-template-columns: 4.8rem minmax(0, 1fr);
-    gap: 0.55rem;
-    padding: 0.25rem 0.7rem;
+    display: block;
+    width: auto;
+    min-width: 0;
+    padding: 0.25rem 0;
     border: 0;
+  }
+
+  .wordlist-table td:last-child {
+    grid-column: 1 / -1;
   }
 
   .wordlist-table td::before {
     content: attr(data-label);
+    display: block;
+    margin-bottom: 0.15rem;
     color: var(--bs-secondary-color);
     font-size: 0.72rem;
     font-weight: 650;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+}
+
+@container (max-width: 22rem) {
+  .wordlist-table tr {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
