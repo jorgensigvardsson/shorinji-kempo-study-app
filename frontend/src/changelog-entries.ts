@@ -8,6 +8,13 @@ export const CHANGELOG: ChangelogEntry[] = [
     timestamp: "2026-11-24T07:14:24.000Z",
     changes: [
       {
+        emoji: "👣",
+        sv: "Ny kortlek med nio fotförflyttningar: japanska namn på framsidan och förklaringar på baksidan. Du hittar den under Teori → Flashkort.",
+        en: "New deck with nine footwork movements: Japanese names on the front and explanations on the back. Find it under Theory → Flashcards.",
+        tr: "Dokuz ayak hareketi içeren yeni bir kart destesi: ön yüzde Japonca adlar, arka yüzde açıklamalar. Teori → Bilgi kartları bölümünde bulabilirsiniz.",
+        ja: "9種類の足運びを練習する新しいカードデッキを追加しました。表面に日本語名、裏面に説明が表示されます。「理論」→「フラッシュカード」から開けます。",
+      },
+      {
         emoji: "✨",
         sv: "Små gränssnittsförbättringar på tränings- och studiesidor, i menyer och formulär.",
         en: "Small interface improvements across training and study pages, menus and forms.",
@@ -16,10 +23,10 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         emoji: "🔎",
-        sv: "Quiz och flashkort ryms på mobilskärmen med kontrollerna kvar i bild. Långa texter och anteckningar kan rullas inne i kortet. Klickbara rubriker har tydligare markering för mus och tangentbord, och flashkort kan vändas med Enter eller mellanslag.",
-        en: "Quizzes and flashcards fit the mobile screen with controls kept in view. Long texts and notes can be scrolled inside the card. Clickable headings have clearer mouse and keyboard highlighting, and flashcards can be flipped with Enter or Space.",
-        tr: "Quizler ve bilgi kartları, kontroller görünür kalacak şekilde mobil ekrana sığıyor. Uzun metinler ve notlar kartın içinde kaydırılabiliyor. Tıklanabilir başlıklarda fare ve klavye vurguları daha belirgin; bilgi kartları Enter veya Boşluk ile çevrilebiliyor.",
-        ja: "クイズとフラッシュカードが操作ボタンを表示したままスマートフォンの画面に収まるようになりました。長い文章やメモはカード内でスクロールできます。クリックできる見出しのマウス・キーボード操作時の表示も明確にし、フラッシュカードをEnterキーやスペースキーでも裏返せるようにしました。",
+        sv: "Quiz och flashkort ryms på mobilskärmen. Långa texter och anteckningar kan rullas inne i kortet. Sveptipsen försvinner när du har kommit igång, och valet visas medan du sveper. Klickbara rubriker har tydligare markering för mus och tangentbord, och flashkort kan vändas med Enter eller mellanslag.",
+        en: "Quizzes and flashcards fit the mobile screen. Long texts and notes can be scrolled inside the card. Swipe tips disappear once you get started, with the action shown while you swipe. Clickable headings have clearer mouse and keyboard highlighting, and flashcards can be flipped with Enter or Space.",
+        tr: "Quizler ve bilgi kartları mobil ekrana sığıyor. Uzun metinler ve notlar kartın içinde kaydırılabiliyor. Başladıktan sonra kaydırma ipuçları kayboluyor; işlem kaydırırken gösteriliyor. Tıklanabilir başlıklarda fare ve klavye vurguları daha belirgin; bilgi kartları Enter veya Boşluk ile çevrilebiliyor.",
+        ja: "クイズとフラッシュカードがスマートフォンの画面に収まるようになりました。長い文章やメモはカード内でスクロールできます。操作に慣れたらスワイプの案内は消え、スワイプ中に操作内容が表示されます。クリックできる見出しのマウス・キーボード操作時の表示も明確にし、フラッシュカードをEnterキーやスペースキーでも裏返せるようにしました。",
       },
       {
         emoji: "⭐",

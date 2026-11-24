@@ -31,9 +31,31 @@
 
 .hokei-flashcard-progress-trigger {
   display: flex;
+  align-self: center;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.hokei-flashcard-progress-trigger:hover,
+.hokei-flashcard-progress-trigger:focus-visible {
+  color: var(--bs-body-color);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.hokei-flashcard-progress-trigger:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .hokei-flashcard-progress-trigger span:last-child {
@@ -97,10 +119,12 @@
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   z-index: 10;
+  gap: 0.6rem;
 }
 
 .flashcard-swipe-indicator-icon {
@@ -122,6 +146,16 @@
 
 .flashcard-swipe-indicator.is-next .flashcard-swipe-indicator-icon {
   color: var(--bs-primary);
+}
+
+.flashcard-swipe-indicator-label {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.4rem;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .flashcard-scene {
@@ -244,7 +278,7 @@
 }
 
 .flashcard-main-interactive {
-  place-content: stretch;
+  place-content: start stretch;
   text-align: start;
   overflow-y: auto;
   user-select: text;
@@ -260,8 +294,14 @@
 .flashcard-hokei-name {
   margin: 0;
   color: var(--bs-emphasis-color);
-  font-size: clamp(3rem, 10vw, 6rem);
-  line-height: 1.05;
+  font-size: clamp(2.25rem, 7vw, 3.5rem);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.flashcard-hokei-name.is-long-name {
+  font-size: clamp(1.75rem, 6vw, 2.75rem);
+  text-wrap: wrap;
 }
 
 .flashcard-hokei-romaji,
@@ -272,36 +312,101 @@
 }
 
 .flashcard-hokei-back {
-  width: 100%;
+  width: min(100%, 26rem);
+  justify-self: center;
   display: grid;
   align-content: start;
-  gap: 1.75rem;
-  padding: clamp(1rem, 4vw, 2.5rem) clamp(0.25rem, 3vw, 2rem);
+  gap: 0.65rem;
+  padding: 0.25rem;
 }
 
 .flashcard-hokei-back .dojo-card-body {
-  gap: clamp(1.5rem, 4vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
 .flashcard-hokei-back .dojo-foot-images {
-  justify-content: flex-start;
-  padding-inline-start: calc(2rem + clamp(0.5rem, 2vw, 1rem));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
 .flashcard-hokei-back .dojo-foot-images .stance-icon {
-  width: clamp(4rem, 14vw, 5.5rem);
-  height: auto;
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
 }
 
 .flashcard-hokei-back .dojo-roles {
-  gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .flashcard-hokei-back .dojo-role {
-  grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: clamp(0.5rem, 2vw, 1rem);
-  font-size: clamp(1.25rem, 3.5vw, 1.65rem);
-  line-height: 1.5;
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  grid-template-areas: "role stance" ". action";
+  align-items: start;
+  min-width: 0;
+  gap: 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.flashcard-hokei-back .dojo-role > strong {
+  grid-area: role;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.flashcard-hokei-back .dojo-role:not(:has(> .dojo-role-stance)) {
+  grid-template-areas: "role action";
+}
+
+.flashcard-hokei-back .dojo-role:not(:has(> .dojo-role-action)) {
+  grid-template-areas: "role stance";
+}
+
+.flashcard-hokei-back .dojo-role-stance {
+  grid-area: stance;
+}
+
+.flashcard-hokei-back .dojo-role-action {
+  grid-area: action;
+}
+
+/* Use the same alignment for every answer. Overflow starts at the top so all
+   technique details and long notes remain reachable on short screens. */
+.hokei-flashcard-view .flashcard-main.flashcard-main-interactive {
+  align-content: safe center;
+}
+
+.flashcard-hokei-back .dojo-role:not(:has(> .dojo-role-stance, > .dojo-role-action)) {
+  display: none;
+}
+
+.flashcard-hokei-back > .hokei-inline-note:not(.has-note):not(.is-editing) {
+  justify-self: center;
+}
+
+.flashcard-hokei-empty-description {
+  margin: 0;
+  color: var(--bs-secondary-color);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.hokei-flashcard-view .flashcard-main {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-border-color) transparent;
 }
 
 .flashcard-hint {
@@ -362,14 +467,6 @@
 
   .flashcard-hokei-back {
     padding-inline: 0;
-  }
-
-  .flashcard-hokei-back .dojo-role {
-    grid-template-columns: 2rem minmax(0, 1fr);
-    grid-template-areas:
-      "role stance"
-      ". action";
-    row-gap: 0.2rem;
   }
 
   .flashcard-meta {
@@ -448,7 +545,7 @@
   }
 
   .study-session .flashcard-hokei-back {
-    gap: 1rem;
+    gap: 0.65rem;
     padding-block: 0.25rem;
   }
 
@@ -468,5 +565,39 @@
     gap: 0.5rem;
     padding-inline: 0;
     font-size: 0.8rem;
+  }
+}
+
+/* On short phone screens the stance illustration sits beside the role text,
+   leaving the available height for the technique instead of stacking gaps. */
+@media (max-width: 991.98px) and (max-height: 650px) {
+  .study-session .flashcard-hokei-back {
+    gap: 0.4rem;
+  }
+
+  .flashcard-hokei-back .dojo-card-body {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .flashcard-hokei-back .dojo-card-body:not(:has(> .dojo-foot-images)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flashcard-hokei-back .dojo-foot-images {
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-inline-start: 0;
+  }
+
+  .flashcard-hokei-back .dojo-roles {
+    min-width: 0;
+    gap: 0.4rem;
+    width: 100%;
+  }
+
+  .flashcard-hokei-back > .hokei-inline-note {
+    padding-block: 0;
   }
 }

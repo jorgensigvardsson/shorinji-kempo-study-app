@@ -220,6 +220,13 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
+        path: "/flashcard/footwork",
+        element: <TheoryToolPage><Flashcard deck="footwork" /></TheoryToolPage>,
+        menuText: translator.translate("Fotförflyttningar"),
+        icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
         path: "/flashcard/hokei",
         element: <TheoryToolPage><HokeiFlashcard allGradePlans={allGradePlans} myGrade={profileGradePlan.grade} /></TheoryToolPage>,
         menuText: translator.translate("Hokei"),

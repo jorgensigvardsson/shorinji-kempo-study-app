@@ -23,9 +23,22 @@ const wordFlashcards: WordFlashcardEntry[] = (wordList as WordListEntry[])
         meanings: entry.meanings,
     }));
 
-const Flashcard = () => {
+// These are existing word identities, shared with the full dictionary deck.
+// Keep the selection explicit so unrelated future words never enter this deck.
+const footworkWordIds = new Set([539, 540, 541, 542, 543, 544, 545, 546, 547]);
+const flashcardDecks = {
+    words: { title: "Ordlista", description: "Öva ord och betydelser.", words: wordFlashcards },
+    footwork: {
+        title: "Fotförflyttningar",
+        description: "Öva namn och betydelser för fotförflyttningar.",
+        words: wordFlashcards.filter(word => footworkWordIds.has(word.id)),
+    },
+};
+
+const Flashcard = ({ deck = "words" }: { deck?: keyof typeof flashcardDecks }) => {
     const translator = useContext(TranslatorContext);
-    const cards = useMemo<FlashcardDeckEntry[]>(() => wordFlashcards.map(card => {
+    const selection = flashcardDecks[deck];
+    const cards = useMemo<FlashcardDeckEntry[]>(() => selection.words.map(card => {
         const kanji = card.kanji ?? card.romaji;
         const primaryMeaning = translator.translate(card.meanings[0]);
         const extraMeanings = card.meanings.slice(1).map(meaning => translator.translate(meaning));
@@ -52,14 +65,14 @@ const Flashcard = () => {
                 </>
             ),
         };
-    }), [translator]);
+    }), [translator, selection]);
 
     return <div className="flashcard-view study-session">
         <header className="study-page-header">
-            <h1 className="app-page-heading">{translator.translate("Flashkort")}: {translator.translate("Ordlista")}</h1>
-            <p className="app-intro-copy">{translator.translate("Öva ord och betydelser.")}</p>
+            <h1 className="app-page-heading">{translator.translate(selection.title)}</h1>
+            <p className="app-intro-copy">{translator.translate(selection.description)}</p>
         </header>
-        <FlashcardDeck cards={cards} swipeOnly hideFaceLabels hideFlipHints />
+        <FlashcardDeck key={deck} cards={cards} swipeOnly hideFaceLabels hideFlipHints hideIndexLabel={deck === "footwork"} />
     </div>;
 };
 

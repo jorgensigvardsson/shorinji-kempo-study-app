@@ -56,7 +56,7 @@ it("shows a hokei name on the front and details with editable notes on the back"
 
     expect(screen.getByRole("heading", { name: "逆小手" })).toBeDefined();
     expect(container.querySelector(".flashcard-hokei-romaji")?.textContent).toBe("gyaku gote");
-    expect(screen.queryByText("Hokei")).toBeNull();
+    expect(container.querySelector(".flashcard-meta")).toBeNull();
     expect(screen.queryByText("Framsida")).toBeNull();
     expect(screen.queryByText("Tryck för att vända")).toBeNull();
     await user.click(screen.getByRole("heading", { name: "逆小手" }));
@@ -79,6 +79,29 @@ it("shows a hokei name on the front and details with editable notes on the back"
 });
 
 
+it("explains missing details while keeping existing notes readable and editable", async () => {
+    const user = userEvent.setup();
+    const emptyHokei = { ...hokei, roles: { attacker: {}, defender: {} }, foot_stance: [] };
+    const emptyPlan: GradePlan = {
+        ...plan,
+        weeks: [{ week: 1, type: "regular_week", moments: [emptyHokei] }],
+    };
+    getAppDataStore().set("notes", { [hokei.id]: "Min egen beskrivning" });
+    const { container } = render(<HokeiFlashcard allGradePlans={[emptyPlan]} myGrade="6 kyū" />);
+
+    await user.click(screen.getByRole("heading", { name: /gyaku gote/i }));
+
+    expect(screen.getByText("Beskrivning saknas för det här kortet.")).toBeDefined();
+    expect(container.querySelector(".dojo-role")).toBeNull();
+    expect(screen.getByText("Min egen beskrivning")).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Redigera anteckningar för gyaku gote" }));
+    await user.clear(screen.getByRole("textbox"));
+    await user.type(screen.getByRole("textbox"), "Uppdaterad beskrivning");
+    await user.click(screen.getByRole("button", { name: "Spara" }));
+
+    expect(getAppDataStore().get("notes")[hokei.id]).toBe("Uppdaterad beskrivning");
+});
+
 it("uses horizontal swipes instead of action buttons during hokei practice", async () => {
     render(<HokeiFlashcard allGradePlans={[plan]} myGrade="6 kyū" />);
 
@@ -97,6 +120,8 @@ it("uses horizontal swipes instead of action buttons during hokei practice", asy
     await waitFor(() => {
         expect(getAppDataStore().get("knownFlashCards")["hokei:gyaku gote"]?.known).toBe(true);
     });
+    expect(screen.queryByText("← Öva igen")).toBeNull();
+    expect(localStorage.getItem("flashcard-swipe-guide-dismissed")).toBe("true");
 });
 
 it("keeps learned word cards when restarting the hokei deck", async () => {

@@ -18,6 +18,14 @@ const FlashcardMenu = () => {
             navigatesTo: "/flashcard/words",
         },
         {
+            key: "footwork-flashcards",
+            title: translator.translate("Fotförflyttningar"),
+            subtitle: translator.translate("Öva namn och betydelser för fotförflyttningar."),
+            icon: <CardHeading />,
+            onSelect: () => navigate("/flashcard/footwork"),
+            navigatesTo: "/flashcard/footwork",
+        },
+        {
             key: "hokei-flashcards",
             title: translator.translate("Hokei"),
             subtitle: translator.translate("Träna fotposition, kamae och utförande med dina egna anteckningar."),

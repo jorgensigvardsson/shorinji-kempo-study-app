@@ -25,6 +25,7 @@ interface Props {
 }
 
 const SWIPE_THRESHOLD = 80;
+const SWIPE_GUIDE_DISMISSED_KEY = "flashcard-swipe-guide-dismissed";
 type PendingAction = "none" | "known" | "next";
 
 const actionForSwipe = (dx: number, dy: number, swipeOnly: boolean): PendingAction => {
@@ -79,6 +80,10 @@ const FlashcardDeck = ({
         pickRandom(cards.filter(card => !store.get("knownFlashCards")[card.id]?.known)),
     );
     const [showBack, setShowBack] = useState(false);
+    const [showSwipeGuide, setShowSwipeGuide] = useState(() => {
+        try { return localStorage.getItem(SWIPE_GUIDE_DISMISSED_KEY) !== "true"; }
+        catch { return true; }
+    });
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [isFlying, setIsFlying] = useState(false);
@@ -96,6 +101,13 @@ const FlashcardDeck = ({
         : availableCards[0]?.id ?? null;
     const currentCard = cards.find(card => card.id === effectiveCurrentCardId) ?? null;
 
+    const dismissSwipeGuide = () => {
+        if (!swipeOnly || !showSwipeGuide) return;
+        setShowSwipeGuide(false);
+        try { localStorage.setItem(SWIPE_GUIDE_DISMISSED_KEY, "true"); }
+        catch { /* It stays dismissed for this visit when storage is unavailable. */ }
+    };
+
     const resetMotion = () => {
         setIsFlying(false);
         setIsDragging(false);
@@ -104,6 +116,7 @@ const FlashcardDeck = ({
     };
 
     const commitMarkKnown = (cardId: string) => {
+        dismissSwipeGuide();
         const updated = {
             ...knownFlashCardsRef.current,
             [cardId]: { known: true, updatedAt: new Date().toISOString() },
@@ -117,6 +130,7 @@ const FlashcardDeck = ({
     };
 
     const commitNextCard = (cardId: string) => {
+        dismissSwipeGuide();
         resetMotion();
         setCurrentCardId(pickRandom(cards.filter(card => !knownFlashCardsRef.current[card.id]?.known), cardId));
         setShowBack(false);
@@ -195,6 +209,7 @@ const FlashcardDeck = ({
 
     const showNextCard = () => {
         if (isFlying) return;
+        dismissSwipeGuide();
         setCurrentCardId(pickRandom(availableCards, currentCard?.id));
         setShowBack(false);
     };
@@ -307,6 +322,9 @@ const FlashcardDeck = ({
         transition: isFlying ? "transform 0.4s ease, opacity 0.4s ease" : "none",
         opacity: isFlying ? 0 : 1,
     } : {};
+    const swipeFeedback = swipeOnly && isDragging
+        ? dragOffset.x > 0 ? "known" : "next"
+        : pendingAction;
 
     return (
         <div className="flashcard-page">
@@ -348,16 +366,19 @@ const FlashcardDeck = ({
                         </div>
                     </div>
                 </div>
-                {isDragging && pendingAction !== "none" && (
-                    <div className={`flashcard-swipe-indicator is-${pendingAction}`}>
+                {(isDragging || isFlying) && swipeFeedback !== "none" && (
+                    <div className={`flashcard-swipe-indicator is-${swipeFeedback}`}>
                         <span className="flashcard-swipe-indicator-icon">
-                            {pendingAction === "known" ? <CheckCircleFill /> : <ArrowLeft />}
+                            {swipeFeedback === "known" ? <CheckCircleFill /> : <ArrowLeft />}
+                        </span>
+                        <span className="flashcard-swipe-indicator-label">
+                            {translator.translate(swipeFeedback === "known" ? "Kan det" : "Öva igen")}
                         </span>
                     </div>
                 )}
             </div>
             {swipeOnly ? (
-                <div className="flashcard-swipe-guide">
+                showSwipeGuide && <div className="flashcard-swipe-guide">
                     <span>← {translator.translate("Öva igen")}</span>
                     <span className="flashcard-swipe-guide-center">{translator.translate("Svep kortet")}</span>
                     <span>{translator.translate("Kan det")} →</span>

@@ -59,6 +59,8 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
     const cards = useMemo<FlashcardDeckEntry[]>(() => selectedHokeis.map(hokei => {
         const romajiName = hokei.hokei_name;
         const kanjiName = translator.japanese(hokei.hokei_name);
+        const hasRoleDescription = !!(hokei.roles.attacker.action?.trim() || hokei.roles.defender.action?.trim());
+        const hasBackDetails = hasRoleDescription || !!(hokei.roles.attacker.stance || hokei.roles.defender.stance || hokei.foot_stance?.length);
         const learnedName = translator.isJapanese
             ? kanjiName
             : translator.translate(hokei.hokei_name, { capitalize: true });
@@ -68,7 +70,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
             indexLabel: translator.translate("Hokei"),
             front: (
                 <div className="flashcard-hokei-front">
-                    <h2 className="flashcard-hokei-name">{kanjiName}</h2>
+                    <h2 className={`flashcard-hokei-name${Array.from(kanjiName).length > 8 ? " is-long-name" : ""}`}>{kanjiName}</h2>
                     {kanjiName !== romajiName && (
                         <p className="flashcard-hokei-romaji">{romajiName}</p>
                     )}
@@ -81,7 +83,9 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
             ),
             back: (
                 <div className="flashcard-hokei-back">
-                    <HokeiDojoDetails hokei={hokei} />
+                    {hasBackDetails ? <HokeiDojoDetails hokei={hokei} /> : (
+                        <p className="flashcard-hokei-empty-description">{translator.translate("Beskrivning saknas för det här kortet.")}</p>
+                    )}
                     <HokeiNoteEditor hokei={hokei} />
                 </div>
             ),
@@ -110,7 +114,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
     return (
         <div className="hokei-flashcard-view study-session">
             <header className="study-page-header">
-                <h1 className="app-page-heading">{translator.translate("Flashkort")}: {translator.translate("Hokei")}</h1>
+                <h1 className="app-page-heading">{translator.translate("Hokei")}</h1>
                 <p className="app-intro-copy">{translator.translate("Träna fotposition, kamae och utförande med dina egna anteckningar.")}</p>
             </header>
             <div className="hokei-flashcard-filter">
@@ -122,7 +126,7 @@ const HokeiFlashcard = ({ allGradePlans, myGrade }: Props) => {
                     choices={gradeChoices}
                     onChange={value => setGradeSelection(value as GradeSelection)}
                 />
-                <Button type="button" variant="outline-secondary" className="hokei-flashcard-progress-trigger" onClick={() => setShowProgress(true)}>
+                <Button type="button" variant="link" className="hokei-flashcard-progress-trigger" onClick={() => setShowProgress(true)}>
                     <span>{translator.translate("Framsteg")}</span>
                     <span>{selectedKnownCount}/{selectedHokeis.length}</span>
                 </Button>

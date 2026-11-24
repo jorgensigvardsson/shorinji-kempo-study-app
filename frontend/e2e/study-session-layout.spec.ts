@@ -12,7 +12,7 @@ const views = [
 ] as const;
 
 const routes = [
-    "/flashcard/words", "/flashcard/hokei", "/quiz/words",
+    "/flashcard/words", "/flashcard/footwork", "/flashcard/hokei", "/quiz/words",
     "/quiz/technique-groups", "/quiz/foot-stance", "/quiz/hand-position",
 ];
 
@@ -25,7 +25,9 @@ async function expectSessionToFit(page: Page) {
         if (scrollY > 1) problems.push("page scrolled instead of card content");
         const nav = document.querySelector(".app-bottom-nav")!.getBoundingClientRect();
         for (const selector of [".study-session", ".quiz-actions, .flashcard-swipe-guide"]) {
-            const box = document.querySelector(selector)!.getBoundingClientRect();
+            const element = document.querySelector(selector);
+            if (!element) continue; // Experienced flashcard users have no footer.
+            const box = element.getBoundingClientRect();
             if (box.top < 0 || box.bottom > nav.top + 1) problems.push(`${selector} leaves available screen`);
         }
         const content = document.querySelector<HTMLElement>(
@@ -51,7 +53,7 @@ for (const view of views) {
                 document.data.language = view.language;
                 // Exercise a real, unusually long dictionary definition.
                 for (const word of wordList) {
-                    if (word.id !== undefined && word.id !== 478) {
+                    if (path === "/flashcard/words" && word.id !== undefined && word.id !== 478) {
                         document.data.knownFlashCards[String(word.id)] = { known: true, updatedAt: document.updatedAt };
                     }
                 }
@@ -105,6 +107,15 @@ for (const view of views) {
                 }
                 if (path.startsWith("/quiz/")) {
                     await page.locator(".quiz-actions > button").click();
+                    await expectSessionToFit(page);
+                } else {
+                    await page.locator(".flashcard-drag-wrapper").press("ArrowLeft");
+                    await expect(page.locator(".flashcard-swipe-guide")).toHaveCount(0);
+                    await expectSessionToFit(page);
+                    await page.reload();
+                    await expect(page.locator(".study-session")).toBeVisible({ timeout: 30_000 });
+                    await page.evaluate(() => window.document.fonts.ready);
+                    await expect(page.locator(".flashcard-swipe-guide")).toHaveCount(0);
                     await expectSessionToFit(page);
                 }
             });

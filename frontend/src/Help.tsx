@@ -68,6 +68,7 @@ export default function Help() {
 
             <HelpSection title={translator.translate("Flashkort")}>
                 <p>{translator.translate("Med flashkort tänker du efter och vänder sedan kortet för att se svaret. Öva ord eller repetera Hokei med teknikdetaljer och dina egna anteckningar under Teori → Flashkort.")}</p>
+                <p>{translator.translate("Tryck på kortet för att vända. Svep vänster för att öva igen eller höger om du kan det.")}</p>
                 <HelpLink to="/flashcard">{translator.translate("Flashkort")}</HelpLink>
             </HelpSection>
         </>}

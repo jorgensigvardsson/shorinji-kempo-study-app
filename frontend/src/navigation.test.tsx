@@ -216,7 +216,7 @@ describe("app search", () => {
             expect((language as Record<string, string>)[activity.title], activity.title).toBeTruthy();
     });
 
-    it.each(["/word-list", "/quiz/words", "/flashcard/hokei", "/theory/grading"])("keeps Theory selected at %s", path => {
+    it.each(["/word-list", "/quiz/words", "/flashcard/hokei", "/flashcard/footwork", "/theory/grading"])("keeps Theory selected at %s", path => {
         expect(mainSection(path)).toBe("/theory");
     });
 });
