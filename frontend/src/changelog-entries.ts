@@ -9,10 +9,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       {
         emoji: "👣",
-        sv: "Ny kortlek med nio fotförflyttningar: japanska namn på framsidan och förklaringar på baksidan. Du hittar den under Teori → Flashkort.",
-        en: "New deck with nine footwork movements: Japanese names on the front and explanations on the back. Find it under Theory → Flashcards.",
-        tr: "Dokuz ayak hareketi içeren yeni bir kart destesi: ön yüzde Japonca adlar, arka yüzde açıklamalar. Teori → Bilgi kartları bölümünde bulabilirsiniz.",
-        ja: "9種類の足運びを練習する新しいカードデッキを追加しました。表面に日本語名、裏面に説明が表示されます。「理論」→「フラッシュカード」から開けます。",
+        sv: "Nya flashkort: fotförflyttningar! Träna nio fotförflyttningar med japanska namn på framsidan och förklaringar på baksidan. Du hittar dem under Teori → Flashkort.",
+        en: "New flashcards: footwork! Practise nine footwork movements with Japanese names on the front and explanations on the back. Find them under Theory → Flashcards.",
+        tr: "Yeni bilgi kartları: ayak hareketleri! Ön yüzde Japonca adlar, arka yüzde açıklamalar ile dokuz ayak hareketini çalışın. Teori → Bilgi kartları bölümünde bulabilirsiniz.",
+        ja: "新しいフラッシュカード：足運び！表面の日本語名と裏面の説明で、9種類の足運びを練習できます。「理論」→「フラッシュカード」から開けます。",
       },
       {
         emoji: "✨",
