@@ -1,0 +1,2017 @@
+[
+  {
+    "id": "tai gamae [kihon]",
+    "kind": "group",
+    "name": "tai gamae",
+    "kanji": "体構え",
+    "description": "kroppsposition",
+    "children": [
+      {
+        "id": "fujinhō",
+        "kind": "subgroup",
+        "name": "fujinhō",
+        "kanji": "布陣法",
+        "description": "inbördes position",
+        "children": [
+          {
+            "id": "seitai gamae",
+            "kind": "technique",
+            "name": "seitai gamae",
+            "kanji": "正体構え",
+            "description": "båda har kaisoku chūdan gamae"
+          },
+          {
+            "id": "tai gamae",
+            "kind": "technique",
+            "name": "tai gamae",
+            "kanji": "対構",
+            "description": "stängd position (båda har samma fot fram)"
+          },
+          {
+            "id": "hiraki gamae",
+            "kind": "technique",
+            "name": "hiraki gamae",
+            "kanji": "開構",
+            "description": "öppen position (olika fot fram)"
+          }
+        ]
+      },
+      {
+        "id": "byakuren hachi jin",
+        "kind": "subgroup",
+        "name": "byakuren hachi jin",
+        "kanji": "白蓮八陣",
+        "description": "byakuren:s åtta positioner",
+        "children": [
+          {
+            "id": "gasshō gamae",
+            "kind": "technique",
+            "name": "gasshō gamae",
+            "kanji": "合掌構え",
+            "description": "hälsningsposition"
+          },
+          {
+            "id": "manji gamae",
+            "kind": "technique",
+            "name": "manji gamae",
+            "kanji": "卍構え",
+            "description": "främre handen knuten, bakre handen öppen över huvudet"
+          },
+          {
+            "id": "midare gamae",
+            "kind": "technique",
+            "name": "midare gamae",
+            "kanji": "乱構",
+            "description": "främre handen öppen, bakre handen öppen framför motsatt axel, inbjuda till attack mot huvudet"
+          },
+          {
+            "id": "hassō gamae",
+            "kind": "technique",
+            "name": "hassō gamae",
+            "kanji": "八相構",
+            "description": "båda händerna öppna, i axelhöjd, för att inbjuda till attack mot kroppen"
+          },
+          {
+            "id": "taiki gamae",
+            "kind": "technique",
+            "name": "taiki gamae",
+            "kanji": "待気構",
+            "description": "båda händerna öppna, främre handen högt ungefär i axelhöjd och bakre handen framför chūdan, inbjuda attack mot huvudet"
+          },
+          {
+            "id": "gyaku taiki gamae",
+            "kind": "technique",
+            "name": "gyaku taiki gamae",
+            "kanji": "逆待気構え",
+            "description": "omvänd taiki gamae, främre handen framför chūdan och bakre handen ungefär i axelhöjd"
+          },
+          {
+            "id": "aiki gamae",
+            "kind": "technique",
+            "name": "aiki gamae",
+            "kanji": "合気構え",
+            "description": "som hassō gamae men händerna hålls högre och mer ut från kroppen, särskilt den bakre handen"
+          },
+          {
+            "id": "byakuren chūdan gamae",
+            "kind": "technique",
+            "name": "byakuren chūdan gamae",
+            "kanji": "白蓮中段構え",
+            "description": "träningsposition, båda fötterna parallella, knutna händer",
+            "alsoKnownAs": {
+              "name": "kaisoku chūdan gamae",
+              "kanji": "開足中段構え"
+            }
+          }
+        ]
+      },
+      {
+        "id": "giwa kyū jin",
+        "kind": "subgroup",
+        "name": "giwa kyū jin",
+        "kanji": "義和九陣",
+        "description": "giwa:s nio positioner",
+        "children": [
+          {
+            "id": "kesshu gamae",
+            "kind": "technique",
+            "name": "kesshu gamae",
+            "kanji": "結手構",
+            "description": "vänster tumme i höger hand, hälarna ihop"
+          },
+          {
+            "id": "ichiji gamae",
+            "kind": "technique",
+            "name": "ichiji gamae",
+            "kanji": "一字構",
+            "description": "sidoposition, främre handen öppen, bakre handen knuten"
+          },
+          {
+            "id": "niō gamae",
+            "kind": "technique",
+            "name": "niō gamae",
+            "kanji": "仁王構え",
+            "description": "som ichiji gamae men främre handen mer mot insidan, bakre handen mer mot utsidan"
+          },
+          {
+            "id": "chūdan gamae",
+            "kind": "technique",
+            "name": "chūdan gamae",
+            "kanji": "中段構",
+            "description": "sidoposition, båda händerna knutna"
+          },
+          {
+            "id": "gedan gamae",
+            "kind": "technique",
+            "name": "gedan gamae",
+            "kanji": "下段構",
+            "description": "som chūdan gamae men främre handen vriden så att tummen inte kan ses av motståndaren"
+          },
+          {
+            "id": "gyaku gedan gamae",
+            "kind": "technique",
+            "name": "gyaku gedan gamae",
+            "kanji": "逆下段構",
+            "description": "omvänd gedan gamae"
+          },
+          {
+            "id": "fukko gamae",
+            "kind": "technique",
+            "name": "fukko gamae",
+            "kanji": "伏虎構え",
+            "description": "knästående med händerna som i ichiji gamae"
+          },
+          {
+            "id": "tate musō gamae",
+            "kind": "technique",
+            "name": "tate musō gamae",
+            "kanji": "立無相構え",
+            "description": "främre handen öppen under den bakre armens armbåge"
+          },
+          {
+            "id": "yoko musō gamae",
+            "kind": "technique",
+            "name": "yoko musō gamae",
+            "kanji": "横無相構え",
+            "description": "främre handen knuten ovanför bakre armens hand, underarmen hålls parallell med marken"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sokuihō",
+    "kind": "group",
+    "name": "sokuihō",
+    "kanji": "足位法",
+    "description": "fotposition",
+    "children": [
+      {
+        "id": "ichi",
+        "kind": "subgroup",
+        "name": "ichi",
+        "kanji": "位置",
+        "description": "placering",
+        "children": [
+          {
+            "id": "kaisoku dachi",
+            "kind": "technique",
+            "name": "kaisoku dachi",
+            "kanji": "開足立",
+            "description": "parallella fötter, axelbredd"
+          },
+          {
+            "id": "heisoku dachi",
+            "kind": "technique",
+            "name": "heisoku dachi",
+            "kanji": "閉足立",
+            "description": "hälarna ihop, tårna 60° öppna"
+          },
+          {
+            "id": "gyaku chōji dachi",
+            "kind": "technique",
+            "name": "gyaku chōji dachi",
+            "kanji": "逆丁字立",
+            "description": "som vid chūdan gamae, ofta förklarat som renoji dachi [レの字立], fötterna placerade som skrivtecknet ”レ” [re]"
+          },
+          {
+            "id": "hachiji ashi dachi",
+            "kind": "technique",
+            "name": "hachiji ashi dachi",
+            "kanji": "八字足立",
+            "description": "fötterna i axelbredd med tårna pekande inåt som skrivtecknet ”八”"
+          },
+          {
+            "id": "mae kagi ashi dachi",
+            "kind": "technique",
+            "name": "mae kagi ashi dachi",
+            "kanji": "前鈎足立",
+            "description": "renoji dachi med främre foten vriden så att hälen pekar något framåt"
+          },
+          {
+            "id": "ushiro kagi ashi dachi",
+            "kind": "technique",
+            "name": "ushiro kagi ashi dachi",
+            "kanji": "後鈎足立",
+            "description": "renoji dachi med bakre foten vriden utåt som i gyaku tenshin, etc."
+          },
+          {
+            "id": "yoko kagi ashi dachi",
+            "kind": "technique",
+            "name": "yoko kagi ashi dachi",
+            "kanji": "横鈎足立",
+            "description": "benen i kors, ena foten framför den andra, främre fotens tår pekande ut till sidan som i formen av; 「"
+          },
+          {
+            "id": "kōsoku dachi",
+            "kind": "technique",
+            "name": "kōsoku dachi",
+            "kanji": "交足立",
+            "description": "benen i kors, vid jūji ashi eller harai uke, etc."
+          }
+        ]
+      },
+      {
+        "id": "tachi kata",
+        "kind": "subgroup",
+        "name": "tachi kata",
+        "kanji": "立ち方",
+        "description": "sätt att stå",
+        "children": [
+          {
+            "id": "kunoji dachi",
+            "kind": "technique",
+            "name": "kunoji dachi",
+            "kanji": "くの字立",
+            "description": "böjda knän, (som skrivtecknet ”く” [ku])"
+          },
+          {
+            "id": "zenkutsu dachi",
+            "kind": "technique",
+            "name": "zenkutsu dachi",
+            "kanji": "前屈立",
+            "description": "vikten på främre benet"
+          },
+          {
+            "id": "kōkutsu dachi",
+            "kind": "technique",
+            "name": "kōkutsu dachi",
+            "kanji": "後屈立",
+            "description": "vikten på bakre benet"
+          },
+          {
+            "id": "neko ashi dachi",
+            "kind": "technique",
+            "name": "neko ashi dachi",
+            "kanji": "猫足立",
+            "description": "kattfotsposition - kraftig kōkutsu dachi, med främre foten endast på tå"
+          },
+          {
+            "id": "kiba dachi",
+            "kind": "technique",
+            "name": "kiba dachi",
+            "kanji": "騎馬立",
+            "description": "fötterna i hachiji dachi med ridställningsliknande position"
+          },
+          {
+            "id": "heima dachi",
+            "kind": "technique",
+            "name": "heima dachi",
+            "kanji": "平馬立",
+            "description": "djupare kiba dachi, vid kagi zuki eller chidori, etc."
+          },
+          {
+            "id": "shiko dachi",
+            "kind": "technique",
+            "name": "shiko dachi",
+            "kanji": "四股立",
+            "description": "”sumo-position”"
+          },
+          {
+            "id": "fukko dachi",
+            "kind": "technique",
+            "name": "fukko dachi",
+            "kanji": "伏虎立",
+            "description": "ett knä i marken"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "umpohō",
+    "kind": "group",
+    "name": "umpohō",
+    "kanji": "運歩法",
+    "description": "fotarbete",
+    "children": [
+      {
+        "id": "de ashi",
+        "kind": "subgroup",
+        "name": "de ashi",
+        "kanji": "出足",
+        "description": "steg framåt",
+        "children": [
+          {
+            "id": "fumikomi ashi",
+            "kind": "technique",
+            "name": "fumikomi ashi",
+            "kanji": "踏込足",
+            "description": "främre benet flyttas rakt fram"
+          },
+          {
+            "id": "mae yose ashi",
+            "kind": "technique",
+            "name": "mae yose ashi",
+            "kanji": "前寄足",
+            "description": "bakre foten dras fram till sidan av eller bakom den främre foten"
+          },
+          {
+            "id": "sashikomi ashi",
+            "kind": "technique",
+            "name": "sashikomi ashi",
+            "kanji": "差込足",
+            "description": "främre foten flyttas rakt fram och följs av bakre foten"
+          },
+          {
+            "id": "sashikae ashi",
+            "kind": "technique",
+            "name": "sashikae ashi",
+            "kanji": "差替足",
+            "description": "flytta bakre foten framåt, framför den främre foten"
+          },
+          {
+            "id": "mae chidori ashi",
+            "kind": "technique",
+            "name": "mae chidori ashi",
+            "kanji": "前千鳥足",
+            "description": "steg diagonalt framåt"
+          },
+          {
+            "id": "tobikomi ashi",
+            "kind": "technique",
+            "name": "tobikomi ashi",
+            "kanji": "跳込足",
+            "description": "hoppande steg, skjut ifrån med den bakre foten"
+          },
+          {
+            "id": "mae kumo ashi",
+            "kind": "technique",
+            "name": "mae kumo ashi",
+            "kanji": "前蜘蛛足",
+            "description": "hoppa framåt genom att skjuta ifrån med främre foten, bakre foten rör sig framåt först sedan den främre (bakre foten tar den främre fotens plats) (spindelsteg)"
+          },
+          {
+            "id": "mae tensoku",
+            "kind": "technique",
+            "name": "mae tensoku",
+            "kanji": "前転足",
+            "description": "hoppa framåt med bägge fötterna samtidigt"
+          }
+        ]
+      },
+      {
+        "id": "hiki ashi [umpohō]",
+        "kind": "subgroup",
+        "name": "hiki ashi",
+        "kanji": "引足",
+        "description": "steg bakåt",
+        "children": [
+          {
+            "id": "hiki ashi",
+            "kind": "technique",
+            "name": "hiki ashi",
+            "kanji": "引足",
+            "description": "dra ett ben bakåt"
+          },
+          {
+            "id": "ushiro yose ashi",
+            "kind": "technique",
+            "name": "ushiro yose ashi",
+            "kanji": "後寄足",
+            "description": "främre foten dras till sidan av eller framför den bakre foten"
+          },
+          {
+            "id": "jun sagari ashi",
+            "kind": "technique",
+            "name": "jun sagari ashi",
+            "kanji": "順退足",
+            "description": "flytta först bak den bakre foten sedan den främre = sashi komi ashi bakåt"
+          },
+          {
+            "id": "hiraki sagari ashi",
+            "kind": "technique",
+            "name": "hiraki sagari ashi",
+            "kanji": "開退足",
+            "description": "dra tillbaka den främre foten bakom den bakre, skifta sida genom att öppna kroppen"
+          },
+          {
+            "id": "ushiro chidori ashi",
+            "kind": "technique",
+            "name": "ushiro chidori ashi",
+            "kanji": "後千鳥足",
+            "description": "steg diagonalt bakåt"
+          },
+          {
+            "id": "ushiro tobi sagari ashi",
+            "kind": "technique",
+            "name": "ushiro tobi sagari ashi",
+            "kanji": "後跳退足",
+            "description": "hoppande steg bakåt från zenkutsu dachi"
+          },
+          {
+            "id": "ushiro kumo ashi",
+            "kind": "technique",
+            "name": "ushiro kumo ashi",
+            "kanji": "後蜘蛛足",
+            "description": "hoppa bakåt, skjut ifrån med bakre foten"
+          },
+          {
+            "id": "ushiro tensoku",
+            "kind": "technique",
+            "name": "ushiro tensoku",
+            "kanji": "後転足",
+            "description": "hoppa bakåt med båda fötterna samtidigt"
+          }
+        ]
+      },
+      {
+        "id": "yoko ashi [umpohō]",
+        "kind": "subgroup",
+        "name": "yoko ashi",
+        "kanji": "横足",
+        "description": "steg åt sidan",
+        "children": [
+          {
+            "id": "yoko ashi",
+            "kind": "technique",
+            "name": "yoko ashi",
+            "kanji": "横足",
+            "description": "med enbart en fot ett steg åt sidan"
+          },
+          {
+            "id": "kani ashi",
+            "kind": "technique",
+            "name": "kani ashi",
+            "kanji": "蟹足",
+            "description": "båda fötterna steg åt sidan, krabbsteg = sashikomi ashi åt sidan"
+          },
+          {
+            "id": "jūji ashi",
+            "kind": "technique",
+            "name": "jūji ashi",
+            "kanji": "十字足",
+            "description": "kors-steg = sashi kae ashi åt sidan"
+          },
+          {
+            "id": "yoko kumo ashi",
+            "kind": "technique",
+            "name": "yoko kumo ashi",
+            "kanji": "横蜘蛛足",
+            "description": "hoppa åt sidan - kumo ashi åt sidan"
+          },
+          {
+            "id": "yoko tensoku",
+            "kind": "technique",
+            "name": "yoko tensoku",
+            "kanji": "横転足",
+            "description": "hoppa åt sidan med bägge fötterna samtidigt"
+          },
+          {
+            "id": "yoko tobi komi ashi",
+            "kind": "technique",
+            "name": "yoko tobi komi ashi",
+            "kanji": "横跳込足",
+            "description": "hoppande steg åt sidan = tobi komi ashi åt sidan"
+          }
+        ]
+      },
+      {
+        "id": "tenkai ashi",
+        "kind": "subgroup",
+        "name": "tenkai ashi",
+        "kanji": "転回足",
+        "description": "vändningar",
+        "children": [
+          {
+            "id": "zen tensoku",
+            "kind": "technique",
+            "name": "zen tensoku",
+            "kanji": "全転足",
+            "description": "fotarbete i zen tenkan"
+          },
+          {
+            "id": "gyaku tensoku",
+            "kind": "technique",
+            "name": "gyaku tensoku",
+            "kanji": "逆転足",
+            "description": "fotarbete i gyaku tenshin"
+          },
+          {
+            "id": "han tensoku",
+            "kind": "technique",
+            "name": "han tensoku",
+            "kanji": "半転足",
+            "description": "fotarbete i han tenshin"
+          },
+          {
+            "id": "nisoku tenkai",
+            "kind": "technique",
+            "name": "nisoku tenkai",
+            "kanji": "二足転回",
+            "description": "fotarbete i tvåstegsvändning 180°"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "taisabaki",
+    "kind": "group",
+    "name": "taisabaki",
+    "kanji": "体捌き",
+    "description": "kroppsrörelse",
+    "children": [
+      {
+        "id": "taishin",
+        "kind": "subgroup",
+        "name": "taishin",
+        "kanji": "退身",
+        "description": "kroppsrörelse bakåt",
+        "children": [
+          {
+            "id": "hidari taishin",
+            "kind": "technique",
+            "name": "hidari taishin",
+            "kanji": "左退身",
+            "description": "kroppsförflyttning bakåt med vänster fot hiki ashi"
+          },
+          {
+            "id": "migi taishin",
+            "kind": "technique",
+            "name": "migi taishin",
+            "kanji": "右退身",
+            "description": "kroppsförflyttning bakåt med höger fot hiki ashi"
+          },
+          {
+            "id": "hiraki sagari",
+            "kind": "technique",
+            "name": "hiraki sagari",
+            "kanji": "開退り",
+            "description": "kroppsförflyttning bakåt med hiraki sagari ashi"
+          },
+          {
+            "id": "jun sagari",
+            "kind": "technique",
+            "name": "jun sagari",
+            "kanji": "順退り",
+            "description": "kroppsförflyttning bakåt med jun sagari ashi"
+          },
+          {
+            "id": "tobi sagari",
+            "kind": "technique",
+            "name": "tobi sagari",
+            "kanji": "飛退り",
+            "description": "kroppsförflyttning bakåt med ushiro tobi ashi sagari"
+          }
+        ]
+      },
+      {
+        "id": "irimi",
+        "kind": "subgroup",
+        "name": "irimi",
+        "kanji": "入り身",
+        "description": "kroppsrörelse inåt/framåt",
+        "children": [
+          {
+            "id": "yorimi",
+            "kind": "technique",
+            "name": "yorimi",
+            "kanji": "寄身",
+            "description": "kroppsförflyttning framåt med hela kroppen"
+          },
+          {
+            "id": "hiraki irimi",
+            "kind": "technique",
+            "name": "hiraki irimi",
+            "kanji": "開き入身",
+            "description": "kroppsförflyttning framåt och vrida kroppen (kaishin zuki)"
+          },
+          {
+            "id": "sashikae irimi",
+            "kind": "technique",
+            "name": "sashikae irimi",
+            "kanji": "差替入身",
+            "description": "kroppsförflyttning framåt i sashikae ashi"
+          },
+          {
+            "id": "chidori irimi",
+            "kind": "technique",
+            "name": "chidori irimi",
+            "kanji": "千鳥入身",
+            "description": "kroppsförflyttning framåt med chidori ashi"
+          },
+          {
+            "id": "tobi komi",
+            "kind": "technique",
+            "name": "tobi komi",
+            "kanji": "飛込み",
+            "description": "kroppsförflyttning framåt med hopp"
+          },
+          {
+            "id": "jūji irimi",
+            "kind": "technique",
+            "name": "jūji irimi",
+            "kanji": "十字入身",
+            "description": "kroppsförflyttning framåt med jūji ashi"
+          }
+        ]
+      },
+      {
+        "id": "kaishin [taisabaki]",
+        "kind": "subgroup",
+        "name": "kaishin",
+        "kanji": "開身",
+        "description": "öppna kroppen",
+        "children": [
+          {
+            "id": "kaishin",
+            "kind": "technique",
+            "name": "kaishin",
+            "kanji": "開身",
+            "description": "flytta en fot och vrid kroppen åt sidan"
+          },
+          {
+            "id": "ten kaishin",
+            "kind": "technique",
+            "name": "ten kaishin",
+            "kanji": "転開身",
+            "description": "kani ashi och vrid kroppen åt sidan"
+          },
+          {
+            "id": "tobi kaishin",
+            "kind": "technique",
+            "name": "tobi kaishin",
+            "kanji": "飛開身",
+            "description": "kumo ashi och vrid kroppen åt sidan"
+          }
+        ]
+      },
+      {
+        "id": "furimi",
+        "kind": "subgroup",
+        "name": "furimi",
+        "kanji": "振身",
+        "description": "pendla kroppen",
+        "children": [
+          {
+            "id": "yoko furimi",
+            "kind": "technique",
+            "name": "yoko furimi",
+            "kanji": "横振身",
+            "description": "flytta en fot åt sidan och vrida övre delen av kroppen till sidan (som i furiko zuki)"
+          },
+          {
+            "id": "sorimi",
+            "kind": "technique",
+            "name": "sorimi",
+            "kanji": "反り身",
+            "description": "dra övre delen av kroppen bakåt"
+          },
+          {
+            "id": "hikimi",
+            "kind": "technique",
+            "name": "hikimi",
+            "kanji": "引き身",
+            "description": "dra in magen bakåt"
+          },
+          {
+            "id": "ryūsui",
+            "kind": "technique",
+            "name": "ryūsui",
+            "kanji": "流水",
+            "description": "kusshin och furimi"
+          }
+        ]
+      },
+      {
+        "id": "kusshin [taisabaki]",
+        "kind": "subgroup",
+        "name": "kusshin",
+        "kanji": "屈身",
+        "description": "ducka",
+        "children": [
+          {
+            "id": "kusshin",
+            "kind": "technique",
+            "name": "kusshin",
+            "kanji": "屈身",
+            "description": "böja knäna och sänka höften för att undvika attacker mot jōdan"
+          },
+          {
+            "id": "fusemi",
+            "kind": "technique",
+            "name": "fusemi",
+            "kanji": "伏身",
+            "description": "djup duckning med händerna eller knän i golvet"
+          }
+        ]
+      },
+      {
+        "id": "tenshin",
+        "kind": "subgroup",
+        "name": "tenshin",
+        "kanji": "転身",
+        "description": "kroppsvridning",
+        "children": [
+          {
+            "id": "han tenshin",
+            "kind": "technique",
+            "name": "han tenshin",
+            "kanji": "半転身",
+            "description": "vrid kroppen genom att dra in den bakre foten bakom den främre, vänd åt sidan"
+          },
+          {
+            "id": "gyaku tenshin",
+            "kind": "technique",
+            "name": "gyaku tenshin",
+            "kanji": "逆転身",
+            "description": "vrid kroppen genom att dra in främre foten bakom den bakre foten, vänd åt sidan"
+          },
+          {
+            "id": "han tenkan",
+            "kind": "technique",
+            "name": "han tenkan",
+            "kanji": "半転換",
+            "description": "90° vändning"
+          },
+          {
+            "id": "zen tenkan",
+            "kind": "technique",
+            "name": "zen tenkan",
+            "kanji": "全転換",
+            "description": "180° vändning"
+          },
+          {
+            "id": "nisoku han tenshin",
+            "kind": "technique",
+            "name": "nisoku han tenshin",
+            "kanji": "二足半転身",
+            "description": "han tenshin i två steg (som i uwa uke nage)"
+          },
+          {
+            "id": "sansoku han tenshin",
+            "kind": "technique",
+            "name": "sansoku han tenshin",
+            "kanji": "三足半転身",
+            "description": "han tenshin i tre steg (som i gyaku gote)"
+          },
+          {
+            "id": "nisoku zen tenkan",
+            "kind": "technique",
+            "name": "nisoku zen tenkan",
+            "kanji": "二足全転換",
+            "description": "zen tenkan i två steg (som i katate nage, se nage)"
+          },
+          {
+            "id": "sansoku zen tenkan",
+            "kind": "technique",
+            "name": "sansoku zen tenkan",
+            "kanji": "三足全転換",
+            "description": "zen tenkan i tre steg"
+          }
+        ]
+      },
+      {
+        "id": "kaiten shin",
+        "kind": "subgroup",
+        "name": "kaiten shin",
+        "kanji": "廻転身",
+        "description": "rulla kroppen",
+        "children": [
+          {
+            "id": "mae ukemi",
+            "kind": "technique",
+            "name": "mae ukemi",
+            "kanji": "前受身",
+            "description": "framåtrullning"
+          },
+          {
+            "id": "ushiro ukemi",
+            "kind": "technique",
+            "name": "ushiro ukemi",
+            "kanji": "後受身",
+            "description": "bakåtrullning"
+          },
+          {
+            "id": "dai sharin",
+            "kind": "technique",
+            "name": "dai sharin",
+            "kanji": "大車輪",
+            "description": "hjulning"
+          },
+          {
+            "id": "tombo gaeri",
+            "kind": "technique",
+            "name": "tombo gaeri",
+            "kanji": "とんぼ返り",
+            "description": "volt"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "kōgi",
+    "kind": "group",
+    "name": "kōgi",
+    "kanji": "攻技",
+    "description": "offensiva tekniker",
+    "children": [
+      {
+        "id": "te no waza",
+        "kind": "category",
+        "name": "te no waza",
+        "kanji": "手の技",
+        "description": "tekniker med handen",
+        "children": [
+          {
+            "id": "tsuki te",
+            "kind": "subgroup",
+            "name": "tsuki te",
+            "kanji": "突手",
+            "description": "slag",
+            "children": [
+              {
+                "id": "tsuki kata",
+                "kind": "methods",
+                "name": "tsuki kata",
+                "kanji": "突方",
+                "description": "slagmetoder",
+                "children": [
+                  {
+                    "id": "sugu zuki",
+                    "kind": "technique",
+                    "name": "sugu zuki",
+                    "kanji": "すぐ突",
+                    "description": "rakt slag från chūdan gamae utan att dra bak armbågen eller vrida näven"
+                  },
+                  {
+                    "id": "neji zuki",
+                    "kind": "technique",
+                    "name": "neji zuki",
+                    "kanji": "捻突",
+                    "description": "vridet slag"
+                  },
+                  {
+                    "id": "jun zuki",
+                    "kind": "technique",
+                    "name": "jun zuki",
+                    "kanji": "順突",
+                    "description": "slag med näven närmast motståndaren"
+                  },
+                  {
+                    "id": "gyaku zuki",
+                    "kind": "technique",
+                    "name": "gyaku zuki",
+                    "kanji": "逆突",
+                    "description": "slag med näven längst från motståndaren"
+                  },
+                  {
+                    "id": "ren zuki",
+                    "kind": "technique",
+                    "name": "ren zuki",
+                    "kanji": "連突",
+                    "description": "flera slag efter varandra med båda händerna"
+                  },
+                  {
+                    "id": "dan zuki",
+                    "kind": "technique",
+                    "name": "dan zuki",
+                    "kanji": "段突",
+                    "description": "flera slag efter varandra med en hand"
+                  },
+                  {
+                    "id": "morote zuki",
+                    "kind": "technique",
+                    "name": "morote zuki",
+                    "kanji": "双手突",
+                    "description": "slag med båda händerna samtidigt"
+                  }
+                ]
+              },
+              {
+                "id": "tsuki waza",
+                "kind": "techniques",
+                "name": "tsuki waza",
+                "kanji": "突技",
+                "description": "slagtekniker",
+                "children": [
+                  {
+                    "id": "chokusen [tsuki waza]",
+                    "kind": "trajectory",
+                    "name": "chokusen",
+                    "kanji": "直線",
+                    "description": "rak linje",
+                    "children": [
+                      {
+                        "id": "choku zuki",
+                        "kind": "family",
+                        "name": "choku zuki",
+                        "kanji": "直突",
+                        "description": "raka slag",
+                        "note": "väldigt grundläggande slag, som får kraft genom att böja och sträcka armbågsleden, hastigheten är viktigast i choku zuki",
+                        "children": [
+                          {
+                            "id": "jōdan choku zuki",
+                            "kind": "technique",
+                            "name": "jōdan choku zuki",
+                            "kanji": "上段直突",
+                            "description": "choku zuki i huvudsak mot huvudet eller mot nacken, slag rakt mot kyūsho med neji zuki uppåt"
+                          },
+                          {
+                            "id": "chūdan choku zuki",
+                            "kind": "technique",
+                            "name": "chūdan choku zuki",
+                            "kanji": "中段直突",
+                            "description": "choku zuki i huvudsak mot bröstet och magen, håll dina knän böjda så att du inte slår nedåt"
+                          },
+                          {
+                            "id": "gedan choku zuki",
+                            "kind": "technique",
+                            "name": "gedan choku zuki",
+                            "kanji": "下段直突",
+                            "description": "choku zuki, i huvudsak efter kast, efter att du kastat din motståndare, genom att böja benen ordentligt, slå nedåt i huvudsak mot huvudet eller kroppen"
+                          }
+                        ]
+                      },
+                      {
+                        "id": "kagi zuki",
+                        "kind": "family",
+                        "name": "kagi zuki",
+                        "kanji": "鈎突",
+                        "description": "krokslag",
+                        "note": "slag där armbågen hålls i en form av ”く”, använd enbart kraften från axel och höftvridning",
+                        "children": [
+                          {
+                            "id": "uwa kagi zuki",
+                            "kind": "technique",
+                            "name": "uwa kagi zuki",
+                            "kanji": "上鈎突",
+                            "description": "upper-cut i boxning"
+                          },
+                          {
+                            "id": "yoko kagi zuki",
+                            "kind": "technique",
+                            "name": "yoko kagi zuki",
+                            "kanji": "横鈎突",
+                            "description": "kagi zuki från sidan"
+                          },
+                          {
+                            "id": "tate kagi zuki",
+                            "kind": "technique",
+                            "name": "tate kagi zuki",
+                            "kanji": "立鈎突",
+                            "description": "kagi zuki med armbågen nära kroppen och endast axelrörelse, som en pistong"
+                          },
+                          {
+                            "id": "ushiro kagi zuki",
+                            "kind": "technique",
+                            "name": "ushiro kagi zuki",
+                            "kanji": "後鈎突",
+                            "description": "kagi zuki som används när man blivit greppad bakifrån, slå bakåt över axeln"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "kyokusen [tsuki waza]",
+                    "kind": "trajectory",
+                    "name": "kyokusen",
+                    "kanji": "曲線",
+                    "description": "cirkulär linje",
+                    "children": [
+                      {
+                        "id": "furi zuki",
+                        "kind": "family",
+                        "name": "furi zuki",
+                        "kanji": "振突",
+                        "description": "svingslag",
+                        "note": "med handflatan eller kumade",
+                        "children": [
+                          {
+                            "id": "age furi zuki",
+                            "kind": "technique",
+                            "name": "age furi zuki",
+                            "kanji": "上振突",
+                            "description": "furi zuki diagonalt upp mot mikazuki"
+                          },
+                          {
+                            "id": "sage furi zuki",
+                            "kind": "technique",
+                            "name": "sage furi zuki",
+                            "kanji": "下げ振突",
+                            "description": "furi zuki diagonalt nedåt mot nacken"
+                          },
+                          {
+                            "id": "yoko furi zuki",
+                            "kind": "technique",
+                            "name": "yoko furi zuki",
+                            "kanji": "横振突",
+                            "description": "furi zuki från sidan som i suigetsu gaeshi"
+                          },
+                          {
+                            "id": "kaeshi furi zuki",
+                            "kind": "technique",
+                            "name": "kaeshi furi zuki",
+                            "kanji": "返振突",
+                            "description": "furi zuki som träffar med uraken, stor rörelse i axel, ej armbågen"
+                          },
+                          {
+                            "id": "jūji furi zuki",
+                            "kind": "technique",
+                            "name": "jūji furi zuki",
+                            "kanji": "十字振突",
+                            "description": "dubbel furi zuki med en näve, sage furi zuki - kaeshi furi zuki = tasuki gake"
+                          },
+                          {
+                            "id": "ushiro furi zuki",
+                            "kind": "technique",
+                            "name": "ushiro furi zuki",
+                            "kanji": "後振突",
+                            "description": "furi zuki mot en angripare tätt bakom en själv"
+                          }
+                        ]
+                      },
+                      {
+                        "id": "henka zuki",
+                        "kind": "family",
+                        "name": "henka zuki",
+                        "kanji": "変化突",
+                        "description": "speciella/underliga slag",
+                        "children": [
+                          {
+                            "id": "hebi zuki",
+                            "kind": "technique",
+                            "name": "hebi zuki",
+                            "kanji": "蛇突",
+                            "description": "slag i en båge, som en orm attackerar sitt byte"
+                          },
+                          {
+                            "id": "wa zuki",
+                            "kind": "technique",
+                            "name": "wa zuki",
+                            "kanji": "輪突",
+                            "description": "liknande kagi zuki, men cirkulär rörelse"
+                          },
+                          {
+                            "id": "kaeshi zuki",
+                            "kind": "technique",
+                            "name": "kaeshi zuki",
+                            "kanji": "返突",
+                            "description": "slag diagonalt från insidan och utåt"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "uchi te",
+            "kind": "subgroup",
+            "name": "uchi te",
+            "kanji": "打手",
+            "description": "slag (slag som i huvudsak utförs med armen)",
+            "children": [
+              {
+                "id": "akken uchi",
+                "kind": "family",
+                "name": "akken uchi",
+                "kanji": "握拳打",
+                "description": "slag med knuten näve",
+                "note": "sex typer av uchi te med knuten näve i huvudsak mot huvudet eller nacken",
+                "children": [
+                  {
+                    "id": "seiken uchi",
+                    "kind": "technique",
+                    "name": "seiken uchi",
+                    "kanji": "正拳打",
+                    "description": "akken uchi med seiken = rätt näve"
+                  },
+                  {
+                    "id": "uraken uchi",
+                    "kind": "technique",
+                    "name": "uraken uchi",
+                    "kanji": "裏拳打",
+                    "description": "akken uchi med uraken = baksidan av näven"
+                  },
+                  {
+                    "id": "hiraken uchi",
+                    "kind": "technique",
+                    "name": "hiraken uchi",
+                    "kanji": "平拳打",
+                    "description": "akken uchi med hiraken = insidan av näven"
+                  },
+                  {
+                    "id": "shōken uchi",
+                    "kind": "technique",
+                    "name": "shōken uchi",
+                    "kanji": "掌拳打",
+                    "description": "akken uchi med shōken = lillfingersidan av näven"
+                  },
+                  {
+                    "id": "dai kentō uchi",
+                    "kind": "technique",
+                    "name": "dai kentō uchi",
+                    "kanji": "大拳頭打",
+                    "description": "akken uchi med pekfingerknogen"
+                  },
+                  {
+                    "id": "morote uchi",
+                    "kind": "technique",
+                    "name": "morote uchi",
+                    "kanji": "双手打",
+                    "description": "akken uchi med händerna knäppta som när man ber"
+                  }
+                ]
+              },
+              {
+                "id": "kaishu uchi",
+                "kind": "family",
+                "name": "kaishu uchi",
+                "kanji": "開手打",
+                "description": "slag med öppen hand",
+                "note": "sex typer av uchi te med öppen hand",
+                "children": [
+                  {
+                    "id": "hirate uchi",
+                    "kind": "technique",
+                    "name": "hirate uchi",
+                    "kanji": "平手打",
+                    "description": "kaishu uchi med insidan av handen (örfil)"
+                  },
+                  {
+                    "id": "urate uchi",
+                    "kind": "technique",
+                    "name": "urate uchi",
+                    "kanji": "裏手打",
+                    "description": "kaishu uchi med baksidan av handen = me uchi"
+                  },
+                  {
+                    "id": "shutō uchi",
+                    "kind": "technique",
+                    "name": "shutō uchi",
+                    "kanji": "手刀打",
+                    "description": "kaishu uchi med handkanten, lillfingersidan"
+                  },
+                  {
+                    "id": "chōji uchi",
+                    "kind": "technique",
+                    "name": "chōji uchi",
+                    "kanji": "丁字打",
+                    "description": "kaishu uchi med chōji (mellan tummen och pekfingret), som i uchi nuki"
+                  },
+                  {
+                    "id": "kumade uchi",
+                    "kind": "technique",
+                    "name": "kumade uchi",
+                    "kanji": "熊手打",
+                    "description": "kaishu uchi med kumade (björnhand) i huvudsak mot näsan"
+                  },
+                  {
+                    "id": "toride uchi",
+                    "kind": "technique",
+                    "name": "toride uchi",
+                    "kanji": "鳥手打",
+                    "description": "kaishu uchi med toride (fågelhand)"
+                  }
+                ]
+              },
+              {
+                "id": "wantō uchi",
+                "kind": "family",
+                "name": "wantō uchi",
+                "kanji": "腕刀打",
+                "description": "slag med underarmen",
+                "note": "tre typer av uchi te med underarmen",
+                "children": [
+                  {
+                    "id": "nai wantō uchi",
+                    "kind": "technique",
+                    "name": "nai wantō uchi",
+                    "kanji": "内腕刀打",
+                    "description": "wantō uchi med tumsidan av armen = insidan"
+                  },
+                  {
+                    "id": "gai wantō uchi",
+                    "kind": "technique",
+                    "name": "gai wantō uchi",
+                    "kanji": "外腕刀打",
+                    "description": "wantō uchi med lillfingersidan av armen = utsidan"
+                  },
+                  {
+                    "id": "wankotsu uchi",
+                    "kind": "technique",
+                    "name": "wankotsu uchi",
+                    "kanji": "腕骨打",
+                    "description": "wantō uchi med benet i underarmen, vid t.ex. eri jūji"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kiri te",
+            "kind": "subgroup",
+            "name": "kiri te",
+            "kanji": "切手",
+            "description": "skärande hand",
+            "children": [
+              {
+                "id": "shutō giri",
+                "kind": "technique",
+                "name": "shutō giri",
+                "kanji": "手刀切",
+                "description": "använd handflatans kant, på lillfingersidan = shutō, kiri te med armbågen böjd, tänk tryck - skära, i huvudsak mot nacken"
+              },
+              {
+                "id": "hiraken giri",
+                "kind": "technique",
+                "name": "hiraken giri",
+                "kanji": "平拳切",
+                "description": "använd insidan av näven = hira ken, kiri te mot kyūsho i ansiktet från utsidan mot insidan"
+              },
+              {
+                "id": "wantō giri",
+                "kind": "technique",
+                "name": "wantō giri",
+                "kanji": "腕刀切",
+                "description": "kiri te med lillfingersidan av armen, tänk tryck-skära"
+              }
+            ]
+          },
+          {
+            "id": "hiji ate",
+            "kind": "subgroup",
+            "name": "hiji ate",
+            "kanji": "肘当",
+            "description": "armbågsslag",
+            "note": "fem typer av slag med armbågen, väldigt kraftfull vid nära avstånd, handflatan nedåt när armbågen är rak, när du böjer armbågen vrid handflatan uppåt och slå",
+            "children": [
+              {
+                "id": "uwa hiji ate",
+                "kind": "technique",
+                "name": "uwa hiji ate",
+                "kanji": "上肘当",
+                "description": "hiji ate uppåt, i huvudsak mot mikazuki eller suigetsu"
+              },
+              {
+                "id": "yoko hiji ate",
+                "kind": "technique",
+                "name": "yoko hiji ate",
+                "kanji": "横肘当",
+                "description": "hiji ate åt sidan"
+              },
+              {
+                "id": "uchi hiji ate",
+                "kind": "technique",
+                "name": "uchi hiji ate",
+                "kanji": "打肘当",
+                "description": "slag med övre delen av armbågen, effektivt när angripare försöker att skalla"
+              },
+              {
+                "id": "shita hiji ate",
+                "kind": "technique",
+                "name": "shita hiji ate",
+                "kanji": "下肘当",
+                "description": "hiji ate nedåt i huvudsak mot ryggen när motståndarens huvud är vid din midja"
+              },
+              {
+                "id": "ushiro hiji ate",
+                "kind": "technique",
+                "name": "ushiro hiji ate",
+                "kanji": "後肘当",
+                "description": "hiji ate bakåt i huvudsak mot sammai eller suigetsu när man blir attackerad bakifrån"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ashi no waza",
+        "kind": "category",
+        "name": "ashi no waza",
+        "kanji": "足の技",
+        "description": "tekniker med benet",
+        "children": [
+          {
+            "id": "keri ashi",
+            "kind": "subgroup",
+            "name": "keri ashi",
+            "kanji": "蹴足",
+            "description": "sparkar",
+            "children": [
+              {
+                "id": "keri kata",
+                "kind": "methods",
+                "name": "keri kata",
+                "kanji": "蹴方",
+                "description": "sparkmetoder",
+                "children": [
+                  {
+                    "id": "jun geri",
+                    "kind": "technique",
+                    "name": "jun geri",
+                    "kanji": "順蹴",
+                    "description": "spark med foten som är närmast motståndaren"
+                  },
+                  {
+                    "id": "gyaku geri",
+                    "kind": "technique",
+                    "name": "gyaku geri",
+                    "kanji": "逆蹴",
+                    "description": "spark med foten som är längst från motståndaren"
+                  },
+                  {
+                    "id": "sashikomi geri",
+                    "kind": "technique",
+                    "name": "sashikomi geri",
+                    "kanji": "差込蹴",
+                    "description": "spark efter sashikomi ashi"
+                  },
+                  {
+                    "id": "sashikae geri",
+                    "kind": "technique",
+                    "name": "sashikae geri",
+                    "kanji": "差替蹴",
+                    "description": "spark efter sashikae ashi"
+                  },
+                  {
+                    "id": "tenshin geri",
+                    "kind": "technique",
+                    "name": "tenshin geri",
+                    "kanji": "転身蹴",
+                    "description": "spark efter tenshin"
+                  },
+                  {
+                    "id": "gyaku tenshin geri",
+                    "kind": "technique",
+                    "name": "gyaku tenshin geri",
+                    "kanji": "逆転身蹴",
+                    "description": "spark efter gyaku tenshin"
+                  },
+                  {
+                    "id": "han tenshin geri",
+                    "kind": "technique",
+                    "name": "han tenshin geri",
+                    "kanji": "半転身蹴",
+                    "description": "spark efter han tenshin"
+                  },
+                  {
+                    "id": "jūji geri",
+                    "kind": "technique",
+                    "name": "jūji geri",
+                    "kanji": "十字蹴",
+                    "description": "sparka mot en motståndare sedan jūji ashi och sparka med andra benet mot en annan motståndare på andra sidan"
+                  },
+                  {
+                    "id": "nidan geri",
+                    "kind": "technique",
+                    "name": "nidan geri",
+                    "kanji": "二段蹴",
+                    "description": "två sparkar efter varandra med samma fot"
+                  },
+                  {
+                    "id": "ren geri",
+                    "kind": "technique",
+                    "name": "ren geri",
+                    "kanji": "連蹴",
+                    "description": "flera sparkar efter varandra med olika fötter"
+                  },
+                  {
+                    "id": "tobi komi geri",
+                    "kind": "technique",
+                    "name": "tobi komi geri",
+                    "kanji": "跳込蹴",
+                    "description": "spark efter hoppande steg framåt"
+                  },
+                  {
+                    "id": "tobi geri",
+                    "kind": "technique",
+                    "name": "tobi geri",
+                    "kanji": "飛蹴",
+                    "description": "hoppspark, håll inte balansen med armarna, håll korrekt kamae"
+                  },
+                  {
+                    "id": "tobi ren geri",
+                    "kind": "technique",
+                    "name": "tobi ren geri",
+                    "kanji": "飛連蹴",
+                    "description": "flera sparkar med båda fötterna i tobi geri"
+                  },
+                  {
+                    "id": "jūji tobi geri",
+                    "kind": "technique",
+                    "name": "jūji tobi geri",
+                    "kanji": "十字飛蹴",
+                    "description": "som jūji geri men hoppande jūji ashi"
+                  },
+                  {
+                    "id": "tenkai ren geri",
+                    "kind": "technique",
+                    "name": "tenkai ren geri",
+                    "kanji": "転回連蹴",
+                    "description": "keri age följt av en snurrspark"
+                  }
+                ]
+              },
+              {
+                "id": "keri waza",
+                "kind": "techniques",
+                "name": "keri waza",
+                "kanji": "蹴技",
+                "description": "sparktekniker",
+                "children": [
+                  {
+                    "id": "chokusen [keri waza]",
+                    "kind": "trajectory",
+                    "name": "chokusen",
+                    "kanji": "直線",
+                    "description": "rak linje",
+                    "children": [
+                      {
+                        "id": "keri age",
+                        "kind": "technique",
+                        "name": "keri age",
+                        "kanji": "蹴上",
+                        "description": "spark uppåt när motståndarens kropp är böjd framåt, använder i huvudsak kraften från knät"
+                      },
+                      {
+                        "id": "keri komi",
+                        "kind": "technique",
+                        "name": "keri komi",
+                        "kanji": "蹴込",
+                        "description": "spark aningen nedåt när motståndarens kropp är antingen rak eller något böjd bakåt, dra upp knät högt, sparka och dra tillbaka snabbt så att det inte blir fumi geri"
+                      },
+                      {
+                        "id": "uchi geri",
+                        "kind": "technique",
+                        "name": "uchi geri",
+                        "kanji": "打蹴",
+                        "description": "spark som enbart använder underbenet och kraften från rörelsen i knät, används när motståndaren är väldigt nära eller ligger på marken efter kast"
+                      },
+                      {
+                        "id": "kinteki geri",
+                        "kind": "technique",
+                        "name": "kinteki geri",
+                        "kanji": "金的蹴",
+                        "description": "snärtig spark mot skrevet, träffa med fotens ovansida"
+                      },
+                      {
+                        "id": "yoko geri",
+                        "kind": "technique",
+                        "name": "yoko geri",
+                        "kanji": "横蹴",
+                        "description": "spark åt sidan med sokutō = fotkanten, lilltåsidan, eller sokutei = trampdynan på foten"
+                      },
+                      {
+                        "id": "ushiro geri",
+                        "kind": "technique",
+                        "name": "ushiro geri",
+                        "kanji": "後蹴",
+                        "description": "spark bakåt, sparka iväg"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "kyokusen [keri waza]",
+                    "kind": "trajectory",
+                    "name": "kyokusen",
+                    "kanji": "曲線",
+                    "description": "cirkulär linje",
+                    "children": [
+                      {
+                        "id": "mawashi geri",
+                        "kind": "technique",
+                        "name": "mawashi geri",
+                        "kanji": "廻蹴",
+                        "description": "rundspark mot sammai"
+                      },
+                      {
+                        "id": "kaeshi geri",
+                        "kind": "technique",
+                        "name": "kaeshi geri",
+                        "kanji": "返蹴",
+                        "description": "spark från insidan mot utsidan, används t.ex. för första sparken i nidan geri eller kinteki geri"
+                      },
+                      {
+                        "id": "furi geri",
+                        "kind": "technique",
+                        "name": "furi geri",
+                        "kanji": "振蹴",
+                        "description": "svepande rundspark som träffar med vristen, vid väldigt nära avstånd, med knät"
+                      },
+                      {
+                        "id": "mikazuki geri",
+                        "kind": "technique",
+                        "name": "mikazuki geri",
+                        "kanji": "三日月蹴",
+                        "description": "hög spark mot mikazuki från sidan och snett uppåt"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kari ashi",
+            "kind": "subgroup",
+            "name": "kari ashi",
+            "kanji": "刈足",
+            "description": "svepa/meja ner",
+            "children": [
+              {
+                "id": "kyakutō gari",
+                "kind": "technique",
+                "name": "kyakutō gari",
+                "kanji": "脚刀刈",
+                "description": "kari ashi med baksidan av underbenet mot motståndarens baksida av knä eller underben"
+              },
+              {
+                "id": "ushiro kakato gari",
+                "kind": "technique",
+                "name": "ushiro kakato gari",
+                "kanji": "後踵刈",
+                "description": "samma som kyakutō gari, men träffa med hälen"
+              },
+              {
+                "id": "sokutō gari",
+                "kind": "technique",
+                "name": "sokutō gari",
+                "kanji": "足刀刈",
+                "description": "kari ashi från sidan eller bakifrån mot knäts baksida med fotkanten = sokutō"
+              },
+              {
+                "id": "nai sokutō gari",
+                "kind": "technique",
+                "name": "nai sokutō gari",
+                "kanji": "内足刀刈",
+                "description": "kari ashi med insidan av fotkanten = nai sokutō mot san'inkō"
+              },
+              {
+                "id": "sokutei gari",
+                "kind": "technique",
+                "name": "sokutei gari",
+                "kanji": "足底刈",
+                "description": "kari ashi med undersidan av foten = sokutei, som ashi barai i jūdō"
+              }
+            ]
+          },
+          {
+            "id": "fumi ashi",
+            "kind": "subgroup",
+            "name": "fumi ashi",
+            "kanji": "踏足",
+            "description": "fotstamp",
+            "children": [
+              {
+                "id": "fumi geri",
+                "kind": "technique",
+                "name": "fumi geri",
+                "kanji": "踏蹴",
+                "description": "”tryck-stamp”-spark, ingen hastighet men kraftfull"
+              },
+              {
+                "id": "fumi tsuke",
+                "kind": "technique",
+                "name": "fumi tsuke",
+                "kanji": "踏付",
+                "description": "trampa på en motståndares kropp så att han inte kan röra sig (tsuke = fästa, sätta fast)"
+              },
+              {
+                "id": "fumi kiri",
+                "kind": "technique",
+                "name": "fumi kiri",
+                "kanji": "踏切",
+                "description": "stampa-skär motståndarens fot med sokutō"
+              }
+            ]
+          },
+          {
+            "id": "hiza ate",
+            "kind": "subgroup",
+            "name": "hiza ate",
+            "kanji": "膝当",
+            "description": "knäattack",
+            "children": [
+              {
+                "id": "uwa hiza ate",
+                "kind": "technique",
+                "name": "uwa hiza ate",
+                "kanji": "上膝当",
+                "description": "hiza ate uppåt, mot suigetsu eller mae sammai"
+              },
+              {
+                "id": "yoko hiza ate",
+                "kind": "technique",
+                "name": "yoko hiza ate",
+                "kanji": "横膝当",
+                "description": "hiza ate åt sidan, som mawashi geri men med knät"
+              },
+              {
+                "id": "fumi hiza ate",
+                "kind": "technique",
+                "name": "fumi hiza ate",
+                "kanji": "踏膝当",
+                "description": "stampa nedåt med knät mot en motståndare som ligger på marken efter att blivit kastad"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "karada no waza",
+        "kind": "category",
+        "name": "karada no waza",
+        "kanji": "体の技",
+        "description": "tekniker med kroppen",
+        "children": [
+          {
+            "id": "zu tsuki [karada no waza]",
+            "kind": "subgroup",
+            "name": "zu tsuki",
+            "kanji": "頭突",
+            "description": "skallning",
+            "children": [
+              {
+                "id": "zu tsuki",
+                "kind": "technique",
+                "name": "zu tsuki",
+                "kanji": "頭突",
+                "description": "skallning"
+              },
+              {
+                "id": "zentō uchi",
+                "kind": "technique",
+                "name": "zentō uchi",
+                "kanji": "前頭打",
+                "description": "zu tsuki med pannan, mot jitsu getsu, sankaku, sangō, etc."
+              },
+              {
+                "id": "kōtō uchi",
+                "kind": "technique",
+                "name": "kōtō uchi",
+                "kanji": "後頭打",
+                "description": "zu tsuki med baksidan av huvudet, mot ansikte på en motståndare som attackerar bakifrån"
+              },
+              {
+                "id": "ōtō uchi",
+                "kind": "technique",
+                "name": "ōtō uchi",
+                "kanji": "横頭打",
+                "description": "zu tsuki med sidan av huvudet, används när man är för nära för att använda zentō uchi, svinga huvudet åt sidan och attackera sangō"
+              }
+            ]
+          },
+          {
+            "id": "tai atari [karada no waza]",
+            "kind": "subgroup",
+            "name": "tai atari",
+            "kanji": "体当",
+            "description": "kroppsattack",
+            "children": [
+              {
+                "id": "kata ate",
+                "kind": "technique",
+                "name": "kata ate",
+                "kanji": "肩当",
+                "description": "tai atari med ena axeln för att knuffa iväg med full kraft från kroppen"
+              },
+              {
+                "id": "tai atari",
+                "kind": "technique",
+                "name": "tai atari",
+                "kanji": "体当",
+                "description": "liknande kata ate, men med armarna i kors framför kroppen och knuffa iväg med bröstet och magen"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bōgi",
+    "kind": "group",
+    "name": "bōgi",
+    "kanji": "防技",
+    "description": "defensiva tekniker",
+    "children": [
+      {
+        "id": "te ashi ni yoru bōgi",
+        "kind": "subgroup",
+        "name": "te ashi ni yoru bōgi",
+        "kanji": "手足による防技",
+        "description": "försvar med armar och ben",
+        "footnote": "niō uke (仁王受) är det samtidiga utförandet av soto uke och uchi uke + uchi otoshi uke",
+        "children": [
+          {
+            "id": "uwa uke",
+            "kind": "technique",
+            "name": "uwa uke",
+            "kanji": "上受",
+            "description": "uppåtblockering framför ansiktet (öppen hand), (eg. uke = ta emot)"
+          },
+          {
+            "id": "shita uke",
+            "kind": "technique",
+            "name": "shita uke",
+            "kanji": "下受",
+            "description": "nedåtblockering framför magen (öppen hand)"
+          },
+          {
+            "id": "uchi uke",
+            "kind": "technique",
+            "name": "uchi uke",
+            "kanji": "内受",
+            "description": "inåtblockering framför ansiktet (öppen hand)"
+          },
+          {
+            "id": "soto uke",
+            "kind": "technique",
+            "name": "soto uke",
+            "kanji": "外受",
+            "description": "utåtblockering med armen rätvinklig mot marken framför ansiktet (knuten hand)"
+          },
+          {
+            "id": "uchi age uke",
+            "kind": "technique",
+            "name": "uchi age uke",
+            "kanji": "打上受",
+            "description": "slag-uppåtblockering med armen parallell med marken framför ansiktet (knuten hand)"
+          },
+          {
+            "id": "uchi otoshi uke",
+            "kind": "technique",
+            "name": "uchi otoshi uke",
+            "kanji": "打落受",
+            "description": "slag-nedåtblockering framför ansiktet (knuten hand eller shutō)"
+          },
+          {
+            "id": "uchi harai uke",
+            "kind": "technique",
+            "name": "uchi harai uke",
+            "kanji": "打払受",
+            "description": "slag-svepblockering med underarmen (ofta med knuten hand)"
+          },
+          {
+            "id": "sukui uke",
+            "kind": "technique",
+            "name": "sukui uke",
+            "kanji": "掬受",
+            "description": "”håva in”-blockering, ”håva in” motståndarens mawashi geri med tai sabaki (öppen hand)"
+          },
+          {
+            "id": "oshi uke (soto, uchi)",
+            "kind": "technique",
+            "name": "oshi uke (soto, uchi)",
+            "kanji": "押受(外､内)",
+            "description": "tryckblockering, utåt och inåt, effektiv mot furi zuki"
+          },
+          {
+            "id": "uwa jūji uke",
+            "kind": "technique",
+            "name": "uwa jūji uke",
+            "kanji": "上十字受",
+            "description": "uppåt korsblockering (knutna händer eller kumade med handflatan upp)"
+          },
+          {
+            "id": "yoko jūji uke",
+            "kind": "technique",
+            "name": "yoko jūji uke",
+            "kanji": "横十字受",
+            "description": "åt sidan korsblockering, en hand uchi uke, den andra uchi harai uke samtidigt, (öppna händer)"
+          },
+          {
+            "id": "shita jūji uke",
+            "kind": "technique",
+            "name": "shita jūji uke",
+            "kanji": "下十字受",
+            "description": "nedåt korsblockering (knutna händer eller shutō)"
+          },
+          {
+            "id": "ken uke",
+            "kind": "technique",
+            "name": "ken uke",
+            "kanji": "拳受",
+            "description": "knytnävsblockering, effektiv mot kinteki geri"
+          },
+          {
+            "id": "harai uke",
+            "kind": "technique",
+            "name": "harai uke",
+            "kanji": "払受",
+            "description": "svepblockering framför magen, använd hela armen från axeln"
+          },
+          {
+            "id": "hangetsu uke",
+            "kind": "technique",
+            "name": "hangetsu uke",
+            "kanji": "半月受",
+            "description": "blockera för att fånga motståndarens tsuki te med handleden böjd = hebi te, rör i cirkel framför ansiktet"
+          },
+          {
+            "id": "niren bō",
+            "kind": "technique",
+            "name": "niren bō",
+            "kanji": "二連防",
+            "description": "tvåkombinationsförsvar från ten'ō ken, en hand uwa uke, den andra shita uke"
+          },
+          {
+            "id": "hiza uke",
+            "kind": "technique",
+            "name": "hiza uke",
+            "kanji": "膝受",
+            "description": "knäblockering, med benet från knät ned till fotleden"
+          },
+          {
+            "id": "keri dome",
+            "kind": "technique",
+            "name": "keri dome",
+            "kanji": "蹴止",
+            "description": "sparkblockering (- dome = stopp) mot motståndarens spark med sokutō eller zen sokutei"
+          },
+          {
+            "id": "fumi dome",
+            "kind": "technique",
+            "name": "fumi dome",
+            "kanji": "踏止",
+            "description": "stoppa motståndarens spark eller rörelse genom att stampa på benet"
+          },
+          {
+            "id": "sanren bō",
+            "kind": "technique",
+            "name": "sanren bō",
+            "kanji": "三連防",
+            "description": "trekombinationsförsvar, ursprungligen kallat sanbōjin med yoko jūji uke och hiza uke"
+          },
+          {
+            "id": "hasami uke",
+            "kind": "technique",
+            "name": "hasami uke",
+            "kanji": "挾受",
+            "description": "saxblockering mot spark, en hand shita uke och den andra sukui uke, håll fast benet mellan dina armar"
+          }
+        ]
+      },
+      {
+        "id": "taisabaki ni yoru bōgi",
+        "kind": "subgroup",
+        "name": "taisabaki ni yoru bōgi",
+        "kanji": "体捌きによる防技",
+        "description": "försvar med kroppsrörelse",
+        "children": [
+          {
+            "id": "kaishin uke",
+            "kind": "technique",
+            "name": "kaishin uke",
+            "kanji": "開身受",
+            "description": "försvar, vid attacker mot huvudet, genom att öppna upp kroppen ut ur attacklinjen, vanligtvis tillsammans med handblockering"
+          },
+          {
+            "id": "furimi uke",
+            "kind": "technique",
+            "name": "furimi uke",
+            "kanji": "振身受",
+            "description": "försvar genom att vrida/pendla huvudet åt sidan, vid attacker mot huvudet"
+          },
+          {
+            "id": "sorimi uke",
+            "kind": "technique",
+            "name": "sorimi uke",
+            "kanji": "反身受",
+            "description": "försvar genom att luta kroppen bakåt, vid attacker mot huvudet"
+          },
+          {
+            "id": "hikimi uke",
+            "kind": "technique",
+            "name": "hikimi uke",
+            "kanji": "引身受",
+            "description": "försvar genom att dra in magen, vid attacker mot magen"
+          },
+          {
+            "id": "ryūsui uke",
+            "kind": "technique",
+            "name": "ryūsui uke",
+            "kanji": "流水受",
+            "description": "vrida och sänka kroppen, vid attacker mot huvudet"
+          },
+          {
+            "id": "kusshin uke",
+            "kind": "technique",
+            "name": "kusshin uke",
+            "kanji": "屈身受",
+            "description": "duckande försvar med djupt böjda knän, ofta tillsammans med ryūsui"
+          },
+          {
+            "id": "fusemi uke",
+            "kind": "technique",
+            "name": "fusemi uke",
+            "kanji": "伏身受",
+            "description": "duckande försvar med händerna i golvet"
+          },
+          {
+            "id": "tenshin uke",
+            "kind": "technique",
+            "name": "tenshin uke",
+            "kanji": "転身受",
+            "description": "försvar genom att vrida kroppen, vanligtvis använt tillsammans med handblockering"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shuhō",
+    "kind": "group",
+    "name": "shuhō",
+    "kanji": "守法",
+    "description": "försvarsmetoder",
+    "children": [
+      {
+        "id": "kagite shuhō",
+        "kind": "technique",
+        "name": "kagite shuhō",
+        "kanji": "鈎手守法",
+        "description": "låst arm-försvar med armbågen som ”」”"
+      },
+      {
+        "id": "tsuitate shuhō",
+        "kind": "technique",
+        "name": "tsuitate shuhō",
+        "kanji": "衝立守法",
+        "description": "rak arm-försvar (tsuitate = stående skärm)"
+      },
+      {
+        "id": "sankaku shuhō",
+        "kind": "technique",
+        "name": "sankaku shuhō",
+        "kanji": "三角守法",
+        "description": "triangelförsvar"
+      },
+      {
+        "id": "konoha shuhō",
+        "kind": "technique",
+        "name": "konoha shuhō",
+        "kanji": "木葉守法",
+        "description": "lövförsvar, mot attacker mot fingrar, genom att nypa ihop tumme och långfinger"
+      },
+      {
+        "id": "chōji shuhō",
+        "kind": "technique",
+        "name": "chōji shuhō",
+        "kanji": "丁字守法",
+        "description": "försvar mot chōji, högre kagite så att motståndaren inte kan använda chōji"
+      },
+      {
+        "id": "kubi jime shuhō",
+        "kind": "technique",
+        "name": "kubi jime shuhō",
+        "kanji": "首締守法",
+        "description": "försvar mot strypning = kubi jime, sänk hakan mot ditt bröst"
+      },
+      {
+        "id": "hagai shuhō",
+        "kind": "technique",
+        "name": "hagai shuhō",
+        "kanji": "羽交守法",
+        "description": "försvar mot att armarna låses bakifrån = hagai jime (dubbel-nelson)"
+      }
+    ]
+  }
+]

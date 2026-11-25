@@ -4413,5 +4413,2488 @@
     "meanings": [
       "försvarsresponser (svarstekniker mot specifika grepp/stryptag; t.ex. hagai jime to shuhō)"
     ]
+  },
+  {
+    "id": 548,
+    "kanji": "布陣法",
+    "romaji": "fujinhō",
+    "meanings": [
+      "inbördes position"
+    ]
+  },
+  {
+    "id": 549,
+    "kanji": "対構",
+    "romaji": "tai gamae",
+    "meanings": [
+      "stängd position (båda har samma fot fram)"
+    ]
+  },
+  {
+    "id": 550,
+    "kanji": "白蓮八陣",
+    "romaji": "byakuren hachi jin",
+    "meanings": [
+      "byakuren:s åtta positioner"
+    ]
+  },
+  {
+    "id": 551,
+    "kanji": "合掌構え",
+    "romaji": "gasshō gamae",
+    "meanings": [
+      "hälsningsposition"
+    ]
+  },
+  {
+    "id": 552,
+    "kanji": "卍構え",
+    "romaji": "manji gamae",
+    "meanings": [
+      "främre handen knuten, bakre handen öppen över huvudet"
+    ]
+  },
+  {
+    "id": 553,
+    "kanji": "乱構",
+    "romaji": "midare gamae",
+    "meanings": [
+      "främre handen öppen, bakre handen öppen framför motsatt axel, inbjuda till attack mot huvudet"
+    ]
+  },
+  {
+    "id": 554,
+    "kanji": "八相構",
+    "romaji": "hassō gamae",
+    "meanings": [
+      "båda händerna öppna, i axelhöjd, för att inbjuda till attack mot kroppen"
+    ]
+  },
+  {
+    "id": 555,
+    "kanji": "待気構",
+    "romaji": "taiki gamae",
+    "meanings": [
+      "båda händerna öppna, främre handen högt ungefär i axelhöjd och bakre handen framför chūdan, inbjuda attack mot huvudet"
+    ]
+  },
+  {
+    "id": 556,
+    "kanji": "逆待気構え",
+    "romaji": "gyaku taiki gamae",
+    "meanings": [
+      "omvänd taiki gamae, främre handen framför chūdan och bakre handen ungefär i axelhöjd"
+    ]
+  },
+  {
+    "id": 557,
+    "kanji": "合気構え",
+    "romaji": "aiki gamae",
+    "meanings": [
+      "som hassō gamae men händerna hålls högre och mer ut från kroppen, särskilt den bakre handen"
+    ]
+  },
+  {
+    "id": 558,
+    "kanji": "白蓮中段構え",
+    "romaji": "byakuren chūdan gamae",
+    "meanings": [
+      "träningsposition, båda fötterna parallella, knutna händer"
+    ]
+  },
+  {
+    "id": 559,
+    "kanji": "開足中段構え",
+    "romaji": "kaisoku chūdan gamae",
+    "meanings": [
+      "träningsposition, båda fötterna parallella, knutna händer"
+    ]
+  },
+  {
+    "id": 560,
+    "kanji": "義和九陣",
+    "romaji": "giwa kyū jin",
+    "meanings": [
+      "giwa:s nio positioner"
+    ]
+  },
+  {
+    "id": 561,
+    "kanji": "結手構",
+    "romaji": "kesshu gamae",
+    "meanings": [
+      "vänster tumme i höger hand, hälarna ihop"
+    ]
+  },
+  {
+    "id": 562,
+    "kanji": "仁王構え",
+    "romaji": "niō gamae",
+    "meanings": [
+      "som ichiji gamae men främre handen mer mot insidan, bakre handen mer mot utsidan"
+    ]
+  },
+  {
+    "id": 563,
+    "kanji": "下段構",
+    "romaji": "gedan gamae",
+    "meanings": [
+      "som chūdan gamae men främre handen vriden så att tummen inte kan ses av motståndaren"
+    ]
+  },
+  {
+    "id": 564,
+    "kanji": "逆下段構",
+    "romaji": "gyaku gedan gamae",
+    "meanings": [
+      "omvänd gedan gamae"
+    ]
+  },
+  {
+    "id": 565,
+    "kanji": "伏虎構え",
+    "romaji": "fukko gamae",
+    "meanings": [
+      "knästående med händerna som i ichiji gamae"
+    ]
+  },
+  {
+    "id": 566,
+    "kanji": "立無相構え",
+    "romaji": "tate musō gamae",
+    "meanings": [
+      "främre handen öppen under den bakre armens armbåge"
+    ]
+  },
+  {
+    "id": 567,
+    "kanji": "横無相構え",
+    "romaji": "yoko musō gamae",
+    "meanings": [
+      "främre handen knuten ovanför bakre armens hand, underarmen hålls parallell med marken"
+    ]
+  },
+  {
+    "id": 568,
+    "kanji": "足位法",
+    "romaji": "sokuihō",
+    "meanings": [
+      "fotposition"
+    ]
+  },
+  {
+    "id": 569,
+    "kanji": "位置",
+    "romaji": "ichi",
+    "meanings": [
+      "placering"
+    ]
+  },
+  {
+    "id": 570,
+    "kanji": "開足立",
+    "romaji": "kaisoku dachi",
+    "meanings": [
+      "parallella fötter, axelbredd"
+    ]
+  },
+  {
+    "id": 571,
+    "kanji": "閉足立",
+    "romaji": "heisoku dachi",
+    "meanings": [
+      "hälarna ihop, tårna 60° öppna"
+    ]
+  },
+  {
+    "id": 572,
+    "kanji": "逆丁字立",
+    "romaji": "gyaku chōji dachi",
+    "meanings": [
+      "som vid chūdan gamae, ofta förklarat som renoji dachi [レの字立], fötterna placerade som skrivtecknet ”レ” [re]"
+    ]
+  },
+  {
+    "id": 573,
+    "kanji": "八字足立",
+    "romaji": "hachiji ashi dachi",
+    "meanings": [
+      "fötterna i axelbredd med tårna pekande inåt som skrivtecknet ”八”"
+    ]
+  },
+  {
+    "id": 574,
+    "kanji": "前鈎足立",
+    "romaji": "mae kagi ashi dachi",
+    "meanings": [
+      "renoji dachi med främre foten vriden så att hälen pekar något framåt"
+    ]
+  },
+  {
+    "id": 575,
+    "kanji": "後鈎足立",
+    "romaji": "ushiro kagi ashi dachi",
+    "meanings": [
+      "renoji dachi med bakre foten vriden utåt som i gyaku tenshin, etc."
+    ]
+  },
+  {
+    "id": 576,
+    "kanji": "横鈎足立",
+    "romaji": "yoko kagi ashi dachi",
+    "meanings": [
+      "benen i kors, ena foten framför den andra, främre fotens tår pekande ut till sidan som i formen av; 「"
+    ]
+  },
+  {
+    "id": 577,
+    "kanji": "交足立",
+    "romaji": "kōsoku dachi",
+    "meanings": [
+      "benen i kors, vid jūji ashi eller harai uke, etc."
+    ]
+  },
+  {
+    "id": 578,
+    "kanji": "くの字立",
+    "romaji": "kunoji dachi",
+    "meanings": [
+      "böjda knän, (som skrivtecknet ”く” [ku])"
+    ]
+  },
+  {
+    "id": 579,
+    "kanji": "前屈立",
+    "romaji": "zenkutsu dachi",
+    "meanings": [
+      "vikten på främre benet"
+    ]
+  },
+  {
+    "id": 580,
+    "kanji": "後屈立",
+    "romaji": "kōkutsu dachi",
+    "meanings": [
+      "vikten på bakre benet"
+    ]
+  },
+  {
+    "id": 581,
+    "kanji": "猫足立",
+    "romaji": "neko ashi dachi",
+    "meanings": [
+      "kattfotsposition - kraftig kōkutsu dachi, med främre foten endast på tå"
+    ]
+  },
+  {
+    "id": 582,
+    "kanji": "騎馬立",
+    "romaji": "kiba dachi",
+    "meanings": [
+      "fötterna i hachiji dachi med ridställningsliknande position"
+    ]
+  },
+  {
+    "id": 583,
+    "kanji": "平馬立",
+    "romaji": "heima dachi",
+    "meanings": [
+      "djupare kiba dachi, vid kagi zuki eller chidori, etc."
+    ]
+  },
+  {
+    "id": 584,
+    "kanji": "四股立",
+    "romaji": "shiko dachi",
+    "meanings": [
+      "”sumo-position”"
+    ]
+  },
+  {
+    "id": 585,
+    "kanji": "伏虎立",
+    "romaji": "fukko dachi",
+    "meanings": [
+      "ett knä i marken"
+    ]
+  },
+  {
+    "id": 586,
+    "kanji": "運歩法",
+    "romaji": "umpohō",
+    "meanings": [
+      "fotarbete"
+    ]
+  },
+  {
+    "id": 587,
+    "kanji": "出足",
+    "romaji": "de ashi",
+    "meanings": [
+      "steg framåt"
+    ]
+  },
+  {
+    "id": 588,
+    "kanji": "踏込足",
+    "romaji": "fumikomi ashi",
+    "meanings": [
+      "främre benet flyttas rakt fram"
+    ]
+  },
+  {
+    "id": 589,
+    "kanji": "前寄足",
+    "romaji": "mae yose ashi",
+    "meanings": [
+      "bakre foten dras fram till sidan av eller bakom den främre foten"
+    ]
+  },
+  {
+    "id": 590,
+    "kanji": "跳込足",
+    "romaji": "tobikomi ashi",
+    "meanings": [
+      "hoppande steg, skjut ifrån med den bakre foten"
+    ]
+  },
+  {
+    "id": 591,
+    "kanji": "前蜘蛛足",
+    "romaji": "mae kumo ashi",
+    "meanings": [
+      "hoppa framåt genom att skjuta ifrån med främre foten, bakre foten rör sig framåt först sedan den främre (bakre foten tar den främre fotens plats) (spindelsteg)"
+    ]
+  },
+  {
+    "id": 592,
+    "kanji": "前転足",
+    "romaji": "mae tensoku",
+    "meanings": [
+      "hoppa framåt med bägge fötterna samtidigt"
+    ]
+  },
+  {
+    "id": 593,
+    "kanji": "引足",
+    "romaji": "hiki ashi",
+    "meanings": [
+      "steg bakåt",
+      "dra ett ben bakåt"
+    ]
+  },
+  {
+    "id": 594,
+    "kanji": "後寄足",
+    "romaji": "ushiro yose ashi",
+    "meanings": [
+      "främre foten dras till sidan av eller framför den bakre foten"
+    ]
+  },
+  {
+    "id": 595,
+    "kanji": "順退足",
+    "romaji": "jun sagari ashi",
+    "meanings": [
+      "flytta först bak den bakre foten sedan den främre = sashi komi ashi bakåt"
+    ]
+  },
+  {
+    "id": 596,
+    "kanji": "開退足",
+    "romaji": "hiraki sagari ashi",
+    "meanings": [
+      "dra tillbaka den främre foten bakom den bakre, skifta sida genom att öppna kroppen"
+    ]
+  },
+  {
+    "id": 597,
+    "kanji": "後跳退足",
+    "romaji": "ushiro tobi sagari ashi",
+    "meanings": [
+      "hoppande steg bakåt från zenkutsu dachi"
+    ]
+  },
+  {
+    "id": 598,
+    "kanji": "後蜘蛛足",
+    "romaji": "ushiro kumo ashi",
+    "meanings": [
+      "hoppa bakåt, skjut ifrån med bakre foten"
+    ]
+  },
+  {
+    "id": 599,
+    "kanji": "後転足",
+    "romaji": "ushiro tensoku",
+    "meanings": [
+      "hoppa bakåt med båda fötterna samtidigt"
+    ]
+  },
+  {
+    "id": 600,
+    "kanji": "横足",
+    "romaji": "yoko ashi",
+    "meanings": [
+      "steg åt sidan",
+      "med enbart en fot ett steg åt sidan"
+    ]
+  },
+  {
+    "id": 601,
+    "kanji": "横蜘蛛足",
+    "romaji": "yoko kumo ashi",
+    "meanings": [
+      "hoppa åt sidan - kumo ashi åt sidan"
+    ]
+  },
+  {
+    "id": 602,
+    "kanji": "横転足",
+    "romaji": "yoko tensoku",
+    "meanings": [
+      "hoppa åt sidan med bägge fötterna samtidigt"
+    ]
+  },
+  {
+    "id": 603,
+    "kanji": "横跳込足",
+    "romaji": "yoko tobi komi ashi",
+    "meanings": [
+      "hoppande steg åt sidan = tobi komi ashi åt sidan"
+    ]
+  },
+  {
+    "id": 604,
+    "kanji": "転回足",
+    "romaji": "tenkai ashi",
+    "meanings": [
+      "vändningar"
+    ]
+  },
+  {
+    "id": 605,
+    "kanji": "全転足",
+    "romaji": "zen tensoku",
+    "meanings": [
+      "fotarbete i zen tenkan"
+    ]
+  },
+  {
+    "id": 606,
+    "kanji": "逆転足",
+    "romaji": "gyaku tensoku",
+    "meanings": [
+      "fotarbete i gyaku tenshin"
+    ]
+  },
+  {
+    "id": 607,
+    "kanji": "半転足",
+    "romaji": "han tensoku",
+    "meanings": [
+      "fotarbete i han tenshin"
+    ]
+  },
+  {
+    "id": 608,
+    "kanji": "二足転回",
+    "romaji": "nisoku tenkai",
+    "meanings": [
+      "fotarbete i tvåstegsvändning 180°"
+    ]
+  },
+  {
+    "id": 609,
+    "kanji": "退身",
+    "romaji": "taishin",
+    "meanings": [
+      "kroppsrörelse bakåt"
+    ]
+  },
+  {
+    "id": 610,
+    "kanji": "左退身",
+    "romaji": "hidari taishin",
+    "meanings": [
+      "kroppsförflyttning bakåt med vänster fot hiki ashi"
+    ]
+  },
+  {
+    "id": 611,
+    "kanji": "右退身",
+    "romaji": "migi taishin",
+    "meanings": [
+      "kroppsförflyttning bakåt med höger fot hiki ashi"
+    ]
+  },
+  {
+    "id": 612,
+    "kanji": "飛退り",
+    "romaji": "tobi sagari",
+    "meanings": [
+      "kroppsförflyttning bakåt med ushiro tobi ashi sagari"
+    ]
+  },
+  {
+    "id": 613,
+    "kanji": "寄身",
+    "romaji": "yorimi",
+    "meanings": [
+      "kroppsförflyttning framåt med hela kroppen"
+    ]
+  },
+  {
+    "id": 614,
+    "kanji": "開き入身",
+    "romaji": "hiraki irimi",
+    "meanings": [
+      "kroppsförflyttning framåt och vrida kroppen (kaishin zuki)"
+    ]
+  },
+  {
+    "id": 615,
+    "kanji": "差替入身",
+    "romaji": "sashikae irimi",
+    "meanings": [
+      "kroppsförflyttning framåt i sashikae ashi"
+    ]
+  },
+  {
+    "id": 616,
+    "kanji": "千鳥入身",
+    "romaji": "chidori irimi",
+    "meanings": [
+      "kroppsförflyttning framåt med chidori ashi"
+    ]
+  },
+  {
+    "id": 617,
+    "kanji": "飛込み",
+    "romaji": "tobi komi",
+    "meanings": [
+      "kroppsförflyttning framåt med hopp"
+    ]
+  },
+  {
+    "id": 618,
+    "kanji": "十字入身",
+    "romaji": "jūji irimi",
+    "meanings": [
+      "kroppsförflyttning framåt med jūji ashi"
+    ]
+  },
+  {
+    "id": 619,
+    "kanji": "転開身",
+    "romaji": "ten kaishin",
+    "meanings": [
+      "kani ashi och vrid kroppen åt sidan"
+    ]
+  },
+  {
+    "id": 620,
+    "kanji": "飛開身",
+    "romaji": "tobi kaishin",
+    "meanings": [
+      "kumo ashi och vrid kroppen åt sidan"
+    ]
+  },
+  {
+    "id": 621,
+    "kanji": "振身",
+    "romaji": "furimi",
+    "meanings": [
+      "pendla kroppen"
+    ]
+  },
+  {
+    "id": 622,
+    "kanji": "横振身",
+    "romaji": "yoko furimi",
+    "meanings": [
+      "flytta en fot åt sidan och vrida övre delen av kroppen till sidan (som i furiko zuki)"
+    ]
+  },
+  {
+    "id": 623,
+    "kanji": "反り身",
+    "romaji": "sorimi",
+    "meanings": [
+      "dra övre delen av kroppen bakåt"
+    ]
+  },
+  {
+    "id": 624,
+    "kanji": "引き身",
+    "romaji": "hikimi",
+    "meanings": [
+      "dra in magen bakåt"
+    ]
+  },
+  {
+    "id": 625,
+    "kanji": "伏身",
+    "romaji": "fusemi",
+    "meanings": [
+      "djup duckning med händerna eller knän i golvet"
+    ]
+  },
+  {
+    "id": 626,
+    "kanji": "半転身",
+    "romaji": "han tenshin",
+    "meanings": [
+      "vrid kroppen genom att dra in den bakre foten bakom den främre, vänd åt sidan"
+    ]
+  },
+  {
+    "id": 627,
+    "kanji": "逆転身",
+    "romaji": "gyaku tenshin",
+    "meanings": [
+      "vrid kroppen genom att dra in främre foten bakom den bakre foten, vänd åt sidan"
+    ]
+  },
+  {
+    "id": 628,
+    "kanji": "半転換",
+    "romaji": "han tenkan",
+    "meanings": [
+      "90° vändning"
+    ]
+  },
+  {
+    "id": 629,
+    "kanji": "全転換",
+    "romaji": "zen tenkan",
+    "meanings": [
+      "180° vändning"
+    ]
+  },
+  {
+    "id": 630,
+    "kanji": "二足半転身",
+    "romaji": "nisoku han tenshin",
+    "meanings": [
+      "han tenshin i två steg (som i uwa uke nage)"
+    ]
+  },
+  {
+    "id": 631,
+    "kanji": "三足半転身",
+    "romaji": "sansoku han tenshin",
+    "meanings": [
+      "han tenshin i tre steg (som i gyaku gote)"
+    ]
+  },
+  {
+    "id": 632,
+    "kanji": "二足全転換",
+    "romaji": "nisoku zen tenkan",
+    "meanings": [
+      "zen tenkan i två steg (som i katate nage, se nage)"
+    ]
+  },
+  {
+    "id": 633,
+    "kanji": "三足全転換",
+    "romaji": "sansoku zen tenkan",
+    "meanings": [
+      "zen tenkan i tre steg"
+    ]
+  },
+  {
+    "id": 634,
+    "kanji": "廻転身",
+    "romaji": "kaiten shin",
+    "meanings": [
+      "rulla kroppen"
+    ]
+  },
+  {
+    "id": 635,
+    "kanji": "前受身",
+    "romaji": "mae ukemi",
+    "meanings": [
+      "framåtrullning"
+    ]
+  },
+  {
+    "id": 636,
+    "kanji": "後受身",
+    "romaji": "ushiro ukemi",
+    "meanings": [
+      "bakåtrullning"
+    ]
+  },
+  {
+    "id": 637,
+    "kanji": "大車輪",
+    "romaji": "dai sharin",
+    "meanings": [
+      "hjulning"
+    ]
+  },
+  {
+    "id": 638,
+    "kanji": "とんぼ返り",
+    "romaji": "tombo gaeri",
+    "meanings": [
+      "volt"
+    ]
+  },
+  {
+    "id": 639,
+    "kanji": "攻技",
+    "romaji": "kōgi",
+    "meanings": [
+      "offensiva tekniker"
+    ]
+  },
+  {
+    "id": 640,
+    "kanji": "手の技",
+    "romaji": "te no waza",
+    "meanings": [
+      "tekniker med handen"
+    ]
+  },
+  {
+    "id": 641,
+    "kanji": "突手",
+    "romaji": "tsuki te",
+    "meanings": [
+      "slag"
+    ]
+  },
+  {
+    "id": 642,
+    "kanji": "突方",
+    "romaji": "tsuki kata",
+    "meanings": [
+      "slagmetoder"
+    ]
+  },
+  {
+    "id": 643,
+    "kanji": "すぐ突",
+    "romaji": "sugu zuki",
+    "meanings": [
+      "rakt slag från chūdan gamae utan att dra bak armbågen eller vrida näven"
+    ]
+  },
+  {
+    "id": 644,
+    "kanji": "捻突",
+    "romaji": "neji zuki",
+    "meanings": [
+      "vridet slag"
+    ]
+  },
+  {
+    "id": 645,
+    "kanji": "順突",
+    "romaji": "jun zuki",
+    "meanings": [
+      "slag med näven närmast motståndaren"
+    ]
+  },
+  {
+    "id": 646,
+    "kanji": "逆突",
+    "romaji": "gyaku zuki",
+    "meanings": [
+      "slag med näven längst från motståndaren"
+    ]
+  },
+  {
+    "id": 647,
+    "kanji": "連突",
+    "romaji": "ren zuki",
+    "meanings": [
+      "flera slag efter varandra med båda händerna"
+    ]
+  },
+  {
+    "id": 648,
+    "kanji": "段突",
+    "romaji": "dan zuki",
+    "meanings": [
+      "flera slag efter varandra med en hand"
+    ]
+  },
+  {
+    "id": 649,
+    "kanji": "双手突",
+    "romaji": "morote zuki",
+    "meanings": [
+      "slag med båda händerna samtidigt"
+    ]
+  },
+  {
+    "id": 650,
+    "kanji": "突技",
+    "romaji": "tsuki waza",
+    "meanings": [
+      "slagtekniker"
+    ]
+  },
+  {
+    "id": 651,
+    "kanji": "直線",
+    "romaji": "chokusen",
+    "meanings": [
+      "rak linje"
+    ]
+  },
+  {
+    "id": 652,
+    "kanji": "直突",
+    "romaji": "choku zuki",
+    "meanings": [
+      "raka slag"
+    ]
+  },
+  {
+    "id": 653,
+    "kanji": "上段直突",
+    "romaji": "jōdan choku zuki",
+    "meanings": [
+      "choku zuki i huvudsak mot huvudet eller mot nacken, slag rakt mot kyūsho med neji zuki uppåt"
+    ]
+  },
+  {
+    "id": 654,
+    "kanji": "中段直突",
+    "romaji": "chūdan choku zuki",
+    "meanings": [
+      "choku zuki i huvudsak mot bröstet och magen, håll dina knän böjda så att du inte slår nedåt"
+    ]
+  },
+  {
+    "id": 655,
+    "kanji": "下段直突",
+    "romaji": "gedan choku zuki",
+    "meanings": [
+      "choku zuki, i huvudsak efter kast, efter att du kastat din motståndare, genom att böja benen ordentligt, slå nedåt i huvudsak mot huvudet eller kroppen"
+    ]
+  },
+  {
+    "id": 656,
+    "kanji": "鈎突",
+    "romaji": "kagi zuki",
+    "meanings": [
+      "krokslag"
+    ]
+  },
+  {
+    "id": 657,
+    "kanji": "上鈎突",
+    "romaji": "uwa kagi zuki",
+    "meanings": [
+      "upper-cut i boxning"
+    ]
+  },
+  {
+    "id": 658,
+    "kanji": "横鈎突",
+    "romaji": "yoko kagi zuki",
+    "meanings": [
+      "kagi zuki från sidan"
+    ]
+  },
+  {
+    "id": 659,
+    "kanji": "立鈎突",
+    "romaji": "tate kagi zuki",
+    "meanings": [
+      "kagi zuki med armbågen nära kroppen och endast axelrörelse, som en pistong"
+    ]
+  },
+  {
+    "id": 660,
+    "kanji": "後鈎突",
+    "romaji": "ushiro kagi zuki",
+    "meanings": [
+      "kagi zuki som används när man blivit greppad bakifrån, slå bakåt över axeln"
+    ]
+  },
+  {
+    "id": 661,
+    "kanji": "曲線",
+    "romaji": "kyokusen",
+    "meanings": [
+      "cirkulär linje"
+    ]
+  },
+  {
+    "id": 662,
+    "kanji": "振突",
+    "romaji": "furi zuki",
+    "meanings": [
+      "svingslag"
+    ]
+  },
+  {
+    "id": 663,
+    "kanji": "上振突",
+    "romaji": "age furi zuki",
+    "meanings": [
+      "furi zuki diagonalt upp mot mikazuki"
+    ]
+  },
+  {
+    "id": 664,
+    "kanji": "下げ振突",
+    "romaji": "sage furi zuki",
+    "meanings": [
+      "furi zuki diagonalt nedåt mot nacken"
+    ]
+  },
+  {
+    "id": 665,
+    "kanji": "横振突",
+    "romaji": "yoko furi zuki",
+    "meanings": [
+      "furi zuki från sidan som i suigetsu gaeshi"
+    ]
+  },
+  {
+    "id": 666,
+    "kanji": "返振突",
+    "romaji": "kaeshi furi zuki",
+    "meanings": [
+      "furi zuki som träffar med uraken, stor rörelse i axel, ej armbågen"
+    ]
+  },
+  {
+    "id": 667,
+    "kanji": "十字振突",
+    "romaji": "jūji furi zuki",
+    "meanings": [
+      "dubbel furi zuki med en näve, sage furi zuki - kaeshi furi zuki = tasuki gake"
+    ]
+  },
+  {
+    "id": 668,
+    "kanji": "後振突",
+    "romaji": "ushiro furi zuki",
+    "meanings": [
+      "furi zuki mot en angripare tätt bakom en själv"
+    ]
+  },
+  {
+    "id": 669,
+    "kanji": "変化突",
+    "romaji": "henka zuki",
+    "meanings": [
+      "speciella/underliga slag"
+    ]
+  },
+  {
+    "id": 670,
+    "kanji": "蛇突",
+    "romaji": "hebi zuki",
+    "meanings": [
+      "slag i en båge, som en orm attackerar sitt byte"
+    ]
+  },
+  {
+    "id": 671,
+    "kanji": "輪突",
+    "romaji": "wa zuki",
+    "meanings": [
+      "liknande kagi zuki, men cirkulär rörelse"
+    ]
+  },
+  {
+    "id": 672,
+    "kanji": "返突",
+    "romaji": "kaeshi zuki",
+    "meanings": [
+      "slag diagonalt från insidan och utåt"
+    ]
+  },
+  {
+    "id": 673,
+    "kanji": "打手",
+    "romaji": "uchi te",
+    "meanings": [
+      "slag (slag som i huvudsak utförs med armen)"
+    ]
+  },
+  {
+    "id": 674,
+    "kanji": "握拳打",
+    "romaji": "akken uchi",
+    "meanings": [
+      "slag med knuten näve"
+    ]
+  },
+  {
+    "id": 675,
+    "kanji": "正拳打",
+    "romaji": "seiken uchi",
+    "meanings": [
+      "akken uchi med seiken = rätt näve"
+    ]
+  },
+  {
+    "id": 676,
+    "kanji": "裏拳打",
+    "romaji": "uraken uchi",
+    "meanings": [
+      "akken uchi med uraken = baksidan av näven"
+    ]
+  },
+  {
+    "id": 677,
+    "kanji": "平拳打",
+    "romaji": "hiraken uchi",
+    "meanings": [
+      "akken uchi med hiraken = insidan av näven"
+    ]
+  },
+  {
+    "id": 678,
+    "kanji": "掌拳打",
+    "romaji": "shōken uchi",
+    "meanings": [
+      "akken uchi med shōken = lillfingersidan av näven"
+    ]
+  },
+  {
+    "id": 679,
+    "kanji": "大拳頭打",
+    "romaji": "dai kentō uchi",
+    "meanings": [
+      "akken uchi med pekfingerknogen"
+    ]
+  },
+  {
+    "id": 680,
+    "kanji": "双手打",
+    "romaji": "morote uchi",
+    "meanings": [
+      "akken uchi med händerna knäppta som när man ber"
+    ]
+  },
+  {
+    "id": 681,
+    "kanji": "開手打",
+    "romaji": "kaishu uchi",
+    "meanings": [
+      "slag med öppen hand"
+    ]
+  },
+  {
+    "id": 682,
+    "kanji": "平手打",
+    "romaji": "hirate uchi",
+    "meanings": [
+      "kaishu uchi med insidan av handen (örfil)"
+    ]
+  },
+  {
+    "id": 683,
+    "kanji": "裏手打",
+    "romaji": "urate uchi",
+    "meanings": [
+      "kaishu uchi med baksidan av handen = me uchi"
+    ]
+  },
+  {
+    "id": 684,
+    "kanji": "手刀打",
+    "romaji": "shutō uchi",
+    "meanings": [
+      "kaishu uchi med handkanten, lillfingersidan"
+    ]
+  },
+  {
+    "id": 685,
+    "kanji": "丁字打",
+    "romaji": "chōji uchi",
+    "meanings": [
+      "kaishu uchi med chōji (mellan tummen och pekfingret), som i uchi nuki"
+    ]
+  },
+  {
+    "id": 686,
+    "kanji": "熊手打",
+    "romaji": "kumade uchi",
+    "meanings": [
+      "kaishu uchi med kumade (björnhand) i huvudsak mot näsan"
+    ]
+  },
+  {
+    "id": 687,
+    "kanji": "鳥手打",
+    "romaji": "toride uchi",
+    "meanings": [
+      "kaishu uchi med toride (fågelhand)"
+    ]
+  },
+  {
+    "id": 688,
+    "kanji": "腕刀打",
+    "romaji": "wantō uchi",
+    "meanings": [
+      "slag med underarmen"
+    ]
+  },
+  {
+    "id": 689,
+    "kanji": "内腕刀打",
+    "romaji": "nai wantō uchi",
+    "meanings": [
+      "wantō uchi med tumsidan av armen = insidan"
+    ]
+  },
+  {
+    "id": 690,
+    "kanji": "外腕刀打",
+    "romaji": "gai wantō uchi",
+    "meanings": [
+      "wantō uchi med lillfingersidan av armen = utsidan"
+    ]
+  },
+  {
+    "id": 691,
+    "kanji": "腕骨打",
+    "romaji": "wankotsu uchi",
+    "meanings": [
+      "wantō uchi med benet i underarmen, vid t.ex. eri jūji"
+    ]
+  },
+  {
+    "id": 692,
+    "kanji": "切手",
+    "romaji": "kiri te",
+    "meanings": [
+      "skärande hand"
+    ]
+  },
+  {
+    "id": 693,
+    "kanji": "手刀切",
+    "romaji": "shutō giri",
+    "meanings": [
+      "använd handflatans kant, på lillfingersidan = shutō, kiri te med armbågen böjd, tänk tryck - skära, i huvudsak mot nacken"
+    ]
+  },
+  {
+    "id": 694,
+    "kanji": "平拳切",
+    "romaji": "hiraken giri",
+    "meanings": [
+      "använd insidan av näven = hira ken, kiri te mot kyūsho i ansiktet från utsidan mot insidan"
+    ]
+  },
+  {
+    "id": 695,
+    "kanji": "腕刀切",
+    "romaji": "wantō giri",
+    "meanings": [
+      "kiri te med lillfingersidan av armen, tänk tryck-skära"
+    ]
+  },
+  {
+    "id": 696,
+    "kanji": "肘当",
+    "romaji": "hiji ate",
+    "meanings": [
+      "armbågsslag"
+    ]
+  },
+  {
+    "id": 697,
+    "kanji": "上肘当",
+    "romaji": "uwa hiji ate",
+    "meanings": [
+      "hiji ate uppåt, i huvudsak mot mikazuki eller suigetsu"
+    ]
+  },
+  {
+    "id": 698,
+    "kanji": "横肘当",
+    "romaji": "yoko hiji ate",
+    "meanings": [
+      "hiji ate åt sidan"
+    ]
+  },
+  {
+    "id": 699,
+    "kanji": "打肘当",
+    "romaji": "uchi hiji ate",
+    "meanings": [
+      "slag med övre delen av armbågen, effektivt när angripare försöker att skalla"
+    ]
+  },
+  {
+    "id": 700,
+    "kanji": "下肘当",
+    "romaji": "shita hiji ate",
+    "meanings": [
+      "hiji ate nedåt i huvudsak mot ryggen när motståndarens huvud är vid din midja"
+    ]
+  },
+  {
+    "id": 701,
+    "kanji": "後肘当",
+    "romaji": "ushiro hiji ate",
+    "meanings": [
+      "hiji ate bakåt i huvudsak mot sammai eller suigetsu när man blir attackerad bakifrån"
+    ]
+  },
+  {
+    "id": 702,
+    "kanji": "足の技",
+    "romaji": "ashi no waza",
+    "meanings": [
+      "tekniker med benet"
+    ]
+  },
+  {
+    "id": 703,
+    "kanji": "蹴足",
+    "romaji": "keri ashi",
+    "meanings": [
+      "sparkar"
+    ]
+  },
+  {
+    "id": 704,
+    "kanji": "蹴方",
+    "romaji": "keri kata",
+    "meanings": [
+      "sparkmetoder"
+    ]
+  },
+  {
+    "id": 705,
+    "kanji": "順蹴",
+    "romaji": "jun geri",
+    "meanings": [
+      "spark med foten som är närmast motståndaren"
+    ]
+  },
+  {
+    "id": 706,
+    "kanji": "逆蹴",
+    "romaji": "gyaku geri",
+    "meanings": [
+      "spark med foten som är längst från motståndaren"
+    ]
+  },
+  {
+    "id": 707,
+    "kanji": "差込蹴",
+    "romaji": "sashikomi geri",
+    "meanings": [
+      "spark efter sashikomi ashi"
+    ]
+  },
+  {
+    "id": 708,
+    "kanji": "差替蹴",
+    "romaji": "sashikae geri",
+    "meanings": [
+      "spark efter sashikae ashi"
+    ]
+  },
+  {
+    "id": 709,
+    "kanji": "転身蹴",
+    "romaji": "tenshin geri",
+    "meanings": [
+      "spark efter tenshin"
+    ]
+  },
+  {
+    "id": 710,
+    "kanji": "逆転身蹴",
+    "romaji": "gyaku tenshin geri",
+    "meanings": [
+      "spark efter gyaku tenshin"
+    ]
+  },
+  {
+    "id": 711,
+    "kanji": "半転身蹴",
+    "romaji": "han tenshin geri",
+    "meanings": [
+      "spark efter han tenshin"
+    ]
+  },
+  {
+    "id": 712,
+    "kanji": "十字蹴",
+    "romaji": "jūji geri",
+    "meanings": [
+      "sparka mot en motståndare sedan jūji ashi och sparka med andra benet mot en annan motståndare på andra sidan"
+    ]
+  },
+  {
+    "id": 713,
+    "kanji": "二段蹴",
+    "romaji": "nidan geri",
+    "meanings": [
+      "två sparkar efter varandra med samma fot"
+    ]
+  },
+  {
+    "id": 714,
+    "kanji": "連蹴",
+    "romaji": "ren geri",
+    "meanings": [
+      "flera sparkar efter varandra med olika fötter"
+    ]
+  },
+  {
+    "id": 715,
+    "kanji": "跳込蹴",
+    "romaji": "tobi komi geri",
+    "meanings": [
+      "spark efter hoppande steg framåt"
+    ]
+  },
+  {
+    "id": 716,
+    "kanji": "飛蹴",
+    "romaji": "tobi geri",
+    "meanings": [
+      "hoppspark, håll inte balansen med armarna, håll korrekt kamae"
+    ]
+  },
+  {
+    "id": 717,
+    "kanji": "飛連蹴",
+    "romaji": "tobi ren geri",
+    "meanings": [
+      "flera sparkar med båda fötterna i tobi geri"
+    ]
+  },
+  {
+    "id": 718,
+    "kanji": "十字飛蹴",
+    "romaji": "jūji tobi geri",
+    "meanings": [
+      "som jūji geri men hoppande jūji ashi"
+    ]
+  },
+  {
+    "id": 719,
+    "kanji": "転回連蹴",
+    "romaji": "tenkai ren geri",
+    "meanings": [
+      "keri age följt av en snurrspark"
+    ]
+  },
+  {
+    "id": 720,
+    "kanji": "蹴技",
+    "romaji": "keri waza",
+    "meanings": [
+      "sparktekniker"
+    ]
+  },
+  {
+    "id": 721,
+    "kanji": "蹴上",
+    "romaji": "keri age",
+    "meanings": [
+      "spark uppåt när motståndarens kropp är böjd framåt, använder i huvudsak kraften från knät"
+    ]
+  },
+  {
+    "id": 722,
+    "kanji": "蹴込",
+    "romaji": "keri komi",
+    "meanings": [
+      "spark aningen nedåt när motståndarens kropp är antingen rak eller något böjd bakåt, dra upp knät högt, sparka och dra tillbaka snabbt så att det inte blir fumi geri"
+    ]
+  },
+  {
+    "id": 723,
+    "kanji": "打蹴",
+    "romaji": "uchi geri",
+    "meanings": [
+      "spark som enbart använder underbenet och kraften från rörelsen i knät, används när motståndaren är väldigt nära eller ligger på marken efter kast"
+    ]
+  },
+  {
+    "id": 724,
+    "kanji": "金的蹴",
+    "romaji": "kinteki geri",
+    "meanings": [
+      "snärtig spark mot skrevet, träffa med fotens ovansida"
+    ]
+  },
+  {
+    "id": 725,
+    "kanji": "横蹴",
+    "romaji": "yoko geri",
+    "meanings": [
+      "spark åt sidan med sokutō = fotkanten, lilltåsidan, eller sokutei = trampdynan på foten"
+    ]
+  },
+  {
+    "id": 726,
+    "kanji": "後蹴",
+    "romaji": "ushiro geri",
+    "meanings": [
+      "spark bakåt, sparka iväg"
+    ]
+  },
+  {
+    "id": 727,
+    "kanji": "廻蹴",
+    "romaji": "mawashi geri",
+    "meanings": [
+      "rundspark mot sammai"
+    ]
+  },
+  {
+    "id": 728,
+    "kanji": "返蹴",
+    "romaji": "kaeshi geri",
+    "meanings": [
+      "spark från insidan mot utsidan, används t.ex. för första sparken i nidan geri eller kinteki geri"
+    ]
+  },
+  {
+    "id": 729,
+    "kanji": "振蹴",
+    "romaji": "furi geri",
+    "meanings": [
+      "svepande rundspark som träffar med vristen, vid väldigt nära avstånd, med knät"
+    ]
+  },
+  {
+    "id": 730,
+    "kanji": "三日月蹴",
+    "romaji": "mikazuki geri",
+    "meanings": [
+      "hög spark mot mikazuki från sidan och snett uppåt"
+    ]
+  },
+  {
+    "id": 731,
+    "kanji": "刈足",
+    "romaji": "kari ashi",
+    "meanings": [
+      "svepa/meja ner"
+    ]
+  },
+  {
+    "id": 732,
+    "kanji": "脚刀刈",
+    "romaji": "kyakutō gari",
+    "meanings": [
+      "kari ashi med baksidan av underbenet mot motståndarens baksida av knä eller underben"
+    ]
+  },
+  {
+    "id": 733,
+    "kanji": "後踵刈",
+    "romaji": "ushiro kakato gari",
+    "meanings": [
+      "samma som kyakutō gari, men träffa med hälen"
+    ]
+  },
+  {
+    "id": 734,
+    "kanji": "足刀刈",
+    "romaji": "sokutō gari",
+    "meanings": [
+      "kari ashi från sidan eller bakifrån mot knäts baksida med fotkanten = sokutō"
+    ]
+  },
+  {
+    "id": 735,
+    "kanji": "内足刀刈",
+    "romaji": "nai sokutō gari",
+    "meanings": [
+      "kari ashi med insidan av fotkanten = nai sokutō mot san'inkō"
+    ]
+  },
+  {
+    "id": 736,
+    "kanji": "足底刈",
+    "romaji": "sokutei gari",
+    "meanings": [
+      "kari ashi med undersidan av foten = sokutei, som ashi barai i jūdō"
+    ]
+  },
+  {
+    "id": 737,
+    "kanji": "踏足",
+    "romaji": "fumi ashi",
+    "meanings": [
+      "fotstamp"
+    ]
+  },
+  {
+    "id": 738,
+    "kanji": "踏蹴",
+    "romaji": "fumi geri",
+    "meanings": [
+      "”tryck-stamp”-spark, ingen hastighet men kraftfull"
+    ]
+  },
+  {
+    "id": 739,
+    "kanji": "踏付",
+    "romaji": "fumi tsuke",
+    "meanings": [
+      "trampa på en motståndares kropp så att han inte kan röra sig (tsuke = fästa, sätta fast)"
+    ]
+  },
+  {
+    "id": 740,
+    "kanji": "踏切",
+    "romaji": "fumi kiri",
+    "meanings": [
+      "stampa-skär motståndarens fot med sokutō"
+    ]
+  },
+  {
+    "id": 741,
+    "kanji": "膝当",
+    "romaji": "hiza ate",
+    "meanings": [
+      "knäattack"
+    ]
+  },
+  {
+    "id": 742,
+    "kanji": "上膝当",
+    "romaji": "uwa hiza ate",
+    "meanings": [
+      "hiza ate uppåt, mot suigetsu eller mae sammai"
+    ]
+  },
+  {
+    "id": 743,
+    "kanji": "横膝当",
+    "romaji": "yoko hiza ate",
+    "meanings": [
+      "hiza ate åt sidan, som mawashi geri men med knät"
+    ]
+  },
+  {
+    "id": 744,
+    "kanji": "踏膝当",
+    "romaji": "fumi hiza ate",
+    "meanings": [
+      "stampa nedåt med knät mot en motståndare som ligger på marken efter att blivit kastad"
+    ]
+  },
+  {
+    "id": 745,
+    "kanji": "体の技",
+    "romaji": "karada no waza",
+    "meanings": [
+      "tekniker med kroppen"
+    ]
+  },
+  {
+    "id": 746,
+    "kanji": "頭突",
+    "romaji": "zu tsuki",
+    "meanings": [
+      "skallning"
+    ]
+  },
+  {
+    "id": 747,
+    "kanji": "前頭打",
+    "romaji": "zentō uchi",
+    "meanings": [
+      "zu tsuki med pannan, mot jitsu getsu, sankaku, sangō, etc."
+    ]
+  },
+  {
+    "id": 748,
+    "kanji": "後頭打",
+    "romaji": "kōtō uchi",
+    "meanings": [
+      "zu tsuki med baksidan av huvudet, mot ansikte på en motståndare som attackerar bakifrån"
+    ]
+  },
+  {
+    "id": 749,
+    "kanji": "横頭打",
+    "romaji": "ōtō uchi",
+    "meanings": [
+      "zu tsuki med sidan av huvudet, används när man är för nära för att använda zentō uchi, svinga huvudet åt sidan och attackera sangō"
+    ]
+  },
+  {
+    "id": 750,
+    "kanji": "体当",
+    "romaji": "tai atari",
+    "meanings": [
+      "kroppsattack",
+      "liknande kata ate, men med armarna i kors framför kroppen och knuffa iväg med bröstet och magen"
+    ]
+  },
+  {
+    "id": 751,
+    "kanji": "肩当",
+    "romaji": "kata ate",
+    "meanings": [
+      "tai atari med ena axeln för att knuffa iväg med full kraft från kroppen"
+    ]
+  },
+  {
+    "id": 752,
+    "kanji": "防技",
+    "romaji": "bōgi",
+    "meanings": [
+      "defensiva tekniker"
+    ]
+  },
+  {
+    "id": 753,
+    "kanji": "手足による防技",
+    "romaji": "te ashi ni yoru bōgi",
+    "meanings": [
+      "försvar med armar och ben"
+    ]
+  },
+  {
+    "id": 754,
+    "kanji": "上受",
+    "romaji": "uwa uke",
+    "meanings": [
+      "uppåtblockering framför ansiktet (öppen hand), (eg. uke = ta emot)"
+    ]
+  },
+  {
+    "id": 755,
+    "kanji": "下受",
+    "romaji": "shita uke",
+    "meanings": [
+      "nedåtblockering framför magen (öppen hand)"
+    ]
+  },
+  {
+    "id": 756,
+    "kanji": "内受",
+    "romaji": "uchi uke",
+    "meanings": [
+      "inåtblockering framför ansiktet (öppen hand)"
+    ]
+  },
+  {
+    "id": 757,
+    "kanji": "外受",
+    "romaji": "soto uke",
+    "meanings": [
+      "utåtblockering med armen rätvinklig mot marken framför ansiktet (knuten hand)"
+    ]
+  },
+  {
+    "id": 758,
+    "kanji": "打上受",
+    "romaji": "uchi age uke",
+    "meanings": [
+      "slag-uppåtblockering med armen parallell med marken framför ansiktet (knuten hand)"
+    ]
+  },
+  {
+    "id": 759,
+    "kanji": "打落受",
+    "romaji": "uchi otoshi uke",
+    "meanings": [
+      "slag-nedåtblockering framför ansiktet (knuten hand eller shutō)"
+    ]
+  },
+  {
+    "id": 760,
+    "kanji": "打払受",
+    "romaji": "uchi harai uke",
+    "meanings": [
+      "slag-svepblockering med underarmen (ofta med knuten hand)"
+    ]
+  },
+  {
+    "id": 761,
+    "kanji": "掬受",
+    "romaji": "sukui uke",
+    "meanings": [
+      "”håva in”-blockering, ”håva in” motståndarens mawashi geri med tai sabaki (öppen hand)"
+    ]
+  },
+  {
+    "id": 762,
+    "kanji": "押受(外､内)",
+    "romaji": "oshi uke (soto, uchi)",
+    "meanings": [
+      "tryckblockering, utåt och inåt, effektiv mot furi zuki"
+    ]
+  },
+  {
+    "id": 763,
+    "kanji": "上十字受",
+    "romaji": "uwa jūji uke",
+    "meanings": [
+      "uppåt korsblockering (knutna händer eller kumade med handflatan upp)"
+    ]
+  },
+  {
+    "id": 764,
+    "kanji": "横十字受",
+    "romaji": "yoko jūji uke",
+    "meanings": [
+      "åt sidan korsblockering, en hand uchi uke, den andra uchi harai uke samtidigt, (öppna händer)"
+    ]
+  },
+  {
+    "id": 765,
+    "kanji": "下十字受",
+    "romaji": "shita jūji uke",
+    "meanings": [
+      "nedåt korsblockering (knutna händer eller shutō)"
+    ]
+  },
+  {
+    "id": 766,
+    "kanji": "拳受",
+    "romaji": "ken uke",
+    "meanings": [
+      "knytnävsblockering, effektiv mot kinteki geri"
+    ]
+  },
+  {
+    "id": 767,
+    "kanji": "払受",
+    "romaji": "harai uke",
+    "meanings": [
+      "svepblockering framför magen, använd hela armen från axeln"
+    ]
+  },
+  {
+    "id": 768,
+    "kanji": "半月受",
+    "romaji": "hangetsu uke",
+    "meanings": [
+      "blockera för att fånga motståndarens tsuki te med handleden böjd = hebi te, rör i cirkel framför ansiktet"
+    ]
+  },
+  {
+    "id": 769,
+    "kanji": "二連防",
+    "romaji": "niren bō",
+    "meanings": [
+      "tvåkombinationsförsvar från ten'ō ken, en hand uwa uke, den andra shita uke"
+    ]
+  },
+  {
+    "id": 770,
+    "kanji": "膝受",
+    "romaji": "hiza uke",
+    "meanings": [
+      "knäblockering, med benet från knät ned till fotleden"
+    ]
+  },
+  {
+    "id": 771,
+    "kanji": "蹴止",
+    "romaji": "keri dome",
+    "meanings": [
+      "sparkblockering (- dome = stopp) mot motståndarens spark med sokutō eller zen sokutei"
+    ]
+  },
+  {
+    "id": 772,
+    "kanji": "踏止",
+    "romaji": "fumi dome",
+    "meanings": [
+      "stoppa motståndarens spark eller rörelse genom att stampa på benet"
+    ]
+  },
+  {
+    "id": 773,
+    "kanji": "三連防",
+    "romaji": "sanren bō",
+    "meanings": [
+      "trekombinationsförsvar, ursprungligen kallat sanbōjin med yoko jūji uke och hiza uke"
+    ]
+  },
+  {
+    "id": 774,
+    "kanji": "挾受",
+    "romaji": "hasami uke",
+    "meanings": [
+      "saxblockering mot spark, en hand shita uke och den andra sukui uke, håll fast benet mellan dina armar"
+    ]
+  },
+  {
+    "id": 775,
+    "kanji": "体捌きによる防技",
+    "romaji": "taisabaki ni yoru bōgi",
+    "meanings": [
+      "försvar med kroppsrörelse"
+    ]
+  },
+  {
+    "id": 776,
+    "kanji": "開身受",
+    "romaji": "kaishin uke",
+    "meanings": [
+      "försvar, vid attacker mot huvudet, genom att öppna upp kroppen ut ur attacklinjen, vanligtvis tillsammans med handblockering"
+    ]
+  },
+  {
+    "id": 777,
+    "kanji": "振身受",
+    "romaji": "furimi uke",
+    "meanings": [
+      "försvar genom att vrida/pendla huvudet åt sidan, vid attacker mot huvudet"
+    ]
+  },
+  {
+    "id": 778,
+    "kanji": "反身受",
+    "romaji": "sorimi uke",
+    "meanings": [
+      "försvar genom att luta kroppen bakåt, vid attacker mot huvudet"
+    ]
+  },
+  {
+    "id": 779,
+    "kanji": "引身受",
+    "romaji": "hikimi uke",
+    "meanings": [
+      "försvar genom att dra in magen, vid attacker mot magen"
+    ]
+  },
+  {
+    "id": 780,
+    "kanji": "流水受",
+    "romaji": "ryūsui uke",
+    "meanings": [
+      "vrida och sänka kroppen, vid attacker mot huvudet"
+    ]
+  },
+  {
+    "id": 781,
+    "kanji": "屈身受",
+    "romaji": "kusshin uke",
+    "meanings": [
+      "duckande försvar med djupt böjda knän, ofta tillsammans med ryūsui"
+    ]
+  },
+  {
+    "id": 782,
+    "kanji": "伏身受",
+    "romaji": "fusemi uke",
+    "meanings": [
+      "duckande försvar med händerna i golvet"
+    ]
+  },
+  {
+    "id": 783,
+    "kanji": "転身受",
+    "romaji": "tenshin uke",
+    "meanings": [
+      "försvar genom att vrida kroppen, vanligtvis använt tillsammans med handblockering"
+    ]
+  },
+  {
+    "id": 784,
+    "kanji": "鈎手守法",
+    "romaji": "kagite shuhō",
+    "meanings": [
+      "låst arm-försvar med armbågen som ”」”"
+    ]
+  },
+  {
+    "id": 785,
+    "kanji": "衝立守法",
+    "romaji": "tsuitate shuhō",
+    "meanings": [
+      "rak arm-försvar (tsuitate = stående skärm)"
+    ]
+  },
+  {
+    "id": 786,
+    "kanji": "三角守法",
+    "romaji": "sankaku shuhō",
+    "meanings": [
+      "triangelförsvar"
+    ]
+  },
+  {
+    "id": 787,
+    "kanji": "木葉守法",
+    "romaji": "konoha shuhō",
+    "meanings": [
+      "lövförsvar, mot attacker mot fingrar, genom att nypa ihop tumme och långfinger"
+    ]
+  },
+  {
+    "id": 788,
+    "kanji": "丁字守法",
+    "romaji": "chōji shuhō",
+    "meanings": [
+      "försvar mot chōji, högre kagite så att motståndaren inte kan använda chōji"
+    ]
+  },
+  {
+    "id": 789,
+    "kanji": "首締守法",
+    "romaji": "kubi jime shuhō",
+    "meanings": [
+      "försvar mot strypning = kubi jime, sänk hakan mot ditt bröst"
+    ]
+  },
+  {
+    "id": 790,
+    "kanji": "羽交守法",
+    "romaji": "hagai shuhō",
+    "meanings": [
+      "försvar mot att armarna låses bakifrån = hagai jime (dubbel-nelson)"
+    ]
+  },
+  {
+    "id": 791,
+    "kanji": "手の部",
+    "romaji": "te no bu",
+    "meanings": [
+      "delar på handen"
+    ]
+  },
+  {
+    "id": 792,
+    "kanji": "握拳",
+    "romaji": "akken",
+    "meanings": [
+      "knuten näve"
+    ]
+  },
+  {
+    "id": 793,
+    "kanji": "平拳",
+    "romaji": "hiraken",
+    "meanings": [
+      "insidan av näven med tummen på pekfingrets andra led"
+    ]
+  },
+  {
+    "id": 794,
+    "kanji": "掌拳",
+    "romaji": "shōken",
+    "meanings": [
+      "lillfingersidan av akken"
+    ]
+  },
+  {
+    "id": 795,
+    "kanji": "内掌",
+    "romaji": "naishō",
+    "meanings": [
+      "tumsidans kant av hiraken"
+    ]
+  },
+  {
+    "id": 796,
+    "kanji": "大拳頭",
+    "romaji": "dai kentō",
+    "meanings": [
+      "första leden på pekfingret i seiken (pekfingerknogen)"
+    ]
+  },
+  {
+    "id": 797,
+    "kanji": "一本拳",
+    "romaji": "ippon ken",
+    "meanings": [
+      "antingen långfingret eller pekfingret utsträckt vid användande av kyūsho-attack eller lätta slag"
+    ]
+  },
+  {
+    "id": 798,
+    "kanji": "開手",
+    "romaji": "kaishu",
+    "meanings": [
+      "öppen hand"
+    ]
+  },
+  {
+    "id": 799,
+    "kanji": "平手",
+    "romaji": "hirate",
+    "meanings": [
+      "öppen hand, insidan (handflatan)"
+    ]
+  },
+  {
+    "id": 800,
+    "kanji": "裏手",
+    "romaji": "urate",
+    "meanings": [
+      "öppen hand, baksidan"
+    ]
+  },
+  {
+    "id": 801,
+    "kanji": "手刀",
+    "romaji": "shutō",
+    "meanings": [
+      "öppen hand, handkanten (lillfingersidan)"
+    ]
+  },
+  {
+    "id": 802,
+    "kanji": "内手刀",
+    "romaji": "nai shutō",
+    "meanings": [
+      "öppen hand, tumsidans kant med tummen kraftigt böjd, träffa med nedre delen av pekfingret"
+    ]
+  },
+  {
+    "id": 803,
+    "kanji": "一本角手",
+    "romaji": "ippon tsunode",
+    "meanings": [
+      "ett finger, antingen tummen eller pekfingret"
+    ]
+  },
+  {
+    "id": 804,
+    "kanji": "二本角手",
+    "romaji": "nihon tsunode",
+    "meanings": [
+      "två fingrar, antingen tummen och pekfingret eller pekfingret och långfingret"
+    ]
+  },
+  {
+    "id": 805,
+    "kanji": "四本角手",
+    "romaji": "shihon tsunode",
+    "meanings": [
+      "fyra fingrar, ej tummen, ibland den andra leden böjd"
+    ]
+  },
+  {
+    "id": 806,
+    "kanji": "丁字手",
+    "romaji": "chōji te",
+    "meanings": [
+      "mellan tummen och pekfingrets första led"
+    ]
+  },
+  {
+    "id": 807,
+    "kanji": "変手",
+    "romaji": "henshu",
+    "meanings": [
+      "speciella händer"
+    ]
+  },
+  {
+    "id": 808,
+    "kanji": "虎手",
+    "romaji": "torade",
+    "meanings": [
+      "tigerhand, alla fingrar något böjda för att ta tag eller slå"
+    ]
+  },
+  {
+    "id": 809,
+    "kanji": "鳥手",
+    "romaji": "toride",
+    "meanings": [
+      "fågelhand, alla fingrar raka hålls ihop som en fågelnäbb"
+    ]
+  },
+  {
+    "id": 810,
+    "kanji": "蟹手",
+    "romaji": "kanite",
+    "meanings": [
+      "krabbhand, tummen och pekfingret eller långfingret greppar och klämmer"
+    ]
+  },
+  {
+    "id": 811,
+    "kanji": "巻鋏",
+    "romaji": "maki basami",
+    "meanings": [
+      "nypa med tummen och pekfingrets andra led, mot t.ex. motståndares öra, finger eller annan speciell muskel"
+    ]
+  },
+  {
+    "id": 812,
+    "kanji": "腕部",
+    "romaji": "wanbu",
+    "meanings": [
+      "delar av armen"
+    ]
+  },
+  {
+    "id": 813,
+    "kanji": "腕刀",
+    "romaji": "wantō",
+    "meanings": [
+      "underarmens utsida, från handled till armbåge, lillfingersidans kant"
+    ]
+  },
+  {
+    "id": 814,
+    "kanji": "内腕刀",
+    "romaji": "nai wantō",
+    "meanings": [
+      "underarmens insida, från handled till armbåge, tumsidans kant"
+    ]
+  },
+  {
+    "id": 815,
+    "kanji": "蛇手",
+    "romaji": "hebi te",
+    "meanings": [
+      "ormhand, öppen hand med handleden böjd, formad som ett S"
+    ]
+  },
+  {
+    "id": 816,
+    "kanji": "裏手首",
+    "romaji": "ura tekubi",
+    "meanings": [
+      "baksidan av handleden i hebi te (form) för att använda den vassa delen av handledens baksida"
+    ]
+  },
+  {
+    "id": 817,
+    "kanji": "足の部",
+    "romaji": "ashi no bu",
+    "meanings": [
+      "delar på benet"
+    ]
+  },
+  {
+    "id": 818,
+    "kanji": "足部",
+    "romaji": "sokubu",
+    "meanings": [
+      "fot"
+    ]
+  },
+  {
+    "id": 819,
+    "kanji": "爪先",
+    "romaji": "tsuma saki",
+    "meanings": [
+      "tåspets"
+    ]
+  },
+  {
+    "id": 820,
+    "kanji": "前足底",
+    "romaji": "zen sokutei",
+    "meanings": [
+      "främre delen av trampdynan"
+    ]
+  },
+  {
+    "id": 821,
+    "kanji": "踵",
+    "romaji": "kakato",
+    "meanings": [
+      "hälen"
+    ]
+  },
+  {
+    "id": 822,
+    "kanji": "後踵",
+    "romaji": "ushiro kakato",
+    "meanings": [
+      "baksidan av hälen, spetsiga delen under hälsenan"
+    ]
+  },
+  {
+    "id": 823,
+    "kanji": "足裏",
+    "romaji": "ashi no ura",
+    "meanings": [
+      "undersidan av foten (trampdynan)"
+    ]
+  },
+  {
+    "id": 824,
+    "kanji": "足刀",
+    "romaji": "sokutō",
+    "meanings": [
+      "fotkanten (lilltåsidan)"
+    ]
+  },
+  {
+    "id": 825,
+    "kanji": "内足刀",
+    "romaji": "nai sokutō",
+    "meanings": [
+      "insidan av fotkanten (stortåsidan)"
+    ]
+  },
+  {
+    "id": 826,
+    "kanji": "足甲",
+    "romaji": "sokkō (ashi no kō)",
+    "meanings": [
+      "ovansidan av foten (vristen)"
+    ]
+  },
+  {
+    "id": 827,
+    "kanji": "脚部",
+    "romaji": "kyakubu",
+    "meanings": [
+      "ben"
+    ]
+  },
+  {
+    "id": 828,
+    "kanji": "膝頭",
+    "romaji": "hiza gashira",
+    "meanings": [
+      "knä - övre delen för att sparka, nedre för att pressa/trycka"
+    ]
+  },
+  {
+    "id": 829,
+    "kanji": "脚刀",
+    "romaji": "kyakutō",
+    "meanings": [
+      "baksidan av benet, från hälsenan till baksidan av knät"
+    ]
+  },
+  {
+    "id": 830,
+    "kanji": "外脚刀",
+    "romaji": "gai kyakutō",
+    "meanings": [
+      "yttre kanten av benet, från utsidan av fotleden till utsidan knät"
+    ]
+  },
+  {
+    "id": 831,
+    "kanji": "体の部",
+    "romaji": "karada no bu",
+    "meanings": [
+      "delar på kroppen"
+    ]
+  },
+  {
+    "id": 832,
+    "kanji": "頭部",
+    "romaji": "tōbu",
+    "meanings": [
+      "huvudet"
+    ]
+  },
+  {
+    "id": 833,
+    "kanji": "前頭骨",
+    "romaji": "zentō kotsu",
+    "meanings": [
+      "pannan"
+    ]
+  },
+  {
+    "id": 834,
+    "kanji": "後頭骨",
+    "romaji": "kōtō kotsu",
+    "meanings": [
+      "baksidan av huvudet"
+    ]
+  },
+  {
+    "id": 835,
+    "kanji": "横頭",
+    "romaji": "yoko atama",
+    "meanings": [
+      "sidan av huvudet"
+    ]
+  },
+  {
+    "id": 836,
+    "kanji": "目",
+    "romaji": "me",
+    "meanings": [
+      "ögon (använda blicken)"
+    ]
+  },
+  {
+    "id": 837,
+    "kanji": "歯",
+    "romaji": "ha",
+    "meanings": [
+      "tänder (att bita)"
+    ]
+  },
+  {
+    "id": 838,
+    "kanji": "口舌",
+    "romaji": "kozetsu",
+    "meanings": [
+      "mun och tunga (att spotta)"
+    ]
+  },
+  {
+    "id": 839,
+    "kanji": "声",
+    "romaji": "koe",
+    "meanings": [
+      "röst (att prata, att skrika)"
+    ]
+  },
+  {
+    "id": 840,
+    "kanji": "顔",
+    "romaji": "kao",
+    "meanings": [
+      "ansikte (att uttrycka)"
+    ]
+  },
+  {
+    "id": 841,
+    "kanji": "体部",
+    "romaji": "taibu",
+    "meanings": [
+      "kropp"
+    ]
+  },
+  {
+    "id": 842,
+    "kanji": "腹",
+    "romaji": "hara",
+    "meanings": [
+      "mage"
+    ]
+  },
+  {
+    "id": 843,
+    "kanji": "器の部",
+    "romaji": "ki no bu",
+    "meanings": [
+      "verktyg (vapen)"
+    ]
+  },
+  {
+    "id": 844,
+    "kanji": "金剛杵",
+    "romaji": "kongōsho",
+    "meanings": [
+      "kort, cirka 15 cm, metallstav använd av buddistmunkar"
+    ]
+  },
+  {
+    "id": 845,
+    "kanji": "三鈷",
+    "romaji": "sanko",
+    "meanings": [
+      "kongōsho med tre spetsar"
+    ]
+  },
+  {
+    "id": 846,
+    "kanji": "五鈷",
+    "romaji": "goko",
+    "meanings": [
+      "kongōsho med fem spetsar"
+    ]
+  },
+  {
+    "id": 847,
+    "kanji": "金剛杖",
+    "romaji": "kongōjō",
+    "meanings": [
+      "≈120 cm lång stav, åttkantig i tvärsnitt, ofta kallad hanbō"
+    ]
+  },
+  {
+    "id": 848,
+    "kanji": "外物",
+    "romaji": "gaibutsu",
+    "meanings": [
+      "andra föremål"
+    ]
+  },
+  {
+    "id": 849,
+    "kanji": "秘針",
+    "romaji": "hishin",
+    "meanings": [
+      "dold nål"
+    ]
+  },
+  {
+    "id": 850,
+    "kanji": "寸針",
+    "romaji": "sunbari",
+    "meanings": [
+      "en sun-nål (sun = japansk tum, 3.03 cm)"
+    ]
+  },
+  {
+    "id": 851,
+    "kanji": "三寸針",
+    "romaji": "sansun bari",
+    "meanings": [
+      "tre sun-nål (sun = japansk tum, 3.03 cm)"
+    ]
+  },
+  {
+    "id": 852,
+    "kanji": "五寸針",
+    "romaji": "gosun bari",
+    "meanings": [
+      "fem sun-nål (sun = japansk tum, 3.03 cm)"
+    ]
+  },
+  {
+    "id": 853,
+    "kanji": "鉄丸",
+    "romaji": "tetsugan",
+    "meanings": [
+      "järnkula"
+    ]
+  },
+  {
+    "id": 854,
+    "kanji": "角玉",
+    "romaji": "kakudama",
+    "meanings": [
+      "kantig kula (tetsugan)"
+    ]
+  },
+  {
+    "id": 855,
+    "kanji": "丸玉",
+    "romaji": "marudama",
+    "meanings": [
+      "rund kula (tetsugan)"
+    ]
+  },
+  {
+    "id": 856,
+    "kanji": "繩",
+    "romaji": "jō",
+    "meanings": [
+      "rep, snöre"
+    ]
+  },
+  {
+    "id": 857,
+    "kanji": "薬物",
+    "romaji": "yakubutsu",
+    "meanings": [
+      "mediciner, droger"
+    ]
   }
 ]

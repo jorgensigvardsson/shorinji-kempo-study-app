@@ -41,6 +41,7 @@ when one changes:
 | `word-list.json` | flashcard "known" flags | `word-list-id-baseline.json` | `word-list.test.ts` |
 | `grading-exam-information.json` | ticked grading items | `grading-completion-id-baseline.json` | `grading-completions.test.ts` |
 | `kamokuhyo.json` | notes and self-assessments | `kamokuhyo-id-baseline.json` | `kamokuhyo.test.ts` |
+| `kihon.json` | links to a technique from elsewhere in the app | `kihon-id-baseline.json` | `kihon.test.ts` |
 
 All paths are under `frontend/src/assets/`. Word list ids are numbers, so a new word
 takes `max(id) + 1` wherever in the file it is inserted. Grading ids are strings that
@@ -54,9 +55,22 @@ earlier version of the app wrote note keys in exactly that form, and there are n
 in production stored under them, so matching it is what keeps those notes attached to
 their techniques.
 
+A kihon node's id is its `name` too, and eleven names are shared there as well. The
+technique keeps the bare name, because it is what a link points at; every other holder
+of the name carries its parent's name in brackets: `hiki ashi` is the technique,
+`hiki ashi [umpohō]` the heading above it, and the table-level `tai gamae` (体構え, not
+the pair stance 対構) is `tai gamae [kihon]`.
+
 **A new moment whose name is already taken needs the same treatment.**
 `kamokuhyo.test.ts` fails on a duplicate id, which is what catches it — a name shared
 by two moments would otherwise be a note shared by two techniques, silently.
+
+## Kihon data
+
+`frontend/src/assets/kihon.json` is the kihon (stances, footwork, body movements, attacks,
+defences) as a tree, taken from the yōgoshū. Nothing in the app shows it yet. Read
+`KIHON.md` before building anything on it: it covers the shape, what each `kind` means,
+how ids are formed, and how names, kanji and descriptions are meant to be displayed.
 
 ## Fonts: kanji, hiragana and katakana
 

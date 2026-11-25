@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-25T17:58:00.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ordlistan har fått över 300 nya ord: grundteknikerna (kihon) – kamae, ställningar, fotförflyttningar, kroppsrörelser, slag, sparkar och försvar – samt kroppsdelar och föremål som används vid attack och försvar. Alla med översättning.",
+        en: "The word list has over 300 new words: the fundamentals (kihon) – kamae, stances, footwork, body movements, strikes, kicks and defences – plus the parts of the body and objects used in attack and defence. All of them translated.",
+        tr: "Kelime listesine 300'den fazla yeni kelime eklendi: temel teknikler (kihon) – kamae, duruşlar, ayak hareketleri, vücut hareketleri, vuruşlar, tekmeler ve savunmalar – ile saldırı ve savunmada kullanılan vücut bölümleri ve nesneler. Hepsi çevirileriyle birlikte.",
+        ja: "用語集に300語以上を追加しました。基本（構え、立ち方、足運び、体さばき、突き、蹴り、防御）と、攻防に用いる体の部位・器物です。すべて翻訳付きです。",
+      },
+      {
+        emoji: "🔍",
+        sv: "När du slår upp en fras som inte finns i ordlistan, till exempel ”gyaku gote”, visas nu träffar för varje ord i frasen.",
+        en: "When you look up a phrase that isn't in the word list, such as \"gyaku gote\", you now get results for every word in it.",
+        tr: "Kelime listesinde olmayan bir ifadeyi, örneğin \"gyaku gote\"yi aradığınızda artık ifadedeki her kelime için sonuç görüyorsunuz.",
+        ja: "「gyaku gote」のように用語集にない語句を調べると、語句に含まれる各単語の結果が表示されるようになりました。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-24T07:14:24.000Z",
     changes: [
       {

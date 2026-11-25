@@ -377,3 +377,39 @@ export interface WordListEntry {
     romaji?: string;
     meanings?: string[];
 }
+
+// The kihon tables of the yōgoshū (`assets/kihon.json`), as a tree. How deep it goes
+// varies by table: tai gamae is group → subgroup → technique, while kōgi runs group →
+// category → subgroup → methods/techniques → trajectory → family → technique. A kind
+// says what a node is, not how deep it sits.
+export type KihonKind =
+    | "group"       // one of the kihon groups: tai gamae, sokuihō, umpohō, taisabaki, kōgi, bōgi, shuhō
+    | "category"    // kōgi by what attacks: te no waza, ashi no waza, karada no waza
+    | "subgroup"    // a set of one type: tsuki te, kiri te, fujinhō … (the • rows)
+    | "methods"     // 方, ways of delivering: tsuki kata, keri kata (jun zuki, ren geri …)
+    | "techniques"  // 技, the strikes and kicks themselves: tsuki waza, keri waza
+    | "trajectory"  // the line of the attack: chokusen (straight), kyokusen (curved)
+    | "family"      // a technique whose variants are listed under it: choku zuki, akken uchi … (the ❖ rows)
+    | "technique";
+
+export interface KihonNode {
+    // Identity, so that other parts of the app can link to a technique and anything
+    // saved against one stays attached. It is the name, except where a name is shared:
+    // the technique keeps the bare name (it is what links point at) and every other
+    // holder carries its parent's name in brackets — `hiki ashi [umpohō]` is the
+    // heading, `hiki ashi` the technique under it. Never change an id once shipped;
+    // `assets/kihon.test.ts` fails if one changes meaning.
+    id: string;
+    kind: KihonKind;
+    // No number field: the printed number is the position in `children` + 1, since
+    // numbering restarts per section. Only fujinhō is unnumbered in print.
+    name: string;
+    kanji: string;
+    description?: string;
+    // The small print under a heading row.
+    note?: string;
+    // A "notera:" closing the section.
+    footnote?: string;
+    alsoKnownAs?: { name: string; kanji: string };
+    children?: KihonNode[];
+}

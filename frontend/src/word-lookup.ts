@@ -92,8 +92,13 @@ export const lookupWordEntries = (value: string, translator: Translator): WordLi
     const tokens = [...new Set(query.split(/[\s&,/–—-]+/).filter(token => token.length > 1))];
     if (tokens.length <= 1) return [];
 
-    const matches = tokens.flatMap(token => exactEntries(token, translator));
-    return [...matches.reduce((unique, entry) => {
+    // Taken in turns, so that every word of the phrase is represented within the cap:
+    // a common word such as "gyaku" opens many entries and would otherwise fill every
+    // slot before "gote" got one.
+    const perToken = tokens.map(token => exactEntries(token, translator));
+    const longest = Math.max(...perToken.map(list => list.length));
+    const matches = Array.from({ length: longest }, (_, rank) => perToken.flatMap(list => list[rank] ?? []));
+    return [...matches.flat().reduce((unique, entry) => {
         if (!unique.has(entry.id)) unique.set(entry.id, entry);
         return unique;
     }, new Map<number, WordListEntry>()).values()].slice(0, 5);
