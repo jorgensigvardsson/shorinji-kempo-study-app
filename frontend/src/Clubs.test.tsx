@@ -20,6 +20,13 @@ vi.mock("./sync/manager", () => ({
 
 import Clubs from "./Clubs";
 
+// Signed-in members also have branch names in the transfer picker. Wait for
+// the directory itself, regardless of which section finishes loading first.
+const findDirectoryBranch = async (name: string) => {
+  const directory = await screen.findByRole("region", { name: "Alla klubbar och förbund" });
+  return within(directory).findByText(name);
+};
+
 const openDirectory = async () => {
   const user = userEvent.setup();
   for (const header of document.querySelectorAll<HTMLElement>(".clubs-directory .card-header[aria-expanded='false']")) {
@@ -69,7 +76,7 @@ describe("Clubs", () => {
 
   it("lists branches by name within their federation", async () => {
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     const names = cardFor("Svenska Shorinji Kempoförbundet").getAllByText(/Göteborg|Karlstad/).map(el => el.textContent);
     expect(names).toEqual(["Göteborg", "Karlstad"]);
   });
@@ -78,7 +85,7 @@ describe("Clubs", () => {
   // way there — for everybody, since those pages are as public as this one.
   it("links each federation and WSKO to its own page", async () => {
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     await openDirectory();
     expect(screen.getByRole("link", { name: "Visa förbundet" }).getAttribute("href"))
       .toBe("/admin/federations/SE");
@@ -88,7 +95,7 @@ describe("Clubs", () => {
   // The flag says which country; the code is the system's key.
   it("does not print a federation's country code", async () => {
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     expect(screen.queryByText("SE")).toBeNull();
   });
 
@@ -96,7 +103,9 @@ describe("Clubs", () => {
   it("does not link branches to their members for somebody who covers none of them", async () => {
     roles = [];
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    const own = await screen.findByRole("region", { name: "Min klubb" });
+    await within(own).findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     await openDirectory();
     expect(screen.queryByRole("link", { name: "Karlstad" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Tokyo Honbu" })).toBeNull();
@@ -105,7 +114,7 @@ describe("Clubs", () => {
   it("links a branch to its members for its own admin, and only that branch", async () => {
     roles = ["branch_admin:b-karlstad"];
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     await openDirectory();
     expect(screen.getByRole("link", { name: "Karlstad" }).getAttribute("href")).toBe("/admin/branches/b-karlstad/members");
     expect(screen.queryByRole("link", { name: "Göteborg" })).toBeNull();
@@ -114,7 +123,7 @@ describe("Clubs", () => {
   it("links every branch in a federation for that federation's admin", async () => {
     roles = ["federation_admin:SE"];
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     await openDirectory();
     expect(screen.getByRole("link", { name: "Karlstad" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Göteborg" })).toBeTruthy();
@@ -134,7 +143,7 @@ describe("Clubs", () => {
       wskoBranches: [],
     });
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
 
     expect(cardFor("Svenska Shorinji Kempoförbundet").getByTestId("member-count").textContent).toBe("12");
     expect(cardFor("Norges Shorinji Kempo Forbund").getByText("Inga klubbar här.")).toBeTruthy();
@@ -147,21 +156,21 @@ describe("Clubs", () => {
     roles = ["wsko_admin"];
     adminOrgTree.mockRejectedValue(new Error("offline"));
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    expect(await screen.findByText("Karlstad")).toBeTruthy();
+    expect(await findDirectoryBranch("Karlstad")).toBeTruthy();
   });
 
   // Changing things happens on the federation's, WSKO's or branch's own page.
   it("keeps organization editing on the existing detail pages", async () => {
     roles = ["wsko_admin"];
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     expect(screen.queryByRole("button", { name: "Ny klubb" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Nytt förbund" })).toBeNull();
   });
 
   it("defaults to the list view", async () => {
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     expect(screen.getByRole("button", { name: /Lista/ }).getAttribute("aria-pressed")).toBe("true");
     expect(document.querySelector('[data-testid^="rf__node-"]')).toBeNull();
     for (const header of document.querySelectorAll(".clubs-directory .card-header")) {
@@ -175,11 +184,11 @@ describe("Clubs", () => {
   it("switches to the tree view and shows the same organization there", async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
 
     await user.click(screen.getByRole("button", { name: /Träd/ }));
 
-    expect(await screen.findByText("Tokyo Honbu")).toBeTruthy();
+    expect(await findDirectoryBranch("Tokyo Honbu")).toBeTruthy();
     expect(document.querySelector('[data-testid="rf__node-b-karlstad"]')).toBeTruthy();
     // The list view's cards are gone rather than merely hidden underneath.
     expect(document.querySelector(".card-header")).toBeNull();
@@ -191,13 +200,13 @@ describe("Clubs", () => {
   it("keeps the tree view chosen after the page remounts", async () => {
     const user = userEvent.setup();
     const first = render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     await user.click(screen.getByRole("button", { name: /Träd/ }));
-    await screen.findByText("Tokyo Honbu");
+    await findDirectoryBranch("Tokyo Honbu");
     first.unmount();
 
     render(<MemoryRouter><Clubs /></MemoryRouter>);
-    await screen.findByText("Karlstad");
+    await findDirectoryBranch("Karlstad");
     expect(screen.getByRole("button", { name: /Träd/ }).getAttribute("aria-pressed")).toBe("true");
     expect(document.querySelector(".card-header")).toBeNull();
   });
@@ -209,7 +218,7 @@ describe("Clubs", () => {
     expect(await screen.findByText("Kunde inte hämta organisationen.")).toBeTruthy();
     listBranches.mockResolvedValue(publicBranches);
     await userEvent.setup().click(screen.getByRole("button", { name: "Försök igen" }));
-    expect(await screen.findByText("Karlstad")).toBeTruthy();
+    expect(await findDirectoryBranch("Karlstad")).toBeTruthy();
   });
 
   it("puts the member's branch first and reuses the directory data", async () => {

@@ -5,7 +5,7 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    timestamp: "2026-11-26T11:38:29.000Z",
+    timestamp: "2026-11-26T11:51:34.000Z",
     changes: [
       {
         emoji: "📖",
