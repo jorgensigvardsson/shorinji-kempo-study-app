@@ -1,11 +1,12 @@
 import { useContext } from "react";
-import { Award, CardHeading, Collection, JournalText, QuestionSquare } from "react-bootstrap-icons";
+import { Award, Book, CardHeading, JournalText, QuestionSquare } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 import "./Theory.css";
 import BackButton from "./components/BackButton";
 import OverviewContext from "./components/OverviewContext";
+import { deepeningPath } from "./study-topics";
 
 interface TheoryProps {
     showLanguageTools: boolean;
@@ -17,12 +18,12 @@ const Theory = ({ showLanguageTools, displayName }: TheoryProps) => {
     const navigate = useNavigate();
     const items: GridItem[] = [
         {
-            key: "technique-groups",
-            title: translator.translate("Teknikgrupper"),
-            subtitle: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
-            icon: <Collection />,
-            onSelect: () => navigate("/theory/groups"),
-            navigatesTo: "/theory/groups",
+            key: "deepening",
+            title: translator.translate("Fördjupning"),
+            subtitle: translator.translate("Läs om rörelser, träningsspråk, grader, etikett och filosofi."),
+            icon: <Book />,
+            onSelect: () => navigate(deepeningPath),
+            navigatesTo: deepeningPath,
         },
         {
             key: "grading",
@@ -66,7 +67,7 @@ const Theory = ({ showLanguageTools, displayName }: TheoryProps) => {
             <header className="theory-page-header">
                 <h1 className="app-page-heading">{translator.translate("Teori")}</h1>
                 <p className="app-intro-copy">
-                    {translator.translate("Studera teknikgrupper och teoretiska graderingskrav.")}
+                    {translator.translate("Studera ämnen inom Shorinji Kempo och förbered dig inför gradering.")}
                     {showLanguageTools && <> {translator.translate("Öva vidare med ordlista, quiz och flashkort.")}</>}
                 </p>
             </header>

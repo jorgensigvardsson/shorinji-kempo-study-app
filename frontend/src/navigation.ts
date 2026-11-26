@@ -1,4 +1,5 @@
 import { Award, Book, CardHeading, Collection, HandIndex, JournalText, People, QuestionSquare, type Icon } from "react-bootstrap-icons";
+import { deepeningPath, studyTopics } from "./study-topics";
 
 export interface Activity {
     path: string;
@@ -20,6 +21,8 @@ export const activities: Activity[] = [
     { path: "/training/grading", title: "Träna gradering", section: "Träning", icon: Award },
     { path: "/theory/grading", title: "Teori gradering", section: "Teori", icon: Award },
     { path: "/theory/groups", title: "Teknikgrupper", section: "Teori", icon: Collection },
+    { path: deepeningPath, title: "Fördjupning", section: "Teori", icon: Book },
+    ...studyTopics.filter(topic => topic.key !== "groups").map(topic => ({ path: topic.path, title: topic.title, section: "Teori" as const, icon: Book })),
     { path: "/word-list", title: "Ordlista", section: "Teori", icon: JournalText, languageTool: true },
     { path: "/quiz/words", title: "Quiz ordlista", section: "Teori", icon: QuestionSquare, languageTool: true },
     { path: "/quiz/foot-stance", title: "Quiz fotposition", section: "Teori", icon: QuestionSquare, languageTool: true },

@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-26T11:38:29.000Z",
+    changes: [
+      {
+        emoji: "📖",
+        sv: "Ny fördjupning under Teori: utforska positioner och rörelser, teknikgrupper, träningsspråk, grader och titlar, etikett samt filosofi. Kihon visas med sina underrubriker och förklaringar, och sökningen hjälper dig till rätt avsnitt.",
+        en: "New Further study section under Theory: explore positions and movements, technique groups, training language, ranks and titles, etiquette, and philosophy. Kihon keeps its headings and explanations, and search helps you find the right section.",
+        tr: "Teori altında yeni Derinlemesine çalışma bölümü: duruşları ve hareketleri, teknik gruplarını, antrenman dilini, dereceleri ve unvanları, görgü kurallarını ve felsefeyi keşfedin. Kihon, alt başlıkları ve açıklamalarıyla sunuluyor; arama doğru bölümü bulmanıza yardımcı oluyor.",
+        ja: "「理論」に「詳しく学ぶ」を追加しました。構えと動作、拳系、練習用語、階級と称号、礼儀、思想を学べます。基本は元の見出しと説明に沿って表示され、検索から該当する項目を開けます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-25T17:58:00.000Z",
     changes: [
       {

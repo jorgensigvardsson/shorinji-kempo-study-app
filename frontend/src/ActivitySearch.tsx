@@ -9,6 +9,7 @@ import { searchScore, techniqueCatalogue } from "./activity-search";
 import { beginNavigation } from "./navigation-pending";
 import wordList from "./assets/word-list.json";
 import "./ActivitySearch.css";
+import { searchStudyContent } from "./study-content";
 
 const searchKinds = { all: "Alla", functions: "Funktioner", techniques: "Hokei", words: "Ordlista" } as const;
 type SearchKind = keyof typeof searchKinds;
@@ -27,8 +28,13 @@ export default function ActivitySearch({ allGradePlans }: { allGradePlans: Grade
         setParams(next, { replace: true, preventScrollReset: true });
     };
     const catalogue = useMemo(() => techniqueCatalogue(allGradePlans), [allGradePlans]);
+    const studyMatches = hasQuery ? searchStudyContent(query, translator) : new Map();
     const functions = hasQuery ? availableActivities(translator.isJapanese)
-        .map(activity => ({ activity, score: searchScore(query, translator.translate(activity.title), [activity.title, translator.translate(activity.section)]) }))
+        .map(activity => {
+            const titleScore = searchScore(query, translator.translate(activity.title), [activity.title, translator.translate(activity.section)]);
+            const studyMatch = studyMatches.get(activity.path);
+            return { activity, score: Math.max(titleScore, studyMatch?.score ?? 0), path: titleScore > 0 ? activity.path : studyMatch?.path ?? activity.path };
+        })
         .filter(result => result.score > 0).sort((a, b) => b.score - a.score) : [];
     const techniques = hasQuery ? catalogue
         .map(entry => ({ ...entry, score: searchScore(query, entry.hokei.hokei_name, [
@@ -68,8 +74,8 @@ export default function ActivitySearch({ allGradePlans }: { allGradePlans: Grade
         {showFunctions && functions.length > 0 && <section aria-labelledby="search-functions-heading">
             <h2 id="search-functions-heading" className="app-eyebrow-heading">{translator.translate("Funktioner")}</h2>
             <ul className="search-results">
-                {functions.map(({ activity }) => <li key={activity.path}>
-                    <Link to={activity.path} onClick={() => beginNavigation(activity.path)}>
+                {functions.map(({ activity, path }) => <li key={activity.path}>
+                    <Link to={path} onClick={() => beginNavigation(path)}>
                         <activity.icon size={20} aria-hidden="true" />
                         <span><strong>{translator.translate(activity.title)}</strong><small>{translator.translate(activity.section)}</small></span>
                         <ArrowRight aria-hidden="true" />

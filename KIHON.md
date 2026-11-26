@@ -2,8 +2,11 @@
 
 `frontend/src/assets/kihon.json` holds the kihon (基本, fundamentals) of Shorinji Kempo as
 a tree: the stances, footwork, body movements, attacks and defences that every technique
-is built from. 271 nodes, 218 of them techniques. Nothing in the app reads it yet. It is
-there to be built on.
+is built from. 271 nodes, 218 of them techniques. The app reads it directly under
+**Teori → Fördjupning → Positioner och rörelser** (`/theory/deepening/movements`).
+The reader preserves the source nodes, descriptions, notes, footnotes and alternative
+names. Under tai gamae, its presentation separates Fujinhō from a shared Kamae heading
+containing Byakuren hachi jin and Giwa kyū jin; the source tree and ids stay unchanged.
 
 The source is the kihon chapter of the Swedish yōgoshū (terminology booklet), pages 16–25
 as printed: `docs/yogoshu-utkast.pdf`, a sibling of this repository rather than part of it.
@@ -133,9 +136,23 @@ a pair position), #411 hiraki gamae and #410 ichiji gamae (glosses differ from t
 
 ## Ideas it can carry
 
-- A kihon browser: the tree as collapsible sections, each technique with kanji and gloss.
 - Flashcards per group or subgroup (all of umpohō; the eight byakuren positions), on the
   same pattern as the existing footwork flashcards.
 - Links from hokei and kamokuhyō techniques to the kihon they use.
 - Quiz questions that test structure rather than vocabulary: which trajectory, which
   family, which group.
+
+## The reader and search
+
+`StudyTopic.tsx` renders the source tree without modifying it. `group` and `node` query
+parameters use the source ids so search can open a group and expand the ancestor of a
+matching node. The selected group and open sections are session preferences scoped to
+the current browser account, not synced notes or self-assessments.
+
+The same subject includes the yōgoshū's separate chapters of common movements and
+kōbō yōki below the selected Kihon group. `study-material.ts` names their sections
+and references existing `word-list.json` ids. The temporary independent chapter
+URLs redirect back to those sections. The other Further study
+subjects use the same references for vocabulary, ranks, etiquette and philosophy.
+Their displayed meanings stay in the dictionary; the reading structure does not
+renumber, copy or replace any word or its learned marks.

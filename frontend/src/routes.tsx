@@ -61,6 +61,8 @@ const TermsOfServices = page(() => import("./TermsOfServices.tsx"));
 const PrivacyPolicy = page(() => import("./PrivacyPolicy.tsx"));
 const Changelog = page(() => import("./Changelog.tsx"));
 const Theory = page(() => import("./Theory.tsx"));
+const Deepening = page(() => import("./Deepening.tsx"));
+const StudyTopic = page(() => import("./StudyTopic.tsx"));
 const Feedback = page(() => import("./Feedback.tsx"));
 const ActivitySearch = page(() => import("./ActivitySearch.tsx"));
 const ShortcutSettings = page(() => import("./ShortcutSettings.tsx"));
@@ -137,8 +139,22 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
+        path: "/theory/deepening",
+        element: <TheoryToolPage><Deepening /></TheoryToolPage>,
+        menuText: translator.translate("Fördjupning"),
+        icon: Book,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/theory/deepening/:topic",
+        element: <TheoryToolPage parent="/theory/deepening" parentLabel="Fördjupning"><StudyTopic /></TheoryToolPage>,
+        menuText: translator.translate("Fördjupning"),
+        icon: Book,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
         path: "/theory/groups",
-        element: <TheoryToolPage><Groups allGradePlans={allGradePlans}/></TheoryToolPage>,
+        element: <TheoryToolPage parent="/theory/deepening" parentLabel="Fördjupning"><Groups allGradePlans={allGradePlans}/></TheoryToolPage>,
         menuText: translator.translate("Teknikgrupper"),
         startDescription: translator.translate("Utforska tekniker grupperade efter teknikgrupp."),
         icon: Collection,

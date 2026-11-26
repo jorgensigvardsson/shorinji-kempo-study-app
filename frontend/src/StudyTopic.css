@@ -1,0 +1,56 @@
+.study-topic { max-width: 46rem; }
+.study-topic :is([id^="study-node-"], [id^="study-section-"]) { scroll-margin-top: 6rem; }
+.study-secondary, .study-source, .study-alias { color: var(--bs-secondary-color); }
+.study-secondary { margin: 0.35rem 0 0; font-size: 0.95rem; }
+.study-term-kanji { display: inline-block; margin-inline-start: 0.65rem; font-weight: 400; color: var(--bs-secondary-color); }
+.study-disclosure { border-bottom: 1px solid var(--bs-border-color); }
+.study-disclosure > summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem 0.25rem; min-height: 3.5rem; cursor: pointer; list-style: none;
+}
+.study-disclosure > summary::-webkit-details-marker { display: none; }
+.study-disclosure > summary:hover { background: var(--bs-tertiary-bg); }
+.study-disclosure > summary:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+.study-disclosure > summary > .app-disclosure-chevron { flex-shrink: 0; }
+.study-disclosure-content { padding: 0 0.25rem 1rem; }
+.study-introduction { border: 0; }
+.study-introduction > summary { justify-content: flex-start; gap: 0.5rem; padding: 0.25rem; min-height: 2.75rem; color: var(--bs-primary); }
+.study-paragraph { margin: 0 0 1rem; line-height: 1.65; }
+.study-root-list { padding-left: 1.2rem; margin: 1rem 0; }
+.study-root-list li + li { margin-top: 0.4rem; }
+.study-kihon > .app-view-heading { margin: 1.5rem 0.25rem 0.5rem; }
+.study-kihon > .study-paragraph { margin: 0.65rem 0.25rem 0; }
+.study-area-selector { max-width: 32rem; margin: 1.5rem 0 2rem; }
+.study-kihon-section + .study-kihon-section { margin-top: 2rem; }
+.study-kihon-section > .app-section-heading { padding: 0 0.25rem 0.6rem; }
+.study-kamae-families { margin-left: 0.8rem; }
+.study-tree, .study-words { padding: 0; margin: 0; list-style: none; }
+.study-word {
+    display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 1.25rem;
+    padding: 0.9rem 0.25rem; border-bottom: 1px solid color-mix(in srgb, var(--bs-border-color) 65%, transparent);
+    line-height: 1.6;
+}
+.study-word :is(dt, .study-term) { font-weight: 600; }
+.study-word :is(dt, dd, p) { margin: 0; min-width: 0; }
+.study-word dd p + p { margin-top: 0.35rem; }
+.study-word > :first-child .study-term-kanji { display: block; margin: 0.2rem 0 0; }
+.study-target { background: var(--bs-tertiary-bg); }
+.study-alias { margin-top: 0.35rem; font-size: 0.95rem; }
+.study-subsection, .study-branch { margin-top: 1.65rem; }
+.study-subsection-heading { margin: 0; font-family: var(--app-display-font); font-size: 1.05rem; font-weight: 600; line-height: 1.5; }
+.study-subsection > .study-words, .study-branch > .study-tree { margin-top: 0.6rem; }
+.study-branch:first-child, .study-subsection:first-child { margin-top: 0.5rem; }
+.study-branch > .study-tree > .study-branch { padding-left: 0.75rem; }
+.study-branch .study-branch .study-branch { padding-left: 0; }
+.study-sections { margin-top: 1.5rem; }
+.study-complementary-sections { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 2px solid var(--bs-border-color); }
+.study-chapter + .study-chapter { margin-top: 1.25rem; }
+.study-source { margin: 2rem 0 1rem; font-size: 0.85rem; }
+.study-kana-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); align-items: start; gap: 1.5rem; }
+.study-kana-table { width: 100%; table-layout: fixed; margin-top: 0.75rem; }
+.study-kana-table :is(th, td) { padding: 0.5rem 0.25rem; overflow-wrap: anywhere; }
+@media (max-width: 35rem) {
+    .study-word { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
+    .study-word > :first-child .study-term-kanji { display: inline; margin-inline-start: 0.65rem; }
+    .study-area-selector { margin-bottom: 1.5rem; }
+}

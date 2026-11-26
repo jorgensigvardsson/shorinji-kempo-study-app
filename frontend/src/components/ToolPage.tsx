@@ -31,10 +31,11 @@ const ToolPage = ({ className, backClassName, label, parent, children, showParen
     );
 };
 
-export const TheoryToolPage = ({ children, showParentLink }: ToolPageProps) => {
+export const TheoryToolPage = ({ children, showParentLink, parent = "/theory", parentLabel = "Teori" }:
+    ToolPageProps & { parent?: string; parentLabel?: string }) => {
     const translator = useContext(TranslatorContext);
     return (
-        <ToolPage className="theory-tool-page" backClassName="theory-back" label={translator.translate("Teori")} parent="/theory" showParentLink={showParentLink}>
+        <ToolPage className="theory-tool-page" backClassName="theory-back" label={translator.translate(parentLabel)} parent={parent} showParentLink={showParentLink}>
             {children}
         </ToolPage>
     );
