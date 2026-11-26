@@ -11,7 +11,6 @@ import { deepeningPath, studyTopicFor, type ReadingTopicKey } from "./study-topi
 import "./StudyTopic.css";
 import JapaneseReading from "./JapaneseReading";
 
-const rootTitles = ["Kroppspositioner", "Fotpositioner", "Fotförflyttningar", "Kroppsrörelser", "Angrepp", "Försvar", "Försvarsmetoder"];
 const isBoolean = (value: unknown): value is boolean => typeof value === "boolean";
 
 function StudyDisclosure({ stateKey, title, subtitle, children, defaultOpen = false, forced = false, id, headingLevel = 3 }: {
@@ -135,7 +134,8 @@ function KihonStudy() {
     const targetPath = target ? kihonNodePath(target) : [];
     const selected = kihonRoots.find(root => root.id === params.get("group"))
         ?? targetPath[0] ?? kihonRoots.find(root => root.id === savedGroup) ?? kihonRoots[0];
-    const index = kihonRoots.indexOf(selected);
+    const groupLabel = (root: KihonNode) => noTranslate(translator.isJapanese ? root.kanji : root.name)
+        + (root.description ? ` – ${translator.translate(root.description)}` : "");
     const isTaiGamae = selected.id === "tai gamae [kihon]";
     const kamaeFamilies = isTaiGamae ? selected.children?.filter(node => node.id === "byakuren hachi jin" || node.id === "giwa kyū jin") ?? [] : [];
     const otherGroups = selected.children?.filter(node => !kamaeFamilies.includes(node)) ?? [];
@@ -165,13 +165,13 @@ function KihonStudy() {
                 next.set("group", event.target.value); next.delete("node"); next.delete("section");
                 setParams(next, { replace: true, preventScrollReset: true });
             }}>
-                {kihonRoots.map((root, rootIndex) => <option key={root.id} value={root.id}>
-                    {translator.translate(rootTitles[rootIndex])}
+                {kihonRoots.map(root => <option key={root.id} value={root.id}>
+                    {groupLabel(root)}
                 </option>)}
             </Form.Select>
             <p id="study-kihon-name" className="study-secondary"><KihonName node={selected} /></p>
         </Form.Group>
-        <section className="study-kihon-group" key={`${selected.id}:${target ?? ""}`} id={studyNodeId(selected.id)} aria-label={translator.translate(rootTitles[index])}>
+        <section className="study-kihon-group" key={`${selected.id}:${target ?? ""}`} id={studyNodeId(selected.id)} aria-label={groupLabel(selected)}>
             {selected.note && <p className="study-paragraph">{translator.translate(selected.note)}</p>}
             {selected.children?.every(node => node.kind === "technique")
                 ? <KihonChildren nodes={selected.children} target={target} />
