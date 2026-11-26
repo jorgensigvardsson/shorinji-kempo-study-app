@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 import "./Quiz.css";
+import { practiceThemes } from "./practice-themes";
 
 const Quiz = () => {
   const translator = useContext(TranslatorContext);
@@ -16,6 +17,30 @@ const Quiz = () => {
       icon: <JournalText />,
       onSelect: () => navigate("/quiz/words"),
       navigatesTo: "/quiz/words",
+    },
+    {
+      key: "commands-quiz",
+      title: translator.translate(practiceThemes.commands.title),
+      subtitle: translator.translate(practiceThemes.commands.description),
+      icon: <JournalText />,
+      onSelect: () => navigate("/quiz/commands"),
+      navigatesTo: "/quiz/commands",
+    },
+    {
+      key: "body-quiz",
+      title: translator.translate(practiceThemes.body.title),
+      subtitle: translator.translate(practiceThemes.body.description),
+      icon: <HandIndex />,
+      onSelect: () => navigate("/quiz/body"),
+      navigatesTo: "/quiz/body",
+    },
+    {
+      key: "footwork-quiz",
+      title: translator.translate(practiceThemes.footwork.title),
+      subtitle: translator.translate(practiceThemes.footwork.description),
+      icon: <QuestionSquare />,
+      onSelect: () => navigate("/quiz/footwork"),
+      navigatesTo: "/quiz/footwork",
     },
     {
       key: "technique-group-quiz",

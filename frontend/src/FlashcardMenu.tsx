@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
 import "./Quiz.css";
+import { practiceThemes } from "./practice-themes";
 
 const FlashcardMenu = () => {
     const translator = useContext(TranslatorContext);
@@ -16,6 +17,22 @@ const FlashcardMenu = () => {
             icon: <CardHeading />,
             onSelect: () => navigate("/flashcard/words"),
             navigatesTo: "/flashcard/words",
+        },
+        {
+            key: "commands-flashcards",
+            title: translator.translate(practiceThemes.commands.title),
+            subtitle: translator.translate(practiceThemes.commands.description),
+            icon: <CardHeading />,
+            onSelect: () => navigate("/flashcard/commands"),
+            navigatesTo: "/flashcard/commands",
+        },
+        {
+            key: "body-flashcards",
+            title: translator.translate(practiceThemes.body.title),
+            subtitle: translator.translate(practiceThemes.body.description),
+            icon: <HandIndex />,
+            onSelect: () => navigate("/flashcard/body"),
+            navigatesTo: "/flashcard/body",
         },
         {
             key: "footwork-flashcards",

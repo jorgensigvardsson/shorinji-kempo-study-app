@@ -5,6 +5,25 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-26T13:04:59.000Z",
+    changes: [
+      {
+        emoji: "💬",
+        sv: "Två nya teman i både Quiz och Flashkort: träningskommandon och hälsningar samt kroppsdelar och träffytor. Öva 20 utvalda ord per tema med romaji och tydliga förklaringar. Quizen har tre svarsalternativ och samma ord som flashkorten. Efter 20 frågor visas ditt resultat, och du väljer själv om du vill öva igen.",
+        en: "Two new topics in both Quiz and Flashcards: training commands and greetings, and body parts and striking surfaces. Practise 20 selected words per topic with romaji and clear explanations. The quizzes have three answer choices and use the same words as the flashcards. After 20 questions, you see your result and choose whether to practise again.",
+        tr: "Quiz ve Bilgi kartları için iki yeni konu: antrenman komutları ve selamlaşmalar ile vücut bölümleri ve vuruş yüzeyleri. Her konuda seçilmiş 20 kelimeyi romaji ve anlaşılır açıklamalarla çalışın. Quizlerde üç cevap seçeneği bulunur ve bilgi kartlarıyla aynı kelimeler kullanılır. 20 sorudan sonra sonucunuzu görür ve tekrar çalışıp çalışmayacağınıza kendiniz karar verirsiniz.",
+        ja: "クイズとフラッシュカードに「練習の号令と挨拶」「体の部位と当てる部位」を追加しました。各テーマで選んだ20語をローマ字と説明で学べます。クイズは3択で、フラッシュカードと同じ用語を使います。20問で結果を表示し、もう一度練習するかを選べます。",
+      },
+      {
+        emoji: "👣",
+        sv: "Nytt quiz för fotförflyttningar! Öva samma nio fotförflyttningar som i flashkorten, med tre svarsalternativ och ditt resultat efter nio frågor.",
+        en: "New Footwork quiz! Practise the same nine movements as in the flashcards, with three answer choices and your result after nine questions.",
+        tr: "Yeni Ayak hareketleri quizi! Bilgi kartlarındaki aynı dokuz hareketi, üç cevap seçeneğiyle çalışın ve dokuz sorudan sonra sonucunuzu görün.",
+        ja: "足運びのクイズを追加しました。フラッシュカードと同じ9種類を3択で練習し、9問の後に結果を確認できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-26T12:32:33.000Z",
     changes: [
       {

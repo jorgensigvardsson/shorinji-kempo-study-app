@@ -16,6 +16,10 @@ it("offers word, footwork, kamae and hokei flashcards", async () => {
     );
 
     expect(screen.getByRole("button", { name: /Ordlista/i })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: /^Träningskommandon och hälsningar/ }));
+    expect(screen.getByTestId("location").textContent).toBe("/flashcard/commands");
+    await user.click(screen.getByRole("button", { name: /^Kroppsdelar och träffytor/ }));
+    expect(screen.getByTestId("location").textContent).toBe("/flashcard/body");
     await user.click(screen.getByRole("button", { name: /Fotförflyttningar/i }));
     expect(screen.getByTestId("location").textContent).toBe("/flashcard/footwork");
     await user.click(screen.getByRole("button", { name: /^Kamae\b/i }));

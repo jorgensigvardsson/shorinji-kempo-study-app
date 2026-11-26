@@ -16,38 +16,51 @@ interface QuizRunnerProps {
   title: string;
   quizPool: QuizPool;
   controls?: ReactNode;
+  finite?: boolean;
 }
 
-const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
+const QuizRunner = ({ title, quizPool, controls, finite = false }: QuizRunnerProps) => {
   const translator = useContext(TranslatorContext);
   const [quizCard, setQuizCard] = useState<QuizQuestion | null>(() => drawQuestion(quizPool));
-  const [recentQuestionIds, setRecentQuestionIds] = useState<string[]>([]);
+  const [recentQuestionIds, setRecentQuestionIds] = useState<string[]>(() => quizCard ? [quizCard.id] : []);
   const [answer, setAnswer] = useState<number | null>(null);
   const [showBack, setShowBack] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const totalQuestions = new Set(quizPool.candidates.map(candidate => candidate.id)).size;
   const [currentStreak, setCurrentStreak] = useState(currentStreakData.data ?? 0);
   const [highScore, setHighScore] = useState(highScoreData.data ?? 0);
-  const previousQuizPool = useRef(quizPool);
+  const [sessionSource, setSessionSource] = useState({ pool: quizPool, finite });
+  const previousSource = useRef(sessionSource);
 
   const saveCurrentStreak = (streak: number) => {
     currentStreakData.save(streak);
     setCurrentStreak(streak);
   };
 
-  useEffect(() => {
+  // Adjust the session before rendering a newly selected pool. The first
+  // question and its history are initialized together, so no extra draw occurs.
+  if (sessionSource.pool !== quizPool || sessionSource.finite !== finite) {
     const initialQuestion = drawQuestion(quizPool);
+    setSessionSource({ pool: quizPool, finite });
     setQuizCard(initialQuestion);
     setRecentQuestionIds(initialQuestion ? [initialQuestion.id] : []);
     setAnswer(null);
     setShowBack(false);
+    setCompleted(false);
+    setCorrectAnswers(0);
 
-    // A new pool means the questions changed under the streak — a grade was picked,
-    // say — so it starts over. Mounting the quiz is not such a change: coming back
-    // to the page, or reloading the app, picks the streak up where it was left.
-    if (previousQuizPool.current !== quizPool) {
-      previousQuizPool.current = quizPool;
-      saveCurrentStreak(0);
+    setCurrentStreak(0);
+  }
+
+  useEffect(() => {
+    // Persist a reset only when the new selection commits. Mounting the quiz
+    // still picks up the saved streak as before.
+    if (previousSource.current !== sessionSource) {
+      previousSource.current = sessionSource;
+      currentStreakData.save(0);
     }
-  }, [quizPool]);
+  }, [sessionSource]);
 
   useEffect(() => {
     return highScoreData.registerListener((newHighScore) => {
@@ -58,12 +71,16 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
   const answeredCorrectly = answer !== null && quizCard !== null && answer === quizCard.correctAnswer;
 
   const showAnswer = () => {
+    if (showBack) return;
+    if (finite) setAnswer(null);
     saveCurrentStreak(0);
     setShowBack(true);
   };
 
   const submitAnswer = () => {
+    if (showBack || answer === null) return;
     if (answeredCorrectly) {
+      if (finite) setCorrectAnswers(previous => previous + 1);
       const newStreak = currentStreak + 1;
       saveCurrentStreak(newStreak);
       if (newStreak > highScore) {
@@ -77,22 +94,59 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
   };
 
   const nextCard = () => {
+    if (finite && recentQuestionIds.length >= totalQuestions) {
+      setCompleted(true);
+      return;
+    }
     const nextQuestion = drawQuestion(quizPool, recentQuestionIds);
     if (!nextQuestion)
       return;
 
     setQuizCard(nextQuestion);
-    setRecentQuestionIds(prev => [nextQuestion.id, ...prev].slice(0, 20));
+    setRecentQuestionIds(prev => finite ? [nextQuestion.id, ...prev] : [nextQuestion.id, ...prev].slice(0, 20));
     setAnswer(null);
     setShowBack(false);
+  };
+
+  const restartRound = () => {
+    const firstQuestion = drawQuestion(quizPool);
+    setQuizCard(firstQuestion);
+    setRecentQuestionIds(firstQuestion ? [firstQuestion.id] : []);
+    setAnswer(null);
+    setShowBack(false);
+    setCompleted(false);
+    setCorrectAnswers(0);
+    saveCurrentStreak(0);
   };
 
   const header = (
     <header className="quiz-session-header">
       <h1 className="app-page-heading quiz-page-heading">{title}</h1>
       {controls}
+      {finite && !completed && quizCard && <p className="quiz-round-progress">
+        {translator.translate("Fråga {0} av {1}", { params: [String(Math.max(1, recentQuestionIds.length)), String(totalQuestions)] })}
+      </p>}
     </header>
   );
+
+  if (finite && completed) {
+    return <div className="quiz-page study-session quiz-round">
+      {header}
+      <div className="quiz-scene">
+        <Card className="quiz-card">
+          <Card.Body className="quiz-body">
+            <div className="quiz-main quiz-answer-main">
+              <h2 className="quiz-title">{translator.translate("Omgången klar!")}</h2>
+              <p className="mb-0">{translator.translate("Du fick {0} av {1} rätt.", { params: [String(correctAnswers), String(totalQuestions)] })}</p>
+            </div>
+          </Card.Body>
+        </Card>
+      </div>
+      <div className="quiz-actions">
+        <Button variant="primary" onClick={restartRound}>{translator.translate("Öva igen")}</Button>
+      </div>
+    </div>;
+  }
 
   if (!quizCard) {
     return (
@@ -131,7 +185,7 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
     quizCard.alternatives[quizCard.correctAnswer];
 
   return (
-    <div className="quiz-page study-session">
+    <div className={`quiz-page study-session${finite ? " quiz-round" : ""}`}>
       {header}
       <div className={`quiz-scene ${showBack ? "is-flipped" : ""}`}>
         <div className="quiz-inner">
@@ -216,7 +270,7 @@ const QuizRunner = ({ title, quizPool, controls }: QuizRunnerProps) => {
       {showBack && (
         <div className="quiz-actions">
           <Button variant="primary" onClick={nextCard}>
-            {translator.translate("Nästa fråga")}
+            {translator.translate(finite && recentQuestionIds.length >= totalQuestions ? "Visa resultat" : "Nästa fråga")}
           </Button>
         </div>
       )}

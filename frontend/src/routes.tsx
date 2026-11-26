@@ -50,6 +50,7 @@ const Groups = page(() => import("./Groups.tsx"));
 const WordList = page(() => import("./WordList.tsx"));
 const Quiz = page(() => import("./Quiz.tsx"));
 const WordQuiz = page(() => import("./WordQuiz.tsx"));
+const PracticeQuiz = page(() => import("./PracticeQuiz.tsx"));
 const TechniqueGroupQuiz = page(() => import("./TechniqueGroupQuiz.tsx"));
 const FootStanceQuiz = page(() => import("./FootStanceQuiz.tsx"));
 const HandPositionQuiz = page(() => import("./HandPositionQuiz.tsx"));
@@ -201,6 +202,27 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {
+        path: "/quiz/commands",
+        element: <TheoryToolPage><PracticeQuiz theme="commands" /></TheoryToolPage>,
+        menuText: translator.translate("Träningskommandon och hälsningar"),
+        icon: JournalText,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/quiz/body",
+        element: <TheoryToolPage><PracticeQuiz theme="body" /></TheoryToolPage>,
+        menuText: translator.translate("Kroppsdelar och träffytor"),
+        icon: HandIndex,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/quiz/footwork",
+        element: <TheoryToolPage><PracticeQuiz theme="footwork" /></TheoryToolPage>,
+        menuText: translator.translate("Fotförflyttningar"),
+        icon: QuestionSquare,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
         path: "/quiz/technique-groups",
         element: <TheoryToolPage><TechniqueGroupQuiz myGrade={profileGradePlan.grade}/></TheoryToolPage>,
         menuText: translator.translate("Teknikgruppsquiz"),
@@ -234,6 +256,20 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         element: <TheoryToolPage><Flashcard /></TheoryToolPage>,
         menuText: translator.translate("Ordlista"),
         icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/flashcard/commands",
+        element: <TheoryToolPage><Flashcard deck="commands" /></TheoryToolPage>,
+        menuText: translator.translate("Träningskommandon och hälsningar"),
+        icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/flashcard/body",
+        element: <TheoryToolPage><Flashcard deck="body" /></TheoryToolPage>,
+        menuText: translator.translate("Kroppsdelar och träffytor"),
+        icon: HandIndex,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {

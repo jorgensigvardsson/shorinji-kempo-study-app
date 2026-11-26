@@ -42,6 +42,9 @@ describe("Quiz menu", () => {
     render(<MemoryRouter><Quiz /></MemoryRouter>);
 
     expect(screen.getByRole("button", { name: /Ordlista/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Träningskommandon och hälsningar/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Kroppsdelar och träffytor/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Fotförflyttningar/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Teknikgrupper/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Fotposition/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Kamae/i })).toBeTruthy();
