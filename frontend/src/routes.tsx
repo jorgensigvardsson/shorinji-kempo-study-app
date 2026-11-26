@@ -57,6 +57,7 @@ const GradingTest = page(() => import("./GradingTest.tsx"));
 const FlashcardMenu = page(() => import("./FlashcardMenu.tsx"));
 const Flashcard = page(() => import("./Flashcard.tsx"));
 const HokeiFlashcard = page(() => import("./HokeiFlashcard.tsx"));
+const KamaeFlashcard = page(() => import("./KamaeFlashcard.tsx"));
 const TermsOfServices = page(() => import("./TermsOfServices.tsx"));
 const PrivacyPolicy = page(() => import("./PrivacyPolicy.tsx"));
 const Changelog = page(() => import("./Changelog.tsx"));
@@ -240,6 +241,13 @@ export const getRoutes = (gradePlan: GradePlan, profileGradePlan: GradePlan, cur
         element: <TheoryToolPage><Flashcard deck="footwork" /></TheoryToolPage>,
         menuText: translator.translate("Fotförflyttningar"),
         icon: CardHeading,
+        hideOnStartPage: true,
+        hideFromMenu: true,
+    }, {
+        path: "/flashcard/kamae",
+        element: <TheoryToolPage><KamaeFlashcard currentGrade={currentGrade} /></TheoryToolPage>,
+        menuText: translator.translate("Kamae"),
+        icon: HandIndex,
         hideOnStartPage: true,
         hideFromMenu: true,
     }, {

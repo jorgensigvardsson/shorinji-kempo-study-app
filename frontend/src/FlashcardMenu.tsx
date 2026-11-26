@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { CardHeading, People } from "react-bootstrap-icons";
+import { CardHeading, HandIndex, People } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import Grid, { type GridItem } from "./components/Grid";
 import { TranslatorContext } from "./i18n";
@@ -24,6 +24,14 @@ const FlashcardMenu = () => {
             icon: <CardHeading />,
             onSelect: () => navigate("/flashcard/footwork"),
             navigatesTo: "/flashcard/footwork",
+        },
+        {
+            key: "kamae-flashcards",
+            title: translator.translate("Kamae"),
+            subtitle: translator.translate("Öva olika kamae."),
+            icon: <HandIndex />,
+            onSelect: () => navigate("/flashcard/kamae"),
+            navigatesTo: "/flashcard/kamae",
         },
         {
             key: "hokei-flashcards",

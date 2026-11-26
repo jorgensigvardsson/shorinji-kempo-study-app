@@ -6,7 +6,7 @@ import FlashcardMenu from "./FlashcardMenu";
 
 const Location = () => <span data-testid="location">{useLocation().pathname}</span>;
 
-it("offers word, footwork and hokei flashcards", async () => {
+it("offers word, footwork, kamae and hokei flashcards", async () => {
     const user = userEvent.setup();
     render(
         <MemoryRouter>
@@ -18,6 +18,8 @@ it("offers word, footwork and hokei flashcards", async () => {
     expect(screen.getByRole("button", { name: /Ordlista/i })).toBeDefined();
     await user.click(screen.getByRole("button", { name: /Fotförflyttningar/i }));
     expect(screen.getByTestId("location").textContent).toBe("/flashcard/footwork");
+    await user.click(screen.getByRole("button", { name: /^Kamae\b/i }));
+    expect(screen.getByTestId("location").textContent).toBe("/flashcard/kamae");
     await user.click(screen.getByRole("button", { name: /Hokei/i }));
     expect(screen.getByTestId("location").textContent).toBe("/flashcard/hokei");
 });

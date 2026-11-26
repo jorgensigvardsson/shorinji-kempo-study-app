@@ -5,6 +5,18 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-26T12:32:33.000Z",
+    changes: [
+      {
+        emoji: "🃏",
+        sv: "Nya flashkort för Kamae! Öva ställningarna i Byakuren och Giwa med namn på framsidan och förklaring och familj på baksidan. Din grad väljer starturvalet: Kyū-urval för kyū och alla 17 för dan. Du kan alltid byta urval.",
+        en: "New Kamae flashcards! Practise Byakuren and Giwa stances with names on the front and explanations and families on the back. Your grade sets the initial selection: the kyū selection for kyū grades and all 17 for dan grades. You can change the selection at any time.",
+        tr: "Yeni Kamae bilgi kartları! Ön yüzde adları, arka yüzde açıklamaları ve gruplarıyla Byakuren ve Giwa duruşlarını çalışın. Dereceniz başlangıç seçimini belirler: kyū dereceleri için kyū seçimi, dan dereceleri için 17 duruşun tamamı. Seçimi istediğiniz zaman değiştirebilirsiniz.",
+        ja: "構えのフラッシュカードを追加しました。表面の名称と裏面の説明・分類で、白蓮八陣と義和九陣の構えを学べます。級位では級向けの構え、段位では全17種類が最初に選ばれます。選択はいつでも変更できます。",
+      },
+    ],
+  },
+  {
     timestamp: "2026-11-26T11:51:34.000Z",
     changes: [
       {

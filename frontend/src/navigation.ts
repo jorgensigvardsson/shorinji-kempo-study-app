@@ -29,6 +29,7 @@ export const activities: Activity[] = [
     { path: "/quiz/hand-position", title: "Quiz kamae", section: "Teori", icon: HandIndex, languageTool: true },
     { path: "/flashcard/words", title: "Flashkort ordlista", section: "Teori", icon: CardHeading, languageTool: true },
     { path: "/flashcard/footwork", title: "Flashkort fotförflyttningar", section: "Teori", icon: CardHeading, languageTool: true },
+    { path: "/flashcard/kamae", title: "Flashkort kamae", section: "Teori", icon: HandIndex, languageTool: true },
     { path: "/flashcard/hokei", title: "Flashkort hokei", section: "Teori", icon: CardHeading, languageTool: true },
 ];
 
