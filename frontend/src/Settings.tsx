@@ -14,6 +14,7 @@ import { ArrowRepeat, Download, Upload } from "react-bootstrap-icons";
 import Loading from "./components/Loading";
 import CollapsibleCard from "./components/CollapsibleCard";
 import DisclosureChevron from "./components/DisclosureChevron";
+import GradingCelebration from "./components/GradingCelebration";
 import { resetAppInstallation } from "./app-update";
 
 const DEBUG = import.meta.env.VITE_DEBUG === "true";
@@ -219,6 +220,7 @@ const Settings = (props: Props) => {
                             <p id="settings-grade-help" className="settings-help-text">
                                 {translator.translate("Välj graden du har idag. Appen visar innehållet inför din nästa gradering.")}
                             </p>
+                            <GradingCelebration currentGrade={currentGrade} onSetCurrentGrade={onSetCurrentGrade} />
                         </Form.Group>
                     </div>
                 </section>

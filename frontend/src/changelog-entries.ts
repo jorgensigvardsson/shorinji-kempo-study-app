@@ -5,6 +5,16 @@ import type { ChangelogEntry } from './changelog';
 // in its startup bundle. Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    timestamp: "2026-11-26T19:00:00.000Z",
+    changes: [{
+      emoji: "✨",
+      sv: "När det är dags att gradera nästa gång kommer appen också att vara med och fira dig.",
+      en: "When it's time for your next grading, the app will be there to celebrate with you too.",
+      tr: "Bir sonraki derece sınavınızın zamanı geldiğinde, uygulama da sizinle birlikte kutlayacak.",
+      ja: "次の昇級・昇段審査のときには、アプリも一緒にあなたをお祝いします。",
+    }],
+  },
+  {
     timestamp: "2026-11-26T13:04:59.000Z",
     changes: [
       {
